@@ -41,6 +41,25 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 1,
 				'error'           => '',
 			),
+			'preload_imagesrcset_without_href'           => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'         => 'preload',
+							'imagesrcset' => 'https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w',
+							'imagesizes'  => '(max-width: 600px) 480px, 800px',
+							'as'          => 'image',
+							'media'       => 'screen',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" as="image" media="screen">
+				',
+				'expected_header' => 'Link: <about:blank>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; as="image"; media="screen"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
 			'preload_with_min0_max_viewport_widths'      => array(
 				'links_args'      => array(
 					array(

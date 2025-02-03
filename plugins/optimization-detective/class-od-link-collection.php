@@ -258,7 +258,7 @@ final class OD_Link_Collection implements Countable {
 			if ( isset( $link['href'] ) ) {
 				$decoded_url = urldecode( $link['href'] );
 
-				// Encode only non-ASCII characters.
+				// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
 				$encoded_url  = preg_replace_callback(
 					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]/',
 					static function ( $matches ) {
