@@ -46,14 +46,6 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'max_breakpoint_bad'         => array(
-				'url_metrics'   => array(),
-				'current_etag'  => $current_etag,
-				'breakpoints'   => array( PHP_INT_MAX ),
-				'sample_size'   => 3,
-				'freshness_ttl' => HOUR_IN_SECONDS,
-				'exception'     => InvalidArgumentException::class,
-			),
 			'string_breakpoint_bad'      => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
@@ -352,7 +344,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					),
 					array(
 						'minimum_viewport_width'     => 640,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 800 ),
 					),
 				),
@@ -368,7 +360,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					),
 					array(
 						'minimum_viewport_width'     => 480,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 600, 800, 1000 ),
 					),
 				),
@@ -379,7 +371,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'expected_groups' => array(
 					array(
 						'minimum_viewport_width'     => 0,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 250, 500, 1000 ),
 					),
 				),

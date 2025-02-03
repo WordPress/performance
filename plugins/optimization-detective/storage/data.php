@@ -377,20 +377,7 @@ function od_get_breakpoint_max_widths(): array {
 	$breakpoint_max_widths = array_map(
 		static function ( $original_breakpoint ) use ( $function_name ): int {
 			$breakpoint = $original_breakpoint;
-			if ( PHP_INT_MAX === $breakpoint ) {
-				$breakpoint = PHP_INT_MAX - 1;
-				_doing_it_wrong(
-					esc_html( $function_name ),
-					esc_html(
-						sprintf(
-							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'optimization-detective' ),
-							$original_breakpoint
-						)
-					),
-					''
-				);
-			} elseif ( $breakpoint <= 0 ) {
+			if ( $breakpoint <= 0 ) {
 				$breakpoint = 1;
 				_doing_it_wrong(
 					esc_html( $function_name ),
@@ -409,12 +396,12 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
+		 * A breakpoint must be greater than zero. This array may be empty in which case there
 		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
+		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
 		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) ) )
 	);

@@ -41,11 +41,11 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	private $minimum_viewport_width;
 
 	/**
-	 * Maximum possible viewport width for the group (inclusive).
+	 * Maximum possible viewport width for the group (inclusive), where null means it is unbounded.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int<1, max>
+	 * @var int<1, max>|null
 	 */
 	private $maximum_viewport_width;
 
@@ -98,33 +98,35 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @access private
 	 * @throws InvalidArgumentException If arguments are invalid.
 	 *
-	 * @phpstan-param int<0, max> $minimum_viewport_width
-	 * @phpstan-param int<1, max> $maximum_viewport_width
-	 * @phpstan-param int<1, max> $sample_size
-	 * @phpstan-param int<0, max> $freshness_ttl
+	 * @phpstan-param int<0, max>      $minimum_viewport_width
+	 * @phpstan-param int<1, max>|null $maximum_viewport_width
+	 * @phpstan-param int<1, max>      $sample_size
+	 * @phpstan-param int<0, max>      $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]                $url_metrics            URL Metrics to add to the group.
 	 * @param int                            $minimum_viewport_width Minimum possible viewport width (exclusive) for the group. Must be zero or greater.
-	 * @param int                            $maximum_viewport_width Maximum possible viewport width (inclusive) for the group. Must be greater than zero and the minimum viewport width.
+	 * @param int|null                       $maximum_viewport_width Maximum possible viewport width (inclusive) for the group. Must be greater than zero and the minimum viewport width. Null means unbounded.
 	 * @param int                            $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
 	 * @param int                            $freshness_ttl          Freshness age (TTL) for a given URL Metric.
 	 * @param OD_URL_Metric_Group_Collection $collection             Collection that this instance belongs to.
 	 */
-	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, OD_URL_Metric_Group_Collection $collection ) {
+	public function __construct( array $url_metrics, int $minimum_viewport_width, ?int $maximum_viewport_width, int $sample_size, int $freshness_ttl, OD_URL_Metric_Group_Collection $collection ) {
 		if ( $minimum_viewport_width < 0 ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'The minimum viewport width must be at least zero.', 'optimization-detective' )
 			);
 		}
-		if ( $maximum_viewport_width < 1 ) {
-			throw new InvalidArgumentException(
-				esc_html__( 'The maximum viewport width must be greater than zero.', 'optimization-detective' )
-			);
-		}
-		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
-			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'optimization-detective' )
-			);
+		if ( isset( $maximum_viewport_width ) ) {
+			if ( $maximum_viewport_width < 1 ) {
+				throw new InvalidArgumentException(
+					esc_html__( 'The maximum viewport width must be greater than zero.', 'optimization-detective' )
+				);
+			}
+			if ( $minimum_viewport_width >= $maximum_viewport_width ) {
+				throw new InvalidArgumentException(
+					esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'optimization-detective' )
+				);
+			}
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
 		$this->maximum_viewport_width = $maximum_viewport_width;
@@ -176,9 +178,9 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.1.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @return int<1, max> Minimum viewport width (inclusive).
+	 * @return int<1, max>|null Minimum viewport width (inclusive). Null means unbounded.
 	 */
-	public function get_maximum_viewport_width(): int {
+	public function get_maximum_viewport_width(): ?int {
 		return $this->maximum_viewport_width;
 	}
 
@@ -219,7 +221,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	public function is_viewport_width_in_range( int $viewport_width ): bool {
 		return (
 			$viewport_width > $this->minimum_viewport_width &&
-			$viewport_width <= $this->maximum_viewport_width
+			( null === $this->maximum_viewport_width || $viewport_width <= $this->maximum_viewport_width )
 		);
 	}
 
@@ -485,8 +487,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @return array{
 	 *             freshness_ttl: 0|positive-int,
 	 *             sample_size: positive-int,
-	 *             minimum_viewport_width: 0|positive-int,
-	 *             maximum_viewport_width: positive-int,
+	 *             minimum_viewport_width: int<0, max>,
+	 *             maximum_viewport_width: int<1, max>|null,
 	 *             lcp_element: ?OD_Element,
 	 *             complete: bool,
 	 *             url_metrics: OD_URL_Metric[]

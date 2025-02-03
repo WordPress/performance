@@ -50,7 +50,7 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 	if ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 ) {
 		$media_attributes[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width + 1 );
 	}
-	if ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ) {
+	if ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ) { // Note: The use of PHP_INT_MAX is obsolete.
 		$media_attributes[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
 	}
 	if ( count( $media_attributes ) === 0 ) {

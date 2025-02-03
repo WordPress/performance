@@ -196,7 +196,7 @@ final class OD_Link_Collection implements Countable {
 					&&
 					$last_link['maximum_viewport_width'] === $link['minimum_viewport_width']
 				) {
-					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
+					$last_link['maximum_viewport_width'] = null === $link['maximum_viewport_width'] ? null : max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
 
 					// Update the last link with the new maximum viewport width.
 					$carry[ count( $carry ) - 1 ] = $last_link;
