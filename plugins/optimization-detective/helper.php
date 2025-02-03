@@ -126,6 +126,9 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 /**
  * Enqueues admin scripts.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @param string $hook_suffix Current admin page.
  */
 function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
@@ -141,9 +144,26 @@ function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
 }
 
 /**
+ * Adds the Optimization Detective menu to the admin menu.
+ *
+ * @since 0.1.0
+ * @access private
+ */
+function od_enqueue_block_editor_prime_url_metrics_scripts(): void {
+	wp_enqueue_script(
+		'od-prime-url-metrics',
+		plugins_url( od_get_asset_path( 'prime-url-metrics-block-editor.js' ), __FILE__ ),
+		array( 'wp-data', 'wp-api-fetch' ),
+		OPTIMIZATION_DETECTIVE_VERSION,
+		true
+	);
+}
+
+/**
  * Gets URLs for priming URL Metrics from sitemap in batches.
  *
  * @since n.e.x.t
+ * @access private
  *
  * @param array<string, int> $cursor Cursor to resume from.
  * @return array<string, mixed> Batch of URLs to prime metrics for and the updated cursor.
@@ -266,6 +286,9 @@ function od_get_batch_for_iframe_url_metrics_priming( array $cursor ): array {
 /**
  * Filter for WP_Query to allow specifying 'post_title__in' => array( 'title1', 'title2', ... ).
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @param string   $where The WHERE clause of the query.
  * @param WP_Query $query The WP_Query instance.
  */
@@ -339,6 +362,9 @@ function od_get_metrics_by_post_title( array $urls ): array {
 /**
  * Computes the standard array of breakpoints.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @return array<int, array{width: int, height: int}> Array of breakpoints.
  */
 function od_get_standard_breakpoints(): array {
@@ -372,6 +398,9 @@ function od_get_standard_breakpoints(): array {
 
 /**
  * Filters the batch of URLs to only include those that need additional metrics.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param array<string> $urls Array of URLs to filter.
  * @return array<int, array{url: string, breakpoints: array<int, array{width: int, height: int}>}> Filtered batch of URLs.

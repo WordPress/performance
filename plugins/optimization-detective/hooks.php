@@ -25,4 +25,5 @@ add_action( 'admin_init', 'od_maybe_run_rest_api_health_check' );
 add_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_notice_in_plugin_row', 30 );
 add_action( 'admin_menu', 'od_add_optimization_detective_menu' );
 add_action( 'admin_enqueue_scripts', 'od_enqueue_prime_url_metrics_scripts' );
+add_action( 'enqueue_block_editor_assets', 'od_enqueue_block_editor_prime_url_metrics_scripts' );
 // @codeCoverageIgnoreEnd
