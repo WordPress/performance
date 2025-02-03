@@ -260,7 +260,7 @@ final class OD_Link_Collection implements Countable {
 
 				// Encode only non-ASCII characters.
 				$encoded_url  = preg_replace_callback(
-					'/[^\x00-\x7F]/',
+					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]/',
 					static function ( $matches ) {
 						return rawurlencode( $matches[0] );
 					},
