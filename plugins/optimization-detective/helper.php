@@ -52,9 +52,9 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 	if ( $has_min_width && $has_max_width ) {
 		$media_attributes = sprintf( '( %dpx < width <= %dpx )', $minimum_viewport_width, $maximum_viewport_width );
 	} elseif ( $has_min_width ) {
-		$media_attributes = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
+		$media_attributes = sprintf( '( %dpx < width )', $minimum_viewport_width );
 	} elseif ( $has_max_width ) {
-		$media_attributes = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
+		$media_attributes = sprintf( '( width <= %dpx )', $maximum_viewport_width );
 	} else {
 		return null;
 	}

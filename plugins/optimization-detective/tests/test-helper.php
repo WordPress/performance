@@ -34,12 +34,12 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			'mobile'      => array(
 				'min_width' => 0,
 				'max_width' => 320,
-				'expected'  => '(max-width: 320px)',
+				'expected'  => '( width <= 320px )',
 			),
 			'mobile_alt'  => array(
 				'min_width' => null,
 				'max_width' => 320,
-				'expected'  => '(max-width: 320px)',
+				'expected'  => '( width <= 320px )',
 			),
 			'tablet'      => array(
 				'min_width' => 321,
@@ -49,12 +49,12 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			'desktop'     => array(
 				'min_width' => 601,
 				'max_width' => PHP_INT_MAX,
-				'expected'  => '(min-width: 601px)',
+				'expected'  => '( 601px < width )',
 			),
 			'desktop_alt' => array(
 				'min_width' => 601,
 				'max_width' => null,
-				'expected'  => '(min-width: 601px)',
+				'expected'  => '( 601px < width )',
 			),
 			'no_widths'   => array(
 				'min_width' => null,
