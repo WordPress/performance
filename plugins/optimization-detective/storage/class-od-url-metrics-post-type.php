@@ -84,7 +84,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug URL Metrics slug.
+	 * @param non-empty-string $slug URL Metrics slug.
 	 * @return WP_Post|null Post object if exists.
 	 */
 	public static function get_post( string $slug ): ?WP_Post {
@@ -202,9 +202,9 @@ class OD_URL_Metrics_Post_Type {
 	 * @since 0.1.0
 	 * @todo There is duplicate logic here with od_handle_rest_request().
 	 *
-	 * @param string        $slug           Slug (hash of normalized query vars).
-	 * @param OD_URL_Metric $new_url_metric New URL Metric.
-	 * @return int|WP_Error Post ID or WP_Error otherwise.
+	 * @param non-empty-string $slug Slug (hash of normalized query vars).
+	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
+	 * @return positive-int|WP_Error Post ID or WP_Error otherwise.
 	 */
 	public static function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
 		$post_data = array(
@@ -243,13 +243,8 @@ class OD_URL_Metrics_Post_Type {
 		}
 
 		$post_data['post_content'] = wp_json_encode(
-			array_map(
-				static function ( OD_URL_Metric $url_metric ): array {
-					return $url_metric->jsonSerialize();
-				},
-				$group_collection->get_flattened_url_metrics()
-			),
-			JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
+			$group_collection->get_flattened_url_metrics(),
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {
 			return new WP_Error( 'json_encode_error', json_last_error_msg() );
