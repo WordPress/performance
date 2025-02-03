@@ -13,6 +13,7 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
+      - 'tools/phpunit/bootstrap.php'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
@@ -24,6 +25,7 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
+      - 'tools/phpunit/bootstrap.php'
       - 'composer.json'
       - 'composer.lock'
     types:
