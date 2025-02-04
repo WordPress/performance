@@ -46,19 +46,17 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'The minimum width cannot be greater than or equal to the maximum width.', 'optimization-detective' ), 'Optimization Detective 0.7.0' );
 		return null;
 	}
-	$media_attributes = '';
-	$has_min_width    = ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 );
-	$has_max_width    = ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ); // Note: The use of PHP_INT_MAX is obsolete.
+	$has_min_width = ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 );
+	$has_max_width = ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ); // Note: The use of PHP_INT_MAX is obsolete.
 	if ( $has_min_width && $has_max_width ) {
-		$media_attributes = sprintf( '( %dpx < width <= %dpx )', $minimum_viewport_width, $maximum_viewport_width );
+		return sprintf( '(%dpx < width <= %dpx)', $minimum_viewport_width, $maximum_viewport_width );
 	} elseif ( $has_min_width ) {
-		$media_attributes = sprintf( '( %dpx < width )', $minimum_viewport_width );
+		return sprintf( '(%dpx < width)', $minimum_viewport_width );
 	} elseif ( $has_max_width ) {
-		$media_attributes = sprintf( '( width <= %dpx )', $maximum_viewport_width );
+		return sprintf( '(width <= %dpx)', $maximum_viewport_width );
 	} else {
 		return null;
 	}
-	return $media_attributes;
 }
 
 /**
