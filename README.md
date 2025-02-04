@@ -15,9 +15,9 @@ Plugin                          | Slug                      | Experimental | Lin
 [Modern Image Formats][2]       | `webp-uploads`            | No           | [Source][10], [Issues][18], [PRs][26]
 [Performant Translations][3]    | `performant-translations` | No           | [Source][11], [Issues][19], [PRs][27]
 [Speculative Loading][4]        | `speculation-rules`       | No           | [Source][12], [Issues][20], [PRs][28]
-[Embed Optimizer][5]            | `embed-optimizer`         | Yes          | [Source][13], [Issues][21], [PRs][29]
+[Embed Optimizer][5]            | `embed-optimizer`         | No           | [Source][13], [Issues][21], [PRs][29]
+[Image Prioritizer][7]          | `image-prioritizer`       | No           | [Source][15], [Issues][23], [PRs][31]
 [Enhanced Responsive Images][6] | `auto-sizes`              | Yes          | [Source][14], [Issues][22], [PRs][30]
-[Image Prioritizer][7]          | `image-prioritizer`       | Yes          | [Source][15], [Issues][23], [PRs][31]
 [Web Worker Offloading][8]      | `web-worker-offloading`   | Yes          | [Source][16], [Issues][24], [PRs][32]
 
 [1]: https://wordpress.org/plugins/dominant-color-images/
