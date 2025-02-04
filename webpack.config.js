@@ -207,6 +207,14 @@ const optimizationDetective = ( env ) => {
 						from: `${ destination }/detect.js`,
 						to: `${ destination }/detect.min.js`,
 					},
+					{
+						from: `${ destination }/prime-url-metrics.js`,
+						to: `${ destination }/prime-url-metrics.min.js`,
+					},
+					{
+						from: `${ destination }/prime-url-metrics-block-editor.js`,
+						to: `${ destination }/prime-url-metrics-block-editor.min.js`,
+					},
 				],
 			} ),
 			new WebpackBar( {

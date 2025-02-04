@@ -146,7 +146,7 @@ function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
 /**
  * Adds the Optimization Detective menu to the admin menu.
  *
- * @since 0.1.0
+ * @since n.e.x.t
  * @access private
  */
 function od_enqueue_block_editor_prime_url_metrics_scripts(): void {
@@ -315,6 +315,9 @@ function od_filter_posts_where_for_titles( string $where, WP_Query $query ): str
 
 /**
  * Fetches od_url_metrics posts of URLs in a single WP_Query.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param string[] $urls Array of exact URLs, as stored in post_title of od_url_metrics.
  * @return array<string, OD_URL_Metric_Group_Collection> Map of URL to its OD_URL_Metric_Group_Collection.
