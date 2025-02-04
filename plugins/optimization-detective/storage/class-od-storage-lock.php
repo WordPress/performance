@@ -81,12 +81,12 @@ final class OD_Storage_Lock {
 		 *
 		 * By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current
 		 * user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This
-		 * meta capability by default maps to the `manage_options` primitive capability via the `map_meta_cap` filter.
+		 * custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
 		 *
 		 * @since 0.1.0
-		 * @since 1.0.0 This now defaults to zero (0) for administrator users.
+		 * @since 1.0.0 This now defaults to zero (0) for authorized users.
 		 *
-		 * @param int $ttl TTL. Defaults to 0 for administrators, and 60 for everyone else.
+		 * @param int $ttl TTL. Defaults to 60, except zero (0) for authorized users.
 		 */
 		$ttl = (int) apply_filters( 'od_url_metric_storage_lock_ttl', $ttl );
 		return max( 0, $ttl );
