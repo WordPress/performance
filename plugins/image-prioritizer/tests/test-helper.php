@@ -111,7 +111,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 481px and max-width: 600px) 540px, (min-width: 601px and max-width: 782px) 704px, (min-width: 783px) 900px, (max-width: 600px) 480px, 800px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 480px and max-width: 600px) 540px, (min-width: 600px and max-width: 782px) 704px, (min-width: 782px) 900px, (max-width: 600px) 480px, 800px">',
 			),
 
 			'non_responsive_image'              => array(
@@ -166,7 +166,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 481px and max-width: 600px) 540px, (min-width: 601px and max-width: 782px) 704px, (min-width: 783px) 900px, (max-width: 600px) 480px, 800px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 480px and max-width: 600px) 540px, (min-width: 600px and max-width: 782px) 704px, (min-width: 782px) 900px, (max-width: 600px) 480px, 800px">',
 			),
 
 			'wrongly_auto_sized_responsive_img_with_only_auto' => array(
@@ -176,7 +176,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 481px and max-width: 600px) 540px, (min-width: 601px and max-width: 782px) 704px, (min-width: 783px) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 480px) 432px, (min-width: 480px and max-width: 600px) 540px, (min-width: 600px and max-width: 782px) 704px, (min-width: 782px) 900px">',
 			),
 		);
 	}

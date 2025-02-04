@@ -185,12 +185,21 @@ final class Embed_Optimizer_Tag_Visitor {
 
 			$style_rules = array();
 			foreach ( $minimums as $minimum ) {
-				$style_rules[] = sprintf(
-					'@media %s { #%s { min-height: %dpx; } }',
-					od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() ),
+				$style_rule = sprintf(
+					'#%s { min-height: %dpx; }',
 					$element_id,
 					$minimum['height']
 				);
+
+				$media_feature = od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() );
+				if ( null !== $media_feature ) {
+					$style_rule = sprintf(
+						'@media %s { %s }',
+						$media_feature,
+						$style_rule
+					);
+				}
+				$style_rules[] = $style_rule;
 			}
 
 			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );

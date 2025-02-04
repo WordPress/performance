@@ -69,7 +69,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				if ( $group->get_minimum_viewport_width() !== 0 ) {
 					$media_queries[] = sprintf( 'min-width: %dpx', $group->get_minimum_viewport_width() );
 				}
-				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
+				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX && $group->get_maximum_viewport_width() !== null ) {
 					$media_queries[] = sprintf( 'max-width: %dpx', $group->get_maximum_viewport_width() );
 				}
 				if ( count( $media_queries ) > 0 ) {
