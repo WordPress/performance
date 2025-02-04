@@ -41,35 +41,25 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	 */
 	public function data_filter_map_meta_cap(): array {
 		return array(
-			'bad_caps_relevant'   => array(
-				'caps'      => null,
-				'cap'       => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
-				'user_role' => 'administrator',
-				'expected'  => array( 'manage_options' ),
+			'caps_null_irrelevant' => array(
+				'caps'     => null,
+				'cap'      => 'edit_posts',
+				'expected' => array(),
 			),
-			'bad_caps_irrelevant' => array(
-				'caps'      => null,
-				'cap'       => 'edit_posts',
-				'user_role' => 'administrator',
-				'expected'  => array(),
+			'caps_irrelevant'      => array(
+				'caps'     => array( 'edit_posts' ),
+				'cap'      => 'edit_posts',
+				'expected' => array( 'edit_posts' ),
 			),
-			'caps_authorized'     => array(
-				'caps'      => array(),
-				'cap'       => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
-				'user_role' => 'administrator',
-				'expected'  => array( 'manage_options' ),
+			'caps_null_relevant'   => array(
+				'caps'     => null,
+				'cap'      => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
+				'expected' => array( 'manage_options' ),
 			),
-			'caps_unauthorized'   => array(
-				'caps'      => array(),
-				'cap'       => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
-				'user_role' => 'subscriber',
-				'expected'  => array(),
-			),
-			'caps_anonymous'      => array(
-				'caps'      => array(),
-				'cap'       => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
-				'user_role' => null,
-				'expected'  => array(),
+			'caps_normal_relevant' => array(
+				'caps'     => array( OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY ),
+				'cap'      => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
+				'expected' => array( 'manage_options' ),
 			),
 		);
 	}
@@ -82,14 +72,10 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	 *
 	 * @param string[]|mixed $caps      Primitive capabilities required of the user.
 	 * @param string         $cap       Capability being checked.
-	 * @param string|null    $user_role Current user role.
 	 * @param string[]       $expected  Expected primitive capabilities required of the user.
 	 */
-	public function test_filter_map_meta_cap( $caps, string $cap, ?string $user_role, array $expected ): void {
-		if ( null !== $user_role ) {
-			wp_set_current_user( self::factory()->user->create( array( 'role' => $user_role ) ) );
-		}
-		$return = OD_Storage_Lock::filter_map_meta_cap( $caps, $cap, wp_get_current_user()->ID );
+	public function test_filter_map_meta_cap( $caps, string $cap, array $expected ): void {
+		$return = OD_Storage_Lock::filter_map_meta_cap( $caps, $cap );
 		$this->assertSame( $expected, $return );
 	}
 

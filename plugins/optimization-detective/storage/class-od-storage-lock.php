@@ -36,30 +36,28 @@ final class OD_Storage_Lock {
 	 * @access private
 	 */
 	public static function add_hooks(): void {
-		add_filter( 'map_meta_cap', array( __CLASS__, 'filter_map_meta_cap' ), 10, 3 );
+		add_filter( 'map_meta_cap', array( __CLASS__, 'filter_map_meta_cap' ), 10, 2 );
 	}
 
 	/**
-	 * Filters map_meta_cap to grant the `od_store_url_metric_now` capability to administrators by default.
+	 * Filters map_meta_cap to grant the `od_store_url_metric_now` capability to `manage_options` by default.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
-	 * @param string[]|mixed $caps    Primitive capabilities required of the user.
-	 * @param string         $cap     Capability being checked.
-	 * @param int            $user_id The user ID.
+	 * @param string[]|mixed $caps Primitive capabilities required of the user.
+	 * @param string         $cap  Capability being checked.
 	 * @return string[] Primitive capabilities required of the user.
 	 */
-	public static function filter_map_meta_cap( $caps, string $cap, int $user_id ): array {
+	public static function filter_map_meta_cap( $caps, string $cap ): array {
 		if ( ! is_array( $caps ) ) {
 			$caps = array();
 		}
 
 		$primitive_cap = 'manage_options';
-		if ( self::STORE_URL_METRIC_NOW_CAPABILITY === $cap && user_can( $user_id, $primitive_cap ) ) {
+		if ( self::STORE_URL_METRIC_NOW_CAPABILITY === $cap ) {
 			$caps = array( $primitive_cap );
 		}
-
 		return $caps;
 	}
 
