@@ -138,6 +138,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 			iterator_to_array( $group_collection )
 		),
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
+		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
 	);
 	if ( is_user_logged_in() ) {

@@ -90,6 +90,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 					'extensionModuleUrls' => array(),
 					'cachePurgePostId'    => null,
+					'freshnessTTL'        => DAY_IN_SECONDS,
 				),
 				'expected_standard_build' => true,
 			),
@@ -138,9 +139,16 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return DAY_IN_SECONDS;
 						}
 					);
+					add_filter(
+						'od_url_metric_freshness_ttl',
+						static function () {
+							return WEEK_IN_SECONDS;
+						}
+					);
 				},
 				'expected_exports'        => array(
 					'storageLockTTL'         => DAY_IN_SECONDS,
+					'freshnessTTL'           => WEEK_IN_SECONDS,
 					'extensionModuleUrls'    => array( home_url( '/my-extension.js', 'https' ) ),
 					'minViewportAspectRatio' => 0,
 					'maxViewportAspectRatio' => 2,
@@ -184,6 +192,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 				'currentUrl'             => od_get_current_url(),
 				'urlMetricSlug'          => $slug,
 				'cachePurgePostId'       => od_get_cache_purge_post_id(),
+				'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 			),
 			$expected_exports
 		);
