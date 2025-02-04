@@ -210,7 +210,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
 	 * @return array<non-empty-string> Array of URLs to preconnect to.
@@ -270,7 +270,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Adds preconnect links for embed resources.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
@@ -299,7 +299,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Optimizes an embed based on whether it is displayed in any initial viewport.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */

@@ -2,7 +2,7 @@
 /**
  * Helper trait for Optimization Detective tests.
  *
- * @package performance-lab
+ * @package optimization-detective
  *
  * @noinspection PhpDocMissingThrowsInspection
  * @noinspection PhpUnhandledExceptionInspection

@@ -3,7 +3,7 @@
  * Helper function to detect if static assets have effective caching headers.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 3.8.0
  */
 
 // @codeCoverageIgnoreStart
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Callback for the effective caching headers test.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
@@ -50,7 +50,7 @@ function perflab_effective_asset_cache_headers_assets_test(): array {
 	/**
 	 * Filters the list of assets to check for effective caching headers.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.8.0
 	 *
 	 * @param string[] $assets List of asset URLs to check.
 	 */
@@ -84,7 +84,7 @@ function perflab_effective_asset_cache_headers_assets_test(): array {
 /**
  * Checks if effective caching headers are enabled for a list of assets.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @param  string[] $assets List of asset URLs to check.
@@ -163,7 +163,7 @@ function perflab_effective_asset_cache_headers_check_assets( array $assets ): ar
 /**
  * Checks if effective caching headers are enabled.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @param WpOrg\Requests\Utility\CaseInsensitiveDictionary|array<string, string|array<string>> $headers Response headers.
@@ -173,7 +173,7 @@ function perflab_effective_asset_cache_headers_check_headers( $headers ): array 
 	/**
 	 * Filters the threshold for effective caching headers.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.8.0
 	 *
 	 * @param int $threshold Threshold in seconds.
 	 */
@@ -266,7 +266,7 @@ function perflab_effective_asset_cache_headers_check_headers( $headers ): array 
 /**
  * Attempt a conditional request with ETag/Last-Modified.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @param string                                                                               $url     The asset URL.
@@ -304,7 +304,7 @@ function perflab_effective_asset_cache_headers_try_conditional_request( string $
 /**
  * Generate a table listing files that need effective caching headers, including reasons.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @param array<array{filename: string, reason: string}> $fail_details Array of arrays with 'filename' and 'reason'.

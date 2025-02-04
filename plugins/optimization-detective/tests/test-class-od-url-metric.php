@@ -31,8 +31,8 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		return array(
 			'valid_minimal'                   => array(
 				'data' => array(
-					// Note: The 'etag' field is currently optional, so this data is still valid without it.
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -127,14 +127,14 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'error' => 'OD_URL_Metric[etag] must be at most 32 characters long.',
 			),
 			'missing_etag'                    => array(
-				'data' => array(
+				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				// Note: Add error message 'etag is a required property of OD_URL_Metric.' when 'etag' becomes mandatory.
+				'error' => 'etag is a required property of OD_URL_Metric.',
 			),
 			'missing_viewport'                => array(
 				'data'  => array(
@@ -327,14 +327,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$this->assertSame( $data['url'], $url_metric->get_url() );
 		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );
 
-		// Note: When the 'etag' field becomes required, the else statement can be removed.
-		if ( array_key_exists( 'etag', $data ) ) {
-			$this->assertSame( $data['etag'], $url_metric->get_etag() );
-			$this->assertSame( $data['etag'], $url_metric->get( 'etag' ) );
-			$this->assertTrue( 1 === preg_match( '/^[a-f0-9]{32}$/', $url_metric->get_etag() ) );
-		} else {
-			$this->assertNull( $url_metric->get_etag() );
-		}
+		$this->assertSame( $data['etag'], $url_metric->get_etag() );
+		$this->assertSame( $data['etag'], $url_metric->get( 'etag' ) );
+		$this->assertTrue( 1 === preg_match( '/^[a-f0-9]{32}$/', $url_metric->get_etag() ) );
 
 		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
 		$this->assertSame( $url_metric->get_uuid(), $url_metric->get( 'uuid' ) );
@@ -370,6 +365,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 
 		$data = array(
 			'url'       => home_url( '/' ),
+			'etag'      => md5( '' ),
 			'viewport'  => $viewport,
 			'timestamp' => microtime( true ),
 			'elements'  => array( $valid_element ),
@@ -390,6 +386,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -424,6 +421,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -455,6 +453,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -478,6 +477,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
@@ -516,6 +516,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array( $valid_element ),
@@ -545,6 +546,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
@@ -917,8 +919,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 */
 	protected function check_schema_subset( array $schema, string $path, bool $extended = false ): void {
 		$this->assertArrayHasKey( 'required', $schema, $path );
-		// Skipping the check for 'root/etag' as it is currently optional.
-		if ( ! $extended && 'root/etag' !== $path ) {
+		if ( ! $extended ) {
 			$this->assertTrue( $schema['required'], $path );
 		}
 		$this->assertArrayHasKey( 'type', $schema, $path );

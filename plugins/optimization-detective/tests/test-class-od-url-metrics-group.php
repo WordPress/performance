@@ -73,6 +73,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 					new OD_URL_Metric(
 						array(
 							'url'       => home_url( '/' ),
+							'etag'      => md5( '' ),
 							'viewport'  => array(
 								'width'  => 1,
 								'height' => 2,
@@ -140,7 +141,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'breakpoints'              => array( 10 ),
 				'group_index'              => 0,
 				'viewport_widths_expected' => array(
-					0  => true,
+					-1 => false,
+					0  => false,
 					1  => true,
 					9  => true,
 					10 => true,
@@ -151,7 +153,9 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'breakpoints'              => array( 99, 200 ),
 				'group_index'              => 1,
 				'viewport_widths_expected' => array(
+					-1  => false,
 					0   => false,
+					1   => false,
 					99  => false,
 					100 => true,
 					101 => true,
@@ -263,21 +267,6 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_is_group_complete' => false,
 			),
-			// Note: The following test case will not be required once the ETag is mandatory in a future release.
-			'etag_missing'   => array(
-				'url_metric'                 => new OD_URL_Metric(
-					array(
-						'url'       => home_url( '/' ),
-						'viewport'  => array(
-							'width'  => 400,
-							'height' => 700,
-						),
-						'timestamp' => microtime( true ),
-						'elements'  => array(),
-					)
-				),
-				'expected_is_group_complete' => false,
-			),
 			'etag_mismatch'  => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
 				'expected_is_group_complete' => false,
@@ -340,8 +329,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
 						'0:600',
-						'601:800',
-						'801:',
+						'600:800',
+						'800:',
 					),
 					$this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' )
 				),
@@ -359,7 +348,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:600' => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
-					'601:'  => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					'600:'  => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'same_lcp_element_across_non_consecutive_breakpoints' => array(
@@ -375,8 +364,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:400'   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-					'401:600' => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
-					'601:'    => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					'400:600' => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
+					'600:'    => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'no_lcp_image_elements'                    => array(
@@ -390,7 +379,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
 						'0:600',
-						'601:',
+						'600:',
 					),
 					null
 				),

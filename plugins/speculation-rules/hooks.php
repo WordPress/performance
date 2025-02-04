@@ -37,7 +37,7 @@ function plsr_print_speculation_rules(): void {
 		 * For site owners of sites without pretty permalinks that are certain their site is not using such a pattern,
 		 * this filter can be used to still enable speculative loading at their own risk.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.4.0
 		 *
 		 * @param bool $enabled Whether speculative loading is enabled even without pretty permalinks.
 		 */

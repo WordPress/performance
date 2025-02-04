@@ -341,20 +341,18 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
 				'xpath_breadcrumbs' => array(
-					'/HTML'                              => array( 'HTML' ),
-					'/HTML/HEAD'                         => array( 'HTML', 'HEAD' ),
-					'/HTML/BODY'                         => array( 'HTML', 'BODY' ),
-					'/HTML/BODY/DIV[@id=\'wpadminbar\']' => array( 'HTML', 'BODY', 'DIV' ),
-					'/HTML/BODY/DIV[@id=\'wpadminbar\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'header\']'     => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML'                             => array( 'HTML' ),
+					'/HTML/HEAD'                        => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                        => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'header\']'    => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'header\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'primary\']'    => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'primary\']'   => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'primary\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'secondary\']'  => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'secondary\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'secondary\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'colophon\']'   => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'colophon\']'  => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'colophon\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 				),
 			),
@@ -394,14 +392,12 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
 				'xpath_breadcrumbs' => array(
-					'/HTML'                              => array( 'HTML' ),
-					'/HTML/HEAD'                         => array( 'HTML', 'HEAD' ),
-					'/HTML/BODY'                         => array( 'HTML', 'BODY' ),
-					'/HTML/BODY/DIV[@id=\'wpadminbar\']' => array( 'HTML', 'BODY', 'DIV' ),
-					'/HTML/BODY/DIV[@id=\'wpadminbar\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@role=\'banner\']'   => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML'                            => array( 'HTML' ),
+					'/HTML/HEAD'                       => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                       => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@role=\'banner\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@role=\'banner\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 					'/HTML/BODY/DIV[@class=\'content-area main\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'content-area main\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
@@ -409,12 +405,12 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					'/HTML/BODY/DIV[@class=\'widget-area\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 					'/HTML/BODY/DIV[@class=\'site-footer\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'site-footer\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@class=\'\']'        => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@class=\'\']'      => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@role=\'\']'         => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@role=\'\']'       => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@role=\'\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV'                     => array( 'HTML', 'BODY', 'DIV' ),
-					'/HTML/BODY/DIV/*[1][self::IMG]'     => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
+					'/HTML/BODY/DIV'                   => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::IMG]'   => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 				),
 			),
 		);
@@ -432,6 +428,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * @covers ::get_breadcrumbs
 	 * @covers ::get_indexed_breadcrumbs
 	 * @covers ::get_disambiguating_attributes
+	 * @covers ::is_admin_bar
 	 * @covers ::warn
 	 *
 	 * @dataProvider data_provider_sample_documents

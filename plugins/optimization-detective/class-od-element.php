@@ -36,7 +36,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Transitional XPath.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @todo Remove logic related to transitional_xpath in a subsequent release once URL Metrics have been collected with the new format.
 	 * @var non-empty-string|null
 	 */
@@ -131,7 +131,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * Gets XPath for element.
 	 *
 	 * @since 0.7.0
-	 * @since n.e.x.t Returns the transitional XPath format. To access the underlying raw XPath, access the 'xpath' key of the jsonSerialize response.
+	 * @since 1.0.0 Returns the transitional XPath format. To access the underlying raw XPath, access the 'xpath' key of the jsonSerialize response.
 	 * @todo Remove logic related to transitional_xpath in a subsequent release once URL Metrics have been collected with the new format.
 	 *
 	 * @return non-empty-string XPath.

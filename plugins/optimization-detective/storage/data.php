@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @return int Expiration TTL in seconds.
+ * @return int<0, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
@@ -117,6 +117,8 @@ function od_get_current_url(): string {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
 	}
+
+	// TODO: We should be able to assert that this returns an non-empty-string.
 	return esc_url_raw( $current_url );
 }
 
@@ -131,7 +133,7 @@ function od_get_current_url(): string {
  * @see od_get_normalized_query_vars()
  *
  * @param array<string, mixed> $query_vars Normalized query vars.
- * @return string Slug.
+ * @return non-empty-string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
 	return md5( (string) wp_json_encode( $query_vars ) );
@@ -257,15 +259,22 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
  * @see od_verify_url_metrics_storage_hmac()
  * @see od_get_url_metrics_slug()
  *
- * @param string           $slug                Slug (hash of normalized query vars).
- * @param non-empty-string $current_etag        Current ETag.
- * @param string           $url                 URL.
- * @param int|null         $cache_purge_post_id Cache purge post ID.
- * @return string HMAC.
+ * @param non-empty-string  $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string  $current_etag        Current ETag.
+ * @param string            $url                 URL.
+ * @param positive-int|null $cache_purge_post_id Cache purge post ID.
+ * @return non-empty-string HMAC.
  */
 function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): string {
 	$action = "store_url_metric:$slug:$current_etag:$url:$cache_purge_post_id";
-	return wp_hash( $action, 'nonce' );
+
+	/**
+	 * HMAC.
+	 *
+	 * @var non-empty-string $hmac
+	 */
+	$hmac = wp_hash( $action, 'nonce' );
+	return $hmac;
 }
 
 /**
@@ -278,11 +287,11 @@ function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, st
  * @see od_get_url_metrics_storage_hmac()
  * @see od_get_url_metrics_slug()
  *
- * @param string           $hmac                HMAC.
- * @param string           $slug                Slug (hash of normalized query vars).
- * @param non-empty-string $current_etag        Current ETag.
- * @param string           $url                 URL.
- * @param int|null         $cache_purge_post_id Cache purge post ID.
+ * @param non-empty-string  $hmac                HMAC.
+ * @param non-empty-string  $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string  $current_etag        Current ETag.
+ * @param string            $url                 URL.
+ * @param positive-int|null $cache_purge_post_id Cache purge post ID.
  * @return bool Whether the HMAC is valid.
  */
 function od_verify_url_metrics_storage_hmac( string $hmac, string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): bool {
@@ -360,7 +369,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  * @access private
  * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
  *
- * @return int[] Breakpoint max widths, sorted in ascending order.
+ * @return positive-int[] Breakpoint max widths, sorted in ascending order.
  */
 function od_get_breakpoint_max_widths(): array {
 	$function_name = __FUNCTION__;
@@ -368,20 +377,7 @@ function od_get_breakpoint_max_widths(): array {
 	$breakpoint_max_widths = array_map(
 		static function ( $original_breakpoint ) use ( $function_name ): int {
 			$breakpoint = $original_breakpoint;
-			if ( PHP_INT_MAX === $breakpoint ) {
-				$breakpoint = PHP_INT_MAX - 1;
-				_doing_it_wrong(
-					esc_html( $function_name ),
-					esc_html(
-						sprintf(
-							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'optimization-detective' ),
-							$original_breakpoint
-						)
-					),
-					''
-				);
-			} elseif ( $breakpoint <= 0 ) {
+			if ( $breakpoint <= 0 ) {
 				$breakpoint = 1;
 				_doing_it_wrong(
 					esc_html( $function_name ),
@@ -400,12 +396,12 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
+		 * A breakpoint must be greater than zero. This array may be empty in which case there
 		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
 		 *
 		 * @since 0.1.0
 		 *
-		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
+		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
 		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) ) )
 	);
@@ -425,7 +421,7 @@ function od_get_breakpoint_max_widths(): array {
  * @since 0.1.0
  * @access private
  *
- * @return int Sample size.
+ * @return int<1, max> Sample size.
  */
 function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**

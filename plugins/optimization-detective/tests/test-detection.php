@@ -152,9 +152,9 @@ class Test_OD_Detection extends WP_UnitTestCase {
 			$web_vitals_library_src
 		);
 		$this->assertStringContainsString( '"minimumViewportWidth":0', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":481', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":783', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":480', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":600', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":782', $script );
 		$this->assertStringContainsString( '"complete":false', $script );
 	}
 }

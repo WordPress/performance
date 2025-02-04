@@ -149,7 +149,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Open stack tags.
 	 *
 	 * @since 0.4.0
-	 * @var string[]
+	 * @var non-empty-string[]
 	 */
 	private $open_stack_tags = array();
 
@@ -159,8 +159,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Note that currently only the third item will currently be populated (index 2), as this corresponds to tags which
 	 * are children of the `BODY` tag. This is used in {@see self::get_xpath()}.
 	 *
-	 * @since n.e.x.t
-	 * @var array<array<string, string>>
+	 * @since 1.0.0
+	 * @var array<array<non-empty-string, string>>
 	 */
 	private $open_stack_attributes = array();
 
@@ -168,7 +168,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Open stack indices.
 	 *
 	 * @since 0.4.0
-	 * @var int[]
+	 * @var non-negative-int[]
 	 */
 	private $open_stack_indices = array();
 
@@ -181,7 +181,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * populated back into `$this->open_stack_tags` and `$this->open_stack_indices`.
 	 *
 	 * @since 0.4.0
-	 * @var array<string, array{tags: string[], attributes: array<array<string, string>>, indices: int[]}>
+	 * @var array<string, array{tags: non-empty-string[], attributes: array<array<non-empty-string, string>>, indices: non-negative-int[]}>
 	 */
 	private $bookmarked_open_stacks = array();
 
@@ -204,7 +204,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This is used to store the old XPath format in a transitional period until which new URL Metrics are expected to
 	 * have been collected to purge out references to the old format.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var string|null
 	 */
 	private $current_xpath = null;
@@ -221,7 +221,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Mapping of bookmark name to a list of HTML strings which will be inserted at the time get_updated_html() is called.
 	 *
 	 * @since 0.4.0
-	 * @var array<string, string[]>
+	 * @var array<non-empty-string, string[]>
 	 */
 	private $buffered_text_replacements = array();
 
@@ -238,7 +238,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Count for the number of times that the cursor was moved.
 	 *
 	 * @since 0.6.0
-	 * @var int
+	 * @var non-negative-int
 	 * @see self::next_token()
 	 * @see self::seek()
 	 */
@@ -262,7 +262,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( null !== $query ) {
 			throw new InvalidArgumentException( esc_html__( 'Processor subclass does not support queries.', 'optimization-detective' ) );
 		}
-		return parent::next_tag( array( 'tag_closers' => 'visit' ) );
+
+		// Elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
+		do {
+			$matched = parent::next_tag( array( 'tag_closers' => 'visit' ) );
+		} while ( $matched && $this->is_admin_bar() );
+		return $matched;
 	}
 
 	/**
@@ -287,7 +292,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see WP_HTML_Processor::expects_closer()
 	 * @since 0.4.0
 	 *
-	 * @param string|null $tag_name Tag name, if not provided then the current tag is used. Optional.
+	 * @param non-empty-string|null $tag_name Tag name, if not provided then the current tag is used. Optional.
 	 * @return bool Whether to expect a closer for the tag.
 	 */
 	public function expects_closer( ?string $tag_name = null ): bool {
@@ -331,6 +336,11 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( null === $tag_name || $this->get_token_type() !== '#tag' ) {
 			return true;
 		}
+		/**
+		 * Tag name.
+		 *
+		 * @var non-empty-string $tag_name
+		 */
 
 		if ( $this->previous_tag_without_closer ) {
 			array_pop( $this->open_stack_tags );
@@ -417,7 +427,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see self::next_token()
 	 * @see self::seek()
 	 *
-	 * @return int Count of times the cursor has moved.
+	 * @return non-negative-int Count of times the cursor has moved.
 	 */
 	public function get_cursor_move_count(): int {
 		return $this->cursor_move_count;
@@ -453,8 +463,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string      $name  Meta attribute name.
-	 * @param string|true $value Value.
+	 * @param non-empty-string $name  Meta attribute name.
+	 * @param string|true      $value Value.
 	 * @return bool Whether an attribute was set.
 	 */
 	public function set_meta_attribute( string $name, $value ): bool {
@@ -484,7 +494,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @see WP_HTML_Processor::get_current_depth()
 	 *
-	 * @return int Nesting-depth of current location in the document.
+	 * @return non-negative-int Nesting-depth of current location in the document.
 	 */
 	public function get_current_depth(): int {
 		return count( $this->open_stack_tags );
@@ -560,7 +570,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @since 0.9.0 Renamed from get_breadcrumbs() to get_indexed_breadcrumbs().
 	 *
-	 * @return Generator<array{string, int, array<string, string>}> Breadcrumb.
+	 * @return Generator<array{non-empty-string, non-negative-int, array<non-empty-string, string>}> Breadcrumb.
 	 */
 	private function get_indexed_breadcrumbs(): Generator {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
@@ -577,9 +587,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Themes utilize the 'wp-site-blocks' class name in the root `DIV`. Only one attribute is currently returned,
 	 * although potentially more could be returned if additional disambiguation is needed in the future.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
-	 * @return array<string, string> Disambiguating attributes.
+	 * @return array<non-empty-string, string> Disambiguating attributes.
 	 */
 	private function get_disambiguating_attributes(): array {
 		$attributes = array();
@@ -612,7 +622,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.9.0
 	 * @see WP_HTML_Processor::get_breadcrumbs()
 	 *
-	 * @return string[] Array of tag names representing path to matched node.
+	 * @return non-empty-string[] Array of tag names representing path to matched node.
 	 */
 	public function get_breadcrumbs(): array {
 		return $this->open_stack_tags;
@@ -677,7 +687,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * can simply be an alias for that one. See related logic in {@see OD_Element::get_xpath()}. This function is only
 	 * used internally by Optimization Detective in {@see od_optimize_template_output_buffer()}.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @todo Move the logic in this method to the get_xpath() method and let this be an alias for that method once the transitional period is over.
 	 * @access private
 	 *
@@ -705,6 +715,23 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 		}
 		return $this->current_stored_xpath;
+	}
+
+	/**
+	 * Returns whether the processor is currently at or inside the admin bar.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool Whether at or inside the admin bar.
+	 */
+	private function is_admin_bar(): bool {
+		return (
+			isset( $this->open_stack_tags[2], $this->open_stack_attributes[2]['id'] )
+			&&
+			'DIV' === $this->open_stack_tags[2]
+			&&
+			'wpadminbar' === $this->open_stack_attributes[2]['id']
+		);
 	}
 
 	/**

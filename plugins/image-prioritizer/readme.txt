@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.3.0
+Stable tag:   0.3.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
@@ -69,6 +69,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.3.1 =
+
+**Bug Fixes**
+
+* Remove erroneous check for resource initiator type when considering whether to submit LCP background image. ([1760](https://github.com/WordPress/performance/pull/1760))
 
 = 0.3.0 =
 

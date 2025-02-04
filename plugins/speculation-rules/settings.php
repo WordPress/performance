@@ -63,7 +63,7 @@ function plsr_get_setting_default(): array {
 /**
  * Returns the stored setting value for Speculative Loading configuration.
  *
- * @since n.e.x.t
+ * @since 1.4.0
  *
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
  *     Stored setting value.

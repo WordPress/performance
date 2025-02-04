@@ -5,7 +5,7 @@
  * Description: Enables browsers to speculatively prerender or prefetch pages to achieve near-instant loads based on user interaction.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 1.3.1
+ * Version: 1.4.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'plsr_pending_plugin_info',
-	'1.3.1',
+	'1.4.0',
 	static function ( string $version ): void {
 
 		// Define the constant.

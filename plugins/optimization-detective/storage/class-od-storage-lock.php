@@ -26,7 +26,7 @@ final class OD_Storage_Lock {
 	 * @since 0.1.0
 	 * @access private
 	 *
-	 * @return int TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
+	 * @return int<0, max> TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
 	 */
 	public static function get_ttl(): int {
 
@@ -52,7 +52,7 @@ final class OD_Storage_Lock {
 	 * Gets transient key for locking URL Metric storage (for the current IP).
 	 *
 	 * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
-	 * @return string Transient key.
+	 * @return non-empty-string Transient key.
 	 */
 	public static function get_transient_key(): string {
 		$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];

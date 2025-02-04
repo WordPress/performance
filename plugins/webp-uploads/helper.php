@@ -66,7 +66,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	// Ensure that all mime types have correct transforms. If a mime type has invalid transforms array,
 	// then fallback to the original mime type to make sure that the correct subsizes are created.
 	foreach ( $transforms as $mime_type => $transform_types ) {
-		if ( ! is_array( $transform_types ) || empty( $transform_types ) ) {
+		if ( ! is_array( $transform_types ) || 0 === count( $transform_types ) ) {
 			$transforms[ $mime_type ] = array( $mime_type );
 		}
 	}
@@ -163,7 +163,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	// If stored EXIF data exists, rotate the source image before creating sub-sizes.
-	if ( ! empty( $image_meta['image_meta'] ) ) {
+	if ( isset( $image_meta['image_meta'] ) && is_array( $image_meta['image_meta'] ) && count( $image_meta['image_meta'] ) > 0 ) {
 		$editor->maybe_exif_rotate();
 	}
 
@@ -185,7 +185,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		return $image;
 	}
 
-	if ( empty( $image['file'] ) ) {
+	if ( ! isset( $image['file'] ) || ! is_string( $image['file'] ) || '' === $image['file'] ) {
 		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'webp-uploads' ) );
 	}
 

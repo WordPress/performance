@@ -3,7 +3,7 @@
  * Hook callbacks used for effective caching headers.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 3.8.0
  */
 
 // @codeCoverageIgnoreStart
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds tests to site health.
  *
- * @since n.e.x.t
+ * @since 3.8.0
  * @access private
  *
  * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
