@@ -608,6 +608,10 @@ export default async function detect( {
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
 		if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+			window.parent.postMessage(
+				'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
+				'*'
+			);
 			resolve();
 		}
 
@@ -711,40 +715,14 @@ export default async function detect( {
 			'prime_url_metrics_verification_token',
 			odPrimeUrlMetricsVerificationToken
 		);
-
-		fetch( url, {
-			method: 'POST',
-			body: JSON.stringify( urlMetric ),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		} )
-			.then( ( response ) => {
-				if ( ! response.ok ) {
-					throw new Error(
-						`Failed to send URL Metric: ${ response.statusText }`
-					);
-				}
-				window.parent.postMessage(
-					'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
-					'*'
-				);
-			} )
-			.catch( ( err ) => {
-				window.parent.postMessage(
-					'OD_PRIME_URL_METRICS_REQUEST_FAILURE',
-					'*'
-				);
-				error( 'Failed to send URL Metric:', err );
-			} );
-	} else {
-		navigator.sendBeacon(
-			url,
-			new Blob( [ JSON.stringify( urlMetric ) ], {
-				type: 'application/json',
-			} )
-		);
 	}
+
+	navigator.sendBeacon(
+		url,
+		new Blob( [ JSON.stringify( urlMetric ) ], {
+			type: 'application/json',
+		} )
+	);
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();

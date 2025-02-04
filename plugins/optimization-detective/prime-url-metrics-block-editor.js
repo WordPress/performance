@@ -14,7 +14,6 @@
 	iframe.style.display = 'block';
 	iframe.style.position = 'absolute';
 	iframe.style.transform = 'translateX(-9999px)';
-	iframe.style.visibility = 'hidden';
 	document.body.appendChild( iframe );
 
 	/**
