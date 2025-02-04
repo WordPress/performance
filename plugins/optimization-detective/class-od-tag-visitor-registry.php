@@ -27,7 +27,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Visitors.
 	 *
-	 * @var array<string, TagVisitorCallback>
+	 * @var array<non-empty-string, TagVisitorCallback>
 	 */
 	private $visitors = array();
 
@@ -36,8 +36,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 *
 	 * @phpstan-param TagVisitorCallback $tag_visitor_callback
 	 *
-	 * @param string   $id                   Identifier for the tag visitor.
-	 * @param callable $tag_visitor_callback Tag visitor callback.
+	 * @param non-empty-string $id                   Identifier for the tag visitor.
+	 * @param callable         $tag_visitor_callback Tag visitor callback.
 	 */
 	public function register( string $id, callable $tag_visitor_callback ): void {
 		$this->visitors[ $id ] = $tag_visitor_callback;
@@ -46,7 +46,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Determines if a visitor has been registered.
 	 *
-	 * @param string $id Identifier for the tag visitor.
+	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return bool Whether registered.
 	 */
 	public function is_registered( string $id ): bool {
@@ -56,7 +56,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Gets a registered visitor.
 	 *
-	 * @param string $id Identifier for the tag visitor.
+	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return TagVisitorCallback|null Whether registered.
 	 */
 	public function get_registered( string $id ): ?callable {
@@ -69,7 +69,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Unregisters a tag visitor.
 	 *
-	 * @param string $id Identifier for the tag visitor.
+	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return bool Whether a tag visitor was unregistered.
 	 */
 	public function unregister( string $id ): bool {

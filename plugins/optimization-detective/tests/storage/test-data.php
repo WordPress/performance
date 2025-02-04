@@ -674,13 +674,9 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 				'breakpoints' => array( 0 ),
 				'expected'    => array( 1 ),
 			),
-			'max'      => array(
-				'breakpoints' => array( PHP_INT_MAX ),
-				'expected'    => array( PHP_INT_MAX - 1 ),
-			),
 			'multiple' => array(
 				'breakpoints' => array( -1, 0, 10, PHP_INT_MAX ),
-				'expected'    => array( 1, 10, PHP_INT_MAX - 1 ),
+				'expected'    => array( 1, 10, PHP_INT_MAX ),
 			),
 		);
 	}

@@ -98,20 +98,31 @@ function error( ...message ) {
 /**
  * Checks whether the URL Metric(s) for the provided viewport width is needed.
  *
+ * The comparison logic here corresponds with the PHP logic in `OD_URL_Metric_Group::is_viewport_width_in_range()`.
+ *
  * @param {number}                 viewportWidth          - Current viewport width.
  * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
  * @return {boolean} Whether URL Metrics are needed.
  */
 function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
-	let lastWasLacking = false;
-	for ( const { minimumViewportWidth, complete } of urlMetricGroupStatuses ) {
-		if ( viewportWidth >= minimumViewportWidth ) {
-			lastWasLacking = ! complete;
-		} else {
-			break;
+	if ( viewportWidth === 0 ) {
+		return false;
+	}
+
+	for ( const {
+		minimumViewportWidth,
+		maximumViewportWidth,
+		complete,
+	} of urlMetricGroupStatuses ) {
+		if (
+			viewportWidth > minimumViewportWidth &&
+			( null === maximumViewportWidth ||
+				viewportWidth <= maximumViewportWidth )
+		) {
+			return ! complete;
 		}
 	}
-	return lastWasLacking;
+	return false;
 }
 
 /**
