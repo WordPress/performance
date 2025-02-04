@@ -119,7 +119,7 @@ function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
 			( null === maximumViewportWidth ||
 				viewportWidth <= maximumViewportWidth )
 		) {
-			return complete;
+			return ! complete;
 		}
 	}
 	return false;
