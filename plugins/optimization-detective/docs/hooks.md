@@ -102,15 +102,19 @@ add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
 } );
 ```
 
-### Filter: `od_url_metric_storage_lock_ttl` (default: 1 minute in seconds)
+### Filter: `od_url_metric_storage_lock_ttl` (default: 60 seconds, except 0 for authorized logged-in users)
 
-Filters how long a given IP is locked from submitting another metric-storage REST API request. Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
+Filters how long the current IP is locked from submitting another URL metric storage REST API request.
+
+Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
 
 ```php
 add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 	return is_user_logged_in() ? 0 : $ttl;
 } );
 ```
+
+By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
 
 During development this is useful to set to zero so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 
