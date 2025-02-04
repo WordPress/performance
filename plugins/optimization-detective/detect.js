@@ -366,15 +366,12 @@ export default async function detect( {
 	}
 
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
-	// TODO: Remove the console timing.
-	console.time( 'sha1' ); // eslint-disable-line no-console
 	const alreadySubmittedSessionStorageKey =
 		await getAlreadySubmittedSessionStorageKey(
 			currentETag,
 			currentUrl,
 			urlMetricGroupStatus
 		);
-	console.timeEnd( 'sha1' ); // eslint-disable-line no-console
 	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
 		const previousVisitTime = parseInt(
 			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
