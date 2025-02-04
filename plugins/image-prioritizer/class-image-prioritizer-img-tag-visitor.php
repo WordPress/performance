@@ -63,18 +63,13 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			}
 
 			if ( $element_max_width > 0 ) {
-				// TODO: The min-width will need to be adjusted after <https://github.com/WordPress/performance/pull/1839>.
-				// TODO: Consider reusing od_generate_media_query() here but note the extra parentheses should be removed from its output.
-				$media_queries = array();
-				if ( $group->get_minimum_viewport_width() !== 0 ) {
-					$media_queries[] = sprintf( 'min-width: %dpx', $group->get_minimum_viewport_width() );
+				$size = sprintf( '%dpx', $element_max_width );
+
+				$media_feature = od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() );
+				if ( null !== $media_feature ) {
+					$size = "$media_feature $size";
 				}
-				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX && $group->get_maximum_viewport_width() !== null ) {
-					$media_queries[] = sprintf( 'max-width: %dpx', $group->get_maximum_viewport_width() );
-				}
-				if ( count( $media_queries ) > 0 ) {
-					$sizes[] = sprintf( '(%s) %dpx', join( ' and ', $media_queries ), round( $element_max_width ) );
-				}
+				$sizes[] = $size;
 			}
 		}
 
