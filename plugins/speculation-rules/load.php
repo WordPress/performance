@@ -19,7 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -83,3 +82,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/settings.php';
 	}
 );
+// @codeCoverageIgnoreEnd
