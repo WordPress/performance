@@ -34,27 +34,27 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			'mobile'      => array(
 				'min_width' => 0,
 				'max_width' => 320,
-				'expected'  => '( width <= 320px )',
+				'expected'  => '(width <= 320px)',
 			),
 			'mobile_alt'  => array(
 				'min_width' => null,
 				'max_width' => 320,
-				'expected'  => '( width <= 320px )',
+				'expected'  => '(width <= 320px)',
 			),
 			'tablet'      => array(
 				'min_width' => 320,
 				'max_width' => 600,
-				'expected'  => '( 321px < width <= 600px )',
+				'expected'  => '(320px < width <= 600px)',
 			),
 			'desktop'     => array(
 				'min_width' => 600,
 				'max_width' => PHP_INT_MAX,
-				'expected'  => '( 601px < width )',
+				'expected'  => '(600px < width)',
 			),
 			'desktop_alt' => array(
 				'min_width' => 600,
 				'max_width' => null,
-				'expected'  => '( 601px < width )',
+				'expected'  => '(600px < width)',
 			),
 			'no_widths'   => array(
 				'min_width' => null,
