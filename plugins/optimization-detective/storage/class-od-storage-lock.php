@@ -36,29 +36,26 @@ final class OD_Storage_Lock {
 	 * @access private
 	 */
 	public static function add_hooks(): void {
-		add_filter( 'map_meta_cap', array( __CLASS__, 'filter_map_meta_cap' ), 10, 2 );
+		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap' ) );
 	}
 
 	/**
-	 * Filters map_meta_cap to grant the `od_store_url_metric_now` capability to `manage_options` by default.
+	 * Filters `user_has_cap` to grant the `od_store_url_metric_now` capability to users who can `manage_options` by default.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
-	 * @param string[]|mixed $caps Primitive capabilities required of the user.
-	 * @param string         $cap  Capability being checked.
-	 * @return string[] Primitive capabilities required of the user.
+	 * @param array<string, bool>|mixed $allcaps Capability names mapped to boolean values for whether the user has that capability.
+	 * @return array<string, bool> Capability names mapped to boolean values for whether the user has that capability.
 	 */
-	public static function filter_map_meta_cap( $caps, string $cap ): array {
-		if ( ! is_array( $caps ) ) {
-			$caps = array();
+	public static function filter_user_has_cap( $allcaps ): array {
+		if ( ! is_array( $allcaps ) ) {
+			$allcaps = array();
 		}
-
-		$primitive_cap = 'manage_options';
-		if ( self::STORE_URL_METRIC_NOW_CAPABILITY === $cap ) {
-			$caps = array( $primitive_cap );
+		if ( isset( $allcaps['manage_options'] ) ) {
+			$allcaps['od_store_url_metric_now'] = $allcaps['manage_options'];
 		}
-		return $caps;
+		return $allcaps;
 	}
 
 	/**
