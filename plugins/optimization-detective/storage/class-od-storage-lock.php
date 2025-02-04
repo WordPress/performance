@@ -56,7 +56,10 @@ final class OD_Storage_Lock {
 
 		$primitive_cap = 'manage_options';
 		if ( self::STORE_URL_METRIC_NOW_CAPABILITY === $cap ) {
-			$caps = array( $primitive_cap );
+			$i = array_search( self::STORE_URL_METRIC_NOW_CAPABILITY, $caps, true );
+			if ( false !== $i ) {
+				$caps[ $i ] = $primitive_cap;
+			}
 		}
 		return $caps;
 	}

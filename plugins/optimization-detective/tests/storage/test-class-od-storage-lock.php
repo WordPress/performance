@@ -54,12 +54,17 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 			'caps_null_relevant'   => array(
 				'caps'     => null,
 				'cap'      => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
-				'expected' => array( 'manage_options' ),
+				'expected' => array(),
 			),
 			'caps_normal_relevant' => array(
 				'caps'     => array( OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY ),
 				'cap'      => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
 				'expected' => array( 'manage_options' ),
+			),
+			'caps_extra_relevant'  => array(
+				'caps'     => array( 'edit_posts', OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY ),
+				'cap'      => OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY,
+				'expected' => array( 'edit_posts', 'manage_options' ),
 			),
 		);
 	}
