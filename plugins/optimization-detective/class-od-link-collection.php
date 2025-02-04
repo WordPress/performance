@@ -260,7 +260,7 @@ final class OD_Link_Collection implements Countable {
 
 				// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
 				$encoded_url  = preg_replace_callback(
-					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]/',
+					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
 					static function ( $matches ) {
 						return rawurlencode( $matches[0] );
 					},
