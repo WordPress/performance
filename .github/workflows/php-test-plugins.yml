@@ -92,13 +92,13 @@ jobs:
             ALL_CHANGED_PLUGINS+=("$PLUGIN_NAME")
           done
 
-          # Define and add plugin dependencies (e.g., optimization-detective triggers others).
-          declare -A PLUGIN_DEPENDENCIES=(
+          # Define and add plugin dependents (e.g., changes to Optimization Detective should trigger its dependents).
+          declare -A PLUGIN_DEPENDENTS=(
             ["optimization-detective"]="embed-optimizer image-prioritizer"
           )
           for PLUGIN in "${ALL_CHANGED_PLUGINS[@]}"; do
-            if [[ -n "${PLUGIN_DEPENDENCIES[$PLUGIN]}" ]]; then
-              for DEP in ${PLUGIN_DEPENDENCIES[$PLUGIN]}; do
+            if [[ -n "${PLUGIN_DEPENDENTS[$PLUGIN]}" ]]; then
+              for DEP in ${PLUGIN_DEPENDENTS[$PLUGIN]}; do
                 if [[ ! " ${ALL_CHANGED_PLUGINS[*]} " =~ " ${DEP} " ]]; then
                   ALL_CHANGED_PLUGINS+=("$DEP")
                 fi
