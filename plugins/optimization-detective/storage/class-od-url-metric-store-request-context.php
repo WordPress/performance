@@ -31,7 +31,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	/**
 	 * ID for the URL Metric post.
 	 *
-	 * @var int
+	 * @var positive-int
 	 * @readonly
 	 */
 	public $post_id;
@@ -66,7 +66,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @param WP_REST_Request                $request                     REST API request.
-	 * @param int                            $post_id                     ID for the URL Metric post.
+	 * @param positive-int                   $post_id                     ID for the URL Metric post.
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
 	 * @param OD_URL_Metric_Group            $url_metric_group            URL Metric group.
 	 * @param OD_URL_Metric                  $url_metric                  URL Metric.
