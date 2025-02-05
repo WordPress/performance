@@ -127,6 +127,7 @@ function od_compose_site_health_result( $response ): array {
 		$message = wp_remote_retrieve_response_message( $response );
 		$body    = wp_remote_retrieve_body( $response );
 		$data    = json_decode( $body, true );
+		$header  = wp_remote_retrieve_header( $response, 'content-type' );
 
 		$is_expected = (
 			400 === $code &&
@@ -156,7 +157,14 @@ function od_compose_site_health_result( $response ): array {
 				$result['description'] .= '<blockquote>' . esc_html( $data['message'] ) . '</blockquote>';
 			}
 
-			$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary><pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+			$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
+
+			if ( isset( $header ) && 'text/html' === $header ) {
+				$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
+				$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox seamless></iframe></details>';
+			} else {
+				$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+			}
 		}
 	}
 	return $result;
@@ -238,7 +246,7 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
 		$message = "<details>$message</details>";
 	}
 
-	wp_admin_notice(
+	$notice = wp_get_admin_notice(
 		$message,
 		array(
 			'type'               => 'warning',
@@ -246,6 +254,15 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
 			'paragraph_wrap'     => false,
 		)
 	);
+
+	$allowed_tags           = wp_kses_allowed_html( 'post' );
+	$allowed_tags['iframe'] = array(
+		'srcdoc'   => true,
+		'seamless' => true,
+		'sandbox'  => true,
+	);
+
+	echo wp_kses( $notice, $allowed_tags );
 }
 
 /**
