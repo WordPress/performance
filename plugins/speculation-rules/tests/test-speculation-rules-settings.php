@@ -206,9 +206,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'plsr_speculation_rules', $wp_settings_sections['reading'] );
 
 		// Check the output of the callback function for the section.
-		ob_start();
-		call_user_func( $wp_settings_sections['reading']['plsr_speculation_rules']['callback'] );
-		$output = ob_get_clean();
+		$output = get_echo( $wp_settings_sections['reading']['plsr_speculation_rules']['callback'] );
 		$this->assertStringContainsString( 'This section allows you to control how URLs that your users navigate to are speculatively loaded to improve performance.', $output );
 	}
 
@@ -265,9 +263,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		update_option( 'plsr_speculation_rules', $stored_settings );
 
 		// Capture the output of the settings field rendering.
-		ob_start();
-		plsr_render_settings_field( $args );
-		$output = ob_get_clean();
+		$output = get_echo( 'plsr_render_settings_field', array( $args ) );
 
 		// Check for the presence of form elements.
 		$this->assertStringContainsString( $name_check, $output );
