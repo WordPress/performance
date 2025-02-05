@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property-read OD_URL_Metric_Group_Collection $url_metric_group_collection  URL Metric group collection.
  * @property-read OD_Link_Collection             $link_collection              Link collection.
  * @property-read positive-int|null              $url_metrics_id               ID for the od_url_metrics post which provided the URL Metrics in the collection.
- * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated alias for the url_metric_group_collection property.
+ * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated alias for the $url_metric_group_collection property.
  */
 final class OD_Tag_Visitor_Context {
 
@@ -123,10 +123,10 @@ final class OD_Tag_Visitor_Context {
 			case 'url_metrics_group_collection':
 				// TODO: Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
 				_doing_it_wrong(
-					__CLASS__ . '::$url_metrics_group_collection',
+					esc_html( __CLASS__ . '::$' . $name ),
 					esc_html(
 						sprintf(
-						/* translators: %s is class member variable name */
+							/* translators: %s is class member variable name */
 							__( 'Use %s instead.', 'optimization-detective' ),
 							__CLASS__ . '::$url_metric_group_collection'
 						)

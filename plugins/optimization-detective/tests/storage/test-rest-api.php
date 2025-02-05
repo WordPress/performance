@@ -88,7 +88,11 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				$this->assertInstanceOf( OD_URL_Metric_Group::class, $context->url_metric_group );
 				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
 				$this->assertInstanceOf( WP_REST_Request::class, $context->request );
+				$this->assertIsInt( $context->url_metrics_id );
+				$this->setExpectedIncorrectUsage( 'OD_URL_Metric_Store_Request_Context::$post_id' );
 				$this->assertIsInt( $context->post_id );
+				$this->assertSame( $context->url_metrics_id, $context->post_id );
+
 				$error = null;
 				$value = '';
 				try {
