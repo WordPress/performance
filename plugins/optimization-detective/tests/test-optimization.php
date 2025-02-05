@@ -299,7 +299,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 							'post_status' => 'draft',
 						)
 					);
-					return get_preview_post_link( $post_id );
+					return (string) get_preview_post_link( $post_id );
 				},
 				'expected' => false,
 			),
