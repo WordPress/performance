@@ -17,7 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.4.0
  *
- * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated property accessed via magic getter. Use the url_metric_group_collection property instead.
+ * @property-read OD_HTML_Tag_Processor          $processor                    HTML tag processor.
+ * @property-read OD_URL_Metric_Group_Collection $url_metric_group_collection  URL Metric group collection.
+ * @property-read OD_Link_Collection             $link_collection              Link collection.
+ * @property-read positive-int|null              $url_metrics_id               ID for the od_url_metrics post which provided the URL Metrics in the collection.
+ * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated alias for the url_metric_group_collection property.
  */
 final class OD_Tag_Visitor_Context {
 
@@ -26,27 +30,24 @@ final class OD_Tag_Visitor_Context {
 	 *
 	 * @since 0.4.0
 	 * @var OD_HTML_Tag_Processor
-	 * @readonly
 	 */
-	public $processor;
+	private $processor;
 
 	/**
 	 * URL Metric group collection.
 	 *
 	 * @since 0.4.0
 	 * @var OD_URL_Metric_Group_Collection
-	 * @readonly
 	 */
-	public $url_metric_group_collection;
+	private $url_metric_group_collection;
 
 	/**
 	 * Link collection.
 	 *
 	 * @since 0.4.0
 	 * @var OD_Link_Collection
-	 * @readonly
 	 */
-	public $link_collection;
+	private $link_collection;
 
 	/**
 	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
@@ -55,12 +56,13 @@ final class OD_Tag_Visitor_Context {
 	 *
 	 * @since n.e.x.t
 	 * @var positive-int|null
-	 * @readonly
 	 */
-	public $url_metrics_id;
+	private $url_metrics_id;
 
 	/**
 	 * Visited tag state.
+	 *
+	 * Important: This object is not exposed directly by the getter. It is only exposed via {@see self::track_tag()}.
 	 *
 	 * @since 1.0.0
 	 * @var OD_Visited_Tag_State
@@ -98,39 +100,50 @@ final class OD_Tag_Visitor_Context {
 	}
 
 	/**
-	 * Gets deprecated property.
+	 * Gets a property.
 	 *
 	 * @since 0.7.0
-	 * @todo Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
 	 *
 	 * @param string $name Property name.
-	 * @return OD_URL_Metric_Group_Collection URL Metric group collection.
+	 * @return mixed Property value.
 	 *
 	 * @throws Error When property is unknown.
 	 */
-	public function __get( string $name ): OD_URL_Metric_Group_Collection {
-		if ( 'url_metrics_group_collection' === $name ) {
-			_doing_it_wrong(
-				__CLASS__ . '::$url_metrics_group_collection',
-				esc_html(
-					sprintf(
+	public function __get( string $name ) {
+		// Note that there is intentionally not a case for 'visited_tag_state'.
+		switch ( $name ) {
+			case 'processor':
+				return $this->processor;
+			case 'link_collection':
+				return $this->link_collection;
+			case 'url_metrics_id':
+				return $this->url_metrics_id;
+			case 'url_metric_group_collection':
+				return $this->url_metric_group_collection;
+			case 'url_metrics_group_collection':
+				// TODO: Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
+				_doing_it_wrong(
+					__CLASS__ . '::$url_metrics_group_collection',
+					esc_html(
+						sprintf(
 						/* translators: %s is class member variable name */
-						__( 'Use %s instead.', 'optimization-detective' ),
-						__CLASS__ . '::$url_metric_group_collection'
+							__( 'Use %s instead.', 'optimization-detective' ),
+							__CLASS__ . '::$url_metric_group_collection'
+						)
+					),
+					'optimization-detective 0.7.0'
+				);
+				return $this->url_metric_group_collection;
+			default:
+				throw new Error(
+					esc_html(
+						sprintf(
+							/* translators: %s is class member variable name */
+							__( 'Unknown property %s.', 'optimization-detective' ),
+							__CLASS__ . '::$' . $name
+						)
 					)
-				),
-				'optimization-detective 0.7.0'
-			);
-			return $this->url_metric_group_collection;
+				);
 		}
-		throw new Error(
-			esc_html(
-				sprintf(
-					/* translators: %s is class member variable name */
-					__( 'Unknown property %s.', 'optimization-detective' ),
-					__CLASS__ . '::$' . $name
-				)
-			)
-		);
 	}
 }

@@ -77,6 +77,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_trigger_page_cache_invalidation
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 * @covers OD_URL_Metric_Store_Request_Context::__construct
+	 * @covers OD_URL_Metric_Store_Request_Context::__get
 	 */
 	public function test_rest_request_good_params( Closure $set_up ): void {
 		$stored_context = null;
@@ -88,6 +89,15 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
 				$this->assertInstanceOf( WP_REST_Request::class, $context->request );
 				$this->assertIsInt( $context->post_id );
+				$error = null;
+				$value = '';
+				try {
+					$value = $context->__get( 'unknown' );
+				} catch ( Error $e ) {
+					$error = $e;
+				}
+				$this->assertSame( '', $value );
+				$this->assertInstanceOf( Error::class, $error );
 				$stored_context = $context;
 			}
 		);
