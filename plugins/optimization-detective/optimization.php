@@ -167,7 +167,7 @@ function od_can_optimize_response(): bool {
 		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
 		is_embed() ||
-		// Do not gather url metric for post that is not published yet, see - https://github.com/WordPress/performance/issues/1841.
+		// Skip posts that aren't published yet.
 		is_preview() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||

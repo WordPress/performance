@@ -293,10 +293,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			),
 			'singular_as_post_preview'             => array(
 				'set_up'   => static function (): string {
+					$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
+					wp_set_current_user( $user_id );
 					$post_id = self::factory()->post->create(
 						array(
 							'post_title'  => 'Hello',
 							'post_status' => 'draft',
+							'post_author' => $user_id,
 						)
 					);
 					return (string) get_preview_post_link( $post_id );
