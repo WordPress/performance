@@ -23,7 +23,7 @@ trait Optimization_Detective_Test_Helpers {
 	 * @phpstan-param ElementDataSubset[] $elements
 	 * @param array[] $elements Element data.
 	 * @param bool    $complete Whether to fully populate the groups.
-	 * @return positive-int Post ID.
+	 * @return positive-int ID for od_url_metrics post.
 	 * @throws Exception If something terrible happens.
 	 */
 	public function populate_url_metrics( array $elements, bool $complete = true ): int {
