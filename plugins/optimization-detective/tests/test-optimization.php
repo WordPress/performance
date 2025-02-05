@@ -291,6 +291,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected' => false,
 			),
+			'singular_as_post_preview'             => array(
+				'set_up'   => static function (): string {
+					$post_id = self::factory()->post->create( array( 'post_title' => 'Hello', 'post_status' => 'draft' ) );
+					return get_preview_post_link( $post_id );
+				},
+				'expected' => false,
+			),
 			'home_post_request_as_anonymous'       => array(
 				'set_up'   => static function (): string {
 					$_SERVER['REQUEST_METHOD'] = 'POST';
