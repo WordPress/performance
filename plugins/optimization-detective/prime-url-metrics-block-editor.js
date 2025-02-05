@@ -11,9 +11,14 @@
 	let breakpoints = [];
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
-	iframe.style.display = 'block';
-	iframe.style.position = 'absolute';
-	iframe.style.transform = 'translateX(-9999px)';
+	iframe.style.position = 'fixed';
+	iframe.style.top = '0';
+	iframe.style.right = '0';
+	iframe.style.transform = 'scale(0.05)';
+	iframe.style.transformOrigin = '0 0';
+	iframe.style.pointerEvents = 'none';
+	iframe.style.opacity = '0.000001';
+	iframe.style.zIndex = '-9999';
 	document.body.appendChild( iframe );
 
 	/**
