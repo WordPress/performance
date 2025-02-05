@@ -267,7 +267,13 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	);
 	$link_collection      = new OD_Link_Collection();
 	$visited_tag_state    = new OD_Visited_Tag_State();
-	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection, $visited_tag_state );
+	$tag_visitor_context  = new OD_Tag_Visitor_Context(
+		$processor,
+		$group_collection,
+		$link_collection,
+		$visited_tag_state,
+		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
