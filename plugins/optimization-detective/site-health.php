@@ -271,7 +271,7 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
  * @since 1.0.0
  * @access private
  *
- * @param string $plugin_file Plugin file.
+ * @param non-empty-string $plugin_file Plugin file.
  */
 function od_render_rest_api_health_check_admin_notice_in_plugin_row( string $plugin_file ): void {
 	if ( 'optimization-detective/load.php' !== $plugin_file ) { // TODO: What if a different plugin slug is used?
