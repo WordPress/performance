@@ -41,6 +41,25 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 1,
 				'error'           => '',
 			),
+			'preload_imagesrcset_without_href'           => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'         => 'preload',
+							'imagesrcset' => 'https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w',
+							'imagesizes'  => '(max-width: 600px) 480px, 800px',
+							'as'          => 'image',
+							'media'       => 'screen',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" as="image" media="screen">
+				',
+				'expected_header' => 'Link: <about:blank>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; as="image"; media="screen"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
 			'preload_with_min0_max_viewport_widths'      => array(
 				'links_args'      => array(
 					array(
@@ -368,6 +387,74 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_header' => '',
 				'expected_count'  => 0,
 				'error'           => 'Maximum width must be greater than zero and greater than the minimum width.',
+			),
+			'international_domain_name'                  => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://例.example.com/תמונה.jpg',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://例.example.com/תמונה.jpg" as="image">
+				',
+				'expected_header' => 'Link: <https://%E4%BE%8B.example.com/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'non_ascii_path'                             => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/חנות/תמונה.jpg',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/חנות/תמונה.jpg" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'percent-in-path'                            => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/100%25-one-hundred-percent.png?a[1]=2',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/100%25-one-hundred-percent.png?a[1]=2" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/100%25-one-hundred-percent.png?a%5B1%5D=2>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'multisite_subdirectory_non_ascii'           => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/חנות/wp-content/uploads/2025/01/example.jpg?ver=1+2',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/חנות/wp-content/uploads/2025/01/example.jpg?ver=1+2" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg?ver=1%202>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
 			),
 		);
 	}
