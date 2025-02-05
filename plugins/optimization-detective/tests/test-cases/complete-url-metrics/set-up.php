@@ -23,7 +23,7 @@ return static function ( Test_OD_Optimization $test_case ): void {
 			$registry->register(
 				'everything',
 				static function ( OD_Tag_Visitor_Context $context ) use ( $test_case, $post_id ): void {
-					$test_case->assertSame( $post_id, $context->url_metrics_post_id, 'Expected url_metrics_post_id in context too match the ID from when URL Metrics were populated.' );
+					$test_case->assertSame( $post_id, $context->url_metrics_id, 'Expected url_metrics_id in context too match the ID from when URL Metrics were populated.' );
 				}
 			);
 		}

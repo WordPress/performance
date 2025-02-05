@@ -49,7 +49,7 @@ final class OD_Tag_Visitor_Context {
 	public $link_collection;
 
 	/**
-	 * Post ID for the od_url_metrics post which provided the URL Metrics in the collection.
+	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
 	 *
 	 * May be null if no post has been created yet.
 	 *
@@ -57,7 +57,7 @@ final class OD_Tag_Visitor_Context {
 	 * @var positive-int|null
 	 * @readonly
 	 */
-	public $url_metrics_post_id;
+	public $url_metrics_id;
 
 	/**
 	 * Visited tag state.
@@ -76,14 +76,14 @@ final class OD_Tag_Visitor_Context {
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
 	 * @param OD_Link_Collection             $link_collection             Link collection.
 	 * @param OD_Visited_Tag_State           $visited_tag_state           Visited tag state.
-	 * @param positive-int|null              $url_metrics_post_id         Post ID for the od_url_metrics post which provided the URL Metrics in the collection. May be null if no post has been created yet.
+	 * @param positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection. May be null if no post has been created yet.
 	 */
-	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, OD_Visited_Tag_State $visited_tag_state, ?int $url_metrics_post_id ) {
+	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, OD_Visited_Tag_State $visited_tag_state, ?int $url_metrics_id ) {
 		$this->processor                   = $processor;
 		$this->url_metric_group_collection = $url_metric_group_collection;
 		$this->link_collection             = $link_collection;
 		$this->visited_tag_state           = $visited_tag_state;
-		$this->url_metrics_post_id         = $url_metrics_post_id;
+		$this->url_metrics_id              = $url_metrics_id;
 	}
 
 	/**
