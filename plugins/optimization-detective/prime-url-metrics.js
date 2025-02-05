@@ -21,6 +21,11 @@
 		'iframe#od-prime-url-metrics-iframe'
 	);
 
+	/** @type {HTMLDivElement} */
+	const iframeContainer = document.querySelector(
+		'div#od-prime-url-metrics-iframe-container'
+	);
+
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
@@ -166,11 +171,6 @@
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
 					cleanup();
 					resolve();
-				} else if (
-					event.data === 'OD_PRIME_URL_METRICS_REQUEST_FAILURE'
-				) {
-					cleanup();
-					reject( new Error( 'Failed to send metrics' ) );
 				}
 			};
 
@@ -200,9 +200,23 @@
 				verificationToken;
 
 			if ( isDebug ) {
-				iframe.style.position = 'unset';
-				iframe.style.transform = 'scale(0.5) translate(-50%, -50%)';
-				iframe.style.visibility = 'visible';
+				function fitIframe() {
+					const containerWidth = iframeContainer.clientWidth;
+					if ( containerWidth <= 0 ) {
+						return;
+					}
+
+					const nativeWidth = parseInt( iframe.width, 10 ) || 1;
+					const scale = containerWidth / nativeWidth;
+
+					iframe.style.position = 'unset';
+					iframe.style.transform = `scale(${ scale })`;
+					iframe.style.pointerEvents = 'auto';
+					iframe.style.opacity = '1';
+					iframe.style.zIndex = '9999';
+				}
+				window.addEventListener( 'resize', fitIframe );
+				fitIframe();
 			}
 		} );
 	}

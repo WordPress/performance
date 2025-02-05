@@ -66,11 +66,6 @@
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
 					cleanup();
 					resolve();
-				} else if (
-					event.data === 'OD_PRIME_URL_METRICS_REQUEST_FAILURE'
-				) {
-					cleanup();
-					reject( new Error( 'Failed to send metrics' ) );
 				}
 			};
 
