@@ -215,7 +215,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<mixed>> Data for testing settings fields.
 	 */
-	public function settingsFieldProvider(): array {
+	public function data_provider_to_test_render_settings_field(): array {
 		return array(
 			'mode'      => array(
 				array(
@@ -251,7 +251,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	/**
 	 * Test rendering of settings fields using data provider.
 	 *
-	 * @dataProvider settingsFieldProvider
+	 * @dataProvider data_provider_to_test_render_settings_field
 	 * @param array<mixed> $args Arguments for the settings field.
 	 * @param array<mixed> $stored_settings Stored settings values.
 	 * @param string       $name_check HTML name attribute check.
