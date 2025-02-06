@@ -214,6 +214,27 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
+	/*
+	 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+	 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+	 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+	 * getting sent.
+	 */
+	$max_size       = 64 * 1024;
+	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+	if ( $content_length > $max_size ) {
+		return new WP_Error(
+			'rest_content_too_large',
+			sprintf(
+				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+				number_format_i18n( $content_length ),
+				number_format_i18n( $max_size )
+			),
+			array( 'status' => 413 )
+		);
+	}
+
 	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
 	$result = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),

@@ -187,123 +187,269 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$valid_params  = $this->get_valid_params();
 		$valid_element = $valid_params['elements'][0];
 
-		return array_map(
-			static function ( $params ) use ( $valid_params ) {
-				return array(
-					'params' => array_merge( $valid_params, $params ),
-				);
-			},
-			array(
-				'bad_url'                                  => array(
-					'url' => 'bad://url',
+		return array(
+			'missing_callback_params'                  => array(
+				'params'          => array(
+					'slug' => $valid_params['slug'],
 				),
-				'bad_current_etag1'                        => array(
-					'current_etag' => 'foo',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_missing_callback_param',
+			),
+			'bad_url'                                  => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'url' => 'bad://url',
+					)
 				),
-				'bad_current_etag2'                        => array(
-					'current_etag' => $valid_params['current_etag'] . "\n",
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_current_etag1'                        => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'current_etag' => 'foo',
+					)
 				),
-				'bad_slug'                                 => array(
-					'slug' => '<script>document.write("evil")</script>',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_current_etag2'                        => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'current_etag' => $valid_params['current_etag'] . "\n",
+					)
 				),
-				'bad_hmac'                                 => array(
-					'hmac' => 'not even a hash',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_slug'                                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'slug' => '<script>document.write("evil")</script>',
+					)
 				),
-				'invalid_hmac'                             => array(
-					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), $valid_params['current_etag'], home_url( '/' ) ),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_hmac'                                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => 'not even a hash',
+					)
 				),
-				'invalid_hmac_with_queried_object'         => array(
-					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array() ), $valid_params['current_etag'], home_url( '/' ), 1 ),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_hmac'                             => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), $valid_params['current_etag'], home_url( '/' ) ),
+					)
 				),
-				'invalid_viewport_type'                    => array(
-					'viewport' => '640x480',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_hmac_with_queried_object'         => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array() ), $valid_params['current_etag'], home_url( '/' ), 1 ),
+					)
 				),
-				'invalid_viewport_values'                  => array(
-					'viewport' => array(
-						'breadth' => 100,
-						'depth'   => 200,
-					),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_type'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => '640x480',
+					)
 				),
-				'invalid_viewport_aspect_ratio'            => array(
-					'viewport' => array(
-						'width'  => 1024,
-						'height' => 12000,
-					),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_values'                  => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => array(
+							'breadth' => 100,
+							'depth'   => 200,
+						),
+					)
 				),
-				'invalid_elements_type'                    => array(
-					'elements' => 'bad',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_aspect_ratio'            => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => array(
+							'width'  => 1024,
+							'height' => 12000,
+						),
+					)
 				),
-				'invalid_elements_prop_is_lcp'             => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'isLCP' => 'totally!',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_type'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => 'bad',
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_prop_is_lcp'             => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'isLCP' => 'totally!',
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_prop_xpath'              => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => 'html > body img',
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_content_length'                   => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Repeat the elements until the JSON will surpass 64 KiB.
+						'elements' => array_fill(
+							0,
+							200,
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+								)
 							)
 						),
-					),
+					)
 				),
-				'invalid_elements_prop_xpath'              => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'xpath' => 'html > body img',
-							)
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+			'invalid_elements_prop_intersection_ratio' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRatio' => - 1,
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_prop_intersection_ratio' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRatio' => - 1,
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_additional_intersect_rect_property' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRect' => array(
+										'width'  => 640,
+										'height' => 480,
+										'wooHoo' => 'bad',
+									),
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_additional_intersect_rect_property' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRect' => array(
-									'width'  => 640,
-									'height' => 480,
-									'wooHoo' => 'bad',
-								),
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_negative_width_intersect_rect_property' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRect' => array(
+										'width'  => -640,
+										'height' => 480,
+									),
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_negative_width_intersect_rect_property' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRect' => array(
-									'width'  => -640,
-									'height' => 480,
-								),
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_root_property'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'is_touch' => false,
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_element_property'                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'is_big' => true,
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_root_property'                    => array(
-					'is_touch' => false,
-				),
-				'invalid_element_property'                 => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'is_big' => true,
-							)
-						),
-					),
-				),
-			)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
 		);
 	}
 
@@ -318,11 +464,11 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @param array<string, mixed> $params Params.
 	 */
-	public function test_rest_request_bad_params( array $params ): void {
+	public function test_rest_request_bad_params( array $params, int $expected_status, string $expected_code ): void {
 		$request  = $this->create_request( $params );
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
-		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( $expected_code, $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 
 		$this->assertNull( OD_URL_Metrics_Post_Type::get_post( $params['slug'] ) );
 		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
