@@ -129,6 +129,24 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 				'expected_status'      => 'recommended',
 				'expected_unavailable' => true,
 			),
+			'other_forbidden' => array(
+				'mocked_response'      => array(
+					'response' => array(
+						'code'    => 403,
+						'message' => 'Forbidden',
+					),
+					'headers'  => array(
+						'content-type' => array(
+							'text/html; charset=utf-8',
+							'application/xhtml+xml',
+						),
+					),
+					'body'     => '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this resource.</p></body></html>',
+				),
+				'expected_option'      => '1',
+				'expected_status'      => 'recommended',
+				'expected_unavailable' => true,
+			),
 			'error'           => array(
 				'mocked_response'      => new WP_Error( 'bad', 'Something terrible has happened' ),
 				'expected_option'      => '1',
