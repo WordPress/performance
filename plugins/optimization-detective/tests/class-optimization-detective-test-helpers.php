@@ -23,15 +23,17 @@ trait Optimization_Detective_Test_Helpers {
 	 * @phpstan-param ElementDataSubset[] $elements
 	 * @param array[] $elements Element data.
 	 * @param bool    $complete Whether to fully populate the groups.
-	 * @throws Exception But it won't.
+	 * @return positive-int ID for od_url_metrics post.
+	 * @throws Exception If something terrible happens.
 	 */
-	public function populate_url_metrics( array $elements, bool $complete = true ): void {
+	public function populate_url_metrics( array $elements, bool $complete = true ): int {
 		$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 		$etag        = od_get_current_url_metrics_etag( new OD_Tag_Visitor_Registry(), null, null ); // Note: Tests rely on the od_current_url_metrics_etag_data filter to set the desired value.
 		$sample_size = $complete ? od_get_url_metrics_breakpoint_sample_size() : 1;
+		$last_result = null;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				OD_URL_Metrics_Post_Type::store_url_metric(
+				$result = OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
 					$this->get_sample_url_metric(
 						array(
@@ -41,8 +43,19 @@ trait Optimization_Detective_Test_Helpers {
 						)
 					)
 				);
+				if ( $result instanceof WP_Error ) {
+					throw new Exception( 'Failed to store URL Metric: ' . $result->get_error_message() );
+				}
+				if ( null !== $last_result && $result !== $last_result ) {
+					throw new Exception( 'Expected same post ID to always be returned.' );
+				}
+				$last_result = $result;
 			}
 		}
+		if ( null === $last_result ) {
+			throw new Exception( 'Unexpectedly did not create any URL Metrics.' );
+		}
+		return $last_result;
 	}
 
 	/**
