@@ -161,14 +161,16 @@ function od_compose_site_health_result( $response ): array {
 			}
 
 			if ( '' !== $body ) {
-				$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
+				$result['description'] .= '<details>';
+				$result['description'] .= '<summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
 
 				if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
 					$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
-					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe></details>';
+					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe>';
 				} else {
-					$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+					$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre>';
 				}
+				$result['description'] .= '</details>';
 			}
 		}
 	}
