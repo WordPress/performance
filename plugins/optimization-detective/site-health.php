@@ -165,7 +165,7 @@ function od_compose_site_health_result( $response ): array {
 
 				if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
 					$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
-					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox seamless></iframe></details>';
+					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox seamless width="100%" height="300"></iframe></details>';
 				} else {
 					$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
 				}
@@ -260,14 +260,15 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
 		)
 	);
 
-	$allowed_tags           = wp_kses_allowed_html( 'post' );
-	$allowed_tags['iframe'] = array(
-		'srcdoc'   => true,
-		'seamless' => true,
-		'sandbox'  => true,
+	echo wp_kses(
+		$notice,
+		array_merge(
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'iframe' => array_fill_keys( array( 'srcdoc', 'seamless', 'sandbox', 'width', 'height' ), true ),
+			)
+		)
 	);
-
-	echo wp_kses( $notice, $allowed_tags );
 }
 
 /**
