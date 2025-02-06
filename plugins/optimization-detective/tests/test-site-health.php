@@ -120,6 +120,9 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 						'code'    => 403,
 						'message' => 'Forbidden',
 					),
+					'headers'  => array(
+						'content-type' => 'text/html',
+					),
 					'body'     => "<html>\n<head><title>403 Forbidden</title></head>\n<body>\n<center><h1>403 Forbidden</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>",
 				),
 				'expected_option'      => '1',
@@ -151,6 +154,10 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 		$this->filter_rest_api_response( $mocked_response );
 
 		$result = od_test_rest_api_availability();
+		if ( 'nginx_forbidden' === $this->dataName() ) {
+			$notice = get_echo( 'od_render_rest_api_health_check_admin_notice_in_plugin_row', array( 'optimization-detective/load.php' ) );
+			$this->assertStringContainsString( '</iframe>', $notice );
+		}
 		$this->assertArrayHasKey( 'label', $result );
 		$this->assertArrayHasKey( 'status', $result );
 		$this->assertArrayHasKey( 'badge', $result );

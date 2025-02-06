@@ -128,6 +128,9 @@ function od_compose_site_health_result( $response ): array {
 		$body    = wp_remote_retrieve_body( $response );
 		$data    = json_decode( $body, true );
 		$header  = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_array( $header ) ) {
+			$header = array_pop( $header );
+		}
 
 		$is_expected = (
 			400 === $code &&
@@ -157,13 +160,15 @@ function od_compose_site_health_result( $response ): array {
 				$result['description'] .= '<blockquote>' . esc_html( $data['message'] ) . '</blockquote>';
 			}
 
-			$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
+			if ( '' !== $body ) {
+				$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
 
-			if ( isset( $header ) && 'text/html' === $header ) {
-				$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
-				$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox seamless></iframe></details>';
-			} else {
-				$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+				if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
+					$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
+					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox seamless></iframe></details>';
+				} else {
+					$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+				}
 			}
 		}
 	}
