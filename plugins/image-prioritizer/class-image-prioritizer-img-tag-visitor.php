@@ -23,6 +23,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 
 	/**
+	 * List of PICTURE XPaths to skip processing of child IMG tags.
+	 *
+	 * @since n.e.x.t
+	 * @var string[]
+	 */
+	private $picture_ancestor_xpaths_to_skip = array();
+
+	/**
 	 * Visits a tag.
 	 *
 	 * @since 0.1.0
@@ -36,12 +44,48 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		$tag       = $processor->get_tag();
 
 		if ( 'PICTURE' === $tag ) {
-			return $this->process_picture( $processor, $context );
+			$picture_xpath = $processor->get_xpath();
+			if ( false === $this->process_picture( $processor, $context ) ) {
+				$this->picture_ancestor_xpaths_to_skip[] = $picture_xpath;
+			}
+			return false; // Because the IMG child is what gets tracked in URL Metrics.
 		} elseif ( 'IMG' === $tag ) {
 			return $this->process_img( $processor, $context );
 		}
 
 		return false;
+	}
+
+	/**
+	 * Determines whether the current IMG is valid for tracking in URL Metrics.
+	 *
+	 * An IMG must have a src attribute which is not a data: URL. And if it has a srcset attribute, it also must not be
+	 * a data: URL.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_HTML_Tag_Processor $processor Tag Processor.
+	 * @return bool Whether valid for tracking in URL Metrics.
+	 */
+	private function is_img_with_valid_src_and_srcset( OD_HTML_Tag_Processor $processor ): bool {
+		$src     = $this->get_attribute_value( $processor, 'src' );
+		$has_src = ( is_string( $src ) && '' !== $src );
+		if ( ! $has_src ) {
+			return false;
+		}
+
+		$srcset     = $this->get_attribute_value( $processor, 'srcset' );
+		$has_srcset = ( is_string( $srcset ) && '' !== $srcset );
+
+		// Abort data: URLs (which may very be JS-based lazy-loading).
+		if ( $this->is_data_url( $src ) ) {
+			return false;
+		}
+		if ( $has_srcset && $this->is_data_url( $srcset ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -54,12 +98,20 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 * @return bool Whether the tag should be tracked in URL Metrics.
 	 */
 	private function process_img( OD_HTML_Tag_Processor $processor, OD_Tag_Visitor_Context $context ): bool {
-		$src = $this->get_valid_src( $processor );
-		if ( null === $src ) {
+		if ( ! $this->is_img_with_valid_src_and_srcset( $processor ) ) {
 			return false;
 		}
 
 		$xpath = $processor->get_xpath();
+
+		// If the PICTURE's processing was aborted, then abort processing its child IMG as well.
+		if ( 'PICTURE' === $this->get_parent_tag_name( $context ) ) {
+			foreach ( $this->picture_ancestor_xpaths_to_skip as $picture_xpath ) {
+				if ( str_starts_with( $xpath, $picture_xpath ) ) {
+					return false;
+				}
+			}
+		}
 
 		$current_fetchpriority = $this->get_attribute_value( $processor, 'fetchpriority' );
 		$is_lazy_loaded        = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
@@ -188,7 +240,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 *
 	 * @param OD_HTML_Tag_Processor  $processor HTML tag processor.
 	 * @param OD_Tag_Visitor_Context $context   Tag visitor context.
-	 * @return bool Whether the tag should be tracked in URL Metrics.
+	 * @return bool Whether the PICTURE was processed.
 	 */
 	private function process_picture( OD_HTML_Tag_Processor $processor, OD_Tag_Visitor_Context $context ): bool {
 		/**
@@ -219,8 +271,13 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				}
 
 				// Abort processing if a SOURCE lacks the required srcset attribute.
-				$srcset = $this->get_valid_src( $processor, 'srcset' );
-				if ( null === $srcset ) {
+				$srcset = $this->get_attribute_value( $processor, 'srcset' );
+				if ( ! is_string( $srcset ) ) {
+					return false;
+				}
+
+				// Abort if the srcset is a data: URL since there is nothing to optimize.
+				if ( $this->is_data_url( $srcset ) ) {
 					return false;
 				}
 
@@ -243,8 +300,8 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 			// Process the IMG element within the PICTURE.
 			if ( 'IMG' === $tag && ! $processor->is_tag_closer() ) {
-				$src = $this->get_valid_src( $processor );
-				if ( null === $src ) {
+				// Abort if process_img() won't later be processing this IMG.
+				if ( ! $this->is_img_with_valid_src_and_srcset( $processor ) ) {
 					return false;
 				}
 
@@ -275,31 +332,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			)
 		);
 
-		return false;
-	}
-
-	/**
-	 * Gets valid src attribute value for preloading.
-	 *
-	 * Returns null if the src attribute is not a string (i.e. src was used as a boolean attribute was used), if it
-	 * it has an empty string value after trimming, or if it is a data: URL.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param OD_HTML_Tag_Processor $processor      Processor.
-	 * @param 'src'|'srcset'        $attribute_name Attribute name.
-	 * @return non-empty-string|null URL which is not a data: URL.
-	 */
-	private function get_valid_src( OD_HTML_Tag_Processor $processor, string $attribute_name = 'src' ): ?string {
-		$src = $processor->get_attribute( $attribute_name );
-		if ( ! is_string( $src ) ) {
-			return null;
-		}
-		$src = trim( $src );
-		if ( '' === $src || $this->is_data_url( $src ) ) {
-			return null;
-		}
-		return $src;
+		return true;
 	}
 
 	/**
