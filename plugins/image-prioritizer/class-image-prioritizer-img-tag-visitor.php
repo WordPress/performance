@@ -172,6 +172,10 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				$computed_sizes = $this->compute_sizes( $context );
 				if ( count( $computed_sizes ) > 0 ) {
 					$new_sizes = join( ', ', $computed_sizes );
+
+					// Preserve the original sizes as a fallback when URL Metrics are missing from one or more viewport group.
+					// Note that when all groups are populated, the media features will span all possible viewport widths from
+					// zero to infinity, so there is no need to include the original sizes since they will never match.
 					if ( '' !== $sizes && ! $context->url_metric_group_collection->is_every_group_populated() ) {
 						$new_sizes .= ", $sizes";
 					}
