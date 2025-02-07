@@ -45,38 +45,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	}
 
 	/**
-	 * Computes responsive sizes for the current element based on its boundingClientRect width captured in URL Metrics.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param OD_Tag_Visitor_Context $context Context.
-	 * @return non-empty-string[] Computed sizes.
-	 */
-	private function compute_sizes( OD_Tag_Visitor_Context $context ): array {
-		$sizes = array();
-
-		$xpath = $context->processor->get_xpath();
-		foreach ( $context->url_metric_group_collection as $group ) {
-			$element_max_width = 0;
-			foreach ( $group->get_xpath_elements_map()[ $xpath ] ?? array() as $element ) {
-				$element_max_width = max( $element_max_width, $element->get_bounding_client_rect()['width'] );
-			}
-
-			if ( $element_max_width > 0 ) {
-				$size = sprintf( '%dpx', $element_max_width );
-
-				$media_feature = od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() );
-				if ( null !== $media_feature ) {
-					$size = "$media_feature $size";
-				}
-				$sizes[] = $size;
-			}
-		}
-
-		return $sizes;
-	}
-
-	/**
 	 * Process an IMG element.
 	 *
 	 * @since 0.3.0
@@ -435,5 +403,37 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		} else {
 			return 'auto' === $sizes_attr || str_starts_with( $sizes_attr, 'auto,' );
 		}
+	}
+
+	/**
+	 * Computes responsive sizes for the current element based on its boundingClientRect width captured in URL Metrics.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Context.
+	 * @return non-empty-string[] Computed sizes.
+	 */
+	private function compute_sizes( OD_Tag_Visitor_Context $context ): array {
+		$sizes = array();
+
+		$xpath = $context->processor->get_xpath();
+		foreach ( $context->url_metric_group_collection as $group ) {
+			$element_max_width = 0;
+			foreach ( $group->get_xpath_elements_map()[ $xpath ] ?? array() as $element ) {
+				$element_max_width = max( $element_max_width, $element->get_bounding_client_rect()['width'] );
+			}
+
+			if ( $element_max_width > 0 ) {
+				$size = sprintf( '%dpx', $element_max_width );
+
+				$media_feature = od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() );
+				if ( null !== $media_feature ) {
+					$size = "$media_feature $size";
+				}
+				$sizes[] = $size;
+			}
+		}
+
+		return $sizes;
 	}
 }
