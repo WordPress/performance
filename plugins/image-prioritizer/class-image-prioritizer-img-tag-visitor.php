@@ -418,16 +418,18 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $context->processor->get_xpath();
 		foreach ( $context->url_metric_group_collection as $group ) {
+			// Obtain the maximum width that the image appears among all URL Metrics collected for this viewport group.
 			$element_max_width = 0;
 			foreach ( $group->get_xpath_elements_map()[ $xpath ] ?? array() as $element ) {
 				$element_max_width = max( $element_max_width, $element->get_bounding_client_rect()['width'] );
 			}
 
+			// Use the maximum width as the size for image in this breakpoint.
 			if ( $element_max_width > 0 ) {
-				$size = sprintf( '%dpx', $element_max_width );
-
+				$size          = sprintf( '%dpx', $element_max_width );
 				$media_feature = od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() );
 				if ( null !== $media_feature ) {
+					// Note: The null case only happens when a site has filtered od_breakpoint_max_widths to be an empty array, meaning there is only one viewport group.
 					$size = "$media_feature $size";
 				}
 				$sizes[] = $size;
