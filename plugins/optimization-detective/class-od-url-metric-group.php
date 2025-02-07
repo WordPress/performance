@@ -209,6 +209,18 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
+	 * Gets the collection that this group is a part of.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @todo Eliminate in favor of readonly public property.
+	 * @return OD_URL_Metric_Group_Collection Collection.
+	 */
+	public function get_collection(): OD_URL_Metric_Group_Collection {
+		return $this->collection;
+	}
+
+	/**
 	 * Checks whether the provided viewport width is between the minimum (exclusive) and maximum (inclusive).
 	 *
 	 * @since 0.1.0
