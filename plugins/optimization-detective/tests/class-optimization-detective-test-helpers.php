@@ -171,7 +171,8 @@ trait Optimization_Detective_Test_Helpers {
 	 */
 	public function load_snapshot_test_cases( string $directory ): array {
 		$test_cases = array();
-		foreach ( (array) glob( $directory . '/*' ) as $test_case ) {
+		foreach ( (array) glob( $directory . '/*', GLOB_ONLYDIR ) as $test_case ) {
+
 			/**
 			 * Test case directory.
 			 *
