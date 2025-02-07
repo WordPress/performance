@@ -371,6 +371,18 @@ export default async function detect( {
 		return;
 	}
 
+	/** @type {HTMLIFrameElement|null} */
+	const urlPrimeIframeElement = win.parent.document.querySelector(
+		'iframe#od-prime-url-metrics-iframe'
+	);
+	if (
+		urlPrimeIframeElement &&
+		urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
+	) {
+		odPrimeUrlMetricsVerificationToken =
+			urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken;
+	}
+
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
 	const alreadySubmittedSessionStorageKey =
 		await getAlreadySubmittedSessionStorageKey(
@@ -378,7 +390,10 @@ export default async function detect( {
 			currentUrl,
 			urlMetricGroupStatus
 		);
-	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
+	if (
+		'' === odPrimeUrlMetricsVerificationToken &&
+		alreadySubmittedSessionStorageKey in sessionStorage
+	) {
 		const previousVisitTime = parseInt(
 			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
 			10
@@ -433,18 +448,6 @@ export default async function detect( {
 		await new Promise( ( resolve ) => {
 			requestIdleCallback( resolve );
 		} );
-	}
-
-	/** @type {HTMLIFrameElement|null} */
-	const urlPrimeIframeElement = win.parent.document.querySelector(
-		'iframe#od-prime-url-metrics-iframe'
-	);
-	if (
-		urlPrimeIframeElement &&
-		urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
-	) {
-		odPrimeUrlMetricsVerificationToken =
-			urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken;
 	}
 
 	// TODO: Does this make sense here? Should it be moved up above the isViewportNeeded condition?
