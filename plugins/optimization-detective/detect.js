@@ -688,6 +688,7 @@ export default async function detect( {
 		return;
 	}
 
+	// Finalize extensions.
 	if ( extensions.size > 0 ) {
 		/** @type {Promise[]} */
 		const extensionFinalizePromises = [];
@@ -740,6 +741,36 @@ export default async function detect( {
 		}
 	}
 
+	/*
+	 * Now prepare the URL Metric to be sent as JSON request body.
+	 */
+
+	const maxBodyLengthKiB = 64;
+	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
+
+	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
+	const jsonBody = JSON.stringify( urlMetric );
+	const percentOfBudget =
+		( jsonBody.length / ( maxBodyLengthKiB * 1000 ) ) * 100;
+
+	/*
+	 * According to the fetch() spec:
+	 * "If the sum of contentLength and inflightKeepaliveBytes is greater than 64 kibibytes, then return a network error."
+	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
+	 * than the maximum, we should avoid even trying to send it.
+	 */
+	if ( jsonBody.length > maxBodyLengthBytes ) {
+		if ( isDebug ) {
+			error(
+				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+					percentOfBudget
+				) }% of ${ maxBodyLengthKiB } KiB limit:`,
+				urlMetric
+			);
+		}
+		return;
+	}
+
 	// Even though the server may reject the REST API request, we still have to set the storage lock
 	// because we can't look at the response when sending a beacon.
 	setStorageLock( getCurrentTime() );
@@ -751,7 +782,16 @@ export default async function detect( {
 	);
 
 	if ( isDebug ) {
-		log( 'Sending URL Metric:', urlMetric );
+		const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+			percentOfBudget
+		) }% of ${ maxBodyLengthKiB } KiB limit):`;
+
+		// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
+		if ( percentOfBudget < 50 ) {
+			log( message, urlMetric );
+		} else {
+			warn( message, urlMetric );
+		}
 	}
 
 	const url = new URL( restApiEndpoint );
@@ -769,7 +809,7 @@ export default async function detect( {
 	url.searchParams.set( 'hmac', urlMetricHMAC );
 	navigator.sendBeacon(
 		url,
-		new Blob( [ JSON.stringify( urlMetric ) ], {
+		new Blob( [ jsonBody ], {
 			type: 'application/json',
 		} )
 	);

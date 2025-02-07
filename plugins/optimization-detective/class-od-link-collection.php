@@ -255,9 +255,24 @@ final class OD_Link_Collection implements Countable {
 		$link_headers = array();
 
 		foreach ( $this->get_prepared_links() as $link ) {
-			// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
-			$link['href'] = isset( $link['href'] ) ? esc_url_raw( $link['href'] ) : 'about:blank';
-			$link_header  = '<' . $link['href'] . '>';
+			if ( isset( $link['href'] ) ) {
+				$decoded_url = urldecode( $link['href'] );
+
+				// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
+				$encoded_url  = preg_replace_callback(
+					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
+					static function ( $matches ) {
+						return rawurlencode( $matches[0] );
+					},
+					$decoded_url
+				);
+				$link['href'] = esc_url_raw( $encoded_url ?? '' );
+			} else {
+				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
+				$link['href'] = 'about:blank';
+			}
+
+			$link_header = '<' . $link['href'] . '>';
 			unset( $link['href'] );
 			foreach ( $link as $name => $value ) {
 				/*
