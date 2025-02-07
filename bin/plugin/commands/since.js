@@ -61,7 +61,7 @@ exports.handler = async ( opt ) => {
 		const readmeFile = path.resolve( pluginDirectory, 'readme.txt' );
 		const readmeContent = fs.readFileSync( readmeFile, 'utf-8' );
 		const readmeContentMatches = readmeContent.match(
-			/^Stable tag:\s+(\d+\.\d+\.\d+)$/m
+			/^Stable tag:\s+(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 		);
 		if ( ! readmeContentMatches ) {
 			throw new Error(

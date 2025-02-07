@@ -6,9 +6,11 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Displays the HTML generator tag for the plugin.

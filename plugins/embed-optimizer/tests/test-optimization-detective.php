@@ -81,46 +81,25 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array<string, mixed> Data.
+	 * @return array<string, array{ directory: non-empty-string }> Test cases.
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
-		$test_cases = array();
-		foreach ( (array) glob( __DIR__ . '/test-cases/*.php' ) as $test_case ) {
-			$name                = basename( $test_case, '.php' );
-			$test_cases[ $name ] = require $test_case;
-		}
-		return $test_cases;
+		return $this->load_snapshot_test_cases( __DIR__ . '/test-cases' );
 	}
 
 	/**
 	 * Test embed_optimizer_visit_tag().
 	 *
-	 * @covers Embed_Optimizer_Tag_Visitor
+	 * @covers       Embed_Optimizer_Tag_Visitor
 	 * @covers ::embed_optimizer_update_markup
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
+	 *
+	 * @param non-empty-string $directory Test case directory.
+	 *
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
-		$set_up( $this );
-
-		$buffer = od_optimize_template_output_buffer( $buffer );
-		$buffer = preg_replace_callback(
-			':(<script type="module">)(.+?)(</script>):s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				if ( false !== strpos( $matches[1], 'import detect' ) ) {
-					$matches[1] = '/* import detect ... */';
-				} elseif ( false !== strpos( $matches[1], 'const lazyEmbedsScripts' ) ) {
-					$matches[1] = '/* const lazyEmbedsScripts ... */';
-				}
-				return implode( '', $matches );
-			},
-			$buffer
-		);
-		$this->assertEquals(
-			trim( $this->remove_initial_tabs( $expected ) ),
-			trim( $this->remove_initial_tabs( $buffer ) ),
-			"Buffer snapshot:\n$buffer"
-		);
+	public function test_od_optimize_template_output_buffer( string $directory ): void {
+		$this->assert_snapshot_equals( $directory );
 	}
 }

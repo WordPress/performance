@@ -191,6 +191,11 @@ const optimizationDetective = ( env ) => {
 						info: { minimized: true },
 					},
 					{
+						from: `${ source }/dist/web-vitals.attribution.js`,
+						to: `${ destination }/build/web-vitals-attribution.js`,
+						info: { minimized: true },
+					},
+					{
 						from: `${ source }/package.json`,
 						to: `${ destination }/build/web-vitals.asset.php`,
 						transform: {

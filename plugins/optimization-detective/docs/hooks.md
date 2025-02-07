@@ -53,6 +53,23 @@ The supplied context object includes these properties:
 
 ## Filters
 
+### Filter: `od_use_web_vitals_attribution_build` (default: `false`)
+
+Filters whether to use the web-vitals.js build with attribution.
+
+When using the attribution build of web-vitals, the metric object passed to report callbacks registered via
+`onTTFB`, `onFCP`, `onLCP`, `onCLS`, and `onINP` will include an additional [attribution property](https://github.com/GoogleChrome/web-vitals#attribution).
+For details, please refer to the [web-vitals documentation](https://github.com/GoogleChrome/web-vitals).
+
+For example, to opt in to using the attribution build:
+
+```php
+add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
+```
+
+Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
+The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
+
 ### Filter: `od_breakpoint_max_widths` (default: `array(480, 600, 782)`)
 
 Filters the breakpoint max widths to group URL Metrics for various viewports. Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).
@@ -67,8 +84,7 @@ Filters whether the current response can be optimized. By default, detection and
 2. It’s not a post embed template (`is_embed()`).
 3. It’s not the Customizer preview (`is_customize_preview()`)
 4. It’s not the response to a `POST` request.
-5. The user is not an administrator (`current_user_can( 'customize' )`), unless you're in plugin development mode (`wp_is_development_mode( 'plugin' )`).
-6. There is at least one queried post on the page. This is used to facilitate the purging of page caches after a new URL Metric is stored.
+5. There is at least one queried post on the page. This is used to facilitate the purging of page caches after a new URL Metric is stored.
 
 To force every response to be optimized regardless of the conditions above, you can do:
 
@@ -86,15 +102,19 @@ add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
 } );
 ```
 
-### Filter: `od_url_metric_storage_lock_ttl` (default: 1 minute in seconds)
+### Filter: `od_url_metric_storage_lock_ttl` (default: 60 seconds, except 0 for authorized logged-in users)
 
-Filters how long a given IP is locked from submitting another metric-storage REST API request. Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
+Filters how long the current IP is locked from submitting another URL metric storage REST API request.
+
+Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
 
 ```php
 add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 	return is_user_logged_in() ? 0 : $ttl;
 } );
 ```
+
+By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
 
 During development this is useful to set to zero so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 

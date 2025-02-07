@@ -6,10 +6,11 @@
  * @since 0.7.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Data for a single element in a URL Metric.
@@ -33,6 +34,15 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	protected $data;
 
 	/**
+	 * Transitional XPath.
+	 *
+	 * @since 1.0.0
+	 * @todo Remove logic related to transitional_xpath in a subsequent release once URL Metrics have been collected with the new format.
+	 * @var non-empty-string|null
+	 */
+	protected $transitional_xpath = null;
+
+	/**
 	 * URL Metric that this element belongs to.
 	 *
 	 * @since 0.7.0
@@ -51,7 +61,8 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @param OD_URL_Metric        $url_metric URL Metric.
 	 */
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
-		$this->data       = $data;
+		$this->data = $data;
+
 		$this->url_metric = $url_metric;
 	}
 
@@ -88,6 +99,9 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
+		if ( 'xpath' === $key ) {
+			return $this->get_xpath();
+		}
 		return $this->data[ $key ] ?? null;
 	}
 
@@ -117,11 +131,59 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * Gets XPath for element.
 	 *
 	 * @since 0.7.0
+	 * @since 1.0.0 Returns the transitional XPath format. To access the underlying raw XPath, access the 'xpath' key of the jsonSerialize response.
+	 * @todo Remove logic related to transitional_xpath in a subsequent release once URL Metrics have been collected with the new format.
 	 *
 	 * @return non-empty-string XPath.
 	 */
 	public function get_xpath(): string {
-		return $this->data['xpath'];
+
+		if ( ! isset( $this->transitional_xpath ) ) {
+			$replacements = array(
+
+				/*
+				 * Convert the original XPath format for elements in the BODY.
+				 *
+				 * Example:
+				 *   /*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]/*[1][self::IMG]
+				 *   =>
+				 *   /HTML/BODY/DIV/*[1][self::IMG]
+				 */
+				'#^/\*\[1]\[self::HTML]/\*\[2]\[self::BODY]/\*\[\d+]\[self::([a-zA-Z0-9:_-]+)]#' => '/HTML/BODY/$1',
+
+				/*
+				 * Convert the original XPath format for elements in the HEAD.
+				 *
+				 * Example:
+				 *   /*[1][self::HTML]/*[1][self::HEAD]/*[1][self::META]
+				 *   =>
+				 *   /HTML/HEAD/*[1][self::META]
+				 */
+				'#^/\*\[1\]\[self::HTML\]/\*\[1\]\[self::HEAD]#' => '/HTML/HEAD',
+
+				/*
+				 * Convert the new XPath format for elements in the BODY.
+				 *
+				 * Note that the new XPath format for elements in the HEAD does not need to be converted to the
+				 * transitional format since disambiguating attributes are not used in the HEAD.
+				 *
+				 * Example:
+				 *   /HTML/BODY/DIV[@id='page']/*[1][self::IMG]
+				 *   =>
+				 *   /HTML/BODY/DIV/*[1][self::IMG]
+				 */
+				'#^(/HTML/BODY/\w+)\[@[^\]]+?]#' => '$1',
+			);
+			foreach ( $replacements as $search => $replace ) {
+				$xpath = preg_replace( $search, $replace, $this->data['xpath'], -1, $count );
+				if ( $count > 0 ) {
+					$this->transitional_xpath = $xpath;
+					break;
+				}
+			}
+		}
+
+		return $this->transitional_xpath ?? $this->data['xpath'];
 	}
 
 	/**
@@ -188,6 +250,9 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 */
 	#[ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
+		if ( 'xpath' === $offset ) {
+			return $this->get_xpath();
+		}
 		return $this->data[ $offset ] ?? null;
 	}
 
