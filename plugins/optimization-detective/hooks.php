@@ -27,4 +27,5 @@ add_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_noti
 add_action( 'admin_menu', 'od_add_optimization_detective_menu' );
 add_action( 'admin_enqueue_scripts', 'od_enqueue_prime_url_metrics_scripts' );
 add_action( 'enqueue_block_editor_assets', 'od_enqueue_block_editor_prime_url_metrics_scripts' );
+add_filter( 'redirect_post_location', 'od_add_data_to_post_update_redirect_url_for_classic_editor' );
 // @codeCoverageIgnoreEnd

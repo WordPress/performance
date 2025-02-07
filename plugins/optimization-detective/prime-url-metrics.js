@@ -101,6 +101,9 @@
 						'optimization-detective'
 					);
 					controlButton.disabled = true;
+					iframe.src = 'about:blank';
+					iframe.width = '0';
+					iframe.height = '0';
 				}
 			}
 		}

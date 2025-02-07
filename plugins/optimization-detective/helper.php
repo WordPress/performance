@@ -124,7 +124,7 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 }
 
 /**
- * Enqueues admin scripts.
+ * Enqueues scripts for the URL priming in the admin area.
  *
  * @since n.e.x.t
  * @access private
@@ -141,10 +141,43 @@ function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
 			true
 		);
 	}
+
+	if (
+		'post.php' === $hook_suffix &&
+		function_exists( 'get_current_screen' ) &&
+		isset( $_GET['od_classic_editor_post_update_nonce'] ) &&
+		false !== wp_verify_nonce( $_GET['od_classic_editor_post_update_nonce'], 'od_classic_editor_post_update' ) &&
+		isset( $_GET['post'] ) &&
+		isset( $_GET['message'] ) &&
+		1 === (int) $_GET['message']
+	) {
+		$screen = get_current_screen();
+		if ( $screen instanceof WP_Screen && ! $screen->is_block_editor() ) {
+			$permalink = get_permalink( (int) $_GET['post'] );
+
+			if ( false !== $permalink ) {
+				wp_enqueue_script(
+					'od-prime-url-metrics-classic-editor',
+					plugins_url( od_get_asset_path( 'prime-url-metrics-classic-editor.js' ), __FILE__ ),
+					array( 'wp-i18n', 'wp-api-fetch' ),
+					OPTIMIZATION_DETECTIVE_VERSION,
+					true
+				);
+
+				wp_localize_script(
+					'od-prime-url-metrics-classic-editor',
+					'odPrimeURLMetricsClassicEditor',
+					array(
+						'permalink' => $permalink,
+					)
+				);
+			}
+		}
+	}
 }
 
 /**
- * Adds the Optimization Detective menu to the admin menu.
+ * Enqueues scripts for the URL priming in block editor.
  *
  * @since n.e.x.t
  * @access private
@@ -157,6 +190,19 @@ function od_enqueue_block_editor_prime_url_metrics_scripts(): void {
 		OPTIMIZATION_DETECTIVE_VERSION,
 		true
 	);
+}
+
+/**
+ * Adds a nonce to the post update redirect URL for the classic editor.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $location The redirect URL.
+ * @return string The updated redirect URL.
+ */
+function od_add_data_to_post_update_redirect_url_for_classic_editor( string $location ): string {
+	return add_query_arg( 'od_classic_editor_post_update_nonce', wp_create_nonce( 'od_classic_editor_post_update' ), $location );
 }
 
 /**
