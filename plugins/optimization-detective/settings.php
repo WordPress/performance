@@ -44,7 +44,7 @@ function od_render_optimization_detective_page(): void {
 				<button id="od-prime-url-metrics-control-button" class="button button-primary"><?php esc_html_e( 'Start', 'optimization-detective' ); ?></button>
 				<progress id="od-prime-url-metrics-progress" value="0" max="0"></progress>
 				<div id="od-prime-url-metrics-iframe-container">
-					<iframe id="od-prime-url-metrics-iframe" src="" style="position: fixed; transform: scale(0.05); top: 0px; right: 0px; transform-origin: 0px 0px; pointer-events: none; opacity: 1e-06; z-index: -99999;"></iframe>
+					<iframe id="od-prime-url-metrics-iframe" src="" style="position: fixed; transform: scale(0.05); top: 0px; left: 0px; transform-origin: 0px 0px; pointer-events: none; opacity: 1e-06; z-index: -99999;"></iframe>
 				</div>	
 			</div>
 		</div>

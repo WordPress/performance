@@ -13,7 +13,7 @@
 	iframe.id = 'od-prime-url-metrics-iframe';
 	iframe.style.position = 'fixed';
 	iframe.style.top = '0';
-	iframe.style.right = '0';
+	iframe.style.left = '0';
 	iframe.style.transform = 'scale(0.05)';
 	iframe.style.transformOrigin = '0 0';
 	iframe.style.pointerEvents = 'none';
