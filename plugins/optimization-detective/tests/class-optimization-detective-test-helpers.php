@@ -12,7 +12,9 @@
  * @phpstan-type ElementDataSubset array{
  *     xpath: string,
  *     isLCP?: bool,
- *     intersectionRatio?: float
+ *     intersectionRatio?: float,
+ *     intersectionRect?: array<string, float>,
+ *     boundingClientRect?: array<string, float>,
  * }
  */
 trait Optimization_Detective_Test_Helpers {
@@ -61,18 +63,22 @@ trait Optimization_Detective_Test_Helpers {
 	/**
 	 * Gets a sample DOM rect for testing.
 	 *
+	 * @param float $width  Width.
+	 * @param float $height Height.
 	 * @return array<string, float>
 	 */
-	public function get_sample_dom_rect(): array {
+	public function get_sample_dom_rect( float $width = 500.1, float $height = 500.2 ): array {
+		$x = 100.3;
+		$y = 200.0;
 		return array(
-			'width'  => 500.1,
-			'height' => 500.2,
-			'x'      => 100.3,
-			'y'      => 100.4,
-			'top'    => 0.1,
+			'width'  => $width,
+			'height' => $height,
+			'x'      => $x,
+			'y'      => $y,
+			'top'    => $y,
 			'right'  => 0.2,
 			'bottom' => 0.3,
-			'left'   => 0.4,
+			'left'   => $x,
 		);
 	}
 
@@ -103,6 +109,9 @@ trait Optimization_Detective_Test_Helpers {
 			),
 			$params
 		);
+		if ( ! isset( $params['viewport_height'] ) ) {
+			$params['viewport_height'] = ceil( $params['viewport_width'] / 2 );
+		}
 
 		if ( array_key_exists( 'element', $params ) ) {
 			$params['elements'][] = $params['element'];
@@ -114,19 +123,38 @@ trait Optimization_Detective_Test_Helpers {
 				'url'       => $params['url'],
 				'viewport'  => array(
 					'width'  => $params['viewport_width'],
-					'height' => $params['viewport_height'] ?? ceil( $params['viewport_width'] / 2 ),
+					'height' => $params['viewport_height'],
 				),
 				'timestamp' => $params['timestamp'],
 				'elements'  => array_map(
-					function ( array $element ): array {
+					function ( array $element ) use ( $params ): array {
+						$default_props = array(
+							'isLCP'              => false,
+							'isLCPCandidate'     => $element['isLCP'] ?? false,
+							'intersectionRatio'  => 1,
+							'boundingClientRect' => $this->get_sample_dom_rect( round( $params['viewport_width'] ) * 0.9, round( $params['viewport_height'] * 0.9 ) ),
+						);
+
+						if ( isset( $element['intersectionRatio'] ) && $element['intersectionRatio'] < PHP_FLOAT_EPSILON ) {
+							$default_props['intersectionRect'] = array_fill_keys( array_keys( $this->get_sample_dom_rect() ), 0.0 );
+						} else {
+							$default_props['intersectionRect'] = $default_props['boundingClientRect'];
+						}
+
+						$element['intersectionRect'] = array_merge(
+							$this->get_sample_dom_rect(),
+							$default_props['intersectionRect'],
+							$element['intersectionRect'] ?? array()
+						);
+
+						$element['boundingClientRect'] = array_merge(
+							$this->get_sample_dom_rect(),
+							$default_props['boundingClientRect'],
+							$element['boundingClientRect'] ?? array()
+						);
+
 						return array_merge(
-							array(
-								'isLCP'              => false,
-								'isLCPCandidate'     => $element['isLCP'] ?? false,
-								'intersectionRatio'  => 1,
-								'intersectionRect'   => $this->get_sample_dom_rect(),
-								'boundingClientRect' => $this->get_sample_dom_rect(),
-							),
+							$default_props,
 							$element
 						);
 					},
