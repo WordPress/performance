@@ -7,9 +7,11 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Registers setting for generating JPEG in addition to the selected modern format for image uploads.

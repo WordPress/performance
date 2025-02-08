@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Obtains the ID for a post related to this response so that page caches can be told to invalidate their cache.
@@ -36,11 +38,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @global WP_Query $wp_query WordPress Query object.
  *
- * @return int|null Post ID or null if none found.
+ * @return positive-int|null Post ID or null if none found.
  */
 function od_get_cache_purge_post_id(): ?int {
 	$queried_object = get_queried_object();
-	if ( $queried_object instanceof WP_Post ) {
+	if ( $queried_object instanceof WP_Post && $queried_object->ID > 0 ) {
 		return $queried_object->ID;
 	}
 
@@ -53,6 +55,8 @@ function od_get_cache_purge_post_id(): ?int {
 		isset( $wp_query->posts[0] )
 		&&
 		$wp_query->posts[0] instanceof WP_Post
+		&&
+		$wp_query->posts[0]->ID > 0
 	) {
 		return $wp_query->posts[0]->ID;
 	}
@@ -66,7 +70,7 @@ function od_get_cache_purge_post_id(): ?int {
  * @since 0.1.0
  * @access private
  *
- * @param string                         $slug             URL Metrics slug.
+ * @param non-empty-string               $slug             URL Metrics slug.
  * @param OD_URL_Metric_Group_Collection $group_collection URL Metric group collection.
  */
 function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
@@ -85,7 +89,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	 * Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
 	 * The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param bool $use_attribution_build Whether to use the attribution build.
 	 */
@@ -126,15 +130,20 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'urlMetricGroupStatuses' => array_map(
 			static function ( OD_URL_Metric_Group $group ): array {
 				return array(
-					'minimumViewportWidth' => $group->get_minimum_viewport_width(),
+					'minimumViewportWidth' => $group->get_minimum_viewport_width(), // Exclusive.
+					'maximumViewportWidth' => $group->get_maximum_viewport_width(), // Inclusive.
 					'complete'             => $group->is_complete(),
 				);
 			},
 			iterator_to_array( $group_collection )
 		),
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
+		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
 	);
+	if ( is_user_logged_in() ) {
+		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );
+	}
 	if ( WP_DEBUG ) {
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}

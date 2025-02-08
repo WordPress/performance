@@ -84,15 +84,28 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 */
 	public function data_provider_od_get_detection_script(): array {
 		return array(
-			'unfiltered' => array(
+			'unfiltered'       => array(
 				'set_up'                  => static function (): void {},
 				'expected_exports'        => array(
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 					'extensionModuleUrls' => array(),
+					'cachePurgePostId'    => null,
+					'freshnessTTL'        => DAY_IN_SECONDS,
 				),
 				'expected_standard_build' => true,
 			),
-			'filtered'   => array(
+			'unfiltered_admin' => array(
+				'set_up'                  => static function (): void {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+				},
+				'expected_exports'        => array(
+					'storageLockTTL'      => 0,
+					'extensionModuleUrls' => array(),
+					'cachePurgePostId'    => null,
+				),
+				'expected_standard_build' => true,
+			),
+			'filtered'         => array(
 				'set_up'                  => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
@@ -107,11 +120,38 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return $urls;
 						}
 					);
+					add_filter(
+						'od_minimum_viewport_aspect_ratio',
+						static function () {
+							return 0;
+						}
+					);
+					add_filter(
+						'od_maximum_viewport_aspect_ratio',
+						static function () {
+							return 2;
+						}
+					);
 					add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
+					add_filter(
+						'od_url_metric_storage_lock_ttl',
+						static function () {
+							return DAY_IN_SECONDS;
+						}
+					);
+					add_filter(
+						'od_url_metric_freshness_ttl',
+						static function () {
+							return WEEK_IN_SECONDS;
+						}
+					);
 				},
 				'expected_exports'        => array(
-					'storageLockTTL'      => HOUR_IN_SECONDS,
-					'extensionModuleUrls' => array( home_url( '/my-extension.js', 'https' ) ),
+					'storageLockTTL'         => DAY_IN_SECONDS,
+					'freshnessTTL'           => WEEK_IN_SECONDS,
+					'extensionModuleUrls'    => array( home_url( '/my-extension.js', 'https' ) ),
+					'minViewportAspectRatio' => 0,
+					'maxViewportAspectRatio' => 2,
 				),
 				'expected_standard_build' => false,
 			),
@@ -122,6 +162,16 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 * Make sure the expected script is printed.
 	 *
 	 * @covers ::od_get_detection_script
+	 * @covers ::od_get_asset_path
+	 * @covers OD_Storage_Lock::get_ttl
+	 * @covers ::od_get_cache_purge_post_id
+	 * @covers ::od_get_minimum_viewport_aspect_ratio
+	 * @covers ::od_get_maximum_viewport_aspect_ratio
+	 * @covers ::od_get_current_url
+	 * @covers ::od_get_url_metrics_storage_hmac
+	 * @covers OD_URL_Metric_Group::get_minimum_viewport_width
+	 * @covers OD_URL_Metric_Group::is_complete
+	 * @covers OD_URL_Metric_Group_Collection::get_current_etag
 	 *
 	 * @dataProvider data_provider_od_get_detection_script
 	 *
@@ -131,8 +181,21 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 */
 	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports, bool $expected_standard_build ): void {
 		$set_up();
-		$slug         = od_get_url_metrics_slug( array( 'p' => '1' ) );
+		$slug         = od_get_url_metrics_slug( array() );
 		$current_etag = md5( '' );
+
+		$expected_exports = array_merge(
+			array(
+				'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
+				'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
+				'isDebug'                => WP_DEBUG,
+				'currentUrl'             => od_get_current_url(),
+				'urlMetricSlug'          => $slug,
+				'cachePurgePostId'       => od_get_cache_purge_post_id(),
+				'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
+			),
+			$expected_exports
+		);
 
 		$breakpoints      = array( 480, 600, 782 );
 		$group_collection = new OD_URL_Metric_Group_Collection( array(), $current_etag, $breakpoints, 3, HOUR_IN_SECONDS );
@@ -144,6 +207,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		foreach ( $expected_exports as $key => $value ) {
 			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
 		}
+		$this->assertStringContainsString( '"urlMetricHMAC":', $script );
 		$this->assertSame( 1, preg_match( '/"webVitalsLibrarySrc":("[^"]+?")/', $script, $matches ) );
 		$web_vitals_library_src = json_decode( $matches[1] );
 		$this->assertStringContainsString(
@@ -151,9 +215,14 @@ class Test_OD_Detection extends WP_UnitTestCase {
 			$web_vitals_library_src
 		);
 		$this->assertStringContainsString( '"minimumViewportWidth":0', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":481', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );
-		$this->assertStringContainsString( '"minimumViewportWidth":783', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":480', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":600', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":782', $script );
 		$this->assertStringContainsString( '"complete":false', $script );
+		if ( is_user_logged_in() ) {
+			$this->assertStringContainsString( '"restApiNonce":', $script );
+		} else {
+			$this->assertStringNotContainsString( '"restApiNonce":', $script );
+		}
 	}
 }

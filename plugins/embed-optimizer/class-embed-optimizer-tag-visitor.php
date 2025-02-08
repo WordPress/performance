@@ -6,10 +6,11 @@
  * @since 0.2.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Tag visitor that optimizes embeds.
@@ -184,12 +185,21 @@ final class Embed_Optimizer_Tag_Visitor {
 
 			$style_rules = array();
 			foreach ( $minimums as $minimum ) {
-				$style_rules[] = sprintf(
-					'@media %s { #%s { min-height: %dpx; } }',
-					od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() ),
+				$style_rule = sprintf(
+					'#%s { min-height: %dpx; }',
 					$element_id,
 					$minimum['height']
 				);
+
+				$media_feature = od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() );
+				if ( null !== $media_feature ) {
+					$style_rule = sprintf(
+						'@media %s { %s }',
+						$media_feature,
+						$style_rule
+					);
+				}
+				$style_rules[] = $style_rule;
 			}
 
 			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
@@ -209,7 +219,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
 	 * @return array<non-empty-string> Array of URLs to preconnect to.
@@ -269,7 +279,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Adds preconnect links for embed resources.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
@@ -298,7 +308,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Optimizes an embed based on whether it is displayed in any initial viewport.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */

@@ -3,12 +3,12 @@
 		<meta charset="utf-8">
 		<title>...</title>
 		<!--</head>-->
-	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (max-width: 480px)">
+	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (width &lt;= 480px)">
 </head>
 	<!--</head>-->
 	<body>
 		<div id="page">
-			<img data-od-xpath="/HTML/BODY/DIV/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+			<img data-od-xpath="/HTML/BODY/DIV[@id=&#039;page&#039;]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 			<!--</body>-->
 		</div>
 	<script type="module">/* import detect ... */</script>

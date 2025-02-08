@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Initializes Image Prioritizer when Optimization Detective has loaded.

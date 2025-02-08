@@ -4,7 +4,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 		array(
 			array(
 				'isLCP' => true,
-				'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 			),
 		)
 	);

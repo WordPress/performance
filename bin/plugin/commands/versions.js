@@ -38,7 +38,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
-		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-\w+)?)$/m
+		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
 		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
@@ -46,11 +46,11 @@ async function checkPluginDirectory( pluginDirectory ) {
 	const stableTagVersion = stableTagVersionMatches[ 1 ];
 
 	const latestChangelogMatches = readmeContents.match(
-		/^== Changelog ==\n+= (\d+\.\d+\.\d+(?:-\w+)?) =$/m
+		/^== Changelog ==\n+= (\d+\.\d+\.\d+(?:-[\w\.]+)?) =$/m
 	);
 	if ( ! latestChangelogMatches ) {
 		throw new Error(
-			'Unable to latest version entry in readme changelog.'
+			'Unable to locate latest version entry in readme changelog.'
 		);
 	}
 	const latestChangelogVersion = latestChangelogMatches[ 1 ];
@@ -71,7 +71,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	}
 
 	const headerVersionMatches = phpBootstrapFileContents.match(
-		/^ \* Version:\s+(\d+\.\d+\.\d+(?:-\w+)?)$/m
+		/^ \* Version:\s+(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
 	if ( ! headerVersionMatches ) {
 		throw new Error(
@@ -81,7 +81,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	const headerVersion = headerVersionMatches[ 1 ];
 
 	const phpLiteralVersionMatches = phpBootstrapFileContents.match(
-		/'(\d+\.\d+\.\d+(?:-\w+)?)'/
+		/'(\d+\.\d+\.\d+(?:-[\w\.]+)?)'/
 	);
 	if ( ! phpLiteralVersionMatches ) {
 		throw new Error( 'Unable to locate the PHP literal version.' );

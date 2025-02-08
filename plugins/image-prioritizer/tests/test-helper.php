@@ -102,32 +102,24 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_auto_sizes(): array {
-		$outside_viewport_rect = array_merge(
-			$this->get_sample_dom_rect(),
-			array(
-				'top' => 1000,
-			)
-		);
-
 		return array(
 			// Note: The Image Prioritizer plugin removes the loading attribute, and so then Auto Sizes does not then add sizes=auto.
 			'wrongly_lazy_responsive_img'       => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
 			),
 
 			'non_responsive_image'              => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
-					'intersectionRect'   => $outside_viewport_rect,
-					'boundingClientRect' => $outside_viewport_rect,
+					'boundingClientRect' => array( 'top' => 100000 ),
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
@@ -135,23 +127,32 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'auto_sizes_added'                  => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
-					'intersectionRect'   => $outside_viewport_rect,
-					'boundingClientRect' => $outside_viewport_rect,
+					'boundingClientRect' => array( 'top' => 100000 ),
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 				'expected'        => '<img data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 			),
 
-			'auto_sizes_already_added'          => array(
+			'sizes_attribute_added'             => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
-					'intersectionRect'   => $outside_viewport_rect,
-					'boundingClientRect' => $outside_viewport_rect,
+					'boundingClientRect' => array( 'top' => 100000 ),
+				),
+				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w">',
+				'expected'        => '<img data-od-added-sizes sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w">',
+			),
+
+			'auto_sizes_already_added'          => array(
+				'element_metrics' => array(
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'boundingClientRect' => array( 'top' => 100000 ),
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
@@ -160,22 +161,22 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 			// If Auto Sizes added the sizes=auto attribute but Image Prioritizer ended up removing it due to the image not being lazy-loaded, remove sizes=auto again.
 			'wrongly_auto_sized_responsive_img' => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
 			),
 
 			'wrongly_auto_sized_responsive_img_with_only_auto' => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
 			),
 		);
 	}
@@ -184,6 +185,10 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * Test auto sizes.
 	 *
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::__invoke
+	 * @covers Image_Prioritizer_Img_Tag_Visitor::process_img
+	 * @covers Image_Prioritizer_Tag_Visitor::get_attribute_value
+	 * @covers Image_Prioritizer_Img_Tag_Visitor::compute_sizes
+	 * @covers Image_Prioritizer_Img_Tag_Visitor::sizes_attribute_includes_valid_auto
 	 *
 	 * @dataProvider data_provider_test_auto_sizes
 	 * @phpstan-param array{ xpath: string, isLCP: bool, intersectionRatio: int } $element_metrics

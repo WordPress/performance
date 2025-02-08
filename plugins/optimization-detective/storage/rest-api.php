@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Namespace for optimization-detective.
@@ -34,6 +36,8 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
  *
  * @since 0.1.0
  * @access private
+ *
+ * @see od_compose_site_health_result()
  */
 function od_register_endpoint(): void {
 
@@ -68,7 +72,7 @@ function od_register_endpoint(): void {
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+\z',
 			'validate_callback' => static function ( string $hmac, WP_REST_Request $request ) {
-				if ( ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
+				if ( '' === $hmac || ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
 					return new WP_Error( 'invalid_hmac', __( 'URL Metrics HMAC verification failure.', 'optimization-detective' ) );
 				}
 				return true;
@@ -164,7 +168,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	} catch ( InvalidArgumentException $exception ) {
 		// Note: This should never happen because an exception only occurs if a viewport width is less than zero, and the JSON Schema enforces that the viewport.width have a minimum of zero.
-		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
+		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() ); // @codeCoverageIgnore
 	}
 	if ( $url_metric_group->is_complete() ) {
 		return new WP_Error(
@@ -207,6 +211,27 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 				$e->getMessage()
 			),
 			array( 'status' => 400 )
+		);
+	}
+
+	/*
+	 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+	 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+	 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+	 * getting sent.
+	 */
+	$max_size       = 64 * 1024;
+	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+	if ( $content_length > $max_size ) {
+		return new WP_Error(
+			'rest_content_too_large',
+			sprintf(
+				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+				number_format_i18n( $content_length ),
+				number_format_i18n( $max_size )
+			),
+			array( 'status' => 413 )
 		);
 	}
 
@@ -275,7 +300,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
  * @since 0.8.0
  * @access private
  *
- * @param int $cache_purge_post_id Cache purge post ID.
+ * @param positive-int $cache_purge_post_id Cache purge post ID.
  */
 function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 	$post = get_post( $cache_purge_post_id );

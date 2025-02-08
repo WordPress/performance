@@ -26,7 +26,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 					array(
 						'viewport_width' => $viewport_width,
 						'element'        => array(
-							'xpath' => sprintf( '/HTML/BODY/DIV/*[%d][self::DIV]', $div_index + 1 ),
+							'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'page\']/*[%d][self::DIV]', $div_index + 1 ),
 							'isLCP' => true,
 						),
 					)

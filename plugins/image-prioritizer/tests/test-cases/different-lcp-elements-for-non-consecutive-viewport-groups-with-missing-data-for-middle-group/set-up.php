@@ -8,12 +8,12 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 				'elements'       => array(
 					array(
 						'isLCP'             => true,
-						'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+						'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 						'intersectionRatio' => 1.0,
 					),
 					array(
 						'isLCP'             => false,
-						'xpath'             => '/HTML/BODY/DIV/*[2][self::IMG]',
+						'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::IMG]',
 						'intersectionRatio' => 0.0,
 					),
 				),
@@ -28,12 +28,12 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 				'elements'       => array(
 					array(
 						'isLCP'             => false,
-						'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+						'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 						'intersectionRatio' => 0.0,
 					),
 					array(
 						'isLCP'             => true,
-						'xpath'             => '/HTML/BODY/DIV/*[2][self::IMG]',
+						'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::IMG]',
 						'intersectionRatio' => 1.0,
 					),
 				),

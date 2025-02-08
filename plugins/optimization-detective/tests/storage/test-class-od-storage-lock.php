@@ -18,17 +18,93 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test add_hooks().
+	 *
+	 * @covers ::add_hooks
+	 */
+	public function test_add_hooks(): void {
+		remove_all_filters( 'user_has_cap' );
+
+		OD_Storage_Lock::add_hooks();
+
+		$this->assertSame(
+			10,
+			has_filter( 'user_has_cap', array( OD_Storage_Lock::class, 'filter_user_has_cap' ) )
+		);
+	}
+
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_filter_user_has_cap(): array {
+		return array(
+			'caps_null_irrelevant'     => array(
+				'allcaps'  => null,
+				'expected' => array(),
+			),
+			'caps_irrelevant'          => array(
+				'allcaps'  => array( 'edit_posts' => true ),
+				'expected' => array( 'edit_posts' => true ),
+			),
+			'caps_relevant_allowed'    => array(
+				'allcaps'  => array(
+					'edit_posts'     => true,
+					'manage_options' => true,
+				),
+				'expected' => array(
+					'edit_posts'     => true,
+					'manage_options' => true,
+					OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY => true,
+				),
+			),
+			'caps_relevant_disallowed' => array(
+				'allcaps'  => array(
+					'edit_posts'     => true,
+					'manage_options' => false,
+				),
+				'expected' => array(
+					'edit_posts'     => true,
+					'manage_options' => false,
+					OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test filter_user_has_cap().
+	 *
+	 * @dataProvider data_filter_user_has_cap
+	 * @covers ::filter_user_has_cap
+	 *
+	 * @param array<string, bool>|null $allcaps  Existing capabilities.
+	 * @param array<string, bool>      $expected Expected capabilities.
+	 */
+	public function test_filter_user_has_cap( ?array $allcaps, array $expected ): void {
+		$this->assertSame( $expected, OD_Storage_Lock::filter_user_has_cap( $allcaps ) );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array<string, array{set_up: Closure, expected: int}>
 	 */
 	public function data_provider_get_ttl(): array {
 		return array(
-			'unfiltered'        => array(
+			'unfiltered'         => array(
 				'set_up'   => static function (): void {},
 				'expected' => MINUTE_IN_SECONDS,
 			),
-			'filtered_hour'     => array(
+			'unfiltered_admin'   => array(
+				'set_up'   => static function (): void {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+				},
+				'expected' => 0,
+			),
+			'filtered_hour'      => array(
 				'set_up'   => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
@@ -39,13 +115,30 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 				},
 				'expected' => HOUR_IN_SECONDS,
 			),
-			'filtered_negative' => array(
+			'filtered_negative'  => array(
 				'set_up'   => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
 						static function (): int {
 							return -100;
 						}
+					);
+				},
+				'expected' => 0,
+			),
+			'granted_subscriber' => array(
+				'set_up'   => static function (): void {
+					add_filter(
+						'map_meta_cap',
+						static function ( array $caps, string $cap, int $user_id ): array {
+							$primitive_cap = 'exist';
+							if ( OD_Storage_Lock::STORE_URL_METRIC_NOW_CAPABILITY === $cap && user_can( $user_id, $primitive_cap ) ) {
+								$caps = array( $primitive_cap );
+							}
+							return $caps;
+						},
+						10,
+						3
 					);
 				},
 				'expected' => 0,
@@ -57,6 +150,7 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	 * Test get_ttl().
 	 *
 	 * @covers ::get_ttl
+	 * @covers ::filter_user_has_cap
 	 *
 	 * @dataProvider data_provider_get_ttl
 	 *

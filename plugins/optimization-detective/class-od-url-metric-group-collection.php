@@ -6,10 +6,11 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Collection of URL groups according to the breakpoints.
@@ -45,26 +46,21 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Breakpoints in max widths.
 	 *
-	 * Valid values are from 1 to PHP_INT_MAX - 1. This is because:
-	 *
-	 * 1. It doesn't make sense for there to be a viewport width of zero, so the first breakpoint (max width) must be at least 1.
-	 * 2. After the last breakpoint, the final breakpoint group is set to be spanning one plus the last breakpoint max width up
-	 *    until PHP_INT_MAX. So a breakpoint cannot be PHP_INT_MAX because then the minimum viewport width for the final group
-	 *    would end up being larger than PHP_INT_MAX.
+	 * A breakpoint must be greater than zero because a viewport group's maximum viewport width has a minimum (inclusive)
+	 * value of 1, and the breakpoints are used as the maximum viewport widths for the viewport groups, with the addition of
+	 * a final viewport group which has a maximum viewport width of infinity.
 	 *
 	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
 	 * single group.
 	 *
-	 * @var int[]
-	 * @phpstan-var positive-int[]
+	 * @var positive-int[]
 	 */
 	private $breakpoints;
 
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
 	 *
-	 * @var int
-	 * @phpstan-var positive-int
+	 * @var int<1, max>
 	 */
 	private $sample_size;
 
@@ -73,8 +69,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * A freshness age of zero means a URL Metric will always be considered stale.
 	 *
-	 * @var int
-	 * @phpstan-var 0|positive-int
+	 * @var int<0, max>
 	 */
 	private $freshness_ttl;
 
@@ -89,7 +84,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
+	 *          get_xpath_elements_map?: array<string, non-empty-array<non-negative-int, OD_Element>>,
 	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
@@ -99,6 +94,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Constructor.
 	 *
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
+	 *
+	 * @phpstan-param positive-int[] $breakpoints
+	 * @phpstan-param int<1, max>    $sample_size
+	 * @phpstan-param int<0, max>    $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]  $url_metrics   URL Metrics.
 	 * @param non-empty-string $current_etag  The current ETag.
@@ -125,13 +124,13 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		sort( $breakpoints );
 		$breakpoints = array_values( array_unique( $breakpoints, SORT_NUMERIC ) );
 		foreach ( $breakpoints as $breakpoint ) {
-			if ( ! is_int( $breakpoint ) || $breakpoint < 1 || PHP_INT_MAX === $breakpoint ) {
+			if ( ! is_int( $breakpoint ) || $breakpoint < 1 ) {
 				throw new InvalidArgumentException(
 					esc_html(
 						sprintf(
 							/* translators: %d is the invalid breakpoint */
 							__(
-								'Each of the breakpoints must be greater than zero and less than PHP_INT_MAX, but encountered: %d',
+								'Each of the breakpoints must be greater than zero, but encountered: %d',
 								'optimization-detective'
 							),
 							$breakpoint
@@ -213,7 +212,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * This group normally represents viewports for desktop devices.  This group always has a minimum viewport width
 	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
-	 * The maximum viewport is always `PHP_INT_MAX`, or in other words it is unbounded.
+	 * The maximum viewport width of this group is always `null`, or in other words it is unbounded.
 	 *
 	 * @since 0.7.0
 	 *
@@ -242,13 +241,13 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @return OD_URL_Metric_Group[] Groups.
 	 */
 	private function create_groups(): array {
-		$groups    = array();
-		$min_width = 0;
-		foreach ( $this->breakpoints as $max_width ) {
-			$groups[]  = new OD_URL_Metric_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl, $this );
-			$min_width = $max_width + 1;
+		$groups              = array();
+		$min_width_exclusive = 0;
+		foreach ( $this->breakpoints as $max_width_inclusive ) {
+			$groups[]            = new OD_URL_Metric_Group( array(), $min_width_exclusive, $max_width_inclusive, $this->sample_size, $this->freshness_ttl, $this );
+			$min_width_exclusive = $max_width_inclusive;
 		}
-		$groups[] = new OD_URL_Metric_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
+		$groups[] = new OD_URL_Metric_Group( array(), $min_width_exclusive, null, $this->sample_size, $this->freshness_ttl, $this );
 		return $groups;
 	}
 
@@ -269,9 +268,12 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 				return;
 			}
 		}
+		// @codeCoverageIgnoreStart
+		// In practice this exception should never get thrown because create_groups() creates groups from a minimum of 0 to an unbounded maximum.
 		throw new InvalidArgumentException(
 			esc_html__( 'No group available to add URL Metric to.', 'optimization-detective' )
 		);
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -280,7 +282,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
-	 * @param int $viewport_width Viewport width.
+	 * @param positive-int $viewport_width Viewport width.
 	 * @return OD_URL_Metric_Group URL Metric group for the viewport width.
 	 */
 	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metric_Group {
@@ -294,6 +296,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 					return $group;
 				}
 			}
+			// @codeCoverageIgnoreStart
+			// In practice this exception should never get thrown because create_groups() creates groups from a minimum of 0 to an unbounded maximum.
 			throw new InvalidArgumentException(
 				esc_html(
 					sprintf(
@@ -303,6 +307,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 					)
 				)
 			);
+			// @codeCoverageIgnoreEnd
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ][ $viewport_width ] = $result;
@@ -487,7 +492,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
+	 * @return array<string, non-empty-array<non-negative-int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
 	public function get_xpath_elements_map(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
@@ -659,8 +664,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *             every_group_populated: bool,
 	 *             groups: array<int, array{
 	 *                 lcp_element: ?OD_Element,
-	 *                 minimum_viewport_width: 0|positive-int,
-	 *                 maximum_viewport_width: positive-int,
+	 *                 minimum_viewport_width: int<0, max>,
+	 *                 maximum_viewport_width: int<1, max>|null,
 	 *                 complete: bool,
 	 *                 url_metrics: OD_URL_Metric[]
 	 *             }>

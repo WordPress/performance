@@ -6,17 +6,18 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
  * @phpstan-type ViewportRect array{
- *                                width: int,
- *                                height: int
+ *                                width: positive-int,
+ *                                height: positive-int
  *                            }
  * @phpstan-type DOMRect      array{
  *                                width: float,
@@ -38,11 +39,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            }
  * @phpstan-type Data         array{
  *                                uuid: non-empty-string,
- *                                etag?: non-empty-string,
+ *                                etag: non-empty-string,
  *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]
+ *                            }
+ * @phpstan-type JSONSchema   array{
+ *                                type: string|string[],
+ *                                items?: mixed,
+ *                                properties?: array<string, mixed>,
+ *                                patternProperties?: array<string, mixed>,
+ *                                required?: bool,
+ *                                minimum?: int,
+ *                                maximum?: int,
+ *                                pattern?: non-empty-string,
+ *                                additionalProperties?: bool,
+ *                                format?: non-empty-string,
+ *                                readonly?: bool,
  *                            }
  *
  * @since 0.1.0
@@ -156,10 +170,11 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 Added the 'etag' property to the schema.
+	 * @since n.e.x.t The 'etag' property is now required.
 	 *
 	 * @todo Cache the return value?
 	 *
-	 * @return array<string, mixed> Schema.
+	 * @return JSONSchema Schema.
 	 */
 	public static function get_json_schema(): array {
 		/*
@@ -215,7 +230,7 @@ class OD_URL_Metric implements JsonSerializable {
 					'pattern'     => '^[0-9a-f]{32}\z',
 					'minLength'   => 32,
 					'maxLength'   => 32,
-					'required'    => false, // To be made required in a future release.
+					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
 				),
 				'url'       => array(
@@ -233,12 +248,12 @@ class OD_URL_Metric implements JsonSerializable {
 						'width'  => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 						'height' => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 					),
 					'additionalProperties' => false,
@@ -421,7 +436,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @return string UUID.
+	 * @return non-empty-string UUID.
 	 */
 	public function get_uuid(): string {
 		return $this->data['uuid'];
@@ -431,12 +446,12 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Gets ETag.
 	 *
 	 * @since 0.9.0
+	 * @since n.e.x.t No longer returns null as 'etag' is now required.
 	 *
-	 * @return non-empty-string|null ETag.
+	 * @return non-empty-string ETag.
 	 */
-	public function get_etag(): ?string {
-		// Since the ETag is optional for now, return null for old URL Metrics that do not have one.
-		return $this->data['etag'] ?? null;
+	public function get_etag(): string {
+		return $this->data['etag'];
 	}
 
 	/**
@@ -444,7 +459,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string URL.
+	 * @return non-empty-string URL.
 	 */
 	public function get_url(): string {
 		return $this->data['url'];
@@ -466,7 +481,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int Viewport width.
+	 * @return positive-int Viewport width.
 	 */
 	public function get_viewport_width(): int {
 		return $this->data['viewport']['width'];

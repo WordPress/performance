@@ -96,22 +96,65 @@ function error( ...message ) {
 }
 
 /**
- * Checks whether the URL Metric(s) for the provided viewport width is needed.
+ * Gets the status for the URL Metric group for the provided viewport width.
+ *
+ * The comparison logic here corresponds with the PHP logic in `OD_URL_Metric_Group::is_viewport_width_in_range()`.
+ * This function is also similar to the PHP logic in `\OD_URL_Metric_Group_Collection::get_group_for_viewport_width()`.
  *
  * @param {number}                 viewportWidth          - Current viewport width.
  * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
- * @return {boolean} Whether URL Metrics are needed.
+ * @return {URLMetricGroupStatus} The URL metric group for the viewport width.
  */
-function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
-	let lastWasLacking = false;
-	for ( const { minimumViewportWidth, complete } of urlMetricGroupStatuses ) {
-		if ( viewportWidth >= minimumViewportWidth ) {
-			lastWasLacking = ! complete;
-		} else {
-			break;
+function getGroupForViewportWidth( viewportWidth, urlMetricGroupStatuses ) {
+	for ( const urlMetricGroupStatus of urlMetricGroupStatuses ) {
+		if (
+			viewportWidth > urlMetricGroupStatus.minimumViewportWidth &&
+			( null === urlMetricGroupStatus.maximumViewportWidth ||
+				viewportWidth <= urlMetricGroupStatus.maximumViewportWidth )
+		) {
+			return urlMetricGroupStatus;
 		}
 	}
-	return lastWasLacking;
+	throw new Error(
+		`${ consoleLogPrefix } Unexpectedly unable to locate group for the current viewport width.`
+	);
+}
+
+/**
+ * Gets the sessionStorage key for keeping track of whether the current client session already submitted a URL Metric.
+ *
+ * @param {string}               currentETag          - Current ETag.
+ * @param {string}               currentUrl           - Current URL.
+ * @param {URLMetricGroupStatus} urlMetricGroupStatus - URL Metric group status.
+ * @return {Promise<string>} Session storage key.
+ */
+async function getAlreadySubmittedSessionStorageKey(
+	currentETag,
+	currentUrl,
+	urlMetricGroupStatus
+) {
+	const message = [
+		currentETag,
+		currentUrl,
+		urlMetricGroupStatus.minimumViewportWidth,
+		urlMetricGroupStatus.maximumViewportWidth || '',
+	].join( '-' );
+
+	/*
+	 * Note that the components are hashed for a couple of reasons:
+	 *
+	 * 1. It results in a consistent length string devoid of any special characters that could cause problems.
+	 * 2. Since the key includes the URL, hashing it avoids potential privacy concerns where the sessionStorage is
+	 *    examined to see which URLs the client went to.
+	 *
+	 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
+	 */
+	const msgBuffer = new TextEncoder().encode( message );
+	const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
+	const hashHex = Array.from( new Uint8Array( hashBuffer ) )
+		.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
+		.join( '' );
+	return `odSubmitted-${ hashHex }`;
 }
 
 /**
@@ -253,6 +296,7 @@ function extendElementData( xpath, properties ) {
  * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
  * @param {boolean}                args.isDebug                    Whether to show debug messages.
  * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
+ * @param {string}                 [args.restApiNonce]             Nonce for the REST API when the user is logged-in.
  * @param {string}                 args.currentETag                Current ETag.
  * @param {string}                 args.currentUrl                 Current URL.
  * @param {string}                 args.urlMetricSlug              Slug for URL Metric.
@@ -260,6 +304,7 @@ function extendElementData( xpath, properties ) {
  * @param {string}                 args.urlMetricHMAC              HMAC for URL Metric storage.
  * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL Metric group statuses.
  * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL Metric storage lock.
+ * @param {number}                 args.freshnessTTL               The freshness age (TTL) for a given URL Metric.
  * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
  * @param {CollectionDebugData}    [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
  */
@@ -269,6 +314,7 @@ export default async function detect( {
 	isDebug,
 	extensionModuleUrls,
 	restApiEndpoint,
+	restApiNonce,
 	currentETag,
 	currentUrl,
 	urlMetricSlug,
@@ -276,6 +322,7 @@ export default async function detect( {
 	urlMetricHMAC,
 	urlMetricGroupStatuses,
 	storageLockTTL,
+	freshnessTTL,
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
@@ -297,12 +344,50 @@ export default async function detect( {
 		);
 	}
 
+	if ( win.innerWidth === 0 || win.innerHeight === 0 ) {
+		if ( isDebug ) {
+			log(
+				'Window must have non-zero dimensions for URL Metric collection.'
+			);
+		}
+		return;
+	}
+
 	// Abort if the current viewport is not among those which need URL Metrics.
-	if ( ! isViewportNeeded( win.innerWidth, urlMetricGroupStatuses ) ) {
+	const urlMetricGroupStatus = getGroupForViewportWidth(
+		win.innerWidth,
+		urlMetricGroupStatuses
+	);
+	if ( urlMetricGroupStatus.complete ) {
 		if ( isDebug ) {
 			log( 'No need for URL Metrics from the current viewport.' );
 		}
 		return;
+	}
+
+	// Abort if the client already submitted a URL Metric for this URL and viewport group.
+	const alreadySubmittedSessionStorageKey =
+		await getAlreadySubmittedSessionStorageKey(
+			currentETag,
+			currentUrl,
+			urlMetricGroupStatus
+		);
+	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
+		const previousVisitTime = parseInt(
+			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
+			10
+		);
+		if (
+			! isNaN( previousVisitTime ) &&
+			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
+		) {
+			if ( isDebug ) {
+				log(
+					'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
+				);
+				return;
+			}
+		}
 	}
 
 	// Abort if the viewport aspect ratio is not in a common range.
@@ -603,6 +688,7 @@ export default async function detect( {
 		return;
 	}
 
+	// Finalize extensions.
 	if ( extensions.size > 0 ) {
 		/** @type {Promise[]} */
 		const extensionFinalizePromises = [];
@@ -655,15 +741,63 @@ export default async function detect( {
 		}
 	}
 
+	/*
+	 * Now prepare the URL Metric to be sent as JSON request body.
+	 */
+
+	const maxBodyLengthKiB = 64;
+	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
+
+	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
+	const jsonBody = JSON.stringify( urlMetric );
+	const percentOfBudget =
+		( jsonBody.length / ( maxBodyLengthKiB * 1000 ) ) * 100;
+
+	/*
+	 * According to the fetch() spec:
+	 * "If the sum of contentLength and inflightKeepaliveBytes is greater than 64 kibibytes, then return a network error."
+	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
+	 * than the maximum, we should avoid even trying to send it.
+	 */
+	if ( jsonBody.length > maxBodyLengthBytes ) {
+		if ( isDebug ) {
+			error(
+				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+					percentOfBudget
+				) }% of ${ maxBodyLengthKiB } KiB limit:`,
+				urlMetric
+			);
+		}
+		return;
+	}
+
 	// Even though the server may reject the REST API request, we still have to set the storage lock
 	// because we can't look at the response when sending a beacon.
 	setStorageLock( getCurrentTime() );
 
+	// Remember that the URL Metric was submitted for this URL to avoid having multiple entries submitted by the same client.
+	sessionStorage.setItem(
+		alreadySubmittedSessionStorageKey,
+		String( getCurrentTime() )
+	);
+
 	if ( isDebug ) {
-		log( 'Sending URL Metric:', urlMetric );
+		const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+			percentOfBudget
+		) }% of ${ maxBodyLengthKiB } KiB limit):`;
+
+		// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
+		if ( percentOfBudget < 50 ) {
+			log( message, urlMetric );
+		} else {
+			warn( message, urlMetric );
+		}
 	}
 
 	const url = new URL( restApiEndpoint );
+	if ( typeof restApiNonce === 'string' ) {
+		url.searchParams.set( '_wpnonce', restApiNonce );
+	}
 	url.searchParams.set( 'slug', urlMetricSlug );
 	url.searchParams.set( 'current_etag', currentETag );
 	if ( typeof cachePurgePostId === 'number' ) {
@@ -675,7 +809,7 @@ export default async function detect( {
 	url.searchParams.set( 'hmac', urlMetricHMAC );
 	navigator.sendBeacon(
 		url,
-		new Blob( [ JSON.stringify( urlMetric ) ], {
+		new Blob( [ jsonBody ], {
 			type: 'application/json',
 		} )
 	);

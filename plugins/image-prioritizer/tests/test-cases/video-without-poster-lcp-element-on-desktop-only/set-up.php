@@ -13,11 +13,11 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 		$elements = array(
 			array(
 				'isLCP' => true,
-				'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 			),
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[2][self::VIDEO]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::VIDEO]',
 			),
 		);
 		OD_URL_Metrics_Post_Type::store_url_metric(
@@ -39,7 +39,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 				'elements'       => array(
 					array(
 						'isLCP' => false,
-						'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+						'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					),
 				),
 			)

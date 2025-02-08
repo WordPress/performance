@@ -12,6 +12,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
+	 * @covers ::__construct
 	 * @covers ::get
 	 * @covers ::get_url_metric
 	 * @covers ::get_url_metric_group
@@ -39,7 +40,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 		);
 
 		$element_data = array(
-			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/HEADER/*[1][self::IMG]',
 			'isLCP'              => false,
 			'isLCPCandidate'     => true,
 			'intersectionRatio'  => 0.123,
@@ -147,5 +148,57 @@ class Test_OD_Element extends WP_UnitTestCase {
 			$exception = $e;
 		}
 		$this->assertInstanceOf( Exception::class, $exception ); // @phpstan-ignore method.impossibleType (It is thrown by offsetUnset actually.)
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_test_transitional_get_xpath(): array {
+		return array(
+			'current-without-disambiguating-attr-on-body-child' => array(
+				'xpath'    => '/HTML/BODY/HEADER/*[1][self::IMG]',
+				'expected' => '/HTML/BODY/HEADER/*[1][self::IMG]',
+			),
+			'current-with-disambiguating-attr-on-body-child' => array(
+				'xpath'    => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
+				'expected' => '/HTML/BODY/DIV/*[1][self::IMG]',
+			),
+			'old-format-body' => array(
+				'xpath'    => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]/*[1][self::IMG]',
+				'expected' => '/HTML/BODY/DIV/*[1][self::IMG]',
+			),
+			'old-format-head' => array(
+				'xpath'    => '/*[1][self::HTML]/*[1][self::HEAD]/*[1][self::META]',
+				'expected' => '/HTML/HEAD/*[1][self::META]',
+			),
+		);
+	}
+
+	/**
+	 * Test that get_xpath() converts to the transitional format.
+	 *
+	 * @dataProvider data_provider_test_transitional_get_xpath
+	 * @covers ::get_xpath
+	 */
+	public function test_transitional_get_xpath( string $xpath, string $expected ): void {
+
+		$element_data = array(
+			'xpath'              => $xpath,
+			'isLCP'              => false,
+			'isLCPCandidate'     => true,
+			'intersectionRatio'  => 0.123,
+			'intersectionRect'   => $this->get_sample_dom_rect(),
+			'boundingClientRect' => $this->get_sample_dom_rect(),
+		);
+
+		$url_metric = $this->get_sample_url_metric( array( 'element' => $element_data ) );
+		$element    = $url_metric->get_elements()[0];
+
+		$this->assertSame( $expected, $element->get_xpath() );
+		$this->assertSame( $expected, $element->get( 'xpath' ) );
+		$this->assertSame( $expected, $element['xpath'] );
+		$this->assertSame( $xpath, $url_metric->jsonSerialize()['elements'][0]['xpath'] );
 	}
 }

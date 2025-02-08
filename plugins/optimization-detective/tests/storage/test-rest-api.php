@@ -75,6 +75,9 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
+	 * @covers OD_URL_Metric_Store_Request_Context::__construct
+	 * @covers OD_URL_Metric_Store_Request_Context::__get
 	 */
 	public function test_rest_request_good_params( Closure $set_up ): void {
 		$stored_context = null;
@@ -85,7 +88,20 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				$this->assertInstanceOf( OD_URL_Metric_Group::class, $context->url_metric_group );
 				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
 				$this->assertInstanceOf( WP_REST_Request::class, $context->request );
+				$this->assertIsInt( $context->url_metrics_id );
+				$this->setExpectedIncorrectUsage( 'OD_URL_Metric_Store_Request_Context::$post_id' );
 				$this->assertIsInt( $context->post_id );
+				$this->assertSame( $context->url_metrics_id, $context->post_id );
+
+				$error = null;
+				$value = '';
+				try {
+					$value = $context->__get( 'unknown' );
+				} catch ( Error $e ) {
+					$error = $e;
+				}
+				$this->assertSame( '', $value );
+				$this->assertInstanceOf( Error::class, $error );
 				$stored_context = $context;
 			}
 		);
@@ -115,6 +131,9 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL Metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $this->get_array_json_data( $url_metrics[0]->get( 'elements' ) ) );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
+		$element = $url_metrics[0]->get( 'elements' )[0];
+		$this->assertStringStartsWith( '/HTML/BODY/DIV[@id=\'page\']/', $element->jsonSerialize()['xpath'] );
+		$this->assertStringStartsWith( '/HTML/BODY/DIV/', $element->get_xpath() ); // TODO: Remove once the XPath transitional period is over.
 
 		$expected_data = $valid_params;
 		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['current_etag'], $expected_data['cache_purge_post_id'] );
@@ -138,6 +157,28 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test good params.
+	 *
+	 * @dataProvider data_provider_to_test_rest_request_good_params
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
+	 */
+	public function test_rest_request_good_params_but_post_save_failed( Closure $set_up ): void {
+		$valid_params = $set_up();
+
+		add_filter( 'wp_insert_post_empty_content', '__return_true' ); // Cause wp_insert_post() to return WP_Error.
+
+		$request  = $this->create_request( $valid_params );
+		$response = rest_get_server()->dispatch( $request );
+
+		$error = $response->as_error();
+		$this->assertInstanceOf( WP_Error::class, $error );
+		$this->assertSame( 'unable_to_store_url_metric', $error->get_error_code() );
+	}
+
+	/**
 	 * Data provider for test_rest_request_bad_params.
 	 *
 	 * @return array<string, mixed> Test data.
@@ -146,123 +187,269 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$valid_params  = $this->get_valid_params();
 		$valid_element = $valid_params['elements'][0];
 
-		return array_map(
-			static function ( $params ) use ( $valid_params ) {
-				return array(
-					'params' => array_merge( $valid_params, $params ),
-				);
-			},
-			array(
-				'bad_url'                                  => array(
-					'url' => 'bad://url',
+		return array(
+			'missing_callback_params'                  => array(
+				'params'          => array(
+					'slug' => $valid_params['slug'],
 				),
-				'bad_current_etag1'                        => array(
-					'current_etag' => 'foo',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_missing_callback_param',
+			),
+			'bad_url'                                  => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'url' => 'bad://url',
+					)
 				),
-				'bad_current_etag2'                        => array(
-					'current_etag' => $valid_params['current_etag'] . "\n",
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_current_etag1'                        => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'current_etag' => 'foo',
+					)
 				),
-				'bad_slug'                                 => array(
-					'slug' => '<script>document.write("evil")</script>',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_current_etag2'                        => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'current_etag' => $valid_params['current_etag'] . "\n",
+					)
 				),
-				'bad_hmac'                                 => array(
-					'hmac' => 'not even a hash',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_slug'                                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'slug' => '<script>document.write("evil")</script>',
+					)
 				),
-				'invalid_hmac'                             => array(
-					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), $valid_params['current_etag'], home_url( '/' ) ),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'bad_hmac'                                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => 'not even a hash',
+					)
 				),
-				'invalid_hmac_with_queried_object'         => array(
-					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array() ), $valid_params['current_etag'], home_url( '/' ), 1 ),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_hmac'                             => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), $valid_params['current_etag'], home_url( '/' ) ),
+					)
 				),
-				'invalid_viewport_type'                    => array(
-					'viewport' => '640x480',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_hmac_with_queried_object'         => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array() ), $valid_params['current_etag'], home_url( '/' ), 1 ),
+					)
 				),
-				'invalid_viewport_values'                  => array(
-					'viewport' => array(
-						'breadth' => 100,
-						'depth'   => 200,
-					),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_type'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => '640x480',
+					)
 				),
-				'invalid_viewport_aspect_ratio'            => array(
-					'viewport' => array(
-						'width'  => 1024,
-						'height' => 12000,
-					),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_values'                  => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => array(
+							'breadth' => 100,
+							'depth'   => 200,
+						),
+					)
 				),
-				'invalid_elements_type'                    => array(
-					'elements' => 'bad',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_viewport_aspect_ratio'            => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'viewport' => array(
+							'width'  => 1024,
+							'height' => 12000,
+						),
+					)
 				),
-				'invalid_elements_prop_is_lcp'             => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'isLCP' => 'totally!',
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_type'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => 'bad',
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_prop_is_lcp'             => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'isLCP' => 'totally!',
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_prop_xpath'              => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => 'html > body img',
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_content_length'                   => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Repeat the elements until the JSON will surpass 64 KiB.
+						'elements' => array_fill(
+							0,
+							200,
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+								)
 							)
 						),
-					),
+					)
 				),
-				'invalid_elements_prop_xpath'              => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'xpath' => 'html > body img',
-							)
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+			'invalid_elements_prop_intersection_ratio' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRatio' => - 1,
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_prop_intersection_ratio' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRatio' => - 1,
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_additional_intersect_rect_property' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRect' => array(
+										'width'  => 640,
+										'height' => 480,
+										'wooHoo' => 'bad',
+									),
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_additional_intersect_rect_property' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRect' => array(
-									'width'  => 640,
-									'height' => 480,
-									'wooHoo' => 'bad',
-								),
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_elements_negative_width_intersect_rect_property' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'intersectionRect' => array(
+										'width'  => -640,
+										'height' => 480,
+									),
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_elements_negative_width_intersect_rect_property' => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'intersectionRect' => array(
-									'width'  => -640,
-									'height' => 480,
-								),
-							)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_root_property'                    => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'is_touch' => false,
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'invalid_element_property'                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'is_big' => true,
+								)
+							),
 						),
-					),
+					)
 				),
-				'invalid_root_property'                    => array(
-					'is_touch' => false,
-				),
-				'invalid_element_property'                 => array(
-					'elements' => array(
-						array_merge(
-							$valid_element,
-							array(
-								'is_big' => true,
-							)
-						),
-					),
-				),
-			)
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
 		);
 	}
 
@@ -271,16 +458,17 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
 	 *
 	 * @param array<string, mixed> $params Params.
 	 */
-	public function test_rest_request_bad_params( array $params ): void {
+	public function test_rest_request_bad_params( array $params, int $expected_status, string $expected_code ): void {
 		$request  = $this->create_request( $params );
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
-		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( $expected_code, $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 
 		$this->assertNull( OD_URL_Metrics_Post_Type::get_post( $params['slug'] ) );
 		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
@@ -545,7 +733,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		);
 		$url_metric_groups = iterator_to_array( $group_collection );
 		$this->assertSame(
-			array( 0, $breakpoint_width + 1 ),
+			array( 0, $breakpoint_width ),
 			array_map(
 				static function ( OD_URL_Metric_Group $group ) {
 					return $group->get_minimum_viewport_width();
@@ -653,6 +841,22 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test od_trigger_page_cache_invalidation() for an invalid post.
+	 *
+	 * @covers ::od_trigger_page_cache_invalidation
+	 */
+	public function test_od_trigger_page_cache_invalidation_invalid_post_id(): void {
+		wp_delete_post( 1, true );
+		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
+		$before_transition_post_status_count = did_action( 'transition_post_status' );
+		$before_save_post_count              = did_action( 'save_post' );
+		od_trigger_page_cache_invalidation( 1 );
+		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
+		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
+		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
+	}
+
+	/**
 	 * Populate URL Metrics.
 	 *
 	 * @param int                  $count  Count of URL Metrics to populate.
@@ -678,7 +882,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			array(
 				'viewport_width' => 480,
 				'element'        => array(
-					'xpath' => '/HTML/BODY/DIV/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
+					'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
 				),
 			)
 		)->jsonSerialize();
