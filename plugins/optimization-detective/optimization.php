@@ -259,30 +259,37 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * or even a class with an `__invoke` method defined). The tag visitor callback is invoked by passing an instance
 	 * of the `OD_Tag_Visitor_Context` object which includes the following read-only properties:
 	 *
-	 * - `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current tag.
+	 * - `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current open tag.
 	 * - `$url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The URL Metrics which may include information about the current tag to inform what optimizations the callback performs.
 	 * - `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add preload links and preconnect links as needed.
+	 * - `$url_metrics_id` (`positive-int|null`): The post ID for the `od_url_metrics` post from which the URL Metrics were loaded (if any). For advanced usage.
 	 *
-	 * Note that you are free to call `next_tag()` in the callback (such as to walk over any child elements) since the
-	 * cursor will be reset to the tag after the callback finishes.
+	 * Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child elements)
+	 * since the tag processor's cursor will be reset to the tag after the callback finishes.
 	 *
-	 * A tag visitor callback returns a boolean value. When it returns `true`, then Optimization Detective will mark the
-	 * tag as needing to be included among the elements stored in URL Metrics. The element data includes properties such
-	 * as intersectionRatio, intersectionRect, and boundingClientRect as well as whether it is the LCP element. If the
-	 * current tag is not relevant for the tag visitor or if the tag visitor callback does not need to query the provided
-	 * `OD_URL_Metric_Group_Collection` instance to apply the desired optimizations, it can just return `false`. An
-	 * element will be tracked in URL Metrics if _any_ tag visitor callback returns `true` when visiting the tag.
+	 * When a tag visitor sees it is at a relevant open tag (e.g. by checking `$processor->get_tag()`), it can call the
+	 * `$context->track_tag()` method to indicate that the tag should be measured during detection. This will cause the
+	 * tag to be included among the `elements` in the stored URL Metrics. The element data includes properties such
+	 * as `intersectionRatio`, `intersectionRect`, and `boundingClientRect` (provided by an `IntersectionObserver`) as
+	 * well as whether the tag is the LCP element (`isLCP`) or LCP element candidate (`isLCPCandidate`). This method
+	 * should not be called if the current tag is not relevant for the tag visitor or if the tag visitor callback does
+	 * not need to query the provided `OD_URL_Metric_Group_Collection` instance to apply the desired optimizations. (In
+	 * addition to calling the `$context->track_tag()`, a callback may also return `true` to indicate the tag should be
+	 * tracked.)
 	 *
 	 * Here's an example tag visitor that depends on URL Metrics data:
 	 *
 	 *     $tag_visitor_registry->register(
 	 *         'lcp-img-fetchpriority-high',
-	 *         static function ( OD_Tag_Visitor_Context $context ): bool {
+	 *         static function ( OD_Tag_Visitor_Context $context ): void {
 	 *             if ( $context->processor->get_tag() !== 'IMG' ) {
-	 *                 return false; // Tag is not relevant for this tag visitor.
+	 *                 return; // Tag is not relevant for this tag visitor.
 	 *             }
 	 *
-	 *             // Make sure fetchpriority=high is added to LCP IMG elements.
+	 *             // Mark the tag for measurement during detection so it is included among the elements stored in URL Metrics.
+	 *             $context->track_tag();
+	 *
+	 *             // Make sure fetchpriority=high is added to LCP IMG elements based on the captured URL Metrics.
 	 *             $common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 	 *             if (
 	 *                 null !== $common_lcp_element
@@ -291,9 +298,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *             ) {
 	 *                 $context->processor->set_attribute( 'fetchpriority', 'high' );
 	 *             }
-	 *
-	 *             // Must return true so that the tag is included among the elements stored in URL Metrics.
-	 *             return true;
 	 *         }
 	 *     );
 	 *
@@ -306,17 +310,13 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *         'img-decoding-async',
 	 *         static function ( OD_Tag_Visitor_Context $context ): bool {
 	 *             if ( $context->processor->get_tag() !== 'IMG' ) {
-	 *                 return false; // Tag is not relevant for this tag visitor.
+	 *                 return; // Tag is not relevant for this tag visitor.
 	 *             }
 	 *
 	 *             // Set the decoding attribute if it is absent.
 	 *             if ( null === $context->processor->get_attribute( 'decoding' ) ) {
 	 *                 $context->processor->set_attribute( 'decoding', 'async' );
 	 *             }
-	 *
-	 *             // There's no need to query OD_URL_Metric_Group_Collection, so this element
-	 *             // doesn't need to be tracked in URL Metrics and the callback can return false.
-	 *             return false;
 	 *         }
 	 *     );
 	 *
