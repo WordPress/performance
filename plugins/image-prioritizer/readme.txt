@@ -15,7 +15,7 @@ This plugin optimizes the loading of images (and videos) with prioritization to 
 
 The current optimizations include:
 
-1. Add breakpoint-specific `fetchpriority=high` preload links (`LINK[rel=preload]`) for image URLs of LCP elements:
+1. Add breakpoint-specific `fetchpriority=high` preload links (both as `LINK[rel=preload]` elements and `Link` response headers) for image URLs of LCP elements:
    1. An `IMG` element, including the `srcset`/`sizes` attributes supplied as `imagesrcset`/`imagesizes` on the `LINK`.
    2. The first `SOURCE` element with a `type` attribute in a `PICTURE` element. (Art-directed `PICTURE` elements using media queries are not supported.)
    3. An element with a CSS `background-image` inline `style` attribute.
