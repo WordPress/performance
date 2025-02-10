@@ -17,3 +17,4 @@ coverage:
         informational: true
 comment:
   hide_project_coverage: TRUE
+  layout: "condensed_header, condensed_files, condensed_footer"
