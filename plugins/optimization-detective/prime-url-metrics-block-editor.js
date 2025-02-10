@@ -9,6 +9,8 @@
 
 	let isProcessing = false;
 	let breakpoints = [];
+	let currentTasks = [];
+
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
 	iframe.style.position = 'fixed';
@@ -26,7 +28,6 @@
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function primeURL() {
-		isProcessing = true;
 		try {
 			if ( 0 === breakpoints.length ) {
 				breakpoints = await apiFetch( {
@@ -41,15 +42,17 @@
 				method: 'GET',
 			} );
 
-			for ( const breakpoint of breakpoints ) {
-				await processTask( {
-					url: postURL,
-					width: breakpoint.width,
-					height: breakpoint.height,
-					verificationToken,
-				} );
+			currentTasks = breakpoints.map( ( breakpoint ) => ( {
+				url: postURL,
+				width: breakpoint.width,
+				height: breakpoint.height,
+				verificationToken,
+			} ) );
+
+			if ( ! isProcessing && currentTasks.length > 0 ) {
+				isProcessing = true;
+				processTasks();
 			}
-			isProcessing = false;
 		} catch ( error ) {
 			isProcessing = false;
 		}
@@ -57,11 +60,11 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
-	 * @param {{url: string, width: number, height: number, verificationToken: string}} task - The breakpoint to set for the iframe.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	function processTask( task ) {
-		return new Promise( ( resolve, reject ) => {
+	async function processTasks() {
+		const task = currentTasks.shift();
+		await new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
 					cleanup();
@@ -94,18 +97,26 @@
 			iframe.dataset.odPrimeUrlMetricsVerificationToken =
 				task.verificationToken;
 		} );
+
+		if ( currentTasks.length > 0 ) {
+			processTasks();
+		} else {
+			isProcessing = false;
+		}
 	}
 
-	// Listen for post save/publish events
+	// Listen for post save/publish events.
+	let wasSaving = false;
 	subscribe( () => {
 		const isSaving = select( 'core/editor' ).isSavingPost();
 		const isAutosaving = select( 'core/editor' ).isAutosavingPost();
-		const isPublished =
-			select( 'core/editor' ).getCurrentPost().status === 'publish';
-		const isJustSaved = isSaving && ! isAutosaving && isPublished;
-		if ( isJustSaved ) {
+
+		// Trigger when saving transitions from true to false (save completed).
+		if ( wasSaving && ! isSaving && ! isAutosaving ) {
 			primeURL();
 		}
+
+		wasSaving = isSaving;
 	} );
 
 	/**
