@@ -201,6 +201,15 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 		$queried_object_data['type'] = $queried_object->name;
 	}
 
+	$active_plugins = (array) get_option( 'active_plugins', array() );
+	if ( is_multisite() ) {
+		$active_plugins = array_merge(
+			$active_plugins,
+			(array) get_site_option( 'active_sitewide_plugins', array() )
+		);
+	}
+	sort( $active_plugins );
+
 	$data = array(
 		'xpath_version'    => 2, // Bump whenever a major change to the XPath format occurs so that new URL Metrics are proactively gathered.
 		'tag_visitors'     => array_keys( iterator_to_array( $tag_visitor_registry ) ),
@@ -232,6 +241,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 				'version' => wp_get_theme()->get( 'Version' ),
 			),
 		),
+		'active_plugins'   => $active_plugins,
 		'current_template' => $current_template instanceof WP_Block_Template ? get_object_vars( $current_template ) : $current_template,
 	);
 
