@@ -685,10 +685,6 @@ export default async function detect( {
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
 		if ( '' !== odPrimeUrlMetricsVerificationToken ) {
-			window.parent.postMessage(
-				'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
-				'*'
-			);
 			resolve();
 		}
 
@@ -849,6 +845,13 @@ export default async function detect( {
 			type: 'application/json',
 		} )
 	);
+
+	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+		window.parent.postMessage(
+			'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
+			'*'
+		);
+	}
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
