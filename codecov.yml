@@ -13,3 +13,5 @@ coverage:
       default:
         threshold: 80%
         informational: true
+comment:
+  hide_project_coverage: TRUE
