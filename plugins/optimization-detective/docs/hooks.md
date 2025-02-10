@@ -134,6 +134,8 @@ add_filter( 'od_url_metric_freshness_ttl', static function (): int {
 } );
 ```
 
+Note that even if you have large freshness TTL a URL Metric can still become stale sooner; if the page state changes then this results in a change to the ETag associated with a URL Metric. This will allow new URL Metrics to be collected before the freshness TTL has transpired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
+
 During development, this can be useful to set to zero so that you don't have to wait for new URL Metrics to be requested when engineering a new optimization:
 
 ```php
@@ -233,10 +235,17 @@ add_filter(
 
 See also [example usage](https://github.com/WordPress/performance/blob/6bb8405c5c446e3b66c2bfa3ae03ba61b188bca2/plugins/embed-optimizer/hooks.php#L128-L144) in Embed Optimizer. Note in particular the structure of the plugin’s [detect.js](https://github.com/WordPress/performance/blob/trunk/plugins/embed-optimizer/detect.js) script module, how it exports `initialize` and `finalize` functions which Optimization Detective then calls when the page loads and when the page unloads, at which time the URL Metric is constructed and sent to the server for storage. Refer also to the [TypeScript type definitions](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/types.ts).
 
-### Filter: `od_current_url_metrics_etag_data` (default: array with `tag_visitors` key)
+### Filter: `od_current_url_metrics_etag_data` (default: `array<string, mixed>`)
 
 Filters the data that goes into computing the current ETag for URL Metrics.
 
-The ETag is a unique identifier that changes whenever the underlying data used to generate it changes. By default, the ETag calculation includes the names of registered tag visitors. This ensures that when a new Optimization Detective-dependent plugin is activated (like [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) or [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)), any existing URL Metrics are immediately considered stale. This happens because the newly registered tag visitors alter the ETag calculation, making it different from the stored ones.
+The ETag is a unique identifier that changes whenever the underlying data used to generate it changes. By default, the ETag calculation includes:
 
-When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag. These new URL Metrics will include data relevant to the newly activated plugins and their tag visitors.
+1. The active theme and current version (for both parent and child themes).
+2. The queried object ID, post type, and modified date.
+3. The list of registered tag visitors.
+4. The IDs and modified times of posts in The Loop.
+5. The current theme template used to render the page.
+6. The list of active plugins.
+
+A change in ETag means that any previously-collected URL Metrics will be immediately considered stale. When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag.
