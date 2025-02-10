@@ -90,7 +90,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 					'extensionModuleUrls' => array(),
 					'cachePurgePostId'    => null,
-					'freshnessTTL'        => DAY_IN_SECONDS,
+					'freshnessTTL'        => WEEK_IN_SECONDS,
 				),
 				'expected_standard_build' => true,
 			),
