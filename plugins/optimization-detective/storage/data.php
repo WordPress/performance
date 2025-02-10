@@ -203,9 +203,11 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 
 	$active_plugins = (array) get_option( 'active_plugins', array() );
 	if ( is_multisite() ) {
-		$active_plugins = array_merge(
-			$active_plugins,
-			(array) get_site_option( 'active_sitewide_plugins', array() )
+		$active_plugins = array_unique(
+			array_merge(
+				$active_plugins,
+				array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+			)
 		);
 	}
 	sort( $active_plugins );

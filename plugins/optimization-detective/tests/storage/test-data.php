@@ -529,7 +529,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 			update_site_option(
 				'active_sitewide_plugins',
 				array(
-					'performance-lab/load.php',
+					'performance-lab/load.php' => time(),
 				)
 			);
 		}
