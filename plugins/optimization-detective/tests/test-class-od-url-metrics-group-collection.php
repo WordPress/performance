@@ -111,6 +111,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	/**
 	 * @covers ::__construct
 	 * @covers ::get_current_etag
+	 * @covers ::get_breakpoints
+	 * @covers ::get_sample_size
+	 * @covers ::get_freshness_ttl
 	 * @covers ::create_groups
 	 * @covers ::count
 	 *
@@ -130,6 +133,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$group_collection = new OD_URL_Metric_Group_Collection( $url_metrics, $current_etag, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertCount( count( $breakpoints ) + 1, $group_collection );
 		$this->assertSame( $current_etag, $group_collection->get_current_etag() );
+		$this->assertSame( $sample_size, $group_collection->get_sample_size() );
+		$this->assertSame( $breakpoints, $group_collection->get_breakpoints() );
+		$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
 	}
 
 	/**
