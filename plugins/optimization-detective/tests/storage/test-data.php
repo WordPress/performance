@@ -33,7 +33,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
 	public function test_od_get_url_metric_freshness_ttl(): void {
-		$this->assertSame( DAY_IN_SECONDS, od_get_url_metric_freshness_ttl() );
+		$this->assertSame( WEEK_IN_SECONDS, od_get_url_metric_freshness_ttl() );
 
 		add_filter(
 			'od_url_metric_freshness_ttl',

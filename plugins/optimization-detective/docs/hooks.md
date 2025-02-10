@@ -124,13 +124,13 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 } );
 ```
 
-### Filter: `od_url_metric_freshness_ttl` (default: 1 day in seconds)
+### Filter: `od_url_metric_freshness_ttl` (default: 1 week in seconds)
 
-Filters the freshness age (TTL) for a given URL Metric. The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale. In practice, the value should be at least an hour. If your site content does not change frequently, you may want to increase the TTL to a week:
+Filters the freshness age (TTL) for a given URL Metric. The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale. In practice, the value should be at least an hour. If your site content does not change frequently, you may want to increase the TTL even longer, say to a month:
 
 ```php
 add_filter( 'od_url_metric_freshness_ttl', static function (): int {
-	return WEEK_IN_SECONDS;
+	return MONTH_IN_SECONDS;
 } );
 ```
 

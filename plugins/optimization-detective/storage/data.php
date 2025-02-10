@@ -31,9 +31,9 @@ function od_get_url_metric_freshness_ttl(): int {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
+	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', DAY_IN_SECONDS );
+	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
 
 	if ( $freshness_ttl < 0 ) {
 		_doing_it_wrong(
