@@ -13,7 +13,7 @@ coverage:
         informational: true
     patch:
       default:
-        threshold: 80%
+        threshold: 20%
         informational: true
 comment:
   hide_project_coverage: TRUE
