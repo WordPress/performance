@@ -7,7 +7,7 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
 
-Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
 
 == Description ==
 

@@ -58,8 +58,6 @@ function od_get_url_metric_freshness_ttl(): int {
  *
  * This is used as a cache key for stored URL Metrics.
  *
- * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
- *
  * @since 0.1.0
  * @access private
  *

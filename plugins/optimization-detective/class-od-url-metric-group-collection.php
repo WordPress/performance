@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements IteratorAggregate<int, OD_URL_Metric_Group>
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
 
@@ -31,6 +30,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * even to when there are zero breakpoints: there will still be one group
 	 * in this case, in which every single URL Metric is added.
 	 *
+	 * @since 0.1.0
 	 * @var OD_URL_Metric_Group[]
 	 * @phpstan-var non-empty-array<OD_URL_Metric_Group>
 	 */
@@ -54,6 +54,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
 	 * single group.
 	 *
+	 * @since 0.1.0
 	 * @var positive-int[]
 	 */
 	private $breakpoints;
@@ -61,6 +62,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
 	 *
+	 * @since 0.1.0
 	 * @var int<1, max>
 	 */
 	private $sample_size;
@@ -70,6 +72,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * A freshness age of zero means a URL Metric will always be considered stale.
 	 *
+	 * @since 0.1.0
 	 * @var int<0, max>
 	 */
 	private $freshness_ttl;
@@ -77,6 +80,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Result cache.
 	 *
+	 * @since 0.3.0
 	 * @var array{
 	 *          get_group_for_viewport_width?: array<int, OD_URL_Metric_Group>,
 	 *          is_every_group_populated?: bool,
@@ -93,6 +97,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
 	 *

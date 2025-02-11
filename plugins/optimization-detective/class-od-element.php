@@ -21,7 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
  *
  * @since 0.7.0
- * @access private
  */
 class OD_Element implements ArrayAccess, JsonSerializable {
 
