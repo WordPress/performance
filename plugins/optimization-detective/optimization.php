@@ -167,6 +167,8 @@ function od_can_optimize_response(): bool {
 		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
 		is_embed() ||
+		// Skip posts that aren't published yet.
+		is_preview() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
@@ -251,6 +253,77 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
+	 * Once a page has finished rendering and the output buffer is processed, the page contents are loaded into
+	 * an HTML Tag Processor instance. It then iterates over each tag in the document, and at each open tag it will
+	 * invoke all registered tag visitors. A tag visitor is simply a callable (such as a regular function, closure,
+	 * or even a class with an `__invoke` method defined). The tag visitor callback is invoked by passing an instance
+	 * of the `OD_Tag_Visitor_Context` object which includes the following read-only properties:
+	 *
+	 * - `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current open tag.
+	 * - `$url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The URL Metrics which may include information about the current tag to inform what optimizations the callback performs.
+	 * - `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add preload links and preconnect links as needed.
+	 * - `$url_metrics_id` (`positive-int|null`): The post ID for the `od_url_metrics` post from which the URL Metrics were loaded (if any). For advanced usage.
+	 *
+	 * Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child elements)
+	 * since the tag processor's cursor will be reset to the tag after the callback finishes.
+	 *
+	 * When a tag visitor sees it is at a relevant open tag (e.g. by checking `$processor->get_tag()`), it can call the
+	 * `$context->track_tag()` method to indicate that the tag should be measured during detection. This will cause the
+	 * tag to be included among the `elements` in the stored URL Metrics. The element data includes properties such
+	 * as `intersectionRatio`, `intersectionRect`, and `boundingClientRect` (provided by an `IntersectionObserver`) as
+	 * well as whether the tag is the LCP element (`isLCP`) or LCP element candidate (`isLCPCandidate`). This method
+	 * should not be called if the current tag is not relevant for the tag visitor or if the tag visitor callback does
+	 * not need to query the provided `OD_URL_Metric_Group_Collection` instance to apply the desired optimizations. (In
+	 * addition to calling the `$context->track_tag()`, a callback may also return `true` to indicate the tag should be
+	 * tracked.)
+	 *
+	 * Here's an example tag visitor that depends on URL Metrics data:
+	 *
+	 *     $tag_visitor_registry->register(
+	 *         'lcp-img-fetchpriority-high',
+	 *         static function ( OD_Tag_Visitor_Context $context ): void {
+	 *             if ( $context->processor->get_tag() !== 'IMG' ) {
+	 *                 return; // Tag is not relevant for this tag visitor.
+	 *             }
+	 *
+	 *             // Mark the tag for measurement during detection so it is included among the elements stored in URL Metrics.
+	 *             $context->track_tag();
+	 *
+	 *             // Make sure fetchpriority=high is added to LCP IMG elements based on the captured URL Metrics.
+	 *             $common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
+	 *             if (
+	 *                 null !== $common_lcp_element
+	 *                 &&
+	 *                 $common_lcp_element->get_xpath() === $context->processor->get_xpath()
+	 *             ) {
+	 *                 $context->processor->set_attribute( 'fetchpriority', 'high' );
+	 *             }
+	 *         }
+	 *     );
+	 *
+	 * Please note this implementation of setting `fetchpriority=high` on the LCP `IMG` element is simplified. Please
+	 * see the Image Prioritizer extension for a more robust implementation.
+	 *
+	 * Here's an example tag visitor that does not depend on any URL Metrics data:
+	 *
+	 *     $tag_visitor_registry->register(
+	 *         'img-decoding-async',
+	 *         static function ( OD_Tag_Visitor_Context $context ): bool {
+	 *             if ( $context->processor->get_tag() !== 'IMG' ) {
+	 *                 return; // Tag is not relevant for this tag visitor.
+	 *             }
+	 *
+	 *             // Set the decoding attribute if it is absent.
+	 *             if ( null === $context->processor->get_attribute( 'decoding' ) ) {
+	 *                 $context->processor->set_attribute( 'decoding', 'async' );
+	 *             }
+	 *         }
+	 *     );
+	 *
+	 * Refer to [Image Prioritizer](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) and
+	 * [Embed Optimizer](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) for additional
+	 * examples of how tag visitors are used.
+	 *
 	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
@@ -267,7 +340,13 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	);
 	$link_collection      = new OD_Link_Collection();
 	$visited_tag_state    = new OD_Visited_Tag_State();
-	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection, $visited_tag_state );
+	$tag_visitor_context  = new OD_Tag_Visitor_Context(
+		$processor,
+		$group_collection,
+		$link_collection,
+		$visited_tag_state,
+		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 

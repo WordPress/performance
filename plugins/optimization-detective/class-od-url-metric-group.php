@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements IteratorAggregate<int, OD_URL_Metric>
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSerializable {
 
@@ -94,6 +93,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Constructor.
 	 *
 	 * This class should never be directly constructed. It should only be constructed by the {@see OD_URL_Metric_Group_Collection::create_groups()}.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @access private
 	 * @throws InvalidArgumentException If arguments are invalid.
@@ -206,6 +207,18 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 */
 	public function get_freshness_ttl(): int {
 		return $this->freshness_ttl;
+	}
+
+	/**
+	 * Gets the collection that this group is a part of.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @todo Eliminate in favor of readonly public property.
+	 * @return OD_URL_Metric_Group_Collection Collection.
+	 */
+	public function get_collection(): OD_URL_Metric_Group_Collection {
+		return $this->collection;
 	}
 
 	/**

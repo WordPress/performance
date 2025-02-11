@@ -37,12 +37,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.3.0
  * @since 0.4.0 Renamed from OD_Preload_Link_Collection.
- * @access private
  */
 final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Links grouped by rel type.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @var array<string, Link[]>
 	 */
@@ -50,6 +51,8 @@ final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Adds link.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *
@@ -111,6 +114,8 @@ final class OD_Link_Collection implements Countable {
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together. Also, add media attributes to the links.
 	 *
+	 * @since 0.4.0
+	 *
 	 * @return LinkAttributes[] Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
 	private function get_prepared_links(): array {
@@ -132,6 +137,8 @@ final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Merges consecutive links.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param Link[] $links Links.
 	 * @return LinkAttributes[] Merged consecutive links.
@@ -228,6 +235,8 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Gets the HTML for the link tags.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @return string Link tags HTML.
 	 */
 	public function get_html(): string {
@@ -248,6 +257,8 @@ final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Constructs the Link HTTP response header.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @return non-empty-string|null Link HTTP response header, or null if there are none.
 	 */
@@ -301,6 +312,8 @@ final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Counts the links.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return non-negative-int Link count.
 	 */

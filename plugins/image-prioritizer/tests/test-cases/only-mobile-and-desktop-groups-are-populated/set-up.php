@@ -10,13 +10,6 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$sample_size = od_get_url_metrics_breakpoint_sample_size();
 
-	$outside_viewport_rect = array_merge(
-		$test_case->get_sample_dom_rect(),
-		array(
-			'top' => 100000,
-		)
-	);
-
 	// Populate the mobile and desktop viewport groups only.
 	foreach ( array( 400, 800 ) as $viewport_width ) {
 		for ( $i = 0; $i < $sample_size; $i++ ) {
@@ -35,8 +28,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::MAIN]/*[4][self::DIV]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
-								'intersectionRect'   => $outside_viewport_rect,
-								'boundingClientRect' => $outside_viewport_rect,
+								'boundingClientRect' => array( 'top' => 100000 ),
 							),
 						),
 					)
