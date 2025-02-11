@@ -193,6 +193,39 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets the breakpoints in max widths.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return positive-int[] Breakpoints in max widths.
+	 */
+	public function get_breakpoints(): array {
+		return $this->breakpoints;
+	}
+
+	/**
+	 * Gets the sample size for URL Metrics for a given breakpoint.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int<1, max> Sample size for URL Metrics for a given breakpoint.
+	 */
+	public function get_sample_size(): int {
+		return $this->sample_size;
+	}
+
+	/**
+	 * Gets the freshness age (TTL) for a given URL Metric..
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int<0, max> Freshness age (TTL) for a given URL Metric.
+	 */
+	public function get_freshness_ttl(): int {
+		return $this->freshness_ttl;
+	}
+
+	/**
 	 * Gets the first URL Metric group.
 	 *
 	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0
