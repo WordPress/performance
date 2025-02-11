@@ -419,6 +419,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	/**
 	 * Test next_tag(), next_token(), get_xpath(), expects_closer().
 	 *
+	 * @covers ::__construct
 	 * @covers ::next_open_tag
 	 * @covers ::next_tag
 	 * @covers ::next_token

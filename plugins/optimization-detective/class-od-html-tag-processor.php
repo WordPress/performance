@@ -259,6 +259,27 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $cursor_at_bookmark = null;
 
 	/**
+	 * Whether current WP version has the no-op check in seek() for when the cursor is already at the provided bookmark.
+	 *
+	 * @since n.e.x.t
+	 * @see self::seek()
+	 * @var bool
+	 */
+	private $has_seek_noop;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $html HTML to process.
+	 */
+	public function __construct( string $html ) {
+		parent::__construct( $html );
+		$this->has_seek_noop = version_compare( (string) strtok( get_bloginfo( 'version' ), '-' ), '6.8', '>=' );
+	}
+
+	/**
 	 * Finds the next tag.
 	 *
 	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
@@ -527,7 +548,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function seek( $bookmark_name ): bool {
 		// This is only needed prior to WP 6.8 per <https://core.trac.wordpress.org/ticket/62085>.
-		if ( $bookmark_name === $this->cursor_at_bookmark ) {
+		if ( ! $this->has_seek_noop && $bookmark_name === $this->cursor_at_bookmark ) {
 			return true;
 		}
 
