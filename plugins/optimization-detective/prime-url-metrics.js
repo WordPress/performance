@@ -41,6 +41,18 @@
 		'span#od-prime-url-metrics-total-tasks-in-batch'
 	);
 
+	if (
+		! controlButton ||
+		! progressBar ||
+		! iframe ||
+		! iframeContainer ||
+		! currentBatchElement ||
+		! currentTaskElement ||
+		! totalTasksInBatchElement
+	) {
+		return;
+	}
+
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
@@ -50,6 +62,8 @@
 	let currentTasks = [];
 	let currentTaskIndex = 0;
 	let currentBatchNumber = 0;
+	let isTabHidden = false;
+	let abortController = null;
 
 	/**
 	 * Handles the prime URL metrics control button click.
@@ -62,9 +76,16 @@
 				'Resume',
 				'optimization-detective'
 			);
+			if ( abortController ) {
+				abortController.abort();
+				abortController = null;
+			}
 		} else {
 			// Start/resume processing
 			isProcessing = true;
+			if ( isTabHidden ) {
+				isTabHidden = false;
+			}
 			controlButton.textContent = __( 'Pause', 'optimization-detective' );
 
 			try {
@@ -96,7 +117,11 @@
 						isProcessing &&
 						currentTaskIndex < currentTasks.length
 					) {
-						await processTask( currentTasks[ currentTaskIndex ] );
+						abortController = new AbortController();
+						await processTask(
+							currentTasks[ currentTaskIndex ],
+							abortController.signal
+						);
 						currentTaskIndex++;
 						progressBar.value = currentTaskIndex;
 						currentTaskElement.textContent =
@@ -115,11 +140,13 @@
 				}
 			} catch ( error ) {
 				// TODO: Decide whether to skip the current task or stop processing.
-				isProcessing = false;
-				controlButton.textContent = __(
-					'Click to retry',
-					'optimization-detective'
-				);
+				if ( ! isTabHidden && 'Task Aborted' !== error.message ) {
+					isProcessing = false;
+					controlButton.textContent = __(
+						'Click to retry',
+						'optimization-detective'
+					);
+				}
 			} finally {
 				if ( ! isNextBatchAvailable ) {
 					isProcessing = false;
@@ -193,10 +220,11 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
-	 * @param {{url: string, width: number, height: number}} task - The breakpoint to set for the iframe.
+	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                                  signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	function processTask( task ) {
+	function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
@@ -205,10 +233,16 @@
 				}
 			};
 
+			const abortHandler = () => {
+				cleanup();
+				reject( new Error( 'Task Aborted' ) );
+			};
+
 			const cleanup = () => {
 				window.removeEventListener( 'message', handleMessage );
 				clearTimeout( timeoutId );
 				iframe.onerror = null;
+				iframe.src = 'about:blank';
 			};
 
 			const timeoutId = setTimeout( () => {
@@ -216,6 +250,12 @@
 				reject( new Error( 'Timeout waiting for message' ) );
 			}, 30000 ); // 30-second timeout
 
+			if ( signal.aborted ) {
+				abortHandler();
+				return;
+			}
+
+			signal.addEventListener( 'abort', abortHandler );
 			window.addEventListener( 'message', handleMessage );
 
 			iframe.onerror = () => {
@@ -253,6 +293,25 @@
 	}
 
 	controlButton.addEventListener( 'click', handleControlButtonClick );
+
+	/**
+	 * Pause processing when the tab/window becomes hidden.
+	 */
+	document.addEventListener( 'visibilitychange', () => {
+		if ( document.visibilityState === 'hidden' && isProcessing ) {
+			isProcessing = false;
+			isTabHidden = true;
+			if ( abortController ) {
+				abortController.abort();
+				abortController = null;
+			}
+
+			controlButton.textContent = __(
+				'Resume',
+				'optimization-detective'
+			);
+		}
+	} );
 
 	/**
 	 * Prevent the user from leaving the page while processing.
