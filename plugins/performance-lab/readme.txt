@@ -73,6 +73,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.9.0 =
 
+**Enhancements**
+
+* Remove experimental flags from Embed Optimizer and Image Prioritizer. ([1846](https://github.com/WordPress/performance/pull/1846))
+
 = 3.8.0 =
 
 **Enhancements**

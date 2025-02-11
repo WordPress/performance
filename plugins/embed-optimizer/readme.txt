@@ -69,6 +69,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta1 =
 
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+
 = 0.4.1 =
 
 **Bug Fixes**

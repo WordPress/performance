@@ -74,6 +74,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta1 =
 
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Compute responsive `sizes` attribute based on the `width` from the `boundingClientRect` in captured URL Metrics. ([1840](https://github.com/WordPress/performance/pull/1840))
+
 = 0.3.1 =
 
 **Bug Fixes**
