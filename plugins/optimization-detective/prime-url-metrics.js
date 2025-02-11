@@ -26,6 +26,21 @@
 		'div#od-prime-url-metrics-iframe-container'
 	);
 
+	/** @type {HTMLSpanElement} */
+	const currentBatchElement = document.querySelector(
+		'span#od-prime-url-metrics-current-batch'
+	);
+
+	/** @type {HTMLSpanElement} */
+	const currentTaskElement = document.querySelector(
+		'span#od-prime-url-metrics-current-task'
+	);
+
+	/** @type {HTMLSpanElement} */
+	const totalTasksInBatchElement = document.querySelector(
+		'span#od-prime-url-metrics-total-tasks-in-batch'
+	);
+
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
@@ -34,6 +49,7 @@
 	let currentBatch = null;
 	let currentTasks = [];
 	let currentTaskIndex = 0;
+	let currentBatchNumber = 0;
 
 	/**
 	 * Handles the prime URL metrics control button click.
@@ -60,6 +76,10 @@
 							break;
 						}
 
+						currentBatchNumber++;
+						currentBatchElement.textContent =
+							currentBatchNumber.toString();
+
 						// Initialize batch state
 						verificationToken = currentBatch.verificationToken;
 						isDebug = currentBatch.isDebug;
@@ -67,6 +87,9 @@
 						currentTaskIndex = 0;
 						progressBar.max = currentTasks.length;
 						progressBar.value = 0;
+						totalTasksInBatchElement.textContent =
+							currentTasks.length.toString();
+						currentTaskElement.textContent = '0';
 					}
 					// Process tasks in current batch
 					while (
@@ -76,6 +99,8 @@
 						await processTask( currentTasks[ currentTaskIndex ] );
 						currentTaskIndex++;
 						progressBar.value = currentTaskIndex;
+						currentTaskElement.textContent =
+							currentTaskIndex.toString();
 					}
 
 					if ( currentTaskIndex >= currentTasks.length ) {
@@ -84,6 +109,8 @@
 						currentBatch = null;
 						currentTasks = [];
 						currentTaskIndex = 0;
+						totalTasksInBatchElement.textContent = '0';
+						currentTaskElement.textContent = '0';
 					}
 				}
 			} catch ( error ) {
@@ -104,6 +131,7 @@
 					iframe.src = 'about:blank';
 					iframe.width = '0';
 					iframe.height = '0';
+					currentBatchElement.textContent = '0';
 				}
 			}
 		}

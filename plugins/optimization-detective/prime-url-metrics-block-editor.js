@@ -64,43 +64,50 @@
 	 */
 	async function processTasks() {
 		const task = currentTasks.shift();
-		await new Promise( ( resolve, reject ) => {
-			const handleMessage = ( event ) => {
-				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
+
+		try {
+			await new Promise( ( resolve, reject ) => {
+				const handleMessage = ( event ) => {
+					if (
+						event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS'
+					) {
+						cleanup();
+						resolve();
+					}
+				};
+
+				const cleanup = () => {
+					window.removeEventListener( 'message', handleMessage );
+					clearTimeout( timeoutId );
+					iframe.onerror = null;
+				};
+
+				const timeoutId = setTimeout( () => {
 					cleanup();
-					resolve();
-				}
-			};
+					reject( new Error( 'Timeout waiting for message' ) );
+				}, 30000 ); // 30-second timeout
 
-			const cleanup = () => {
-				window.removeEventListener( 'message', handleMessage );
-				clearTimeout( timeoutId );
-				iframe.onerror = null;
-			};
+				window.addEventListener( 'message', handleMessage );
 
-			const timeoutId = setTimeout( () => {
-				cleanup();
-				reject( new Error( 'Timeout waiting for message' ) );
-			}, 30000 ); // 30-second timeout
+				iframe.onerror = () => {
+					cleanup();
+					reject( new Error( 'Iframe failed to load' ) );
+				};
 
-			window.addEventListener( 'message', handleMessage );
+				// Load the iframe
+				iframe.src = task.url;
+				iframe.width = task.width.toString();
+				iframe.height = task.height.toString();
+				iframe.dataset.odPrimeUrlMetricsVerificationToken =
+					task.verificationToken;
+			} );
 
-			iframe.onerror = () => {
-				cleanup();
-				reject( new Error( 'Iframe failed to load' ) );
-			};
-
-			// Load the iframe
-			iframe.src = task.url;
-			iframe.width = task.width.toString();
-			iframe.height = task.height.toString();
-			iframe.dataset.odPrimeUrlMetricsVerificationToken =
-				task.verificationToken;
-		} );
-
-		if ( currentTasks.length > 0 ) {
-			processTasks();
-		} else {
+			if ( currentTasks.length > 0 ) {
+				processTasks();
+			} else {
+				isProcessing = false;
+			}
+		} catch ( error ) {
 			isProcessing = false;
 		}
 	}
