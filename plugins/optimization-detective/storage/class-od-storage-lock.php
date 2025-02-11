@@ -93,7 +93,6 @@ final class OD_Storage_Lock {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
 	 * @return non-empty-string Transient key.
 	 */
 	public static function get_transient_key(): string {
