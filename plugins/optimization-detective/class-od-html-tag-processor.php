@@ -234,6 +234,31 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $reached_end_of_document = false;
 
 	/**
+	 * Count for the number of times that the cursor was moved.
+	 *
+	 * The use of this has been replaced with {@see self::$cursor_at_bookmark}.
+	 *
+	 * @since 0.6.0
+	 * @var non-negative-int
+	 * @see self::next_token()
+	 */
+	private $cursor_move_count = 0;
+
+	/**
+	 * The bookmark that the cursor is currently known to be at.
+	 *
+	 * This is used as a backport for the WP 6.8 fix in {@link https://core.trac.wordpress.org/ticket/62085} which
+	 * no-ops seek() calls in which the cursor is already at the provided bookmark.
+	 *
+	 * @since n.e.x.t
+	 * @var string|null
+	 * @see self::next_token()
+	 * @see self::seek()
+	 * @see self::set_bookmark()
+	 */
+	private $cursor_at_bookmark = null;
+
+	/**
 	 * Finds the next tag.
 	 *
 	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
@@ -310,6 +335,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function next_token(): bool {
 		$this->current_stored_xpath = null; // Clear cache.
 		$this->current_xpath        = null; // Clear cache.
+		$this->cursor_at_bookmark   = null;
+		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags       = array();
 			$this->open_stack_attributes = array();
@@ -409,6 +436,20 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Gets the number of times the cursor has moved.
+	 *
+	 * @since 0.6.0
+	 * @deprecated n.e.x.t The use of this has been replaced with {@see self::$cursor_at_bookmark}.
+	 * @codeCoverageIgnore
+	 *
+	 * @return non-negative-int Count of times the cursor has moved.
+	 */
+	public function get_cursor_move_count(): int {
+		_deprecated_function( __METHOD__, 'optimization-detective n.e.x.t' );
+		return $this->cursor_move_count;
+	}
+
+	/**
 	 * Updates or creates a new attribute on the currently matched tag with the passed value.
 	 *
 	 * @inheritDoc
@@ -485,8 +526,14 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether the internal cursor was successfully moved to the bookmark's location.
 	 */
 	public function seek( $bookmark_name ): bool {
+		// This is only needed prior to WP 6.8 per <https://core.trac.wordpress.org/ticket/62085>.
+		if ( $bookmark_name === $this->cursor_at_bookmark ) {
+			return true;
+		}
+
 		$result = parent::seek( $bookmark_name );
 		if ( $result ) {
+			$this->cursor_at_bookmark    = $bookmark_name;
 			$this->open_stack_tags       = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
 			$this->open_stack_attributes = $this->bookmarked_open_stacks[ $bookmark_name ]['attributes'];
 			$this->open_stack_indices    = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
@@ -506,6 +553,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function set_bookmark( $name ): bool {
 		$result = parent::set_bookmark( $name );
 		if ( $result ) {
+			$this->cursor_at_bookmark = $name; // Only needed prior to WP 6.8 per <https://core.trac.wordpress.org/ticket/62085>.
+
 			$this->bookmarked_open_stacks[ $name ] = array(
 				'tags'       => $this->open_stack_tags,
 				'attributes' => $this->open_stack_attributes,
@@ -534,6 +583,10 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			return false;
 		}
 		unset( $this->bookmarked_open_stacks[ $name ] );
+		if ( $this->cursor_at_bookmark === $name ) {
+			// Only needed prior to WP 6.8 per <https://core.trac.wordpress.org/ticket/62085>.
+			$this->cursor_at_bookmark = null;
+		}
 		return parent::release_bookmark( $name );
 	}
 
