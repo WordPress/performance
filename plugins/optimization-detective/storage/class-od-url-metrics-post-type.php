@@ -23,6 +23,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Post type slug.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const SLUG = 'od_url_metrics';
@@ -30,6 +31,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Event name (hook) for garbage collection of stale URL Metrics posts.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const GC_CRON_EVENT_NAME = 'od_url_metrics_gc';
@@ -37,6 +39,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Recurrence for garbage collection of stale URL Metrics posts.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const GC_CRON_RECURRENCE = 'daily';

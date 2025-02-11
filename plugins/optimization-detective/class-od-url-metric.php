@@ -66,6 +66,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
+	 * @since 0.1.0
 	 * @var Data
 	 */
 	protected $data;
@@ -73,6 +74,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Elements.
 	 *
+	 * @since 0.7.0
 	 * @var OD_Element[]
 	 */
 	protected $elements;
@@ -87,6 +89,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
@@ -103,6 +107,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Prepares data with validation and sanitization.
+	 *
+	 * @since 0.6.0
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
@@ -349,7 +355,6 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
 	 * @param array<string, mixed> $additional_properties Additional properties.
 	 * @param string               $filter_name           Filter name used to extend.
-	 *
 	 * @return array<string, mixed> Extended schema.
 	 */
 	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {

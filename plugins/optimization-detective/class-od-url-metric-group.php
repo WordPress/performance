@@ -94,6 +94,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * This class should never be directly constructed. It should only be constructed by the {@see OD_URL_Metric_Group_Collection::create_groups()}.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @access private
 	 * @throws InvalidArgumentException If arguments are invalid.
 	 *

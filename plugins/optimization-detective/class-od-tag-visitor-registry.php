@@ -26,12 +26,16 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Visitors.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @var array<non-empty-string, TagVisitorCallback>
 	 */
 	private $visitors = array();
 
 	/**
 	 * Registers a tag visitor.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @phpstan-param TagVisitorCallback $tag_visitor_callback
 	 *
@@ -45,6 +49,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Determines if a visitor has been registered.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return bool Whether registered.
 	 */
@@ -54,6 +60,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 
 	/**
 	 * Gets a registered visitor.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return TagVisitorCallback|null Whether registered.
@@ -67,6 +75,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 
 	/**
 	 * Unregisters a tag visitor.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return bool Whether a tag visitor was unregistered.
@@ -82,6 +92,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	/**
 	 * Returns an iterator for the URL Metrics in the group.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @return ArrayIterator<string, TagVisitorCallback> ArrayIterator for tag visitors.
 	 */
 	public function getIterator(): ArrayIterator {
@@ -90,6 +102,8 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 
 	/**
 	 * Counts the URL Metrics in the group.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return int<0, max> URL Metric count.
 	 */

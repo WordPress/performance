@@ -24,7 +24,6 @@ final class OD_Storage_Lock {
 	 * Capability for being able to store a URL Metric now.
 	 *
 	 * @since n.e.x.t
-	 * @access private
 	 * @var string
 	 */
 	const STORE_URL_METRIC_NOW_CAPABILITY = 'od_store_url_metric_now';
@@ -33,7 +32,6 @@ final class OD_Storage_Lock {
 	 * Adds hooks.
 	 *
 	 * @since n.e.x.t
-	 * @access private
 	 */
 	public static function add_hooks(): void {
 		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap' ) );
@@ -43,7 +41,6 @@ final class OD_Storage_Lock {
 	 * Filters `user_has_cap` to grant the `od_store_url_metric_now` capability to users who can `manage_options` by default.
 	 *
 	 * @since n.e.x.t
-	 * @access private
 	 *
 	 * @param array<string, bool>|mixed $allcaps Capability names mapped to boolean values for whether the user has that capability.
 	 * @return array<string, bool> Capability names mapped to boolean values for whether the user has that capability.
@@ -93,6 +90,8 @@ final class OD_Storage_Lock {
 
 	/**
 	 * Gets transient key for locking URL Metric storage (for the current IP).
+	 *
+	 * @since 0.1.0
 	 *
 	 * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
 	 * @return non-empty-string Transient key.
