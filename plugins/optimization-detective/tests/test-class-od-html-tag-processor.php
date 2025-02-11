@@ -682,14 +682,9 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		);
 
 		$actual_figure_contents = array();
-		$last_cursor_move_count = $processor->get_cursor_move_count();
-		$this->assertSame( 0, $last_cursor_move_count );
 
 		$bookmarks = array();
 		while ( $processor->next_open_tag() ) {
-			$this_cursor_move_count = $processor->get_cursor_move_count();
-			$this->assertGreaterThan( $last_cursor_move_count, $this_cursor_move_count );
-			$last_cursor_move_count = $this_cursor_move_count;
 			if (
 				'FIGURE' === $processor->get_tag()
 				&&
@@ -771,56 +766,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertFalse( $processor->release_bookmark( 'optimization_detective_end_of_body' ) );
 
 		// TODO: Try adding too many bookmarks.
-	}
-
-	/**
-	 * Test get_cursor_move_count().
-	 *
-	 * @covers ::get_cursor_move_count
-	 */
-	public function test_get_cursor_move_count(): void {
-		$processor = new OD_HTML_Tag_Processor(
-			trim(
-				'
-				<html>
-					<head></head>
-					<body></body>
-				</html>
-				'
-			)
-		);
-		$this->assertSame( 0, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'HTML', $processor->get_tag() );
-		$this->assertTrue( $processor->set_bookmark( 'document_root' ) );
-		$this->assertSame( 1, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'HEAD', $processor->get_tag() );
-		$this->assertSame( 3, $processor->get_cursor_move_count() ); // Note that next_token() call #2 was for the whitespace between <html> and <head>.
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'HEAD', $processor->get_tag() );
-		$this->assertTrue( $processor->is_tag_closer() );
-		$this->assertSame( 4, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'BODY', $processor->get_tag() );
-		$this->assertSame( 6, $processor->get_cursor_move_count() ); // Note that next_token() call #5 was for the whitespace between </head> and <body>.
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'BODY', $processor->get_tag() );
-		$this->assertTrue( $processor->is_tag_closer() );
-		$this->assertSame( 7, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
-		$this->assertSame( 'HTML', $processor->get_tag() );
-		$this->assertTrue( $processor->is_tag_closer() );
-		$this->assertSame( 9, $processor->get_cursor_move_count() ); // Note that next_token() call #8 was for the whitespace between </body> and <html>.
-		$this->assertFalse( $processor->next_tag() );
-		$this->assertSame( 10, $processor->get_cursor_move_count() );
-		$this->assertFalse( $processor->next_tag() );
-		$this->assertSame( 11, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->seek( 'document_root' ) );
-		$this->assertSame( 12, $processor->get_cursor_move_count() );
-		$this->setExpectedIncorrectUsage( 'WP_HTML_Tag_Processor::seek' );
-		$this->assertFalse( $processor->seek( 'does_not_exist' ) );
-		$this->assertSame( 12, $processor->get_cursor_move_count() ); // The bookmark does not exist so no change.
 	}
 
 	/**

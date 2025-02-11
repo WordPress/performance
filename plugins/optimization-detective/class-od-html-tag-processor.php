@@ -234,16 +234,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $reached_end_of_document = false;
 
 	/**
-	 * Count for the number of times that the cursor was moved.
-	 *
-	 * @since 0.6.0
-	 * @var non-negative-int
-	 * @see self::next_token()
-	 * @see self::seek()
-	 */
-	private $cursor_move_count = 0;
-
-	/**
 	 * Finds the next tag.
 	 *
 	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
@@ -320,7 +310,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function next_token(): bool {
 		$this->current_stored_xpath = null; // Clear cache.
 		$this->current_xpath        = null; // Clear cache.
-		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags       = array();
 			$this->open_stack_attributes = array();
@@ -417,19 +406,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Gets the number of times the cursor has moved.
-	 *
-	 * @since 0.6.0
-	 * @see self::next_token()
-	 * @see self::seek()
-	 *
-	 * @return non-negative-int Count of times the cursor has moved.
-	 */
-	public function get_cursor_move_count(): int {
-		return $this->cursor_move_count;
 	}
 
 	/**
