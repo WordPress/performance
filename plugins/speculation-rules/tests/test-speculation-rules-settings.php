@@ -248,7 +248,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * @param string       $value_check HTML value attribute check.
 	 * @param string       $description_check Description check.
 	 */
-	public function test_render_settings_field( array $args, array $stored_settings, string $name_check, string $value_check, string $description_check ): void {
+	public function test_plsr_render_settings_field( array $args, array $stored_settings, string $name_check, string $value_check, string $description_check ): void {
 		// Simulate getting stored settings.
 		update_option( 'plsr_speculation_rules', $stored_settings );
 
