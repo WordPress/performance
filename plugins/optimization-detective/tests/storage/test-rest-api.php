@@ -635,7 +635,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$request = $this->create_request( $this->get_valid_params() );
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 423, $response->get_status() );
 		$this->assertSame( 'url_metric_storage_locked', $response->get_data()['code'] );
 	}
 

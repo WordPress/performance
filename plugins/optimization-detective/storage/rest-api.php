@@ -102,7 +102,7 @@ function od_register_endpoint(): void {
 					return new WP_Error(
 						'url_metric_storage_locked',
 						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-						array( 'status' => 403 ) // TODO: Consider 423 Locked status code.
+						array( 'status' => 423 )
 					);
 				}
 				return true;
