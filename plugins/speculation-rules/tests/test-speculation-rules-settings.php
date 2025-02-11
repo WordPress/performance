@@ -9,6 +9,9 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::plsr_register_setting
+	 * @covers ::plsr_get_mode_labels
+	 * @covers ::plsr_get_eagerness_labels
+	 * @covers ::plsr_get_setting_default
 	 */
 	public function test_plsr_register_setting(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
@@ -18,6 +21,14 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		plsr_register_setting();
 		$settings = get_registered_settings();
 		$this->assertArrayHasKey( 'plsr_speculation_rules', $settings );
+
+		$settings = plsr_get_setting_default();
+		$this->assertArrayHasKey( 'mode', $settings );
+		$this->assertArrayHasKey( 'eagerness', $settings );
+
+		// Test default settings applied correctly.
+		$default_settings = plsr_get_setting_default();
+		$this->assertEquals( $default_settings, get_option( 'plsr_speculation_rules' ) );
 	}
 
 	/**
@@ -124,21 +135,6 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::plsr_get_mode_labels
-	 * @covers ::plsr_get_eagerness_labels
-	 * @covers ::plsr_get_setting_default
-	 * @covers ::plsr_register_setting
-	 */
-	public function test_register_settings(): void {
-		plsr_register_setting();
-		$settings = plsr_get_setting_default();
-		$this->assertArrayHasKey( 'mode', $settings );
-		// Test default settings applied correctly.
-		$default_settings = plsr_get_setting_default();
-		$this->assertEquals( $default_settings, get_option( 'plsr_speculation_rules' ) );
-	}
-
-	/**
 	 * @covers ::plsr_get_stored_setting_value
 	 */
 	public function test_get_stored_setting_value(): void {
@@ -167,13 +163,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	/**
 	 * Function to test sanitize_setting() with various inputs.
 	 */
-	public function test_sanitize_setting(): void {
-		$input     = array(
-			'mode'      => 'prerender',
-			'eagerness' => 'eager',
-		);
-		$sanitized = plsr_sanitize_setting( $input );
-		$this->assertEquals( $input, $sanitized );
+	public function test_plsr_sanitize_setting_with_invalid_inputs(): void {
 
 		$input     = array(
 			'mode'      => 'invalid_mode',
@@ -197,7 +187,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_add_setting_ui
 	 */
-	public function test_add_setting_ui(): void {
+	public function test_plsr_add_setting_ui(): void {
 		do_action( 'load-options-reading.php' );// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		// Check if the settings section has been added.
