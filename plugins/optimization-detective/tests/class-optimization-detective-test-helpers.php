@@ -166,7 +166,6 @@ trait Optimization_Detective_Test_Helpers {
 		return new OD_URL_Metric( $data );
 	}
 
-
 	/**
 	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
 	 *
