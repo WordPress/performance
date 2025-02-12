@@ -239,10 +239,20 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
-	$result = OD_URL_Metrics_Post_Type::store_url_metric(
+	try {
+		$url_metric_group->add_url_metric( $url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+	}
+
+	$result = OD_URL_Metrics_Post_Type::update_post(
 		$request->get_param( 'slug' ),
-		$url_metric
+		// The URL is supplied as the post title in order to aid with debugging. Note that an od-url-metrics post stores
+		// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
+		// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
+		// normalized query vars among them.
+		$url_metric->get_url(),
+		$url_metric_group_collection
 	);
 	if ( $result instanceof WP_Error ) {
 		$error_data = array(
