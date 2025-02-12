@@ -35,7 +35,7 @@ trait Optimization_Detective_Test_Helpers {
 		$last_result = null;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$result = OD_URL_Metrics_Post_Type::store_url_metric(
+				$result = $this->store_url_metric(
 					$slug,
 					$this->get_sample_url_metric(
 						array(
@@ -164,6 +164,76 @@ trait Optimization_Detective_Test_Helpers {
 			$params['extended_root']
 		);
 		return new OD_URL_Metric( $data );
+	}
+
+
+	/**
+	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
+	 *
+	 * @param non-empty-string $slug Slug (hash of normalized query vars).
+	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
+	 * @return positive-int|WP_Error Post ID or WP_Error otherwise.
+	 */
+	public function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
+		$post_data = array(
+			'post_title' => $new_url_metric->get_url(),
+		);
+
+		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
+		if ( $post instanceof WP_Post ) {
+			$post_data['ID']        = $post->ID;
+			$post_data['post_name'] = $post->post_name;
+			$url_metrics            = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
+		} else {
+			$post_data['post_name'] = $slug;
+			$url_metrics            = array();
+		}
+
+		$etag = $new_url_metric->get_etag();
+
+		$group_collection = new OD_URL_Metric_Group_Collection(
+			$url_metrics,
+			$etag,
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
+
+		try {
+			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
+			$group->add_url_metric( $new_url_metric );
+		} catch ( InvalidArgumentException $e ) {
+			return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+		}
+
+		$post_data['post_content'] = wp_json_encode(
+			$group_collection->get_flattened_url_metrics(),
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
+		);
+		if ( ! is_string( $post_data['post_content'] ) ) {
+			return new WP_Error( 'json_encode_error', json_last_error_msg() );
+		}
+
+		$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
+		if ( $has_kses ) {
+			// Prevent KSES from corrupting JSON in post_content.
+			kses_remove_filters();
+		}
+
+		$post_data['post_type']   = OD_URL_Metrics_Post_Type::SLUG;
+		$post_data['post_status'] = 'publish';
+		$slashed_post_data        = wp_slash( $post_data );
+		if ( isset( $post_data['ID'] ) ) {
+			$result = wp_update_post( $slashed_post_data, true );
+		} else {
+			$result = wp_insert_post( $slashed_post_data, true );
+		}
+
+		if ( $has_kses ) {
+			kses_init_filters();
+		}
+
+		return $result;
 	}
 
 	/**
