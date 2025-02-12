@@ -33,6 +33,32 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_namespace().
+	 *
+	 * @covers OD_Rest_API::get_namespace
+	 */
+	public function test_get_namespace(): void {
+
+		$expected = 'optimization-detective/v1';
+		$actual   = OD_Rest_API::get_namespace();
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
+	 * Test get_route().
+	 *
+	 * @covers OD_Rest_API::get_route
+	 */
+	public function test_get_route(): void {
+
+		$expected = '/url-metrics:store';
+		$actual   = OD_Rest_API::get_route();
+
+		$this->assertSame( $expected, $actual );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array<string, mixed>

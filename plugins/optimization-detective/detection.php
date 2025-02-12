@@ -121,7 +121,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                => WP_DEBUG,
 		'extensionModuleUrls'    => $extension_module_urls,
-		'restApiEndpoint'        => rest_url( OD_Rest_API::OD_REST_API_NAMESPACE . OD_Rest_API::OD_URL_METRICS_ROUTE ),
+		'restApiEndpoint'        => rest_url( OD_Rest_API::get_namespace() . OD_Rest_API::get_route() ),
 		'currentETag'            => $current_etag,
 		'currentUrl'             => $current_url,
 		'urlMetricSlug'          => $slug,

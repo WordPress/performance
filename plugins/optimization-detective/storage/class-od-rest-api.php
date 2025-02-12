@@ -53,6 +53,28 @@ class OD_Rest_API {
 	}
 
 	/**
+	 * Get the namespace for optimization-detective
+	 *
+	 * @since n.e.x.t
+	 * @access private
+	 * @return string
+	 */
+	public static function get_namespace(): string {
+		return self::OD_REST_API_NAMESPACE;
+	}
+
+	/**
+	 * Get the route for storing URL metric.
+	 *
+	 * @since n.e.x.t
+	 * @access private
+	 * @return string
+	 */
+	public static function get_route(): string {
+		return self::OD_URL_METRICS_ROUTE;
+	}
+
+	/**
 	 * Registers endpoint for storage of URL Metric.
 	 *
 	 * @since 0.1.0
@@ -102,8 +124,8 @@ class OD_Rest_API {
 		);
 
 		register_rest_route(
-			self::OD_REST_API_NAMESPACE,
-			self::OD_URL_METRICS_ROUTE,
+			self::get_namespace(),
+			self::get_route(),
 			array(
 				'methods'             => 'POST',
 				'args'                => array_merge(
