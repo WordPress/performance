@@ -21,29 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class OD_Rest_API {
 
 	/**
-	 * Namespace for optimization-detective.
-	 *
-	 * @since 0.1.0
-	 * @access private
-	 * @var string
-	 */
-	const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
-
-	/**
-	 * Route for storing a URL Metric.
-	 *
-	 * Note the `:store` art of the endpoint follows Google's guidance in AIP-136 for the use of the POST method in a way
-	 * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
-	 * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
-	 *
-	 * @since 0.1.0
-	 * @access private
-	 * @link https://google.aip.dev/136
-	 * @var string
-	 */
-	const OD_URL_METRICS_ROUTE = '/url-metrics:store';
-
-	/**
 	 * Adds hooks.
 	 *
 	 * @since n.e.x.t
@@ -56,20 +33,25 @@ class OD_Rest_API {
 	 * Get the namespace for optimization-detective
 	 *
 	 * @since n.e.x.t
-	 * @access private
+	 * @return non-empty-string Namespace.
 	 */
 	public static function get_namespace(): string {
-		return self::OD_REST_API_NAMESPACE;
+		return OD_REST_API_NAMESPACE; // @phpstan-ignore constant.deprecated (To be replaced with string literal when constant is removed.)
 	}
 
 	/**
-	 * Get the route for storing URL metric.
+	 * Gets the route for storing a URL Metric.
+	 *
+	 * Note the `:store` art of the endpoint follows Google's guidance in AIP-136 for the use of the POST method in a way
+	 * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
+	 * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
 	 *
 	 * @since n.e.x.t
-	 * @access private
+	 * @link https://google.aip.dev/136
+	 * @return non-empty-string Route.
 	 */
 	public static function get_route(): string {
-		return self::OD_URL_METRICS_ROUTE;
+		return OD_URL_METRICS_ROUTE; // @phpstan-ignore constant.deprecated (To be replaced with string literal when constant is removed.)
 	}
 
 	/**

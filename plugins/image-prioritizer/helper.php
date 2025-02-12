@@ -298,7 +298,11 @@ function image_prioritizer_filter_rest_request_before_callbacks( $response, arra
 		$request->get_method() !== 'POST'
 		||
 		// The strtolower() and outer trim are due to \WP_REST_Server::match_request_to_handler() using case-insensitive pattern match and using '$' instead of '\z'.
-		OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE !== rtrim( strtolower( ltrim( $request->get_route(), '/' ) ) )
+		(
+			OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE // @phpstan-ignore constant.deprecated, constant.deprecated (To be replaced with class method calls in subsequent release.)
+			!==
+			rtrim( strtolower( ltrim( $request->get_route(), '/' ) ) )
+		)
 	) {
 		return $response;
 	}

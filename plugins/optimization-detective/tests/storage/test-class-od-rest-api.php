@@ -12,9 +12,13 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
 	/**
-	 * @var string
+	 * Gets the route.
+	 *
+	 * @return string Route.
 	 */
-	const ROUTE = '/' . OD_Rest_API::OD_REST_API_NAMESPACE . OD_Rest_API::OD_URL_METRICS_ROUTE;
+	private function get_route(): string {
+		return '/' . OD_Rest_API::get_namespace() . OD_Rest_API::get_route();
+	}
 
 	/**
 	 * Test add_hooks().
@@ -518,7 +522,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_is_allowed_http_origin
 	 */
 	public function test_rest_request_without_origin(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -534,7 +538,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_is_allowed_http_origin
 	 */
 	public function test_rest_request_cross_origin(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Origin', 'https://cross-origin.example.com' );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
@@ -569,7 +573,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_handle_rest_request
 	 */
 	public function test_rest_request_not_json_data(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Origin', home_url() );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
@@ -585,7 +589,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_handle_rest_request
 	 */
 	public function test_rest_request_not_json_content_type(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( wp_json_encode( $this->get_valid_params() ) );
 		$request->set_header( 'Content-Type', 'text/plain' );
 		$response = rest_get_server()->dispatch( $request );
@@ -601,7 +605,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_handle_rest_request
 	 */
 	public function test_rest_request_empty_array_json_body(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( '[]' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$response = rest_get_server()->dispatch( $request );
@@ -617,7 +621,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @covers OD_Rest_API::od_handle_rest_request
 	 */
 	public function test_rest_request_non_array_json_body(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( '"Hello World!"' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$response = rest_get_server()->dispatch( $request );
@@ -973,7 +977,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 		 *
 		 * @var WP_REST_Request<array<string, mixed>> $request
 		 */
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
