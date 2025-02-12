@@ -207,13 +207,25 @@ class OD_URL_Metrics_Post_Type {
 	 * @since n.e.x.t
 	 *
 	 * @param non-empty-string               $slug Slug (hash of normalized query vars).
-	 * @param non-empty-string               $post_title The new Post Title.
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection containing the metrics to be stored.
 	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
 	 */
-	public static function update_post( string $slug, string $post_title, OD_URL_Metric_Group_Collection $url_metric_group_collection ) {
-		$post_data = array(
-			'post_title' => $post_title,
+	public static function update_post( string $slug, OD_URL_Metric_Group_Collection $url_metric_group_collection ) {
+		$url_metrics = $url_metric_group_collection->get_flattened_url_metrics();
+		// Sort URL Metrics in descending order by timestamp.
+		usort(
+			$url_metrics,
+			static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
+				return $b->get_timestamp() <=> $a->get_timestamp();
+			}
+		);
+		$latest_url_metric = $url_metrics[0];
+		$post_data         = array(
+			// The URL is supplied as the post title in order to aid with debugging. Note that an od-url-metrics post stores
+			// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
+			// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
+			// normalized query vars among them.
+			'post_title' => $latest_url_metric->get_url(),
 		);
 
 		$post = self::get_post( $slug );

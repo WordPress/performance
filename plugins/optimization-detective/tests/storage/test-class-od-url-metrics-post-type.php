@@ -214,7 +214,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 
 		$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width( $validated_url_metric->get_viewport_width() );
 		$url_metric_group->add_url_metric( $validated_url_metric );
-		$post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $validated_url_metric->get_url(), $url_metric_group_collection );
+		$post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
 		$this->assertIsInt( $post_id );
 
 		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
@@ -229,7 +229,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 
 		$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width( $another_validated_url_metric->get_viewport_width() );
 		$url_metric_group->add_url_metric( $another_validated_url_metric );
-		$again_post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $another_validated_url_metric->get_url(), $url_metric_group_collection );
+		$again_post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
 		$again_post    = get_post( $again_post_id );
 		$this->assertInstanceOf( WP_Post::class, $again_post );
 		$this->assertSame( $post_id, $again_post_id );
