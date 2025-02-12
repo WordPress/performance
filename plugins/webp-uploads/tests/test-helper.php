@@ -364,17 +364,19 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->set_image_output_type( 'avif' );
 			$default_transforms = array(
-				'image/jpeg' => array( 'image/avif' ),
-				'image/webp' => array( 'image/avif' ),
-				'image/avif' => array( 'image/avif' ),
-				'image/png'  => array( 'image/avif' ),
+				'image/jpeg'      => array( 'image/avif' ),
+				'image/webp'      => array( 'image/avif' ),
+				'image/avif'      => array( 'image/avif' ),
+				'image/png'       => array( 'image/avif' ),
+				'application/pdf' => array( 'image/avif' ),
 			);
 		} else {
 			$default_transforms = array(
-				'image/jpeg' => array( 'image/webp' ),
-				'image/webp' => array( 'image/webp' ),
-				'image/avif' => array( 'image/avif' ),
-				'image/png'  => array( 'image/webp' ),
+				'image/jpeg'      => array( 'image/webp' ),
+				'image/webp'      => array( 'image/webp' ),
+				'image/avif'      => array( 'image/avif' ),
+				'image/png'       => array( 'image/webp' ),
+				'application/pdf' => array( 'image/webp' ),
 			);
 		}
 
@@ -448,6 +450,16 @@ class Test_WebP_Uploads_Helper extends TestCase {
 				$transforms
 			);
 		}
+	}
+
+	/**
+	 * Returns true if 'application/pdf' is included in the MIME transforms array.
+	 */
+	public function test_it_should_include_pdf_in_mime_transforms(): void {
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertArrayHasKey( 'application/pdf', $transforms );
+		$this->assertContains( 'image/webp', $transforms['application/pdf'] );
 	}
 
 	/**

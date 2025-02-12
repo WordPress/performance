@@ -29,10 +29,11 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
 
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/' . $output_format ),
-		'image/webp' => array( 'image/' . $output_format ),
-		'image/avif' => array( 'image/avif' ),
-		'image/png'  => array( 'image/' . $output_format ),
+		'image/jpeg'      => array( 'image/' . $output_format ),
+		'image/webp'      => array( 'image/' . $output_format ),
+		'image/avif'      => array( 'image/avif' ),
+		'image/png'       => array( 'image/' . $output_format ),
+		'application/pdf' => array( 'image/' . $output_format ),
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
@@ -144,7 +145,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'webp-uploads' ) );
 	}
 
-	$image_path = wp_get_original_image_path( $attachment_id );
+	$image_path = 'application/pdf' !== get_post_mime_type( $attachment_id ) ? wp_get_original_image_path( $attachment_id ) : get_attached_file( $attachment_id );
 	if ( false === $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
