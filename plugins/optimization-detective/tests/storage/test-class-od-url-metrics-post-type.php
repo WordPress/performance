@@ -183,17 +183,38 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test store_url_metric().
+	 * Test update_post().
 	 *
-	 * @covers ::store_url_metric
+	 * @covers ::update_post
 	 */
-	public function test_store_url_metric(): void {
-		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
+	public function test_update_post(): void {
+		$slug         = od_get_url_metrics_slug( array( 'p' => 1 ) );
+		$current_etag = md5( '' );
 
-		$validated_url_metric         = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
-		$another_validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/sample-page/' ) ) );
+		$url_metric_group_collection = new OD_URL_Metric_Group_Collection(
+			array(),
+			$current_etag,
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
 
-		$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
+		$validated_url_metric         = $this->get_sample_url_metric(
+			array(
+				'url'  => home_url( '/' ),
+				'etag' => $current_etag,
+			)
+		);
+		$another_validated_url_metric = $this->get_sample_url_metric(
+			array(
+				'url'  => home_url( '/sample-page/' ),
+				'etag' => $current_etag,
+			)
+		);
+
+		$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width( $validated_url_metric->get_viewport_width() );
+		$url_metric_group->add_url_metric( $validated_url_metric );
+		$post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $validated_url_metric->get_url(), $url_metric_group_collection );
 		$this->assertIsInt( $post_id );
 
 		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
@@ -206,7 +227,9 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 
-		$again_post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $another_validated_url_metric );
+		$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width( $another_validated_url_metric->get_viewport_width() );
+		$url_metric_group->add_url_metric( $another_validated_url_metric );
+		$again_post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $another_validated_url_metric->get_url(), $url_metric_group_collection );
 		$again_post    = get_post( $again_post_id );
 		$this->assertInstanceOf( WP_Post::class, $again_post );
 		$this->assertSame( $post_id, $again_post_id );
