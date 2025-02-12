@@ -15,7 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * OD_Rest_API class
  *
- * @since 0.1.0
+ * @since n.e.x.t
+ *
  * @access private
  */
 class OD_Rest_API {
@@ -26,7 +27,7 @@ class OD_Rest_API {
 	 * @since n.e.x.t
 	 */
 	public static function add_hooks(): void {
-		add_action( 'rest_api_init', array( __CLASS__, 'od_register_endpoint' ) );
+		add_action( 'rest_api_init', array( __CLASS__, 'register_endpoint' ) );
 	}
 
 	/**
@@ -47,7 +48,9 @@ class OD_Rest_API {
 	 * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
 	 *
 	 * @since n.e.x.t
+	 *
 	 * @link https://google.aip.dev/136
+	 *
 	 * @return non-empty-string Route.
 	 */
 	public static function get_route(): string {
@@ -57,12 +60,11 @@ class OD_Rest_API {
 	/**
 	 * Registers endpoint for storage of URL Metric.
 	 *
-	 * @since 0.1.0
-	 * @access private
+	 * @since n.e.x.t
 	 *
 	 * @see od_compose_site_health_result()
 	 */
-	public static function od_register_endpoint(): void {
+	public static function register_endpoint(): void {
 
 		// The slug and cache_purge_post_id args are further validated via the validate_callback for the 'hmac' parameter,
 		// they are provided as input with the 'url' argument to create the HMAC by the server.
@@ -113,7 +115,7 @@ class OD_Rest_API {
 					rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
 				),
 				'callback'            => static function ( WP_REST_Request $request ) {
-					return self::od_handle_rest_request( $request );
+					return self::handle_rest_request( $request );
 				},
 				'permission_callback' => static function () {
 					// Needs to be available to unauthenticated visitors.
@@ -137,15 +139,15 @@ class OD_Rest_API {
 	 * not account for the URL port (although there is a to-do comment committed in core to address this). Additionally,
 	 * the `is_allowed_http_origin()` function in core for some reason returns a string rather than a boolean.
 	 *
-	 * @since 0.8.0
-	 * @access private
+	 * @since n.e.x.t
 	 *
 	 * @see is_allowed_http_origin()
 	 *
 	 * @param string $origin Origin to check.
+	 *
 	 * @return bool Whether the origin is allowed.
 	 */
-	private static function od_is_allowed_http_origin( string $origin ): bool {
+	private static function is_allowed_http_origin( string $origin ): bool {
 		// Strip out the port number since core does not account for it yet as noted in get_allowed_http_origins().
 		$origin = preg_replace( '/:\d+$/', '', $origin );
 		return '' !== is_allowed_http_origin( $origin );
@@ -154,18 +156,18 @@ class OD_Rest_API {
 	/**
 	 * Handles REST API request to store metrics.
 	 *
-	 * @since 0.1.0
-	 * @access private
+	 * @since n.e.x.t
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @param WP_REST_Request $request Request.
+	 *
 	 * @return WP_REST_Response|WP_Error Response.
 	 */
-	private static function od_handle_rest_request( WP_REST_Request $request ) {
+	private static function handle_rest_request( WP_REST_Request $request ) {
 		// Block cross-origin storage requests since by definition URL Metrics data can only be sourced from the frontend of the site.
 		$origin = $request->get_header( 'origin' );
-		if ( null === $origin || ! self::od_is_allowed_http_origin( $origin ) ) {
+		if ( null === $origin || ! self::is_allowed_http_origin( $origin ) ) {
 			return new WP_Error(
 				'rest_cross_origin_forbidden',
 				__( 'Cross-origin requests are not allowed for this endpoint.', 'optimization-detective' ),
@@ -319,11 +321,11 @@ class OD_Rest_API {
 	 * This is intended to flush any page cache for the URL after the new URL Metric was submitted so that the optimizations
 	 * which depend on that URL Metric can start to take effect.
 	 *
-	 * @since 0.8.0
+	 * @since n.e.x.t
 	 *
 	 * @param positive-int $cache_purge_post_id Cache purge post ID.
 	 */
-	public static function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
+	public static function trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 		$post = get_post( $cache_purge_post_id );
 		if ( ! ( $post instanceof WP_Post ) ) {
 			return;
