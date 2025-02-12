@@ -57,7 +57,6 @@ class OD_Rest_API {
 	 *
 	 * @since n.e.x.t
 	 * @access private
-	 * @return string
 	 */
 	public static function get_namespace(): string {
 		return self::OD_REST_API_NAMESPACE;
@@ -68,7 +67,6 @@ class OD_Rest_API {
 	 *
 	 * @since n.e.x.t
 	 * @access private
-	 * @return string
 	 */
 	public static function get_route(): string {
 		return self::OD_URL_METRICS_ROUTE;
