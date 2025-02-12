@@ -8,8 +8,12 @@
 	const { apiFetch } = wp;
 
 	let isProcessing = false;
+	let verificationToken = '';
 	let breakpoints = [];
 	let currentTasks = [];
+	let currentTaskIndex = 0;
+	let isTabHidden = false;
+	let abortController = null;
 
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
@@ -27,8 +31,9 @@
 	 * Primes the URL metrics for all breakpoints.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	async function primeURL() {
+	async function processTasks() {
 		try {
+			isProcessing = true;
 			if ( 0 === breakpoints.length ) {
 				breakpoints = await apiFetch( {
 					path: '/optimization-detective/v1/prime-urls-breakpoints',
@@ -36,23 +41,27 @@
 				} );
 			}
 
-			const postURL = select( 'core/editor' ).getPermalink();
-			const verificationToken = await apiFetch( {
+			const permalink = select( 'core/editor' ).getPermalink();
+			verificationToken = await apiFetch( {
 				path: '/optimization-detective/v1/prime-urls-verification-token',
 				method: 'GET',
 			} );
 
 			currentTasks = breakpoints.map( ( breakpoint ) => ( {
-				url: postURL,
+				url: permalink,
 				width: breakpoint.width,
 				height: breakpoint.height,
-				verificationToken,
 			} ) );
 
-			if ( ! isProcessing && currentTasks.length > 0 ) {
-				isProcessing = true;
-				processTasks();
+			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
+				abortController = new AbortController();
+				await processTask(
+					currentTasks[ currentTaskIndex ],
+					abortController.signal
+				);
+				currentTaskIndex++;
 			}
+			isProcessing = false;
 		} catch ( error ) {
 			isProcessing = false;
 		}
@@ -60,56 +69,56 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
+	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                                  signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	async function processTasks() {
-		const task = currentTasks.shift();
-
-		try {
-			await new Promise( ( resolve, reject ) => {
-				const handleMessage = ( event ) => {
-					if (
-						event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS'
-					) {
-						cleanup();
-						resolve();
-					}
-				};
-
-				const cleanup = () => {
-					window.removeEventListener( 'message', handleMessage );
-					clearTimeout( timeoutId );
-					iframe.onerror = null;
-				};
-
-				const timeoutId = setTimeout( () => {
+	async function processTask( task, signal ) {
+		return new Promise( ( resolve, reject ) => {
+			const handleMessage = ( event ) => {
+				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
 					cleanup();
-					reject( new Error( 'Timeout waiting for message' ) );
-				}, 30000 ); // 30-second timeout
+					resolve();
+				}
+			};
 
-				window.addEventListener( 'message', handleMessage );
+			const abortHandler = () => {
+				cleanup();
+				reject( new Error( 'Task Aborted' ) );
+			};
 
-				iframe.onerror = () => {
-					cleanup();
-					reject( new Error( 'Iframe failed to load' ) );
-				};
+			const cleanup = () => {
+				window.removeEventListener( 'message', handleMessage );
+				clearTimeout( timeoutId );
+				iframe.onerror = null;
+				iframe.src = 'about:blank';
+			};
 
-				// Load the iframe
-				iframe.src = task.url;
-				iframe.width = task.width.toString();
-				iframe.height = task.height.toString();
-				iframe.dataset.odPrimeUrlMetricsVerificationToken =
-					task.verificationToken;
-			} );
+			const timeoutId = setTimeout( () => {
+				cleanup();
+				reject( new Error( 'Timeout waiting for message' ) );
+			}, 30000 ); // 30-second timeout
 
-			if ( currentTasks.length > 0 ) {
-				processTasks();
-			} else {
-				isProcessing = false;
+			if ( signal.aborted ) {
+				abortHandler();
+				return;
 			}
-		} catch ( error ) {
-			isProcessing = false;
-		}
+
+			signal.addEventListener( 'abort', abortHandler );
+			window.addEventListener( 'message', handleMessage );
+
+			iframe.onerror = () => {
+				cleanup();
+				reject( new Error( 'Iframe failed to load' ) );
+			};
+
+			// Load the iframe
+			iframe.src = task.url;
+			iframe.width = task.width.toString();
+			iframe.height = task.height.toString();
+			iframe.dataset.odPrimeUrlMetricsVerificationToken =
+				verificationToken;
+		} );
 	}
 
 	// Listen for post save/publish events.
@@ -120,10 +129,31 @@
 
 		// Trigger when saving transitions from true to false (save completed).
 		if ( wasSaving && ! isSaving && ! isAutosaving ) {
-			primeURL();
+			currentTaskIndex = 0;
+			processTasks();
 		}
 
 		wasSaving = isSaving;
+	} );
+
+	/**
+	 * Pause processing when the tab/window becomes hidden.
+	 */
+	document.addEventListener( 'visibilitychange', () => {
+		if ( 'hidden' === document.visibilityState && isProcessing ) {
+			isProcessing = false;
+			isTabHidden = true;
+			if ( abortController ) {
+				abortController.abort();
+				abortController = null;
+			}
+		} else if ( 'visible' === document.visibilityState && isTabHidden ) {
+			isTabHidden = false;
+			if ( ! isProcessing ) {
+				isProcessing = true;
+				processTasks();
+			}
+		}
 	} );
 
 	/**

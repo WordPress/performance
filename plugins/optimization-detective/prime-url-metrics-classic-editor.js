@@ -13,7 +13,13 @@
 	const { apiFetch } = wp;
 
 	let isProcessing = false;
+	let verificationToken = '';
 	let breakpoints = [];
+	let currentTasks = [];
+	let currentTaskIndex = 0;
+	let isTabHidden = false;
+	let abortController = null;
+
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
 	iframe.style.position = 'fixed';
@@ -30,9 +36,9 @@
 	 * Primes the URL metrics for all breakpoints.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	async function primeURL() {
-		isProcessing = true;
+	async function processTasks() {
 		try {
+			isProcessing = true;
 			if ( 0 === breakpoints.length ) {
 				breakpoints = await apiFetch( {
 					path: '/optimization-detective/v1/prime-urls-breakpoints',
@@ -40,18 +46,24 @@
 				} );
 			}
 
-			const verificationToken = await apiFetch( {
+			verificationToken = await apiFetch( {
 				path: '/optimization-detective/v1/prime-urls-verification-token',
 				method: 'GET',
 			} );
 
-			for ( const breakpoint of breakpoints ) {
-				await processTask( {
-					url: permalink,
-					width: breakpoint.width,
-					height: breakpoint.height,
-					verificationToken,
-				} );
+			currentTasks = breakpoints.map( ( breakpoint ) => ( {
+				url: permalink,
+				width: breakpoint.width,
+				height: breakpoint.height,
+			} ) );
+
+			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
+				abortController = new AbortController();
+				await processTask(
+					currentTasks[ currentTaskIndex ],
+					abortController.signal
+				);
+				currentTaskIndex++;
 			}
 			isProcessing = false;
 		} catch ( error ) {
@@ -61,10 +73,11 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
-	 * @param {{url: string, width: number, height: number, verificationToken: string}} task - The breakpoint to set for the iframe.
+	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                                  signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	function processTask( task ) {
+	function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
@@ -73,10 +86,16 @@
 				}
 			};
 
+			const abortHandler = () => {
+				cleanup();
+				reject( new Error( 'Task Aborted' ) );
+			};
+
 			const cleanup = () => {
 				window.removeEventListener( 'message', handleMessage );
 				clearTimeout( timeoutId );
 				iframe.onerror = null;
+				iframe.src = 'about:blank';
 			};
 
 			const timeoutId = setTimeout( () => {
@@ -84,6 +103,12 @@
 				reject( new Error( 'Timeout waiting for message' ) );
 			}, 30000 ); // 30-second timeout
 
+			if ( signal.aborted ) {
+				abortHandler();
+				return;
+			}
+
+			signal.addEventListener( 'abort', abortHandler );
 			window.addEventListener( 'message', handleMessage );
 
 			iframe.onerror = () => {
@@ -96,7 +121,7 @@
 			iframe.width = task.width.toString();
 			iframe.height = task.height.toString();
 			iframe.dataset.odPrimeUrlMetricsVerificationToken =
-				task.verificationToken;
+				verificationToken;
 		} );
 	}
 
@@ -105,7 +130,27 @@
 	 * when the document is ready.
 	 */
 	document.addEventListener( 'DOMContentLoaded', () => {
-		primeURL();
+		processTasks();
+	} );
+
+	/**
+	 * Pause processing when the tab/window becomes hidden.
+	 */
+	document.addEventListener( 'visibilitychange', () => {
+		if ( 'hidden' === document.visibilityState && isProcessing ) {
+			isProcessing = false;
+			isTabHidden = true;
+			if ( abortController ) {
+				abortController.abort();
+				abortController = null;
+			}
+		} else if ( 'visible' === document.visibilityState && isTabHidden ) {
+			isTabHidden = false;
+			if ( ! isProcessing ) {
+				isProcessing = true;
+				processTasks();
+			}
+		}
 	} );
 
 	/**

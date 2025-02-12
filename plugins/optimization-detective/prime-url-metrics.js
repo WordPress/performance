@@ -66,9 +66,9 @@
 	let abortController = null;
 
 	/**
-	 * Handles the prime URL metrics control button click.
+	 * Toggles the processing state.
 	 */
-	async function handleControlButtonClick() {
+	function toggleProcessing() {
 		if ( isProcessing ) {
 			// Pause processing
 			isProcessing = false;
@@ -83,83 +83,86 @@
 		} else {
 			// Start/resume processing
 			isProcessing = true;
-			if ( isTabHidden ) {
-				isTabHidden = false;
-			}
 			controlButton.textContent = __( 'Pause', 'optimization-detective' );
+			processBatches();
+		}
+	}
 
-			try {
-				while ( isProcessing ) {
-					if ( ! currentBatch ) {
-						currentBatch = await getBatch( cursor );
-						if ( ! currentBatch.batch.length ) {
-							isNextBatchAvailable = false;
-							break;
-						}
-
-						currentBatchNumber++;
-						currentBatchElement.textContent =
-							currentBatchNumber.toString();
-
-						// Initialize batch state
-						verificationToken = currentBatch.verificationToken;
-						isDebug = currentBatch.isDebug;
-						currentTasks = flattenBatchToTasks( currentBatch );
-						currentTaskIndex = 0;
-						progressBar.max = currentTasks.length;
-						progressBar.value = 0;
-						totalTasksInBatchElement.textContent =
-							currentTasks.length.toString();
-						currentTaskElement.textContent = '0';
-					}
-					// Process tasks in current batch
-					while (
-						isProcessing &&
-						currentTaskIndex < currentTasks.length
-					) {
-						abortController = new AbortController();
-						await processTask(
-							currentTasks[ currentTaskIndex ],
-							abortController.signal
-						);
-						currentTaskIndex++;
-						progressBar.value = currentTaskIndex;
-						currentTaskElement.textContent =
-							currentTaskIndex.toString();
+	/**
+	 * Processes batches of URLs.
+	 */
+	async function processBatches() {
+		try {
+			while ( isProcessing ) {
+				if ( ! currentBatch ) {
+					currentBatch = await getBatch( cursor );
+					if ( ! currentBatch.batch.length ) {
+						isNextBatchAvailable = false;
+						break;
 					}
 
-					if ( currentTaskIndex >= currentTasks.length ) {
-						// Complete current batch
-						cursor = currentBatch.cursor;
-						currentBatch = null;
-						currentTasks = [];
-						currentTaskIndex = 0;
-						totalTasksInBatchElement.textContent = '0';
-						currentTaskElement.textContent = '0';
-					}
+					currentBatchNumber++;
+					currentBatchElement.textContent =
+						currentBatchNumber.toString();
+
+					// Initialize batch state
+					verificationToken = currentBatch.verificationToken;
+					isDebug = currentBatch.isDebug;
+					currentTasks = flattenBatchToTasks( currentBatch );
+					currentTaskIndex = 0;
+					progressBar.max = currentTasks.length;
+					progressBar.value = 0;
+					totalTasksInBatchElement.textContent =
+						currentTasks.length.toString();
+					currentTaskElement.textContent = '0';
 				}
-			} catch ( error ) {
-				// TODO: Decide whether to skip the current task or stop processing.
-				if ( ! isTabHidden && 'Task Aborted' !== error.message ) {
-					isProcessing = false;
-					controlButton.textContent = __(
-						'Click to retry',
-						'optimization-detective'
+
+				// Process tasks in current batch
+				while (
+					isProcessing &&
+					currentTaskIndex < currentTasks.length
+				) {
+					abortController = new AbortController();
+					await processTask(
+						currentTasks[ currentTaskIndex ],
+						abortController.signal
 					);
+					currentTaskIndex++;
+					progressBar.value = currentTaskIndex;
+					currentTaskElement.textContent =
+						currentTaskIndex.toString();
 				}
-			} finally {
-				if ( ! isNextBatchAvailable ) {
-					isProcessing = false;
-					controlButton.textContent = __(
-						'Finished',
-						'optimization-detective'
-					);
-					controlButton.disabled = true;
-					iframe.src = 'about:blank';
-					iframe.width = '0';
-					iframe.height = '0';
-					currentBatchElement.textContent = '0';
+
+				if ( currentTaskIndex >= currentTasks.length ) {
+					// Complete current batch
+					cursor = currentBatch.cursor;
+					currentBatch = null;
+					currentTasks = [];
+					currentTaskIndex = 0;
+					totalTasksInBatchElement.textContent = '0';
+					currentTaskElement.textContent = '0';
 				}
+			}
+		} catch ( error ) {
+			if ( ! isTabHidden && 'Task Aborted' !== error.message ) {
+				isProcessing = false;
+				controlButton.textContent = __(
+					'Click to retry',
+					'optimization-detective'
+				);
+			}
+		} finally {
+			if ( ! isNextBatchAvailable ) {
+				isProcessing = false;
+				controlButton.textContent = __(
+					'Finished',
+					'optimization-detective'
+				);
+				controlButton.disabled = true;
+				iframe.src = 'about:blank';
+				iframe.width = '0';
+				iframe.height = '0';
+				currentBatchElement.textContent = '0';
 			}
 		}
 	}
@@ -167,11 +170,7 @@
 	/**
 	 * Flattens the batch to tasks.
 	 * @param {Object} batch - The batch to flatten.
-	 * @return {Array<{
-	 *   url: string,
-	 *   width: number,
-	 *   height: number
-	 * }>} - The flattened tasks.
+	 * @return {Array<{ url: string, width: number, height: number }>} - The flattened tasks.
 	 */
 	function flattenBatchToTasks( batch ) {
 		const tasks = [];
@@ -190,24 +189,7 @@
 	/**
 	 * Fetches the next batch of URLs.
 	 * @param {Object} lastCursor - The cursor to fetch the next batch.
-	 * @return {Promise<{
-	 *   batch: Array<Array<{
-	 *     url: string,
-	 *     breakpoints: Array<{
-	 *       width: number,
-	 *       height: number
-	 *     }>
-	 *   }>>,
-	 *   cursor: {
-	 *     provider_index: number,
-	 *     subtype_index: number,
-	 *     page_number: number,
-	 *     offset_within_page: number,
-	 *     batch_size: number
-	 *   },
-	 *   verificationToken: string,
-	 *   isDebug: boolean
-	 * }>} - The promise that resolves to the batch of URLs.
+	 * @return {Promise<Object>} - The promise that resolves to the batch of URLs.
 	 */
 	async function getBatch( lastCursor ) {
 		const response = await apiFetch( {
@@ -220,8 +202,8 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
-	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
-	 * @param {AbortSignal}                                  signal - The signal to abort the task.
+	 * @param {{ url: string, width: number, height: number }} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                                    signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	function processTask( task, signal ) {
@@ -292,24 +274,35 @@
 		} );
 	}
 
-	controlButton.addEventListener( 'click', handleControlButtonClick );
+	controlButton.addEventListener( 'click', toggleProcessing );
 
 	/**
-	 * Pause processing when the tab/window becomes hidden.
+	 * Pause processing when the tab/window becomes hidden, resume when visible.
 	 */
 	document.addEventListener( 'visibilitychange', () => {
-		if ( document.visibilityState === 'hidden' && isProcessing ) {
-			isProcessing = false;
-			isTabHidden = true;
-			if ( abortController ) {
-				abortController.abort();
-				abortController = null;
+		if ( 'hidden' === document.visibilityState ) {
+			if ( isProcessing ) {
+				isProcessing = false;
+				isTabHidden = true;
+				if ( abortController ) {
+					abortController.abort();
+					abortController = null;
+				}
+				controlButton.textContent = __(
+					'Resume',
+					'optimization-detective'
+				);
 			}
-
-			controlButton.textContent = __(
-				'Resume',
-				'optimization-detective'
-			);
+		} else if ( 'visible' === document.visibilityState && isTabHidden ) {
+			isTabHidden = false;
+			if ( ! isProcessing ) {
+				isProcessing = true;
+				controlButton.textContent = __(
+					'Pause',
+					'optimization-detective'
+				);
+				processBatches();
+			}
 		}
 	} );
 
