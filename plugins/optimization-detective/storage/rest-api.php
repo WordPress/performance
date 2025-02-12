@@ -242,7 +242,8 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	try {
 		$url_metric_group->add_url_metric( $url_metric );
 	} catch ( InvalidArgumentException $e ) {
-		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+		// NOTE: This exception should never be thrown because `get_group_for_viewport_width()` already ensures the viewport width is valid.
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() ); // @codeCoverageIgnore
 	}
 
 	$result = OD_URL_Metrics_Post_Type::update_post(
