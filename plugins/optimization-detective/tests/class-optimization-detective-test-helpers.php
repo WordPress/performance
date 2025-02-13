@@ -171,27 +171,14 @@ trait Optimization_Detective_Test_Helpers {
 	 *
 	 * @param non-empty-string $slug Slug (hash of normalized query vars).
 	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
-	 * @return positive-int|WP_Error Post ID or WP_Error otherwise.
+	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
 	 */
 	public function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
-		$post_data = array(
-			'post_title' => $new_url_metric->get_url(),
-		);
-
 		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
-		if ( $post instanceof WP_Post ) {
-			$post_data['ID']        = $post->ID;
-			$post_data['post_name'] = $post->post_name;
-			$url_metrics            = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
-		} else {
-			$post_data['post_name'] = $slug;
-			$url_metrics            = array();
-		}
-
 		$etag = $new_url_metric->get_etag();
 
 		$group_collection = new OD_URL_Metric_Group_Collection(
-			$url_metrics,
+			$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 			$etag,
 			od_get_breakpoint_max_widths(),
 			od_get_url_metrics_breakpoint_sample_size(),
@@ -205,34 +192,7 @@ trait Optimization_Detective_Test_Helpers {
 			return new WP_Error( 'invalid_url_metric', $e->getMessage() );
 		}
 
-		$post_data['post_content'] = wp_json_encode(
-			$group_collection->get_flattened_url_metrics(),
-			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
-		);
-		if ( ! is_string( $post_data['post_content'] ) ) {
-			return new WP_Error( 'json_encode_error', json_last_error_msg() );
-		}
-
-		$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
-		if ( $has_kses ) {
-			// Prevent KSES from corrupting JSON in post_content.
-			kses_remove_filters();
-		}
-
-		$post_data['post_type']   = OD_URL_Metrics_Post_Type::SLUG;
-		$post_data['post_status'] = 'publish';
-		$slashed_post_data        = wp_slash( $post_data );
-		if ( isset( $post_data['ID'] ) ) {
-			$result = wp_update_post( $slashed_post_data, true );
-		} else {
-			$result = wp_insert_post( $slashed_post_data, true );
-		}
-
-		if ( $has_kses ) {
-			kses_init_filters();
-		}
-
-		return $result;
+		return OD_URL_Metrics_Post_Type::update_post( $slug, $group_collection );
 	}
 
 	/**
