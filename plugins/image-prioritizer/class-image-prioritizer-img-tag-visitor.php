@@ -412,7 +412,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Computes responsive sizes for the current element based on its boundingClientRect width captured in URL Metrics.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Context.
 	 * @return non-empty-string[] Computed sizes.
