@@ -28,4 +28,5 @@ add_action( 'admin_menu', 'od_add_optimization_detective_menu' );
 add_action( 'admin_enqueue_scripts', 'od_enqueue_prime_url_metrics_scripts' );
 add_action( 'enqueue_block_editor_assets', 'od_enqueue_block_editor_prime_url_metrics_scripts' );
 add_filter( 'redirect_post_location', 'od_add_data_to_post_update_redirect_url_for_classic_editor' );
+add_filter( 'plugin_action_links_' . OPTIMIZATION_DETECTIVE_MAIN_FILE, 'od_add_settings_action_link' );
 // @codeCoverageIgnoreEnd

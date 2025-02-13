@@ -76,6 +76,7 @@
 				'Resume',
 				'optimization-detective'
 			);
+			controlButton.classList.remove( 'updating-message' );
 			if ( abortController ) {
 				abortController.abort();
 				abortController = null;
@@ -84,6 +85,7 @@
 			// Start/resume processing
 			isProcessing = true;
 			controlButton.textContent = __( 'Pause', 'optimization-detective' );
+			controlButton.classList.add( 'updating-message' );
 			processBatches();
 		}
 	}
@@ -95,7 +97,18 @@
 		try {
 			while ( isProcessing ) {
 				if ( ! currentBatch ) {
+					controlButton.textContent = __(
+						'Getting next batch…',
+						'optimization-detective'
+					);
+
 					currentBatch = await getBatch( cursor );
+
+					controlButton.textContent = __(
+						'Pause',
+						'optimization-detective'
+					);
+
 					if ( ! currentBatch.batch.length ) {
 						isNextBatchAvailable = false;
 						break;
@@ -159,6 +172,7 @@
 					'optimization-detective'
 				);
 				controlButton.disabled = true;
+				controlButton.classList.remove( 'updating-message' );
 				iframe.src = 'about:blank';
 				iframe.width = '0';
 				iframe.height = '0';

@@ -72,3 +72,29 @@ function od_render_optimization_detective_page(): void {
 	</div>
 	<?php
 }
+
+/**
+ * Adds a settings link to the plugin's action links.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $links An array of plugin action links.
+ * @return string[]|mixed The modified list of actions.
+ */
+function od_add_settings_action_link( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'tools.php?page=od-optimization-detective' ) ),
+				esc_html__( 'Settings', 'optimization-detective' )
+			),
+		),
+		$links
+	);
+}
+add_filter( 'plugin_action_links_' . OPTIMIZATION_DETECTIVE_MAIN_FILE, 'od_add_settings_action_link' );

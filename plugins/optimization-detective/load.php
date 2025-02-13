@@ -96,6 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		define( 'OPTIMIZATION_DETECTIVE_VERSION', $version );
+		define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 		require_once __DIR__ . '/helper.php';
 
