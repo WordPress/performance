@@ -35,16 +35,19 @@ As mentioned above, this plugin is a dependency that doesn't provide features on
 
 ## Extension Plugins
 
-For production, from the WordPress.org Plugin Directory:
+Stable plugins for use in production from the WordPress.org Plugin Directory:
 
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/): Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy loading.
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/): Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
 
-For development and debugging, from repositories on GitHub:
+Experimental plugins being explored exploration, from repositories on GitHub:
+
+* [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility): Applies content-visibility to posts in The Loop to improve rendering performance.
+* [Optimization Detective Intrinsic Dimensions](https://github.com/westonruter/od-intrinsic-dimensions): Supplies width and height attributes to IMG and VIDEO tags that lack them according to their intrinsic dimensions. This reduces Cumulative Layout Shift (CLS). 
+
+For development and debugging, also on GitHub:
 
 * [Optimization Detective Admin UI](https://github.com/westonruter/od-admin-ui): Provides an admin UI to inspect URL Metrics from the Optimization Detective plugin.
 * [Optimization Detective Store Query Vars](https://github.com/westonruter/od-store-query-vars): Stores the Query Vars with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular what the slug was computed from.
 * [Optimization Detective Store User Agent](https://github.com/westonruter/od-store-user-agent): Stores the User Agent with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular to understand what device has a given viewport dimensions.
 * [Optimization Detective Dev Mode](https://github.com/westonruter/od-dev-mode): Adds filters to facilitate development of the Optimization Detective plugin.
-* [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility): Applies content-visibility to posts in The Loop to improve rendering performance.
-* [Optimization Detective Intrinsic Dimensions](https://github.com/westonruter/od-intrinsic-dimensions): Supplies width and height attributes to IMG and VIDEO tags that lack them according to their intrinsic dimensions. This reduces Cumulative Layout Shift (CLS).
