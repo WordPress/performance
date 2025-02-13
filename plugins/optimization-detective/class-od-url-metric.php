@@ -176,7 +176,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 Added the 'etag' property to the schema.
-	 * @since n.e.x.t The 'etag' property is now required.
+	 * @since 1.0.0 The 'etag' property is now required.
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -451,7 +451,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Gets ETag.
 	 *
 	 * @since 0.9.0
-	 * @since n.e.x.t No longer returns null as 'etag' is now required.
+	 * @since 1.0.0 No longer returns null as 'etag' is now required.
 	 *
 	 * @return non-empty-string ETag.
 	 */

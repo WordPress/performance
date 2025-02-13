@@ -39,7 +39,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 *
 	 * This was originally $post_id which was introduced in 0.7.0.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var positive-int
 	 */
 	private $url_metrics_id;
@@ -92,7 +92,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	/**
 	 * Gets a property.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param string $name Property name.
 	 * @return mixed Property value.
@@ -121,7 +121,7 @@ final class OD_URL_Metric_Store_Request_Context {
 							__CLASS__ . '::$url_metrics_id'
 						)
 					),
-					'optimization-detective n.e.x.t'
+					'optimization-detective 1.0.0'
 				);
 				return $this->url_metrics_id;
 			default:

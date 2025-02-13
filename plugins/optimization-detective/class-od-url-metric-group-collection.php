@@ -202,7 +202,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the breakpoints in max widths.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return positive-int[] Breakpoints in max widths.
 	 */
@@ -213,7 +213,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the sample size for URL Metrics for a given breakpoint.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return int<1, max> Sample size for URL Metrics for a given breakpoint.
 	 */
@@ -224,7 +224,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the freshness age (TTL) for a given URL Metric..
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return int<0, max> Freshness age (TTL) for a given URL Metric.
 	 */

@@ -54,7 +54,7 @@ final class OD_Tag_Visitor_Context {
 	 *
 	 * May be null if no post has been created yet.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var positive-int|null
 	 */
 	private $url_metrics_id;
