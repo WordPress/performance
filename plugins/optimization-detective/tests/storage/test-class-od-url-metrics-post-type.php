@@ -199,6 +199,11 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 			od_get_url_metric_freshness_ttl()
 		);
 
+		// Test with empty URL Metric group collection.
+		$result = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'no_url_metrics', $result->get_error_code() );
+
 		$validated_url_metric         = $this->get_sample_url_metric(
 			array(
 				'url'  => home_url( '/' ),

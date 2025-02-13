@@ -212,6 +212,10 @@ class OD_URL_Metrics_Post_Type {
 	 */
 	public static function update_post( string $slug, OD_URL_Metric_Group_Collection $url_metric_group_collection ) {
 		$url_metrics = $url_metric_group_collection->get_flattened_url_metrics();
+		if ( 0 === count( $url_metrics ) ) {
+			return new WP_Error( 'no_url_metrics', __( 'No URL Metrics in the group collection.', 'optimization-detective' ) );
+		}
+
 		// Sort URL Metrics in descending order by timestamp.
 		usort(
 			$url_metrics,
