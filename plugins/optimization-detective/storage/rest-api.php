@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Namespace for optimization-detective.
  *
+ * @since 0.1.0
+ * @access private
  * @var string
  */
 const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
@@ -26,6 +28,8 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
  * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
  * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
  *
+ * @since 0.1.0
+ * @access private
  * @link https://google.aip.dev/136
  * @var string
  */
@@ -130,7 +134,7 @@ function od_register_endpoint(): void {
 					return new WP_Error(
 						'url_metric_storage_locked',
 						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-						array( 'status' => 403 ) // TODO: Consider 423 Locked status code.
+						array( 'status' => 423 )
 					);
 				}
 				return true;

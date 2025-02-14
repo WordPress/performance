@@ -30,6 +30,8 @@ final class OD_Visited_Tag_State {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 1.0.0
 	 */
 	public function __construct() {
 		$this->reset();
