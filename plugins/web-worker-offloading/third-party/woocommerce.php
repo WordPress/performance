@@ -33,6 +33,7 @@ function plwwo_woocommerce_configure( $configuration ): array {
 
 	return $configuration;
 }
+// @codeCoverageIgnoreStart
 add_filter( 'plwwo_configuration', 'plwwo_woocommerce_configure' );
 
 plwwo_mark_scripts_for_offloading(
@@ -42,3 +43,4 @@ plwwo_mark_scripts_for_offloading(
 		'woocommerce-google-analytics-integration-gtag',
 	)
 );
+// @codeCoverageIgnoreEnd

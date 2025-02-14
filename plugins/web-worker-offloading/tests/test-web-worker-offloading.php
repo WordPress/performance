@@ -14,6 +14,8 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		parent::set_up();
 		$this->reset_wp_dependencies();
 		add_theme_support( 'html5', array( 'script' ) );
+		require_once __DIR__ . '/../third-party/woocommerce.php';
+		require_once __DIR__ . '/../third-party/seo-by-rank-math.php';
 	}
 
 	/**
@@ -190,7 +192,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 *
 	 * @covers ::plwwo_update_script_type
 	 * @covers ::plwwo_filter_print_scripts_array
-	 * @cogers ::plwwo_filter_inline_script_attributes
+	 * @covers ::plwwo_filter_inline_script_attributes
 	 *
 	 * @dataProvider data_update_script_types
 	 *
@@ -323,5 +325,39 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 */
 	private function reset_wp_dependencies(): void {
 		$GLOBALS['wp_scripts'] = null;
+	}
+
+	/**
+	 * Test the function that marks scripts for offloading.
+	 *
+	 * @covers ::plwwo_mark_scripts_for_offloading
+	 */
+	public function test_plwwo_mark_scripts_for_offloading(): void {
+		// Enqueue a script.
+		wp_enqueue_script( 'test-script', 'https://example.com/test-script.js', array(), '1.0.0', true );
+		plwwo_mark_scripts_for_offloading( array( 'test-script' ) );
+
+		$scripts = wp_scripts();
+		$scripts->do_items();
+
+		// Check that the 'worker' data has been added to the script.
+		$this->assertTrue( wp_scripts()->get_data( 'test-script', 'worker' ) );
+	}
+
+	/**
+	 * Test the function that loads third party plugin integrations.
+	 *
+	 * @covers ::plwwo_load_third_party_integrations
+	 */
+	public function test_plwwo_load_third_party_integrations(): void {
+		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) ) {
+			define( 'GOOGLESITEKIT_VERSION', '1.0.0' );
+		}
+		do_action( 'plugins_loaded' );
+
+		// Check that the integrations have been loaded.
+		$this->assertTrue( function_exists( 'plwwo_google_site_kit_configure' ) );
+		$this->assertTrue( function_exists( 'plwwo_rank_math_configure' ) );
+		$this->assertTrue( function_exists( 'plwwo_woocommerce_configure' ) );
 	}
 }

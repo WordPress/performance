@@ -29,7 +29,7 @@ function plwwo_get_configuration(): array {
 	);
 
 	if ( WP_DEBUG && SCRIPT_DEBUG ) {
-		$config['debug'] = true;
+		$config['debug'] = true;// @codeCoverageIgnore
 	}
 
 	/**
