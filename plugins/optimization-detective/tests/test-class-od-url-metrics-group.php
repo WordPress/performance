@@ -98,6 +98,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * @covers ::get_maximum_viewport_width
 	 * @covers ::get_sample_size
 	 * @covers ::get_freshness_ttl
+	 * @covers ::get_collection
 	 * @covers ::getIterator
 	 * @covers ::count
 	 *
@@ -126,6 +127,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$this->assertSame( $maximum_viewport_width, $group->get_maximum_viewport_width() );
 		$this->assertSame( $sample_size, $group->get_sample_size() );
 		$this->assertSame( $freshness_ttl, $group->get_freshness_ttl() );
+		$this->assertSame( $dummy_collection, $group->get_collection() );
 		$this->assertCount( count( $url_metrics ), $group );
 		$this->assertSame( $url_metrics, iterator_to_array( $group ) );
 	}
@@ -141,7 +143,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'breakpoints'              => array( 10 ),
 				'group_index'              => 0,
 				'viewport_widths_expected' => array(
-					0  => true,
+					-1 => false,
+					0  => false,
 					1  => true,
 					9  => true,
 					10 => true,
@@ -152,7 +155,9 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'breakpoints'              => array( 99, 200 ),
 				'group_index'              => 1,
 				'viewport_widths_expected' => array(
+					-1  => false,
 					0   => false,
+					1   => false,
 					99  => false,
 					100 => true,
 					101 => true,
@@ -326,8 +331,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
 						'0:600',
-						'601:800',
-						'801:',
+						'600:800',
+						'800:',
 					),
 					$this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' )
 				),
@@ -345,7 +350,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:600' => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
-					'601:'  => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					'600:'  => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'same_lcp_element_across_non_consecutive_breakpoints' => array(
@@ -361,8 +366,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:400'   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-					'401:600' => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
-					'601:'    => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					'400:600' => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
+					'600:'    => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'no_lcp_image_elements'                    => array(
@@ -376,7 +381,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
 						'0:600',
-						'601:',
+						'600:',
 					),
 					null
 				),

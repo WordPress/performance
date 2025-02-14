@@ -291,6 +291,21 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected' => false,
 			),
+			'singular_as_post_preview'             => array(
+				'set_up'   => static function (): string {
+					$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
+					wp_set_current_user( $user_id );
+					$post_id = self::factory()->post->create(
+						array(
+							'post_title'  => 'Hello',
+							'post_status' => 'draft',
+							'post_author' => $user_id,
+						)
+					);
+					return (string) get_preview_post_link( $post_id );
+				},
+				'expected' => false,
+			),
 			'home_post_request_as_anonymous'       => array(
 				'set_up'   => static function (): string {
 					$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -378,8 +393,10 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 						$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
 						$this->setExpectedIncorrectUsage( 'OD_Tag_Visitor_Context::$url_metrics_group_collection' );
 						$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metrics_group_collection );
+						$this->assertSame( $context->url_metric_group_collection, $context->url_metrics_group_collection );
 						$this->assertInstanceOf( OD_HTML_Tag_Processor::class, $context->processor );
 						$this->assertInstanceOf( OD_Link_Collection::class, $context->link_collection );
+						$this->assertTrue( null === $context->url_metrics_id || $context->url_metrics_id > 0 );
 
 						$error = null;
 						$value = '';

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type Link array{
  *                   attributes: LinkAttributes,
  *                   minimum_viewport_width: int<0, max>|null,
- *                   maximum_viewport_width: positive-int|null
+ *                   maximum_viewport_width: int<1, max>|null
  *               }
  *
  * @phpstan-type LinkAttributes array{
@@ -37,12 +37,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.3.0
  * @since 0.4.0 Renamed from OD_Preload_Link_Collection.
- * @access private
  */
 final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Links grouped by rel type.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @var array<string, Link[]>
 	 */
@@ -51,11 +52,13 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Adds link.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *
-	 * @param array             $attributes             Attributes.
-	 * @param int<0, max>|null  $minimum_viewport_width Minimum width or null if not bounded or relevant.
-	 * @param positive-int|null $maximum_viewport_width Maximum width or null if not bounded (i.e. infinity) or relevant.
+	 * @param array            $attributes             Attributes.
+	 * @param int<0, max>|null $minimum_viewport_width Minimum width (exclusive) or null if not bounded or relevant.
+	 * @param int<1, max>|null $maximum_viewport_width Maximum width (inclusive) or null if not bounded (i.e. infinity) or relevant.
 	 *
 	 * @throws InvalidArgumentException When invalid arguments are provided.
 	 */
@@ -111,6 +114,8 @@ final class OD_Link_Collection implements Countable {
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together. Also, add media attributes to the links.
 	 *
+	 * @since 0.4.0
+	 *
 	 * @return LinkAttributes[] Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
 	private function get_prepared_links(): array {
@@ -132,6 +137,8 @@ final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Merges consecutive links.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param Link[] $links Links.
 	 * @return LinkAttributes[] Merged consecutive links.
@@ -194,9 +201,9 @@ final class OD_Link_Collection implements Countable {
 					&&
 					is_int( $last_link['maximum_viewport_width'] )
 					&&
-					$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
+					$last_link['maximum_viewport_width'] === $link['minimum_viewport_width']
 				) {
-					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
+					$last_link['maximum_viewport_width'] = null === $link['maximum_viewport_width'] ? null : max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
 
 					// Update the last link with the new maximum viewport width.
 					$carry[ count( $carry ) - 1 ] = $last_link;
@@ -228,6 +235,8 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Gets the HTML for the link tags.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @return string Link tags HTML.
 	 */
 	public function get_html(): string {
@@ -249,15 +258,42 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Constructs the Link HTTP response header.
 	 *
-	 * @return string|null Link HTTP response header, or null if there are none.
+	 * @since 0.4.0
+	 *
+	 * @return non-empty-string|null Link HTTP response header, or null if there are none.
 	 */
 	public function get_response_header(): ?string {
 		$link_headers = array();
 
 		foreach ( $this->get_prepared_links() as $link ) {
-			// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
-			$link['href'] = isset( $link['href'] ) ? esc_url_raw( $link['href'] ) : 'about:blank';
-			$link_header  = '<' . $link['href'] . '>';
+			if ( isset( $link['href'] ) ) {
+				$link['href'] = $this->encode_url_for_response_header( $link['href'] );
+			} else {
+				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
+				$link['href'] = 'about:blank';
+			}
+
+			// Encode the URLs in the srcset.
+			if ( isset( $link['imagesrcset'] ) ) {
+				$link['imagesrcset'] = join(
+					', ',
+					array_map(
+						function ( $image_candidate ) {
+							// Parse out the URL to separate it from the descriptor.
+							$image_candidate_parts = (array) preg_split( '/\s+/', (string) $image_candidate, 2 );
+
+							// Encode the URL.
+							$image_candidate_parts[0] = $this->encode_url_for_response_header( (string) $image_candidate_parts[0] );
+
+							// Re-join the URL with the descriptor.
+							return implode( ' ', $image_candidate_parts );
+						},
+						(array) preg_split( '/\s*,\s*/', $link['imagesrcset'] )
+					)
+				);
+			}
+
+			$link_header = '<' . $link['href'] . '>';
 			unset( $link['href'] );
 			foreach ( $link as $name => $value ) {
 				/*
@@ -285,7 +321,31 @@ final class OD_Link_Collection implements Countable {
 	}
 
 	/**
+	 * Encodes a URL for serving in an HTTP response header.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $url URL to percent encode. Any existing percent encodings will first be decoded.
+	 * @return string Percent-encoded URL.
+	 */
+	private function encode_url_for_response_header( string $url ): string {
+		$decoded_url = urldecode( $url );
+
+		// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
+		$encoded_url = (string) preg_replace_callback(
+			'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
+			static function ( $matches ) {
+				return rawurlencode( $matches[0] );
+			},
+			$decoded_url
+		);
+		return esc_url_raw( $encoded_url );
+	}
+
+	/**
 	 * Counts the links.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return non-negative-int Link count.
 	 */
