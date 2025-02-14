@@ -267,20 +267,30 @@ final class OD_Link_Collection implements Countable {
 
 		foreach ( $this->get_prepared_links() as $link ) {
 			if ( isset( $link['href'] ) ) {
-				$decoded_url = urldecode( $link['href'] );
-
-				// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
-				$encoded_url  = preg_replace_callback(
-					'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
-					static function ( $matches ) {
-						return rawurlencode( $matches[0] );
-					},
-					$decoded_url
-				);
-				$link['href'] = esc_url_raw( $encoded_url ?? '' );
+				$link['href'] = $this->encode_url_for_response_header( $link['href'] );
 			} else {
 				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
 				$link['href'] = 'about:blank';
+			}
+
+			// Encode the URLs in the srcset.
+			if ( isset( $link['imagesrcset'] ) ) {
+				$link['imagesrcset'] = join(
+					', ',
+					array_map(
+						function ( $image_candidate ) {
+							// Parse out the URL to separate it from the descriptor.
+							$image_candidate_parts = (array) preg_split( '/\s+/', (string) $image_candidate, 2 );
+
+							// Encode the URL.
+							$image_candidate_parts[0] = $this->encode_url_for_response_header( (string) $image_candidate_parts[0] );
+
+							// Re-join the URL with the descriptor.
+							return implode( ' ', $image_candidate_parts );
+						},
+						(array) preg_split( '/\s*,\s*/', $link['imagesrcset'] )
+					)
+				);
 			}
 
 			$link_header = '<' . $link['href'] . '>';
@@ -308,6 +318,28 @@ final class OD_Link_Collection implements Countable {
 		}
 
 		return 'Link: ' . implode( ', ', $link_headers );
+	}
+
+	/**
+	 * Encodes a URL for serving in an HTTP response header.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $url URL to percent encode. Any existing percent encodings will first be decoded.
+	 * @return string Percent-encoded URL.
+	 */
+	private function encode_url_for_response_header( string $url ): string {
+		$decoded_url = urldecode( $url );
+
+		// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
+		$encoded_url = (string) preg_replace_callback(
+			'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
+			static function ( $matches ) {
+				return rawurlencode( $matches[0] );
+			},
+			$decoded_url
+		);
+		return esc_url_raw( $encoded_url );
 	}
 
 	/**

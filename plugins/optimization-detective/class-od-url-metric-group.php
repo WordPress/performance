@@ -212,7 +212,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the collection that this group is a part of.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
 	 * @return OD_URL_Metric_Group_Collection Collection.
