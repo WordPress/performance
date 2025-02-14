@@ -53,7 +53,7 @@ function plwwo_register_default_scripts( WP_Scripts $scripts ): void {
 
 	$scripts->add_inline_script( 'web-worker-offloading', $partytown_js );
 }
-add_action( 'wp_default_scripts', 'plwwo_register_default_scripts' );
+add_action( 'wp_default_scripts', 'plwwo_register_default_scripts' );// @codeCoverageIgnore
 
 /**
  * Prepends web-worker-offloading to the list of scripts to print if one of the queued scripts is offloaded to a worker.
@@ -75,7 +75,7 @@ function plwwo_filter_print_scripts_array( $script_handles ): array {
 	}
 	return $script_handles;
 }
-add_filter( 'print_scripts_array', 'plwwo_filter_print_scripts_array', PHP_INT_MAX );
+add_filter( 'print_scripts_array', 'plwwo_filter_print_scripts_array', PHP_INT_MAX );// @codeCoverageIgnore
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
@@ -104,7 +104,7 @@ function plwwo_update_script_type( $tag, string $handle ) {
 	}
 	return $tag;
 }
-add_filter( 'script_loader_tag', 'plwwo_update_script_type', 10, 2 );
+add_filter( 'script_loader_tag', 'plwwo_update_script_type', 10, 2 );// @codeCoverageIgnore
 
 /**
  * Filters inline script attributes to offload to a worker if the script has been opted-in.
@@ -128,7 +128,7 @@ function plwwo_filter_inline_script_attributes( $attributes ): array {
 	}
 	return $attributes;
 }
-add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attributes' );
+add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attributes' );// @codeCoverageIgnore
 
 /**
  * Displays the HTML generator meta tag for the Web Worker Offloading plugin.
@@ -141,4 +141,4 @@ function plwwo_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="web-worker-offloading ' . esc_attr( WEB_WORKER_OFFLOADING_VERSION ) . '">' . "\n";
 }
-add_action( 'wp_head', 'plwwo_render_generator_meta_tag' );
+add_action( 'wp_head', 'plwwo_render_generator_meta_tag' );// @codeCoverageIgnore
