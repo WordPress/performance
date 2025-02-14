@@ -145,7 +145,11 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'webp-uploads' ) );
 	}
 
-	$image_path = wp_attachment_is_image( $attachment_id ) ? wp_get_original_image_path( $attachment_id ) : get_attached_file( $attachment_id );
+	if ( wp_attachment_is_image( $attachment_id ) ) {
+		$image_path = wp_get_original_image_path( $attachment_id );
+	} else {
+		$image_path = get_attached_file( $attachment_id );
+	}
 	if ( false === $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
