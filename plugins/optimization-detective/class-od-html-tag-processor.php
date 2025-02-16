@@ -246,38 +246,35 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next tag.
 	 *
-	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
-	 * It will _always_ visit tag closers.
+	 * Unlike the base class, this subclass visits tag closers by default.
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
+	 * @since n.e.x.t Passing a $query is now allowed.
 	 *
-	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query, but only null is accepted for this subclass.
+	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
 	 *
 	 * @throws InvalidArgumentException If attempting to pass a query.
 	 */
 	public function next_tag( $query = null ): bool {
-		if ( null !== $query ) {
-			throw new InvalidArgumentException( esc_html__( 'Processor subclass does not support queries.', 'optimization-detective' ) );
+		if ( null === $query ) {
+			// For back-compat with tag visitor which previously relied next_tag() always visiting tag closers.
+			$query = array( array( 'tag_closers' => 'visit' ) );
 		}
-
-		// Elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
-		do {
-			$matched = parent::next_tag( array( 'tag_closers' => 'visit' ) );
-		} while ( $matched && $this->is_admin_bar() );
-		return $matched;
+		return parent::next_tag( $query );
 	}
 
 	/**
 	 * Finds the next open tag.
 	 *
 	 * @since 0.4.0
+	 * @deprecated
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
 	public function next_open_tag(): bool {
-		while ( $this->next_tag() ) {
+		while ( $this->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( ! $this->is_tag_closer() ) {
 				return true;
 			}
