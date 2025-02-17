@@ -341,18 +341,20 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
 				'xpath_breadcrumbs' => array(
-					'/HTML'                             => array( 'HTML' ),
-					'/HTML/HEAD'                        => array( 'HTML', 'HEAD' ),
-					'/HTML/BODY'                        => array( 'HTML', 'BODY' ),
-					'/HTML/BODY/DIV[@id=\'header\']'    => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML'                              => array( 'HTML' ),
+					'/HTML/HEAD'                         => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                         => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'wpadminbar\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'wpadminbar\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
+					'/HTML/BODY/DIV[@id=\'header\']'     => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'header\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'primary\']'   => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'primary\']'    => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'primary\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'secondary\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'secondary\']'  => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'secondary\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@id=\'colophon\']'  => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'colophon\']'   => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@id=\'colophon\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 				),
 			),
@@ -392,12 +394,14 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG', 'DIV', 'IMG' ),
 				'xpath_breadcrumbs' => array(
-					'/HTML'                            => array( 'HTML' ),
-					'/HTML/HEAD'                       => array( 'HTML', 'HEAD' ),
-					'/HTML/BODY'                       => array( 'HTML', 'BODY' ),
-					'/HTML/BODY/DIV[@role=\'banner\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML'                              => array( 'HTML' ),
+					'/HTML/HEAD'                         => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                         => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'wpadminbar\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'wpadminbar\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
+					'/HTML/BODY/DIV[@role=\'banner\']'   => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@role=\'banner\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 					'/HTML/BODY/DIV[@class=\'content-area main\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'content-area main\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
@@ -405,12 +409,12 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					'/HTML/BODY/DIV[@class=\'widget-area\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 					'/HTML/BODY/DIV[@class=\'site-footer\']' => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'site-footer\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@class=\'\']'      => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@class=\'\']'        => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@class=\'\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV[@role=\'\']'       => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@role=\'\']'         => array( 'HTML', 'BODY', 'DIV' ),
 					'/HTML/BODY/DIV[@role=\'\']/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
-					'/HTML/BODY/DIV'                   => array( 'HTML', 'BODY', 'DIV' ),
-					'/HTML/BODY/DIV/*[1][self::IMG]'   => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
+					'/HTML/BODY/DIV'                     => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::IMG]'     => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
 				),
 			),
 		);
@@ -442,7 +446,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertSame( '', $p->get_stored_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags                 = array();
 		$actual_xpath_breadcrumbs_mapping = array();
-		while ( $p->next_open_tag() ) {
+		while ( $p->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$actual_open_tags[] = $p->get_tag();
 
 			$xpath = $p->get_stored_xpath();
@@ -466,14 +470,60 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test next_tag() passing query which is invalid.
+	 * Test next_tag() passing query.
 	 *
 	 * @covers ::next_tag
+	 * @covers ::get_xpath
+	 * @covers ::get_current_depth
 	 */
 	public function test_next_tag_with_query(): void {
-		$this->expectException( InvalidArgumentException::class );
-		$p = new OD_HTML_Tag_Processor( '<html></html>' );
-		$p->next_tag( array( 'tag_name' => 'HTML' ) );
+		$html = '
+			<!DOCTYPE html>
+			<html>
+				<head>
+					<title></title>
+				</head>
+				<body>
+					<main>
+						<p>Hello world</p>
+						<figure>
+							<img src="https://example.com/img1.jpg">
+						</figure>
+						<figure>
+							<img src="https://example.com/img2.jpg">
+						</figure>
+						<div class="foo">
+							Foo!
+						</div>
+					</main>
+				</body>
+			</html>
+		';
+
+		$p = new OD_HTML_Tag_Processor( $html );
+		$this->assertTrue( $p->next_tag( array( 'tag_name' => 'HTML' ) ) );
+		$this->assertTrue( $p->set_bookmark( 'document_root' ) );
+		$this->assertSame( 1, $p->get_current_depth() );
+
+		$this->assertTrue( $p->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertEquals( '/HTML/BODY/MAIN/*[2][self::FIGURE]/*[1][self::IMG]', $p->get_xpath() );
+		$this->assertSame( 5, $p->get_current_depth() );
+
+		$this->assertTrue( $p->next_tag( array( 'class_name' => 'foo' ) ) );
+		$this->assertEquals( '/HTML/BODY/MAIN/*[4][self::DIV]', $p->get_xpath() );
+		$this->assertSame( 4, $p->get_current_depth() );
+
+		$this->assertTrue( $p->seek( 'document_root' ) );
+		$this->assertTrue(
+			$p->next_tag(
+				array(
+					'tag_name'     => 'IMG',
+					'match_offset' => 2,
+				)
+			)
+		);
+		$this->assertEquals( '/HTML/BODY/MAIN/*[3][self::FIGURE]/*[1][self::IMG]', $p->get_xpath() );
+		$this->assertSame( 5, $p->get_current_depth() );
 	}
 
 	/**
@@ -484,7 +534,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	public function test_expects_closer(): void {
 		$p = new OD_HTML_Tag_Processor( '<html><body><hr></body></html>' );
 		$this->assertFalse( $p->expects_closer() );
-		while ( $p->next_tag() ) {
+		while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'BODY' === $p->get_tag() ) {
 				break;
 			}
@@ -492,7 +542,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertSame( 'BODY', $p->get_tag() );
 		$this->assertFalse( $p->expects_closer( 'IMG' ) );
 		$this->assertTrue( $p->expects_closer() );
-		$p->next_tag();
+		$p->next_tag( array( 'tag_closers' => 'visit' ) );
 		$this->assertSame( 'HR', $p->get_tag() );
 		$this->assertFalse( $p->expects_closer() );
 		$this->assertTrue( $p->expects_closer( 'DIV' ) );
@@ -594,7 +644,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			</html>
 		';
 		$processor = new OD_HTML_Tag_Processor( $html );
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertEquals( 'HTML', $processor->get_tag() );
 		$max_bookmarks = max( WP_HTML_Processor::MAX_BOOKMARKS, WP_HTML_Tag_Processor::MAX_BOOKMARKS );
 		for ( $i = 0; $i < $max_bookmarks + 1; $i++ ) {
@@ -710,7 +760,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					if ( $processor->get_current_depth() < $embed_block_depth ) {
 						break;
 					}
-				} while ( $processor->next_tag() );
+				} while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 			}
 		}
 
@@ -790,31 +840,31 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			)
 		);
 		$this->assertSame( 0, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'HTML', $processor->get_tag() );
 		$this->assertTrue( $processor->set_bookmark( 'document_root' ) );
 		$this->assertSame( 1, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'HEAD', $processor->get_tag() );
 		$this->assertSame( 3, $processor->get_cursor_move_count() ); // Note that next_token() call #2 was for the whitespace between <html> and <head>.
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'HEAD', $processor->get_tag() );
 		$this->assertTrue( $processor->is_tag_closer() );
 		$this->assertSame( 4, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'BODY', $processor->get_tag() );
 		$this->assertSame( 6, $processor->get_cursor_move_count() ); // Note that next_token() call #5 was for the whitespace between </head> and <body>.
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'BODY', $processor->get_tag() );
 		$this->assertTrue( $processor->is_tag_closer() );
 		$this->assertSame( 7, $processor->get_cursor_move_count() );
-		$this->assertTrue( $processor->next_tag() );
+		$this->assertTrue( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 'HTML', $processor->get_tag() );
 		$this->assertTrue( $processor->is_tag_closer() );
 		$this->assertSame( 9, $processor->get_cursor_move_count() ); // Note that next_token() call #8 was for the whitespace between </body> and <html>.
-		$this->assertFalse( $processor->next_tag() );
+		$this->assertFalse( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 10, $processor->get_cursor_move_count() );
-		$this->assertFalse( $processor->next_tag() );
+		$this->assertFalse( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		$this->assertSame( 11, $processor->get_cursor_move_count() );
 		$this->assertTrue( $processor->seek( 'document_root' ) );
 		$this->assertSame( 12, $processor->get_cursor_move_count() );

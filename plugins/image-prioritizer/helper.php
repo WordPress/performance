@@ -21,8 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
-	$required_od_version = '0.9.0';
-	if ( ! version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '>=' ) ) {
+	if (
+		version_compare( (string) strtok( $optimization_detective_version, '-' ), '1.0.0', '<' )
+		||
+		'1.0.0-beta1' === $optimization_detective_version
+		||
+		'1.0.0-beta2' === $optimization_detective_version
+	) {
 		add_action(
 			'admin_notices',
 			static function (): void {

@@ -226,7 +226,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		$crossorigin    = null;
 
 		// Loop through child tags until we reach the closing PICTURE tag.
-		while ( $processor->next_tag() ) {
+		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			$tag = $processor->get_tag();
 
 			// If we reached the closing PICTURE tag, break.

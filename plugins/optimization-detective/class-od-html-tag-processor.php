@@ -250,17 +250,18 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
-	 * @since n.e.x.t Passing a $query is now allowed.
+	 * @since n.e.x.t Passing a $query is now allowed. In a future release, this will default to skipping tag closers.
 	 *
 	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
-	 *
-	 * @throws InvalidArgumentException If attempting to pass a query.
 	 */
 	public function next_tag( $query = null ): bool {
 		if ( null === $query ) {
-			// For back-compat with tag visitor which previously relied next_tag() always visiting tag closers.
-			$query = array( array( 'tag_closers' => 'visit' ) );
+			$query = array( 'tag_closers' => 'visit' );
+			$this->warn(
+				__METHOD__,
+				esc_html__( 'Previously this method always visited tag closers and did not allow a query to be supplied. Now, however, a query can be supplied. To align this method with the behavior of the base class, a future version of this method will default to skipping tag closers.', 'optimization-detective' )
+			);
 		}
 		return parent::next_tag( $query );
 	}
@@ -269,17 +270,11 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Finds the next open tag.
 	 *
 	 * @since 0.4.0
-	 * @deprecated
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
 	public function next_open_tag(): bool {
-		while ( $this->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
-			if ( ! $this->is_tag_closer() ) {
-				return true;
-			}
-		}
-		return false;
+		return $this->next_tag( array( 'tag_closers' => 'skip' ) );
 	}
 
 	/**

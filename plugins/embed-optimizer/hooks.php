@@ -44,8 +44,13 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
-	$required_od_version = '0.9.0';
-	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
+	if (
+		version_compare( (string) strtok( $optimization_detective_version, '-' ), '1.0.0', '<' )
+		||
+		'1.0.0-beta1' === $optimization_detective_version
+		||
+		'1.0.0-beta2' === $optimization_detective_version
+	) {
 		add_action(
 			'admin_notices',
 			static function (): void {
@@ -253,7 +258,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 					}
 				}
 			}
-		} while ( $html_processor->next_tag() );
+		} while ( $html_processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
 		// If there was only one non-inline script, make it lazy.
 		if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( $bookmark_names['script'] ) ) {
 			$needs_lazy_script = true;

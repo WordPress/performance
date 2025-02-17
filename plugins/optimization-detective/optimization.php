@@ -238,7 +238,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
 	if ( ! (
-		$processor->next_tag() &&
+		$processor->next_tag( array( 'tag_closers' => 'visit' ) ) &&
 		! $processor->is_tag_closer() &&
 		'HTML' === $processor->get_tag()
 	) ) {
@@ -359,7 +359,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if (
 			in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true )
 			||
-			str_starts_with( $processor->get_xpath(), "/HTML/BODY/DIV[@id='wpadminbar']" )
+			str_starts_with( $processor->get_stored_xpath(), "/HTML/BODY/DIV[@id='wpadminbar']" )
 		) {
 			continue;
 		}
