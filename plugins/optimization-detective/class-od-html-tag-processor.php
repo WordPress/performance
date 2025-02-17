@@ -715,7 +715,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @return bool Whether at or inside the admin bar.
 	 */
-	private function is_admin_bar(): bool {
+	public function is_admin_bar(): bool {
 		return (
 			isset( $this->open_stack_tags[2], $this->open_stack_attributes[2]['id'] )
 			&&

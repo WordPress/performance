@@ -359,7 +359,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if (
 			in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true )
 			||
-			str_starts_with( $processor->get_stored_xpath(), "/HTML/BODY/DIV[@id='wpadminbar']" )
+			$processor->is_admin_bar()
 		) {
 			continue;
 		}
