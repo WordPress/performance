@@ -59,7 +59,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 								'href' => $poster,
 							)
 						);
-						$processor->set_attribute( 'preload', 'auto' );
+						$processor->set_attribute( 'preload', 'auto' ); // TODO: For some reason the order here is different with data-od-xpath.
 					} else {
 						$processor->set_attribute( 'preload', 'none' );
 					}
