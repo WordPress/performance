@@ -266,6 +266,15 @@ class Test_AutoSizes extends WP_UnitTestCase {
 				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes=",,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
 				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, ,,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
 			),
+			'expected_when_no_img_tag'                     => array(
+				'input'    => '<p>No image here</p>',
+				'expected' => '<p>No image here</p>',
+			),
+			'expected_when_not_responsive'                 => array(
+				'input'    => '<img src="https://example.com/foo.jpg" loading="lazy">',
+				'expected' => '<img src="https://example.com/foo.jpg" loading="lazy">',
+			),
+
 		);
 	}
 
@@ -278,5 +287,78 @@ class Test_AutoSizes extends WP_UnitTestCase {
 			$expected,
 			auto_sizes_update_content_img_tag( $input )
 		);
+	}
+
+	/**
+	 * @covers ::auto_sizes_attribute_includes_valid_auto
+	 */
+	public function test_auto_sizes_attribute_includes_valid_auto(): void {
+		// Test when 'auto' is the first item in the list.
+		$sizes_attr = 'auto, 100vw';
+		$this->assertTrue( auto_sizes_attribute_includes_valid_auto( $sizes_attr ) );
+
+		// Test when 'auto' is not the first item in the list.
+		$sizes_attr = '100vw, auto';
+		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( $sizes_attr ) );
+	}
+
+	/**
+	 * Provides data for the auto_sizes_update_image_attributes test.
+	 *
+	 * @return array<int,mixed[]> The data for the test cases.
+	 */
+	public function data_provider_for_auto_sizes_update_image_attributes(): array {
+		return array(
+			array(
+				array(
+					'loading' => 'eager',
+					'sizes'   => '100vw',
+				),
+				array(
+					'loading' => 'eager',
+					'sizes'   => '100vw',
+				),
+			),
+
+			// Test when the image is not responsive.
+			array( array( 'loading' => 'lazy' ), array( 'loading' => 'lazy' ) ),
+
+			// Test when 'auto' already exists in the sizes attribute.
+			array(
+				array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+				array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+			),
+
+			// Test when 'auto' needs to be added to the sizes attribute.
+			array(
+				array(
+					'loading' => 'lazy',
+					'sizes'   => '100vw',
+				),
+				array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+			),
+
+			// Test when $attr is not an array.
+			array( 'not an array', array() ),
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $attr Attributes to be updated.
+	 * @param array<string, mixed> $expected Expected updated attributes.
+	 * @covers ::auto_sizes_update_image_attributes
+	 * @dataProvider data_provider_for_auto_sizes_update_image_attributes
+	 */
+	public function test_auto_sizes_update_image_attributes( array $attr, array $expected ): void {
+		$this->assertSame( $expected, auto_sizes_update_image_attributes( $attr ) );
 	}
 }

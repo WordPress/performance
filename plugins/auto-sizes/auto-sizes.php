@@ -19,7 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 // Define the constant.
 if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
@@ -31,3 +30,4 @@ define( 'IMAGE_AUTO_SIZES_VERSION', '1.4.0' );
 require_once __DIR__ . '/includes/auto-sizes.php';
 require_once __DIR__ . '/includes/improve-calculate-sizes.php';
 require_once __DIR__ . '/hooks.php';
+// @codeCoverageIgnoreEnd
