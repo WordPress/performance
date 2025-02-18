@@ -2,12 +2,12 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   1.0.0-beta1
+Stable tag:   1.0.0-beta2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
 
-Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
 
 == Description ==
 
@@ -54,6 +54,28 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Account for 64 KiB limit for sending beacon data. ([1851](https://github.com/WordPress/performance/pull/1851))
+* Add post ID for the `od_url_metrics` post to the tag visitor context. ([1847](https://github.com/WordPress/performance/pull/1847))
+* Change minimum viewport width to be exclusive whereas the maximum width remains inclusive. ([1839](https://github.com/WordPress/performance/pull/1839))
+* Disable URL Metric storage locking by default for administrators. ([1835](https://github.com/WordPress/performance/pull/1835))
+* Include active plugins in ETag data and increase default freshness TTL from 1 day to 1 week. ([1854](https://github.com/WordPress/performance/pull/1854))
+* Make ETag a required property of the URL Metric. ([1824](https://github.com/WordPress/performance/pull/1824))
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+* Use `IFRAME` to display HTML responses for REST API storage request failures in Site Health test. ([1849](https://github.com/WordPress/performance/pull/1849))
+
+**Bug Fixes**
+
+* Prevent URL in `Link` header from including invalid characters. ([1802](https://github.com/WordPress/performance/pull/1802))
+* Prevent optimizing post previews by default. ([1848](https://github.com/WordPress/performance/pull/1848))
+
+**Documentation**
+
+* Improve Optimization Detective documentation. ([1782](https://github.com/WordPress/performance/pull/1782))
 
 = 1.0.0-beta1 =
 

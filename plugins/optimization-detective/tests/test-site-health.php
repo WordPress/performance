@@ -120,7 +120,28 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 						'code'    => 403,
 						'message' => 'Forbidden',
 					),
+					'headers'  => array(
+						'content-type' => 'text/html',
+					),
 					'body'     => "<html>\n<head><title>403 Forbidden</title></head>\n<body>\n<center><h1>403 Forbidden</h1></center>\n<hr><center>nginx</center>\n</body>\n</html>",
+				),
+				'expected_option'      => '1',
+				'expected_status'      => 'recommended',
+				'expected_unavailable' => true,
+			),
+			'other_forbidden' => array(
+				'mocked_response'      => array(
+					'response' => array(
+						'code'    => 403,
+						'message' => 'Forbidden',
+					),
+					'headers'  => array(
+						'content-type' => array(
+							'text/html; charset=utf-8',
+							'application/xhtml+xml',
+						),
+					),
+					'body'     => '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN"><html><head><title>403 Forbidden</title></head><body><h1>Forbidden</h1><p>You don\'t have permission to access this resource.</p></body></html>',
 				),
 				'expected_option'      => '1',
 				'expected_status'      => 'recommended',
@@ -142,6 +163,8 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 	 * @covers ::od_compose_site_health_result
 	 * @covers ::od_get_rest_api_health_check_response
 	 * @covers ::od_is_rest_api_unavailable
+	 * @covers ::od_render_rest_api_health_check_admin_notice_in_plugin_row
+	 * @covers ::od_maybe_render_rest_api_health_check_admin_notice
 	 *
 	 * @dataProvider data_provider_test_rest_api_availability
 	 *
@@ -151,6 +174,24 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 		$this->filter_rest_api_response( $mocked_response );
 
 		$result = od_test_rest_api_availability();
+		$notice = get_echo( 'od_render_rest_api_health_check_admin_notice_in_plugin_row', array( 'optimization-detective/load.php' ) );
+		if ( $expected_unavailable ) {
+			$this->assertStringContainsString( '<code>', $notice );
+			if ( is_array( $mocked_response ) ) {
+				if ( isset( $mocked_response['headers']['content-type'] ) && str_contains( join( '', (array) $mocked_response['headers']['content-type'] ), 'html' ) ) {
+					$this->assertStringContainsString( '</iframe>', $notice );
+					$this->assertStringNotContainsString( '</pre>', $notice );
+				} else {
+					$this->assertStringContainsString( '</pre>', $notice );
+					$this->assertStringNotContainsString( '</iframe>', $notice );
+				}
+			} else {
+				$this->assertStringNotContainsString( '</iframe>', $notice );
+				$this->assertStringNotContainsString( '</pre>', $notice );
+			}
+		} else {
+			$this->assertSame( '', $notice );
+		}
 		$this->assertArrayHasKey( 'label', $result );
 		$this->assertArrayHasKey( 'status', $result );
 		$this->assertArrayHasKey( 'badge', $result );
@@ -392,7 +433,7 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Build a mock response.
+	 * Build a mock JSON response.
 	 *
 	 * @param int                  $status_code HTTP status code.
 	 * @param string               $message     HTTP status message.
@@ -406,6 +447,9 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 				'message' => $message,
 			),
 			'body'     => wp_json_encode( $body ),
+			'headers'  => array(
+				'content-type' => 'application/json',
+			),
 		);
 	}
 }

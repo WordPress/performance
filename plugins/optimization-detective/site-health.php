@@ -127,6 +127,10 @@ function od_compose_site_health_result( $response ): array {
 		$message = wp_remote_retrieve_response_message( $response );
 		$body    = wp_remote_retrieve_body( $response );
 		$data    = json_decode( $body, true );
+		$header  = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_array( $header ) ) {
+			$header = array_pop( $header );
+		}
 
 		$is_expected = (
 			400 === $code &&
@@ -156,7 +160,18 @@ function od_compose_site_health_result( $response ): array {
 				$result['description'] .= '<blockquote>' . esc_html( $data['message'] ) . '</blockquote>';
 			}
 
-			$result['description'] .= '<details><summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary><pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre></details>';
+			if ( '' !== $body ) {
+				$result['description'] .= '<details>';
+				$result['description'] .= '<summary>' . esc_html__( 'Raw response:', 'optimization-detective' ) . '</summary>';
+
+				if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
+					$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
+					$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe>';
+				} else {
+					$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre>';
+				}
+				$result['description'] .= '</details>';
+			}
 		}
 	}
 	return $result;
@@ -238,12 +253,22 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
 		$message = "<details>$message</details>";
 	}
 
-	wp_admin_notice(
+	$notice = wp_get_admin_notice(
 		$message,
 		array(
 			'type'               => 'warning',
 			'additional_classes' => $in_plugin_row ? array( 'inline', 'notice-alt' ) : array(),
 			'paragraph_wrap'     => false,
+		)
+	);
+
+	echo wp_kses(
+		$notice,
+		array_merge(
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'iframe' => array_fill_keys( array( 'srcdoc', 'sandbox', 'width', 'height' ), true ),
+			)
 		)
 	);
 }
@@ -254,7 +279,7 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
  * @since 1.0.0
  * @access private
  *
- * @param string $plugin_file Plugin file.
+ * @param non-empty-string $plugin_file Plugin file.
  */
 function od_render_rest_api_health_check_admin_notice_in_plugin_row( string $plugin_file ): void {
 	if ( 'optimization-detective/load.php' !== $plugin_file ) { // TODO: What if a different plugin slug is used?

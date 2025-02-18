@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Namespace for optimization-detective.
  *
+ * @since 0.1.0
+ * @access private
  * @var string
  */
 const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
@@ -26,6 +28,8 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
  * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
  * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
  *
+ * @since 0.1.0
+ * @access private
  * @link https://google.aip.dev/136
  * @var string
  */
@@ -72,7 +76,7 @@ function od_register_endpoint(): void {
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+\z',
 			'validate_callback' => static function ( string $hmac, WP_REST_Request $request ) {
-				if ( ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
+				if ( '' === $hmac || ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
 					return new WP_Error( 'invalid_hmac', __( 'URL Metrics HMAC verification failure.', 'optimization-detective' ) );
 				}
 				return true;
@@ -98,7 +102,7 @@ function od_register_endpoint(): void {
 					return new WP_Error(
 						'url_metric_storage_locked',
 						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-						array( 'status' => 403 ) // TODO: Consider 423 Locked status code.
+						array( 'status' => 423 )
 					);
 				}
 				return true;
@@ -211,6 +215,27 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 				$e->getMessage()
 			),
 			array( 'status' => 400 )
+		);
+	}
+
+	/*
+	 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+	 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+	 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+	 * getting sent.
+	 */
+	$max_size       = 64 * 1024;
+	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+	if ( $content_length > $max_size ) {
+		return new WP_Error(
+			'rest_content_too_large',
+			sprintf(
+				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+				number_format_i18n( $content_length ),
+				number_format_i18n( $max_size )
+			),
+			array( 'status' => 413 )
 		);
 	}
 
