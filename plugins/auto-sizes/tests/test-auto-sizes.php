@@ -348,7 +348,10 @@ class Test_AutoSizes extends WP_UnitTestCase {
 			),
 
 			// Test when $attr is not an array.
-			array( 'not an array', array() ),
+			array(
+				'attr'     => array(),
+				'expected' => array(),
+			),
 		);
 	}
 
