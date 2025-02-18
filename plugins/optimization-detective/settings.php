@@ -19,6 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  */
 function od_add_optimization_detective_menu(): void {
+	if ( ! od_show_admin_url_priming_feature() ) {
+		return;
+	}
+
 	add_submenu_page(
 		'tools.php',
 		__( 'Optimization Detective', 'optimization-detective' ),
@@ -82,7 +86,7 @@ function od_render_optimization_detective_page(): void {
  * @return string[]|mixed The modified list of actions.
  */
 function od_add_settings_action_link( $links ) {
-	if ( ! is_array( $links ) ) {
+	if ( ! is_array( $links ) || ! od_show_admin_url_priming_feature() ) {
 		return $links;
 	}
 

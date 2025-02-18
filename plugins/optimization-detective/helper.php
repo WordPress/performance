@@ -515,3 +515,67 @@ function od_filter_batch_urls_for_iframe_url_metrics_priming( array $urls ): arr
 
 	return $filtered_batch;
 }
+
+/**
+ * Determines whether the admin-based URL priming feature should be displayed.
+ *
+ * Developers can force-enable the feature by filtering 'od_show_admin_url_priming_feature', or modify the
+ * threshold via 'od_admin_url_priming_threshold'.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if the admin URL priming feature should be displayed, false otherwise.
+ */
+function od_show_admin_url_priming_feature(): bool {
+	/**
+	 * Filters whether the admin URL priming feature should be shown in the admin dashboard.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $show_feature True if the feature should be shown, false otherwise.
+	 */
+	$force_show = apply_filters( 'od_show_admin_url_priming_feature', false );
+	if ( $force_show ) {
+		return true;
+	}
+
+	/**
+	 * Filters the threshold for enabling the admin URL priming feature.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $threshold The threshold count of frontend-visible URLs.
+	 */
+	$threshold = apply_filters( 'od_admin_url_priming_threshold', 1000 );
+	$count     = 0;
+
+	// Get the sitemap server and its registry of providers.
+	$server    = wp_sitemaps_get_server();
+	$registry  = $server->registry;
+	$providers = array_values( $registry->get_providers() );
+
+	foreach ( $providers as $provider ) {
+		// Each provider returns its object subtypes (e.g. 'post', 'page', etc.).
+		$subtypes = array_values( $provider->get_object_subtypes() );
+		foreach ( $subtypes as $subtype ) {
+			$max_pages = $provider->get_max_num_pages( $subtype->name );
+			for ( $page = 1; $page <= $max_pages; $page++ ) {
+				$url_list = $provider->get_url_list( $page, $subtype->name );
+				if ( ! is_array( $url_list ) ) {
+					continue;
+				}
+
+				$url_chunk = array_filter( array_column( $url_list, 'loc' ) );
+				$count    += count( $url_chunk );
+
+				// If we reach the threshold, disable the admin priming feature.
+				if ( $count >= $threshold ) {
+					return false;
+				}
+			}
+		}
+	}
+
+	// If we reach here, the count is less than the threshold. Enable the admin priming feature.
+	return true;
+}
