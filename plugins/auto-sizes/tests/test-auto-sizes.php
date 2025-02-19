@@ -356,10 +356,12 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::auto_sizes_update_image_attributes
+	 *
+	 * @dataProvider data_provider_for_auto_sizes_update_image_attributes
+	 *
 	 * @param array<string, mixed> $attr Attributes to be updated.
 	 * @param array<string, mixed> $expected Expected updated attributes.
-	 * @covers ::auto_sizes_update_image_attributes
-	 * @dataProvider data_provider_for_auto_sizes_update_image_attributes
 	 */
 	public function test_auto_sizes_update_image_attributes( array $attr, array $expected ): void {
 		$this->assertSame( $expected, auto_sizes_update_image_attributes( $attr ) );
