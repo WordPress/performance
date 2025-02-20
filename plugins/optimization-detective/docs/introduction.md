@@ -2,7 +2,8 @@
 
 # Optimization Detective Introduction
 
-Note: To see a table of contents for this document, select the outline button ![GitHub outline button](images/outline-button.png) in GitHub’s header above. This is a large document which will eventually be split up into smaller ones.
+> [!NOTE]
+> To see a table of contents for this document, select the outline button <img src="images/outline-button.png" alt="GitHub outline button" width="20" height="20"> in GitHub’s header above. This is a large document which will eventually be split up into smaller ones.
 
 ## Background
 
