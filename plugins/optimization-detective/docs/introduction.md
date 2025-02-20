@@ -39,13 +39,13 @@ It’s even worse in this specific scenario because the fourth image is the LCP 
 
 As somewhat the inverse of lazy loading is the Fetch Priority API, namely adding `fetchpriority=high` to an `IMG`. This tells the browser it should prioritize loading the resource over other resources on the page. In 2023, enhancing LCP image performance with Fetch Priority was [proposed](https://make.wordpress.org/core/2023/05/02/proposal-for-enhancing-lcp-image-performance-with-fetchpriority/) for WordPress core, and later that year it [landed](https://make.wordpress.org/core/2023/07/13/image-performance-enhancements-in-wordpress-6-3/) and was [improved](https://make.wordpress.org/core/2023/10/18/image-loading-optimization-enhancements-in-6-4/). The performance enhancement added `fetchpriority=high` to the `IMG` which was determined to be the best candidate for being the LCP element. In many cases, the heuristics WordPress uses are correct, but unfortunately the problem remains that PHP on the server is unaware of how the page is actually laid out. It is easy to find scenarios where the LCP `IMG` element is not properly identified. For example, going back to the initial image lazy loading example:
 
-![Limitations in Applying Fetch Priority: Image outside viewport has fetchpriority=high but the LCP element is a header image with a CSS background-image](images/limitations-in-applying-lazy-loading-1.png)
+![Limitations in Applying Fetch Priority: Image outside viewport has fetchpriority=high but the LCP element is a header image with a CSS background-image](images/limitations-in-applying-fetchpriority-high-1.png)
 
 Not only does WordPress incorrectly omit `loading=lazy` from this `IMG` tag which is outside the initial viewport for all devices, it *also* is adding `fetchpriority=high` to this tag. This is problematic because it increases network contention for other resources which are actually needed to render content above the fold. In this specific example, the header is the LCP element which has a CSS `background-image`, and WordPress cannot add `fetchpriority=high` to this. (Specifically, it is a Cover block with a fixed background.) So the image outside the viewport is prioritized by WordPress over loading the critical LCP image. This incorrect prioritization would also negatively impact other critical resources needed for the initial viewport, including stylesheets and fonts.
 
 Another more fundamental problem with adding `fetchpriority=high` to an image is that often the LCP element on desktop will differ from the LCP element on mobile (and even differ from the LCP elements on tablet as well). Consider the previous example where there were four content images, three shown in columns and the fourth shown full size:
 
-![Limitations in Applying Fetch Priority: Actual LCP image element not given fetchpriority=high since it varies between viewports and core only adds it to the first image even though a subsequent image may be larger](images/limitations-in-applying-lazy-loading-2.png)
+![Limitations in Applying Fetch Priority: Actual LCP image element not given fetchpriority=high since it varies between viewports and core only adds it to the first image even though a subsequent image may be larger](images/limitations-in-applying-fetchpriority-high-2.png)
 
 WordPress core adds `fetchpriority=high` to the first sufficiently-large image, which by default is 50,000 pixels (e.g. for a 200x250 image). In the example above, on desktop the image in the first column is only 136x91 because CSS is used to reduce its rendered size inside the column. So even though its dimensions in HTML indicate it is above the threshold, in how the page is actually rendered on desktop it should have been passed over. On mobile, however, the rendered size of the initial image is 300x200 so it is above the threshold and gets `fetchpriority=high`. Nevertheless, the second image on mobile is actually a little bit taller at 300x225, so on a mobile viewport the *second* image is actually the LCP element. And on desktop, as mentioned above, it’s the fourth image not inside the Columns block which is actually the LCP element. So in adding `fetchpriority=high` to an `IMG` tag, not only can WordPress’s existing heuristics do so for the wrong image on both desktop and mobile, but even if it does so correctly for either mobile or desktop, this can result in being incorrect for the other device form factor since LCP elements vary by viewport size. Adding `fetchpriority=high` to an `IMG` is only correct when it is the LCP element for all device form factors, e.g. mobile, tablet, and desktop. On the server-side in WordPress, you cannot reliably provide different HTML attributes for different viewports, so that makes it impossible to apply `fetchpriority=high` with 100% accuracy—even if WordPress Core's server-side guesstimate was perfect.
 
@@ -256,7 +256,6 @@ add_action( 'od_register_tag_visitors', function ( OD_Tag_Visitor_Registry $regi
 			$context->processor->set_attribute( 'fetchpriority', 'high' );
 		}
 	} );
-
 } );
 ```
 
@@ -471,7 +470,7 @@ There is a [reference](https://github.com/WordPress/performance/blob/trunk/plugi
 
 ## [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 
-Prioritizes the loading of images and videos based on how they appear to actual visitors: adds fetchpriority, preloads, lazy loads, and sets sizes.
+> Prioritizes the loading of images and videos based on how they appear to actual visitors: adds fetchpriority, preloads, lazy loads, and sets sizes.
 
 As shown in the Background section above, WordPress core can incorrectly add `fetchpriority=high` to an `IMG` which is never the LCP element. Not only this, different viewport sizes often have different LCP elements, meaning that adding `fetchpriority=high` to an `IMG` will always be wrong for some segment of visitors. Additionally, WordPress adds `loading=lazy` to the first three content images even though the fourth may be in a viewport (and even the LCP element) as can be seen in this example:
 
@@ -534,7 +533,7 @@ After:
 
 ## [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
 
-Optimizes the performance of embeds through lazy loading, preconnecting, and reserving space to reduce layout shifts.
+> Optimizes the performance of embeds through lazy loading, preconnecting, and reserving space to reduce layout shifts.
 
 Embeds are very resource intensive components on a page, both in terms of their network usage and in their CPU load. The page load time suffers when out-of-viewport embeds compete to load alongside assets displayed in the initial viewport. This can be seen here in this profile of a page in which embeds from YouTube, Twitter, and TikTok are on the page but aren’t in the initial viewport:
 
