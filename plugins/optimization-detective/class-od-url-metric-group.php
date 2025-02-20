@@ -242,6 +242,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Adds a URL Metric to the group.
 	 *
 	 * @since 0.1.0
+	 * @access private
 	 *
 	 * @throws InvalidArgumentException If the viewport width of the URL Metric is not within the min/max bounds of the group.
 	 *
@@ -279,7 +280,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Determines whether the URL Metric group is complete.
 	 *
 	 * A group is complete if it has the full sample size of URL Metrics
-	 * and all of these URL Metrics are fresh.
+	 * and all of these URL Metrics are fresh (with a current ETag and a
+	 * timestamp that is not older than the freshness TTL).
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 If the current environment's generated ETag does not match the URL Metric's ETag, the URL Metric is considered stale.
@@ -486,6 +488,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Clears result cache.
 	 *
 	 * @since 0.9.0
+	 * @access private
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();

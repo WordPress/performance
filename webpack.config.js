@@ -306,6 +306,7 @@ const buildPlugin = ( env ) => {
 							dot: true,
 							ignore: [
 								'**/.wordpress-org',
+								'**/docs',
 								'**/phpcs.xml.dist',
 								'**/tests',
 								'**/*.[Cc]ache',
