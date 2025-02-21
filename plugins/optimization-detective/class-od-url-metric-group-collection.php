@@ -233,7 +233,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the first URL Metric group.
+	 * Gets the first URL Metric group (with the lowest minimum viewport width, e.g. for mobile).
 	 *
 	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0
 	 * and the maximum viewport width corresponds to the smallest defined breakpoint returned by
@@ -248,7 +248,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the last URL Metric group.
+	 * Gets the last URL Metric group (with the highest minimum viewport width, e.g. for desktop).
 	 *
 	 * This group normally represents viewports for desktop devices.  This group always has a minimum viewport width
 	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
@@ -266,6 +266,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Clears result cache.
 	 *
 	 * @since 0.3.0
+	 * @access private
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();
@@ -298,6 +299,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 0.1.0
 	 * @throws InvalidArgumentException If there is no group available to add a URL Metric to.
+	 * @access private
 	 *
 	 * @param OD_URL_Metric $new_url_metric New URL Metric.
 	 */
@@ -317,7 +319,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets group for viewport width.
+	 * Gets the group for the provided viewport width.
 	 *
 	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
@@ -411,7 +413,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Checks whether every group is complete.
+	 * Checks whether every group is complete (full sample of non-stale URL Metrics).
+	 *
+	 * Completeness means the full sample size of URL Metrics has been collected,
+	 * none of the collected URL Metrics are stale (with a mismatching ETag or a
+	 * timestamp older than the freshness TTL).
 	 *
 	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group::is_complete()
@@ -438,7 +444,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the groups with the provided LCP element XPath.
+	 * Gets the groups which have an LCP element with the provided XPath.
 	 *
 	 * @since 0.3.0
 	 * @see OD_URL_Metric_Group::get_lcp_element()
@@ -468,7 +474,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets common LCP element.
+	 * Gets the LCP element which is shared by all groups, or at least the first group (mobile) and last group (desktop) if the intermediary groups are not populated.
 	 *
 	 * @since 0.3.0
 	 * @since 0.9.0 An LCP element is also considered common if it is the same in the narrowest and widest viewport groups, and all intermediate groups are empty.
@@ -585,7 +591,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets all elements' status for whether they are positioned in any initial viewport.
+	 * Gets the status for whether each element is positioned in any initial viewport.
 	 *
 	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
 	 * `viewport.height` for any of its recorded URL Metrics. Note that even though the element may be positioned in the

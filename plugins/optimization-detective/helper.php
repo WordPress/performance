@@ -22,22 +22,6 @@ function od_initialize_extensions(): void {
 	/**
 	 * Fires when extensions to Optimization Detective can be loaded and initialized.
 	 *
-	 * This action is useful for loading extension code that depends on Optimization Detective to be running. The version
-	 * of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
-	 *
-	 * Example:
-	 *
-	 *     add_action( 'od_init', function ( string $version ) {
-	 *         if ( version_compare( $version, '1.0', '<' ) ) {
-	 *             add_action( 'admin_notices', 'my_plugin_warn_optimization_plugin_outdated' );
-	 *             return;
-	 *         }
-	 *
-	 *         // Bootstrap the Optimization Detective extension.
-	 *         require_once __DIR__ . '/functions.php';
-	 *         // ...
-	 *     } );
-	 *
 	 * @since 0.7.0
 	 *
 	 * @param string $version Optimization Detective version.
