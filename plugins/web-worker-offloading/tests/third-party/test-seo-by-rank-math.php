@@ -6,6 +6,13 @@
  */
 
 class Test_Seo_By_Rank_Math extends WP_UnitTestCase {
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		require_once __DIR__ . '/../../third-party/seo-by-rank-math.php';
+	}
 
 	/**
 	 * Test the function that configures WWO for Rank Math SEO.

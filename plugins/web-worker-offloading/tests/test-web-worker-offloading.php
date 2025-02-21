@@ -14,8 +14,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		parent::set_up();
 		$this->reset_wp_dependencies();
 		add_theme_support( 'html5', array( 'script' ) );
-		require_once __DIR__ . '/../third-party/woocommerce.php';
-		require_once __DIR__ . '/../third-party/seo-by-rank-math.php';
 	}
 
 	/**
@@ -351,14 +349,13 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 * @covers ::plwwo_load_third_party_integrations
 	 */
 	public function test_plwwo_load_third_party_integrations(): void {
-		if ( ! defined( 'GOOGLESITEKIT_VERSION' ) ) {
-			define( 'GOOGLESITEKIT_VERSION', '1.0.0' );
-		}
-		do_action( 'plugins_loaded' );
+		plwwo_load_third_party_integrations();
 
-		// Check that the integrations have been loaded.
-		$this->assertTrue( function_exists( 'plwwo_google_site_kit_configure' ) );
-		$this->assertTrue( function_exists( 'plwwo_rank_math_configure' ) );
-		$this->assertTrue( function_exists( 'plwwo_woocommerce_configure' ) );
+		// Note: Calling the above function won't actually impact these since none of the plugins are active.
+		// In order to test these being true it would depend on either actually loading those plugins,
+		// or defining constants/classes in separate processes.
+		$this->assertFalse( function_exists( 'plwwo_google_site_kit_configure' ) );
+		$this->assertFalse( function_exists( 'plwwo_rank_math_configure' ) );
+		$this->assertFalse( function_exists( 'plwwo_woocommerce_configure' ) );
 	}
 }

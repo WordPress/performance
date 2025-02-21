@@ -5,6 +5,13 @@
  * @package web-worker-offloading
  */
 class Test_Google_Site_Kit extends WP_UnitTestCase {
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		require_once __DIR__ . '/../../third-party/google-site-kit.php';
+	}
 
 	/**
 	 * Test the function that configures WWO for Google Site Kit.

@@ -6,6 +6,13 @@
  */
 
 class Test_WooCommerce extends WP_UnitTestCase {
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		require_once __DIR__ . '/../../third-party/woocommerce.php';
+	}
 
 	/**
 	 * Test the function that configures WWO for WooCommerce.
