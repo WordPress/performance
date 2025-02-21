@@ -16,7 +16,7 @@
  */
 function auto_sizes_prime_attachment_caches( $content ): string {
 	if ( ! is_string( $content ) ) {
-		return '';// @codeCoverageIgnore
+		return ''; // @codeCoverageIgnore
 	}
 
 	$processor = new WP_HTML_Tag_Processor( $content );
@@ -26,7 +26,7 @@ function auto_sizes_prime_attachment_caches( $content ): string {
 		$class = $processor->get_attribute( 'class' );
 
 		if ( ! is_string( $class ) ) {
-			continue;// @codeCoverageIgnore
+			continue; // @codeCoverageIgnore
 		}
 
 		if ( preg_match( '/(?:^|\s)wp-image-([1-9][0-9]*)(?:\s|$)/', $class, $class_id ) === 1 ) {
@@ -63,7 +63,7 @@ function auto_sizes_prime_attachment_caches( $content ): string {
  */
 function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $block ): string {
 	if ( ! is_string( $content ) ) {
-		return '';// @codeCoverageIgnore
+		return ''; // @codeCoverageIgnore
 	}
 
 	$processor = new WP_HTML_Tag_Processor( $content );
