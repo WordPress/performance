@@ -337,11 +337,12 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		wp_enqueue_script( 'test-script', 'https://example.com/test-script.js', array(), '1.0.0', true );
 		plwwo_mark_scripts_for_offloading( array( 'test-script' ) );
 
-		$scripts = wp_scripts();
-		$scripts->do_items();
+		$html = get_echo( array( wp_scripts(), 'do_items' ) );
 
 		// Check that the 'worker' data has been added to the script.
 		$this->assertTrue( wp_scripts()->get_data( 'test-script', 'worker' ) );
+
+		$this->assertStringContainsString( 'Partytown', $html );
 	}
 
 	/**
