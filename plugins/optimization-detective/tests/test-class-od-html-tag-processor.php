@@ -578,6 +578,42 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test next_open_tag().
+	 *
+	 * @covers ::next_open_tag
+	 */
+	public function test_next_open_tag(): void {
+		$html = '
+			<!DOCTYPE html>
+			<html>
+				<head>
+					<title></title>
+				</head>
+				<body></body>
+			</html>
+		';
+
+		$p = new OD_HTML_Tag_Processor( $html );
+		$this->assertTrue( $p->next_open_tag() ); // @phpstan-ignore method.deprecated
+		$this->assertSame( 'HTML', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_open_tag() ); // @phpstan-ignore method.deprecated
+		$this->assertSame( 'HEAD', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_open_tag() ); // @phpstan-ignore method.deprecated
+		$this->assertSame( 'TITLE', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_open_tag() ); // @phpstan-ignore method.deprecated
+		$this->assertSame( 'BODY', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertFalse( $p->next_open_tag() ); // @phpstan-ignore method.deprecated
+	}
+
+	/**
 	 * Test expects_closer().
 	 *
 	 * @covers ::expects_closer
@@ -632,7 +668,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$saw_head = false;
 		$saw_body = false;
 		$did_seek = false;
-		while ( $processor->next_open_tag() ) {
+		while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$this->assertStringNotContainsString( $head_injected, $processor->get_updated_html(), 'Only expecting end-of-head injection once document was finalized.' );
 			$this->assertStringNotContainsString( $body_injected, $processor->get_updated_html(), 'Only expecting end-of-body injection once document was finalized.' );
 			$tag = $processor->get_tag();
@@ -708,7 +744,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 		$saw_head = false;
 		$saw_body = false;
-		while ( $processor->next_open_tag() ) {
+		while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
@@ -732,7 +768,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
 		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr" data-novalue></html>' );
-		while ( $processor->next_open_tag() ) {
+		while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$open_tag = $processor->get_tag();
 			if ( 'HTML' === $open_tag ) {
 				$processor->set_attribute( 'lang', 'es' );
@@ -787,7 +823,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertSame( 0, $last_cursor_move_count );
 
 		$bookmarks = array();
-		while ( $processor->next_open_tag() ) {
+		while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$this_cursor_move_count = $processor->get_cursor_move_count();
 			$this->assertGreaterThan( $last_cursor_move_count, $this_cursor_move_count );
 			$last_cursor_move_count = $this_cursor_move_count;

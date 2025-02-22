@@ -246,11 +246,13 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next tag.
 	 *
-	 * Unlike the base class, this subclass visits tag closers by default.
+	 * Unlike the base class, this subclass currently visits tag closers by default.
+	 * However, for the 1.0.0 release this method will behave the same as the method in
+	 * the base class, where it skips tag closers by default.
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
-	 * @since n.e.x.t Passing a $query is now allowed. In a future release, this will default to skipping tag closers.
+	 * @since n.e.x.t Passing a $query is now allowed. In the 1.0.0 release, this will default to skipping tag closers.
 	 *
 	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
@@ -269,7 +271,10 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next open tag.
 	 *
+	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
+	 *
 	 * @since 0.4.0
+	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
