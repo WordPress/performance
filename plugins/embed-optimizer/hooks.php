@@ -44,13 +44,8 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
-	if (
-		version_compare( (string) strtok( $optimization_detective_version, '-' ), '1.0.0', '<' )
-		||
-		'1.0.0-beta1' === $optimization_detective_version
-		||
-		'1.0.0-beta2' === $optimization_detective_version
-	) {
+	$required_od_version = '0.9.0';
+	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
 		add_action(
 			'admin_notices',
 			static function (): void {
@@ -192,6 +187,12 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 	$trigger_error  = static function ( string $message ) use ( $function_name ): void {
 		wp_trigger_error( $function_name, esc_html( $message ) );
 	};
+
+	// As of 1.0.0-beta3, next_tag() allows $query and is beginning to migrate to skip tag closers by default.
+	// In versions prior to this, the method always visited closers and passing a $query actually threw an exception.
+	$tag_query = version_compare( OPTIMIZATION_DETECTIVE_VERSION, '1.0.0-beta3', '>=' )
+		? array( 'tag_closers' => 'visit' )
+		: null;
 	try {
 		/*
 		 * Determine how to lazy load the embed.
@@ -258,7 +259,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 					}
 				}
 			}
-		} while ( $html_processor->next_tag( array( 'tag_closers' => 'visit' ) ) );
+		} while ( $html_processor->next_tag( $tag_query ) );
 		// If there was only one non-inline script, make it lazy.
 		if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( $bookmark_names['script'] ) ) {
 			$needs_lazy_script = true;
