@@ -16,6 +16,8 @@ class Test_WooCommerce extends WP_UnitTestCase {
 
 	/**
 	 * Test the function that configures WWO for WooCommerce.
+	 *
+	 * @covers ::plwwo_woocommerce_configure
 	 */
 	public function test_plwwo_woocommerce_configure(): void {
 		$configuration          = array();

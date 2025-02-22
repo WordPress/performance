@@ -16,6 +16,8 @@ class Test_Seo_By_Rank_Math extends WP_UnitTestCase {
 
 	/**
 	 * Test the function that configures WWO for Rank Math SEO.
+	 *
+	 * @covers ::plwwo_rank_math_configure
 	 */
 	public function test_plwwo_rank_math_configure(): void {
 		$configuration          = array();

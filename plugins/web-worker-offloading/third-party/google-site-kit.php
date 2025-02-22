@@ -43,8 +43,7 @@ function plwwo_google_site_kit_configure( $configuration ): array {
 
 	return $configuration;
 }
-// @codeCoverageIgnoreStart
-add_filter( 'plwwo_configuration', 'plwwo_google_site_kit_configure' );
+add_filter( 'plwwo_configuration', 'plwwo_google_site_kit_configure' ); // @codeCoverageIgnore
 
 plwwo_mark_scripts_for_offloading(
 	array(
@@ -52,7 +51,7 @@ plwwo_mark_scripts_for_offloading(
 		'googlesitekit-consent-mode',
 	)
 );
-// @codeCoverageIgnoreEnd
+
 /**
  * Filters inline script attributes to offload Google Site Kit's GTag script tag to Partytown.
  *
@@ -71,4 +70,4 @@ function plwwo_google_site_kit_filter_inline_script_attributes( $attributes ) {
 	return $attributes;
 }
 
-add_filter( 'wp_inline_script_attributes', 'plwwo_google_site_kit_filter_inline_script_attributes' );// @codeCoverageIgnore
+add_filter( 'wp_inline_script_attributes', 'plwwo_google_site_kit_filter_inline_script_attributes' ); // @codeCoverageIgnore

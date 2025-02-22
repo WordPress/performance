@@ -32,7 +32,7 @@ function plwwo_rank_math_configure( $configuration ): array {
 	$configuration['forward'][] = 'gtag';
 	return $configuration;
 }
-add_filter( 'plwwo_configuration', 'plwwo_rank_math_configure' );// @codeCoverageIgnore
+add_filter( 'plwwo_configuration', 'plwwo_rank_math_configure' ); // @codeCoverageIgnore
 
 /*
  * Note: The following integration is not targeting the \RankMath\Analytics\GTag::enqueue_gtag_js() code which is only
@@ -60,7 +60,7 @@ function plwwo_rank_math_filter_script_attributes( $attributes ) {
 	return $attributes;
 }
 
-add_filter( 'wp_script_attributes', 'plwwo_rank_math_filter_script_attributes' );// @codeCoverageIgnore
+add_filter( 'wp_script_attributes', 'plwwo_rank_math_filter_script_attributes' ); // @codeCoverageIgnore
 
 /**
  * Filters inline script attributes to offload Rank Math's GTag script tag to Partytown.
@@ -80,4 +80,4 @@ function plwwo_rank_math_filter_inline_script_attributes( $attributes ) {
 	return $attributes;
 }
 
-add_filter( 'wp_inline_script_attributes', 'plwwo_rank_math_filter_inline_script_attributes' );// @codeCoverageIgnore
+add_filter( 'wp_inline_script_attributes', 'plwwo_rank_math_filter_inline_script_attributes' ); // @codeCoverageIgnore
