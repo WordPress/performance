@@ -527,6 +527,57 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test next_tag() without passing query.
+	 *
+	 * @todo This test will need to be updated once next_tag() defaults to not visiting closers by default.
+	 *
+	 * @covers ::next_tag
+	 */
+	public function test_next_tag_without_query(): void {
+		$html = '
+			<!DOCTYPE html>
+			<html>
+				<head>
+					<title></title>
+				</head>
+				<body></body>
+			</html>
+		';
+
+		$p = new OD_HTML_Tag_Processor( $html );
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'HTML', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'HEAD', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'TITLE', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		// Note: This is not a closing TITLE tag as would be expected since it is special.
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'HEAD', $p->get_tag() );
+		$this->assertTrue( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'BODY', $p->get_tag() );
+		$this->assertFalse( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'BODY', $p->get_tag() );
+		$this->assertTrue( $p->is_tag_closer() );
+
+		$this->assertTrue( $p->next_tag() );
+		$this->assertSame( 'HTML', $p->get_tag() );
+		$this->assertTrue( $p->is_tag_closer() );
+
+		$this->assertFalse( $p->next_tag() );
+	}
+
+	/**
 	 * Test expects_closer().
 	 *
 	 * @covers ::expects_closer
