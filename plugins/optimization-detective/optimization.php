@@ -292,7 +292,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
 		foreach ( $visitors as $visitor ) {
-			$cursor_move_count    = $processor->get_cursor_move_count();
 			$visitor_return_value = $visitor( $tag_visitor_context );
 			if ( true === $visitor_return_value ) {
 				$tracked_in_url_metrics = true;
@@ -300,9 +299,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 			// If the visitor traversed HTML tags, we need to go back to this tag so that in the next iteration any
 			// relevant tag visitors may apply, in addition to properly setting the data-od-xpath on this tag below.
-			if ( $cursor_move_count !== $processor->get_cursor_move_count() ) {
-				$processor->seek( $current_tag_bookmark ); // TODO: Should this break out of the optimization loop if it returns false?
-			}
+			$processor->seek( $current_tag_bookmark ); // TODO: Should this break out of the optimization loop if it returns false?
 		}
 		$processor->release_bookmark( $current_tag_bookmark );
 
