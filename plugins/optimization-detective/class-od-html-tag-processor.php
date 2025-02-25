@@ -716,7 +716,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns whether the processor is currently at or inside the admin bar.
 	 *
+	 * This is only intended to be used internally by Optimization Detective as part of the "optimization loop". Tag
+	 * visitors should not rely on this method as it may be deprecated in the future, especially with a migration to
+	 * WP_HTML_Processor after {@link https://core.trac.wordpress.org/ticket/63020} is implemented.
+	 *
 	 * @since 1.0.0
+	 * @access private
 	 *
 	 * @return bool Whether at or inside the admin bar.
 	 */
