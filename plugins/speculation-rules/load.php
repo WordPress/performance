@@ -77,8 +77,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		define( 'SPECULATION_RULES_VERSION', $version );
 		define( 'SPECULATION_RULES_MAIN_FILE', plugin_basename( __FILE__ ) );
 
-		require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
-		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 		require_once __DIR__ . '/settings.php';
 	}
