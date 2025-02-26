@@ -82,11 +82,11 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
  * @since 1.0.0
  * @access private
  *
- * @param int                                          $attachment_id         The ID of the attachment from where this image would be created.
- * @param string                                       $image_size            The size name that would be used to create the image source, out of the registered subsizes.
- * @param array{ width: int, height: int, crop: bool } $size_data             An array with the dimensions of the image: height, width and crop.
- * @param string                                       $mime                  The target mime in which the image should be created.
- * @param string|null                                  $destination_file_name The path where the file would be stored, including the extension. If null, `generate_filename` is used to create the destination file name.
+ * @param int                                                                     $attachment_id         The ID of the attachment from where this image would be created.
+ * @param string                                                                  $image_size            The size name that would be used to create the image source, out of the registered subsizes.
+ * @param array{ width: int, height: int, crop: bool|array{0: string, 1: string}} $size_data             An array with the dimensions of the image: height, width and crop.
+ * @param string                                                                  $mime                  The target mime in which the image should be created.
+ * @param string|null                                                             $destination_file_name The path where the file would be stored, including the extension. If null, `generate_filename` is used to create the destination file name.
  *
  * @return array{ file: string, filesize: int }|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
@@ -109,7 +109,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	 * @param array{
 	 *            width: int,
 	 *            height: int,
-	 *            crop: bool
+	 *            crop: bool|array{0: string, 1: string}
 	 *        }               $size_data     An array with the dimensions of the image.
 	 * @param string          $mime          The target mime in which the image should be created.
 	 */
@@ -156,7 +156,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
-	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
+	$crop   = isset( $size_data['crop'] ) ? $size_data['crop'] : false;
 	if ( $width <= 0 && $height <= 0 ) {
 		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'webp-uploads' ) );
 	}
@@ -240,8 +240,21 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
 		$size_data['height'] = $metadata['sizes'][ $size ]['height'];
 	}
 
-	if ( isset( $sizes[ $size ]['crop'] ) ) {
-		$size_data['crop'] = (bool) $sizes[ $size ]['crop'];
+	if (
+		isset( $sizes[ $size ]['crop'] ) &&
+		(
+			(
+				is_array( $sizes[ $size ]['crop'] ) &&
+				count( $sizes[ $size ]['crop'] ) === 2 &&
+				isset( $sizes[ $size ]['crop'][0] ) &&
+				isset( $sizes[ $size ]['crop'][1] ) &&
+				is_string( $sizes[ $size ]['crop'][0] ) &&
+				is_string( $sizes[ $size ]['crop'][1] )
+			) ||
+			is_bool( $sizes[ $size ]['crop'] )
+		)
+	) {
+		$size_data['crop'] = $sizes[ $size ]['crop'];
 	}
 
 	return webp_uploads_generate_additional_image_source( $attachment_id, $size, $size_data, $mime );
