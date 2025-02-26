@@ -373,4 +373,27 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->assertStringContainsString( $image_meta['sources'][ self::$mime_type ]['file'], $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should have full size image.' );
 		}
 	}
+
+	/**
+	 * Test handling of case when wp_get_attachment_image_src returns false.
+	 */
+	public function test_wrap_image_in_picture_with_false_image_src(): void {
+		$this->opt_in_to_picture_element();
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		add_filter( 'wp_get_attachment_image_src', '__return_false' );
+		$filtered_image = apply_filters( 'wp_content_img_tag', $image, 'the_content', self::$image_id );
+		remove_filter( 'wp_get_attachment_image_src', '__return_false' );
+
+		$this->assertSame( $image, $filtered_image );
+	}
 }
