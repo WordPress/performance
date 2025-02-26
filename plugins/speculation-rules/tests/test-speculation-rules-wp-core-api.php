@@ -7,6 +7,9 @@
 
 class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_configuration
+	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_regular(): void {
 		$this->assertSame(
 			array(
@@ -22,6 +25,9 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_configuration
+	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_invalid(): void {
 		$this->assertSame(
 			array(
@@ -32,10 +38,16 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_configuration
+	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_null(): void {
 		$this->assertNull( plsr_filter_speculation_rules_configuration( null ) );
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_configuration
+	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_pretty_permalinks_filter(): void {
 		// Providing null while pretty permalinks are disabled should be respected.
 		$this->disable_pretty_permalinks();
@@ -52,6 +64,9 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_exclude_paths
+	 */
 	public function test_plsr_filter_speculation_rules_exclude_paths_with_regular(): void {
 		$base_rules = array( '/membership-areas/*' );
 
@@ -71,6 +86,9 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_exclude_paths
+	 */
 	public function test_plsr_filter_speculation_rules_exclude_paths_with_invalid(): void {
 		$this->assertSame( array( '/personalized/*' ), plsr_filter_speculation_rules_exclude_paths( '/personalized/*', 'prefetch' ) );
 	}
