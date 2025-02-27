@@ -239,10 +239,16 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
-	$result = OD_URL_Metrics_Post_Type::store_url_metric(
+	try {
+		$url_metric_group->add_url_metric( $url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		// NOTE: This exception should never be thrown because `get_group_for_viewport_width()` already ensures the viewport width is valid.
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() ); // @codeCoverageIgnore
+	}
+
+	$result = OD_URL_Metrics_Post_Type::update_post(
 		$request->get_param( 'slug' ),
-		$url_metric
+		$url_metric_group_collection
 	);
 	if ( $result instanceof WP_Error ) {
 		$error_data = array(

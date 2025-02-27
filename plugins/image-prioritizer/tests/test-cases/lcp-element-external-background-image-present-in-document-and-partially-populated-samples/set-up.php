@@ -27,7 +27,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	// Partially populate all viewport groups.
 	foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $i => $viewport_width ) {
 		for ( $j = 0; $j < $viewport_sample_sizes[ $i ]; $j++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				$slug,
 				$test_case->get_sample_url_metric(
 					array(
@@ -48,7 +48,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	}
 
 	// Store one more URL metric for desktop which has a different background image.
-	OD_URL_Metrics_Post_Type::store_url_metric(
+	$test_case->store_url_metric(
 		$slug,
 		$test_case->get_sample_url_metric(
 			array(
