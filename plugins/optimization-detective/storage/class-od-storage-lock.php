@@ -23,7 +23,7 @@ final class OD_Storage_Lock {
 	/**
 	 * Capability for being able to store a URL Metric now.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var string
 	 */
 	const STORE_URL_METRIC_NOW_CAPABILITY = 'od_store_url_metric_now';
@@ -31,7 +31,7 @@ final class OD_Storage_Lock {
 	/**
 	 * Adds hooks.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 */
 	public static function add_hooks(): void {
 		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap' ) );
@@ -40,7 +40,7 @@ final class OD_Storage_Lock {
 	/**
 	 * Filters `user_has_cap` to grant the `od_store_url_metric_now` capability to users who can `manage_options` by default.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param array<string, bool>|mixed $allcaps Capability names mapped to boolean values for whether the user has that capability.
 	 * @return array<string, bool> Capability names mapped to boolean values for whether the user has that capability.
