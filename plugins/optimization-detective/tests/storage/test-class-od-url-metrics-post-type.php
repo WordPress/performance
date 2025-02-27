@@ -217,7 +217,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 			)
 		);
 
-		$url_metric_group = $url_metric_group_collection->add_url_metric( $validated_url_metric );
+		$url_metric_group_collection->add_url_metric( $validated_url_metric );
 		$post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
 		$this->assertIsInt( $post_id );
 
