@@ -200,7 +200,7 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Updates the URL Metrics Post Type with new URL Metrics.
+	 * Inserts or updates the od_url_metrics post with a provided collection of URL Metrics.
 	 *
 	 * This method updates an existing URL Metrics post or creates a new one if it doesn't exist.
 	 *

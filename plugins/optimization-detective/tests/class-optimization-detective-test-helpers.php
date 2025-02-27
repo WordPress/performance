@@ -169,7 +169,7 @@ trait Optimization_Detective_Test_Helpers {
 	/**
 	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
 	 *
-	 * @param non-empty-string $slug Slug (hash of normalized query vars).
+	 * @param non-empty-string $slug           Slug (hash of normalized query vars).
 	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
 	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
 	 */
