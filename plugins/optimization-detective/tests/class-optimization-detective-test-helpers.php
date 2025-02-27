@@ -185,12 +185,7 @@ trait Optimization_Detective_Test_Helpers {
 			od_get_url_metric_freshness_ttl()
 		);
 
-		try {
-			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
-			$group->add_url_metric( $new_url_metric );
-		} catch ( InvalidArgumentException $e ) {
-			return new WP_Error( 'invalid_url_metric', $e->getMessage() );
-		}
+		$group_collection->add_url_metric( $new_url_metric );
 
 		return OD_URL_Metrics_Post_Type::update_post( $slug, $group_collection );
 	}
