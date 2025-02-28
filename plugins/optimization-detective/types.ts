@@ -61,6 +61,7 @@ export interface Logger {
 export type InitializeArgs = {
 	readonly isDebug: boolean;
 	readonly log: LogFunction;
+	readonly info: LogFunction;
 	readonly warn: LogFunction;
 	readonly error: LogFunction;
 	readonly onTTFB: OnTTFBFunction | OnTTFBWithAttributionFunction;
@@ -82,6 +83,7 @@ export type FinalizeArgs = {
 	) => void;
 	readonly isDebug: boolean;
 	readonly log: LogFunction;
+	readonly info: LogFunction;
 	readonly warn: LogFunction;
 	readonly error: LogFunction;
 };
