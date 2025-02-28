@@ -53,6 +53,7 @@ export type LogFunction = ( ...message: any[] ) => void;
 
 export interface Logger {
 	log: LogFunction;
+	info: LogFunction;
 	warn: LogFunction;
 	error: LogFunction;
 }

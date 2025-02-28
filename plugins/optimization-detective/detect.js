@@ -71,7 +71,7 @@ function setStorageLock( currentTime ) {
  *
  * @param {boolean} [debugMode=false] - Whether to enable debug mode.
  * @param {string}  [prefix='']       - Prefix to prepend to the console message.
- * @return {Logger} Logger object with log, warn, and error methods.
+ * @return {Logger} Logger object with log, info, warn, and error methods.
  */
 function createLogger( debugMode = false, prefix = '' ) {
 	return {
@@ -84,6 +84,18 @@ function createLogger( debugMode = false, prefix = '' ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
 				console.log( prefix, ...message );
+			}
+		},
+
+		/**
+		 * Logs an informational message if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log as info.
+		 */
+		info( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.info( prefix, ...message );
 			}
 		},
 
