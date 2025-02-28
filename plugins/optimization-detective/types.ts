@@ -52,7 +52,6 @@ export type OnCLSWithAttributionFunction = typeof onCLSWithAttribution;
 export type LogFunction = ( ...message: any[] ) => void;
 
 export interface Logger {
-	prefix: string;
 	log: LogFunction;
 	warn: LogFunction;
 	error: LogFunction;
