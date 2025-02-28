@@ -70,15 +70,11 @@ function setStorageLock( currentTime ) {
  * Creates a logger object with log, warn, and error methods.
  *
  * @param {boolean} [debugMode=false] - Whether to enable debug mode.
+ * @param {string}  [prefix='']       - Prefix to prepend to the console message.
  * @return {Logger} Logger object with log, warn, and error methods.
  */
-function createLogger( debugMode = false ) {
+function createLogger( debugMode = false, prefix = '' ) {
 	return {
-		/**
-		 * Prefix for log messages.
-		 * @type {string}
-		 */
-		prefix: '',
 
 		/**
 		 * Logs a message if debug mode is enabled.
@@ -88,7 +84,7 @@ function createLogger( debugMode = false ) {
 		log( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.log( this.prefix, ...message );
+				console.log( prefix, ...message );
 			}
 		},
 
@@ -100,7 +96,7 @@ function createLogger( debugMode = false ) {
 		warn( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.warn( this.prefix, ...message );
+				console.warn( prefix, ...message );
 			}
 		},
 
@@ -111,7 +107,7 @@ function createLogger( debugMode = false ) {
 		 */
 		error( ...message ) {
 			// eslint-disable-next-line no-console
-			console.error( this.prefix, ...message );
+			console.error( prefix, ...message );
 		},
 	};
 }
@@ -347,8 +343,7 @@ export default async function detect( {
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
-	const logger = createLogger( isDebug );
-	logger.prefix = consoleLogPrefix;
+	const { log, warn, error } = createLogger( isDebug, consoleLogPrefix );
 
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
@@ -360,19 +355,19 @@ export default async function detect( {
 				allUrlMetrics.push( otherUrlMetric );
 			}
 		}
-		logger.log(
+		log(
 			'Stored URL Metric Group Collection:',
 			urlMetricGroupCollection
 		);
 		allUrlMetrics.sort( ( a, b ) => b.timestamp - a.timestamp );
-		logger.log(
+		log(
 			'Stored URL Metrics in reverse chronological order:',
 			allUrlMetrics
 		);
 	}
 
 	if ( win.innerWidth === 0 || win.innerHeight === 0 ) {
-		logger.log(
+		log(
 			'Window must have non-zero dimensions for URL Metric collection.'
 		);
 		return;
@@ -384,7 +379,7 @@ export default async function detect( {
 		urlMetricGroupStatuses
 	);
 	if ( urlMetricGroupStatus.complete ) {
-		logger.log( 'No need for URL Metrics from the current viewport.' );
+		log( 'No need for URL Metrics from the current viewport.' );
 		return;
 	}
 
@@ -404,7 +399,7 @@ export default async function detect( {
 			! isNaN( previousVisitTime ) &&
 			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
 		) {
-			logger.log(
+			log(
 				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
 			);
 			return;
@@ -417,7 +412,7 @@ export default async function detect( {
 		aspectRatio < minViewportAspectRatio ||
 		aspectRatio > maxViewportAspectRatio
 	) {
-		logger.warn(
+		warn(
 			`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
 		);
 		return;
@@ -453,7 +448,7 @@ export default async function detect( {
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( getCurrentTime(), storageLockTTL ) ) {
-		logger.warn( 'Aborted detection due to storage being locked.' );
+		warn( 'Aborted detection due to storage being locked.' );
 		return;
 	}
 
@@ -478,13 +473,13 @@ export default async function detect( {
 	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
 	if ( doc.documentElement.scrollTop > 0 ) {
-		logger.warn(
+		warn(
 			'Aborted detection since initial scroll position of page is not at the top.'
 		);
 		return;
 	}
 
-	logger.log( 'Proceeding with detection' );
+	log( 'Proceeding with detection' );
 
 	/** @type {Map<string, Extension>} */
 	const extensions = new Map();
@@ -501,9 +496,7 @@ export default async function detect( {
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
 
-			const extensionLogger = createLogger( isDebug );
-			extensionLogger.prefix =
-				extension.consoleLogPrefix || '[Extension]';
+			const extensionLogger = createLogger( isDebug, extension.name ? `[${extension.name}]` : '[Optimization Detective extension]' );
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
 			if ( extension.initialize instanceof Function ) {
@@ -522,7 +515,7 @@ export default async function detect( {
 				}
 			}
 		} catch ( err ) {
-			logger.error(
+			error(
 				`Failed to start initializing extension '${ extensionModuleUrl }':`,
 				err
 			);
@@ -538,7 +531,7 @@ export default async function detect( {
 		settledInitializePromise,
 	] of settledInitializePromises.entries() ) {
 		if ( settledInitializePromise.status === 'rejected' ) {
-			logger.error(
+			error(
 				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
 				settledInitializePromise.reason
 			);
@@ -626,7 +619,7 @@ export default async function detect( {
 
 	// Stop observing.
 	disconnectIntersectionObserver();
-	logger.log( 'Detection is stopping.' );
+	log( 'Detection is stopping.' );
 
 	urlMetric = {
 		url: currentUrl,
@@ -643,7 +636,7 @@ export default async function detect( {
 		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
 		if ( ! xpath ) {
 			if ( isDebug ) {
-				logger.error( 'Unable to look up XPath for element' );
+				error( 'Unable to look up XPath for element' );
 			}
 			continue;
 		}
@@ -674,7 +667,7 @@ export default async function detect( {
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
-	logger.log( 'Current URL Metric:', urlMetric );
+	log( 'Current URL Metric:', urlMetric );
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
@@ -695,7 +688,7 @@ export default async function detect( {
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
 	if ( didWindowResize ) {
-		logger.log(
+		log(
 			'Aborting URL Metric collection due to viewport size change.'
 		);
 		return;
@@ -714,9 +707,7 @@ export default async function detect( {
 			extension,
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
-				const extensionLogger = createLogger( isDebug );
-				extensionLogger.prefix =
-					extension.consoleLogPrefix || '[Extension]';
+				const extensionLogger = createLogger( isDebug, extension.name ? `[${extension.name}]` : '[Optimization Detective extension]' );
 
 				try {
 					const finalizePromise = extension.finalize( {
@@ -734,7 +725,7 @@ export default async function detect( {
 						);
 					}
 				} catch ( err ) {
-					logger.error(
+					error(
 						`Unable to start finalizing extension '${ extensionModuleUrl }':`,
 						err
 					);
@@ -751,7 +742,7 @@ export default async function detect( {
 			settledFinalizePromise,
 		] of settledFinalizePromises.entries() ) {
 			if ( settledFinalizePromise.status === 'rejected' ) {
-				logger.error(
+				error(
 					`Failed to finalize extension '${ finalizingExtensionModuleUrls[ i ] }':`,
 					settledFinalizePromise.reason
 				);
@@ -779,7 +770,7 @@ export default async function detect( {
 	 */
 	if ( jsonBody.length > maxBodyLengthBytes ) {
 		if ( isDebug ) {
-			logger.error(
+			error(
 				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
 					percentOfBudget
 				) }% of ${ maxBodyLengthKiB } KiB limit:`,
@@ -805,9 +796,9 @@ export default async function detect( {
 
 	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
 	if ( percentOfBudget < 50 ) {
-		logger.log( message, urlMetric );
+		log( message, urlMetric );
 	} else {
-		logger.warn( message, urlMetric );
+		warn( message, urlMetric );
 	}
 
 	const url = new URL( restApiEndpoint );
