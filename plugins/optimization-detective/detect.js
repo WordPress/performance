@@ -75,7 +75,6 @@ function setStorageLock( currentTime ) {
  */
 function createLogger( debugMode = false, prefix = '' ) {
 	return {
-
 		/**
 		 * Logs a message if debug mode is enabled.
 		 *
@@ -355,10 +354,7 @@ export default async function detect( {
 				allUrlMetrics.push( otherUrlMetric );
 			}
 		}
-		log(
-			'Stored URL Metric Group Collection:',
-			urlMetricGroupCollection
-		);
+		log( 'Stored URL Metric Group Collection:', urlMetricGroupCollection );
 		allUrlMetrics.sort( ( a, b ) => b.timestamp - a.timestamp );
 		log(
 			'Stored URL Metrics in reverse chronological order:',
@@ -496,7 +492,12 @@ export default async function detect( {
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
 
-			const extensionLogger = createLogger( isDebug, extension.name ? `[${extension.name}]` : '[Optimization Detective extension]' );
+			const extensionLogger = createLogger(
+				isDebug,
+				extension.name
+					? `[${ extension.name }]`
+					: '[Optimization Detective extension]'
+			);
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
 			if ( extension.initialize instanceof Function ) {
@@ -688,9 +689,7 @@ export default async function detect( {
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
 	if ( didWindowResize ) {
-		log(
-			'Aborting URL Metric collection due to viewport size change.'
-		);
+		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
 	}
 
@@ -707,7 +706,12 @@ export default async function detect( {
 			extension,
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
-				const extensionLogger = createLogger( isDebug, extension.name ? `[${extension.name}]` : '[Optimization Detective extension]' );
+				const extensionLogger = createLogger(
+					isDebug,
+					extension.name
+						? `[${ extension.name }]`
+						: '[Optimization Detective extension]'
+				);
 
 				try {
 					const finalizePromise = extension.finalize( {
