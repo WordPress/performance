@@ -16,7 +16,7 @@ export const name = 'Embed Optimizer';
  * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
  * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
  * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
- * @typedef {import("../optimization-detective/types.ts").Logger} Logger
+ * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
  */
 
 /**
@@ -32,17 +32,17 @@ const loadedElementContentRects = new Map();
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { logger } ) {
+export async function initialize( { log } ) {
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
 
 	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper, logger );
+		monitorEmbedWrapperForResizes( embedWrapper, log );
 	}
 
-	logger.log( 'Loaded embed content rects:', loadedElementContentRects );
+	log( 'Loaded embed content rects:', loadedElementContentRects );
 }
 
 /**
@@ -52,7 +52,8 @@ export async function initialize( { logger } ) {
  * @param {FinalizeArgs} args Args.
  */
 export async function finalize( {
-	logger,
+	log,
+	error,
 	getElementData,
 	extendElementData,
 } ) {
@@ -62,14 +63,14 @@ export async function finalize( {
 				resizedBoundingClientRect: domRect,
 			} );
 			const elementData = getElementData( xpath );
-			logger.log(
+			log(
 				`boundingClientRect for ${ xpath } resized:`,
 				elementData.boundingClientRect,
 				'=>',
 				domRect
 			);
 		} catch ( err ) {
-			logger.error(
+			error(
 				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
 				domRect,
 				err
@@ -82,9 +83,9 @@ export async function finalize( {
  * Monitors embed wrapper for resizes.
  *
  * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
- * @param {Logger}         logger       Logger.
+ * @param {LogFunction}    log          The function to call with log messages.
  */
-function monitorEmbedWrapperForResizes( embedWrapper, logger ) {
+function monitorEmbedWrapperForResizes( embedWrapper, log ) {
 	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
@@ -92,7 +93,7 @@ function monitorEmbedWrapperForResizes( embedWrapper, logger ) {
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
 		loadedElementContentRects.set( xpath, entry.contentRect );
-		logger.log( `Resized element ${ xpath }:`, entry.contentRect );
+		log( `Resized element ${ xpath }:`, entry.contentRect );
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
 }

@@ -503,7 +503,7 @@ export default async function detect( {
 			if ( extension.initialize instanceof Function ) {
 				const initializePromise = extension.initialize( {
 					isDebug,
-					logger: extensionLogger,
+					...extensionLogger,
 					onTTFB,
 					onFCP,
 					onLCP,
@@ -716,7 +716,7 @@ export default async function detect( {
 				try {
 					const finalizePromise = extension.finalize( {
 						isDebug,
-						logger: extensionLogger,
+						...extensionLogger,
 						getRootData,
 						getElementData,
 						extendElementData,

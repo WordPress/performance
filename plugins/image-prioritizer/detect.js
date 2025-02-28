@@ -29,7 +29,7 @@ const externalBackgroundImages = [];
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
  * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
  * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
- * @typedef {import("../optimization-detective/types.ts").Logger} Logger
+ * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
  */
 
 /**
@@ -40,10 +40,10 @@ const externalBackgroundImages = [];
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { logger, onLCP } ) {
+export async function initialize( { log, onLCP } ) {
 	onLCP(
 		( metric ) => {
-			handleLCPMetric( metric, logger );
+			handleLCPMetric( metric, log );
 		},
 		{
 			// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
@@ -59,10 +59,10 @@ export async function initialize( { logger, onLCP } ) {
  *
  * @since 0.3.0
  *
- * @param {LCPMetric} metric - LCP Metric.
- * @param {Logger}    logger - Logger.
+ * @param {LCPMetric}   metric - LCP Metric.
+ * @param {LogFunction} log    - The function to call with log messages.
  */
-function handleLCPMetric( metric, logger ) {
+function handleLCPMetric( metric, log ) {
 	for ( const entry of metric.entries ) {
 		// Look only for LCP entries that have a URL and a corresponding element which is not an IMG or VIDEO.
 		if (
@@ -87,15 +87,13 @@ function handleLCPMetric( metric, logger ) {
 
 		// Skip URLs that are excessively long. This is the maxLength defined in image_prioritizer_add_element_item_schema_properties().
 		if ( entry.url.length > 500 ) {
-			logger.log( `Skipping very long URL: ${ entry.url }` );
+			log( `Skipping very long URL: ${ entry.url }` );
 			return;
 		}
 
 		// Also skip Custom Elements which have excessively long tag names. This is the maxLength defined in image_prioritizer_add_element_item_schema_properties().
 		if ( entry.element.tagName.length > 100 ) {
-			logger.log(
-				`Skipping very long tag name: ${ entry.element.tagName }`
-			);
+			log( `Skipping very long tag name: ${ entry.element.tagName }` );
 			return;
 		}
 
@@ -103,12 +101,12 @@ function handleLCPMetric( metric, logger ) {
 		// The maxLengths are defined in image_prioritizer_add_element_item_schema_properties().
 		const id = entry.element.getAttribute( 'id' );
 		if ( typeof id === 'string' && id.length > 100 ) {
-			logger.log( `Skipping very long ID: ${ id }` );
+			log( `Skipping very long ID: ${ id }` );
 			return;
 		}
 		const className = entry.element.getAttribute( 'class' );
 		if ( typeof className === 'string' && className.length > 500 ) {
-			logger.log( `Skipping very long className: ${ className }` );
+			log( `Skipping very long className: ${ className }` );
 			return;
 		}
 
@@ -122,7 +120,7 @@ function handleLCPMetric( metric, logger ) {
 			class: className,
 		};
 
-		logger.log(
+		log(
 			'Detected external LCP background image:',
 			externalBackgroundImage
 		);
@@ -139,7 +137,7 @@ function handleLCPMetric( metric, logger ) {
  * @type {FinalizeCallback}
  * @param {FinalizeArgs} args Args.
  */
-export async function finalize( { extendRootData, logger } ) {
+export async function finalize( { extendRootData, log } ) {
 	if ( externalBackgroundImages.length === 0 ) {
 		return;
 	}
@@ -147,7 +145,7 @@ export async function finalize( { extendRootData, logger } ) {
 	// Get the last detected external background image which is going to be for the LCP element (or very likely will be).
 	const lcpElementExternalBackgroundImage = externalBackgroundImages.pop();
 
-	logger.log(
+	log(
 		'Sending external background image for LCP element:',
 		lcpElementExternalBackgroundImage
 	);
