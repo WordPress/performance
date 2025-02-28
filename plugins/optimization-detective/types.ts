@@ -49,8 +49,18 @@ export type OnLCPWithAttributionFunction = typeof onLCPWithAttribution;
 export type OnINPWithAttributionFunction = typeof onINPWithAttribution;
 export type OnCLSWithAttributionFunction = typeof onCLSWithAttribution;
 
+export type LogFunction = ( ...message: any[] ) => void;
+
+export interface Logger {
+	prefix: string;
+	log: LogFunction;
+	warn: LogFunction;
+	error: LogFunction;
+}
+
 export type InitializeArgs = {
 	readonly isDebug: boolean;
+	readonly logger: Logger;
 	readonly onTTFB: OnTTFBFunction | OnTTFBWithAttributionFunction;
 	readonly onFCP: OnFCPFunction | OnFCPWithAttributionFunction;
 	readonly onLCP: OnLCPFunction | OnLCPWithAttributionFunction;
@@ -69,11 +79,13 @@ export type FinalizeArgs = {
 		properties: ExtendedElementData
 	) => void;
 	readonly isDebug: boolean;
+	readonly logger: Logger;
 };
 
 export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
 
 export interface Extension {
+	readonly consoleLogPrefix?: string;
 	initialize?: InitializeCallback;
 	finalize?: FinalizeCallback;
 }

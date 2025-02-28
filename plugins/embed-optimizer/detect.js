@@ -6,7 +6,7 @@
  * when it is submitted for storage.
  */
 
-const consoleLogPrefix = '[Embed Optimizer]';
+export const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
  * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
@@ -16,27 +16,8 @@ const consoleLogPrefix = '[Embed Optimizer]';
  * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
  * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
  * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("../optimization-detective/types.ts").Logger} Logger
  */
-
-/**
- * Logs a message.
- *
- * @param {...*} message
- */
-function log( ...message ) {
-	// eslint-disable-next-line no-console
-	console.log( consoleLogPrefix, ...message );
-}
-
-/**
- * Logs an error.
- *
- * @param {...*} message
- */
-function error( ...message ) {
-	// eslint-disable-next-line no-console
-	console.error( consoleLogPrefix, ...message );
-}
 
 /**
  * Embed element heights.
@@ -51,19 +32,17 @@ const loadedElementContentRects = new Map();
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { isDebug } ) {
+export async function initialize( { logger } ) {
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
 
 	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
+		monitorEmbedWrapperForResizes( embedWrapper, logger );
 	}
 
-	if ( isDebug ) {
-		log( 'Loaded embed content rects:', loadedElementContentRects );
-	}
+	logger.log( 'Loaded embed content rects:', loadedElementContentRects );
 }
 
 /**
@@ -73,7 +52,7 @@ export async function initialize( { isDebug } ) {
  * @param {FinalizeArgs} args Args.
  */
 export async function finalize( {
-	isDebug,
+	logger,
 	getElementData,
 	extendElementData,
 } ) {
@@ -82,17 +61,15 @@ export async function finalize( {
 			extendElementData( xpath, {
 				resizedBoundingClientRect: domRect,
 			} );
-			if ( isDebug ) {
-				const elementData = getElementData( xpath );
-				log(
-					`boundingClientRect for ${ xpath } resized:`,
-					elementData.boundingClientRect,
-					'=>',
-					domRect
-				);
-			}
+			const elementData = getElementData( xpath );
+			logger.log(
+				`boundingClientRect for ${ xpath } resized:`,
+				elementData.boundingClientRect,
+				'=>',
+				domRect
+			);
 		} catch ( err ) {
-			error(
+			logger.error(
 				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
 				domRect,
 				err
@@ -105,9 +82,9 @@ export async function finalize( {
  * Monitors embed wrapper for resizes.
  *
  * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
- * @param {boolean}        isDebug      Whether debug.
+ * @param {Logger}         logger       Logger.
  */
-function monitorEmbedWrapperForResizes( embedWrapper, isDebug ) {
+function monitorEmbedWrapperForResizes( embedWrapper, logger ) {
 	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
@@ -115,9 +92,7 @@ function monitorEmbedWrapperForResizes( embedWrapper, isDebug ) {
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
 		loadedElementContentRects.set( xpath, entry.contentRect );
-		if ( isDebug ) {
-			log( `Resized element ${ xpath }:`, entry.contentRect );
-		}
+		logger.log( `Resized element ${ xpath }:`, entry.contentRect );
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
 }
