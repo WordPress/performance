@@ -5,7 +5,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 
 	// Only populate the largest (desktop) viewport group.
 	for ( $i = 0; $i < $sample_size; $i++ ) {
-		OD_URL_Metrics_Post_Type::store_url_metric(
+		$test_case->store_url_metric(
 			$slug,
 			$test_case->get_sample_url_metric(
 				array(

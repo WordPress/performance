@@ -268,7 +268,25 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/bar.jpg" as="image" fetchpriority="high" imagesrcset="https://example.com/&quot;bar&quot;-480w.jpg 480w, https://example.com/&quot;bar&quot;-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 				',
-				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/\"bar\"-480w.jpg 480w, https://example.com/\"bar\"-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"',
+				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/%22bar%22-480w.jpg 480w, https://example.com/%22bar%22-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'preload_mime_with_quotes'                   => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/bar.webm',
+							'as'   => 'video',
+							'type' => 'video/webm; codecs="vp8, vorbis"',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/bar.webm" as="video" type="video/webm; codecs=&quot;vp8, vorbis&quot;">
+				',
+				'expected_header' => 'Link: <https://example.com/bar.webm>; rel="preload"; as="video"; type="video/webm; codecs=\"vp8, vorbis\""',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -422,6 +440,25 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 1,
 				'error'           => '',
 			),
+			'non_ascii_srcset'                           => array(
+				'links_args'      => array(
+					array(
+						array(
+							'href'        => 'https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp',
+							'rel'         => 'preload',
+							'as'          => 'image',
+							'imagesizes'  => '(width <= 480px) 316px, (480px < width <= 600px) 489px, (600px < width <= 782px) 644px, (782px < width) 644px',
+							'imagesrcset' => 'https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp 1024w, https://example.com/wp-content/uploads/2025/02/البيسون-300x196-jpg.webp 300w, https://example.com/wp-content/uploads/2025/02/البيسون-768x501-jpg.webp 768w, https://example.com/wp-content/uploads/2025/02/البيسون-1536x1002-jpg.webp 1536w, https://example.com/wp-content/uploads/2025/02/البيسون-2048x1336-jpg.webp 2048w',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag href="https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp" rel="preload" as="image" imagesizes="(width &lt;= 480px) 316px, (480px &lt; width &lt;= 600px) 489px, (600px &lt; width &lt;= 782px) 644px, (782px &lt; width) 644px" imagesrcset="https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp 1024w, https://example.com/wp-content/uploads/2025/02/البيسون-300x196-jpg.webp 300w, https://example.com/wp-content/uploads/2025/02/البيسون-768x501-jpg.webp 768w, https://example.com/wp-content/uploads/2025/02/البيسون-1536x1002-jpg.webp 1536w, https://example.com/wp-content/uploads/2025/02/البيسون-2048x1336-jpg.webp 2048w">
+				',
+				'expected_header' => 'Link: <https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1024x668-jpg.webp>; rel="preload"; as="image"; imagesizes="(width <= 480px) 316px, (480px < width <= 600px) 489px, (600px < width <= 782px) 644px, (782px < width) 644px"; imagesrcset="https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1024x668-jpg.webp 1024w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-300x196-jpg.webp 300w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-768x501-jpg.webp 768w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1536x1002-jpg.webp 1536w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-2048x1336-jpg.webp 2048w"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
 			'percent-in-path'                            => array(
 				'links_args'      => array(
 					array(
@@ -467,6 +504,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 	 * @covers ::get_prepared_links
 	 * @covers ::merge_consecutive_links
 	 * @covers ::get_response_header
+	 * @covers ::encode_url_for_response_header
 	 * @covers ::count
 	 *
 	 * @dataProvider data_provider_to_test_add_link

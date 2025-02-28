@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   3.8.0
+Stable tag:   3.9.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -15,13 +15,14 @@ The Performance Lab plugin is a collection of features focused on enhancing perf
 
 The feature plugins which are currently featured by this plugin are:
 
+* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
+* [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) _(experimental)_
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
-* [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
@@ -70,6 +71,12 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.9.0 =
+
+**Enhancements**
+
+* Remove experimental flags from Embed Optimizer and Image Prioritizer. ([1846](https://github.com/WordPress/performance/pull/1846))
 
 = 3.8.0 =
 
