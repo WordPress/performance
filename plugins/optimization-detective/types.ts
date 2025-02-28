@@ -85,7 +85,7 @@ export type FinalizeArgs = {
 export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
 
 export interface Extension {
-	readonly consoleLogPrefix?: string;
+	readonly name?: string;
 	initialize?: InitializeCallback;
 	finalize?: FinalizeCallback;
 }

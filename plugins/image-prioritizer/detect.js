@@ -9,7 +9,7 @@
  * document has a tag with the same name, ID, and class.
  */
 
-export const consoleLogPrefix = '[Image Prioritizer]';
+export const name = 'Image Prioritizer';
 
 /**
  * Detected LCP external background image candidates.

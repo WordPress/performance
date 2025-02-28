@@ -6,7 +6,7 @@
  * when it is submitted for storage.
  */
 
-export const consoleLogPrefix = '[Embed Optimizer]';
+export const name = 'Embed Optimizer';
 
 /**
  * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
