@@ -4,7 +4,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	$sample_size = od_get_url_metrics_breakpoint_sample_size();
 	foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 		for ( $i = 0; $i < $sample_size; $i++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				$slug,
 				$test_case->get_sample_url_metric(
 					array(
