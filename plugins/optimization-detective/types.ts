@@ -92,6 +92,6 @@ export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
 
 export interface Extension {
 	readonly name?: string;
-	initialize?: InitializeCallback;
-	finalize?: FinalizeCallback;
+	readonly initialize?: InitializeCallback;
+	readonly finalize?: FinalizeCallback;
 }
