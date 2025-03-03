@@ -506,9 +506,9 @@ export default async function detect( {
 
 			const extensionLogger = createLogger(
 				isDebug,
-				extension.name
-					? `[${ extension.name }]`
-					: '[Optimization Detective extension]'
+				`[Optimization Detective: ${
+					extension.name || 'Unnamed Extension'
+				}]`
 			);
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
@@ -720,9 +720,9 @@ export default async function detect( {
 			if ( extension.finalize instanceof Function ) {
 				const extensionLogger = createLogger(
 					isDebug,
-					extension.name
-						? `[${ extension.name }]`
-						: '[Optimization Detective extension]'
+					`[Optimization Detective: ${
+						extension.name || 'Unnamed Extension'
+					}]`
 				);
 
 				try {
