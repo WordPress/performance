@@ -40,7 +40,10 @@ const externalBackgroundImages = [];
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { log, onLCP } ) {
+export async function initialize( { log: _log, onLCP } ) {
+	// eslint-disable-next-line no-console
+	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
+
 	onLCP(
 		( metric ) => {
 			handleLCPMetric( metric, log );
@@ -137,7 +140,10 @@ function handleLCPMetric( metric, log ) {
  * @type {FinalizeCallback}
  * @param {FinalizeArgs} args Args.
  */
-export async function finalize( { extendRootData, log } ) {
+export async function finalize( { extendRootData, log: _log } ) {
+	// eslint-disable-next-line no-console
+	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
+
 	if ( externalBackgroundImages.length === 0 ) {
 		return;
 	}

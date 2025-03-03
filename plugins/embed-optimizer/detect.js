@@ -32,7 +32,10 @@ const loadedElementContentRects = new Map();
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { log } ) {
+export async function initialize( { log: _log } ) {
+	// eslint-disable-next-line no-console
+	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
+
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
@@ -52,11 +55,17 @@ export async function initialize( { log } ) {
  * @param {FinalizeArgs} args Args.
  */
 export async function finalize( {
-	log,
-	error,
+	log: _log,
+	error: _error,
 	getElementData,
 	extendElementData,
 } ) {
+	/* eslint-disable no-console */
+	// TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
+	const log = _log || console.log;
+	const error = _error || console.error;
+	/* eslint-enable no-console */
+
 	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
 		try {
 			extendElementData( xpath, {
