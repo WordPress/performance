@@ -17,6 +17,7 @@
  * @typedef {import("./types.ts").Extension} Extension
  * @typedef {import("./types.ts").ExtendedRootData} ExtendedRootData
  * @typedef {import("./types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("./types.ts").Logger} Logger
  */
 
 const win = window;
@@ -72,33 +73,60 @@ function setStorageLock( currentTime ) {
 }
 
 /**
- * Logs a message.
+ * Creates a logger object with log, warn, and error methods.
  *
- * @param {...*} message
+ * @param {boolean} [debugMode=false] - Whether to enable debug mode.
+ * @param {string}  [prefix='']       - Prefix to prepend to the console message.
+ * @return {Logger} Logger object with log, info, warn, and error methods.
  */
-function log( ...message ) {
-	// eslint-disable-next-line no-console
-	console.log( consoleLogPrefix, ...message );
-}
+function createLogger( debugMode = false, prefix = '' ) {
+	return {
+		/**
+		 * Logs a message if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log.
+		 */
+		log( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.log( prefix, ...message );
+			}
+		},
 
-/**
- * Logs a warning.
- *
- * @param {...*} message
- */
-function warn( ...message ) {
-	// eslint-disable-next-line no-console
-	console.warn( consoleLogPrefix, ...message );
-}
+		/**
+		 * Logs an informational message if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log as info.
+		 */
+		info( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.info( prefix, ...message );
+			}
+		},
 
-/**
- * Logs an error.
- *
- * @param {...*} message
- */
-function error( ...message ) {
-	// eslint-disable-next-line no-console
-	console.error( consoleLogPrefix, ...message );
+		/**
+		 * Logs a warning if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log as a warning.
+		 */
+		warn( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.warn( prefix, ...message );
+			}
+		},
+
+		/**
+		 * Logs an error.
+		 *
+		 * @param {...*} message - The message(s) to log as an error.
+		 */
+		error( ...message ) {
+			// eslint-disable-next-line no-console
+			console.error( prefix, ...message );
+		},
+	};
 }
 
 /**
@@ -332,6 +360,8 @@ export default async function detect( {
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
+	const { log, warn, error } = createLogger( isDebug, consoleLogPrefix );
+
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
 		for ( const group of urlMetricGroupCollection.groups ) {
@@ -351,11 +381,9 @@ export default async function detect( {
 	}
 
 	if ( win.innerWidth === 0 || win.innerHeight === 0 ) {
-		if ( isDebug ) {
-			log(
-				'Window must have non-zero dimensions for URL Metric collection.'
-			);
-		}
+		log(
+			'Window must have non-zero dimensions for URL Metric collection.'
+		);
 		return;
 	}
 
@@ -365,9 +393,7 @@ export default async function detect( {
 		urlMetricGroupStatuses
 	);
 	if ( urlMetricGroupStatus.complete ) {
-		if ( isDebug ) {
-			log( 'No need for URL Metrics from the current viewport.' );
-		}
+		log( 'No need for URL Metrics from the current viewport.' );
 		return;
 	}
 
@@ -402,12 +428,10 @@ export default async function detect( {
 			! isNaN( previousVisitTime ) &&
 			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
 		) {
-			if ( isDebug ) {
-				log(
-					'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
-				);
-				return;
-			}
+			log(
+				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
+			);
+			return;
 		}
 	}
 
@@ -417,11 +441,9 @@ export default async function detect( {
 		aspectRatio < minViewportAspectRatio ||
 		aspectRatio > maxViewportAspectRatio
 	) {
-		if ( isDebug ) {
-			warn(
-				`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
-			);
-		}
+		warn(
+			`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
+		);
 		return;
 	}
 
@@ -455,9 +477,7 @@ export default async function detect( {
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( getCurrentTime(), storageLockTTL ) ) {
-		if ( isDebug ) {
-			warn( 'Aborted detection due to storage being locked.' );
-		}
+		warn( 'Aborted detection due to storage being locked.' );
 		return;
 	}
 
@@ -482,17 +502,13 @@ export default async function detect( {
 	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
 	if ( doc.documentElement.scrollTop > 0 ) {
-		if ( isDebug ) {
-			warn(
-				'Aborted detection since initial scroll position of page is not at the top.'
-			);
-		}
+		warn(
+			'Aborted detection since initial scroll position of page is not at the top.'
+		);
 		return;
 	}
 
-	if ( isDebug ) {
-		log( 'Proceeding with detection' );
-	}
+	log( 'Proceeding with detection' );
 
 	/** @type {Map<string, Extension>} */
 	const extensions = new Map();
@@ -508,10 +524,19 @@ export default async function detect( {
 			/** @type {Extension} */
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
+
+			const extensionLogger = createLogger(
+				isDebug,
+				`[Optimization Detective: ${
+					extension.name || 'Unnamed Extension'
+				}]`
+			);
+
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
 			if ( extension.initialize instanceof Function ) {
 				const initializePromise = extension.initialize( {
 					isDebug,
+					...extensionLogger,
 					onTTFB,
 					onFCP,
 					onLCP,
@@ -628,9 +653,7 @@ export default async function detect( {
 
 	// Stop observing.
 	disconnectIntersectionObserver();
-	if ( isDebug ) {
-		log( 'Detection is stopping.' );
-	}
+	log( 'Detection is stopping.' );
 
 	urlMetric = {
 		url: currentUrl,
@@ -678,9 +701,7 @@ export default async function detect( {
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
-	if ( isDebug ) {
-		log( 'Current URL Metric:', urlMetric );
-	}
+	log( 'Current URL Metric:', urlMetric );
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
@@ -705,11 +726,7 @@ export default async function detect( {
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
 	if ( didWindowResize ) {
-		if ( isDebug ) {
-			log(
-				'Aborting URL Metric collection due to viewport size change.'
-			);
-		}
+		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
 	}
 
@@ -726,9 +743,17 @@ export default async function detect( {
 			extension,
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
+				const extensionLogger = createLogger(
+					isDebug,
+					`[Optimization Detective: ${
+						extension.name || 'Unnamed Extension'
+					}]`
+				);
+
 				try {
 					const finalizePromise = extension.finalize( {
 						isDebug,
+						...extensionLogger,
 						getRootData,
 						getElementData,
 						extendElementData,
@@ -806,17 +831,15 @@ export default async function detect( {
 		String( getCurrentTime() )
 	);
 
-	if ( isDebug ) {
-		const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
-			percentOfBudget
-		) }% of ${ maxBodyLengthKiB } KiB limit):`;
+	const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+		percentOfBudget
+	) }% of ${ maxBodyLengthKiB } KiB limit):`;
 
-		// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
-		if ( percentOfBudget < 50 ) {
-			log( message, urlMetric );
-		} else {
-			warn( message, urlMetric );
-		}
+	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
+	if ( percentOfBudget < 50 ) {
+		log( message, urlMetric );
+	} else {
+		warn( message, urlMetric );
 	}
 
 	const url = new URL( restApiEndpoint );

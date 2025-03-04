@@ -200,53 +200,48 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
+	 * Inserts or updates the od_url_metrics post with a provided collection of URL Metrics.
 	 *
-	 * @since 0.1.0
-	 * @todo There is duplicate logic here with od_handle_rest_request().
+	 * This method updates an existing URL Metrics post or creates a new one if it doesn't exist.
 	 *
-	 * @param non-empty-string $slug Slug (hash of normalized query vars).
-	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
-	 * @return positive-int|WP_Error Post ID or WP_Error otherwise.
+	 * @since n.e.x.t
+	 *
+	 * @param non-empty-string               $slug Slug (hash of normalized query vars).
+	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection containing the metrics to be stored.
+	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
 	 */
-	public static function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
-		$post_data = array(
+	public static function update_post( string $slug, OD_URL_Metric_Group_Collection $url_metric_group_collection ) {
+		$url_metrics = $url_metric_group_collection->get_flattened_url_metrics();
+		if ( 0 === count( $url_metrics ) ) {
+			return new WP_Error( 'no_url_metrics', __( 'No URL Metrics in the group collection.', 'optimization-detective' ) );
+		}
+
+		// Sort URL Metrics in descending order by timestamp.
+		usort(
+			$url_metrics,
+			static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
+				return $b->get_timestamp() <=> $a->get_timestamp();
+			}
+		);
+		$latest_url_metric = $url_metrics[0];
+		$post_data         = array(
 			// The URL is supplied as the post title in order to aid with debugging. Note that an od-url-metrics post stores
 			// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
 			// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
 			// normalized query vars among them.
-			'post_title' => $new_url_metric->get_url(),
+			'post_title' => $latest_url_metric->get_url(),
 		);
 
 		$post = self::get_post( $slug );
 		if ( $post instanceof WP_Post ) {
 			$post_data['ID']        = $post->ID;
 			$post_data['post_name'] = $post->post_name;
-			$url_metrics            = self::get_url_metrics_from_post( $post );
 		} else {
 			$post_data['post_name'] = $slug;
-			$url_metrics            = array();
-		}
-
-		$etag = $new_url_metric->get_etag();
-
-		$group_collection = new OD_URL_Metric_Group_Collection(
-			$url_metrics,
-			$etag,
-			od_get_breakpoint_max_widths(),
-			od_get_url_metrics_breakpoint_sample_size(),
-			od_get_url_metric_freshness_ttl()
-		);
-
-		try {
-			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
-			$group->add_url_metric( $new_url_metric );
-		} catch ( InvalidArgumentException $e ) {
-			return new WP_Error( 'invalid_url_metric', $e->getMessage() );
 		}
 
 		$post_data['post_content'] = wp_json_encode(
-			$group_collection->get_flattened_url_metrics(),
+			$url_metric_group_collection->get_flattened_url_metrics(),
 			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {

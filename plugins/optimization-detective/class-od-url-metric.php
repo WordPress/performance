@@ -145,11 +145,11 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this URL Metric is a part of (which may not be any).
+	 * Gets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return OD_URL_Metric_Group|null Group.
+	 * @return OD_URL_Metric_Group|null Group. Null will never occur in the context of a tag visitor.
 	 */
 	public function get_group(): ?OD_URL_Metric_Group {
 		return $this->group;
@@ -159,6 +159,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Sets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
+	 * @access private
 	 *
 	 * @param OD_URL_Metric_Group $group Group.
 	 *
@@ -177,6 +178,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since 0.1.0
 	 * @since 0.9.0 Added the 'etag' property to the schema.
 	 * @since 1.0.0 The 'etag' property is now required.
+	 * @access private
 	 *
 	 * @todo Cache the return value?
 	 *

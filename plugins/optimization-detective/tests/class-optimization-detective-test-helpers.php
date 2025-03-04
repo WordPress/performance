@@ -35,7 +35,7 @@ trait Optimization_Detective_Test_Helpers {
 		$last_result = null;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$result = OD_URL_Metrics_Post_Type::store_url_metric(
+				$result = $this->store_url_metric(
 					$slug,
 					$this->get_sample_url_metric(
 						array(
@@ -164,6 +164,30 @@ trait Optimization_Detective_Test_Helpers {
 			$params['extended_root']
 		);
 		return new OD_URL_Metric( $data );
+	}
+
+	/**
+	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
+	 *
+	 * @param non-empty-string $slug           Slug (hash of normalized query vars).
+	 * @param OD_URL_Metric    $new_url_metric New URL Metric.
+	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
+	 */
+	public function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
+		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
+		$etag = $new_url_metric->get_etag();
+
+		$group_collection = new OD_URL_Metric_Group_Collection(
+			$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
+			$etag,
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
+
+		$group_collection->add_url_metric( $new_url_metric );
+
+		return OD_URL_Metrics_Post_Type::update_post( $slug, $group_collection );
 	}
 
 	/**
