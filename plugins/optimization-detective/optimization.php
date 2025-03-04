@@ -238,7 +238,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
 	if ( ! (
-		$processor->next_tag() &&
+		$processor->next_tag( array( 'tag_closers' => 'visit' ) ) &&
 		! $processor->is_tag_closer() &&
 		'HTML' === $processor->get_tag()
 	) ) {
@@ -284,7 +284,12 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
-		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
+		if (
+			in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true )
+			||
+			$processor->is_admin_bar()
+		) {
 			continue;
 		}
 
@@ -317,7 +322,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		$visited_tag_state->reset();
-	} while ( $processor->next_open_tag() );
+	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {

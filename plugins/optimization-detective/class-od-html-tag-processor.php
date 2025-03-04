@@ -246,43 +246,40 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next tag.
 	 *
-	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
-	 * It will _always_ visit tag closers.
+	 * Unlike the base class, this subclass currently visits tag closers by default.
+	 * However, for the 1.0.0 release this method will behave the same as the method in
+	 * the base class, where it skips tag closers by default.
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
+	 * @since n.e.x.t Passing a $query is now allowed. In the 1.0.0 release, this will default to skipping tag closers.
 	 *
-	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query, but only null is accepted for this subclass.
+	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
-	 *
-	 * @throws InvalidArgumentException If attempting to pass a query.
 	 */
 	public function next_tag( $query = null ): bool {
-		if ( null !== $query ) {
-			throw new InvalidArgumentException( esc_html__( 'Processor subclass does not support queries.', 'optimization-detective' ) );
+		if ( null === $query ) {
+			$query = array( 'tag_closers' => 'visit' );
+			$this->warn(
+				__METHOD__,
+				esc_html__( 'Previously this method always visited tag closers and did not allow a query to be supplied. Now, however, a query can be supplied. To align this method with the behavior of the base class, a future version of this method will default to skipping tag closers.', 'optimization-detective' )
+			);
 		}
-
-		// Elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
-		do {
-			$matched = parent::next_tag( array( 'tag_closers' => 'visit' ) );
-		} while ( $matched && $this->is_admin_bar() );
-		return $matched;
+		return parent::next_tag( $query );
 	}
 
 	/**
 	 * Finds the next open tag.
 	 *
+	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
+	 *
 	 * @since 0.4.0
+	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
 	public function next_open_tag(): bool {
-		while ( $this->next_tag() ) {
-			if ( ! $this->is_tag_closer() ) {
-				return true;
-			}
-		}
-		return false;
+		return $this->next_tag( array( 'tag_closers' => 'skip' ) );
 	}
 
 	/**
@@ -719,11 +716,16 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns whether the processor is currently at or inside the admin bar.
 	 *
+	 * This is only intended to be used internally by Optimization Detective as part of the "optimization loop". Tag
+	 * visitors should not rely on this method as it may be deprecated in the future, especially with a migration to
+	 * WP_HTML_Processor after {@link https://core.trac.wordpress.org/ticket/63020} is implemented.
+	 *
 	 * @since 1.0.0
+	 * @access private
 	 *
 	 * @return bool Whether at or inside the admin bar.
 	 */
-	private function is_admin_bar(): bool {
+	public function is_admin_bar(): bool {
 		return (
 			isset( $this->open_stack_tags[2], $this->open_stack_attributes[2]['id'] )
 			&&

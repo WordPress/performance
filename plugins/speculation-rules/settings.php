@@ -224,7 +224,8 @@ function plsr_render_settings_field( array $args ): void {
 			$choices = plsr_get_eagerness_labels();
 			break;
 		default:
-			return; // Invalid (and this case should never occur).
+			// Invalid (and this case should never occur).
+			return; // @codeCoverageIgnore
 	}
 
 	$value = $option[ $args['field'] ];
