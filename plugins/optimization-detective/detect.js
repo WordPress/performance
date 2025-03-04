@@ -311,6 +311,23 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
+ * Compresses a string using CompressionStream API.
+ *
+ * @param {string} string String to compress.
+ * @return {Promise<Blob>} Compressed data.
+ */
+async function compress( string ) {
+	const encodedData = new TextEncoder().encode( string );
+	const compressedDataStream = new Blob( [ encodedData ] )
+		.stream()
+		.pipeThrough( new CompressionStream( 'gzip' ) );
+	const compressedDataBuffer = await new Response(
+		compressedDataStream
+	).arrayBuffer();
+	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
+}
+
+/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -775,8 +792,9 @@ export default async function detect( {
 
 	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
 	const jsonBody = JSON.stringify( urlMetric );
+	const compressedJsonBody = await compress( jsonBody );
 	const percentOfBudget =
-		( jsonBody.length / ( maxBodyLengthKiB * 1000 ) ) * 100;
+		( compressedJsonBody.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
 	/*
 	 * According to the fetch() spec:
@@ -784,10 +802,10 @@ export default async function detect( {
 	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
 	 * than the maximum, we should avoid even trying to send it.
 	 */
-	if ( jsonBody.length > maxBodyLengthBytes ) {
+	if ( compressedJsonBody.size > maxBodyLengthBytes ) {
 		if ( isDebug ) {
 			error(
-				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+				`Unable to send URL Metric because it is ${ compressedJsonBody.size.toLocaleString() } bytes, ${ Math.round(
 					percentOfBudget
 				) }% of ${ maxBodyLengthKiB } KiB limit:`,
 				urlMetric
@@ -806,7 +824,7 @@ export default async function detect( {
 		String( getCurrentTime() )
 	);
 
-	const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+	const message = `Sending URL Metric (${ compressedJsonBody.size.toLocaleString() } bytes, ${ Math.round(
 		percentOfBudget
 	) }% of ${ maxBodyLengthKiB } KiB limit):`;
 
@@ -830,12 +848,7 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon(
-		url,
-		new Blob( [ jsonBody ], {
-			type: 'application/json',
-		} )
-	);
+	navigator.sendBeacon( url, compressedJsonBody );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
