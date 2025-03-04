@@ -1,0 +1,39 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/wp-content/uploads/foo.jpg" media="screen and (width &lt;= 600px)">
+<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/wp-content/uploads/foo.jpg" media="screen and (782px &lt; width)">
+</head>
+	<body>
+		<div class="wp-site-blocks">
+			<header></header>
+			<main>
+				<div></div>
+				<div>
+					<ul>
+						<li>
+							<div>
+								<figure>
+									<a href="https://example.net/foo/">
+										<img data-od-xpath="/HTML/BODY/DIV[@class=&#039;wp-site-blocks&#039;]/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[1][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]" src="https://example.net/wp-content/uploads/foo.jpg" width="1600" height="1000" alt="Foo">
+									</a>
+								</figure>
+							</div>
+						</li>
+						<li>
+							<div>
+								<figure>
+									<a href="https://example.net/bar/">
+										<img data-od-xpath="/HTML/BODY/DIV[@class=&#039;wp-site-blocks&#039;]/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[2][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]" src="https://example.net/wp-content/uploads/bar.jpg" width="1600" height="1000" alt="Bar">
+									</a>
+								</figure>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</main>
+		</div>
+	<script type="module">/* import detect ... */</script>
+</body>
+</html>
