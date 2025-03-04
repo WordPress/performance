@@ -265,6 +265,115 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	/**
+	 * Test that the picture element source tag srcset has the same image sizes as the img tag srcset.
+	 *
+	 * @dataProvider data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 *
+	 * @param Closure|null $set_up Set up the test.
+	 * @param Closure|null $tear_down Tear down the test.
+	 */
+	public function test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset( ?Closure $set_up, ?Closure $tear_down ): void {
+		if ( $set_up instanceof Closure ) {
+			$set_up();
+		}
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		update_option( 'perflab_generate_all_fallback_sizes', '1' );
+
+		// Create image with different sizes.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+
+		$image = wp_get_attachment_image(
+			$attachment_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . $attachment_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
+		$picture_markup    = apply_filters( 'the_content', $image );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'SOURCE' ) );
+		$source_srcset = $picture_processor->get_attribute( 'srcset' );
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$img_srcset = $picture_processor->get_attribute( 'srcset' );
+
+		// Extract file names from srcset.
+		$extract_file_names_from_srcset = static function ( string $srcset ): array {
+			$srcset_parts = explode( ', ', $srcset );
+			$files        = array();
+			foreach ( $srcset_parts as $srcset_part ) {
+				$parts   = explode( ' ', trim( $srcset_part ) );
+				$url     = $parts[0];
+				$files[] = pathinfo( basename( $url ), PATHINFO_FILENAME );
+			}
+			return $files;
+		};
+
+		$source_files = $extract_file_names_from_srcset( $source_srcset );
+		$img_files    = $extract_file_names_from_srcset( $img_srcset );
+
+		$this->assertCount( count( $source_files ), $img_files );
+
+		foreach ( $img_files as $img_index => $img_file ) {
+			// Check the file name starts with the same prefix.
+			// e.g. $img_file = 'leaves-350x200' and $source_files[ $img_index ] = 'leaves-350x350-jpg'.
+			$this->assertStringStartsWith( $img_file, $source_files[ $img_index ] );
+		}
+
+		wp_delete_attachment( $attachment_id, true );
+
+		if ( $tear_down instanceof Closure ) {
+			$tear_down();
+		}
+	}
+
+	/**
+	 * Data provider for test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset.
+	 *
+	 * @return array<string, array{ set_up: Closure|null, tear_down: Closure|null }>
+	 */
+	public function data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset(): array {
+		return array(
+			'default_sizes' => array(
+				'set_up'    => null,
+				'tear_down' => null,
+			),
+			'when_two_different_image_sizes_have_same_width' => array(
+				'set_up'    => static function (): void {
+					add_image_size( 'square', 768, 768, true );
+					remove_all_filters( 'pre_option_medium_large_size_w' );
+					add_filter(
+						'pre_option_medium_large_size_w',
+						static function () {
+							return '768';
+						}
+					);
+					remove_all_filters( 'pre_option_medium_large_size_h' );
+					add_filter(
+						'pre_option_medium_large_size_h',
+						static function () {
+							return '512';
+						}
+					);
+				},
+				'tear_down' => static function (): void {
+					remove_image_size( 'square' );
+					remove_all_filters( 'pre_option_medium_large_size_w' );
+					remove_all_filters( 'pre_option_medium_large_size_h' );
+				},
+			),
+		);
+	}
+
+	/**
 	 * @dataProvider data_provider_test_disable_responsive_image_with_picture_element
 	 *
 	 * @param Closure $set_up Set up the filter.
@@ -376,6 +485,8 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	/**
 	 * Test handling of case when wp_get_attachment_image_src returns false.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
 	 */
 	public function test_wrap_image_in_picture_with_false_image_src(): void {
 		$this->opt_in_to_picture_element();
