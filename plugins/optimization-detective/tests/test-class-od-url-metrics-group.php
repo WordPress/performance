@@ -443,20 +443,26 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * @param bool $order_reversed Whether the order of URL Metrics should be reversed.
 	 */
 	public function test_get_lcp_element_when_group_half_stale( bool $order_reversed ): void {
-		$current_etag = 'f8527651f96776745f88cc49df70b62d';
-
 		$url_metrics_data = json_decode( file_get_contents( __DIR__ . '/data/url-metrics/tablet-viewport-half-stale.json' ), true );
 		if ( $order_reversed ) {
 			$url_metrics_data = array_reverse( $url_metrics_data );
 		}
+		$url_metrics = array();
+		$etag_counts = array();
+		foreach ( $url_metrics_data as $url_metric_data ) {
+			$url_metric = new OD_URL_Metric( $url_metric_data );
+			$etag       = $url_metric->get_etag();
+			if ( ! isset( $etag_counts[ $etag ] ) ) {
+				$etag_counts[ $etag ] = 0;
+			}
+			++$etag_counts[ $etag ];
+			$url_metrics[] = $url_metric;
+		}
+		arsort( $etag_counts );
+		$current_etag = key( $etag_counts ); // The ETag used most often.
 
 		$collection = new OD_URL_Metric_Group_Collection(
-			array_map(
-				static function ( array $url_metric_data ): OD_URL_Metric {
-					return new OD_URL_Metric( $url_metric_data );
-				},
-				$url_metrics_data
-			),
+			$url_metrics,
 			$current_etag,
 			array( 480, 600, 782 ),
 			3,
