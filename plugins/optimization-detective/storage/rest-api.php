@@ -182,7 +182,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$data = $request->get_json_params();
+	$data = $request->get_body_params();
 	if ( ! is_array( $data ) ) {
 		return new WP_Error(
 			'missing_array_json_body',
@@ -215,27 +215,6 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 				$e->getMessage()
 			),
 			array( 'status' => 400 )
-		);
-	}
-
-	/*
-	 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
-	 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
-	 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
-	 * getting sent.
-	 */
-	$max_size       = 64 * 1024;
-	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
-	if ( $content_length > $max_size ) {
-		return new WP_Error(
-			'rest_content_too_large',
-			sprintf(
-				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
-				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
-				number_format_i18n( $content_length ),
-				number_format_i18n( $max_size )
-			),
-			array( 'status' => 413 )
 		);
 	}
 
@@ -346,3 +325,71 @@ function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 	/** This action is documented in wp-includes/post.php. */
 	do_action( 'save_post', $post->ID, $post, /* $update */ true );
 }
+
+/**
+ * Decompresses the REST API request body for the URL Metrics endpoint.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
+ * @param mixed           $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
+ * @param WP_REST_Server  $server  Server instance.
+ * @param WP_REST_Request $request Request used to generate the response.
+ * @return mixed Response to replace the requested version with.
+ */
+function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
+	if (
+		$request->get_route() === '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE &&
+		'application/gzip' === $request->get_header( 'Content-Type' )
+	) {
+		$compressed_body = $request->get_body();
+
+		/*
+		 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+		 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+		 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+		 * getting sent.
+		 */
+		$max_size       = 64 * 1024; // 64 KB
+		$content_length = strlen( $compressed_body );
+		if ( $content_length > $max_size ) {
+			return new WP_Error(
+				'rest_content_too_large',
+				sprintf(
+					/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+					__( 'Compressed JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+					number_format_i18n( $content_length ),
+					number_format_i18n( $max_size )
+				),
+				array( 'status' => 413 )
+			);
+		}
+
+		$decompressed_body = gzdecode( $compressed_body );
+		if ( false === $decompressed_body ) {
+			return new WP_Error(
+				'rest_invalid_payload',
+				__( 'Unable to decompress the gzip payload.', 'optimization-detective' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$decoded_body = json_decode( $decompressed_body, true );
+		if ( JSON_ERROR_NONE !== json_last_error() ) {
+			return new WP_Error(
+				'rest_invalid_json',
+				__( 'Invalid JSON in decompressed payload.', 'optimization-detective' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Update the request so later handlers see the decompressed JSON.
+		$request->set_body( $decompressed_body );
+		$request->set_body_params( $decoded_body );
+		$request->set_header( 'Content-Type', 'application/json' );
+	}
+	return $result;
+}
+add_filter( 'rest_pre_dispatch', 'od_decompress_rest_request_body', 10, 3 );
