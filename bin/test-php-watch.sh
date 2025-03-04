@@ -13,5 +13,5 @@ while true; do
 	echo "Running phpunit tests for $(tput bold)$plugin_slug$(tput sgr0):"
 	# TODO: Interrupt when a change is made while running tests or re-run if change made since tests started running.
 	# Note: This is calling phpunit directly and not the composer script due to extra noise it outputs.
-	npm run wp-env --silent -- run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance -- vendor/bin/phpunit --testsuite "$plugin_slug" "$@"
+	npm run wp-env --silent -- run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance -- vendor/bin/phpunit --testsuite "$plugin_slug" --verbose "$@"
 done
