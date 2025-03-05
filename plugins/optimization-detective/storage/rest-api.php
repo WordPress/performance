@@ -182,7 +182,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$data = $request->get_body_params();
+	$data = $request->get_json_params();
 	if ( ! is_array( $data ) ) {
 		return new WP_Error(
 			'missing_array_json_body',
@@ -367,7 +367,12 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 			);
 		}
 
-		$decompressed_body = gzdecode( $compressed_body );
+		try {
+			$decompressed_body = gzdecode( $compressed_body );
+		} catch ( Exception $e ) {
+			$decompressed_body = false;
+		}
+
 		if ( false === $decompressed_body ) {
 			return new WP_Error(
 				'rest_invalid_payload',
@@ -376,18 +381,8 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 			);
 		}
 
-		$decoded_body = json_decode( $decompressed_body, true );
-		if ( JSON_ERROR_NONE !== json_last_error() ) {
-			return new WP_Error(
-				'rest_invalid_json',
-				__( 'Invalid JSON in decompressed payload.', 'optimization-detective' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		// Update the request so later handlers see the decompressed JSON.
 		$request->set_body( $decompressed_body );
-		$request->set_body_params( $decoded_body );
 		$request->set_header( 'Content-Type', 'application/json' );
 	}
 	return $result;

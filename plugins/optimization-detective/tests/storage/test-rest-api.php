@@ -349,16 +349,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'params'          => array_merge(
 					$valid_params,
 					array(
-						// Repeat the elements until the JSON will surpass 64 KiB.
-						'elements' => array_fill(
-							0,
-							200,
+						// Fill the JSON with more than 64KB of data.
+						'elements' => array(
 							array_merge(
 								$valid_element,
 								array(
-									'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+									'xpath' => bin2hex( random_bytes( 65000 ) ),
 								)
-							)
+							),
 						),
 					)
 				),
@@ -938,11 +936,11 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		 * @var WP_REST_Request<array<string, mixed>> $request
 		 */
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
-		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_header( 'Content-Type', 'application/gzip' );
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
-		$request->set_body( wp_json_encode( $params ) );
+		$request->set_body( gzencode( wp_json_encode( $params ) ) );
 		return $request;
 	}
 }
