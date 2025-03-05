@@ -489,7 +489,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/חנות/wp-content/uploads/2025/01/example.jpg?ver=1+2" as="image">
 				',
-				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg?ver=1%202>; rel="preload"; as="image"',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg?ver=1+2>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
