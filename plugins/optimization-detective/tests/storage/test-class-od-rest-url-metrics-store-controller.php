@@ -1,16 +1,16 @@
 <?php
 /**
- * Tests for optimization-detective plugin storage/class-od-rest-api.php aka OD_Rest_API.
+ * Tests for optimization-detective plugin storage/class-od-rest-url-metrics-store-controller.php aka OD_REST_URL_Metrics_Store_Controller.
  *
  * @package optimization-detective
  */
 
 /**
- * Class Test_OD_REST_API used to test `OD_Rest_API` class.
+ * Class Test_OD_REST_URL_Metrics_Store_Controller used to test `OD_REST_URL_Metrics_Store_Controller` class.
  *
  * @since n.e.x.t
  */
-class Test_OD_REST_API extends WP_UnitTestCase {
+class Test_OD_REST_URL_Metrics_Store_Controller extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
 	/**
@@ -19,34 +19,34 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 * @return string Route.
 	 */
 	private function get_route(): string {
-		return '/' . OD_Rest_API::get_namespace() . OD_Rest_API::get_route();
+		return '/' . OD_REST_URL_Metrics_Store_Controller::get_namespace() . OD_REST_URL_Metrics_Store_Controller::get_route();
 	}
 
 	/**
 	 * Test add_hooks().
 	 *
-	 * @covers OD_Rest_API::add_hooks
+	 * @covers OD_REST_URL_Metrics_Store_Controller::add_hooks
 	 */
 	public function test_add_hooks(): void {
 		remove_all_actions( 'rest_api_init' );
 
-		OD_Rest_API::add_hooks();
+		( new OD_REST_URL_Metrics_Store_Controller() )->add_hooks();
 
 		$this->assertSame(
 			10,
-			has_action( 'rest_api_init', array( OD_Rest_API::class, 'register_endpoint' ) )
+			has_action( 'rest_api_init', array( OD_REST_URL_Metrics_Store_Controller::class, 'register_endpoint' ) )
 		);
 	}
 
 	/**
 	 * Test get_namespace().
 	 *
-	 * @covers OD_Rest_API::get_namespace
+	 * @covers OD_REST_URL_Metrics_Store_Controller::get_namespace
 	 */
 	public function test_get_namespace(): void {
 
 		$expected = 'optimization-detective/v1';
-		$actual   = OD_Rest_API::get_namespace();
+		$actual   = OD_REST_URL_Metrics_Store_Controller::get_namespace();
 
 		$this->assertSame( $expected, $actual );
 	}
@@ -54,12 +54,12 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test get_route().
 	 *
-	 * @covers OD_Rest_API::get_route
+	 * @covers OD_REST_URL_Metrics_Store_Controller::get_route
 	 */
 	public function test_get_route(): void {
 
 		$expected = '/url-metrics:store';
-		$actual   = OD_Rest_API::get_route();
+		$actual   = OD_REST_URL_Metrics_Store_Controller::get_route();
 
 		$this->assertSame( $expected, $actual );
 	}
@@ -114,9 +114,9 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
-	 * @covers OD_Rest_API::trigger_page_cache_invalidation
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::trigger_page_cache_invalidation
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 * @covers OD_URL_Metric_Store_Request_Context::__construct
 	 * @covers OD_URL_Metric_Store_Request_Context::__get
@@ -203,8 +203,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 */
 	public function test_rest_request_good_params_but_post_save_failed( Closure $set_up ): void {
@@ -498,8 +498,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test bad params.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
@@ -519,9 +519,9 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending data when no Origin request header is sent.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
-	 * @covers OD_Rest_API::is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::is_allowed_http_origin
 	 */
 	public function test_rest_request_without_origin(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -535,9 +535,9 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending data when a cross-domain Origin request header is sent.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
-	 * @covers OD_Rest_API::is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::is_allowed_http_origin
 	 */
 	public function test_rest_request_cross_origin(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -552,9 +552,9 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when 'home_url' is filtered.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
-	 * @covers OD_Rest_API::is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::is_allowed_http_origin
 	 */
 	public function test_rest_request_origin_when_home_url_filtered(): void {
 		$request = $this->create_request( $this->get_valid_params() );
@@ -571,8 +571,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test not sending JSON data.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_not_json_data(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -587,8 +587,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test not sending JSON Content-Type.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_not_json_content_type(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -603,8 +603,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test empty array JSON body.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_empty_array_json_body(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -619,8 +619,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test non-array JSON body.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_non_array_json_body(): void {
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
@@ -635,8 +635,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test timestamp ignored.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_timestamp_ignored(): void {
 		$initial_microtime = microtime( true );
@@ -668,8 +668,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when metric storage is locked.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_locked(): void {
 		OD_Storage_Lock::set_lock();
@@ -684,8 +684,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -716,8 +716,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -740,8 +740,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the wider viewport group and then adding one more.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_over_populate_wider_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -796,8 +796,8 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the narrower viewport group and then adding one more.
 	 *
-	 * @covers OD_Rest_API::register_endpoint
-	 * @covers OD_Rest_API::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Controller::register_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Controller::handle_rest_request
 	 */
 	public function test_rest_request_over_populate_narrower_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -830,7 +830,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test trigger_page_cache_invalidation().
 	 *
-	 * @covers OD_Rest_API::trigger_page_cache_invalidation
+	 * @covers OD_REST_URL_Metrics_Store_Controller::trigger_page_cache_invalidation
 	 */
 	public function test_trigger_page_cache_invalidation(): void {
 		$cache_purge_post_id = self::factory()->post->create();
@@ -845,7 +845,7 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 			PHP_INT_MAX
 		);
 
-		OD_Rest_API::trigger_page_cache_invalidation( $cache_purge_post_id );
+		OD_REST_URL_Metrics_Store_Controller::trigger_page_cache_invalidation( $cache_purge_post_id );
 
 		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
 		$found = false;
@@ -885,14 +885,14 @@ class Test_OD_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test trigger_page_cache_invalidation() for an invalid post.
 	 *
-	 * @covers OD_Rest_API::trigger_page_cache_invalidation
+	 * @covers OD_REST_URL_Metrics_Store_Controller::trigger_page_cache_invalidation
 	 */
 	public function test_trigger_page_cache_invalidation_invalid_post_id(): void {
 		wp_delete_post( 1, true );
 		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
 		$before_transition_post_status_count = did_action( 'transition_post_status' );
 		$before_save_post_count              = did_action( 'save_post' );
-		OD_Rest_API::trigger_page_cache_invalidation( 1 );
+		OD_REST_URL_Metrics_Store_Controller::trigger_page_cache_invalidation( 1 );
 		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
 		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
 		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );

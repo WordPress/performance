@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API integration for the plugin: OD_Rest_API.
+ * REST API integration for the plugin: OD_REST_URL_Metrics_Store_Controller.
  *
  * @package optimization-detective
  * @since 0.1.0
@@ -13,20 +13,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * OD_Rest_API class
+ * OD_REST_URL_Metrics_Store_Controller class
  *
  * @since n.e.x.t
  *
  * @access private
  */
-class OD_Rest_API {
+class OD_REST_URL_Metrics_Store_Controller {
 
 	/**
 	 * Adds hooks.
 	 *
 	 * @since n.e.x.t
 	 */
-	public static function add_hooks(): void {
+	public function add_hooks(): void {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_endpoint' ) );
 	}
 

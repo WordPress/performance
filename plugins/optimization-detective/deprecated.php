@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.1.0
  * @access private
- * @deprecated n.e.x.t This constant should not be used, instead use OD_Rest_API::get_namespace() method.
+ * @deprecated n.e.x.t This constant should not be used, instead use OD_REST_URL_Metrics_Store_Controller::get_namespace() method.
  * @var string
  */
 const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
@@ -32,7 +32,7 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
  * @since 0.1.0
  * @access private
  * @link https://google.aip.dev/136
- * @deprecated n.e.x.t This constant should not be used, instead use OD_Rest_API::get_route() method.
+ * @deprecated n.e.x.t This constant should not be used, instead use OD_REST_URL_Metrics_Store_Controller::get_route() method.
  * @var string
  */
 const OD_URL_METRICS_ROUTE = '/url-metrics:store';
