@@ -25,6 +25,20 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 */
 	public static $image_id;
 
+	/**
+	 * Temporary attachment IDs created during tests.
+	 *
+	 * @var array<int>
+	 */
+	private $temp_attachment_ids = array();
+
+	/**
+	 * Temporary custom image sizes created during tests.
+	 *
+	 * @var array<string>
+	 */
+	private $temp_custom_image_sizes = array();
+
 	public function set_up(): void {
 		parent::set_up();
 
@@ -34,6 +48,24 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
+	}
+
+	public function tear_down(): void {
+		// Clean up any attachments created during tests.
+		foreach ( $this->temp_attachment_ids as $id ) {
+			wp_delete_attachment( $id, true );
+		}
+		$this->temp_attachment_ids = array();
+
+		// Clean up custom image sizes.
+		foreach ( $this->temp_custom_image_sizes as $size ) {
+			if ( has_image_size( $size ) ) {
+				remove_image_size( $size );
+			}
+		}
+		$this->temp_custom_image_sizes = array();
+
+		parent::tear_down();
 	}
 
 	/**
@@ -270,12 +302,18 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * @dataProvider data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset
 	 * @covers ::webp_uploads_wrap_image_in_picture
 	 *
-	 * @param Closure|null $set_up Set up the test.
-	 * @param Closure|null $tear_down Tear down the test.
+	 * @param Closure|null       $set_up Set up the test.
+	 * @param array<string>|null $custom_sizes Custom image sizes.
 	 */
-	public function test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset( ?Closure $set_up, ?Closure $tear_down ): void {
+	public function test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset( ?Closure $set_up, ?array $custom_sizes ): void {
 		if ( $set_up instanceof Closure ) {
 			$set_up();
+		}
+
+		if ( is_array( $custom_sizes ) ) {
+			foreach ( $custom_sizes as $size ) {
+				$this->temp_custom_image_sizes[] = $size;
+			}
 		}
 
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
@@ -284,6 +322,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Create image with different sizes.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
 
 		$image = wp_get_attachment_image(
 			$attachment_id,
@@ -327,36 +366,28 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			// e.g. $img_file = 'leaves-350x200' and $source_files[ $img_index ] = 'leaves-350x350-jpg'.
 			$this->assertStringStartsWith( $img_file, $source_files[ $img_index ] );
 		}
-
-		wp_delete_attachment( $attachment_id, true );
-
-		if ( $tear_down instanceof Closure ) {
-			$tear_down();
-		}
 	}
 
 	/**
 	 * Data provider for test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset.
 	 *
-	 * @return array<string, array{ set_up: Closure|null, tear_down: Closure|null }>
+	 * @return array<string, array{ set_up: Closure|null, custom_sizes: array<string>|null }>
 	 */
 	public function data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset(): array {
 		return array(
 			'default_sizes' => array(
-				'set_up'    => null,
-				'tear_down' => null,
+				'set_up'       => null,
+				'custom_sizes' => null,
 			),
 			'when_two_different_image_sizes_have_same_width' => array(
-				'set_up'    => static function (): void {
+				'set_up'       => static function (): void {
 					add_image_size( 'square', 768, 768, true );
-					remove_all_filters( 'pre_option_medium_large_size_w' );
 					add_filter(
 						'pre_option_medium_large_size_w',
 						static function () {
 							return '768';
 						}
 					);
-					remove_all_filters( 'pre_option_medium_large_size_h' );
 					add_filter(
 						'pre_option_medium_large_size_h',
 						static function () {
@@ -364,11 +395,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 						}
 					);
 				},
-				'tear_down' => static function (): void {
-					remove_image_size( 'square' );
-					remove_all_filters( 'pre_option_medium_large_size_w' );
-					remove_all_filters( 'pre_option_medium_large_size_h' );
-				},
+				'custom_sizes' => array( 'square' ),
 			),
 		);
 	}
