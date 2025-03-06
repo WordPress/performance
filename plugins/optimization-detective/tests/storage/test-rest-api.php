@@ -354,7 +354,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 							array_merge(
 								$valid_element,
 								array(
-									'xpath' => bin2hex( random_bytes( 65000 ) ),
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', bin2hex( random_bytes( 65000 ) ) ),
 								)
 							),
 						),
