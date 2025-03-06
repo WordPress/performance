@@ -190,7 +190,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 
 	// As of 1.0.0-beta3, next_tag() allows $query and is beginning to migrate to skip tag closers by default.
 	// In versions prior to this, the method always visited closers and passing a $query actually threw an exception.
-	$tag_query = version_compare( OPTIMIZATION_DETECTIVE_VERSION, '1.0.0-beta3', '>=' )
+	$tag_query = ! defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) || version_compare( OPTIMIZATION_DETECTIVE_VERSION, '1.0.0-beta3', '>=' )
 		? array( 'tag_closers' => 'visit' ) : null;
 	try {
 		/*
