@@ -387,4 +387,3 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 	}
 	return $result;
 }
-add_filter( 'rest_pre_dispatch', 'od_decompress_rest_request_body', 10, 3 );

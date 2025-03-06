@@ -588,6 +588,23 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
+
+	/**
+	 * Test invalid compressed JSON body.
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
+	 */
+	public function test_rest_request_invalid_compressed_json_body(): void {
+		$request = $this->create_request( $this->get_valid_params() );
+		$request->set_body( 'Invalid compressed JSON body' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_invalid_payload', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
+	}
+
 	/**
 	 * Test timestamp ignored.
 	 *
@@ -852,6 +869,25 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
 		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
 		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
+	}
+
+	/**
+	 * Test that the request is modified by od_decompress_rest_request_body().
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
+	 */
+	public function test_od_decompress_rest_request_body_modifies_request(): void {
+		$params  = $this->get_valid_params();
+		$request = $this->create_request( $this->get_valid_params() );
+		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		$json_data = wp_json_encode( $params );
+		$result    = od_decompress_rest_request_body( null, rest_get_server(), $request );
+
+		$this->assertNotWPError( $result );
+		$this->assertEquals( $json_data, $request->get_body() );
+		$this->assertEquals( 'application/json', $request->get_header( 'Content-Type' ) );
 	}
 
 	/**
