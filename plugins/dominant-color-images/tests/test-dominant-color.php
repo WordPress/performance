@@ -42,8 +42,6 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers helper::dominant_color_get_dominant_color
-	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
 	 */
@@ -52,6 +50,15 @@ class Test_Dominant_Color extends TestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
+
+		// Test when attachment is not an image.
+		$non_image_attachment = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$this->assertNull( dominant_color_get_dominant_color( $non_image_attachment ) );
 
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -91,8 +98,6 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers helper::dominant_color_get_dominant_color
-	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
 	 * @param bool     $expected_transparency Expected transparency.
@@ -102,6 +107,19 @@ class Test_Dominant_Color extends TestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
+		// Test when metadata is not an array.
+		$invalid_meta_attachment = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata', 'not_an_array' );
+		$this->assertNull( dominant_color_has_transparency( $invalid_meta_attachment ) );
+
+		// Test when has_transparency is not set in metadata.
+		delete_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata' );
+		update_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata', array( 'other_key' => 'value' ) );
+		$this->assertNull( dominant_color_has_transparency( $invalid_meta_attachment ) );
 
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -113,7 +131,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers hooks::dominant_color_img_tag_add_dominant_color
+	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
@@ -199,7 +217,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider data_provider_dominant_color_check_inline_style
 	 *
-	 * @covers hooks::dominant_color_img_tag_add_dominant_color
+	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 *
 	 * @param string $filtered_image The filtered image markup.
 	 *                               Must include `src="%s" width="%d" height="%d"`.
