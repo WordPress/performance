@@ -15,7 +15,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 			$elements[0]['isLCP']             = false;
 		}
 
-		OD_URL_Metrics_Post_Type::store_url_metric(
+		$test_case->store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 			$test_case->get_sample_url_metric(
 				array(

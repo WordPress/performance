@@ -13,7 +13,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	// Populate the mobile and desktop viewport groups only.
 	foreach ( array( 400, 800 ) as $viewport_width ) {
 		for ( $i = 0; $i < $sample_size; $i++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				$slug,
 				$test_case->get_sample_url_metric(
 					array(

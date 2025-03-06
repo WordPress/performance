@@ -376,6 +376,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers OD_Visited_Tag_State::track_tag
 	 * @covers OD_Visited_Tag_State::is_tag_tracked
 	 * @covers OD_Visited_Tag_State::reset
+	 * @covers OD_HTML_Tag_Processor::is_admin_bar
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 *
