@@ -360,7 +360,20 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			 */
 			$breadcrumb_element = array();
 
-			foreach ( $this->url_metrics as $url_metric ) {
+			// Prefer to use URL Metrics which have a current ETag.
+			$url_metrics = array_filter(
+				$this->url_metrics,
+				function ( OD_URL_Metric $url_metric ): bool {
+					return $url_metric->get_etag() === $this->get_collection()->get_current_etag();
+				}
+			);
+
+			// Otherwise, if no URL Metrics have a current ETag, fall back to using all the stale ones.
+			if ( count( $url_metrics ) === 0 ) {
+				$url_metrics = $this->url_metrics;
+			}
+
+			foreach ( $url_metrics as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
 					if ( ! $element->is_lcp() ) {
 						continue;
