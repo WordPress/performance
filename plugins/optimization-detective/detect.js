@@ -313,7 +313,7 @@ function extendElementData( xpath, properties ) {
 /**
  * Compresses a string using CompressionStream API.
  *
- * @param {string} string String to compress.
+ * @param {string} string - String to compress.
  * @return {Promise<Blob>} Compressed data.
  */
 async function compress( string ) {
@@ -790,7 +790,6 @@ export default async function detect( {
 	const maxBodyLengthKiB = 64;
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
-	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
 	const jsonBody = JSON.stringify( urlMetric );
 	const compressedJsonBody = await compress( jsonBody );
 	const percentOfBudget =
