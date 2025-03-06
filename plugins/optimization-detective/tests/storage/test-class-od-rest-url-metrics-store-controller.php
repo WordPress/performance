@@ -23,22 +23,6 @@ class Test_OD_REST_URL_Metrics_Store_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_hooks().
-	 *
-	 * @covers OD_REST_URL_Metrics_Store_Controller::add_hooks
-	 */
-	public function test_add_hooks(): void {
-		remove_all_actions( 'rest_api_init' );
-
-		( new OD_REST_URL_Metrics_Store_Controller() )->add_hooks();
-
-		$this->assertSame(
-			10,
-			has_action( 'rest_api_init', array( OD_REST_URL_Metrics_Store_Controller::class, 'register_endpoint' ) )
-		);
-	}
-
-	/**
 	 * Test get_namespace().
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Controller::get_namespace

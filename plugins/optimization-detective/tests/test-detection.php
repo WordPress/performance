@@ -225,4 +225,27 @@ class Test_OD_Detection extends WP_UnitTestCase {
 			$this->assertStringNotContainsString( '"restApiNonce":', $script );
 		}
 	}
+
+	/**
+	 * Test od_create_rest_url_metric_store_rest_request().
+	 *
+	 * @covers ::od_create_rest_url_metric_store_rest_request
+	 */
+	public function test_od_create_rest_url_metric_store_rest_request(): void {
+
+		global $wp_rest_server;
+
+		if ( ! isset( $wp_rest_server ) ) {
+			$wp_rest_server = new WP_REST_Server();
+
+			// Run the action to register the routes.
+			do_action( 'rest_api_init' );
+		}
+
+		// Get the routes.
+		$routes = $wp_rest_server->get_routes();
+
+		// Check that the route is present.
+		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Controller::get_namespace() . OD_REST_URL_Metrics_Store_Controller::get_route(), $routes );
+	}
 }

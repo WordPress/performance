@@ -157,3 +157,14 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		array( 'type' => 'module' )
 	);
 }
+
+/**
+ * Create the rest request and register the endpoint routes for the URL Metrics Store.
+ *
+ * @since n.e.x.t
+ */
+function od_create_rest_url_metric_store_rest_request(): void {
+
+	$controller = new OD_REST_URL_Metrics_Store_Controller();
+	$controller->register_endpoint();
+}

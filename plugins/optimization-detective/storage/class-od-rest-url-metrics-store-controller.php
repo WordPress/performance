@@ -22,15 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class OD_REST_URL_Metrics_Store_Controller {
 
 	/**
-	 * Adds hooks.
-	 *
-	 * @since n.e.x.t
-	 */
-	public function add_hooks(): void {
-		add_action( 'rest_api_init', array( __CLASS__, 'register_endpoint' ) );
-	}
-
-	/**
 	 * Get the namespace for optimization-detective
 	 *
 	 * @since n.e.x.t
@@ -64,7 +55,7 @@ class OD_REST_URL_Metrics_Store_Controller {
 	 *
 	 * @see od_compose_site_health_result()
 	 */
-	public static function register_endpoint(): void {
+	public function register_endpoint(): void {
 
 		// The slug and cache_purge_post_id args are further validated via the validate_callback for the 'hmac' parameter,
 		// they are provided as input with the 'url' argument to create the HMAC by the server.

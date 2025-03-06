@@ -19,10 +19,10 @@ add_action( 'init', 'od_initialize_extensions', PHP_INT_MAX );
 add_filter( 'template_include', 'od_buffer_output', PHP_INT_MAX );
 OD_URL_Metrics_Post_Type::add_hooks();
 OD_Storage_Lock::add_hooks();
-( new OD_REST_URL_Metrics_Store_Controller() )->add_hooks();
 add_action( 'wp', 'od_maybe_add_template_output_buffer_filter' );
 add_action( 'wp_head', 'od_render_generator_meta_tag' );
 add_filter( 'site_status_tests', 'od_add_rest_api_availability_test' );
 add_action( 'admin_init', 'od_maybe_run_rest_api_health_check' );
 add_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_notice_in_plugin_row', 30 );
+add_action( 'rest_api_init', 'od_create_rest_url_metric_store_rest_request' );
 // @codeCoverageIgnoreEnd
