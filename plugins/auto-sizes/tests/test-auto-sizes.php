@@ -346,12 +346,6 @@ class Test_AutoSizes extends WP_UnitTestCase {
 					'sizes'   => 'auto, 100vw',
 				),
 			),
-
-			// Test when $attr is not an array.
-			array(
-				'attr'     => array(),
-				'expected' => array(),
-			),
 		);
 	}
 
@@ -365,5 +359,32 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 */
 	public function test_auto_sizes_update_image_attributes( array $attr, array $expected ): void {
 		$this->assertSame( $expected, auto_sizes_update_image_attributes( $attr ) );
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_content_img_tag
+	 */
+	public function test_auto_sizes_update_content_img_tag_non_string_input(): void {
+		/*
+			These tests are separate from the data provider approach because the function
+			auto_sizes_update_content_img_tag() expects a string as an argument. Passing a non-string
+			value would cause a TypeError. These tests ensure that the function behaves as expected
+			when it receives non-string inputs.
+		*/
+		$this->assertSame( '', auto_sizes_update_content_img_tag( array() ) );
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_image_attributes
+	 */
+	public function test_auto_sizes_update_image_attributes_with_null_input(): void {
+		/*
+			This test is separate because the main test method uses a data provider
+			that expects the $attr parameter to be an array. Passing null directly
+			would cause a TypeError due to the type hint. By testing null separately,
+			we ensure that the function can handle null inputs gracefully without
+			modifying the type hint in the main test method.
+		*/
+		$this->assertSame( array(), auto_sizes_update_image_attributes( null ) );
 	}
 }

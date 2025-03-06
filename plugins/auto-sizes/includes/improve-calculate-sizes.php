@@ -16,7 +16,7 @@
  */
 function auto_sizes_prime_attachment_caches( $content ): string {
 	if ( ! is_string( $content ) ) {
-		return ''; // @codeCoverageIgnore
+		return '';
 	}
 
 	$processor = new WP_HTML_Tag_Processor( $content );

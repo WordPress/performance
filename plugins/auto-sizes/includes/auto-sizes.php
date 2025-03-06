@@ -49,7 +49,7 @@ function auto_sizes_update_image_attributes( $attr ): array {
  */
 function auto_sizes_update_content_img_tag( $html ): string {
 	if ( ! is_string( $html ) ) {
-		$html = ''; // @codeCoverageIgnore
+		$html = '';
 	}
 
 	$processor = new WP_HTML_Tag_Processor( $html );
