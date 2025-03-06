@@ -75,6 +75,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 * @covers OD_URL_Metric_Store_Request_Context::__construct
 	 * @covers OD_URL_Metric_Store_Request_Context::__get
@@ -456,6 +457,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
