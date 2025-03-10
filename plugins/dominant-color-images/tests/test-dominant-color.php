@@ -19,12 +19,9 @@ class Test_Dominant_Color extends TestCase {
 	 * @param string[] $expected_color Expected color.
 	 */
 	public function test_dominant_color_metadata( string $image_path, array $expected_color ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
-		// Non existing attachment.
+		// Non-existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $dominant_color_metadata );
 
@@ -46,10 +43,7 @@ class Test_Dominant_Color extends TestCase {
 	 * @param string[] $expected_color Expected color.
 	 */
 	public function test_dominant_color_get_dominant_color( string $image_path, array $expected_color ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
 		// Test when attachment is not an image.
 		$non_image_attachment = self::factory()->post->create(
@@ -77,10 +71,7 @@ class Test_Dominant_Color extends TestCase {
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_has_transparency_metadata( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
 		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
@@ -103,10 +94,7 @@ class Test_Dominant_Color extends TestCase {
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_dominant_color_has_transparency( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 		// Test when metadata is not an array.
 		$invalid_meta_attachment = self::factory()->attachment->create(
 			array(
@@ -138,10 +126,7 @@ class Test_Dominant_Color extends TestCase {
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_tag_add_adjust_to_image_attributes( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
@@ -526,5 +511,17 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertArrayHasKey( 'hasTransparency', $response );
 		$this->assertEquals( 'ff0000', $response['dominantColor'] );
 		$this->assertTrue( $response['hasTransparency'] );
+	}
+
+	/**
+	 * Skips if MIME type is not supported.
+	 *
+	 * @param string $image_path Image path.
+	 */
+	private function skip_if_mime_type_unsupported( string $image_path ): void {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
 	}
 }
