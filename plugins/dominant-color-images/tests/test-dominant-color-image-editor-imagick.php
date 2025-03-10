@@ -5,11 +5,11 @@
  * @since 1.2.0
  *
  * @package dominant-color-images
+ * @noinspection PhpComposerExtensionStubsInspection
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 use Dominant_Color_Images\Tests\TestCase;
-use Imagick;
-use ImagickPixel;
 
 /**
  * @coversDefaultClass Dominant_Color_Image_Editor_Imagick
