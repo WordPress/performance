@@ -1,5 +1,5 @@
 {
-  "core": null,
+  "core": "https://wordpress.org/wordpress-6.8-beta1.zip",
   "plugins": [
     "./plugins/optimization-detective",
     "./plugins/auto-sizes",

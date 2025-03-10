@@ -6,6 +6,19 @@
  * @since 1.4.0
  */
 
+/*
+ * Map alignment values to a weighting value so they can be compared.
+ * Note that 'left' and 'right' alignments are only constrained by max alignment.
+ */
+const AUTO_SIZES_CONSTRAINTS = array(
+	'full'    => 0,
+	'wide'    => 1,
+	'left'    => 2,
+	'right'   => 2,
+	'default' => 3,
+	'center'  => 3,
+);
+
 /**
  * Primes attachment into the cache with a single database query.
  *
@@ -172,18 +185,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 	// Normalize default alignment values.
 	$align = '' !== $align ? $align : 'default';
 
-	/*
-	 * Map alignment values to a weighting value so they can be compared.
-	 * Note that 'left' and 'right' alignments are only constrained by max alignment.
-	 */
-	$constraints = array(
-		'full'    => 0,
-		'wide'    => 1,
-		'left'    => 2,
-		'right'   => 2,
-		'default' => 3,
-		'center'  => 3,
-	);
+	// Use the defined constant for constraints.
+	$constraints = AUTO_SIZES_CONSTRAINTS;
 
 	$alignment = $constraints[ $align ] > $constraints[ $max_alignment ] ? $align : $max_alignment;
 
@@ -259,11 +262,14 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 	$consumer_blocks = array(
 		'core/cover',
 		'core/image',
+		'core/group',
+		'core/columns',
+		'core/column',
 	);
 
 	if ( in_array( $block_type->name, $consumer_blocks, true ) ) {
 		// Use array_values to reset the array keys after merging.
-		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'block_width_data' ) ) ) );
+		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'column_count', 'column_width' ) ) ) );
 	}
 	return $uses_context;
 }
@@ -289,38 +295,13 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
-		$alignment = $block['attrs']['align'] ?? '';
+		// Normalize default alignment values.
+		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? $block['attrs']['align'] : 'default';
+		// Use the defined constant for constraints.
+		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		// If the container block doesn't have alignment, it's assumed to be 'default'.
-		if ( '' === $alignment ) {
-			$context['max_alignment'] = 'default';
-		} elseif ( 'wide' === $alignment ) {
-			$context['max_alignment'] = 'wide';
-		}
-	}
-
-	static $block_width_data = array();
-
-	if ( null === $parent_block ) {
-		$block_width_data = array();
-	}
-
-	$block_width_data = $parent_block->context['block_width_data'] ?? $block_width_data;
-	if ( 'core/group' === $block['blockName'] || 'core/columns' === $block['blockName'] ) {
-		if ( isset( $block['attrs']['align'] ) ) {
-			switch ( $block['attrs']['align'] ) {
-				case 'full':
-					$block_width_data[][ $block['blockName'] ] = 'full';
-					break;
-				case 'wide':
-					$block_width_data[][ $block['blockName'] ] = 'wide';
-					break;
-				default:
-					$block_width_data[][ $block['blockName'] ] = 'default';
-					break;
-			}
-		} else {
-			$block_width_data[][ $block['blockName'] ] = 'default';
+		if ( 'default' === $alignment || 'wide' === $alignment ) {
+			$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 		}
 	}
 
@@ -335,17 +316,12 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
 			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
 				// Use specific column width.
-				$block_width_data[][ $block['blockName'] ] = $block['attrs']['width'];
+				$context['column_width'] = $block['attrs']['width'];
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
 				// Determine the width based on equally sized columns.
-				$block_width_data[][ $block['blockName'] ] = '' . ( 100 / $parent_block->context['column_count'] ) . '%';
+				$context['column_width'] = '' . ( 100 / $parent_block->context['column_count'] ) . '%';
 			}
 		}
 	}
-
-	if ( $block_width_data ) {
-		$context['block_width_data'] = $block_width_data;
-	}
-
 	return $context;
 }
