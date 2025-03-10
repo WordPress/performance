@@ -125,7 +125,7 @@ class Test_Dominant_Color extends TestCase {
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
 		// Testing tag_add_adjust() with image being lazy load.
-		$filtered_image_mock_lazy_load = sprintf( '<img loading="lazy" class="test" src="%s" width="%d" height="%d" />', $src, $width, $height );
+		$filtered_image_mock_lazy_load = sprintf( '<img loading="lazy" class="test" src="%s" width="%d" height="%d" alt="" />', $src, $width, $height );
 
 		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
@@ -179,11 +179,11 @@ class Test_Dominant_Color extends TestCase {
 	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes(): array {
 		return array(
 			'double quotes' => array(
-				'image'    => '<img src="%s">',
+				'image'    => '<img src="%s" alt="">',
 				'expected' => true,
 			),
 			'single quotes' => array(
-				'image'    => "<img src='%s'>",
+				'image'    => "<img src='%s' alt=''>",
 				'expected' => true,
 			),
 		);
@@ -222,11 +222,11 @@ class Test_Dominant_Color extends TestCase {
 	public function data_provider_dominant_color_check_inline_style(): array {
 		return array(
 			'no existing inline styles' => array(
-				'filtered_image' => '<img src="%s" width="%d" height="%d" />',
+				'filtered_image' => '<img src="%s" width="%d" height="%d" alt="" />',
 				'expected'       => 'style="--dominant-color: #fe0000;"',
 			),
 			'existing inline styles'    => array(
-				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />',
+				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" alt="" />',
 				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
 			),
 		);
@@ -298,24 +298,24 @@ class Test_Dominant_Color extends TestCase {
 			),
 			'filtered' => array(
 				'existing' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 				),
 				'expected' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 				),
 			),
 			'added'    => array(
 				'existing' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 					'WP_Image_Editor_GD',
 					'WP_Image_Editor_Imagick',
 				),
 				'expected' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 					'Dominant_Color_Image_Editor_GD',
 					'Dominant_Color_Image_Editor_Imagick',
 				),
