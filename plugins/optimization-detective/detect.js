@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution
