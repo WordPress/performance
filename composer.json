@@ -13,7 +13,8 @@
   },
   "require": {
     "php": "^7.2 || ^8.0",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-zlib": "*"
   },
   "suggest": {
     "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class",
