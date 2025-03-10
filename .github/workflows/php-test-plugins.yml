@@ -13,7 +13,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
@@ -25,7 +24,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
     types:
@@ -52,7 +50,7 @@ jobs:
           - php: '8.2'
             phpunit: '9.6'
             wp: 'latest'
-            coverage: true
+            coverage: ${{ !startsWith(github.actor, 'dependabot') }}
     env:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}

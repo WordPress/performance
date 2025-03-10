@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Starts output buffering at the end of the 'template_include' filter.
@@ -78,9 +80,38 @@ function od_buffer_output( $passthrough ) {
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter(): void {
-	if ( ! od_can_optimize_response() || isset( $_GET['optimization_detective_disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$conditions = array(
+		array(
+			'test'   => od_can_optimize_response(),
+			'reason' => __( 'Page is not optimized because od_can_optimize_response() returned false. This can be overridden with the od_can_optimize_response filter.', 'optimization-detective' ),
+		),
+		array(
+			'test'   => ! od_is_rest_api_unavailable() || ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ),
+			'reason' => __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' ),
+		),
+		array(
+			'test'   => ! isset( $_GET['optimization_detective_disabled'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'reason' => __( 'Page is not optimized because the URL has the optimization_detective_disabled query parameter.', 'optimization-detective' ),
+		),
+	);
+	$reasons    = array();
+	foreach ( $conditions as $condition ) {
+		if ( ! $condition['test'] ) {
+			$reasons[] = $condition['reason'];
+		}
+	}
+	if ( count( $reasons ) > 0 ) {
+		if ( WP_DEBUG ) {
+			add_action(
+				'wp_print_footer_scripts',
+				static function () use ( $reasons ): void {
+					od_print_disabled_reasons( $reasons );
+				}
+			);
+		}
 		return;
 	}
+
 	$callback = 'od_optimize_template_output_buffer';
 	if (
 		function_exists( 'perflab_wrap_server_timing' )
@@ -92,6 +123,28 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
+}
+
+/**
+ * Prints the reasons why Optimization Detective is not optimizing the current page.
+ *
+ * This is only used when WP_DEBUG is enabled.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @param string[] $reasons Reason messages.
+ */
+function od_print_disabled_reasons( array $reasons ): void {
+	foreach ( $reasons as $reason ) {
+		wp_print_inline_script_tag(
+			sprintf(
+				'console.info( %s );',
+				(string) wp_json_encode( '[Optimization Detective] ' . $reason )
+			),
+			array( 'type' => 'module' )
+		);
+	}
 }
 
 /**
@@ -114,16 +167,12 @@ function od_can_optimize_response(): bool {
 		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
 		is_embed() ||
+		// Skip posts that aren't published yet.
+		is_preview() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
 		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
-		// The aim is to optimize pages for the majority of site visitors, not for those who administer the site, unless
-		// in 'plugin' development mode. For admin users, additional elements will be present, like the script from
-		// wp_customize_support_script(), which will interfere with the XPath indices. Note that
-		// od_get_normalized_query_vars() is varied by is_user_logged_in(), so membership sites and e-commerce sites
-		// will still be able to be optimized for their normal visitors.
-		( current_user_can( 'customize' ) && ! wp_is_development_mode( 'plugin' ) ) ||
 		// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
 		// the relevant actions on.
 		null === od_get_cache_purge_post_id()
@@ -189,7 +238,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
 	if ( ! (
-		$processor->next_tag() &&
+		$processor->next_tag( array( 'tag_closers' => 'visit' ) ) &&
 		! $processor->is_tag_closer() &&
 		'HTML' === $processor->get_tag()
 	) ) {
@@ -219,7 +268,14 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		od_get_url_metric_freshness_ttl()
 	);
 	$link_collection      = new OD_Link_Collection();
-	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
+	$visited_tag_state    = new OD_Visited_Tag_State();
+	$tag_visitor_context  = new OD_Tag_Visitor_Context(
+		$processor,
+		$group_collection,
+		$link_collection,
+		$visited_tag_state,
+		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
@@ -228,7 +284,12 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
-		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
+		if (
+			in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true )
+			||
+			$processor->is_admin_bar()
+		) {
 			continue;
 		}
 
@@ -236,8 +297,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
 		foreach ( $visitors as $visitor ) {
-			$cursor_move_count      = $processor->get_cursor_move_count();
-			$tracked_in_url_metrics = $visitor( $tag_visitor_context ) || $tracked_in_url_metrics;
+			$cursor_move_count    = $processor->get_cursor_move_count();
+			$visitor_return_value = $visitor( $tag_visitor_context );
+			if ( true === $visitor_return_value ) {
+				$tracked_in_url_metrics = true;
+			}
 
 			// If the visitor traversed HTML tags, we need to go back to this tag so that in the next iteration any
 			// relevant tag visitors may apply, in addition to properly setting the data-od-xpath on this tag below.
@@ -247,10 +311,18 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 		$processor->release_bookmark( $current_tag_bookmark );
 
-		if ( $tracked_in_url_metrics && $needs_detection ) {
-			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
+		if ( $visited_tag_state->is_tag_tracked() ) {
+			$tracked_in_url_metrics = true;
 		}
-	} while ( $processor->next_open_tag() );
+
+		if ( $tracked_in_url_metrics && $needs_detection ) {
+			// TODO: Replace get_stored_xpath with get_xpath once the transitional period is over.
+			$xpath = $processor->get_stored_xpath();
+			$processor->set_meta_attribute( 'xpath', $xpath );
+		}
+
+		$visited_tag_state->reset();
+	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {

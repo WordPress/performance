@@ -6,9 +6,11 @@
  * @package web-worker-offloading
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds scripts to be offloaded to a worker.

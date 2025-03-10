@@ -2,12 +2,12 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.9.0
+Stable tag:   1.0.0-beta2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
 
-Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
 
 == Description ==
 
@@ -54,6 +54,50 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Account for 64 KiB limit for sending beacon data. ([1851](https://github.com/WordPress/performance/pull/1851))
+* Add post ID for the `od_url_metrics` post to the tag visitor context. ([1847](https://github.com/WordPress/performance/pull/1847))
+* Change minimum viewport width to be exclusive whereas the maximum width remains inclusive. ([1839](https://github.com/WordPress/performance/pull/1839))
+* Disable URL Metric storage locking by default for administrators. ([1835](https://github.com/WordPress/performance/pull/1835))
+* Include active plugins in ETag data and increase default freshness TTL from 1 day to 1 week. ([1854](https://github.com/WordPress/performance/pull/1854))
+* Make ETag a required property of the URL Metric. ([1824](https://github.com/WordPress/performance/pull/1824))
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+* Use `IFRAME` to display HTML responses for REST API storage request failures in Site Health test. ([1849](https://github.com/WordPress/performance/pull/1849))
+
+**Bug Fixes**
+
+* Prevent URL in `Link` header from including invalid characters. ([1802](https://github.com/WordPress/performance/pull/1802))
+* Prevent optimizing post previews by default. ([1848](https://github.com/WordPress/performance/pull/1848))
+
+**Documentation**
+
+* Improve Optimization Detective documentation. ([1782](https://github.com/WordPress/performance/pull/1782))
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Add site health check to detect blocked REST API and short-circuit optimization when unavailable. ([1762](https://github.com/WordPress/performance/pull/1762))
+* Allow extensions to opt in to using the web-vitals attribution build via the `od_use_web_vitals_attribution_build` filter. ([1759](https://github.com/WordPress/performance/pull/1759))
+* Disambiguate XPaths for children of `BODY` with `id`, `class`, or `role` attributes. ([1797](https://github.com/WordPress/performance/pull/1797))
+* Eliminate varying URL Metrics by logged-in state and discontinue disabling optimization by default for admins. ([1788](https://github.com/WordPress/performance/pull/1788))
+* Improve test coverage for Optimization Detective. ([1817](https://github.com/WordPress/performance/pull/1817))
+* Introduce `OD_Tag_Visitor_Context::track_tag()` method as alternative for returning `true` in tag visitor callback. ([1821](https://github.com/WordPress/performance/pull/1821))
+* Omit element node index in XPaths up to children of BODY. ([1790](https://github.com/WordPress/performance/pull/1790))
+* Skip visiting tags in the Admin Bar when optimizing a page. ([1816](https://github.com/WordPress/performance/pull/1816))
+
+**Bug Fixes**
+
+* Ensure optimization is performed in the wp-env local environment and log debug messages to console when disabled. ([1822](https://github.com/WordPress/performance/pull/1822))
+* Skip visiting any tags inside of `NOSCRIPT` elements. ([1783](https://github.com/WordPress/performance/pull/1783))
+
+**Documentation**
+
+* Move Optimization Detective docs into [`README.md`](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs). ([1763](https://github.com/WordPress/performance/pull/1763))
 
 = 0.9.0 =
 
