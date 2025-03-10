@@ -6,9 +6,11 @@
  * @package web-worker-offloading
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Configures WWO for WooCommerce and Google Analytics.
@@ -31,7 +33,7 @@ function plwwo_woocommerce_configure( $configuration ): array {
 
 	return $configuration;
 }
-add_filter( 'plwwo_configuration', 'plwwo_woocommerce_configure' );
+add_filter( 'plwwo_configuration', 'plwwo_woocommerce_configure' ); // @codeCoverageIgnore
 
 plwwo_mark_scripts_for_offloading(
 	// Note: 'woocommerce-google-analytics-integration' is intentionally not included because for some reason events like add_to_cart don't get tracked.

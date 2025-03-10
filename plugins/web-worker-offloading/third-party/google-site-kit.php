@@ -6,9 +6,11 @@
  * @package web-worker-offloading
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Configures WWO for Site Kit and Google Analytics.
@@ -41,7 +43,7 @@ function plwwo_google_site_kit_configure( $configuration ): array {
 
 	return $configuration;
 }
-add_filter( 'plwwo_configuration', 'plwwo_google_site_kit_configure' );
+add_filter( 'plwwo_configuration', 'plwwo_google_site_kit_configure' ); // @codeCoverageIgnore
 
 plwwo_mark_scripts_for_offloading(
 	array(
@@ -68,4 +70,4 @@ function plwwo_google_site_kit_filter_inline_script_attributes( $attributes ) {
 	return $attributes;
 }
 
-add_filter( 'wp_inline_script_attributes', 'plwwo_google_site_kit_filter_inline_script_attributes' );
+add_filter( 'wp_inline_script_attributes', 'plwwo_google_site_kit_filter_inline_script_attributes' ); // @codeCoverageIgnore

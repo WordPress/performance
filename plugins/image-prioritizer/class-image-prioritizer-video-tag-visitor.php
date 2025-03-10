@@ -8,10 +8,11 @@
  * @since 0.2.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Image Prioritizer: Image_Prioritizer_Video_Tag_Visitor class

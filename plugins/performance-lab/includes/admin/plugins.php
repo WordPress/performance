@@ -6,9 +6,11 @@
  * @noinspection PhpRedundantOptionalArgumentInspection
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Gets plugin info for the given plugin slug from WordPress.org.

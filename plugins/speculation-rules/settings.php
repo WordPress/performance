@@ -6,10 +6,11 @@
  * @since 1.0.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Returns the available options for the Speculative Loading mode and their labels.
@@ -62,7 +63,7 @@ function plsr_get_setting_default(): array {
 /**
  * Returns the stored setting value for Speculative Loading configuration.
  *
- * @since n.e.x.t
+ * @since 1.4.0
  *
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
  *     Stored setting value.
@@ -223,7 +224,8 @@ function plsr_render_settings_field( array $args ): void {
 			$choices = plsr_get_eagerness_labels();
 			break;
 		default:
-			return; // Invalid (and this case should never occur).
+			// Invalid (and this case should never occur).
+			return; // @codeCoverageIgnore
 	}
 
 	$value = $option[ $args['field'] ];
