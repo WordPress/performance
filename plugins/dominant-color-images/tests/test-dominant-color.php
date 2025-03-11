@@ -95,6 +95,7 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function test_dominant_color_has_transparency( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		$this->skip_if_mime_type_unsupported( $image_path );
+
 		// Test when metadata is not an array.
 		$invalid_meta_attachment = self::factory()->attachment->create(
 			array(
@@ -439,14 +440,13 @@ class Test_Dominant_Color extends TestCase {
 		dominant_color_add_inline_style();
 
 		// Verify the style was registered.
-		global $wp_styles;
-		$this->assertTrue( isset( $wp_styles->registered['dominant-color-styles'] ) );
+		$this->assertTrue( wp_style_is( 'dominant-color-styles', 'registered' ) );
 
 		// Verify the style was enqueued.
 		$this->assertTrue( wp_style_is( 'dominant-color-styles', 'enqueued' ) );
 
 		// Verify the inline style was added.
-		$inline_styles = $wp_styles->get_data( 'dominant-color-styles', 'after' );
+		$inline_styles = wp_styles()->get_data( 'dominant-color-styles', 'after' );
 		$this->assertNotEmpty( $inline_styles );
 		$this->assertStringContainsString(
 			'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
@@ -461,14 +461,13 @@ class Test_Dominant_Color extends TestCase {
 		dominant_color_admin_inline_style();
 
 		// Verify the style was registered.
-		global $wp_styles;
-		$this->assertTrue( isset( $wp_styles->registered['dominant-color-admin-styles'] ) );
+		$this->assertTrue( wp_style_is( 'dominant-color-admin-styles', 'registered' ) );
 
 		// Verify the style was enqueued.
 		$this->assertTrue( wp_style_is( 'dominant-color-admin-styles', 'enqueued' ) );
 
 		// Verify the inline style was added.
-		$inline_styles = $wp_styles->get_data( 'dominant-color-admin-styles', 'after' );
+		$inline_styles = wp_styles()->get_data( 'dominant-color-admin-styles', 'after' );
 		$this->assertNotEmpty( $inline_styles );
 		$this->assertStringContainsString(
 			'.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
@@ -480,7 +479,6 @@ class Test_Dominant_Color extends TestCase {
 	 * @covers ::dominant_color_admin_script
 	 */
 	public function test_dominant_color_admin_script(): void {
-
 		$output = get_echo( 'dominant_color_admin_script' );
 
 		// Verify if script tag exists.
