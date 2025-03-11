@@ -450,6 +450,9 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$url_metrics = array();
 		$etag_counts = array();
 		foreach ( $url_metrics_data as $url_metric_data ) {
+			// Make sure the timestamp is always current as otherwise groups will never be complete, regardless of having a current ETag.
+			$url_metric_data['timestamp'] = microtime( true );
+
 			$url_metric = new OD_URL_Metric( $url_metric_data );
 			$etag       = $url_metric->get_etag();
 			if ( ! isset( $etag_counts[ $etag ] ) ) {
