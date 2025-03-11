@@ -154,39 +154,52 @@ function getGroupForViewportWidth( viewportWidth, urlMetricGroupStatuses ) {
  * @param {string}               currentETag          - Current ETag.
  * @param {string}               currentUrl           - Current URL.
  * @param {URLMetricGroupStatus} urlMetricGroupStatus - URL Metric group status.
- * @return {Promise<string>} Session storage key.
+ * @param {Logger}               logger               - Logger.
+ * @return {Promise<string|null>} Session storage key for the current URL or null if crypto is not available or caused an error.
  */
 async function getAlreadySubmittedSessionStorageKey(
 	currentETag,
 	currentUrl,
-	urlMetricGroupStatus
+	urlMetricGroupStatus,
+	{ warn, error }
 ) {
 	if ( ! window.crypto || ! window.crypto.subtle ) {
-		throw new Error( 'Web Crypto API is unavailable' );
+		warn(
+			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
+		);
+		return null;
 	}
 
-	const message = [
-		currentETag,
-		currentUrl,
-		urlMetricGroupStatus.minimumViewportWidth,
-		urlMetricGroupStatus.maximumViewportWidth || '',
-	].join( '-' );
+	try {
+		const message = [
+			currentETag,
+			currentUrl,
+			urlMetricGroupStatus.minimumViewportWidth,
+			urlMetricGroupStatus.maximumViewportWidth || '',
+		].join( '-' );
 
-	/*
-	 * Note that the components are hashed for a couple of reasons:
-	 *
-	 * 1. It results in a consistent length string devoid of any special characters that could cause problems.
-	 * 2. Since the key includes the URL, hashing it avoids potential privacy concerns where the sessionStorage is
-	 *    examined to see which URLs the client went to.
-	 *
-	 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
-	 */
-	const msgBuffer = new TextEncoder().encode( message );
-	const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
-	const hashHex = Array.from( new Uint8Array( hashBuffer ) )
-		.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
-		.join( '' );
-	return `odSubmitted-${ hashHex }`;
+		/*
+		 * Note that the components are hashed for a couple of reasons:
+		 *
+		 * 1. It results in a consistent length string devoid of any special characters that could cause problems.
+		 * 2. Since the key includes the URL, hashing it avoids potential privacy concerns where the sessionStorage is
+		 *    examined to see which URLs the client went to.
+		 *
+		 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
+		 */
+		const msgBuffer = new TextEncoder().encode( message );
+		const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
+		const hashHex = Array.from( new Uint8Array( hashBuffer ) )
+			.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
+			.join( '' );
+		return `odSubmitted-${ hashHex }`;
+	} catch ( err ) {
+		error(
+			'Unable to generate sessionStorage key for already-submitted URL due to error:',
+			err
+		);
+		return null;
+	}
 }
 
 /**
@@ -358,7 +371,8 @@ export default async function detect( {
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
-	const { log, warn, error } = createLogger( isDebug, consoleLogPrefix );
+	const logger = createLogger( isDebug, consoleLogPrefix );
+	const { log, warn, error } = logger;
 
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
@@ -396,26 +410,17 @@ export default async function detect( {
 	}
 
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
-	let alreadySubmittedSessionStorageKey;
-	try {
-		alreadySubmittedSessionStorageKey =
-			await getAlreadySubmittedSessionStorageKey(
-				currentETag,
-				currentUrl,
-				urlMetricGroupStatus
-			);
-	} catch ( err ) {
-		if ( err.message === 'Web Crypto API is unavailable' ) {
-			error(
-				'Unable to create session storage key: Web Crypto API is not available. This API is only available in secure contexts (HTTPS). Detection cannot proceed. If you are testing locally, ensure you use HTTPS or run on localhost.'
-			);
-		} else {
-			error( 'Unable to create session storage key: ' + err.message );
-		}
-		return;
-	}
-
-	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
+	const alreadySubmittedSessionStorageKey =
+		await getAlreadySubmittedSessionStorageKey(
+			currentETag,
+			currentUrl,
+			urlMetricGroupStatus,
+			logger
+		);
+	if (
+		null !== alreadySubmittedSessionStorageKey &&
+		alreadySubmittedSessionStorageKey in sessionStorage
+	) {
 		const previousVisitTime = parseInt(
 			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
 			10
@@ -818,10 +823,12 @@ export default async function detect( {
 	setStorageLock( getCurrentTime() );
 
 	// Remember that the URL Metric was submitted for this URL to avoid having multiple entries submitted by the same client.
-	sessionStorage.setItem(
-		alreadySubmittedSessionStorageKey,
-		String( getCurrentTime() )
-	);
+	if ( null !== alreadySubmittedSessionStorageKey ) {
+		sessionStorage.setItem(
+			alreadySubmittedSessionStorageKey,
+			String( getCurrentTime() )
+		);
+	}
 
 	const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
 		percentOfBudget
