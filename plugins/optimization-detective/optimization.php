@@ -167,6 +167,8 @@ function od_can_optimize_response(): bool {
 		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
 		is_embed() ||
+		// Skip posts that aren't published yet.
+		is_preview() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
@@ -236,7 +238,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
 	if ( ! (
-		$processor->next_tag() &&
+		$processor->next_tag( array( 'tag_closers' => 'visit' ) ) &&
 		! $processor->is_tag_closer() &&
 		'HTML' === $processor->get_tag()
 	) ) {
@@ -267,7 +269,13 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	);
 	$link_collection      = new OD_Link_Collection();
 	$visited_tag_state    = new OD_Visited_Tag_State();
-	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection, $visited_tag_state );
+	$tag_visitor_context  = new OD_Tag_Visitor_Context(
+		$processor,
+		$group_collection,
+		$link_collection,
+		$visited_tag_state,
+		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
@@ -276,7 +284,12 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
-		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
+		if (
+			in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true )
+			||
+			$processor->is_admin_bar()
+		) {
 			continue;
 		}
 
@@ -307,7 +320,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		$visited_tag_state->reset();
-	} while ( $processor->next_open_tag() );
+	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {

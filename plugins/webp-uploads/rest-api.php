@@ -30,7 +30,7 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 
 	foreach ( $data['media_details']['sizes'] as $size => &$details ) {
 
-		if ( empty( $details['sources'] ) || ! is_array( $details['sources'] ) ) {
+		if ( ! isset( $details['sources'] ) || ! is_array( $details['sources'] ) ) {
 			continue;
 		}
 
@@ -41,7 +41,13 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	}
 
 	$full_src = wp_get_attachment_image_src( $post->ID, 'full' );
-	if ( ! empty( $full_src ) && ! empty( $data['media_details']['sources'] ) && ! empty( $data['media_details']['sizes']['full'] ) ) {
+	if (
+		isset( $full_src[0] ) &&
+		isset( $data['media_details']['sources'] ) &&
+		is_array( $data['media_details']['sources'] ) &&
+		isset( $data['media_details']['sizes']['full'] ) &&
+		is_array( $data['media_details']['sizes']['full'] )
+	) {
 		$full_url_basename = wp_basename( $full_src[0] );
 		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
 			$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );

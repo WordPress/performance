@@ -65,16 +65,17 @@ function dominant_color_update_attachment_image_attributes( $attr, WP_Post $atta
 		$attr['data-has-transparency'] = $image_meta['has_transparency'] ? 'true' : 'false';
 
 		$class = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
-		if ( empty( $attr['class'] ) ) {
-			$attr['class'] = $class;
-		} else {
+
+		if ( isset( $attr['class'] ) && is_string( $attr['class'] ) && '' !== $attr['class'] ) {
 			$attr['class'] .= ' ' . $class;
+		} else {
+			$attr['class'] = $class;
 		}
 	}
 
-	if ( ! empty( $image_meta['dominant_color'] ) ) {
+	if ( isset( $image_meta['dominant_color'] ) && is_string( $image_meta['dominant_color'] ) && '' !== $image_meta['dominant_color'] ) {
 		$attr['data-dominant-color'] = esc_attr( $image_meta['dominant_color'] );
-		$style_attribute             = empty( $attr['style'] ) ? '' : $attr['style'];
+		$style_attribute             = isset( $attr['style'] ) && is_string( $attr['style'] ) ? $attr['style'] : '';
 		$attr['style']               = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';' . $style_attribute;
 	}
 
@@ -140,7 +141,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 		return $filtered_image;
 	}
 
-	if ( ! empty( $image_meta['dominant_color'] ) ) {
+	if ( isset( $image_meta['dominant_color'] ) && is_string( $image_meta['dominant_color'] ) && '' !== $image_meta['dominant_color'] ) {
 		$processor->set_attribute( 'data-dominant-color', $image_meta['dominant_color'] );
 
 		$style_attribute = '--dominant-color: #' . $image_meta['dominant_color'] . '; ';

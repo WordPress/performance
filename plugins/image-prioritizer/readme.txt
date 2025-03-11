@@ -2,12 +2,12 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.3.1
+Stable tag:   1.0.0-beta1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
 
-Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy loading.
+Prioritizes the loading of images and videos based on how they appear to actual visitors: adds fetchpriority, preloads, lazy-loads, and sets sizes.
 
 == Description ==
 
@@ -15,7 +15,7 @@ This plugin optimizes the loading of images (and videos) with prioritization to 
 
 The current optimizations include:
 
-1. Add breakpoint-specific `fetchpriority=high` preload links (`LINK[rel=preload]`) for image URLs of LCP elements:
+1. Add breakpoint-specific `fetchpriority=high` preload links (both as `LINK[rel=preload]` elements and `Link` response headers) for image URLs of LCP elements:
    1. An `IMG` element, including the `srcset`/`sizes` attributes supplied as `imagesrcset`/`imagesizes` on the `LINK`.
    2. The first `SOURCE` element with a `type` attribute in a `PICTURE` element. (Art-directed `PICTURE` elements using media queries are not supported.)
    3. An element with a CSS `background-image` inline `style` attribute.
@@ -27,7 +27,9 @@ The current optimizations include:
    1. Apply lazy loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport.
    2. Implement lazy loading of CSS background images added via inline `style` attributes.
    3. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
-5. Ensure that [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is added to all lazy-loaded `IMG` elements.
+5. Responsive image sizes:
+   1. Compute the `sizes` attribute using the widths of an image collected from URL Metrics for each breakpoint (when not lazy-loaded since then handled by `sizes=auto`).
+   2. Ensure [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is set on `IMG` tags after setting correct lazy-loading (above).
 6. Reduce the size of the `poster` image of a `VIDEO` from full size to the size appropriate for the maximum width of the video (on desktop).
 
 **This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency.** Please refer to that plugin for additional background on how this plugin works as well as additional developer options.
@@ -69,6 +71,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Compute responsive `sizes` attribute based on the `width` from the `boundingClientRect` in captured URL Metrics. ([1840](https://github.com/WordPress/performance/pull/1840))
 
 = 0.3.1 =
 

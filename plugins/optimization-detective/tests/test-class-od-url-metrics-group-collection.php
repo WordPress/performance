@@ -46,14 +46,6 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'max_breakpoint_bad'         => array(
-				'url_metrics'   => array(),
-				'current_etag'  => $current_etag,
-				'breakpoints'   => array( PHP_INT_MAX ),
-				'sample_size'   => 3,
-				'freshness_ttl' => HOUR_IN_SECONDS,
-				'exception'     => InvalidArgumentException::class,
-			),
 			'string_breakpoint_bad'      => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
@@ -119,6 +111,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	/**
 	 * @covers ::__construct
 	 * @covers ::get_current_etag
+	 * @covers ::get_breakpoints
+	 * @covers ::get_sample_size
+	 * @covers ::get_freshness_ttl
 	 * @covers ::create_groups
 	 * @covers ::count
 	 *
@@ -138,6 +133,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$group_collection = new OD_URL_Metric_Group_Collection( $url_metrics, $current_etag, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertCount( count( $breakpoints ) + 1, $group_collection );
 		$this->assertSame( $current_etag, $group_collection->get_current_etag() );
+		$this->assertSame( $sample_size, $group_collection->get_sample_size() );
+		$this->assertSame( $breakpoints, $group_collection->get_breakpoints() );
+		$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
 	}
 
 	/**
@@ -156,7 +154,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					800 => 1,
 				),
 				'expected_counts' => array(
-					0   => 3,
+					1   => 3,
 					481 => 3,
 					783 => 1,
 				),
@@ -171,7 +169,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					783 => 6,
 				),
 				'expected_counts' => array(
-					0   => 2,
+					1   => 2,
 					481 => 2,
 					601 => 2,
 					783 => 2,
@@ -185,7 +183,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					800 => 1,
 				),
 				'expected_counts' => array(
-					0   => 1,
+					1   => 1,
 					481 => 1,
 				),
 			),
@@ -197,7 +195,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					600 => 1,
 				),
 				'expected_counts' => array(
-					0 => 2,
+					1 => 2,
 				),
 			),
 		);
@@ -346,13 +344,13 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 						'url_metric_viewport_widths' => array( 400, 480 ),
 					),
 					array(
-						'minimum_viewport_width'     => 481,
+						'minimum_viewport_width'     => 480,
 						'maximum_viewport_width'     => 640,
 						'url_metric_viewport_widths' => array(),
 					),
 					array(
-						'minimum_viewport_width'     => 641,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'minimum_viewport_width'     => 640,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 800 ),
 					),
 				),
@@ -367,8 +365,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 						'url_metric_viewport_widths' => array( 400 ),
 					),
 					array(
-						'minimum_viewport_width'     => 481,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'minimum_viewport_width'     => 480,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 600, 800, 1000 ),
 					),
 				),
@@ -379,7 +377,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'expected_groups' => array(
 					array(
 						'minimum_viewport_width'     => 0,
-						'maximum_viewport_width'     => PHP_INT_MAX,
+						'maximum_viewport_width'     => null,
 						'url_metric_viewport_widths' => array( 250, 500, 1000 ),
 					),
 				),
@@ -499,7 +497,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 							'complete'             => true,
 						),
 						array(
-							'minimumViewportWidth' => 481,
+							'minimumViewportWidth' => 480,
 							'complete'             => true,
 						),
 					),
@@ -523,7 +521,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 							'complete'             => false,
 						),
 						array(
-							'minimumViewportWidth' => 481,
+							'minimumViewportWidth' => 480,
 							'complete'             => false,
 						),
 					),
@@ -550,7 +548,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 							'complete'             => false,
 						),
 						array(
-							'minimumViewportWidth' => 481,
+							'minimumViewportWidth' => 480,
 							'complete'             => true,
 						),
 					),
@@ -578,7 +576,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 							'complete'             => true,
 						),
 						array(
-							'minimumViewportWidth' => 481,
+							'minimumViewportWidth' => 480,
 							'complete'             => false,
 						),
 					),
@@ -740,13 +738,13 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$current_etag     = md5( '' );
 		$group_collection = new OD_URL_Metric_Group_Collection(
 			array(
-				// Group 1: 0-480 viewport widths.
+				// Group 1: >0-480 viewport widths.
 				$get_url_metric_with_one_lcp_element( 400, $first_child_image_xpath ),
 				$get_url_metric_with_one_lcp_element( 420, $first_child_image_xpath ),
 				$get_url_metric_with_one_lcp_element( 440, $second_child_image_xpath ),
-				// Group 2: 481-800 viewport widths.
+				// Group 2: >480-800 viewport widths.
 				$get_url_metric_with_one_lcp_element( 500, $first_child_h1_xpath ),
-				// Group 3: 801-Infinity viewport widths.
+				// Group 3: >800-Infinity viewport widths.
 				$get_url_metric_with_one_lcp_element( 820, $first_child_image_xpath ),
 				$get_url_metric_with_one_lcp_element( 900, $first_child_image_xpath ),
 			),

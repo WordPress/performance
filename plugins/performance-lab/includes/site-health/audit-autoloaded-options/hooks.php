@@ -63,7 +63,7 @@ function perflab_aao_handle_update_autoload(): void {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
 	}
 
-	if ( empty( $option_name ) ) {
+	if ( '' === $option_name ) {
 		wp_die( esc_html__( 'Invalid option name.', 'performance-lab' ) );
 	}
 

@@ -6,38 +6,104 @@
 
 ### Action: `od_init` (argument: plugin version)
 
-Fires when the Optimization Detective is initializing. This action is useful for loading extension code that depends on Optimization Detective to be running. The version of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
+Fires when the Optimization Detective is initializing.
+
+This action is useful for loading extension code that depends on Optimization Detective to be running. The version
+of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
+
+Example:
+
+```php
+add_action( 'od_init', function ( string $version ) {
+	if ( version_compare( $version, '1.0', '<' ) ) {
+		add_action( 'admin_notices', 'my_plugin_warn_optimization_plugin_outdated' );
+		return;
+	}
+
+	// Bootstrap the Optimization Detective extension.
+	require_once __DIR__ . '/functions.php';
+	// ...
+} );
+```
 
 ### Action: `od_register_tag_visitors` (argument: `OD_Tag_Visitor_Registry`)
 
 Fires to register tag visitors before walking over the document to perform optimizations.
 
-For example, to register a new tag visitor that targets `H1` elements:
+Once a page has finished rendering and the output buffer is processed, the page contents are loaded into
+an HTML Tag Processor instance. It then iterates over each tag in the document, and at each open tag it will
+invoke all registered tag visitors. A tag visitor is simply a callable (such as a regular function, closure,
+or even a class with an `__invoke` method defined). The tag visitor callback is invoked by passing an instance
+of the `OD_Tag_Visitor_Context` object which includes the following read-only properties:
+
+- `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current open tag.
+- `$url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The URL Metrics which may include information about the current tag to inform what optimizations the callback performs.
+- `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add preload links and preconnect links as needed.
+- `$url_metrics_id` (`positive-int|null`): The post ID for the `od_url_metrics` post from which the URL Metrics were loaded (if any). For advanced usage.
+
+Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child elements)
+since the tag processor's cursor will be reset to the tag after the callback finishes.
+
+When a tag visitor sees it is at a relevant open tag (e.g. by checking `$processor->get_tag()`), it can call the
+`$context->track_tag()` method to indicate that the tag should be measured during detection. This will cause the
+tag to be included among the `elements` in the stored URL Metrics. The element data includes properties such
+as `intersectionRatio`, `intersectionRect`, and `boundingClientRect` (provided by an `IntersectionObserver`) as
+well as whether the tag is the LCP element (`isLCP`) or LCP element candidate (`isLCPCandidate`). This method
+should not be called if the current tag is not relevant for the tag visitor or if the tag visitor callback does
+not need to query the provided `OD_URL_Metric_Group_Collection` instance to apply the desired optimizations. (In
+addition to calling the `$context->track_tag()`, a callback may also return `true` to indicate the tag should be
+tracked.)
+
+Here's an example tag visitor that depends on URL Metrics data:
 
 ```php
-add_action(
-	'od_register_tag_visitors',
-	static function ( OD_Tag_Visitor_Registry $registry ) {
-		$registry->register(
-			'my-plugin/h1',
-			static function ( OD_Tag_Visitor_Context $context ): bool {
-				if ( $context->processor->get_tag() !== 'H1' ) {
-					return false;
-				}
-				// Now optimize based on stored URL Metrics in $context->url_metric_group_collection.
-				// ...
+$tag_visitor_registry->register(
+	'lcp-img-fetchpriority-high',
+	static function ( OD_Tag_Visitor_Context $context ): void {
+		if ( $context->processor->get_tag() !== 'IMG' ) {
+			return; // Tag is not relevant for this tag visitor.
+		}
 
-				// Returning true causes the tag to be tracked in URL Metrics. If there is no need
-				// for this, as in there is no reference to $context->url_metric_group_collection
-				// in a tag visitor, then this can instead return false.
-				return true;
-			}
-		);
+		// Mark the tag for measurement during detection so it is included among the elements stored in URL Metrics.
+		$context->track_tag();
+
+		// Make sure fetchpriority=high is added to LCP IMG elements based on the captured URL Metrics.
+		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
+		if (
+			null !== $common_lcp_element
+			&&
+			$common_lcp_element->get_xpath() === $context->processor->get_xpath()
+		) {
+			$context->processor->set_attribute( 'fetchpriority', 'high' );
+		}
+	}
+);
+````
+
+Please note this implementation of setting `fetchpriority=high` on the LCP `IMG` element is simplified. Please
+see the Image Prioritizer extension for a more robust implementation.
+
+Here's an example tag visitor that does not depend on any URL Metrics data:
+
+```php
+$tag_visitor_registry->register(
+	'img-decoding-async',
+	static function ( OD_Tag_Visitor_Context $context ): bool {
+		if ( $context->processor->get_tag() !== 'IMG' ) {
+			return; // Tag is not relevant for this tag visitor.
+		}
+
+		// Set the decoding attribute if it is absent.
+		if ( null === $context->processor->get_attribute( 'decoding' ) ) {
+			$context->processor->set_attribute( 'decoding', 'async' );
+		}
 	}
 );
 ```
 
-Refer to [Image Prioritizer](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) and [Embed Optimizer](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) for real world examples of how tag visitors are used. Registered tag visitors need only be callables, so in addition to providing a closure you may provide a `callable-string` or even a class which has an `__invoke()` method.
+Refer to [Image Prioritizer](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) and
+[Embed Optimizer](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) for additional
+examples of how tag visitors are used.
 
 ### Action: `od_url_metric_stored` (argument: `OD_URL_Metric_Store_Request_Context`)
 
@@ -102,15 +168,19 @@ add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
 } );
 ```
 
-### Filter: `od_url_metric_storage_lock_ttl` (default: 1 minute in seconds)
+### Filter: `od_url_metric_storage_lock_ttl` (default: 60 seconds, except 0 for authorized logged-in users)
 
-Filters how long a given IP is locked from submitting another metric-storage REST API request. Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
+Filters how long the current IP is locked from submitting another URL metric storage REST API request.
+
+Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
 
 ```php
 add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 	return is_user_logged_in() ? 0 : $ttl;
 } );
 ```
+
+By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
 
 During development this is useful to set to zero so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 
@@ -120,15 +190,17 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 } );
 ```
 
-### Filter: `od_url_metric_freshness_ttl` (default: 1 day in seconds)
+### Filter: `od_url_metric_freshness_ttl` (default: 1 week in seconds)
 
-Filters the freshness age (TTL) for a given URL Metric. The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale. In practice, the value should be at least an hour. If your site content does not change frequently, you may want to increase the TTL to a week:
+Filters the freshness age (TTL) for a given URL Metric. The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale. In practice, the value should be at least an hour. If your site content does not change frequently, you may want to increase the TTL even longer, say to a month:
 
 ```php
 add_filter( 'od_url_metric_freshness_ttl', static function (): int {
-	return WEEK_IN_SECONDS;
+	return MONTH_IN_SECONDS;
 } );
 ```
+
+Note that even if you have large freshness TTL a URL Metric can still become stale sooner; if the page state changes then this results in a change to the ETag associated with a URL Metric. This will allow new URL Metrics to be collected before the freshness TTL has transpired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
 
 During development, this can be useful to set to zero so that you don't have to wait for new URL Metrics to be requested when engineering a new optimization:
 
@@ -229,10 +301,17 @@ add_filter(
 
 See also [example usage](https://github.com/WordPress/performance/blob/6bb8405c5c446e3b66c2bfa3ae03ba61b188bca2/plugins/embed-optimizer/hooks.php#L128-L144) in Embed Optimizer. Note in particular the structure of the plugin’s [detect.js](https://github.com/WordPress/performance/blob/trunk/plugins/embed-optimizer/detect.js) script module, how it exports `initialize` and `finalize` functions which Optimization Detective then calls when the page loads and when the page unloads, at which time the URL Metric is constructed and sent to the server for storage. Refer also to the [TypeScript type definitions](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/types.ts).
 
-### Filter: `od_current_url_metrics_etag_data` (default: array with `tag_visitors` key)
+### Filter: `od_current_url_metrics_etag_data` (default: `array<string, mixed>`)
 
 Filters the data that goes into computing the current ETag for URL Metrics.
 
-The ETag is a unique identifier that changes whenever the underlying data used to generate it changes. By default, the ETag calculation includes the names of registered tag visitors. This ensures that when a new Optimization Detective-dependent plugin is activated (like [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) or [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)), any existing URL Metrics are immediately considered stale. This happens because the newly registered tag visitors alter the ETag calculation, making it different from the stored ones.
+The ETag is a unique identifier that changes whenever the underlying data used to generate it changes. By default, the ETag calculation includes:
 
-When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag. These new URL Metrics will include data relevant to the newly activated plugins and their tag visitors.
+1. The active theme and current version (for both parent and child themes).
+2. The queried object ID, post type, and modified date.
+3. The list of registered tag visitors.
+4. The IDs and modified times of posts in The Loop.
+5. The current theme template used to render the page.
+6. The list of active plugins.
+
+A change in ETag means that any previously-collected URL Metrics will be immediately considered stale. When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag.

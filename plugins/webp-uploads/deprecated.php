@@ -30,12 +30,17 @@ function webp_uploads_get_attachment_sources( int $attachment_id, string $size =
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	// Return full image size sources.
-	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
+	if (
+		'full' === $size &&
+		isset( $metadata['sources'] ) &&
+		is_array( $metadata['sources'] ) &&
+		count( $metadata['sources'] ) > 0
+	) {
 		return $metadata['sources'];
 	}
 
 	// Return the resized image sources.
-	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
+	if ( isset( $metadata['sizes'][ $size ]['sources'] ) && is_array( $metadata['sizes'][ $size ]['sources'] ) ) {
 		return $metadata['sizes'][ $size ]['sources'];
 	}
 
