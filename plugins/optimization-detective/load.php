@@ -117,7 +117,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
-		require_once __DIR__ . '/storage/class-od-rest-url-metrics-store-controller.php';
+		require_once __DIR__ . '/storage/class-od-rest-url-metrics-store-endpoint.php';
 		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.

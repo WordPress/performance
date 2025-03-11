@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API integration for the plugin: OD_REST_URL_Metrics_Store_Controller.
+ * REST API integration for the plugin: OD_REST_URL_Metrics_Store_Endpoint.
  *
  * @package optimization-detective
  * @since 0.1.0
@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * OD_REST_URL_Metrics_Store_Controller class
+ * OD_REST_URL_Metrics_Store_Endpoint class
  *
  * @since n.e.x.t
  *
  * @access private
  */
-class OD_REST_URL_Metrics_Store_Controller {
+class OD_REST_URL_Metrics_Store_Endpoint {
 
 	/**
 	 * Get the namespace for optimization-detective

@@ -246,6 +246,6 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$routes = $wp_rest_server->get_routes();
 
 		// Check that the route is present.
-		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Controller::get_namespace() . OD_REST_URL_Metrics_Store_Controller::get_route(), $routes );
+		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Endpoint::get_namespace() . OD_REST_URL_Metrics_Store_Endpoint::get_route(), $routes );
 	}
 }
