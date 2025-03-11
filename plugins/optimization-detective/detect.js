@@ -161,15 +161,8 @@ async function getAlreadySubmittedSessionStorageKey(
 	currentUrl,
 	urlMetricGroupStatus
 ) {
-	// Check if crypto.subtle is available.
 	if ( ! window.crypto || ! window.crypto.subtle ) {
-		// eslint-disable-next-line no-console
-		console.warn(
-			'[Optimization Detective] Web Crypto API is not available. This API is only available in secure contexts (HTTPS). Detection cannot proceed. If you are testing locally, ensure you use HTTPS or run on localhost.'
-		);
-		throw new Error(
-			'Web Crypto API is unavailable in this context. Try using HTTPS or localhost.'
-		);
+		throw new Error( 'Web Crypto API is unavailable' );
 	}
 
 	const message = [
@@ -402,33 +395,40 @@ export default async function detect( {
 		return;
 	}
 
+	// Abort if the client already submitted a URL Metric for this URL and viewport group.
 	let alreadySubmittedSessionStorageKey;
 	try {
-		// Abort if the client already submitted a URL Metric for this URL and viewport group.
 		alreadySubmittedSessionStorageKey =
 			await getAlreadySubmittedSessionStorageKey(
 				currentETag,
 				currentUrl,
 				urlMetricGroupStatus
 			);
-		if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
-			const previousVisitTime = parseInt(
-				sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
-				10
-			);
-			if (
-				! isNaN( previousVisitTime ) &&
-				( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
-			) {
-				log(
-					'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
-				);
-				return;
-			}
-		}
 	} catch ( err ) {
-		warn( 'Unable to create session storage key: ' + err.message );
+		if ( err.message === 'Web Crypto API is unavailable' ) {
+			error(
+				'Unable to create session storage key: Web Crypto API is not available. This API is only available in secure contexts (HTTPS). Detection cannot proceed. If you are testing locally, ensure you use HTTPS or run on localhost.'
+			);
+		} else {
+			error( 'Unable to create session storage key: ' + err.message );
+		}
 		return;
+	}
+
+	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
+		const previousVisitTime = parseInt(
+			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
+			10
+		);
+		if (
+			! isNaN( previousVisitTime ) &&
+			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
+		) {
+			log(
+				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
+			);
+			return;
+		}
 	}
 
 	// Abort if the viewport aspect ratio is not in a common range.
