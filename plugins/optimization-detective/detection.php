@@ -165,6 +165,15 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
  */
 function od_create_rest_url_metric_store_rest_request(): void {
 
-	$controller = new OD_REST_URL_Metrics_Store_Endpoint();
-	$controller->register_endpoint();
+	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
+	$route_args          = $endpoint_controller->get_registration_args();
+
+	/**
+	 * Register the endpoint.
+	 */
+	register_rest_route(
+		$endpoint_controller::get_namespace(),
+		$endpoint_controller::get_route(),
+		$route_args
+	);
 }

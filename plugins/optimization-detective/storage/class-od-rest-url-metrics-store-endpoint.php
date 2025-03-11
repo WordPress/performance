@@ -49,14 +49,18 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 	}
 
 	/**
-	 * Registers endpoint for storage of URL Metric.
+	 * Get the args for the URL Metric storage endpoint.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @see od_compose_site_health_result()
+	 * @return array{
+	 *     methods: string,
+	 *     args: array<string, mixed>,
+	 *     callback: callable,
+	 *     permission_callback: callable
+	 * }
 	 */
-	public function register_endpoint(): void {
-
+	public function get_registration_args(): array {
 		// The slug and cache_purge_post_id args are further validated via the validate_callback for the 'hmac' parameter,
 		// they are provided as input with the 'url' argument to create the HMAC by the server.
 		$args = array(
@@ -96,31 +100,32 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 			),
 		);
 
-		register_rest_route(
-			self::get_namespace(),
-			self::get_route(),
-			array(
-				'methods'             => 'POST',
-				'args'                => array_merge(
-					$args,
-					rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
-				),
-				'callback'            => static function ( WP_REST_Request $request ) {
-					return self::handle_rest_request( $request );
-				},
-				'permission_callback' => static function () {
-					// Needs to be available to unauthenticated visitors.
-					if ( OD_Storage_Lock::is_locked() ) {
-						return new WP_Error(
-							'url_metric_storage_locked',
-							__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-							array( 'status' => 423 )
-						);
-					}
-					return true;
-				},
-			)
+		/**
+		 * Create route args.
+		 */
+		$route_args = array(
+			'methods'             => 'POST',
+			'args'                => array_merge(
+				$args,
+				rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
+			),
+			'callback'            => static function ( WP_REST_Request $request ) {
+				return self::handle_rest_request( $request );
+			},
+			'permission_callback' => static function () {
+				// Needs to be available to unauthenticated visitors.
+				if ( OD_Storage_Lock::is_locked() ) {
+					return new WP_Error(
+						'url_metric_storage_locked',
+						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
+						array( 'status' => 423 )
+					);
+				}
+				return true;
+			},
 		);
+
+		return $route_args;
 	}
 
 	/**
