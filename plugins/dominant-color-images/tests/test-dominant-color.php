@@ -480,9 +480,8 @@ class Test_Dominant_Color extends TestCase {
 	 * @covers ::dominant_color_admin_script
 	 */
 	public function test_dominant_color_admin_script(): void {
-		ob_start();
-		dominant_color_admin_script();
-		$output = ob_get_clean();
+
+		$output = get_echo( 'dominant_color_admin_script' );
 
 		// Verify if script tag exists.
 		$this->assertStringEndsWith( '</script>', trim( $output ) );
