@@ -714,4 +714,18 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		<div class="wp-block-group' . $align_class . '">' . $content . '</div>
 		<!-- /wp:group -->';
 	}
+
+	/**
+	 * Tests the auto_sizes_prime_attachment_caches function.
+	 *
+	 * @covers ::auto_sizes_prime_attachment_caches
+	 */
+	public function test_auto_sizes_prime_attachment_caches_with_empty_class(): void {
+		$img_tag = '<img src="https://example.com/foo.png">';
+
+		$result = auto_sizes_prime_attachment_caches( $img_tag );
+
+		// Assert that the output is the same as the input since no processing should occur.
+		$this->assertSame( $img_tag, $result );
+	}
 }

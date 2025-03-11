@@ -26,7 +26,7 @@ function auto_sizes_prime_attachment_caches( $content ): string {
 		$class = $processor->get_attribute( 'class' );
 
 		if ( ! is_string( $class ) ) {
-			continue; // @codeCoverageIgnore
+			continue;
 		}
 
 		if ( preg_match( '/(?:^|\s)wp-image-([1-9][0-9]*)(?:\s|$)/', $class, $class_id ) === 1 ) {
