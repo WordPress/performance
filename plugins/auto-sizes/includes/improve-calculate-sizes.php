@@ -99,6 +99,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$alignment     = $block->attributes['align'] ?? '';
 			$width         = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment = $block->context['max_alignment'] ?? '';
+			$column_width  = $block->context['column_width'] ?? '';
 
 			/*
 			 * Update width for cover block.
@@ -314,12 +315,22 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
 		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
+			// Get column width, if explicitly set.
 			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				// Use specific column width.
-				$context['column_width'] = $block['attrs']['width'];
+				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
-				// Determine the width based on equally sized columns.
-				$context['column_width'] = '' . ( 100 / $parent_block->context['column_count'] ) . '%';
+				// Default to equally divided width if not explicitly set.
+				$current_width = 1 / $parent_block->context['column_count'];
+			} else {
+				// Full width fallback.
+				$current_width = 1;
+			}
+
+			// Multiply with parent's width if available.
+			if ( isset( $parent_block->context['column_width'] ) ) {
+				$context['column_width'] = $parent_block->context['column_width'] * $current_width;
+			} else {
+				$context['column_width'] = $current_width;
 			}
 		}
 	}
