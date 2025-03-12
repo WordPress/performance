@@ -5,6 +5,31 @@ namespace Dominant_Color_Images\Tests;
 use WP_UnitTestCase;
 
 abstract class TestCase extends WP_UnitTestCase {
+
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
+	 * After a test method runs, resets any state in WordPress the test method might have changed.
+	 */
+	public function tear_down(): void {
+		parent::tear_down();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
+	 * Reset WP_Scripts and WP_Styles.
+	 */
+	private function reset_wp_dependencies(): void {
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+	}
+
 	/**
 	 * Data provider for test_get_dominant_color_GD.
 	 *
