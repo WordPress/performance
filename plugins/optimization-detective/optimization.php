@@ -137,9 +137,10 @@ function od_maybe_add_template_output_buffer_filter(): void {
  * @return non-empty-string|mixed Passed-through template.
  */
 function od_add_template_output_buffer_filter( $template ) {
-	$slug    = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-	$post    = OD_URL_Metrics_Post_Type::get_post( $slug );
-	$post_id = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
+	$query_vars = od_get_normalized_query_vars();
+	$slug       = od_get_url_metrics_slug( $query_vars );
+	$post       = OD_URL_Metrics_Post_Type::get_post( $slug );
+	$post_id    = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
@@ -167,13 +168,20 @@ function od_add_template_output_buffer_filter( $template ) {
 	 * Fires when Optimization Detective is initialized to optimize the current response.
 	 *
 	 * @since n.e.x.t
-	 * @todo The parameters should be put into a context object as is done with other such actions.
 	 *
-	 * @param OD_URL_Metric_Group_Collection $group_collection     URL Metric group collection.
-	 * @param OD_Tag_Visitor_Registry        $tag_visitor_registry Tag visitor registry.
-	 * @param WP_Post|null                   $post                 The od_url_metrics post if it exists.
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
 	 */
-	do_action( 'od_start_template_optimization', $group_collection, $tag_visitor_registry, $post );
+	do_action(
+		'od_start_template_optimization',
+		new OD_Template_Optimization_Context(
+			$group_collection,
+			$tag_visitor_registry,
+			$post_id,
+			$query_vars,
+			$slug,
+			$current_etag
+		)
+	);
 
 	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $slug, $post_id ): string {
 		return od_optimize_template_output_buffer(

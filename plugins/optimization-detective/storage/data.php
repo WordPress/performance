@@ -158,7 +158,7 @@ function od_get_current_theme_template( ?string $template ) {
 		}
 	}
 	if ( isset( $template ) ) {
-		return basename( $template );
+		return basename( $template ); // TODO: Why basename here?
 	}
 	return null;
 }

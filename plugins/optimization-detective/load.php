@@ -121,6 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/detection.php';
 
 		// Optimization logic.
+		require_once __DIR__ . '/class-od-template-optimization-context.php';
 		require_once __DIR__ . '/class-od-link-collection.php';
 		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
 		require_once __DIR__ . '/class-od-visited-tag-state.php';
