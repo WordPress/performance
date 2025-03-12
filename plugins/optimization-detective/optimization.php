@@ -316,9 +316,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $tracked_in_url_metrics && $needs_detection ) {
-			// TODO: Replace get_stored_xpath with get_xpath once the transitional period is over.
-			$xpath = $processor->get_stored_xpath();
-			$processor->set_meta_attribute( 'xpath', $xpath );
+			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
 
 		$visited_tag_state->reset();
