@@ -139,6 +139,18 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		od_get_url_metric_freshness_ttl()
 	);
 
+	/**
+	 * Fires when the current OD_URL_Metric_Group_Collection has been constructed for the response.
+	 *
+	 * @since n.e.x.t
+	 * @todo The parameters should be put into a context object as is done with other such actions.
+	 *
+	 * @param OD_URL_Metric_Group_Collection $group_collection     URL Metric group collection.
+	 * @param OD_Tag_Visitor_Registry        $tag_visitor_registry Tag visitor registry.
+	 * @param WP_Post|null                   $post                 The od_url_metrics post if it exists.
+	 */
+	do_action( 'od_start_template_optimization', $group_collection, $tag_visitor_registry, $post );
+
 	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $slug, $post_id ): string {
 		return od_optimize_template_output_buffer(
 			$buffer,
