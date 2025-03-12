@@ -78,8 +78,6 @@ function od_buffer_output( $passthrough ) {
  *
  * @since 0.1.0
  * @access private
- *
- * @global WP_Query $wp_the_query WP_Query object.
  */
 function od_maybe_add_template_output_buffer_filter(): void {
 	$conditions = array(
@@ -114,6 +112,31 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		return;
 	}
 
+	/*
+	 * The template_include filter with a max priority is used in order to obtain the $template without having to
+	 * rely on the $template global. Additionally, there is no hook which fires after the `template_include` filter
+	 * before the template starts rendering. Therefore, this is the last opportunity we have to initialize key
+	 * Optimization Detective objects while at the same time it is the first opportunity to do so since before here
+	 * the $template will not be known.
+	 *
+	 * Note that output buffering also starts at this same point in another filter, although if output buffering is
+	 * added to core, then it would be started either before the `template_redirect` action or after the
+	 * `template_include` filters have completely applied.
+	 */
+	add_filter( 'template_include', 'od_add_template_output_buffer_filter', PHP_INT_MAX );
+}
+
+/**
+ * Adds filter to optimize the template output buffer.
+ *
+ * @since n.e.x.t
+ *
+ * @global WP_Query $wp_the_query WP_Query object.
+ *
+ * @param non-empty-string|mixed $template Template.
+ * @return non-empty-string|mixed Passed-through template.
+ */
+function od_add_template_output_buffer_filter( $template ) {
 	$slug    = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post    = OD_URL_Metrics_Post_Type::get_post( $slug );
 	$post_id = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
@@ -130,8 +153,9 @@ function od_maybe_add_template_output_buffer_filter(): void {
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
 	global $wp_the_query;
-	$current_etag     = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() ); // TODO: Make sure the template is set!!
-	$group_collection = new OD_URL_Metric_Group_Collection(
+	$current_theme_template = od_get_current_theme_template( is_string( $template ) ? $template : null );
+	$current_etag           = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, $current_theme_template );
+	$group_collection       = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		$current_etag,
 		od_get_breakpoint_max_widths(),
@@ -140,7 +164,7 @@ function od_maybe_add_template_output_buffer_filter(): void {
 	);
 
 	/**
-	 * Fires when the current OD_URL_Metric_Group_Collection has been constructed for the response.
+	 * Fires when Optimization Detective is initialized to optimize the current response.
 	 *
 	 * @since n.e.x.t
 	 * @todo The parameters should be put into a context object as is done with other such actions.
@@ -171,6 +195,8 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
+
+	return $template;
 }
 
 /**
