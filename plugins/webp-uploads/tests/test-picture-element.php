@@ -302,18 +302,11 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * @dataProvider data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset
 	 * @covers ::webp_uploads_wrap_image_in_picture
 	 *
-	 * @param Closure|null       $set_up Set up the test.
-	 * @param array<string>|null $custom_sizes Custom image sizes.
+	 * @param Closure|null $set_up Set up the test.
 	 */
-	public function test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset( ?Closure $set_up, ?array $custom_sizes ): void {
+	public function test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset( ?Closure $set_up ): void {
 		if ( $set_up instanceof Closure ) {
 			$set_up();
-		}
-
-		if ( is_array( $custom_sizes ) ) {
-			foreach ( $custom_sizes as $size ) {
-				$this->temp_custom_image_sizes[] = $size;
-			}
 		}
 
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
@@ -371,17 +364,17 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * Data provider for test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset.
 	 *
-	 * @return array<string, array{ set_up: Closure|null, custom_sizes: array<string>|null }>
+	 * @return array<string, array{ set_up: Closure|null }>
 	 */
 	public function data_provider_test_picture_element_source_tag_srcset_has_same_image_sizes_as_img_tag_srcset(): array {
 		return array(
 			'default_sizes' => array(
-				'set_up'       => null,
-				'custom_sizes' => null,
+				'set_up' => null,
 			),
 			'when_two_different_image_sizes_have_same_width' => array(
-				'set_up'       => static function (): void {
+				'set_up' => function (): void {
 					add_image_size( 'square', 768, 768, true );
+					$this->temp_custom_image_sizes[] = 'square';
 					add_filter(
 						'pre_option_medium_large_size_w',
 						static function () {
@@ -395,7 +388,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 						}
 					);
 				},
-				'custom_sizes' => array( 'square' ),
 			),
 		);
 	}
