@@ -342,7 +342,8 @@ function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
 	if (
 		$request->get_route() === '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE &&
-		'application/gzip' === $request->get_header( 'Content-Type' )
+		'application/gzip' === $request->get_header( 'Content-Type' ) &&
+		function_exists( 'gzdecode' )
 	) {
 		$compressed_body = $request->get_body();
 
@@ -367,11 +368,7 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 			);
 		}
 
-		try {
-			$decompressed_body = gzdecode( $compressed_body );
-		} catch ( Exception $e ) {
-			$decompressed_body = false;
-		}
+		$decompressed_body = @gzdecode( $compressed_body ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- We need to suppress errors here.
 
 		if ( false === $decompressed_body ) {
 			return new WP_Error(

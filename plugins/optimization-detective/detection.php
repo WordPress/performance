@@ -144,6 +144,9 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	if ( is_user_logged_in() ) {
 		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );
 	}
+	if ( function_exists( 'gzdecode' ) ) {
+		$detect_args['gzdecodeAvailable'] = true;
+	}
 	if ( WP_DEBUG ) {
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}
