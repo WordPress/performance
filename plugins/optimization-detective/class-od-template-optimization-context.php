@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property-read array<string, mixed>           $normalized_query_vars       Normalized query vars.
  * @property-read non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
  * @property-read non-empty-string               $current_etag                Current ETag.
+ * @property-read OD_Link_Collection             $link_collection             Link collection.
  */
 final class OD_Template_Optimization_Context {
 
@@ -77,6 +78,14 @@ final class OD_Template_Optimization_Context {
 	private $current_etag;
 
 	/**
+	 * Link collection.
+	 *
+	 * @since n.e.x.t
+	 * @var OD_Link_Collection
+	 */
+	private $link_collection;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since n.e.x.t
@@ -87,14 +96,16 @@ final class OD_Template_Optimization_Context {
 	 * @param array<string, mixed>           $normalized_query_vars       Normalized query vars.
 	 * @param non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
 	 * @param non-empty-string               $current_etag                Current ETag.
+	 * @param OD_Link_Collection             $link_collection             Link collection.
 	 */
-	public function __construct( OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Tag_Visitor_Registry $tag_visitor_registry, ?int $url_metrics_id, array $normalized_query_vars, string $url_metrics_slug, string $current_etag ) {
+	public function __construct( OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Tag_Visitor_Registry $tag_visitor_registry, ?int $url_metrics_id, array $normalized_query_vars, string $url_metrics_slug, string $current_etag, OD_Link_Collection $link_collection ) {
 		$this->url_metric_group_collection = $url_metric_group_collection;
 		$this->tag_visitor_registry        = $tag_visitor_registry;
 		$this->url_metrics_id              = $url_metrics_id;
 		$this->normalized_query_vars       = $normalized_query_vars;
 		$this->url_metrics_slug            = $url_metrics_slug;
 		$this->current_etag                = $current_etag;
+		$this->link_collection             = $link_collection;
 	}
 
 	/**
@@ -121,6 +132,8 @@ final class OD_Template_Optimization_Context {
 				return $this->url_metrics_slug;
 			case 'current_etag':
 				return $this->current_etag;
+			case 'link_collection':
+				return $this->link_collection;
 			default:
 				throw new Error(
 					esc_html(

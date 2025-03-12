@@ -163,6 +163,7 @@ function od_add_template_output_buffer_filter( $template ) {
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()
 	);
+	$link_collection        = new OD_Link_Collection();
 
 	/**
 	 * Fires when Optimization Detective is initialized to optimize the current response.
@@ -179,15 +180,17 @@ function od_add_template_output_buffer_filter( $template ) {
 			$post_id,
 			$query_vars,
 			$slug,
-			$current_etag
+			$current_etag,
+			$link_collection
 		)
 	);
 
-	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $slug, $post_id ): string {
+	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $link_collection, $slug, $post_id ): string {
 		return od_optimize_template_output_buffer(
 			$buffer,
 			$tag_visitor_registry,
 			$group_collection,
+			$link_collection,
 			$slug,
 			$post_id
 		);
@@ -304,11 +307,12 @@ function od_is_response_html_content_type(): bool {
  * @param string                         $buffer               Template output buffer.
  * @param OD_Tag_Visitor_Registry        $tag_visitor_registry Tag visitor registry.
  * @param OD_URL_Metric_Group_Collection $group_collection     URL Metric group collection.
+ * @param OD_Link_Collection             $link_collection      Link collection.
  * @param non-empty-string               $slug                 Slug.
  * @param positive-int|null              $post_id              The ID for the od_url_metric post if it exists.
  * @return string Filtered template output buffer.
  */
-function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metric_Group_Collection $group_collection, string $slug, ?int $post_id ): string {
+function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metric_Group_Collection $group_collection, OD_Link_Collection $link_collection, string $slug, ?int $post_id ): string {
 
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
@@ -328,7 +332,6 @@ function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Regi
 		return $buffer;
 	}
 
-	$link_collection      = new OD_Link_Collection();
 	$visited_tag_state    = new OD_Visited_Tag_State();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context(
 		$processor,
