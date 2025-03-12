@@ -185,19 +185,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $bookmarked_open_stacks = array();
 
 	/**
-	 * Stored XPath for the current tag.
-	 *
-	 * This is used so that repeated calls to {@see self::get_stored_xpath()} won't needlessly reconstruct the string.
-	 * This gets cleared whenever {@see self::open_tags()} iterates to the next tag.
-	 *
-	 * @todo Remove this once the XPath transitional period is over.
-	 *
-	 * @since 0.4.0
-	 * @var string|null
-	 */
-	private $current_stored_xpath = null;
-
-	/**
 	 * (Transitional) XPath for the current tag.
 	 *
 	 * This is used to store the old XPath format in a transitional period until which new URL Metrics are expected to
@@ -315,8 +302,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether a token was parsed.
 	 */
 	public function next_token(): bool {
-		$this->current_stored_xpath = null; // Clear cache.
-		$this->current_xpath        = null; // Clear cache.
+		$this->current_xpath = null; // Clear cache.
 		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags       = array();
@@ -650,23 +636,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This predicate will be included once the transitional period is over.
 	 *
 	 * @since 0.4.0
-	 * @todo Replace the logic herein with what is in get_stored_xpath() once the transitional period is over.
 	 *
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		/*
-		 * This transitional format is used by default for all extensions. The non-transitional format is used only in
-		 * od_optimize_template_output_buffer() when setting the data-od-xpath attribute. This is so that the new format
-		 * will replace the old format as new URL Metrics are collected. After a month of the new format being live, the
-		 * transitional format can be eliminated. See the corresponding logic in OD_Element for normalizing both the
-		 * old and new XPath formats to use the transitional format.
-		 */
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
 			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
-				if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) ) {
+				if ( $i < 2 ) {
 					$this->current_xpath .= "/$tag_name";
+				} elseif ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) {
+					$segment = "/$tag_name";
+					foreach ( $attributes as $attribute_name => $attribute_value ) {
+						$segment .= sprintf(
+							"[@%s='%s']",
+							$attribute_name,
+							$attribute_value // Note: $attribute_value has already been validated to only contain safe characters /^[a-zA-Z0-9_.\s:-]*/ which do not need escaping.
+						);
+					}
+					$this->current_xpath .= $segment;
 				} else {
 					$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
 				}
@@ -678,39 +666,17 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets stored XPath for the current open tag.
 	 *
-	 * This method is temporary for a transition period while new URL Metrics are collected for active installs. Once
-	 * the transition period is over, the logic in this method can be moved to {@see self::get_xpath()} and this method
-	 * can simply be an alias for that one. See related logic in {@see OD_Element::get_xpath()}. This function is only
-	 * used internally by Optimization Detective in {@see od_optimize_template_output_buffer()}.
+	 * This method was temporary for a transition period while new URL Metrics are collected for active installs
 	 *
 	 * @since 1.0.0
-	 * @todo Move the logic in this method to the get_xpath() method and let this be an alias for that method once the transitional period is over.
 	 * @access private
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 *
 	 * @return string XPath.
 	 */
 	public function get_stored_xpath(): string {
-		if ( null === $this->current_stored_xpath ) {
-			$this->current_stored_xpath = '';
-			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
-				if ( $i < 2 ) {
-					$this->current_stored_xpath .= "/$tag_name";
-				} elseif ( 2 === $i && '/HTML/BODY' === $this->current_stored_xpath ) {
-					$segment = "/$tag_name";
-					foreach ( $attributes as $attribute_name => $attribute_value ) {
-						$segment .= sprintf(
-							"[@%s='%s']",
-							$attribute_name,
-							$attribute_value // Note: $attribute_value has already been validated to only contain safe characters /^[a-zA-Z0-9_.\s:-]*/ which do not need escaping.
-						);
-					}
-					$this->current_stored_xpath .= $segment;
-				} else {
-					$this->current_stored_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
-				}
-			}
-		}
-		return $this->current_stored_xpath;
+		return $this->get_xpath();
 	}
 
 	/**
