@@ -121,7 +121,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                => WP_DEBUG,
 		'extensionModuleUrls'    => $extension_module_urls,
-		'restApiEndpoint'        => rest_url( OD_REST_URL_Metrics_Store_Endpoint::get_namespace() . OD_REST_URL_Metrics_Store_Endpoint::get_route() ),
+		'restApiEndpoint'        => rest_url( OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE ),
 		'currentETag'            => $current_etag,
 		'currentUrl'             => $current_url,
 		'urlMetricSlug'          => $slug,
@@ -169,8 +169,22 @@ function od_register_rest_url_metric_store_endpoint(): void {
 	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
 
 	register_rest_route(
-		$endpoint_controller::get_namespace(),
-		$endpoint_controller::get_route(),
+		$endpoint_controller::REST_API_NAMESPACE,
+		$endpoint_controller::REST_API_ROUTE,
 		$endpoint_controller->get_registration_args()
 	);
+}
+
+/**
+ * Triggers the page cache invalidation action for Optimization Detective.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param positive-int $cache_purge_post_id Cache purge post ID.
+ */
+function od_trigger_page_cache_invalidation_callback( int $cache_purge_post_id ): void {
+
+	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
+	$endpoint_controller->trigger_page_cache_invalidation( $cache_purge_post_id );
 }

@@ -91,7 +91,7 @@ function od_compose_site_health_result( $response ): array {
 		sprintf(
 			/* translators: %s is the REST API endpoint */
 			__( 'To collect URL Metrics from visitors the REST API must be available to unauthenticated users. Specifically, visitors must be able to perform a <code>POST</code> request to the <code>%s</code> endpoint.', 'optimization-detective' ),
-			'/' . OD_REST_URL_Metrics_Store_Endpoint::get_namespace() . OD_REST_URL_Metrics_Store_Endpoint::get_route()
+			'/' . OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE
 		),
 		array( 'code' => array() )
 	) . '</p>';
@@ -192,7 +192,7 @@ function od_get_rest_api_health_check_response( bool $use_cached ) {
 	if ( false !== $response ) {
 		return $response;
 	}
-	$rest_url = get_rest_url( null, OD_REST_URL_Metrics_Store_Endpoint::get_namespace() . OD_REST_URL_Metrics_Store_Endpoint::get_route() );
+	$rest_url = get_rest_url( null, OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE );
 	$response = wp_remote_post(
 		$rest_url,
 		array(

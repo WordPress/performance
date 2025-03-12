@@ -21,18 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_REST_URL_Metrics_Store_Endpoint {
 
 	/**
-	 * Gets the namespace for the REST API endpoint.
+	 * Namespace for the REST API endpoint.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return non-empty-string Namespace.
+	 * @var string
 	 */
-	public static function get_namespace(): string {
-		return OD_REST_API_NAMESPACE; // @phpstan-ignore constant.deprecated (To be replaced with string literal when constant is removed.)
-	}
+	const REST_API_NAMESPACE = 'optimization-detective/v1';
 
 	/**
-	 * Gets the route for storing a URL Metric.
+	 * Route for storing a URL Metric.
 	 *
 	 * Note the `:store` art of the endpoint follows Google's guidance in AIP-136 for the use of the POST method in a way
 	 * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
@@ -40,12 +37,9 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 *
 	 * @since n.e.x.t
 	 * @link https://google.aip.dev/136
-	 *
-	 * @return non-empty-string Route.
+	 * @var string
 	 */
-	public static function get_route(): string {
-		return OD_URL_METRICS_ROUTE; // @phpstan-ignore constant.deprecated (To be replaced with string literal when constant is removed.)
-	}
+	const REST_API_ROUTE = '/url-metrics:store';
 
 	/**
 	 * Gets the arguments for registering the endpoint.
@@ -316,7 +310,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 *
 	 * @param positive-int $cache_purge_post_id Cache purge post ID.
 	 */
-	public static function trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
+	public function trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 		$post = get_post( $cache_purge_post_id );
 		if ( ! ( $post instanceof WP_Post ) ) {
 			return;

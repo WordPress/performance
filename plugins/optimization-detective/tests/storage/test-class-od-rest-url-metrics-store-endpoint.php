@@ -19,33 +19,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * @return string Route.
 	 */
 	private function get_route(): string {
-		return '/' . OD_REST_URL_Metrics_Store_Endpoint::get_namespace() . OD_REST_URL_Metrics_Store_Endpoint::get_route();
-	}
-
-	/**
-	 * Test get_namespace().
-	 *
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_namespace
-	 */
-	public function test_get_namespace(): void {
-
-		$expected = 'optimization-detective/v1';
-		$actual   = OD_REST_URL_Metrics_Store_Endpoint::get_namespace();
-
-		$this->assertSame( $expected, $actual );
-	}
-
-	/**
-	 * Test get_route().
-	 *
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_route
-	 */
-	public function test_get_route(): void {
-
-		$expected = '/url-metrics:store';
-		$actual   = OD_REST_URL_Metrics_Store_Endpoint::get_route();
-
-		$this->assertSame( $expected, $actual );
+		return '/' . OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE;
 	}
 
 	/**
@@ -828,7 +802,8 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 			PHP_INT_MAX
 		);
 
-		OD_REST_URL_Metrics_Store_Endpoint::trigger_page_cache_invalidation( $cache_purge_post_id );
+		$url_metric_endpoint = new OD_REST_URL_Metrics_Store_Endpoint();
+		$url_metric_endpoint->trigger_page_cache_invalidation( $cache_purge_post_id );
 
 		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
 		$found = false;
@@ -869,13 +844,15 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test trigger_page_cache_invalidation() for an invalid post.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::trigger_page_cache_invalidation
+	 * @covers ::od_trigger_page_cache_invalidation_callback
 	 */
 	public function test_trigger_page_cache_invalidation_invalid_post_id(): void {
 		wp_delete_post( 1, true );
 		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
 		$before_transition_post_status_count = did_action( 'transition_post_status' );
 		$before_save_post_count              = did_action( 'save_post' );
-		OD_REST_URL_Metrics_Store_Endpoint::trigger_page_cache_invalidation( 1 );
+		$url_metric_endpoint                 = new OD_REST_URL_Metrics_Store_Endpoint();
+		$url_metric_endpoint->trigger_page_cache_invalidation( 1 );
 		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
 		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
 		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
