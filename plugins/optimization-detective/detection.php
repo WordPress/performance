@@ -159,21 +159,18 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 }
 
 /**
- * Create the rest request and register the endpoint routes for the URL Metrics Store.
+ * Registers the REST API endpoint for storing URL Metrics.
  *
  * @since n.e.x.t
+ * @access private
  */
-function od_create_rest_url_metric_store_rest_request(): void {
+function od_register_rest_url_metric_store_endpoint(): void {
 
 	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
-	$route_args          = $endpoint_controller->get_registration_args();
 
-	/**
-	 * Register the endpoint.
-	 */
 	register_rest_route(
 		$endpoint_controller::get_namespace(),
 		$endpoint_controller::get_route(),
-		$route_args
+		$endpoint_controller->get_registration_args()
 	);
 }

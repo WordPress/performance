@@ -16,15 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * OD_REST_URL_Metrics_Store_Endpoint class
  *
  * @since n.e.x.t
- *
  * @access private
  */
-class OD_REST_URL_Metrics_Store_Endpoint {
+final class OD_REST_URL_Metrics_Store_Endpoint {
 
 	/**
-	 * Get the namespace for optimization-detective
+	 * Gets the namespace for the REST API endpoint.
 	 *
 	 * @since n.e.x.t
+	 *
 	 * @return non-empty-string Namespace.
 	 */
 	public static function get_namespace(): string {
@@ -39,7 +39,6 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 	 * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
 	 *
 	 * @since n.e.x.t
-	 *
 	 * @link https://google.aip.dev/136
 	 *
 	 * @return non-empty-string Route.
@@ -49,7 +48,7 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 	}
 
 	/**
-	 * Get the args for the URL Metric storage endpoint.
+	 * Gets the arguments for registering the endpoint.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -100,18 +99,13 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 			),
 		);
 
-		/**
-		 * Create route args.
-		 */
-		$route_args = array(
+		return array(
 			'methods'             => 'POST',
 			'args'                => array_merge(
 				$args,
 				rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
 			),
-			'callback'            => static function ( WP_REST_Request $request ) {
-				return self::handle_rest_request( $request );
-			},
+			'callback'            => array( $this, 'handle_rest_request' ),
 			'permission_callback' => static function () {
 				// Needs to be available to unauthenticated visitors.
 				if ( OD_Storage_Lock::is_locked() ) {
@@ -124,8 +118,6 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 				return true;
 			},
 		);
-
-		return $route_args;
 	}
 
 	/**
@@ -136,31 +128,28 @@ class OD_REST_URL_Metrics_Store_Endpoint {
 	 * the `is_allowed_http_origin()` function in core for some reason returns a string rather than a boolean.
 	 *
 	 * @since n.e.x.t
-	 *
 	 * @see is_allowed_http_origin()
 	 *
 	 * @param string $origin Origin to check.
-	 *
 	 * @return bool Whether the origin is allowed.
 	 */
-	private static function is_allowed_http_origin( string $origin ): bool {
+	protected static function is_allowed_http_origin( string $origin ): bool {
 		// Strip out the port number since core does not account for it yet as noted in get_allowed_http_origins().
 		$origin = preg_replace( '/:\d+$/', '', $origin );
 		return '' !== is_allowed_http_origin( $origin );
 	}
 
 	/**
-	 * Handles REST API request to store metrics.
+	 * Handles the REST API request to store a URL Metric.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @param WP_REST_Request $request Request.
-	 *
 	 * @return WP_REST_Response|WP_Error Response.
 	 */
-	private static function handle_rest_request( WP_REST_Request $request ) {
+	public function handle_rest_request( WP_REST_Request $request ) {
 		// Block cross-origin storage requests since by definition URL Metrics data can only be sourced from the frontend of the site.
 		$origin = $request->get_header( 'origin' );
 		if ( null === $origin || ! self::is_allowed_http_origin( $origin ) ) {
