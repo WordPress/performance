@@ -78,6 +78,8 @@ function od_buffer_output( $passthrough ) {
  *
  * @since 0.1.0
  * @access private
+ *
+ * @global WP_Query $wp_the_query WP_Query object.
  */
 function od_maybe_add_template_output_buffer_filter(): void {
 	$conditions = array(
@@ -112,7 +114,41 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		return;
 	}
 
-	$callback = 'od_optimize_template_output_buffer';
+	$slug    = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+	$post    = OD_URL_Metrics_Post_Type::get_post( $slug );
+	$post_id = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
+
+	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
+
+	/**
+	 * Fires to register tag visitors before walking over the document to perform optimizations.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
+	 */
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
+
+	global $wp_the_query;
+	$current_etag     = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() ); // TODO: Make sure the template is set!!
+	$group_collection = new OD_URL_Metric_Group_Collection(
+		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
+		$current_etag,
+		od_get_breakpoint_max_widths(),
+		od_get_url_metrics_breakpoint_sample_size(),
+		od_get_url_metric_freshness_ttl()
+	);
+
+	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $slug, $post_id ): string {
+		return od_optimize_template_output_buffer(
+			$buffer,
+			$tag_visitor_registry,
+			$group_collection,
+			$slug,
+			$post_id
+		);
+	};
+
 	if (
 		function_exists( 'perflab_wrap_server_timing' )
 		&&
@@ -219,13 +255,14 @@ function od_is_response_html_content_type(): bool {
  * @since 0.1.0
  * @access private
  *
- * @global WP_Query $wp_the_query WP_Query object.
- *
- * @param string $buffer Template output buffer.
+ * @param string                         $buffer               Template output buffer.
+ * @param OD_Tag_Visitor_Registry        $tag_visitor_registry Tag visitor registry.
+ * @param OD_URL_Metric_Group_Collection $group_collection     URL Metric group collection.
+ * @param non-empty-string               $slug                 Slug.
+ * @param positive-int|null              $post_id              The ID for the od_url_metric post if it exists.
  * @return string Filtered template output buffer.
  */
-function od_optimize_template_output_buffer( string $buffer ): string {
-	global $wp_the_query;
+function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metric_Group_Collection $group_collection, string $slug, ?int $post_id ): string {
 
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
@@ -245,28 +282,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		return $buffer;
 	}
 
-	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
-
-	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
-
-	/**
-	 * Fires to register tag visitors before walking over the document to perform optimizations.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
-	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
-
-	$current_etag         = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
-	$group_collection     = new OD_URL_Metric_Group_Collection(
-		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
-		$current_etag,
-		od_get_breakpoint_max_widths(),
-		od_get_url_metrics_breakpoint_sample_size(),
-		od_get_url_metric_freshness_ttl()
-	);
 	$link_collection      = new OD_Link_Collection();
 	$visited_tag_state    = new OD_Visited_Tag_State();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context(
@@ -274,7 +289,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$group_collection,
 		$link_collection,
 		$visited_tag_state,
-		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+		$post_id
 	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
