@@ -165,6 +165,16 @@ function od_add_template_output_buffer_filter( $template ) {
 	);
 	$link_collection        = new OD_Link_Collection();
 
+	$context = new OD_Template_Optimization_Context(
+		$group_collection,
+		$tag_visitor_registry,
+		$post_id,
+		$query_vars,
+		$slug,
+		$current_etag,
+		$link_collection
+	);
+
 	/**
 	 * Fires when Optimization Detective is initialized to optimize the current response.
 	 *
@@ -172,28 +182,10 @@ function od_add_template_output_buffer_filter( $template ) {
 	 *
 	 * @param OD_Template_Optimization_Context $context Template optimization context.
 	 */
-	do_action(
-		'od_start_template_optimization',
-		new OD_Template_Optimization_Context(
-			$group_collection,
-			$tag_visitor_registry,
-			$post_id,
-			$query_vars,
-			$slug,
-			$current_etag,
-			$link_collection
-		)
-	);
+	do_action( 'od_start_template_optimization', $context );
 
-	$callback = static function ( string $buffer ) use ( $tag_visitor_registry, $group_collection, $link_collection, $slug, $post_id ): string {
-		return od_optimize_template_output_buffer(
-			$buffer,
-			$tag_visitor_registry,
-			$group_collection,
-			$link_collection,
-			$slug,
-			$post_id
-		);
+	$callback = static function ( string $buffer ) use ( $context ): string {
+		return od_optimize_template_output_buffer( $buffer, $context );
 	};
 
 	if (
@@ -304,15 +296,11 @@ function od_is_response_html_content_type(): bool {
  * @since 0.1.0
  * @access private
  *
- * @param string                         $buffer               Template output buffer.
- * @param OD_Tag_Visitor_Registry        $tag_visitor_registry Tag visitor registry.
- * @param OD_URL_Metric_Group_Collection $group_collection     URL Metric group collection.
- * @param OD_Link_Collection             $link_collection      Link collection.
- * @param non-empty-string               $slug                 Slug.
- * @param positive-int|null              $post_id              The ID for the od_url_metric post if it exists.
+ * @param string                           $buffer  Template output buffer.
+ * @param OD_Template_Optimization_Context $context Template optimization context.
  * @return string Filtered template output buffer.
  */
-function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metric_Group_Collection $group_collection, OD_Link_Collection $link_collection, string $slug, ?int $post_id ): string {
+function od_optimize_template_output_buffer( string $buffer, OD_Template_Optimization_Context $context ): string {
 
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
@@ -321,6 +309,12 @@ function od_optimize_template_output_buffer( string $buffer, OD_Tag_Visitor_Regi
 	) {
 		return $buffer;
 	}
+
+	$link_collection      = $context->link_collection;
+	$post_id              = $context->url_metrics_id;
+	$group_collection     = $context->url_metric_group_collection;
+	$slug                 = $context->url_metrics_slug;
+	$tag_visitor_registry = $context->tag_visitor_registry;
 
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
