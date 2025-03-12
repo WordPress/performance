@@ -361,7 +361,7 @@ async function compress( string ) {
  * @param {boolean}                args.isDebug                    - Whether to show debug messages.
  * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
  * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
- * @param {boolean}                [args.gzdecodeAvailable]        - Whether application/gzip can be sent to the REST API.
+ * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
  * @param {string}                 args.currentETag                - Current ETag.
  * @param {string}                 args.currentUrl                 - Current URL.
  * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
