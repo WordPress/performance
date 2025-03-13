@@ -248,7 +248,13 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$query_vars = od_get_normalized_query_vars();
 	$slug       = od_get_url_metrics_slug( $query_vars );
 	$post       = OD_URL_Metrics_Post_Type::get_post( $slug );
-	$post_id    = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
+
+	/**
+	 * Post ID.
+	 *
+	 * @var positive-int|null $post_id
+	 */
+	$post_id = $post instanceof WP_Post ? $post->ID : null;
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
