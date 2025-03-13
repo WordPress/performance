@@ -112,86 +112,7 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		return;
 	}
 
-	/*
-	 * The template_include filter with a max priority is used in order to obtain the $template without having to
-	 * rely on the $template global. Additionally, there is no hook which fires after the `template_include` filter
-	 * before the template starts rendering. Therefore, this is the last opportunity we have to initialize key
-	 * Optimization Detective objects while at the same time it is the first opportunity to do so since before here
-	 * the $template will not be known.
-	 *
-	 * Note that output buffering also starts at this same point in another filter, although if output buffering is
-	 * added to core, then it would be started either before the `template_redirect` action or after the
-	 * `template_include` filters have completely applied.
-	 */
-	add_filter( 'template_include', 'od_add_template_output_buffer_filter', PHP_INT_MAX );
-}
-
-/**
- * Adds filter to optimize the template output buffer.
- *
- * @since n.e.x.t
- *
- * @global WP_Query $wp_the_query WP_Query object.
- *
- * @param non-empty-string|mixed $template Template.
- * @return non-empty-string|mixed Passed-through template.
- */
-function od_add_template_output_buffer_filter( $template ) {
-	$query_vars = od_get_normalized_query_vars();
-	$slug       = od_get_url_metrics_slug( $query_vars );
-	$post       = OD_URL_Metrics_Post_Type::get_post( $slug );
-	$post_id    = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
-
-	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
-
-	/**
-	 * Fires to register tag visitors before walking over the document to perform optimizations.
-	 *
-	 * @since 0.3.0
-	 *
-	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
-	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
-
-	// Prevent modification of the tag visitor registry since doing so would invalidate the etag.
-	$tag_visitor_registry->finalize();
-
-	global $wp_the_query;
-	$current_theme_template = od_get_current_theme_template( is_string( $template ) ? $template : null );
-	$current_etag           = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, $current_theme_template );
-	$group_collection       = new OD_URL_Metric_Group_Collection(
-		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
-		$current_etag,
-		// TODO: Add the following values to the context as well.
-		od_get_breakpoint_max_widths(),
-		od_get_url_metrics_breakpoint_sample_size(),
-		od_get_url_metric_freshness_ttl()
-	); // TODO: Also finalize the collection?
-	$link_collection = new OD_Link_Collection();
-
-	$context = new OD_Template_Optimization_Context(
-		$group_collection,
-		$tag_visitor_registry,
-		$post_id,
-		$query_vars,
-		$slug,
-		$current_etag,
-		$link_collection
-	);
-
-	/**
-	 * Fires when Optimization Detective is initialized to optimize the current response.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param OD_Template_Optimization_Context $context Template optimization context.
-	 */
-	do_action( 'od_start_template_optimization', $context );
-
-	$callback = static function ( string $buffer ) use ( $context ): string {
-		return od_optimize_template_output_buffer( $buffer, $context );
-	};
-
+	$callback = 'od_optimize_template_output_buffer';
 	if (
 		function_exists( 'perflab_wrap_server_timing' )
 		&&
@@ -202,8 +123,6 @@ function od_add_template_output_buffer_filter( $template ) {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
-
-	return $template;
 }
 
 /**
@@ -300,11 +219,13 @@ function od_is_response_html_content_type(): bool {
  * @since 0.1.0
  * @access private
  *
- * @param string                           $buffer  Template output buffer.
- * @param OD_Template_Optimization_Context $context Template optimization context.
+ * @global WP_Query $wp_the_query WP_Query object.
+ *
+ * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
  */
-function od_optimize_template_output_buffer( string $buffer, OD_Template_Optimization_Context $context ): string {
+function od_optimize_template_output_buffer( string $buffer ): string {
+	global $wp_the_query;
 
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
@@ -313,12 +234,6 @@ function od_optimize_template_output_buffer( string $buffer, OD_Template_Optimiz
 	) {
 		return $buffer;
 	}
-
-	$link_collection      = $context->link_collection;
-	$post_id              = $context->url_metrics_id;
-	$group_collection     = $context->url_metric_group_collection;
-	$slug                 = $context->url_metrics_slug;
-	$tag_visitor_registry = $context->tag_visitor_registry;
 
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
@@ -329,6 +244,50 @@ function od_optimize_template_output_buffer( string $buffer, OD_Template_Optimiz
 	) ) {
 		return $buffer;
 	}
+
+	$query_vars = od_get_normalized_query_vars();
+	$slug       = od_get_url_metrics_slug( $query_vars );
+	$post       = OD_URL_Metrics_Post_Type::get_post( $slug );
+	$post_id    = $post instanceof WP_Post && $post->ID > 0 ? $post->ID : null;
+
+	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
+
+	/**
+	 * Fires to register tag visitors before walking over the document to perform optimizations.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
+	 */
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
+
+	$current_etag     = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
+	$group_collection = new OD_URL_Metric_Group_Collection(
+		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
+		$current_etag,
+		od_get_breakpoint_max_widths(),
+		od_get_url_metrics_breakpoint_sample_size(),
+		od_get_url_metric_freshness_ttl()
+	);
+	$link_collection  = new OD_Link_Collection();
+
+	$context = new OD_Template_Optimization_Context(
+		$processor,
+		$group_collection,
+		$link_collection,
+		$query_vars,
+		$slug,
+		$post_id
+	);
+
+	/**
+	 * Fires before Optimization Detective starts optimizing the template.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 */
+	do_action( 'od_start_template_optimization', $context );
 
 	$visited_tag_state    = new OD_Visited_Tag_State();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context(
@@ -398,6 +357,15 @@ function od_optimize_template_output_buffer( string $buffer, OD_Template_Optimiz
 	if ( $needs_detection ) {
 		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
+
+	/**
+	 * Fires after Optimization Detective finishes optimizing the template.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 */
+	do_action( 'od_finish_template_optimization', $context );
 
 	return $processor->get_updated_html();
 }

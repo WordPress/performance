@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Context for optimizing a template prior to rendering.
+ * Context for optimizing a template.
  *
  * @since n.e.x.t
  *
@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property-read positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection.
  * @property-read array<string, mixed>           $normalized_query_vars       Normalized query vars.
  * @property-read non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
- * @property-read non-empty-string               $current_etag                Current ETag.
  * @property-read OD_Link_Collection             $link_collection             Link collection.
  */
 final class OD_Template_Optimization_Context {
@@ -36,12 +35,16 @@ final class OD_Template_Optimization_Context {
 	private $url_metric_group_collection;
 
 	/**
-	 * Tag visitor registry.
+	 * HTML Tag Processor.
+	 *
+	 * This object is not directly exposed with an accessor property. This class exposes {@see self::append_head_html()}
+	 * and {@see self::append_body_html()} methods which wrap calls to the underlying
+	 * {@see OD_HTML_Tag_Processor::append_head_html()} and {@see OD_HTML_Tag_Processor::append_body_html()}.s
 	 *
 	 * @since n.e.x.t
-	 * @var OD_Tag_Visitor_Registry
+	 * @var OD_HTML_Tag_Processor
 	 */
-	private $tag_visitor_registry;
+	private $processor;
 
 	/**
 	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
@@ -70,14 +73,6 @@ final class OD_Template_Optimization_Context {
 	private $url_metrics_slug;
 
 	/**
-	 * Current ETag.
-	 *
-	 * @since n.e.x.t
-	 * @var non-empty-string
-	 */
-	private $current_etag;
-
-	/**
 	 * Link collection.
 	 *
 	 * @since n.e.x.t
@@ -90,22 +85,46 @@ final class OD_Template_Optimization_Context {
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param OD_HTML_Tag_Processor          $processor                   HTML Tag Processor.
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
-	 * @param OD_Tag_Visitor_Registry        $tag_visitor_registry        Tag visitor registry.
-	 * @param positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection. May be null if no post has been created yet.
+	 * @param OD_Link_Collection             $link_collection             Link collection.
 	 * @param array<string, mixed>           $normalized_query_vars       Normalized query vars.
 	 * @param non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
-	 * @param non-empty-string               $current_etag                Current ETag.
-	 * @param OD_Link_Collection             $link_collection             Link collection.
+	 * @param positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection. May be null if no post has been created yet.
 	 */
-	public function __construct( OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Tag_Visitor_Registry $tag_visitor_registry, ?int $url_metrics_id, array $normalized_query_vars, string $url_metrics_slug, string $current_etag, OD_Link_Collection $link_collection ) {
+	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, array $normalized_query_vars, string $url_metrics_slug, ?int $url_metrics_id ) {
+		$this->processor                   = $processor;
 		$this->url_metric_group_collection = $url_metric_group_collection;
-		$this->tag_visitor_registry        = $tag_visitor_registry;
-		$this->url_metrics_id              = $url_metrics_id;
+		$this->link_collection             = $link_collection;
 		$this->normalized_query_vars       = $normalized_query_vars;
 		$this->url_metrics_slug            = $url_metrics_slug;
-		$this->current_etag                = $current_etag;
-		$this->link_collection             = $link_collection;
+		$this->url_metrics_id              = $url_metrics_id;
+	}
+
+	/**
+	 * Append HTML to the HEAD.
+	 *
+	 * The provided HTML must be valid! No validation is performed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param non-empty-string $html HTML to inject.
+	 */
+	public function append_head_html( string $html ): void {
+		$this->processor->append_head_html( $html );
+	}
+
+	/**
+	 * Append HTML to the BODY.
+	 *
+	 * The provided HTML must be valid! No validation is performed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param non-empty-string $html HTML to inject.
+	 */
+	public function append_body_html( string $html ): void {
+		$this->processor->append_body_html( $html );
 	}
 
 	/**
@@ -119,9 +138,8 @@ final class OD_Template_Optimization_Context {
 	 * @throws Error When property is unknown.
 	 */
 	public function __get( string $name ) {
+		// Note: The $processor is intentionally not exposed.
 		switch ( $name ) {
-			case 'tag_visitor_registry':
-				return $this->tag_visitor_registry;
 			case 'url_metrics_id':
 				return $this->url_metrics_id;
 			case 'url_metric_group_collection':
@@ -130,8 +148,6 @@ final class OD_Template_Optimization_Context {
 				return $this->normalized_query_vars;
 			case 'url_metrics_slug':
 				return $this->url_metrics_slug;
-			case 'current_etag':
-				return $this->current_etag;
 			case 'link_collection':
 				return $this->link_collection;
 			default:
