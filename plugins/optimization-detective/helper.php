@@ -135,6 +135,8 @@ function od_get_max_url_metric_size(): int {
 	/**
 	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
 	 *
+	 * The default value is 1 MB.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @param int $max_size Maximum allowed byte size.
