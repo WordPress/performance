@@ -129,7 +129,7 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
  * @since n.e.x.t
  * @access private
  *
- * @return int Maximum allowed byte size.
+ * @return positive-int Maximum allowed byte size.
  */
 function od_get_max_url_metric_size(): int {
 	/**
@@ -140,5 +140,20 @@ function od_get_max_url_metric_size(): int {
 	 * @param int $max_size Maximum allowed byte size.
 	 * @return int Filtered maximum allowed byte size.
 	 */
-	return (int) apply_filters( 'od_max_url_metric_size', MB_IN_BYTES );
+	$size = (int) apply_filters( 'od_max_url_metric_size', MB_IN_BYTES );
+	if ( $size <= 0 ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: 1: filter name, 2: size */
+					__( 'Filter %1$s returned invalid "%2$s". Must be greater than zero.', 'optimization-detective' ),
+					$size
+				)
+			),
+			''
+		);
+		$size = MB_IN_BYTES;
+	}
+	return $size;
 }
