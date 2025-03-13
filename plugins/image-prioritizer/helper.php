@@ -79,6 +79,7 @@ function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $regis
 	$registry->register( 'image-prioritizer/img', $img_visitor );
 
 	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor();
+	add_action( 'od_start_template_optimization', array( $bg_image_visitor, 'gather_group_common_lcp_element_external_background_images' ) );
 	$registry->register( 'image-prioritizer/background-image', $bg_image_visitor );
 
 	$video_visitor = new Image_Prioritizer_Video_Tag_Visitor();
