@@ -6,6 +6,19 @@
  * @since 1.4.0
  */
 
+/*
+ * Map alignment values to a weighting value so they can be compared.
+ * Note that 'left' and 'right' alignments are only constrained by max alignment.
+ */
+const AUTO_SIZES_CONSTRAINTS = array(
+	'full'    => 0,
+	'wide'    => 1,
+	'left'    => 2,
+	'right'   => 2,
+	'default' => 3,
+	'center'  => 3,
+);
+
 /**
  * Primes attachment into the cache with a single database query.
  *
@@ -81,11 +94,11 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * @param string $size  The image size data.
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
-
 			$id                   = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
 			$alignment            = $block->attributes['align'] ?? '';
 			$width                = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment        = $block->context['max_alignment'] ?? '';
+			$column_width         = $block->context['column_width'] ?? '';
 			$ancestor_block_width = $block->context['block_width_data'] ?? array();
 
 			/*
@@ -212,18 +225,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 	// Normalize default alignment values.
 	$align = '' !== $align ? $align : 'default';
 
-	/*
-	 * Map alignment values to a weighting value so they can be compared.
-	 * Note that 'left' and 'right' alignments are only constrained by max alignment.
-	 */
-	$constraints = array(
-		'full'    => 0,
-		'wide'    => 1,
-		'left'    => 2,
-		'right'   => 2,
-		'default' => 3,
-		'center'  => 3,
-	);
+	// Use the defined constant for constraints.
+	$constraints = AUTO_SIZES_CONSTRAINTS;
 
 	$alignment = $constraints[ $align ] > $constraints[ $max_alignment ] ? $align : $max_alignment;
 
@@ -303,11 +306,14 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 	$consumer_blocks = array(
 		'core/cover',
 		'core/image',
+		'core/group',
+		'core/columns',
+		'core/column',
 	);
 
 	if ( in_array( $block_type->name, $consumer_blocks, true ) ) {
 		// Use array_values to reset the array keys after merging.
-		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'block_width_data' ) ) ) );
+		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'column_count', 'column_width' ) ) ) );
 	}
 	return $uses_context;
 }
@@ -333,38 +339,13 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
-		$alignment = $block['attrs']['align'] ?? '';
+		// Normalize default alignment values.
+		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? $block['attrs']['align'] : 'default';
+		// Use the defined constant for constraints.
+		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		// If the container block doesn't have alignment, it's assumed to be 'default'.
-		if ( '' === $alignment ) {
-			$context['max_alignment'] = 'default';
-		} elseif ( 'wide' === $alignment ) {
-			$context['max_alignment'] = 'wide';
-		}
-	}
-
-	static $block_width_data = array();
-
-	if ( null === $parent_block ) {
-		$block_width_data = array();
-	}
-
-	$block_width_data = $parent_block->context['block_width_data'] ?? $block_width_data;
-	if ( 'core/group' === $block['blockName'] || 'core/columns' === $block['blockName'] ) {
-		if ( isset( $block['attrs']['align'] ) ) {
-			switch ( $block['attrs']['align'] ) {
-				case 'full':
-					$block_width_data[][ $block['blockName'] ] = 'full';
-					break;
-				case 'wide':
-					$block_width_data[][ $block['blockName'] ] = 'wide';
-					break;
-				default:
-					$block_width_data[][ $block['blockName'] ] = 'default';
-					break;
-			}
-		} else {
-			$block_width_data[][ $block['blockName'] ] = 'default';
+		if ( 'default' === $alignment || 'wide' === $alignment ) {
+			$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 		}
 	}
 
@@ -377,19 +358,24 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
 		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
+			// Get column width, if explicitly set.
 			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				// Use specific column width.
-				$block_width_data[][ $block['blockName'] ] = $block['attrs']['width'];
+				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
-				// Determine the width based on equally sized columns.
-				$block_width_data[][ $block['blockName'] ] = '' . ( 100 / $parent_block->context['column_count'] ) . '%';
+				// Default to equally divided width if not explicitly set.
+				$current_width = 1 / $parent_block->context['column_count'];
+			} else {
+				// Full width fallback.
+				$current_width = 1;
+			}
+
+			// Multiply with parent's width if available.
+			if ( isset( $parent_block->context['column_width'] ) ) {
+				$context['column_width'] = $parent_block->context['column_width'] * $current_width;
+			} else {
+				$context['column_width'] = $current_width;
 			}
 		}
 	}
-
-	if ( $block_width_data ) {
-		$context['block_width_data'] = $block_width_data;
-	}
-
 	return $context;
 }

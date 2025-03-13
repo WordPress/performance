@@ -15,10 +15,11 @@
  * @package auto-sizes
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 // Define the constant.
 if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {

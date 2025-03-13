@@ -8,7 +8,7 @@
 
 // If uninstall.php is not called by WordPress, bail.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
+	exit; // @codeCoverageIgnore
 }
 
 require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
@@ -17,6 +17,10 @@ $od_delete_site_data = static function (): void {
 	// Delete all URL Metrics posts for the current site.
 	OD_URL_Metrics_Post_Type::delete_all_posts();
 	wp_unschedule_hook( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+
+	// Clear out site health check data.
+	delete_option( 'od_rest_api_unavailable' );
+	delete_transient( 'od_rest_api_health_check_response' );
 };
 
 $od_delete_site_data();

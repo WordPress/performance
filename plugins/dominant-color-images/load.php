@@ -15,10 +15,11 @@
  * @package dominant-color-images
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 // Define required constants.
 if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {

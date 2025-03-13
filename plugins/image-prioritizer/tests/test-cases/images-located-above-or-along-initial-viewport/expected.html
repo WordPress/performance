@@ -1,0 +1,17 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	</head>
+	<body>
+		<div id="page">
+			<!-- These three are all true for is_element_positioned_in_any_initial_viewport since their top is above the viewport height. -->
+			<img data-od-replaced-fetchpriority="high" src="https://example.com/bad-left-of-viewport.jpg" alt="Left of Viewport" width="10" height="10" fetchpriority="low">
+			<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="low" src="https://example.com/bad-above-viewport.jpg" alt="Above viewport" width="10" height="10" >
+			<img data-od-added-fetchpriority fetchpriority="low" src="https://example.com/bad-right-of-viewport.jpg" alt="Right of viewport" width="10" height="10">
+	
+			<!-- The only one that should get loading=lazy since user should be able to scroll to it. -->
+			<img data-od-added-loading loading="lazy" src="https://example.com/bad-below-viewport.jpg" alt="Below viewport" width="10" height="10">
+		</div>
+	</body>
+</html>

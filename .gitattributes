@@ -2,3 +2,6 @@
 
 # Improve highlighting for PHPStan stub files.
 *.stub linguist-language=PHP
+
+# Hide diffs for Optimization Detective snapshots.
+plugins/*/tests/test-cases/*/expected.html linguist-generated=true

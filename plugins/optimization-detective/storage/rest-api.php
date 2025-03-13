@@ -6,13 +6,17 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Namespace for optimization-detective.
  *
+ * @since 0.1.0
+ * @access private
  * @var string
  */
 const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
@@ -24,6 +28,8 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
  * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
  * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
  *
+ * @since 0.1.0
+ * @access private
  * @link https://google.aip.dev/136
  * @var string
  */
@@ -34,6 +40,8 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
  *
  * @since 0.1.0
  * @access private
+ *
+ * @see od_compose_site_health_result()
  */
 function od_register_endpoint(): void {
 
@@ -68,7 +76,7 @@ function od_register_endpoint(): void {
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+\z',
 			'validate_callback' => static function ( string $hmac, WP_REST_Request $request ) {
-				if ( ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
+				if ( '' === $hmac || ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
 					return new WP_Error( 'invalid_hmac', __( 'URL Metrics HMAC verification failure.', 'optimization-detective' ) );
 				}
 				return true;
@@ -94,7 +102,7 @@ function od_register_endpoint(): void {
 					return new WP_Error(
 						'url_metric_storage_locked',
 						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-						array( 'status' => 403 ) // TODO: Consider 423 Locked status code.
+						array( 'status' => 423 )
 					);
 				}
 				return true;
@@ -164,7 +172,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	} catch ( InvalidArgumentException $exception ) {
 		// Note: This should never happen because an exception only occurs if a viewport width is less than zero, and the JSON Schema enforces that the viewport.width have a minimum of zero.
-		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
+		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() ); // @codeCoverageIgnore
 	}
 	if ( $url_metric_group->is_complete() ) {
 		return new WP_Error(
@@ -210,10 +218,37 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
-	$result = OD_URL_Metrics_Post_Type::store_url_metric(
+	/*
+	 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+	 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+	 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+	 * getting sent.
+	 */
+	$max_size       = 64 * 1024;
+	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+	if ( $content_length > $max_size ) {
+		return new WP_Error(
+			'rest_content_too_large',
+			sprintf(
+				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+				number_format_i18n( $content_length ),
+				number_format_i18n( $max_size )
+			),
+			array( 'status' => 413 )
+		);
+	}
+
+	try {
+		$url_metric_group->add_url_metric( $url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		// NOTE: This exception should never be thrown because `get_group_for_viewport_width()` already ensures the viewport width is valid.
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() ); // @codeCoverageIgnore
+	}
+
+	$result = OD_URL_Metrics_Post_Type::update_post(
 		$request->get_param( 'slug' ),
-		$url_metric
+		$url_metric_group_collection
 	);
 	if ( $result instanceof WP_Error ) {
 		$error_data = array(
@@ -275,7 +310,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
  * @since 0.8.0
  * @access private
  *
- * @param int $cache_purge_post_id Cache purge post ID.
+ * @param positive-int $cache_purge_post_id Cache purge post ID.
  */
 function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 	$post = get_post( $cache_purge_post_id );
