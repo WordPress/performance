@@ -100,18 +100,26 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
 			),
 			'callback'            => array( $this, 'handle_rest_request' ),
-			'permission_callback' => static function () {
-				// Needs to be available to unauthenticated visitors.
-				if ( OD_Storage_Lock::is_locked() ) {
-					return new WP_Error(
-						'url_metric_storage_locked',
-						__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
-						array( 'status' => 423 )
-					);
-				}
-				return true;
-			},
+			'permission_callback' => array( $this, 'permission_callback' ),
 		);
+	}
+
+	/**
+	 * Permission callback for the REST API endpoint.
+	 *
+	 * @return true|WP_Error True if the request has permission, WP_Error object otherwise.
+	 */
+	public function permission_callback() {
+
+		// Needs to be available to unauthenticated visitors.
+		if ( OD_Storage_Lock::is_locked() ) {
+			return new WP_Error(
+				'url_metric_storage_locked',
+				__( 'URL Metric storage is presently locked for the current IP.', 'optimization-detective' ),
+				array( 'status' => 423 )
+			);
+		}
+		return true;
 	}
 
 	/**
