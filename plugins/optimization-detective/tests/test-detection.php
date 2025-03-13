@@ -236,4 +236,75 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE, $routes );
 	}
+
+	/**
+	 * Test od_handle_trigger_page_cache_invalidation().
+	 *
+	 * @covers ::od_handle_trigger_page_cache_invalidation
+	 */
+	public function test_trigger_page_cache_invalidation(): void {
+		$cache_purge_post_id = self::factory()->post->create();
+
+		$all_hook_callback_args = array();
+		add_action(
+			'all',
+			static function ( string $hook, ...$args ) use ( &$all_hook_callback_args ): void {
+				$all_hook_callback_args[ $hook ][] = $args;
+			},
+			10,
+			PHP_INT_MAX
+		);
+
+		od_handle_trigger_page_cache_invalidation( $cache_purge_post_id );
+
+		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['clean_post_cache'] as $args ) {
+			if ( $args[0] === $cache_purge_post_id ) {
+				$this->assertInstanceOf( WP_Post::class, $args[1] );
+				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected clean_post_cache to have been fired for the post queried object.' );
+
+		$this->assertArrayHasKey( 'transition_post_status', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['transition_post_status'] as $args ) {
+			$this->assertInstanceOf( WP_Post::class, $args[2] );
+			if ( $args[2]->ID === $cache_purge_post_id ) {
+				$this->assertSame( $args[2]->post_status, $args[0] );
+				$this->assertSame( $args[2]->post_status, $args[1] );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected transition_post_status to have been fired for the post queried object.' );
+
+		$this->assertArrayHasKey( 'save_post', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['save_post'] as $args ) {
+			if ( $args[0] === $cache_purge_post_id ) {
+				$this->assertInstanceOf( WP_Post::class, $args[1] );
+				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected save_post to have been fired for the post queried object.' );
+	}
+
+	/**
+	 * Test od_handle_trigger_page_cache_invalidation() for an invalid post.
+	 *
+	 * @covers ::od_handle_trigger_page_cache_invalidation
+	 */
+	public function test_trigger_page_cache_invalidation_invalid_post_id(): void {
+		wp_delete_post( 1, true );
+		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
+		$before_transition_post_status_count = did_action( 'transition_post_status' );
+		$before_save_post_count              = did_action( 'save_post' );
+		od_handle_trigger_page_cache_invalidation( 1 );
+		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
+		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
+		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
+	}
 }
