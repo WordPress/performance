@@ -297,7 +297,7 @@ function image_prioritizer_filter_rest_request_before_callbacks( $response, arra
 
 	// Check for class existence and use constant or class method calls accordingly.
 	$route_endpoint = class_exists( 'OD_REST_URL_Metrics_Store_Endpoint' )
-						? OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE
+						? OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE
 						: OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE; // @phpstan-ignore constant.deprecated, constant.deprecated (To be replaced with class method calls in subsequent release.)
 
 	if (

@@ -19,7 +19,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * @return string Route.
 	 */
 	private function get_route(): string {
-		return '/' . OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE;
+		return '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE;
 	}
 
 	/**

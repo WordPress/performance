@@ -121,7 +121,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                => WP_DEBUG,
 		'extensionModuleUrls'    => $extension_module_urls,
-		'restApiEndpoint'        => rest_url( OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE ),
+		'restApiEndpoint'        => rest_url( OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE ),
 		'currentETag'            => $current_etag,
 		'currentUrl'             => $current_url,
 		'urlMetricSlug'          => $slug,
@@ -169,8 +169,8 @@ function od_register_rest_url_metric_store_endpoint(): void {
 	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
 
 	register_rest_route(
-		$endpoint_controller::REST_API_NAMESPACE,
-		$endpoint_controller::REST_API_ROUTE,
+		$endpoint_controller::ROUTE_NAMESPACE,
+		$endpoint_controller::ROUTE_BASE,
 		$endpoint_controller->get_registration_args()
 	);
 }

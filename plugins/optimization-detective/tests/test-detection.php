@@ -234,7 +234,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	public function od_register_rest_url_metric_store_endpoint(): void {
 
 		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE, $routes );
+		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE, $routes );
 	}
 
 	/**

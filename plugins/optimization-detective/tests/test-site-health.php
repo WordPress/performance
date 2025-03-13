@@ -420,7 +420,7 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, array $args, string $url ) use ( $mocked_response, $observer ) {
-				if ( rest_url( OD_REST_URL_Metrics_Store_Endpoint::REST_API_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::REST_API_ROUTE ) === $url ) {
+				if ( rest_url( OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE ) === $url ) {
 					$observer->counter++;
 					return $mocked_response;
 				}

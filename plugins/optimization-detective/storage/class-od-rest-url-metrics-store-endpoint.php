@@ -26,7 +26,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const REST_API_NAMESPACE = 'optimization-detective/v1';
+	const ROUTE_NAMESPACE = 'optimization-detective/v1';
 
 	/**
 	 * Route for storing a URL Metric.
@@ -39,7 +39,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @link https://google.aip.dev/136
 	 * @var string
 	 */
-	const REST_API_ROUTE = '/url-metrics:store';
+	const ROUTE_BASE = '/url-metrics:store';
 
 	/**
 	 * Gets the arguments for registering the endpoint.
