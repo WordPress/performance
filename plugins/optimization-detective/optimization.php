@@ -153,17 +153,21 @@ function od_add_template_output_buffer_filter( $template ) {
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
+	// Prevent modification of the tag visitor registry since doing so would invalidate the etag.
+	$tag_visitor_registry->finalize();
+
 	global $wp_the_query;
 	$current_theme_template = od_get_current_theme_template( is_string( $template ) ? $template : null );
 	$current_etag           = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, $current_theme_template );
 	$group_collection       = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		$current_etag,
+		// TODO: Add the following values to the context as well.
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()
-	);
-	$link_collection        = new OD_Link_Collection();
+	); // TODO: Also finalize the collection?
+	$link_collection = new OD_Link_Collection();
 
 	$context = new OD_Template_Optimization_Context(
 		$group_collection,

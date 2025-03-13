@@ -33,17 +33,42 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	private $visitors = array();
 
 	/**
+	 * Whether finalized.
+	 *
+	 * @since n.e.x.t
+	 * @var bool
+	 */
+	private $is_finalized = false;
+
+	/**
+	 * Finalizes the registry to prevent further modifications.
+	 *
+	 * @since n.e.x.t
+	 * @access private
+	 */
+	public function finalize(): void {
+		$this->is_finalized = true;
+	}
+
+	/**
 	 * Registers a tag visitor.
 	 *
 	 * @since 0.3.0
+	 * @since n.e.x.t Returns boolean for whether registration is successful. Returns false if registry is finalized.
 	 *
 	 * @phpstan-param TagVisitorCallback $tag_visitor_callback
 	 *
 	 * @param non-empty-string $id                   Identifier for the tag visitor.
 	 * @param callable         $tag_visitor_callback Tag visitor callback.
+	 * @return bool Whether a tag visitor was registered.
 	 */
-	public function register( string $id, callable $tag_visitor_callback ): void {
+	public function register( string $id, callable $tag_visitor_callback ): bool {
+		if ( $this->is_finalized ) {
+			_doing_it_wrong( __METHOD__, esc_html( $this->get_finalized_message() ), 'optimization-detective 1.0.0' );
+			return false;
+		}
 		$this->visitors[ $id ] = $tag_visitor_callback;
+		return true;
 	}
 
 	/**
@@ -77,11 +102,16 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 * Unregisters a tag visitor.
 	 *
 	 * @since 0.3.0
+	 * @since n.e.x.t Returns false if the registry is finalized.
 	 *
 	 * @param non-empty-string $id Identifier for the tag visitor.
 	 * @return bool Whether a tag visitor was unregistered.
 	 */
 	public function unregister( string $id ): bool {
+		if ( $this->is_finalized ) {
+			_doing_it_wrong( __METHOD__, esc_html( $this->get_finalized_message() ), 'optimization-detective 1.0.0' );
+			return false;
+		}
 		if ( ! $this->is_registered( $id ) ) {
 			return false;
 		}
@@ -109,5 +139,20 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 */
 	public function count(): int {
 		return count( $this->visitors );
+	}
+
+	/**
+	 * Gets the finalized message when attempting to mutate the registry after the od_register_tag_visitors action.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string Message.
+	 */
+	private function get_finalized_message(): string {
+		return sprintf(
+			/* translators: %s is the od_register_tag_visitors action */
+			__( 'The tag visitor registry has already been finalized. This method must be called during the %s action.', 'optimization-detective' ),
+			'od_register_tag_visitors'
+		);
 	}
 }
