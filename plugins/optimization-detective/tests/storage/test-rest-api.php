@@ -349,12 +349,30 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'params'          => array_merge(
 					$valid_params,
 					array(
-						// Fill the JSON with more than 64KB of data.
+						// Fill the JSON with more than 64KB of incomprehensible data.
 						'elements' => array(
 							array_merge(
 								$valid_element,
 								array(
-									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', bin2hex( random_bytes( 65000 ) ) ),
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', bin2hex( random_bytes( KB_IN_BYTES * 65 ) ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+			'invalid_decoded_json_body_content_length' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of highly compressible data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
 								)
 							),
 						),
@@ -889,6 +907,100 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertNotWPError( $result );
 		$this->assertEquals( $json_data, $request->get_body() );
 		$this->assertEquals( 'application/json', $request->get_header( 'Content-Type' ) );
+	}
+
+	/**
+	 * Test that the `od_max_url_metric_size` filter can be used to modify the maximum size of URL Metrics.
+	 *
+	 * @dataProvider data_provider_max_url_metrics_size_filter
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_get_max_url_metric_size
+	 *
+	 * @param Closure              $set_up          Set up function.
+	 * @param array<string, mixed> $params          Params.
+	 * @param int                  $expected_status Expected status.
+	 * @param string|null          $expected_code   Expected code.
+	 */
+	public function test_max_url_metrics_size_filter( Closure $set_up, array $params, int $expected_status, ?string $expected_code ): void {
+		$set_up();
+		$request = $this->create_request( $params );
+		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $params ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+		if ( null !== $expected_code ) {
+			$this->assertSame( $expected_code, $response->get_data()['code'] );
+		}
+	}
+
+	/**
+	 * Data provider for test_max_url_metrics_size_filter.
+	 *
+	 * @return array<string, mixed> Test data.
+	 */
+	public function data_provider_max_url_metrics_size_filter(): array {
+		$valid_params  = $this->get_valid_params();
+		$valid_element = $valid_params['elements'][0];
+
+		return array(
+			'url_metrics_should_be_accepted_because_of_increased_max_url_metrics_size' => array(
+				'set_up'          => static function (): void {
+					add_filter(
+						'od_max_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES * 2;
+						}
+					);
+				},
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 200,
+				'expected_code'   => null,
+			),
+			'url_metrics_should_be_rejected_because_of_decreased_max_url_metrics_size' => array(
+				'set_up'          => static function (): void {
+					add_filter(
+						'od_max_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES / 2;
+						}
+					);
+				},
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+
+		);
 	}
 
 	/**
