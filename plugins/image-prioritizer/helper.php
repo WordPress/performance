@@ -83,6 +83,7 @@ function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $regis
 
 	$video_visitor = new Image_Prioritizer_Video_Tag_Visitor();
 	$registry->register( 'image-prioritizer/video', $video_visitor );
+	add_action( 'od_finish_template_optimization', array( $video_visitor, 'insert_lazy_load_script_if_needed' ) );
 }
 
 /**
