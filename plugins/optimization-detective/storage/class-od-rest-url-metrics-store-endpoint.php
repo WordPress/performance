@@ -16,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * OD_REST_URL_Metrics_Store_Endpoint class
  *
  * @since n.e.x.t
- * @access private
  */
 final class OD_REST_URL_Metrics_Store_Endpoint {
 
@@ -45,6 +44,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * Gets the arguments for registering the endpoint.
 	 *
 	 * @since n.e.x.t
+	 * @access private
 	 *
 	 * @return array{
 	 *     methods: string,
@@ -107,6 +107,9 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	/**
 	 * Permission callback for the REST API endpoint.
 	 *
+	 * @since n.e.x.t
+	 * @access private
+	 *
 	 * @return true|WP_Error True if the request has permission, WP_Error object otherwise.
 	 */
 	public function permission_callback() {
@@ -131,6 +134,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 *
 	 * @since n.e.x.t
 	 * @see is_allowed_http_origin()
+	 * @access private
 	 *
 	 * @param string $origin Origin to check.
 	 * @return bool Whether the origin is allowed.
@@ -145,6 +149,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * Handles the REST API request to store a URL Metric.
 	 *
 	 * @since n.e.x.t
+	 * @access private
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 *
