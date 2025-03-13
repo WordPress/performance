@@ -362,6 +362,7 @@ async function compress( string ) {
  * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
  * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
  * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
+ * @param {number}                 args.maxUrlMetricSize           - Maximum size of the URL Metric to send.
  * @param {string}                 args.currentETag                - Current ETag.
  * @param {string}                 args.currentUrl                 - Current URL.
  * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
@@ -381,6 +382,7 @@ export default async function detect( {
 	restApiEndpoint,
 	restApiNonce,
 	gzdecodeAvailable,
+	maxUrlMetricSize,
 	currentETag,
 	currentUrl,
 	urlMetricSlug,
@@ -815,6 +817,14 @@ export default async function detect( {
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
 	const jsonBody = JSON.stringify( urlMetric );
+	if ( jsonBody.length > maxUrlMetricSize ) {
+		error(
+			`URL Metric is ${ jsonBody.length.toLocaleString() } bytes, exceeding the maximum size of ${ maxUrlMetricSize.toLocaleString() } bytes:`,
+			urlMetric
+		);
+		return;
+	}
+
 	const payloadBlob = gzdecodeAvailable
 		? await compress( jsonBody )
 		: new Blob( [ jsonBody ], { type: 'application/json' } );

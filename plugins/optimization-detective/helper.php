@@ -122,3 +122,23 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 
 	return $min_path;
 }
+
+/**
+ * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return int Maximum allowed byte size.
+ */
+function od_get_max_url_metric_size(): int {
+	/**
+	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $max_size Maximum allowed byte size.
+	 * @return int Filtered maximum allowed byte size.
+	 */
+	return (int) apply_filters( 'od_max_url_metric_size', MB_IN_BYTES );
+}

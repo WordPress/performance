@@ -218,6 +218,22 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
+	// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
+	$max_size       = od_get_max_url_metric_size();
+	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+	if ( $content_length > $max_size ) {
+		return new WP_Error(
+			'rest_content_too_large',
+			sprintf(
+				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+				__( 'JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+				number_format_i18n( $content_length ),
+				number_format_i18n( $max_size )
+			),
+			array( 'status' => 413 )
+		);
+	}
+
 	try {
 		$url_metric_group->add_url_metric( $url_metric );
 	} catch ( InvalidArgumentException $e ) {
