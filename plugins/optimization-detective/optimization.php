@@ -271,7 +271,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	);
 	$link_collection  = new OD_Link_Collection();
 
-	$context = new OD_Template_Optimization_Context(
+	$template_optimization_context = new OD_Template_Optimization_Context(
 		$processor,
 		$group_collection,
 		$link_collection,
@@ -285,9 +285,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
-	do_action( 'od_start_template_optimization', $context );
+	do_action( 'od_start_template_optimization', $template_optimization_context );
 
 	$visited_tag_state    = new OD_Visited_Tag_State();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context(
@@ -363,9 +363,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
-	do_action( 'od_finish_template_optimization', $context );
+	do_action( 'od_finish_template_optimization', $template_optimization_context );
 
 	return $processor->get_updated_html();
 }
