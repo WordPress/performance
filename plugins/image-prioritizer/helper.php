@@ -292,8 +292,10 @@ function image_prioritizer_validate_background_image_url( string $url ) {
  *
  * @return WP_REST_Response|WP_HTTP_Response|WP_Error|mixed Result to send to the client.
  * @noinspection PhpDocMissingThrowsInspection
+ * @noinspection PhpDeprecationInspection
  */
 function image_prioritizer_filter_rest_request_before_callbacks( $response, array $handler, WP_REST_Request $request ) {
+	unset( $handler ); // Unused.
 
 	// Check for class existence and use constant or class method calls accordingly.
 	$route_endpoint = class_exists( 'OD_REST_URL_Metrics_Store_Endpoint' )

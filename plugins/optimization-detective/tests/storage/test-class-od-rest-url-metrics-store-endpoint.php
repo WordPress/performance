@@ -9,6 +9,9 @@
  * Class Test_OD_REST_URL_Metrics_Store_Endpoint used to test `OD_REST_URL_Metrics_Store_Endpoint` class.
  *
  * @since n.e.x.t
+ *
+ * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  */
 class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
@@ -1065,6 +1068,9 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		if ( ! function_exists( 'gzencode' ) ) {
+			throw new Exception( 'The gzencode() function is not available.' );
+		}
 		$request->set_body( gzencode( wp_json_encode( $params ) ) );
 		return $request;
 	}

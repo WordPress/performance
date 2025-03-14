@@ -322,6 +322,8 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @return mixed Passed through $result if successful, or otherwise a WP_Error.
 	 */
 	public function decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
+		unset( $server ); // Unused.
+
 		if (
 			$request->get_route() === '/' . self::ROUTE_NAMESPACE . self::ROUTE_BASE &&
 			'application/gzip' === $request->get_header( 'Content-Type' ) &&
