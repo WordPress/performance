@@ -182,7 +182,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width(
 				$request->get_param( 'viewport' )['width']
 			);
-		} catch ( InvalidArgumentException $exception ) {
+		} catch ( InvalidArgumentException $exception ) { // @codeCoverageIgnore
 			// Note: This should never happen because an exception only occurs if a viewport width is less than zero, and the JSON Schema enforces that the viewport.width have a minimum of zero.
 			return new WP_Error( 'invalid_viewport_width', $exception->getMessage() ); // @codeCoverageIgnore
 		}
@@ -248,7 +248,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 
 		try {
 			$url_metric_group->add_url_metric( $url_metric );
-		} catch ( InvalidArgumentException $e ) {
+		} catch ( InvalidArgumentException $e ) { // @codeCoverageIgnore
 			// NOTE: This exception should never be thrown because `get_group_for_viewport_width()` already ensures the viewport width is valid.
 			return new WP_Error( 'invalid_url_metric', $e->getMessage() ); // @codeCoverageIgnore
 		}
