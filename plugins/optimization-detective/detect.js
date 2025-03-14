@@ -739,6 +739,7 @@ export default async function detect( {
 		urlMetric.elements.push( elementData );
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
+	breadcrumbedElementsMap.clear();
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
