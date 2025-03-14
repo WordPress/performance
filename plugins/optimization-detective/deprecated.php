@@ -12,6 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Temporary class alias for back-compat after rename, deprecated since October 2024.
+class_alias( OD_URL_Metric_Group::class, 'OD_URL_Metrics_Group' );
+class_alias( OD_URL_Metric_Group_Collection::class, 'OD_URL_Metrics_Group_Collection' );
+
 /**
  * Namespace for optimization-detective.
  *
