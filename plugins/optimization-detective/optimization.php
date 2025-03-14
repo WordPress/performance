@@ -349,15 +349,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$visited_tag_state->reset();
 	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
-	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
-	if ( count( $link_collection ) > 0 ) {
-		$response_header_links = $link_collection->get_response_header();
-		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
-			header( $response_header_links, false );
-		}
-		$processor->append_head_html( $link_collection->get_html() );
-	}
-
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
@@ -372,6 +363,16 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
 	do_action( 'od_finish_template_optimization', $template_optimization_context );
+
+	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
+	// Additional links may have been added at the od_finish_template_optimization action, so this must come after.
+	if ( count( $link_collection ) > 0 ) {
+		$response_header_links = $link_collection->get_response_header();
+		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
+			header( $response_header_links, false );
+		}
+		$processor->append_head_html( $link_collection->get_html() );
+	}
 
 	return $processor->get_updated_html();
 }

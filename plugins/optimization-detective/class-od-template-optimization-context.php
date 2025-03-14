@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  *
  * @property-read OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
- * @property-read OD_Tag_Visitor_Registry        $tag_visitor_registry        Tag visitor registry.
  * @property-read positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection.
  * @property-read array<string, mixed>           $normalized_query_vars       Normalized query vars.
  * @property-read non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
