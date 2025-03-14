@@ -48,10 +48,10 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	/**
 	 * Test bad od_get_url_metric_freshness_ttl().
 	 *
-	 * @expectedIncorrectUsage od_get_url_metric_freshness_ttl
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
 	public function test_bad_od_get_url_metric_freshness_ttl(): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_url_metric_freshness_ttl&#039;' );
 		add_filter(
 			'od_url_metric_freshness_ttl',
 			static function (): int {
@@ -728,13 +728,13 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_breakpoint_max_widths
 	 *
-	 * @expectedIncorrectUsage od_get_breakpoint_max_widths
 	 * @dataProvider data_provider_test_bad_od_get_breakpoint_max_widths
 	 *
 	 * @param int[] $breakpoints Breakpoints.
 	 * @param int[] $expected Expected breakpoints.
 	 */
 	public function test_bad_od_get_breakpoint_max_widths( array $breakpoints, array $expected ): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_breakpoint_max_widths&#039;' );
 		add_filter(
 			'od_breakpoint_max_widths',
 			static function () use ( $breakpoints ): array {
@@ -766,10 +766,10 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	/**
 	 * Test bad od_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @expectedIncorrectUsage od_get_url_metrics_breakpoint_sample_size
 	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_bad_od_get_url_metrics_breakpoint_sample_size(): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_url_metrics_breakpoint_sample_size&#039;' );
 		add_filter(
 			'od_url_metrics_breakpoint_sample_size',
 			static function (): int {
