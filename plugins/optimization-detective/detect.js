@@ -330,13 +330,13 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
- * Compresses a string using CompressionStream API.
+ * Compresses a (JSON) string using CompressionStream API.
  *
- * @param {string} string - String to compress.
+ * @param {string} jsonString - JSON string to compress.
  * @return {Promise<Blob>} Compressed data.
  */
-async function compress( string ) {
-	const encodedData = new TextEncoder().encode( string );
+async function compress( jsonString ) {
+	const encodedData = new TextEncoder().encode( jsonString );
 	const compressedDataStream = new Blob( [ encodedData ] )
 		.stream()
 		.pipeThrough( new CompressionStream( 'gzip' ) );

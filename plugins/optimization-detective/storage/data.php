@@ -486,7 +486,7 @@ function od_get_maximum_url_metric_size(): int {
 			esc_html( "Filter: 'od_maximum_url_metric_size'" ),
 			esc_html(
 				sprintf(
-				/* translators: %s: size */
+					/* translators: %s: size */
 					__( 'Invalid size "%s". Must be greater than zero.', 'optimization-detective' ),
 					$size
 				)

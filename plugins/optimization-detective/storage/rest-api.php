@@ -353,7 +353,7 @@ function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
  * @param mixed           $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
  * @param WP_REST_Server  $server  Server instance.
  * @param WP_REST_Request $request Request used to generate the response.
- * @return mixed Response to replace the requested version with.
+ * @return mixed Passed through $result if successful, or otherwise a WP_Error.
  */
 function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
 	if (
