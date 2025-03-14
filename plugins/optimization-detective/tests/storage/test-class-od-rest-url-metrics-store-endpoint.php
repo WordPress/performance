@@ -92,7 +92,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
@@ -191,7 +191,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
@@ -504,7 +504,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test bad params.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
@@ -527,7 +527,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test sending data when no Origin request header is sent.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
@@ -545,7 +545,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test sending data when a cross-domain Origin request header is sent.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
@@ -564,7 +564,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test REST API request when 'home_url' is filtered.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
@@ -585,7 +585,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test not sending JSON data.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -603,7 +603,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test not sending JSON Content-Type.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -621,7 +621,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test empty array JSON body.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -639,7 +639,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test non-array JSON body.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -658,7 +658,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test invalid compressed JSON body.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -675,7 +675,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test timestamp ignored.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -710,7 +710,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test REST API request when metric storage is locked.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -728,7 +728,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -762,7 +762,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -788,7 +788,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test fully populating the wider viewport group and then adding one more.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -846,7 +846,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * Test fully populating the narrower viewport group and then adding one more.
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
@@ -881,15 +881,14 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	/**
 	 * Test that the request is modified by ::decompress_rest_request_body().
 	 *
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 */
 	public function test_od_decompress_rest_request_body_modifies_request(): void {
-		$endpoint = new OD_REST_URL_Metrics_Store_Endpoint();
-		$params   = $this->get_valid_params();
-		$request  = $this->create_request( $this->get_valid_params() );
+		$params  = $this->get_valid_params();
+		$request = $this->create_request( $this->get_valid_params() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
 		$json_data = wp_json_encode( $params );
-		$result    = $endpoint->decompress_rest_request_body( null, rest_get_server(), $request );
+		$result    = od_decompress_rest_request_body( null, rest_get_server(), $request );
 
 		$this->assertNotWPError( $result );
 		$this->assertEquals( $json_data, $request->get_body() );
@@ -902,7 +901,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	 * @dataProvider data_provider_maximum_url_metrics_size_filter
 	 *
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
-	 * @covers OD_REST_URL_Metrics_Store_Endpoint::decompress_rest_request_body
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
 	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers ::od_get_maximum_url_metric_size
