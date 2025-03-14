@@ -489,7 +489,58 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/חנות/wp-content/uploads/2025/01/example.jpg?ver=1+2" as="image">
 				',
-				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg?ver=1%202>; rel="preload"; as="image"',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg?ver=1+2>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'comma_in_query'                             => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/wp-content/uploads/2025/02/example.png?resize=768,432&ssl=1',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/wp-content/uploads/2025/02/example.png?resize=768,432&amp;ssl=1" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/wp-content/uploads/2025/02/example.png?resize=768,432&ssl=1>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'percent_encoded_comma_in_query'             => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/wp-content/uploads/2025/02/example.png?resize=768%2C432&ssl=1',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/wp-content/uploads/2025/02/example.png?resize=768%2C432&amp;ssl=1" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/wp-content/uploads/2025/02/example.png?resize=768%2C432&ssl=1>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
+			'percent_encoded_extension'                  => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/image.%6Apg',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/image.%6Apg" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/image.%6Apg>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),

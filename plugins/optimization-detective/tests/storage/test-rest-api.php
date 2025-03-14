@@ -75,6 +75,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 * @covers OD_URL_Metric_Store_Request_Context::__construct
 	 * @covers OD_URL_Metric_Store_Request_Context::__get
@@ -133,7 +134,6 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 		$element = $url_metrics[0]->get( 'elements' )[0];
 		$this->assertStringStartsWith( '/HTML/BODY/DIV[@id=\'page\']/', $element->jsonSerialize()['xpath'] );
-		$this->assertStringStartsWith( '/HTML/BODY/DIV/', $element->get_xpath() ); // TODO: Remove once the XPath transitional period is over.
 
 		$expected_data = $valid_params;
 		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['current_etag'], $expected_data['cache_purge_post_id'] );
@@ -349,16 +349,32 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'params'          => array_merge(
 					$valid_params,
 					array(
-						// Repeat the elements until the JSON will surpass 64 KiB.
-						'elements' => array_fill(
-							0,
-							200,
+						// Fill the JSON with more than 64KB of incomprehensible data.
+						'elements' => array(
 							array_merge(
 								$valid_element,
 								array(
-									'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', bin2hex( random_bytes( KB_IN_BYTES * 65 ) ) ),
 								)
-							)
+							),
+						),
+					)
+				),
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+			'invalid_decoded_json_body_content_length' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of highly compressible data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
 						),
 					)
 				),
@@ -458,6 +474,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
@@ -587,6 +604,23 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
+	}
+
+
+	/**
+	 * Test invalid compressed JSON body.
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
+	 */
+	public function test_rest_request_invalid_compressed_json_body(): void {
+		$request = $this->create_request( $this->get_valid_params() );
+		$request->set_body( 'Invalid compressed JSON body' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_invalid_payload', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
@@ -857,6 +891,151 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the request is modified by od_decompress_rest_request_body().
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_decompress_rest_request_body
+	 */
+	public function test_od_decompress_rest_request_body_modifies_request(): void {
+		$params  = $this->get_valid_params();
+		$request = $this->create_request( $this->get_valid_params() );
+		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		$json_data = wp_json_encode( $params );
+		$result    = od_decompress_rest_request_body( null, rest_get_server(), $request );
+
+		$this->assertNotWPError( $result );
+		$this->assertEquals( $json_data, $request->get_body() );
+		$this->assertEquals( 'application/json', $request->get_header( 'Content-Type' ) );
+	}
+
+	/**
+	 * Test that the `od_maximum_url_metric_size` filter can be used to modify the maximum size of URL Metrics.
+	 *
+	 * @dataProvider data_provider_maximum_url_metrics_size_filter
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_get_maximum_url_metric_size
+	 *
+	 * @param Closure              $set_up                   Set up function.
+	 * @param array<string, mixed> $params                   Params.
+	 * @param int                  $expected_status          Expected status.
+	 * @param string|null          $expected_code            Expected code.
+	 * @param bool                 $expected_incorrect_usage Expected incorrect usage.
+	 */
+	public function test_maximum_url_metrics_size_filter( Closure $set_up, array $params, int $expected_status, ?string $expected_code, bool $expected_incorrect_usage ): void {
+		$set_up();
+		if ( $expected_incorrect_usage ) {
+			$this->setExpectedIncorrectUsage( 'Filter: &#039;od_maximum_url_metric_size&#039;' );
+		}
+		$request = $this->create_request( $params );
+		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $params ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+		if ( null !== $expected_code ) {
+			$this->assertSame( $expected_code, $response->get_data()['code'] );
+		}
+	}
+
+	/**
+	 * Data provider for test_maximum_url_metrics_size_filter.
+	 *
+	 * @return array<string, mixed> Test data.
+	 */
+	public function data_provider_maximum_url_metrics_size_filter(): array {
+		$valid_params  = $this->get_valid_params();
+		$valid_element = $valid_params['elements'][0];
+
+		return array(
+			'url_metrics_should_be_accepted_because_of_increased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES * 2;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => false,
+			),
+			'url_metrics_should_be_rejected_because_of_decreased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES / 2;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 413,
+				'expected_code'            => 'rest_content_too_large',
+				'expected_incorrect_usage' => false,
+			),
+			'negative_maximum_url_metric_size_is_treated_as_1mb' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return -1;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES / 2 ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => true,
+			),
+		);
+	}
+
+	/**
 	 * Populate URL Metrics.
 	 *
 	 * @param int                  $count  Count of URL Metrics to populate.
@@ -938,11 +1117,11 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		 * @var WP_REST_Request<array<string, mixed>> $request
 		 */
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
-		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_header( 'Content-Type', 'application/gzip' );
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
-		$request->set_body( wp_json_encode( $params ) );
+		$request->set_body( gzencode( wp_json_encode( $params ) ) );
 		return $request;
 	}
 }

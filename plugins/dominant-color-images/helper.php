@@ -17,10 +17,10 @@
  */
 function dominant_color_set_image_editors( array $editors ): array {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
-		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';// @codeCoverageIgnore
 	}
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
-		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';// @codeCoverageIgnore
 	}
 
 	$replaces = array(
