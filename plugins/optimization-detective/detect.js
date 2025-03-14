@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution
@@ -214,7 +216,7 @@ function getCurrentTime() {
 /**
  * Recursively freezes an object to prevent mutation.
  *
- * @param {Object} obj Object to recursively freeze.
+ * @param {Object} obj - Object to recursively freeze.
  */
 function recursiveFreeze( obj ) {
 	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
@@ -293,7 +295,7 @@ const reservedElementPropertyKeys = new Set( [
 /**
  * Gets element data.
  *
- * @param {string} xpath XPath.
+ * @param {string} xpath - XPath.
  * @return {ElementData|null} Element data, or null if no element for the XPath exists.
  */
 function getElementData( xpath ) {
@@ -309,8 +311,8 @@ function getElementData( xpath ) {
 /**
  * Extends element data.
  *
- * @param {string}              xpath      XPath.
- * @param {ExtendedElementData} properties Properties.
+ * @param {string}              xpath      - XPath.
+ * @param {ExtendedElementData} properties - Properties.
  */
 function extendElementData( xpath, properties ) {
 	if ( ! elementsByXPath.has( xpath ) ) {
@@ -328,6 +330,23 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
+ * Compresses a (JSON) string using CompressionStream API.
+ *
+ * @param {string} jsonString - JSON string to compress.
+ * @return {Promise<Blob>} Compressed data.
+ */
+async function compress( jsonString ) {
+	const encodedData = new TextEncoder().encode( jsonString );
+	const compressedDataStream = new Blob( [ encodedData ] )
+		.stream()
+		.pipeThrough( new CompressionStream( 'gzip' ) );
+	const compressedDataBuffer = await new Response(
+		compressedDataStream
+	).arrayBuffer();
+	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
+}
+
+/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -335,23 +354,25 @@ function extendElementData( xpath, properties ) {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                 args                            Args.
- * @param {string[]}               args.extensionModuleUrls        URLs for extension script modules to import.
- * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
- * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
- * @param {boolean}                args.isDebug                    Whether to show debug messages.
- * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
- * @param {string}                 [args.restApiNonce]             Nonce for the REST API when the user is logged-in.
- * @param {string}                 args.currentETag                Current ETag.
- * @param {string}                 args.currentUrl                 Current URL.
- * @param {string}                 args.urlMetricSlug              Slug for URL Metric.
- * @param {number|null}            args.cachePurgePostId           Cache purge post ID.
- * @param {string}                 args.urlMetricHMAC              HMAC for URL Metric storage.
- * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL Metric group statuses.
- * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL Metric storage lock.
- * @param {number}                 args.freshnessTTL               The freshness age (TTL) for a given URL Metric.
- * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
- * @param {CollectionDebugData}    [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
+ * @param {Object}                 args                            - Args.
+ * @param {string[]}               args.extensionModuleUrls        - URLs for extension script modules to import.
+ * @param {number}                 args.minViewportAspectRatio     - Minimum aspect ratio allowed for the viewport.
+ * @param {number}                 args.maxViewportAspectRatio     - Maximum aspect ratio allowed for the viewport.
+ * @param {boolean}                args.isDebug                    - Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
+ * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
+ * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
+ * @param {number}                 args.maxUrlMetricSize           - Maximum size of the URL Metric to send.
+ * @param {string}                 args.currentETag                - Current ETag.
+ * @param {string}                 args.currentUrl                 - Current URL.
+ * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
+ * @param {number|null}            args.cachePurgePostId           - Cache purge post ID.
+ * @param {string}                 args.urlMetricHMAC              - HMAC for URL Metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     - URL Metric group statuses.
+ * @param {number}                 args.storageLockTTL             - The TTL (in seconds) for the URL Metric storage lock.
+ * @param {number}                 args.freshnessTTL               - The freshness age (TTL) for a given URL Metric.
+ * @param {string}                 args.webVitalsLibrarySrc        - The URL for the web-vitals library.
+ * @param {CollectionDebugData}    [args.urlMetricGroupCollection] - URL Metric group collection, when in debug mode.
  */
 export default async function detect( {
 	minViewportAspectRatio,
@@ -360,6 +381,8 @@ export default async function detect( {
 	extensionModuleUrls,
 	restApiEndpoint,
 	restApiNonce,
+	gzdecodeAvailable,
+	maxUrlMetricSize,
 	currentETag,
 	currentUrl,
 	urlMetricSlug,
@@ -670,9 +693,7 @@ export default async function detect( {
 	for ( const elementIntersection of elementIntersections ) {
 		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
 		if ( ! xpath ) {
-			if ( isDebug ) {
-				error( 'Unable to look up XPath for element' );
-			}
+			warn( 'Unable to look up XPath for element' );
 			continue;
 		}
 
@@ -795,10 +816,20 @@ export default async function detect( {
 	const maxBodyLengthKiB = 64;
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
-	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
 	const jsonBody = JSON.stringify( urlMetric );
+	if ( jsonBody.length > maxUrlMetricSize ) {
+		error(
+			`URL Metric is ${ jsonBody.length.toLocaleString() } bytes, exceeding the maximum size of ${ maxUrlMetricSize.toLocaleString() } bytes:`,
+			urlMetric
+		);
+		return;
+	}
+
+	const payloadBlob = gzdecodeAvailable
+		? await compress( jsonBody )
+		: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
-		( jsonBody.length / ( maxBodyLengthKiB * 1000 ) ) * 100;
+		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
 	/*
 	 * According to the fetch() spec:
@@ -806,15 +837,13 @@ export default async function detect( {
 	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
 	 * than the maximum, we should avoid even trying to send it.
 	 */
-	if ( jsonBody.length > maxBodyLengthBytes ) {
-		if ( isDebug ) {
-			error(
-				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
-					percentOfBudget
-				) }% of ${ maxBodyLengthKiB } KiB limit:`,
-				urlMetric
-			);
-		}
+	if ( payloadBlob.size > maxBodyLengthBytes ) {
+		error(
+			`Unable to send URL Metric because it is ${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
+				percentOfBudget
+			) }% of ${ maxBodyLengthKiB } KiB limit:`,
+			urlMetric
+		);
 		return;
 	}
 
@@ -830,7 +859,7 @@ export default async function detect( {
 		);
 	}
 
-	const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
+	const message = `Sending URL Metric (${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
 		percentOfBudget
 	) }% of ${ maxBodyLengthKiB } KiB limit):`;
 
@@ -854,12 +883,7 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon(
-		url,
-		new Blob( [ jsonBody ], {
-			type: 'application/json',
-		} )
-	);
+	navigator.sendBeacon( url, payloadBlob );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();

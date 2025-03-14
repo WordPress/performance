@@ -21,5 +21,7 @@ class Test_OD_Hooks extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'site_status_tests', 'od_add_rest_api_availability_test' ) );
 		$this->assertEquals( 10, has_action( 'admin_init', 'od_maybe_run_rest_api_health_check' ) );
 		$this->assertEquals( 30, has_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_notice_in_plugin_row' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', 'od_register_rest_url_metric_store_endpoint' ) );
+		$this->assertEquals( 10, has_action( 'od_trigger_page_cache_invalidation', 'od_handle_trigger_page_cache_invalidation' ) );
 	}
 }

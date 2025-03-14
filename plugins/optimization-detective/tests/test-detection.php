@@ -8,6 +8,22 @@
 class Test_OD_Detection extends WP_UnitTestCase {
 
 	/**
+	 * Sets up.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		unset( $GLOBALS['wp_rest_server'] );
+	}
+
+	/**
+	 * Tears down.
+	 */
+	public function tear_down(): void {
+		parent::tear_down();
+		unset( $GLOBALS['wp_rest_server'] );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array<string, array{set_up: Closure, expected_is_query_object: bool, expected_query_object_class: string|null}>
@@ -230,11 +246,13 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 * Test od_register_rest_url_metric_store_endpoint().
 	 *
 	 * @covers ::od_register_rest_url_metric_store_endpoint
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
 	 */
 	public function od_register_rest_url_metric_store_endpoint(): void {
-
+		$this->assertFalse( has_filter( 'rest_pre_dispatch' ) );
 		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE, $routes );
+		$this->assertTrue( has_filter( 'rest_pre_dispatch' ) );
 	}
 
 	/**
