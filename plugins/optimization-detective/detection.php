@@ -111,10 +111,25 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	$extension_module_urls = (array) apply_filters( 'od_extension_module_urls', array() );
 
 	$cache_purge_post_id = od_get_cache_purge_post_id();
+	$current_url         = od_get_current_url();
+	$current_etag        = $group_collection->get_current_etag();
 
-	$current_url = od_get_current_url();
-
-	$current_etag = $group_collection->get_current_etag();
+	/**
+	 * Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
+	 *
+	 * The URL Metric JSON request bodies are compressed by default since there is a maximum payload of 64 KiB allowed
+	 * in `fetch()` keepalive requests (which is the same as with `navigator.sendBeacon()`). The request body size is
+	 * significantly reduced with gzip compression.
+	 *
+	 * This filter only applies if the `gzdecode()` function actually exists. Sites may want to turn off gzip
+	 * compression during development to more easily inspect the request payloads in DevTools, or they may want to turn
+	 * off gzip if there is an unexpected incompatibility with the server receiving compressed request bodies.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $gzip_url_metric_store_request_payloads Whether to use gzip to compress URL Metric JSON.
+	 */
+	$gzdecode_available = function_exists( 'gzdecode' ) && apply_filters( 'od_gzip_url_metric_store_request_payloads', true );
 
 	$detect_args = array(
 		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
@@ -140,7 +155,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
 		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
-		'gzdecodeAvailable'      => function_exists( 'gzdecode' ),
+		'gzdecodeAvailable'      => $gzdecode_available,
 		'maxUrlMetricSize'       => od_get_maximum_url_metric_size(),
 	);
 	if ( is_user_logged_in() ) {
