@@ -278,7 +278,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$link_collection  = new OD_Link_Collection();
 
 	$template_optimization_context = new OD_Template_Optimization_Context(
-		$processor,
 		$group_collection,
 		$link_collection,
 		$query_vars,

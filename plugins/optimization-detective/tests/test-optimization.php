@@ -379,8 +379,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers OD_HTML_Tag_Processor::is_admin_bar
 	 * @covers OD_Template_Optimization_Context::__construct
 	 * @covers OD_Template_Optimization_Context::__get
-	 * @covers OD_Template_Optimization_Context::append_head_html
-	 * @covers OD_Template_Optimization_Context::append_body_html
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 *
@@ -473,8 +471,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				$this->assertInstanceOf( Error::class, $error );
 				$this->assertSame( '', $value );
 
-				$context->append_head_html( "<!-- Inserted at od_start_template_optimization action. -->\n" );
-
 				$template_optimization_context = $context;
 			}
 		);
@@ -489,7 +485,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 						'href' => 'https://inserted-at-finish-template-optimization-action.example.net/',
 					)
 				);
-				$context->append_body_html( "<!-- Inserted at od_finish_template_optimization action. -->\n" );
 			}
 		);
 

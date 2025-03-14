@@ -34,18 +34,6 @@ final class OD_Template_Optimization_Context {
 	private $url_metric_group_collection;
 
 	/**
-	 * HTML Tag Processor.
-	 *
-	 * This object is not directly exposed with an accessor property. This class exposes {@see self::append_head_html()}
-	 * and {@see self::append_body_html()} methods which wrap calls to the underlying
-	 * {@see OD_HTML_Tag_Processor::append_head_html()} and {@see OD_HTML_Tag_Processor::append_body_html()}.s
-	 *
-	 * @since n.e.x.t
-	 * @var OD_HTML_Tag_Processor
-	 */
-	private $processor;
-
-	/**
 	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
 	 *
 	 * May be null if no post has been created yet.
@@ -83,53 +71,20 @@ final class OD_Template_Optimization_Context {
 	 * Constructor.
 	 *
 	 * @since n.e.x.t
+	 * @access private
 	 *
-	 * @param OD_HTML_Tag_Processor          $processor                   HTML Tag Processor.
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
 	 * @param OD_Link_Collection             $link_collection             Link collection.
 	 * @param array<string, mixed>           $normalized_query_vars       Normalized query vars.
 	 * @param non-empty-string               $url_metrics_slug            Slug for the od_url_metrics post.
 	 * @param positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection. May be null if no post has been created yet.
 	 */
-	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, array $normalized_query_vars, string $url_metrics_slug, ?int $url_metrics_id ) {
-		$this->processor                   = $processor;
+	public function __construct( OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, array $normalized_query_vars, string $url_metrics_slug, ?int $url_metrics_id ) {
 		$this->url_metric_group_collection = $url_metric_group_collection;
 		$this->link_collection             = $link_collection;
 		$this->normalized_query_vars       = $normalized_query_vars;
 		$this->url_metrics_slug            = $url_metrics_slug;
 		$this->url_metrics_id              = $url_metrics_id;
-	}
-
-	/**
-	 * Appends raw HTML to the HEAD.
-	 *
-	 * The provided HTML must be valid for insertion in the HEAD. No validation is currently performed. However, in the
-	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
-	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
-	 *
-	 * @since n.e.x.t
-	 * @see OD_HTML_Tag_Processor::append_head_html()
-	 *
-	 * @param string $raw_html Raw HTML to inject.
-	 */
-	public function append_head_html( string $raw_html ): void {
-		$this->processor->append_head_html( $raw_html );
-	}
-
-	/**
-	 * Appends raw HTML to the BODY.
-	 *
-	 * The provided HTML must be valid for insertion in the BODY. No validation is currently performed. However, in the
-	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
-	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
-	 *
-	 * @since n.e.x.t
-	 * @see OD_HTML_Tag_Processor::append_body_html()
-	 *
-	 * @param string $raw_html HTML to inject.
-	 */
-	public function append_body_html( string $raw_html ): void {
-		$this->processor->append_body_html( $raw_html );
 	}
 
 	/**
