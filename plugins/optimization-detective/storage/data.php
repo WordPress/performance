@@ -37,7 +37,7 @@ function od_get_url_metric_freshness_ttl(): int {
 
 	if ( $freshness_ttl < 0 ) {
 		_doing_it_wrong(
-			__FUNCTION__,
+			esc_html( "Filter: 'od_url_metric_freshness_ttl'" ),
 			esc_html(
 				sprintf(
 					/* translators: %s is the TTL freshness */
@@ -382,15 +382,13 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  * @return positive-int[] Breakpoint max widths, sorted in ascending order.
  */
 function od_get_breakpoint_max_widths(): array {
-	$function_name = __FUNCTION__;
-
 	$breakpoint_max_widths = array_map(
-		static function ( $original_breakpoint ) use ( $function_name ): int {
+		static function ( $original_breakpoint ): int {
 			$breakpoint = $original_breakpoint;
 			if ( $breakpoint <= 0 ) {
 				$breakpoint = 1;
 				_doing_it_wrong(
-					esc_html( $function_name ),
+					esc_html( "Filter: 'od_breakpoint_max_widths'" ),
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
@@ -447,7 +445,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 
 	if ( $sample_size <= 0 ) {
 		_doing_it_wrong(
-			__FUNCTION__,
+			esc_html( "Filter: 'od_url_metrics_breakpoint_sample_size'" ),
 			esc_html(
 				sprintf(
 					/* translators: %s is the sample size */
