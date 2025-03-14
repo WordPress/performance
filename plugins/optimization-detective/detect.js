@@ -884,9 +884,19 @@ export default async function detect( {
 		);
 	}
 
-	const message = `Sending URL Metric (${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
+	let message = 'Sending URL Metric (';
+	message += `${ payloadBlob.size.toLocaleString() } bytes`;
+	message += `, ${ Math.round(
 		percentOfBudget
-	) }% of ${ maxBodyLengthKiB } KiB limit):`;
+	) }% of ${ maxBodyLengthKiB } KiB limit`;
+	if ( gzdecodeAvailable ) {
+		message += `, gzip compressed -${ Math.round(
+			( ( jsonBody.length - payloadBlob.size ) / jsonBody.length ) * 100
+		) }%`;
+	} else {
+		message += ', uncompressed';
+	}
+	message += '):';
 
 	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
 	if ( percentOfBudget < 50 ) {
