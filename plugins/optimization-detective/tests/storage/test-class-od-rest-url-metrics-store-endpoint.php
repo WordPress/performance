@@ -173,6 +173,15 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 			$scheduled = wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $cache_purge_post_id ) );
 			$this->assertIsInt( $scheduled );
 			$this->assertGreaterThan( time(), $scheduled );
+
+			$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
+			$before_transition_post_status_count = did_action( 'transition_post_status' );
+			$before_save_post_count              = did_action( 'save_post' );
+			$this->assertSame( 10, has_action( 'od_trigger_page_cache_invalidation', 'od_trigger_post_update_actions' ) );
+			do_action( 'od_trigger_page_cache_invalidation', $cache_purge_post_id );
+			$this->assertSame( $before_clean_post_cache_count + 1, did_action( 'clean_post_cache' ) );
+			$this->assertSame( $before_transition_post_status_count + 1, did_action( 'transition_post_status' ) );
+			$this->assertSame( $before_save_post_count + 1, did_action( 'save_post' ) );
 		}
 	}
 
