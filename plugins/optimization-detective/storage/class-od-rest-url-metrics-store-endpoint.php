@@ -326,7 +326,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 
 		if (
 			$request->get_route() === '/' . self::ROUTE_NAMESPACE . self::ROUTE_BASE &&
-			'application/gzip' === $request->get_header( 'Content-Type' ) &&
+			'gzip' === $request->get_header( 'Content-Encoding' ) &&
 			function_exists( 'gzdecode' )
 		) {
 			$compressed_body = $request->get_body();
@@ -364,7 +364,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 
 			// Update the request so later handlers see the decompressed JSON.
 			$request->set_body( $decompressed_body );
-			$request->set_header( 'Content-Type', 'application/json' );
+			$request->remove_header( 'Content-Encoding' );
 		}
 		return $result;
 	}

@@ -883,7 +883,21 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon( url, payloadBlob );
+
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	if ( gzdecodeAvailable ) {
+		headers[ 'Content-Encoding' ] = 'gzip';
+	}
+
+	const request = new Request( url, {
+		method: 'POST',
+		body: payloadBlob,
+		headers,
+		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
+	} );
+	await fetch( request );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
