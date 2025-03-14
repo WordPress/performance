@@ -325,9 +325,9 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 		unset( $server ); // Unused.
 
 		if (
+			function_exists( 'gzdecode' ) &&
 			$request->get_route() === '/' . self::ROUTE_NAMESPACE . self::ROUTE_BASE &&
-			'gzip' === $request->get_header( 'Content-Encoding' ) &&
-			function_exists( 'gzdecode' )
+			'gzip' === $request->get_header( 'Content-Encoding' )
 		) {
 			$compressed_body = $request->get_body();
 
