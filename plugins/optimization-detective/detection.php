@@ -179,7 +179,7 @@ function od_register_rest_url_metric_store_endpoint(): void {
 }
 
 /**
- * Triggers actions for page caches to invalidate their caches related to the supplied cache purge post ID.
+ * Triggers post update actions for page caches to invalidate their caches related to the supplied cache purge post ID.
  *
  * This is intended to flush any page cache for the URL after the new URL Metric was submitted so that the optimizations
  * which depend on that URL Metric can start to take effect.
@@ -188,7 +188,7 @@ function od_register_rest_url_metric_store_endpoint(): void {
  *
  * @param positive-int $cache_purge_post_id Cache purge post ID.
  */
-function od_handle_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
+function od_trigger_post_update_actions( int $cache_purge_post_id ): void {
 
 	$post = get_post( $cache_purge_post_id );
 	if ( ! ( $post instanceof WP_Post ) ) {

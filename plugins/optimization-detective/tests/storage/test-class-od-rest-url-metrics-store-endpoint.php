@@ -161,7 +161,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 
 		$this->assertInstanceOf( OD_URL_Metric_Store_Request_Context::class, $stored_context );
 
-		// Now check that od_handle_trigger_page_cache_invalidation() cleaned caches as expected.
+		// Now check that od_trigger_post_update_actions() cleaned caches as expected.
 		$this->assertSame( $url_metrics[0]->jsonSerialize(), $stored_context->url_metric->jsonSerialize() );
 		if ( isset( $valid_params['cache_purge_post_id'] ) ) {
 			$cache_purge_post_id = $stored_context->request->get_param( 'cache_purge_post_id' );

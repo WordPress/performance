@@ -256,9 +256,9 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_handle_trigger_page_cache_invalidation().
+	 * Test od_trigger_post_update_actions().
 	 *
-	 * @covers ::od_handle_trigger_page_cache_invalidation
+	 * @covers ::od_trigger_post_update_actions
 	 */
 	public function test_trigger_page_cache_invalidation(): void {
 		$cache_purge_post_id = self::factory()->post->create();
@@ -273,7 +273,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 			PHP_INT_MAX
 		);
 
-		od_handle_trigger_page_cache_invalidation( $cache_purge_post_id );
+		od_trigger_post_update_actions( $cache_purge_post_id );
 
 		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
 		$found = false;
@@ -311,16 +311,16 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_handle_trigger_page_cache_invalidation() for an invalid post.
+	 * Test od_trigger_post_update_actions() for an invalid post.
 	 *
-	 * @covers ::od_handle_trigger_page_cache_invalidation
+	 * @covers ::od_trigger_post_update_actions
 	 */
-	public function test_trigger_page_cache_invalidation_invalid_post_id(): void {
+	public function test_od_trigger_post_update_actions(): void {
 		wp_delete_post( 1, true );
 		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
 		$before_transition_post_status_count = did_action( 'transition_post_status' );
 		$before_save_post_count              = did_action( 'save_post' );
-		od_handle_trigger_page_cache_invalidation( 1 );
+		od_trigger_post_update_actions( 1 );
 		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
 		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
 		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
