@@ -722,6 +722,7 @@ export default async function detect( {
 		urlMetric.elements.push( elementData );
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
+	breadcrumbedElementsMap.clear();
 
 	log( 'Current URL Metric:', urlMetric );
 
@@ -898,7 +899,4 @@ export default async function detect( {
 		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
 	} );
 	await fetch( request );
-
-	// Clean up.
-	breadcrumbedElementsMap.clear();
 }
