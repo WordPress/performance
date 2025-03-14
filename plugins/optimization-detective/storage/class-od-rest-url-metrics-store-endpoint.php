@@ -100,19 +100,19 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
 			),
 			'callback'            => array( $this, 'handle_rest_request' ),
-			'permission_callback' => array( $this, 'permission_callback' ),
+			'permission_callback' => array( $this, 'store_permissions_check' ),
 		);
 	}
 
 	/**
-	 * Permission callback for the REST API endpoint.
+	 * Checks if a given request has access to store URL Metrics.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
 	 * @return true|WP_Error True if the request has permission, WP_Error object otherwise.
 	 */
-	public function permission_callback() {
+	public function store_permissions_check() {
 
 		// Needs to be available to unauthenticated visitors.
 		if ( OD_Storage_Lock::is_locked() ) {
