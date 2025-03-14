@@ -141,7 +141,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
 		'gzdecodeAvailable'      => function_exists( 'gzdecode' ),
-		'maxUrlMetricSize'       => od_get_max_url_metric_size(),
+		'maxUrlMetricSize'       => od_get_maximum_url_metric_size(),
 	);
 	if ( is_user_logged_in() ) {
 		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );

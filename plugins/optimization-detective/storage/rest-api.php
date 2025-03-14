@@ -219,7 +219,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	}
 
 	// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
-	$max_size       = od_get_max_url_metric_size();
+	$max_size       = od_get_maximum_url_metric_size();
 	$content_length = strlen( (string) wp_json_encode( $url_metric ) );
 	if ( $content_length > $max_size ) {
 		return new WP_Error(

@@ -910,21 +910,25 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the `od_max_url_metric_size` filter can be used to modify the maximum size of URL Metrics.
+	 * Test that the `od_maximum_url_metric_size` filter can be used to modify the maximum size of URL Metrics.
 	 *
-	 * @dataProvider data_provider_max_url_metrics_size_filter
+	 * @dataProvider data_provider_maximum_url_metrics_size_filter
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
-	 * @covers ::od_get_max_url_metric_size
+	 * @covers ::od_get_maximum_url_metric_size
 	 *
-	 * @param Closure              $set_up          Set up function.
-	 * @param array<string, mixed> $params          Params.
-	 * @param int                  $expected_status Expected status.
-	 * @param string|null          $expected_code   Expected code.
+	 * @param Closure              $set_up                   Set up function.
+	 * @param array<string, mixed> $params                   Params.
+	 * @param int                  $expected_status          Expected status.
+	 * @param string|null          $expected_code            Expected code.
+	 * @param bool                 $expected_incorrect_usage Expected incorrect usage.
 	 */
-	public function test_max_url_metrics_size_filter( Closure $set_up, array $params, int $expected_status, ?string $expected_code ): void {
+	public function test_maximum_url_metrics_size_filter( Closure $set_up, array $params, int $expected_status, ?string $expected_code, bool $expected_incorrect_usage ): void {
 		$set_up();
+		if ( $expected_incorrect_usage ) {
+			$this->setExpectedIncorrectUsage( 'Filter: &#039;od_maximum_url_metric_size&#039;' );
+		}
 		$request = $this->create_request( $params );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -938,25 +942,25 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for test_max_url_metrics_size_filter.
+	 * Data provider for test_maximum_url_metrics_size_filter.
 	 *
 	 * @return array<string, mixed> Test data.
 	 */
-	public function data_provider_max_url_metrics_size_filter(): array {
+	public function data_provider_maximum_url_metrics_size_filter(): array {
 		$valid_params  = $this->get_valid_params();
 		$valid_element = $valid_params['elements'][0];
 
 		return array(
-			'url_metrics_should_be_accepted_because_of_increased_max_url_metrics_size' => array(
-				'set_up'          => static function (): void {
+			'url_metrics_should_be_accepted_because_of_increased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
 					add_filter(
-						'od_max_url_metric_size',
+						'od_maximum_url_metric_size',
 						static function (): int {
 							return MB_IN_BYTES * 2;
 						}
 					);
 				},
-				'params'          => array_merge(
+				'params'                   => array_merge(
 					$valid_params,
 					array(
 						// Fill the JSON with more than 1MB of data.
@@ -970,19 +974,20 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 						),
 					)
 				),
-				'expected_status' => 200,
-				'expected_code'   => null,
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => false,
 			),
-			'url_metrics_should_be_rejected_because_of_decreased_max_url_metrics_size' => array(
-				'set_up'          => static function (): void {
+			'url_metrics_should_be_rejected_because_of_decreased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
 					add_filter(
-						'od_max_url_metric_size',
+						'od_maximum_url_metric_size',
 						static function (): int {
 							return MB_IN_BYTES / 2;
 						}
 					);
 				},
-				'params'          => array_merge(
+				'params'                   => array_merge(
 					$valid_params,
 					array(
 						// Fill the JSON with more than 1MB of data.
@@ -996,10 +1001,37 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 						),
 					)
 				),
-				'expected_status' => 413,
-				'expected_code'   => 'rest_content_too_large',
+				'expected_status'          => 413,
+				'expected_code'            => 'rest_content_too_large',
+				'expected_incorrect_usage' => false,
 			),
-
+			'negative_maximum_url_metric_size_is_treated_as_1mb' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return -1;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES / 2 ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => true,
+			),
 		);
 	}
 
