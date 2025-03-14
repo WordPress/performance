@@ -918,11 +918,7 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 		if ( $expected_incorrect_usage ) {
 			$this->setExpectedIncorrectUsage( 'Filter: &#039;od_maximum_url_metric_size&#039;' );
 		}
-		$request = $this->create_request( $params );
-		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body( wp_json_encode( $params ) );
-
+		$request  = $this->create_request( $params, array( 'gzip' => false ) );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
 		if ( null !== $expected_code ) {
@@ -1096,24 +1092,33 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	/**
 	 * Creates a request to store a URL Metric.
 	 *
-	 * @param array<string, mixed> $params Params.
+	 * @param array<string, mixed> $params  Params.
+	 * @param array{ gzip?: bool } $options Options.
 	 * @return WP_REST_Request<array<string, mixed>> Request.
 	 */
-	private function create_request( array $params ): WP_REST_Request {
+	private function create_request( array $params, array $options = array() ): WP_REST_Request {
+		$options = wp_parse_args( $options, array( 'gzip' => true ) );
+
 		/**
 		 * Request.
 		 *
 		 * @var WP_REST_Request<array<string, mixed>> $request
 		 */
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
-		$request->set_header( 'Content-Type', 'application/gzip' );
+		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
-		if ( ! function_exists( 'gzencode' ) ) {
-			throw new Exception( 'The gzencode() function is not available.' );
+
+		if ( $options['gzip'] ) {
+			if ( ! function_exists( 'gzencode' ) ) {
+				throw new Exception( 'The gzencode() function is not available.' );
+			}
+			$request->set_header( 'Content-Encoding', 'gzip' );
+			$request->set_body( gzencode( wp_json_encode( $params ) ) );
+		} else {
+			$request->set_body( wp_json_encode( $params ) );
 		}
-		$request->set_body( gzencode( wp_json_encode( $params ) ) );
 		return $request;
 	}
 }
