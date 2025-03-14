@@ -101,29 +101,35 @@ final class OD_Template_Optimization_Context {
 	}
 
 	/**
-	 * Append HTML to the HEAD.
+	 * Appends raw HTML to the HEAD.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 * The provided HTML must be valid for insertion in the HEAD. No validation is currently performed. However, in the
+	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since n.e.x.t
+	 * @see OD_HTML_Tag_Processor::append_head_html()
 	 *
-	 * @param non-empty-string $html HTML to inject.
+	 * @param string $raw_html Raw HTML to inject.
 	 */
-	public function append_head_html( string $html ): void {
-		$this->processor->append_head_html( $html );
+	public function append_head_html( string $raw_html ): void {
+		$this->processor->append_head_html( $raw_html );
 	}
 
 	/**
-	 * Append HTML to the BODY.
+	 * Appends raw HTML to the BODY.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 * The provided HTML must be valid for insertion in the BODY. No validation is currently performed. However, in the
+	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since n.e.x.t
+	 * @see OD_HTML_Tag_Processor::append_body_html()
 	 *
-	 * @param non-empty-string $html HTML to inject.
+	 * @param string $raw_html HTML to inject.
 	 */
-	public function append_body_html( string $html ): void {
-		$this->processor->append_body_html( $html );
+	public function append_body_html( string $raw_html ): void {
+		$this->processor->append_body_html( $raw_html );
 	}
 
 	/**
@@ -137,7 +143,7 @@ final class OD_Template_Optimization_Context {
 	 * @throws Error When property is unknown.
 	 */
 	public function __get( string $name ) {
-		// Note: The $processor is intentionally not exposed.
+		// Note: There is intentionally not a 'processor' case to expose $this->processor.
 		switch ( $name ) {
 			case 'url_metrics_id':
 				return $this->url_metrics_id;
