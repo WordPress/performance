@@ -110,7 +110,7 @@ final class OD_Tag_Visitor_Context {
 	 * @throws Error When property is unknown.
 	 */
 	public function __get( string $name ) {
-		// Note that there is intentionally not a case for 'visited_tag_state'.
+		// Note: There is intentionally not a 'visited_tag_state' case to expose $this->visited_tag_state.
 		switch ( $name ) {
 			case 'processor':
 				return $this->processor;
