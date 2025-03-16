@@ -727,19 +727,58 @@ export default async function detect( {
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
-		win.addEventListener( 'pagehide', resolve, { once: true } );
-		win.addEventListener( 'pageswap', resolve, { once: true } );
+		/**
+		 * Handle event.
+		 *
+		 * @param {Event} event
+		 */
+		function handlePageLeaveEvent( event ) {
+			log( 'Page leave event:', event.type );
+
+			let eventLog;
+			const eventLogStored = localStorage.getItem( 'odPageLeaveEventLog' );
+			if ( eventLogStored ) {
+				eventLog = JSON.parse( eventLogStored );
+			} else {
+				eventLog = [];
+			}
+
+			eventLog.unshift( { type: event.type, time: (new Date()).toLocaleString() } );
+
+			eventLog.splice( 10 );
+
+			localStorage.setItem( 'odPageLeaveEventLog', JSON.stringify( eventLog ) );
+
+			resolve();
+		}
+
+		const options = { once: true };
+
+		// TODO: Do these events fire when closing a Chrome custom tab?
+		win.addEventListener( 'pagehide', handlePageLeaveEvent, options );
+		win.addEventListener( 'pageswap', handlePageLeaveEvent, options );
+
+		// TODO: This will fire even when switching tabs.
 		doc.addEventListener(
 			'visibilitychange',
-			() => {
-				if ( document.visibilityState === 'hidden' ) {
-					// TODO: This will fire even when switching tabs.
-					resolve();
-				}
-			},
-			{ once: true }
+			handlePageLeaveEvent,
+			options
 		);
+
+		// WARNING: This blocks bfcache from working, but it may be the most reliable.
+		if (
+			'optimizationDetectiveUseBeforeUnloadEvent' in window ||
+			localStorage.getItem( 'optimizationDetectiveUseBeforeUnloadEvent' )
+		) {
+			win.addEventListener(
+				'beforeunload',
+				handlePageLeaveEvent,
+				options
+			);
+		}
 	} );
+
+	const sessionStorageKey = 'lastLineExecuted';
 
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
@@ -747,6 +786,8 @@ export default async function detect( {
 		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
 	}
+
+	sessionStorage.setItem( sessionStorageKey, '790' );
 
 	// Finalize extensions.
 	if ( extensions.size > 0 ) {
@@ -792,6 +833,8 @@ export default async function detect( {
 			}
 		}
 
+		sessionStorage.setItem( sessionStorageKey, '836' );
+
 		// Wait for all extensions to finish finalizing.
 		const settledFinalizePromises = await Promise.allSettled(
 			extensionFinalizePromises
@@ -809,6 +852,8 @@ export default async function detect( {
 		}
 	}
 
+	sessionStorage.setItem( sessionStorageKey, '855' );
+
 	/*
 	 * Now prepare the URL Metric to be sent as JSON request body.
 	 */
@@ -825,11 +870,15 @@ export default async function detect( {
 		return;
 	}
 
+	sessionStorage.setItem( sessionStorageKey, '873' );
+
 	const payloadBlob = gzdecodeAvailable
 		? await compress( jsonBody )
 		: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
 		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
+
+	sessionStorage.setItem( sessionStorageKey, '881' );
 
 	/*
 	 * According to the fetch() spec:
@@ -846,6 +895,8 @@ export default async function detect( {
 		);
 		return;
 	}
+
+	sessionStorage.setItem( sessionStorageKey, '899' );
 
 	// Even though the server may reject the REST API request, we still have to set the storage lock
 	// because we can't look at the response when sending a beacon.
@@ -873,6 +924,8 @@ export default async function detect( {
 	}
 	message += '):';
 
+	sessionStorage.setItem( sessionStorageKey, '927' );
+
 	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
 	if ( percentOfBudget < 50 ) {
 		log( message, urlMetric );
@@ -894,6 +947,8 @@ export default async function detect( {
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
 
+	sessionStorage.setItem( sessionStorageKey, '950' );
+
 	const headers = {
 		'Content-Type': 'application/json',
 	};
@@ -907,5 +962,21 @@ export default async function detect( {
 		headers,
 		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
 	} );
-	await fetch( request );
+
+	sessionStorage.setItem( sessionStorageKey, '966' );
+
+	fetch( request );
+
+	let eventLog;
+	const eventLogStored = localStorage.getItem( 'odSendUrlMetricLog' );
+	if ( eventLogStored ) {
+		eventLog = JSON.parse( eventLogStored );
+	} else {
+		eventLog = [];
+	}
+	eventLog.unshift( (new Date()).toLocaleString() );
+	eventLog.splice( 10 );
+	localStorage.setItem( 'odSendUrlMetricLog', JSON.stringify( eventLog ) );
+
+	sessionStorage.setItem( sessionStorageKey, '981' );
 }
