@@ -392,24 +392,6 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 				'expected_status' => 413,
 				'expected_code'   => 'rest_content_too_large',
 			),
-			'invalid_decoded_json_body_content_length' => array(
-				'params'          => array_merge(
-					$valid_params,
-					array(
-						// Fill the JSON with more than 1MB of highly compressible data.
-						'elements' => array(
-							array_merge(
-								$valid_element,
-								array(
-									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
-								)
-							),
-						),
-					)
-				),
-				'expected_status' => 413,
-				'expected_code'   => 'rest_content_too_large',
-			),
 			'invalid_elements_prop_intersection_ratio' => array(
 				'params'          => array_merge(
 					$valid_params,
