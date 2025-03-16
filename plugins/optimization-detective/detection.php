@@ -117,6 +117,10 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	/**
 	 * Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
 	 *
+	 * Important: Doing gzip compression during the pagehide event results in an error in Safari and the event handler
+	 * execution being aborted in Chrome and Firefox. Therefore, this is disabled by default. The ability to compress
+	 * remains for now in the chance that a solution can be found for the problem.
+	 *
 	 * The URL Metric JSON request bodies are compressed by default since there is a maximum payload of 64 KiB allowed
 	 * in `fetch()` keepalive requests (which is the same as with `navigator.sendBeacon()`). The request body size is
 	 * significantly reduced with gzip compression.
@@ -127,9 +131,9 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param bool $gzip_url_metric_store_request_payloads Whether to use gzip to compress URL Metric JSON.
+	 * @param bool $gzip_url_metric_store_request_payloads Whether to use gzip to compress URL Metric JSON. False by default.
 	 */
-	$gzdecode_available = function_exists( 'gzdecode' ) && apply_filters( 'od_gzip_url_metric_store_request_payloads', true );
+	$gzdecode_available = function_exists( 'gzdecode' ) && apply_filters( 'od_gzip_url_metric_store_request_payloads', false );
 
 	$detect_args = array(
 		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
