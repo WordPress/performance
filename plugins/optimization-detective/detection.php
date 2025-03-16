@@ -165,12 +165,10 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}
 
-	$version = md5( file_get_contents( __DIR__ . '/detect.js' ) );
-
 	return wp_get_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( %s );',
-			wp_json_encode( plugins_url( add_query_arg( 'ver', $version, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
+			wp_json_encode( plugins_url( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
 			wp_json_encode( $detect_args )
 		),
 		array( 'type' => 'module' )
