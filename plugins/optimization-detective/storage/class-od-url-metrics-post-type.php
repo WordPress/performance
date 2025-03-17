@@ -204,7 +204,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * This method updates an existing URL Metrics post or creates a new one if it doesn't exist.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param non-empty-string               $slug Slug (hash of normalized query vars).
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection containing the metrics to be stored.

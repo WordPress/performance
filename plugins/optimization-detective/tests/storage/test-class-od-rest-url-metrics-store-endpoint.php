@@ -8,7 +8,7 @@
 /**
  * Class Test_OD_REST_URL_Metrics_Store_Endpoint used to test `OD_REST_URL_Metrics_Store_Endpoint` class.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @noinspection PhpUnhandledExceptionInspection
  * @noinspection PhpDocMissingThrowsInspection

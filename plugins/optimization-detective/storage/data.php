@@ -464,7 +464,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 /**
  * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return positive-int Maximum allowed byte size.
@@ -475,7 +475,7 @@ function od_get_maximum_url_metric_size(): int {
 	 *
 	 * The default value is 1 MB.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param int $max_size Maximum allowed byte size.
 	 * @return int Filtered maximum allowed byte size.

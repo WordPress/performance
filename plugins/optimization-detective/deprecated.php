@@ -4,7 +4,7 @@
  *
  * @package optimization-detective
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 // @codeCoverageIgnoreStart

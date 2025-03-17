@@ -290,7 +290,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * This is before any of the registered tag visitors have been invoked.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
@@ -361,7 +361,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * This is after all the registered tag visitors have been invoked.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
