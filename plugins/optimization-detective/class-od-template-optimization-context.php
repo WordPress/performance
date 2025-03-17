@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Template_Optimization_Context class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 // @codeCoverageIgnoreStart
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Context for optimizing a template.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @property-read OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
  * @property-read positive-int|null              $url_metrics_id              ID for the od_url_metrics post which provided the URL Metrics in the collection.
@@ -28,7 +28,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * URL Metric group collection.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var OD_URL_Metric_Group_Collection
 	 */
 	private $url_metric_group_collection;
@@ -38,7 +38,7 @@ final class OD_Template_Optimization_Context {
 	 *
 	 * May be null if no post has been created yet.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var positive-int|null
 	 */
 	private $url_metrics_id;
@@ -46,7 +46,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * Normalized query vars.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var array<string, mixed>
 	 */
 	private $normalized_query_vars;
@@ -54,7 +54,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * Slug for the od_url_metrics post.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var non-empty-string
 	 */
 	private $url_metrics_slug;
@@ -62,7 +62,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * Link collection.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var OD_Link_Collection
 	 */
 	private $link_collection;
@@ -70,7 +70,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * Constructor.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @access private
 	 *
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
@@ -90,7 +90,7 @@ final class OD_Template_Optimization_Context {
 	/**
 	 * Gets a property.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param string $name Property name.
 	 * @return mixed Property value.
