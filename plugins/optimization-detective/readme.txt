@@ -57,6 +57,21 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta3 =
 
+**Enhancements**
+
+* De-duplicate logic between REST API and URL Metrics post type. ([1867](https://github.com/WordPress/performance/pull/1867))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+* Fire actions before and after Optimization Detective processes a document. ([1919](https://github.com/WordPress/performance/pull/1919))
+* Update URL Metric storage REST API endpoint to return status code `423 Locked` instead of `403 Forbidden`. ([1863](https://github.com/WordPress/performance/pull/1863))
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+
+**Bug Fixes**
+
+* Fix URL encoding in Link HTTP response header. ([1907](https://github.com/WordPress/performance/pull/1907))
+* Fix triggering post update actions after storing a URL Metric and refactor REST API endpoint logic into class. ([1865](https://github.com/WordPress/performance/pull/1865))
+* Fix unpredictable LCP element being identified in a URL Metric Group. ([1903](https://github.com/WordPress/performance/pull/1903))
+* Handle missing Web Crypto API in non-HTTPS contexts when generating the already-submitted `sessionStorage` key. ([1911](https://github.com/WordPress/performance/pull/1911))
+
 = 1.0.0-beta2 =
 
 **Enhancements**

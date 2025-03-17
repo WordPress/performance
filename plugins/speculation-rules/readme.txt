@@ -121,6 +121,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.5.0 =
 
+**Enhancements**
+
+* Add support for Speculative Loading WP Core API, loading the plugin's own API implementation conditionally. ([1883](https://github.com/WordPress/performance/pull/1883))
+
 = 1.4.0 =
 
 **Enhancements**

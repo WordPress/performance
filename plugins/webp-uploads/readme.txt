@@ -62,6 +62,11 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 2.5.1 =
 
+**Bug Fixes**
+
+* Fix Modern Image Format not cropping image if crop is an array. ([1887](https://github.com/WordPress/performance/pull/1887))
+* Fix incorrect image size selection in `PICTURE` element. ([1885](https://github.com/WordPress/performance/pull/1885))
+
 = 2.5.0 =
 
 **Enhancements**
