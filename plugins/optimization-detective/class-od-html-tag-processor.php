@@ -239,7 +239,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
-	 * @since n.e.x.t Passing a $query is now allowed. In the 1.0.0 release, this will default to skipping tag closers.
+	 * @since 1.0.0 Passing a $query is now allowed. TODO: In the final non-beta 1.0.0 release, also note that this will default to skipping tag closers.
 	 *
 	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.

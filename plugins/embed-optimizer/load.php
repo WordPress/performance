@@ -5,7 +5,7 @@
  * Description: Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 1.0.0-beta1
+ * Version: 1.0.0-beta2
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'embed_optimizer_pending_plugin',
-	'1.0.0-beta1',
+	'1.0.0-beta2',
 	static function ( string $version ): void {
 		if ( defined( 'EMBED_OPTIMIZER_VERSION' ) ) {
 			return;

@@ -286,9 +286,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	);
 
 	/**
-	 * Fires before Optimization Detective starts optimizing the template.
+	 * Fires before Optimization Detective starts iterating over the document in the output buffer.
 	 *
-	 * @since n.e.x.t
+	 * This is before any of the registered tag visitors have been invoked.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
@@ -355,9 +357,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	}
 
 	/**
-	 * Fires after Optimization Detective finishes optimizing the template.
+	 * Fires after Optimization Detective has finished iterating over the document in the output buffer.
 	 *
-	 * @since n.e.x.t
+	 * This is after all the registered tag visitors have been invoked.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */

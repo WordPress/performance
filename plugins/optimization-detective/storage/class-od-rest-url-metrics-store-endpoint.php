@@ -15,14 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * OD_REST_URL_Metrics_Store_Endpoint class
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 final class OD_REST_URL_Metrics_Store_Endpoint {
 
 	/**
 	 * Namespace for the REST API endpoint.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var string
 	 */
 	const ROUTE_NAMESPACE = 'optimization-detective/v1';
@@ -34,7 +34,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
 	 * create a new `od_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @link https://google.aip.dev/136
 	 * @var string
 	 */
@@ -43,7 +43,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	/**
 	 * Gets the arguments for registering the endpoint.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @access private
 	 *
 	 * @return array{
@@ -107,7 +107,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	/**
 	 * Checks if a given request has access to store URL Metrics.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @access private
 	 *
 	 * @return true|WP_Error True if the request has permission, WP_Error object otherwise.
@@ -132,7 +132,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * not account for the URL port (although there is a to-do comment committed in core to address this). Additionally,
 	 * the `is_allowed_http_origin()` function in core for some reason returns a string rather than a boolean.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @see is_allowed_http_origin()
 	 * @access private
 	 *
@@ -148,7 +148,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	/**
 	 * Handles the REST API request to store a URL Metric.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @access private
 	 *
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
