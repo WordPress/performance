@@ -59,11 +59,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 **Enhancements**
 
-* De-duplicate logic between REST API and URL Metrics post type. ([1867](https://github.com/WordPress/performance/pull/1867))
-* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
 * Fire actions before and after Optimization Detective processes a document. ([1919](https://github.com/WordPress/performance/pull/1919))
-* Update URL Metric storage REST API endpoint to return status code `423 Locked` instead of `403 Forbidden`. ([1863](https://github.com/WordPress/performance/pull/1863))
 * Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+* Update URL Metric storage REST API endpoint to return status code `423 Locked` instead of `403 Forbidden`. ([1863](https://github.com/WordPress/performance/pull/1863))
+* De-duplicate logic between REST API and URL Metrics post type. ([1867](https://github.com/WordPress/performance/pull/1867))
 
 **Bug Fixes**
 
