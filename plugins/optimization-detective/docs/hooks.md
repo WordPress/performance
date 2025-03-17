@@ -149,9 +149,7 @@ This is after all the registered tag visitors have been invoked.
 
 This action runs after all the tags in a document have been visited and so no additional tag visitor will be invoked.
 This action has limited usefulness at the moment, but see [#1931](https://github.com/WordPress/performance/issues/1931)
-which will introduce methods on `OD_Template_Optimization_Context` to insert HTML into the document. This will allow,
-for example, tag visitors to gather the styles for tags encountered on the page and to print them all in one single
-`STYLE` tag.
+for possibilities for what it could be used for in the future.
 
 ### Action: `od_url_metric_stored` (argument: `OD_URL_Metric_Store_Request_Context`)
 
