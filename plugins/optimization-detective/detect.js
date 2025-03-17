@@ -401,6 +401,11 @@ export default async function detect( {
 		return;
 	}
 
+	if ( document.visibilityState === 'hidden' && ! document.prerendering ) {
+		log( 'Page opened in background tab so URL Metric is not collected.' );
+		return;
+	}
+
 	// Abort if the current viewport is not among those which need URL Metrics.
 	const urlMetricGroupStatus = getGroupForViewportWidth(
 		win.innerWidth,
