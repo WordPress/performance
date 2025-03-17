@@ -147,10 +147,11 @@ function perflab_aao_query_autoloaded_options(): array {
 	$large_options = array();
 
 	foreach ( $all_options as $option_name => $option_value ) {
-		if ( strlen( $option_value ) > $option_threshold ) {
+		$serialized_value = maybe_serialize( $option_value );
+		if ( strlen( $serialized_value ) > $option_threshold ) {
 			$large_options[] = (object) array(
 				'option_name'         => $option_name,
-				'option_value_length' => strlen( $option_value ),
+				'option_value_length' => strlen( $serialized_value ),
 			);
 		}
 	}
