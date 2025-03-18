@@ -57,7 +57,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 		// The slug and cache_purge_post_id args are further validated via the validate_callback for the 'hmac' parameter,
 		// they are provided as input with the 'url' argument to create the HMAC by the server.
 		$args = array(
-			'slug'                => array(
+			'slug'                                 => array(
 				'type'        => 'string',
 				'description' => __( 'An MD5 hash of the query args.', 'optimization-detective' ),
 				'required'    => true,
@@ -65,7 +65,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'minLength'   => 32,
 				'maxLength'   => 32,
 			),
-			'current_etag'        => array(
+			'current_etag'                         => array(
 				'type'        => 'string',
 				'description' => __( 'ETag for the current environment.', 'optimization-detective' ),
 				'required'    => true,
@@ -73,13 +73,13 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'minLength'   => 32,
 				'maxLength'   => 32,
 			),
-			'cache_purge_post_id' => array(
+			'cache_purge_post_id'                  => array(
 				'type'        => 'integer',
 				'description' => __( 'Cache purge post ID.', 'optimization-detective' ),
 				'required'    => false,
 				'minimum'     => 1,
 			),
-			'hmac'                => array(
+			'hmac'                                 => array(
 				'type'              => 'string',
 				'description'       => __( 'HMAC originally computed by server required to authorize the request.', 'optimization-detective' ),
 				'required'          => true,
@@ -90,6 +90,11 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 					}
 					return true;
 				},
+			),
+			'prime_url_metrics_verification_token' => array(
+				'type'        => 'string',
+				'description' => __( 'Nonce for auto priming URLs.', 'optimization-detective' ),
+				'required'    => false,
 			),
 		);
 
@@ -110,9 +115,17 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @since 1.0.0
 	 * @access private
 	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error True if the request has permission, WP_Error object otherwise.
 	 */
-	public function store_permissions_check() {
+	public function store_permissions_check( WP_REST_Request $request ) {
+		// Authenticated requests when priming URL metrics through IFRAME.
+		$verification_token = $request->get_param( 'prime_url_metrics_verification_token' );
+		if ( '' !== $verification_token && get_transient( 'od_prime_url_metrics_verification_token' ) === $verification_token ) {
+			return true;
+		}
 
 		// Needs to be available to unauthenticated visitors.
 		if ( OD_Storage_Lock::is_locked() ) {
