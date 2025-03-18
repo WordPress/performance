@@ -33,7 +33,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
 	public function test_od_get_url_metric_freshness_ttl(): void {
-		$this->assertSame( DAY_IN_SECONDS, od_get_url_metric_freshness_ttl() );
+		$this->assertSame( WEEK_IN_SECONDS, od_get_url_metric_freshness_ttl() );
 
 		add_filter(
 			'od_url_metric_freshness_ttl',
@@ -48,10 +48,10 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	/**
 	 * Test bad od_get_url_metric_freshness_ttl().
 	 *
-	 * @expectedIncorrectUsage od_get_url_metric_freshness_ttl
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
 	public function test_bad_od_get_url_metric_freshness_ttl(): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_url_metric_freshness_ttl&#039;' );
 		add_filter(
 			'od_url_metric_freshness_ttl',
 			static function (): int {
@@ -486,6 +486,27 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 					};
 				},
 			),
+
+			'plugin_activated'            => array(
+				'set_up' => function (): Closure {
+					$this->go_to( '/' );
+
+					return function ( array $etag_data, Closure $get_etag ): void {
+						$etag = $get_etag();
+						update_option(
+							'active_plugins',
+							array_merge(
+								get_option( 'active_plugins' ),
+								array(
+									'image-prioritizer/load.php',
+								)
+							)
+						);
+						$etag_after = $get_etag();
+						$this->assertNotEquals( $etag, $etag_after );
+					};
+				},
+			),
 		);
 	}
 
@@ -498,6 +519,21 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 * @covers ::od_get_current_theme_template
 	 */
 	public function test_od_get_current_url_metrics_etag( Closure $set_up ): void {
+		update_option(
+			'active_plugins',
+			array(
+				'optimization-detective/load.php',
+			)
+		);
+		if ( is_multisite() ) {
+			update_site_option(
+				'active_sitewide_plugins',
+				array(
+					'performance-lab/load.php' => time(),
+				)
+			);
+		}
+
 		$captured_etag_data = null;
 		add_filter(
 			'od_current_url_metrics_etag_data',
@@ -533,11 +569,17 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 		$etag = $get_etag();
 		$this->assertMatchesRegularExpression( '/^[a-z0-9]{32}\z/', $etag );
 		$this->assertIsArray( $captured_etag_data );
-		$expected_keys = array( 'xpath_version', 'tag_visitors', 'queried_object', 'queried_posts', 'active_theme', 'current_template' );
+		$expected_keys = array( 'xpath_version', 'tag_visitors', 'queried_object', 'queried_posts', 'active_theme', 'current_template', 'active_plugins' );
 		foreach ( $expected_keys as $expected_key ) {
 			$this->assertArrayHasKey( $expected_key, $captured_etag_data );
 		}
 		$this->assertSame( $initial_active_theme, $captured_etag_data['active_theme'] );
+		$this->assertContains( 'optimization-detective/load.php', $captured_etag_data['active_plugins'] );
+		if ( is_multisite() ) {
+			$this->assertContains( 'performance-lab/load.php', $captured_etag_data['active_plugins'] );
+		} else {
+			$this->assertNotContains( 'performance-lab/load.php', $captured_etag_data['active_plugins'] );
+		}
 		$this->assertContains( 'foo', $captured_etag_data['tag_visitors'] );
 		$this->assertContains( 'bar', $captured_etag_data['tag_visitors'] );
 		$this->assertContains( 'baz', $captured_etag_data['tag_visitors'] );
@@ -686,13 +728,13 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_breakpoint_max_widths
 	 *
-	 * @expectedIncorrectUsage od_get_breakpoint_max_widths
 	 * @dataProvider data_provider_test_bad_od_get_breakpoint_max_widths
 	 *
 	 * @param int[] $breakpoints Breakpoints.
 	 * @param int[] $expected Expected breakpoints.
 	 */
 	public function test_bad_od_get_breakpoint_max_widths( array $breakpoints, array $expected ): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_breakpoint_max_widths&#039;' );
 		add_filter(
 			'od_breakpoint_max_widths',
 			static function () use ( $breakpoints ): array {
@@ -724,10 +766,10 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	/**
 	 * Test bad od_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @expectedIncorrectUsage od_get_url_metrics_breakpoint_sample_size
 	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_bad_od_get_url_metrics_breakpoint_sample_size(): void {
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_url_metrics_breakpoint_sample_size&#039;' );
 		add_filter(
 			'od_url_metrics_breakpoint_sample_size',
 			static function (): int {

@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution
@@ -17,6 +19,7 @@
  * @typedef {import("./types.ts").Extension} Extension
  * @typedef {import("./types.ts").ExtendedRootData} ExtendedRootData
  * @typedef {import("./types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("./types.ts").Logger} Logger
  */
 
 const win = window;
@@ -66,33 +69,60 @@ function setStorageLock( currentTime ) {
 }
 
 /**
- * Logs a message.
+ * Creates a logger object with log, warn, and error methods.
  *
- * @param {...*} message
+ * @param {boolean} [debugMode=false] - Whether to enable debug mode.
+ * @param {string}  [prefix='']       - Prefix to prepend to the console message.
+ * @return {Logger} Logger object with log, info, warn, and error methods.
  */
-function log( ...message ) {
-	// eslint-disable-next-line no-console
-	console.log( consoleLogPrefix, ...message );
-}
+function createLogger( debugMode = false, prefix = '' ) {
+	return {
+		/**
+		 * Logs a message if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log.
+		 */
+		log( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.log( prefix, ...message );
+			}
+		},
 
-/**
- * Logs a warning.
- *
- * @param {...*} message
- */
-function warn( ...message ) {
-	// eslint-disable-next-line no-console
-	console.warn( consoleLogPrefix, ...message );
-}
+		/**
+		 * Logs an informational message if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log as info.
+		 */
+		info( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.info( prefix, ...message );
+			}
+		},
 
-/**
- * Logs an error.
- *
- * @param {...*} message
- */
-function error( ...message ) {
-	// eslint-disable-next-line no-console
-	console.error( consoleLogPrefix, ...message );
+		/**
+		 * Logs a warning if debug mode is enabled.
+		 *
+		 * @param {...*} message - The message(s) to log as a warning.
+		 */
+		warn( ...message ) {
+			if ( debugMode ) {
+				// eslint-disable-next-line no-console
+				console.warn( prefix, ...message );
+			}
+		},
+
+		/**
+		 * Logs an error.
+		 *
+		 * @param {...*} message - The message(s) to log as an error.
+		 */
+		error( ...message ) {
+			// eslint-disable-next-line no-console
+			console.error( prefix, ...message );
+		},
+	};
 }
 
 /**
@@ -126,35 +156,52 @@ function getGroupForViewportWidth( viewportWidth, urlMetricGroupStatuses ) {
  * @param {string}               currentETag          - Current ETag.
  * @param {string}               currentUrl           - Current URL.
  * @param {URLMetricGroupStatus} urlMetricGroupStatus - URL Metric group status.
- * @return {Promise<string>} Session storage key.
+ * @param {Logger}               logger               - Logger.
+ * @return {Promise<string|null>} Session storage key for the current URL or null if crypto is not available or caused an error.
  */
 async function getAlreadySubmittedSessionStorageKey(
 	currentETag,
 	currentUrl,
-	urlMetricGroupStatus
+	urlMetricGroupStatus,
+	{ warn, error }
 ) {
-	const message = [
-		currentETag,
-		currentUrl,
-		urlMetricGroupStatus.minimumViewportWidth,
-		urlMetricGroupStatus.maximumViewportWidth || '',
-	].join( '-' );
+	if ( ! window.crypto || ! window.crypto.subtle ) {
+		warn(
+			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
+		);
+		return null;
+	}
 
-	/*
-	 * Note that the components are hashed for a couple of reasons:
-	 *
-	 * 1. It results in a consistent length string devoid of any special characters that could cause problems.
-	 * 2. Since the key includes the URL, hashing it avoids potential privacy concerns where the sessionStorage is
-	 *    examined to see which URLs the client went to.
-	 *
-	 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
-	 */
-	const msgBuffer = new TextEncoder().encode( message );
-	const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
-	const hashHex = Array.from( new Uint8Array( hashBuffer ) )
-		.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
-		.join( '' );
-	return `odSubmitted-${ hashHex }`;
+	try {
+		const message = [
+			currentETag,
+			currentUrl,
+			urlMetricGroupStatus.minimumViewportWidth,
+			urlMetricGroupStatus.maximumViewportWidth || '',
+		].join( '-' );
+
+		/*
+		 * Note that the components are hashed for a couple of reasons:
+		 *
+		 * 1. It results in a consistent length string devoid of any special characters that could cause problems.
+		 * 2. Since the key includes the URL, hashing it avoids potential privacy concerns where the sessionStorage is
+		 *    examined to see which URLs the client went to.
+		 *
+		 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
+		 */
+		const msgBuffer = new TextEncoder().encode( message );
+		const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
+		const hashHex = Array.from( new Uint8Array( hashBuffer ) )
+			.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
+			.join( '' );
+		return `odSubmitted-${ hashHex }`;
+	} catch ( err ) {
+		error(
+			'Unable to generate sessionStorage key for already-submitted URL due to error:',
+			err
+		);
+		return null;
+	}
 }
 
 /**
@@ -169,7 +216,7 @@ function getCurrentTime() {
 /**
  * Recursively freezes an object to prevent mutation.
  *
- * @param {Object} obj Object to recursively freeze.
+ * @param {Object} obj - Object to recursively freeze.
  */
 function recursiveFreeze( obj ) {
 	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
@@ -248,7 +295,7 @@ const reservedElementPropertyKeys = new Set( [
 /**
  * Gets element data.
  *
- * @param {string} xpath XPath.
+ * @param {string} xpath - XPath.
  * @return {ElementData|null} Element data, or null if no element for the XPath exists.
  */
 function getElementData( xpath ) {
@@ -264,8 +311,8 @@ function getElementData( xpath ) {
 /**
  * Extends element data.
  *
- * @param {string}              xpath      XPath.
- * @param {ExtendedElementData} properties Properties.
+ * @param {string}              xpath      - XPath.
+ * @param {ExtendedElementData} properties - Properties.
  */
 function extendElementData( xpath, properties ) {
 	if ( ! elementsByXPath.has( xpath ) ) {
@@ -290,23 +337,23 @@ function extendElementData( xpath, properties ) {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                 args                            Args.
- * @param {string[]}               args.extensionModuleUrls        URLs for extension script modules to import.
- * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
- * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
- * @param {boolean}                args.isDebug                    Whether to show debug messages.
- * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
- * @param {string}                 [args.restApiNonce]             Nonce for the REST API when the user is logged-in.
- * @param {string}                 args.currentETag                Current ETag.
- * @param {string}                 args.currentUrl                 Current URL.
- * @param {string}                 args.urlMetricSlug              Slug for URL Metric.
- * @param {number|null}            args.cachePurgePostId           Cache purge post ID.
- * @param {string}                 args.urlMetricHMAC              HMAC for URL Metric storage.
- * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL Metric group statuses.
- * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL Metric storage lock.
- * @param {number}                 args.freshnessTTL               The freshness age (TTL) for a given URL Metric.
- * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
- * @param {CollectionDebugData}    [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
+ * @param {Object}                 args                            - Args.
+ * @param {string[]}               args.extensionModuleUrls        - URLs for extension script modules to import.
+ * @param {number}                 args.minViewportAspectRatio     - Minimum aspect ratio allowed for the viewport.
+ * @param {number}                 args.maxViewportAspectRatio     - Maximum aspect ratio allowed for the viewport.
+ * @param {boolean}                args.isDebug                    - Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
+ * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
+ * @param {string}                 args.currentETag                - Current ETag.
+ * @param {string}                 args.currentUrl                 - Current URL.
+ * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
+ * @param {number|null}            args.cachePurgePostId           - Cache purge post ID.
+ * @param {string}                 args.urlMetricHMAC              - HMAC for URL Metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     - URL Metric group statuses.
+ * @param {number}                 args.storageLockTTL             - The TTL (in seconds) for the URL Metric storage lock.
+ * @param {number}                 args.freshnessTTL               - The freshness age (TTL) for a given URL Metric.
+ * @param {string}                 args.webVitalsLibrarySrc        - The URL for the web-vitals library.
+ * @param {CollectionDebugData}    [args.urlMetricGroupCollection] - URL Metric group collection, when in debug mode.
  */
 export default async function detect( {
 	minViewportAspectRatio,
@@ -326,6 +373,9 @@ export default async function detect( {
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
+	const logger = createLogger( isDebug, consoleLogPrefix );
+	const { log, warn, error } = logger;
+
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
 		for ( const group of urlMetricGroupCollection.groups ) {
@@ -345,11 +395,14 @@ export default async function detect( {
 	}
 
 	if ( win.innerWidth === 0 || win.innerHeight === 0 ) {
-		if ( isDebug ) {
-			log(
-				'Window must have non-zero dimensions for URL Metric collection.'
-			);
-		}
+		log(
+			'Window must have non-zero dimensions for URL Metric collection.'
+		);
+		return;
+	}
+
+	if ( document.visibilityState === 'hidden' && ! document.prerendering ) {
+		log( 'Page opened in background tab so URL Metric is not collected.' );
 		return;
 	}
 
@@ -359,9 +412,7 @@ export default async function detect( {
 		urlMetricGroupStatuses
 	);
 	if ( urlMetricGroupStatus.complete ) {
-		if ( isDebug ) {
-			log( 'No need for URL Metrics from the current viewport.' );
-		}
+		log( 'No need for URL Metrics from the current viewport.' );
 		return;
 	}
 
@@ -370,9 +421,13 @@ export default async function detect( {
 		await getAlreadySubmittedSessionStorageKey(
 			currentETag,
 			currentUrl,
-			urlMetricGroupStatus
+			urlMetricGroupStatus,
+			logger
 		);
-	if ( alreadySubmittedSessionStorageKey in sessionStorage ) {
+	if (
+		null !== alreadySubmittedSessionStorageKey &&
+		alreadySubmittedSessionStorageKey in sessionStorage
+	) {
 		const previousVisitTime = parseInt(
 			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
 			10
@@ -381,12 +436,10 @@ export default async function detect( {
 			! isNaN( previousVisitTime ) &&
 			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
 		) {
-			if ( isDebug ) {
-				log(
-					'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
-				);
-				return;
-			}
+			log(
+				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
+			);
+			return;
 		}
 	}
 
@@ -396,11 +449,9 @@ export default async function detect( {
 		aspectRatio < minViewportAspectRatio ||
 		aspectRatio > maxViewportAspectRatio
 	) {
-		if ( isDebug ) {
-			warn(
-				`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
-			);
-		}
+		warn(
+			`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
+		);
 		return;
 	}
 
@@ -434,9 +485,7 @@ export default async function detect( {
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( getCurrentTime(), storageLockTTL ) ) {
-		if ( isDebug ) {
-			warn( 'Aborted detection due to storage being locked.' );
-		}
+		warn( 'Aborted detection due to storage being locked.' );
 		return;
 	}
 
@@ -461,17 +510,13 @@ export default async function detect( {
 	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
 	if ( doc.documentElement.scrollTop > 0 ) {
-		if ( isDebug ) {
-			warn(
-				'Aborted detection since initial scroll position of page is not at the top.'
-			);
-		}
+		warn(
+			'Aborted detection since initial scroll position of page is not at the top.'
+		);
 		return;
 	}
 
-	if ( isDebug ) {
-		log( 'Proceeding with detection' );
-	}
+	log( 'Proceeding with detection' );
 
 	/** @type {Map<string, Extension>} */
 	const extensions = new Map();
@@ -487,10 +532,19 @@ export default async function detect( {
 			/** @type {Extension} */
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
+
+			const extensionLogger = createLogger(
+				isDebug,
+				`[Optimization Detective: ${
+					extension.name || 'Unnamed Extension'
+				}]`
+			);
+
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
 			if ( extension.initialize instanceof Function ) {
 				const initializePromise = extension.initialize( {
 					isDebug,
+					...extensionLogger,
 					onTTFB,
 					onFCP,
 					onLCP,
@@ -607,9 +661,7 @@ export default async function detect( {
 
 	// Stop observing.
 	disconnectIntersectionObserver();
-	if ( isDebug ) {
-		log( 'Detection is stopping.' );
-	}
+	log( 'Detection is stopping.' );
 
 	urlMetric = {
 		url: currentUrl,
@@ -625,9 +677,7 @@ export default async function detect( {
 	for ( const elementIntersection of elementIntersections ) {
 		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
 		if ( ! xpath ) {
-			if ( isDebug ) {
-				error( 'Unable to look up XPath for element' );
-			}
+			warn( 'Unable to look up XPath for element' );
 			continue;
 		}
 
@@ -657,9 +707,7 @@ export default async function detect( {
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
-	if ( isDebug ) {
-		log( 'Current URL Metric:', urlMetric );
-	}
+	log( 'Current URL Metric:', urlMetric );
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
@@ -680,11 +728,7 @@ export default async function detect( {
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
 	if ( didWindowResize ) {
-		if ( isDebug ) {
-			log(
-				'Aborting URL Metric collection due to viewport size change.'
-			);
-		}
+		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
 	}
 
@@ -701,9 +745,17 @@ export default async function detect( {
 			extension,
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
+				const extensionLogger = createLogger(
+					isDebug,
+					`[Optimization Detective: ${
+						extension.name || 'Unnamed Extension'
+					}]`
+				);
+
 				try {
 					const finalizePromise = extension.finalize( {
 						isDebug,
+						...extensionLogger,
 						getRootData,
 						getElementData,
 						extendElementData,
@@ -748,10 +800,10 @@ export default async function detect( {
 	const maxBodyLengthKiB = 64;
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
-	// TODO: Consider adding replacer to reduce precision on numbers in DOMRect to reduce payload size.
 	const jsonBody = JSON.stringify( urlMetric );
+	const payloadBlob = new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
-		( jsonBody.length / ( maxBodyLengthKiB * 1000 ) ) * 100;
+		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
 	/*
 	 * According to the fetch() spec:
@@ -759,15 +811,13 @@ export default async function detect( {
 	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
 	 * than the maximum, we should avoid even trying to send it.
 	 */
-	if ( jsonBody.length > maxBodyLengthBytes ) {
-		if ( isDebug ) {
-			error(
-				`Unable to send URL Metric because it is ${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
-					percentOfBudget
-				) }% of ${ maxBodyLengthKiB } KiB limit:`,
-				urlMetric
-			);
-		}
+	if ( payloadBlob.size > maxBodyLengthBytes ) {
+		error(
+			`Unable to send URL Metric because it is ${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
+				percentOfBudget
+			) }% of ${ maxBodyLengthKiB } KiB limit:`,
+			urlMetric
+		);
 		return;
 	}
 
@@ -776,22 +826,22 @@ export default async function detect( {
 	setStorageLock( getCurrentTime() );
 
 	// Remember that the URL Metric was submitted for this URL to avoid having multiple entries submitted by the same client.
-	sessionStorage.setItem(
-		alreadySubmittedSessionStorageKey,
-		String( getCurrentTime() )
-	);
+	if ( null !== alreadySubmittedSessionStorageKey ) {
+		sessionStorage.setItem(
+			alreadySubmittedSessionStorageKey,
+			String( getCurrentTime() )
+		);
+	}
 
-	if ( isDebug ) {
-		const message = `Sending URL Metric (${ jsonBody.length.toLocaleString() } bytes, ${ Math.round(
-			percentOfBudget
-		) }% of ${ maxBodyLengthKiB } KiB limit):`;
+	const message = `Sending URL Metric (${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
+		percentOfBudget
+	) }% of ${ maxBodyLengthKiB } KiB limit):`;
 
-		// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
-		if ( percentOfBudget < 50 ) {
-			log( message, urlMetric );
-		} else {
-			warn( message, urlMetric );
-		}
+	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
+	if ( percentOfBudget < 50 ) {
+		log( message, urlMetric );
+	} else {
+		warn( message, urlMetric );
 	}
 
 	const url = new URL( restApiEndpoint );
@@ -807,12 +857,7 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon(
-		url,
-		new Blob( [ jsonBody ], {
-			type: 'application/json',
-		} )
-	);
+	navigator.sendBeacon( url, payloadBlob );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();

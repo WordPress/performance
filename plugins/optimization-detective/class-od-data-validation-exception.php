@@ -16,6 +16,5 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Exception thrown when failing to validate URL Metrics data.
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_Data_Validation_Exception extends Exception {}

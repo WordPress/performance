@@ -1,13 +1,13 @@
 // h/t https://stackoverflow.com/a/59801602/93579
 type ExcludeProps< T > = { [ k: string ]: any } & { [ K in keyof T ]?: never };
 
-import { onTTFB, onFCP, onLCP, onINP, onCLS } from 'web-vitals';
+import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 import {
-	onTTFB as onTTFBWithAttribution,
-	onFCP as onFCPWithAttribution,
-	onLCP as onLCPWithAttribution,
-	onINP as onINPWithAttribution,
 	onCLS as onCLSWithAttribution,
+	onFCP as onFCPWithAttribution,
+	onINP as onINPWithAttribution,
+	onLCP as onLCPWithAttribution,
+	onTTFB as onTTFBWithAttribution,
 } from 'web-vitals/attribution';
 
 export interface ElementData {
@@ -49,8 +49,21 @@ export type OnLCPWithAttributionFunction = typeof onLCPWithAttribution;
 export type OnINPWithAttributionFunction = typeof onINPWithAttribution;
 export type OnCLSWithAttributionFunction = typeof onCLSWithAttribution;
 
+export type LogFunction = ( ...message: any[] ) => void;
+
+export interface Logger {
+	log: LogFunction;
+	info: LogFunction;
+	warn: LogFunction;
+	error: LogFunction;
+}
+
 export type InitializeArgs = {
 	readonly isDebug: boolean;
+	readonly log: LogFunction;
+	readonly info: LogFunction;
+	readonly warn: LogFunction;
+	readonly error: LogFunction;
 	readonly onTTFB: OnTTFBFunction | OnTTFBWithAttributionFunction;
 	readonly onFCP: OnFCPFunction | OnFCPWithAttributionFunction;
 	readonly onLCP: OnLCPFunction | OnLCPWithAttributionFunction;
@@ -69,11 +82,16 @@ export type FinalizeArgs = {
 		properties: ExtendedElementData
 	) => void;
 	readonly isDebug: boolean;
+	readonly log: LogFunction;
+	readonly info: LogFunction;
+	readonly warn: LogFunction;
+	readonly error: LogFunction;
 };
 
 export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
 
 export interface Extension {
-	initialize?: InitializeCallback;
-	finalize?: FinalizeCallback;
+	readonly name?: string;
+	readonly initialize?: InitializeCallback;
+	readonly finalize?: FinalizeCallback;
 }

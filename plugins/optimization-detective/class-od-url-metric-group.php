@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements IteratorAggregate<int, OD_URL_Metric>
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSerializable {
 
@@ -94,6 +93,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Constructor.
 	 *
 	 * This class should never be directly constructed. It should only be constructed by the {@see OD_URL_Metric_Group_Collection::create_groups()}.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @access private
 	 * @throws InvalidArgumentException If arguments are invalid.
@@ -211,7 +212,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the collection that this group is a part of.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
 	 * @return OD_URL_Metric_Group_Collection Collection.
@@ -241,6 +242,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Adds a URL Metric to the group.
 	 *
 	 * @since 0.1.0
+	 * @access private
 	 *
 	 * @throws InvalidArgumentException If the viewport width of the URL Metric is not within the min/max bounds of the group.
 	 *
@@ -278,7 +280,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Determines whether the URL Metric group is complete.
 	 *
 	 * A group is complete if it has the full sample size of URL Metrics
-	 * and all of these URL Metrics are fresh.
+	 * and all of these URL Metrics are fresh (with a current ETag and a
+	 * timestamp that is not older than the freshness TTL).
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 If the current environment's generated ETag does not match the URL Metric's ETag, the URL Metric is considered stale.
@@ -357,7 +360,20 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			 */
 			$breadcrumb_element = array();
 
-			foreach ( $this->url_metrics as $url_metric ) {
+			// Prefer to use URL Metrics which have a current ETag.
+			$url_metrics = array_filter(
+				$this->url_metrics,
+				function ( OD_URL_Metric $url_metric ): bool {
+					return $url_metric->get_etag() === $this->get_collection()->get_current_etag();
+				}
+			);
+
+			// Otherwise, if no URL Metrics have a current ETag, fall back to using all the stale ones.
+			if ( count( $url_metrics ) === 0 ) {
+				$url_metrics = $this->url_metrics;
+			}
+
+			foreach ( $url_metrics as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
 					if ( ! $element->is_lcp() ) {
 						continue;
@@ -485,6 +501,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Clears result cache.
 	 *
 	 * @since 0.9.0
+	 * @access private
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();

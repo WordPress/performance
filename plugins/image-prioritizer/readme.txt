@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.3.1
+Stable tag:   1.0.0-beta2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
@@ -15,7 +15,7 @@ This plugin optimizes the loading of images (and videos) with prioritization to 
 
 The current optimizations include:
 
-1. Add breakpoint-specific `fetchpriority=high` preload links (`LINK[rel=preload]`) for image URLs of LCP elements:
+1. Add breakpoint-specific `fetchpriority=high` preload links (both as `LINK[rel=preload]` elements and `Link` response headers) for image URLs of LCP elements:
    1. An `IMG` element, including the `srcset`/`sizes` attributes supplied as `imagesrcset`/`imagesizes` on the `LINK`.
    2. The first `SOURCE` element with a `type` attribute in a `PICTURE` element. (Art-directed `PICTURE` elements using media queries are not supported.)
    3. An element with a CSS `background-image` inline `style` attribute.
@@ -71,6 +71,25 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+
+**Bug Fixes**
+
+* Fix URL encoding in Link HTTP response header. ([1907](https://github.com/WordPress/performance/pull/1907))
+* Fix unpredictable LCP element being identified in a URL Metric Group. ([1903](https://github.com/WordPress/performance/pull/1903))
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Compute responsive `sizes` attribute based on the `width` from the `boundingClientRect` in captured URL Metrics. ([1840](https://github.com/WordPress/performance/pull/1840))
 
 = 0.3.1 =
 

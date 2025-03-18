@@ -2,22 +2,22 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   1.0.0-beta2
+Stable tag:   1.0.0-beta3
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
 
-Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
 
 == Description ==
 
 This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics.
 
-This plugin is a dependency which does not provide end-user functionality on its own. For that, please install the dependent plugin [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) or [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) (among [others](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective) to come from the WordPress Core Performance team). There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+This plugin is a framework dependency which does not provide optimization functionality on its own. For that, please install the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) and [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) dependent plugins (among [others](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective) to come from the WordPress Core Performance team). There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
-Your site must have the **REST API accessible** to frontend visitors since this is how metrics are collected about how a page should be optimized.
+Your site must currently have the **REST API accessible** to unauthenticated frontend visitors since this is how real user metrics are collected about pages on your site; nevertheless, [exploration](https://github.com/WordPress/performance/issues/1311) is underway for providing alternative mechanisms for collecting the metrics. Also, please note that no metrics are currently collected from Safari since it does not yet support the [Largest Contentful Paint](https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint) metric, but support for this [Core Web Vitals](https://web.dev/explore/learn-core-web-vitals) metric is coming this year [via Interop 2025](https://webkit.org/blog/16458/announcing-interop-2025/#core-web-vitals).
 
-Please refer to the [full plugin documentation](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/README.md) for a [technical introduction](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md), [filter/action hooks](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md), and [extensions](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md) that show use cases and examples.
+Please refer to the [full plugin documentation](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/README.md) for a [technical introduction](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md), [filter/action hooks](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md), and [extensions](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md) that show use cases and examples. You can also watch the talk from WordCamp Asia 2025: [Boosting Performance with Optimization Detective](https://weston.ruter.net/2025/02/21/boosting-performance-with-optimization-detective/).
 
 == Installation ==
 
@@ -55,7 +55,44 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 == Changelog ==
 
+= 1.0.0-beta3 =
+
+**Enhancements**
+
+* Fire actions before and after Optimization Detective processes a document. ([1919](https://github.com/WordPress/performance/pull/1919))
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+* Update URL Metric storage REST API endpoint to return status code `423 Locked` instead of `403 Forbidden`. ([1863](https://github.com/WordPress/performance/pull/1863))
+* De-duplicate logic between REST API and URL Metrics post type. ([1867](https://github.com/WordPress/performance/pull/1867))
+
+**Bug Fixes**
+
+* Fix URL encoding in Link HTTP response header. ([1907](https://github.com/WordPress/performance/pull/1907))
+* Fix triggering post update actions after storing a URL Metric and refactor REST API endpoint logic into class. ([1865](https://github.com/WordPress/performance/pull/1865))
+* Fix unpredictable LCP element being identified in a URL Metric Group. ([1903](https://github.com/WordPress/performance/pull/1903))
+* Handle missing Web Crypto API in non-HTTPS contexts when generating the already-submitted `sessionStorage` key. ([1911](https://github.com/WordPress/performance/pull/1911))
+
 = 1.0.0-beta2 =
+
+**Enhancements**
+
+* Account for 64 KiB limit for sending beacon data. ([1851](https://github.com/WordPress/performance/pull/1851))
+* Add post ID for the `od_url_metrics` post to the tag visitor context. ([1847](https://github.com/WordPress/performance/pull/1847))
+* Change minimum viewport width to be exclusive whereas the maximum width remains inclusive. ([1839](https://github.com/WordPress/performance/pull/1839))
+* Disable URL Metric storage locking by default for administrators. ([1835](https://github.com/WordPress/performance/pull/1835))
+* Include active plugins in ETag data and increase default freshness TTL from 1 day to 1 week. ([1854](https://github.com/WordPress/performance/pull/1854))
+* Make ETag a required property of the URL Metric. ([1824](https://github.com/WordPress/performance/pull/1824))
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+* Use `IFRAME` to display HTML responses for REST API storage request failures in Site Health test. ([1849](https://github.com/WordPress/performance/pull/1849))
+
+**Bug Fixes**
+
+* Prevent URL in `Link` header from including invalid characters. ([1802](https://github.com/WordPress/performance/pull/1802))
+* Prevent optimizing post previews by default. ([1848](https://github.com/WordPress/performance/pull/1848))
+
+**Documentation**
+
+* Improve Optimization Detective documentation. ([1782](https://github.com/WordPress/performance/pull/1782))
 
 = 1.0.0-beta1 =
 

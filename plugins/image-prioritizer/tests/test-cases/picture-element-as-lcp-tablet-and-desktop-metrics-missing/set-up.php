@@ -15,7 +15,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	// Only populate the mobile and phablet viewport groups.
 	foreach ( array( 480, 600 ) as $viewport_width ) {
 		for ( $i = 0; $i < $sample_size; $i++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				$slug,
 				$test_case->get_sample_url_metric(
 					array(

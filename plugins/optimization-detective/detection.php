@@ -121,7 +121,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                => WP_DEBUG,
 		'extensionModuleUrls'    => $extension_module_urls,
-		'restApiEndpoint'        => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
+		'restApiEndpoint'        => rest_url( OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE ),
 		'currentETag'            => $current_etag,
 		'currentUrl'             => $current_url,
 		'urlMetricSlug'          => $slug,
@@ -156,4 +156,66 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		),
 		array( 'type' => 'module' )
 	);
+}
+
+/**
+ * Registers the REST API endpoint for storing URL Metrics.
+ *
+ * @since 1.0.0
+ * @access private
+ */
+function od_register_rest_url_metric_store_endpoint(): void {
+	$endpoint_controller = new OD_REST_URL_Metrics_Store_Endpoint();
+
+	register_rest_route(
+		$endpoint_controller::ROUTE_NAMESPACE,
+		$endpoint_controller::ROUTE_BASE,
+		$endpoint_controller->get_registration_args()
+	);
+}
+
+/**
+ * Triggers post update actions for page caches to invalidate their caches related to the supplied cache purge post ID.
+ *
+ * This is intended to flush any page cache for the URL after the new URL Metric was submitted so that the optimizations
+ * which depend on that URL Metric can start to take effect.
+ *
+ * @since 1.0.0
+ *
+ * @param positive-int $cache_purge_post_id Cache purge post ID.
+ */
+function od_trigger_post_update_actions( int $cache_purge_post_id ): void {
+
+	$post = get_post( $cache_purge_post_id );
+	if ( ! ( $post instanceof WP_Post ) ) {
+		return;
+	}
+
+	// Fire actions that page caching plugins listen to flush caches.
+
+	/*
+	* The clean_post_cache action is used to flush page caches by:
+	* - Pantheon Advanced Cache <https://github.com/pantheon-systems/pantheon-advanced-page-cache/blob/e3b5552b0cb9268d9b696cb200af56cc044920d9/pantheon-advanced-page-cache.php#L185>
+	* - WP Super Cache <https://github.com/Automattic/wp-super-cache/blob/73b428d2fce397fd874b3056ad3120c343bc1a0c/wp-cache-phase2.php#L1615>
+	* - Batcache <https://github.com/Automattic/batcache/blob/ed0e6b2d9bcbab3924c49a6c3247646fb87a0957/batcache.php#L18>
+	*/
+	/** This action is documented in wp-includes/post.php. */
+	do_action( 'clean_post_cache', $post->ID, $post );
+
+	/*
+	* The transition_post_status action is used to flush page caches by:
+	* - Jetpack Boost <https://github.com/Automattic/jetpack-boost-production/blob/4090a3f9414c2171cd52d8a397f00b0d1151475f/app/modules/optimizations/page-cache/pre-wordpress/Boost_Cache.php#L76>
+	* - WP Super Cache <https://github.com/Automattic/wp-super-cache/blob/73b428d2fce397fd874b3056ad3120c343bc1a0c/wp-cache-phase2.php#L1616>
+	* - LightSpeed Cache <https://github.com/litespeedtech/lscache_wp/blob/7c707469b3c88b4f45d9955593b92f9aeaed54c3/src/purge.cls.php#L68>
+	*/
+	/** This action is documented in wp-includes/post.php. */
+	do_action( 'transition_post_status', $post->post_status, $post->post_status, $post );
+
+	/*
+	* The clean_post_cache action is used to flush page caches by:
+	* - W3 Total Cache <https://github.com/BoldGrid/w3-total-cache/blob/ab08f104294c6a8dcb00f1c66aaacd0615c42850/Util_AttachToActions.php#L32>
+	* - WP Rocket <https://github.com/wp-media/wp-rocket/blob/e5bca6673a3669827f3998edebc0c785210fe561/inc/common/purge.php#L283>
+	*/
+	/** This action is documented in wp-includes/post.php. */
+	do_action( 'save_post', $post->ID, $post, /* $update */ true );
 }

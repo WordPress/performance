@@ -376,6 +376,9 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers OD_Visited_Tag_State::track_tag
 	 * @covers OD_Visited_Tag_State::is_tag_tracked
 	 * @covers OD_Visited_Tag_State::reset
+	 * @covers OD_HTML_Tag_Processor::is_admin_bar
+	 * @covers OD_Template_Optimization_Context::__construct
+	 * @covers OD_Template_Optimization_Context::__get
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 *
@@ -384,6 +387,18 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public function test_od_optimize_template_output_buffer( string $directory ): void {
+		$this->assertSame( 0, did_action( 'od_register_tag_visitors' ) );
+		$this->assertSame( 0, did_action( 'od_start_template_optimization' ) );
+		$this->assertSame( 0, did_action( 'od_finish_template_optimization' ) );
+
+		$did_initialize = false;
+		add_action(
+			'od_register_tag_visitors',
+			static function () use ( &$did_initialize ): void {
+				$did_initialize = true;
+			}
+		);
+
 		add_action(
 			'od_register_tag_visitors',
 			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
@@ -430,6 +445,53 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			}
 		);
 
+		$template_optimization_context = null;
+		add_action(
+			'od_start_template_optimization',
+			function ( OD_Template_Optimization_Context $context ) use ( &$template_optimization_context ): void {
+				$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
+				$this->assertTrue( is_int( $context->url_metrics_id ) || is_null( $context->url_metrics_id ) );
+				$this->assertIsArray( $context->normalized_query_vars );
+				$this->assertIsString( $context->url_metrics_slug );
+				$this->assertSame( od_get_url_metrics_slug( $context->normalized_query_vars ), $context->url_metrics_slug );
+				if ( is_int( $context->url_metrics_id ) ) {
+					$post = get_post( $context->url_metrics_id );
+					$this->assertInstanceOf( WP_Post::class, $post );
+					$this->assertSame( $post->post_name, $context->url_metrics_slug );
+				}
+				$this->assertInstanceOf( OD_Link_Collection::class, $context->link_collection );
+
+				$error = null;
+				$value = '';
+				try {
+					$value = $context->__get( 'invalid_param' );
+				} catch ( Error $e ) {
+					$error = $e;
+				}
+				$this->assertInstanceOf( Error::class, $error );
+				$this->assertSame( '', $value );
+
+				$template_optimization_context = $context;
+			}
+		);
+
+		add_action(
+			'od_finish_template_optimization',
+			function ( OD_Template_Optimization_Context $context ) use ( &$template_optimization_context ): void {
+				$this->assertSame( $template_optimization_context, $context );
+				$context->link_collection->add_link(
+					array(
+						'rel'  => 'preconnect',
+						'href' => 'https://inserted-at-finish-template-optimization-action.example.net/',
+					)
+				);
+			}
+		);
+
 		$this->assert_snapshot_equals( $directory );
+
+		$this->assertSame( $did_initialize ? 1 : 0, did_action( 'od_register_tag_visitors' ) );
+		$this->assertSame( $did_initialize ? 1 : 0, did_action( 'od_start_template_optimization' ) );
+		$this->assertSame( $did_initialize ? 1 : 0, did_action( 'od_finish_template_optimization' ) );
 	}
 }

@@ -17,7 +17,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 
 		$sample_size = od_get_url_metrics_breakpoint_sample_size();
 		for ( $j = 0; $j < $sample_size; $j++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 				$test_case->get_sample_url_metric(
 					array(

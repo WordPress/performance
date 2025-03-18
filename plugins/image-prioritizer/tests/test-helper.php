@@ -727,7 +727,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		};
 
 		$create_request = static function ( array $url_metric_data ): WP_REST_Request {
-			$request = new WP_REST_Request( 'POST', '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE );
+			$request = new WP_REST_Request( 'POST', '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE );
 			$request->set_header( 'content-type', 'application/json' );
 			$request->set_body( wp_json_encode( $url_metric_data ) );
 			return $request;

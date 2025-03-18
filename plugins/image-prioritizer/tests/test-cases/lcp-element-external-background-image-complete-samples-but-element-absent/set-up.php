@@ -20,7 +20,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	// Fully populate all viewport groups, but for all except desktop record that the LCP element had a different tag, id, or class.
 	foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $i => $viewport_width ) {
 		for ( $j = 0; $j < $sample_size; $j++ ) {
-			OD_URL_Metrics_Post_Type::store_url_metric(
+			$test_case->store_url_metric(
 				$slug,
 				$test_case->get_sample_url_metric(
 					array(

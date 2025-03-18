@@ -60,13 +60,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            }
  *
  * @since 0.1.0
- * @access private
  */
 class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Data.
 	 *
+	 * @since 0.1.0
 	 * @var Data
 	 */
 	protected $data;
@@ -74,6 +74,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Elements.
 	 *
+	 * @since 0.7.0
 	 * @var OD_Element[]
 	 */
 	protected $elements;
@@ -88,6 +89,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
@@ -104,6 +107,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Prepares data with validation and sanitization.
+	 *
+	 * @since 0.6.0
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
@@ -140,11 +145,11 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this URL Metric is a part of (which may not be any).
+	 * Gets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return OD_URL_Metric_Group|null Group.
+	 * @return OD_URL_Metric_Group|null Group. Null will never occur in the context of a tag visitor.
 	 */
 	public function get_group(): ?OD_URL_Metric_Group {
 		return $this->group;
@@ -154,6 +159,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Sets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
+	 * @access private
 	 *
 	 * @param OD_URL_Metric_Group $group Group.
 	 *
@@ -171,7 +177,8 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 Added the 'etag' property to the schema.
-	 * @since n.e.x.t The 'etag' property is now required.
+	 * @since 1.0.0 The 'etag' property is now required.
+	 * @access private
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -350,7 +357,6 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
 	 * @param array<string, mixed> $additional_properties Additional properties.
 	 * @param string               $filter_name           Filter name used to extend.
-	 *
 	 * @return array<string, mixed> Extended schema.
 	 */
 	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {
@@ -447,7 +453,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Gets ETag.
 	 *
 	 * @since 0.9.0
-	 * @since n.e.x.t No longer returns null as 'etag' is now required.
+	 * @since 1.0.0 No longer returns null as 'etag' is now required.
 	 *
 	 * @return non-empty-string ETag.
 	 */
