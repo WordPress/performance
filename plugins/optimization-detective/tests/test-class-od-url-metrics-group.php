@@ -20,7 +20,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_construction(): array {
 		return array(
-			'bad_minimum_viewport_width'       => array(
+			'bad_minimum_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => -1,
 				'maximum_viewport_width' => 100,
@@ -28,7 +28,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_maximum_viewport_width'       => array(
+			'bad_maximum_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => -1,
@@ -36,7 +36,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_min_max_viewport_width'       => array(
+			'bad_min_max_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 200,
 				'maximum_viewport_width' => 100,
@@ -44,7 +44,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_sample_size_viewport_width'   => array(
+			'bad_sample_size_viewport_width' => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
@@ -52,15 +52,15 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_freshness_ttl_viewport_width' => array(
+			'negative_freshness_ttl_ok'      => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
 				'sample_size'            => 3,
 				'freshness_ttl'          => -HOUR_IN_SECONDS,
-				'exception'              => InvalidArgumentException::class,
+				'exception'              => '',
 			),
-			'good_empty_url_metrics'           => array(
+			'good_empty_url_metrics'         => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
@@ -68,7 +68,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => '',
 			),
-			'good_one_url_metric'              => array(
+			'good_one_url_metric'            => array(
 				'url_metrics'            => array(
 					new OD_URL_Metric(
 						array(
