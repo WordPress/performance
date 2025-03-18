@@ -26,7 +26,11 @@ function od_get_url_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given URL Metric.
 	 *
-	 * The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale.
+	 * The freshness TTL can be:
+	 * - Zero: URL Metrics are always considered stale based on timestamp
+	 * - Positive: URL Metrics older than this value (in seconds) are considered stale
+	 * - Negative: Timestamp-based staleness checks are disabled, relying solely on ETag changes
+	 *
 	 * In practice, the value should be at least an hour.
 	 *
 	 * @since 0.1.0
