@@ -62,7 +62,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int<0, max>
+	 * @var int<-1, max>
 	 */
 	private $freshness_ttl;
 
@@ -102,7 +102,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @phpstan-param int<0, max>      $minimum_viewport_width
 	 * @phpstan-param int<1, max>|null $maximum_viewport_width
 	 * @phpstan-param int<1, max>      $sample_size
-	 * @phpstan-param int<0, max>      $freshness_ttl
+	 * @phpstan-param int<-1, max>      $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]                $url_metrics            URL Metrics to add to the group.
 	 * @param int                            $minimum_viewport_width Minimum possible viewport width (exclusive) for the group. Must be zero or greater.
@@ -145,17 +145,6 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 		}
 		$this->sample_size = $sample_size;
 
-		if ( $freshness_ttl < 0 ) {
-			throw new InvalidArgumentException(
-				esc_html(
-					sprintf(
-						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'optimization-detective' ),
-						$freshness_ttl
-					)
-				)
-			);
-		}
 		$this->freshness_ttl = $freshness_ttl;
 		$this->collection    = $collection;
 		$this->url_metrics   = $url_metrics;
@@ -203,7 +192,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.9.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @return int<0, max> Freshness age.
+	 * @return int<-1, max> Freshness age.
 	 */
 	public function get_freshness_ttl(): int {
 		return $this->freshness_ttl;
@@ -299,8 +288,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			}
 			$current_time = microtime( true );
 			foreach ( $this->url_metrics as $url_metric ) {
-				// The URL Metric is too old to be fresh.
-				if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
+				// The URL Metric is too old to be fresh (skip if freshness TTL is negative).
+				if ( $this->freshness_ttl >= 0 && $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
 					return false;
 				}
 
@@ -514,7 +503,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.3.1
 	 *
 	 * @return array{
-	 *             freshness_ttl: 0|positive-int,
+	 *             freshness_ttl: int<-1, max>,
 	 *             sample_size: positive-int,
 	 *             minimum_viewport_width: int<0, max>,
 	 *             maximum_viewport_width: int<1, max>|null,

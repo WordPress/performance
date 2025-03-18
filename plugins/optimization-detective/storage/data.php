@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @return int<0, max> Expiration TTL in seconds.
+ * @return int<-1, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
@@ -31,26 +31,9 @@ function od_get_url_metric_freshness_ttl(): int {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
+	 * @param int<-1, max> $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
-
-	if ( $freshness_ttl < 0 ) {
-		_doing_it_wrong(
-			esc_html( "Filter: 'od_url_metric_freshness_ttl'" ),
-			esc_html(
-				sprintf(
-					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'optimization-detective' ),
-					$freshness_ttl
-				)
-			),
-			''
-		);
-		$freshness_ttl = 0;
-	}
-
-	return $freshness_ttl;
+	return (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
 }
 
 /**
