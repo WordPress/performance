@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   2.5.0
+Stable tag:   2.5.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, webp, avif, modern image formats
@@ -59,6 +59,13 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the Modern Image Formats plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.5.1 =
+
+**Bug Fixes**
+
+* Fix Modern Image Format not cropping image if crop is an array. ([1887](https://github.com/WordPress/performance/pull/1887))
+* Fix incorrect image size selection in `PICTURE` element. ([1885](https://github.com/WordPress/performance/pull/1885))
 
 = 2.5.0 =
 

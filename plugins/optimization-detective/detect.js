@@ -336,23 +336,6 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
- * Compresses a (JSON) string using CompressionStream API.
- *
- * @param {string} jsonString - JSON string to compress.
- * @return {Promise<Blob>} Compressed data.
- */
-async function compress( jsonString ) {
-	const encodedData = new TextEncoder().encode( jsonString );
-	const compressedDataStream = new Blob( [ encodedData ] )
-		.stream()
-		.pipeThrough( new CompressionStream( 'gzip' ) );
-	const compressedDataBuffer = await new Response(
-		compressedDataStream
-	).arrayBuffer();
-	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
-}
-
-/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -367,8 +350,6 @@ async function compress( jsonString ) {
  * @param {boolean}                args.isDebug                    - Whether to show debug messages.
  * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
  * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
- * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
- * @param {number}                 args.maxUrlMetricSize           - Maximum size of the URL Metric to send.
  * @param {string}                 args.currentETag                - Current ETag.
  * @param {string}                 args.currentUrl                 - Current URL.
  * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
@@ -387,8 +368,6 @@ export default async function detect( {
 	extensionModuleUrls,
 	restApiEndpoint,
 	restApiNonce,
-	gzdecodeAvailable,
-	maxUrlMetricSize,
 	currentETag,
 	currentUrl,
 	urlMetricSlug,
@@ -425,6 +404,11 @@ export default async function detect( {
 		log(
 			'Window must have non-zero dimensions for URL Metric collection.'
 		);
+		return;
+	}
+
+	if ( document.visibilityState === 'hidden' && ! document.prerendering ) {
+		log( 'Page opened in background tab so URL Metric is not collected.' );
 		return;
 	}
 
@@ -840,17 +824,7 @@ export default async function detect( {
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
 	const jsonBody = JSON.stringify( urlMetric );
-	if ( jsonBody.length > maxUrlMetricSize ) {
-		error(
-			`URL Metric is ${ jsonBody.length.toLocaleString() } bytes, exceeding the maximum size of ${ maxUrlMetricSize.toLocaleString() } bytes:`,
-			urlMetric
-		);
-		return;
-	}
-
-	const payloadBlob = gzdecodeAvailable
-		? await compress( jsonBody )
-		: new Blob( [ jsonBody ], { type: 'application/json' } );
+	const payloadBlob = new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
 		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 

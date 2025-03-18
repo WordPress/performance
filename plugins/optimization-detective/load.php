@@ -100,6 +100,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/helper.php';
 
+		// Deprecations.
+		require_once __DIR__ . '/deprecated.php';
+
 		// Core infrastructure classes.
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
@@ -115,13 +118,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
-		require_once __DIR__ . '/storage/rest-api.php';
+		require_once __DIR__ . '/storage/class-od-rest-url-metrics-store-endpoint.php';
 		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.
 		require_once __DIR__ . '/detection.php';
 
 		// Optimization logic.
+		require_once __DIR__ . '/class-od-template-optimization-context.php';
 		require_once __DIR__ . '/class-od-link-collection.php';
 		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
 		require_once __DIR__ . '/class-od-visited-tag-state.php';

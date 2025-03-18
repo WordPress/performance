@@ -105,6 +105,52 @@ Refer to [Image Prioritizer](https://github.com/WordPress/performance/tree/trunk
 [Embed Optimizer](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) for additional
 examples of how tag visitors are used.
 
+### Action: `od_start_template_optimization` (argument: `OD_Template_Optimization_Context`)
+
+Fires before Optimization Detective starts iterating over the document in the output buffer.
+
+This is before any of the registered tag visitors have been invoked.
+
+It is important to note that this action fires _after_ the entire template has been rendered into the output buffer. In
+other words, it will fire after the `wp_footer` action.
+
+This action runs before any of the registered tag visitors have been invoked in the current response. It is useful for
+an extension to gather the required information from the currently-stored URL Metrics for tag visitors to later leverage.
+See [example](https://github.com/WordPress/performance/pull/1921) from the Image Prioritizer plugin where it can be used
+to determine what the common external LCP background-image is for each viewport group up front so that this doesn't have
+to be computed when a tag visitor is invoked.
+
+This action can be used if a site wants to prevent storing a response in the page cache until it has collected URL Metrics
+from both mobile and desktop:
+
+```php
+add_action(
+	'od_start_template_optimization',
+	static function ( OD_Template_Optimization_Context $context ) {
+		if ( 
+			$context->url_metric_group_collection->get_first_group()->count() === 0
+			||
+			$context->url_metric_group_collection->get_last_group()->count() === 0
+		 ) {
+			header( 'Cache-Control: private' );
+		}
+	}
+);
+```
+
+This could just as well be done at `od_finish_template_optimization` since the headers are not sent until after that
+action completes and the output buffer is returned.
+
+### Action: `od_finish_template_optimization` (argument: `OD_Template_Optimization_Context`)
+
+Fires after Optimization Detective has finished iterating over the document in the output buffer.
+
+This is after all the registered tag visitors have been invoked.
+
+This action runs after all the tags in a document have been visited and so no additional tag visitor will be invoked.
+This action has limited usefulness at the moment, but see [#1931](https://github.com/WordPress/performance/issues/1931)
+for possibilities for what it could be used for in the future.
+
 ### Action: `od_url_metric_stored` (argument: `OD_URL_Metric_Store_Request_Context`)
 
 Fires whenever a URL Metric was successfully stored.
