@@ -79,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		define( 'EMBED_OPTIMIZER_VERSION', $version );
 
-		// Load in the Embed Optimizer plugin hooks.
+		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 	}
 );
