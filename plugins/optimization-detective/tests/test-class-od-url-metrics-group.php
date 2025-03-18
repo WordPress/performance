@@ -260,22 +260,40 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	public function data_provider_test_is_complete(): array {
 		// Note: Test cases for empty URL Metrics and for exact sample size are already covered in the test_add_url_metric() method.
 		return array(
-			'old_url_metric' => array(
+			'old_url_metric'                   => array(
 				'url_metric'                 => $this->get_sample_url_metric(
 					array(
 						'timestamp' => microtime( true ) - ( HOUR_IN_SECONDS + 1 ),
 						'etag'      => md5( '' ),
 					)
 				),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => false,
 			),
-			'etag_mismatch'  => array(
+			'etag_mismatch'                    => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => false,
 			),
-			'etag_match'     => array(
+			'etag_match'                       => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( '' ) ) ),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => true,
+			),
+			'negative_ttl_with_old_url_metric' => array(
+				'url_metric'                 => $this->get_sample_url_metric(
+					array(
+						'timestamp' => microtime( true ) - ( WEEK_IN_SECONDS * 4 ),
+						'etag'      => md5( '' ),
+					)
+				),
+				'freshness_ttl'              => -HOUR_IN_SECONDS,
+				'expected_is_group_complete' => true,
+			),
+			'negative_ttl_with_etag_mismatch'  => array(
+				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
+				'freshness_ttl'              => -HOUR_IN_SECONDS,
+				'expected_is_group_complete' => false,
 			),
 		);
 	}
@@ -287,8 +305,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_is_complete
 	 */
-	public function test_is_complete( OD_URL_Metric $url_metric, bool $expected_is_group_complete ): void {
-		$collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 768 ), 1, HOUR_IN_SECONDS );
+	public function test_is_complete( OD_URL_Metric $url_metric, int $freshness_ttl, bool $expected_is_group_complete ): void {
+		$collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 768 ), 1, $freshness_ttl );
 		$group      = $collection->get_first_group();
 
 		$group->add_url_metric( $url_metric );
