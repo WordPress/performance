@@ -99,9 +99,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/helper.php';
 
-		// Deprecations.
-		require_once __DIR__ . '/deprecated.php';
-
 		// Core infrastructure classes.
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
@@ -110,8 +107,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/class-od-strict-url-metric.php';
 		require_once __DIR__ . '/class-od-url-metric-group.php';
 		require_once __DIR__ . '/class-od-url-metric-group-collection.php';
-		class_alias( OD_URL_Metric_Group::class, 'OD_URL_Metrics_Group' ); // Temporary class alias for back-compat after rename.
-		class_alias( OD_URL_Metric_Group_Collection::class, 'OD_URL_Metrics_Group_Collection' ); // Temporary class alias for back-compat after rename.
 
 		// Storage logic.
 		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
