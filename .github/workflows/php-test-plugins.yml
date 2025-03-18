@@ -128,6 +128,19 @@ jobs:
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Update Composer Dependencies
         run: composer update --with-all-dependencies --no-interaction --no-progress
+      - name: Download Codecov CLI
+        if: ${{ matrix.coverage == true }}
+        run: |
+          # Create a temporary directory for GPG operations
+          mkdir -p .gpg
+
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://cli.codecov.io/latest/linux/codecov
+          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod +x codecov
       - name: Install PHPUnit
         run: |
           if [ "${{ matrix.php }}" == "8.2" ]; then
@@ -141,6 +154,13 @@ jobs:
           if [ "${{ matrix.coverage }}" == "true" ]; then
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php:$PLUGIN -- -- -- --coverage-clover=./single-site-reports/coverage-$PLUGIN.xml
+
+              # Upload coverage report to Codecov.
+              ./codecov --verbose upload-process --disable-search --fail-on-error \
+              -t ${{ secrets.CODECOV_TOKEN }} \
+              -n ${{ matrix.php }}-$PLUGIN-single-site-coverage \
+              -F $PLUGIN \
+              -f ./single-site-reports/coverage-$PLUGIN.xml
             done
           else
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
@@ -152,27 +172,16 @@ jobs:
           if [ "${{ matrix.coverage }}" == "true" ]; then
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php-multisite:$PLUGIN -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-$PLUGIN.xml
+
+              # Upload coverage report to Codecov.
+              ./codecov --verbose upload-process --disable-search --fail-on-error \
+              -t ${{ secrets.CODECOV_TOKEN }} \
+              -n ${{ matrix.php }}-$PLUGIN-multisite-coverage \
+              -F $PLUGIN \
+              -f ./multisite-reports/coverage-multisite-$PLUGIN.xml
             done
           else
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php-multisite:$PLUGIN
             done
           fi
-      - name: Upload single site coverage reports to Codecov
-        if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./single-site-reports
-          flags: single
-          name: ${{ matrix.php }}-single-site-coverage
-          fail_ci_if_error: true
-      - name: Upload multisite coverage reports to Codecov
-        if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./multisite-reports
-          flags: multisite
-          name: ${{ matrix.php }}-multisite-coverage
-          fail_ci_if_error: true
