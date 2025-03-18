@@ -30,6 +30,7 @@ function od_get_url_metric_freshness_ttl(): int {
 	 * In practice, the value should be at least an hour.
 	 *
 	 * @since 0.1.0
+	 * @since n.e.x.t Negative values disable timestamp-based freshness checks.
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
