@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Add hooks.
  *
  * @since 0.2.0
+ * @access private
  */
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
@@ -28,6 +29,7 @@ function embed_optimizer_add_hooks(): void {
  * Adds hooks for when the Optimization Detective logic is not running.
  *
  * @since 0.3.0
+ * @access private
  */
 function embed_optimizer_add_non_optimization_detective_hooks(): void {
 	if ( false === has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) ) {
@@ -39,6 +41,7 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
  * Initializes Embed Optimizer when Optimization Detective has loaded.
  *
  * @since 0.3.0
+ * @access private
  *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
@@ -70,6 +73,7 @@ function embed_optimizer_init_optimization_detective( string $optimization_detec
  * Registers the tag visitor for embeds.
  *
  * @since 0.2.0
+ * @access private
  *
  * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */
@@ -83,6 +87,7 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  * Filters additional properties for the element item schema for Optimization Detective.
  *
  * @since 0.3.0
+ * @access private
  *
  * @param array<string, array{type: string}> $additional_properties Additional properties.
  * @return array<string, array{type: string}> Additional properties.
@@ -114,6 +119,7 @@ function embed_optimizer_add_element_item_schema_properties( array $additional_p
  * Filters the list of Optimization Detective extension module URLs to include the extension for Embed Optimizer.
  *
  * @since 0.3.0
+ * @access private
  *
  * @param string[]|mixed $extension_module_urls Extension module URLs.
  * @return string[] Extension module URLs.
@@ -132,6 +138,7 @@ function embed_optimizer_filter_extension_module_urls( $extension_module_urls ):
  * This ensures that the module for handling embeds is only loaded when there is an embed on the page.
  *
  * @since 0.3.0
+ * @access private
  *
  * @param string|mixed $html The oEmbed HTML.
  * @return string Unchanged oEmbed HTML.
@@ -151,6 +158,7 @@ function embed_optimizer_filter_oembed_html_to_detect_embed_presence( $html ): s
  * Lazy load any script tags.
  *
  * @since 0.1.0
+ * @access private
  *
  * @param string|mixed $html The oEmbed HTML.
  * @return string Filtered oEmbed HTML.
@@ -170,6 +178,7 @@ function embed_optimizer_filter_oembed_html_to_lazy_load( $html ): string {
  * Applies changes to HTML in the supplied tag processor to lazy-load the embed.
  *
  * @since 0.2.0
+ * @access private
  *
  * phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing -- The exception is caught.
  *
@@ -319,6 +328,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
  * Load an embed's scripts when it approaches the viewport using an IntersectionObserver.
  *
  * @since 0.1.0
+ * @access private
  */
 function embed_optimizer_lazy_load_scripts(): void {
 	wp_print_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) );
@@ -330,6 +340,7 @@ function embed_optimizer_lazy_load_scripts(): void {
  * Load an embed's scripts when it approaches the viewport using an IntersectionObserver.
  *
  * @since 0.2.0
+ * @access private
  */
 function embed_optimizer_get_lazy_load_script(): string {
 	$script = file_get_contents( __DIR__ . '/' . embed_optimizer_get_asset_path( 'lazy-load.js' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
@@ -345,6 +356,7 @@ function embed_optimizer_get_lazy_load_script(): string {
  * Prints the Optimization Detective installation notices.
  *
  * @since 0.2.0
+ * @access private
  *
  * @param string $plugin_file Plugin file.
  */
@@ -424,6 +436,7 @@ function embed_optimizer_print_row_meta_install_notice( string $plugin_file ): v
  * See {@see 'wp_head'}.
  *
  * @since 0.1.0
+ * @access private
  */
 function embed_optimizer_render_generator(): void {
 	// Use the plugin slug as it is immutable.
@@ -434,6 +447,7 @@ function embed_optimizer_render_generator(): void {
  * Gets the path to a script or stylesheet.
  *
  * @since 0.4.0
+ * @access private
  *
  * @param string      $src_path Source path, relative to plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.
