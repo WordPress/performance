@@ -85,6 +85,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Tag_Visitor
 	 * @covers Image_Prioritizer_Img_Tag_Visitor
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
+	 * @covers Image_Prioritizer_Video_Tag_Visitor
 	 *
 	 * @dataProvider data_provider_test_filter_tag_visitors
 	 *
