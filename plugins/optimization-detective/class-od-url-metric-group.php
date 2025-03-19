@@ -145,7 +145,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 		}
 		$this->sample_size = $sample_size;
 
-		$this->freshness_ttl = $freshness_ttl;
+		$this->freshness_ttl = max( -1, $freshness_ttl );
 		$this->collection    = $collection;
 		$this->url_metrics   = $url_metrics;
 	}

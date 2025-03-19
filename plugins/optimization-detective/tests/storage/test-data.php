@@ -54,7 +54,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 		add_filter(
 			'od_url_metric_freshness_ttl',
 			static function (): int {
-				return -1;
+				return -12345;
 			}
 		);
 

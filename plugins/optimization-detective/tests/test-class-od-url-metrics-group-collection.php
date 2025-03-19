@@ -135,7 +135,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertSame( $current_etag, $group_collection->get_current_etag() );
 		$this->assertSame( $sample_size, $group_collection->get_sample_size() );
 		$this->assertSame( $breakpoints, $group_collection->get_breakpoints() );
-		$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
+		if ( $freshness_ttl < 0 ) {
+			$this->assertSame( -1, $group_collection->get_freshness_ttl() );
+		} else {
+			$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
+		}
 	}
 
 	/**

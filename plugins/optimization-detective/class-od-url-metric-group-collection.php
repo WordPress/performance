@@ -168,7 +168,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		$this->sample_size = $sample_size;
 
 		// Set freshness TTL.
-		$this->freshness_ttl = $freshness_ttl;
+		$this->freshness_ttl = max( -1, $freshness_ttl );
 
 		// Create groups and the URL Metrics to them.
 		$this->groups = $this->create_groups();

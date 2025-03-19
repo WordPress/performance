@@ -57,7 +57,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
 				'sample_size'            => 3,
-				'freshness_ttl'          => -HOUR_IN_SECONDS,
+				'freshness_ttl'          => -1,
 				'exception'              => '',
 			),
 			'good_empty_url_metrics'         => array(
@@ -287,12 +287,12 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 						'etag'      => md5( '' ),
 					)
 				),
-				'freshness_ttl'              => -HOUR_IN_SECONDS,
+				'freshness_ttl'              => -1,
 				'expected_is_group_complete' => true,
 			),
 			'negative_ttl_with_etag_mismatch'  => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
-				'freshness_ttl'              => -HOUR_IN_SECONDS,
+				'freshness_ttl'              => -1,
 				'expected_is_group_complete' => false,
 			),
 		);
@@ -302,6 +302,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * Test is_complete().
 	 *
 	 * @covers ::is_complete
+	 * @covers ::get_freshness_ttl
+	 * @covers OD_URL_Metric_Group_Collection::get_freshness_ttl
 	 *
 	 * @dataProvider data_provider_test_is_complete
 	 */
@@ -312,6 +314,13 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$group->add_url_metric( $url_metric );
 
 		$this->assertSame( $expected_is_group_complete, $group->is_complete() );
+		if ( $freshness_ttl < 0 ) {
+			$this->assertSame( -1, $collection->get_freshness_ttl() );
+			$this->assertSame( -1, $group->get_freshness_ttl() );
+		} else {
+			$this->assertSame( $freshness_ttl, $collection->get_freshness_ttl() );
+			$this->assertSame( $freshness_ttl, $group->get_freshness_ttl() );
+		}
 	}
 
 	/**
