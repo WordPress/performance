@@ -67,7 +67,7 @@ function od_get_normalized_query_vars(): array {
 		}
 
 		// Re-sorted to account for query vars added via $wp->set_query_var().
-		asort( $normalized_query_vars );
+		ksort( $normalized_query_vars );
 	}
 
 	return $normalized_query_vars;
