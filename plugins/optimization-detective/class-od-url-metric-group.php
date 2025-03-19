@@ -62,7 +62,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int
+	 * @var int<-1, max>
 	 */
 	private $freshness_ttl;
 
@@ -102,7 +102,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @phpstan-param int<0, max>      $minimum_viewport_width
 	 * @phpstan-param int<1, max>|null $maximum_viewport_width
 	 * @phpstan-param int<1, max>      $sample_size
-	 * @phpstan-param int              $freshness_ttl
+	 * @phpstan-param int<-1, max>     $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]                $url_metrics            URL Metrics to add to the group.
 	 * @param int                            $minimum_viewport_width Minimum possible viewport width (exclusive) for the group. Must be zero or greater.
@@ -192,7 +192,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.9.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @return int Freshness age.
+	 * @return int<-1, max> Freshness age.
 	 */
 	public function get_freshness_ttl(): int {
 		return $this->freshness_ttl;
@@ -504,7 +504,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.3.1
 	 *
 	 * @return array{
-	 *             freshness_ttl: int,
+	 *             freshness_ttl: int<-1, max>,
 	 *             sample_size: positive-int,
 	 *             minimum_viewport_width: int<0, max>,
 	 *             maximum_viewport_width: int<1, max>|null,

@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @return int Expiration TTL in seconds.
+ * @return int<-1, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
@@ -38,7 +38,8 @@ function od_get_url_metric_freshness_ttl(): int {
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	return (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
+	$ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
+	return max( -1, $ttl );
 }
 
 /**
