@@ -49,6 +49,7 @@ For development and debugging, also on GitHub:
 
 * [Optimization Detective Admin UI](https://github.com/westonruter/od-admin-ui): Provides an admin UI to inspect URL Metrics from the Optimization Detective plugin.
 * [Optimization Detective Debug Helper](https://github.com/swissspidy/od-debug-helper/): Makes data from Optimization Detective visible on the front end through the admin bar.
+* [Optimization Detective Default Disabled](https://gist.github.com/westonruter/9e9036e8dc11292279a90995273c7adc): Disables Optimization Detective by default unless you supply the `?optimization_detective_enabled=1` query parameter to the URL. This allows you to debug issues on a live site without visitors seeing a broken experience.
 * [Optimization Detective Store Query Vars](https://github.com/westonruter/od-store-query-vars): Stores the Query Vars with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular what the slug was computed from.
 * [Optimization Detective Store User Agent](https://github.com/westonruter/od-store-user-agent): Stores the User Agent with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular to understand what device has a given viewport dimensions.
 * [Optimization Detective Dev Mode](https://github.com/westonruter/od-dev-mode): Adds filters to facilitate development of the Optimization Detective plugin.
