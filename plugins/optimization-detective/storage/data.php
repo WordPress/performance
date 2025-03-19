@@ -49,13 +49,22 @@ function od_get_url_metric_freshness_ttl(): int {
 function od_get_normalized_query_vars(): array {
 	global $wp;
 
-	// Normalize unbounded query vars.
 	if ( is_404() ) {
+		// Note that 404 responses are not optimized by default, but they can be forcibly made to be optimized via
+		// the od_can_optimize_response filter. Since any query vars in a 404 response by definition do not correspond
+		// to any valid content on the site, all the query vars should be overridden to indicate the 404 state.
 		$normalized_query_vars = array(
 			'error' => 404,
 		);
 	} else {
 		$normalized_query_vars = $wp->query_vars;
+
+		// Note that search responses are not optimized by default, but they can be forcibly made to be optimized via
+		// the od_can_optimize_response filter. Since by definition there are no constraints on what can be searched for
+		// the 's' query var must be normalized to prevent an unbounded URL space.
+		if ( isset( $normalized_query_vars['s'] ) ) {
+			$normalized_query_vars['s'] = '';
+		}
 
 		// Re-sorted to account for query vars added via $wp->set_query_var().
 		asort( $normalized_query_vars );
