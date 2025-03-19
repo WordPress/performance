@@ -238,13 +238,17 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 
 ### Filter: `od_url_metric_freshness_ttl` (default: 1 week in seconds)
 
-Filters the freshness age (TTL) for a given URL Metric. 
+Filters age (TTL) for which a URL Metric can be considered fresh.
 
-* A value of zero (0) considers URL Metrics to always be stale.
-* A positive value (e.g., HOUR_IN_SECONDS) sets the TTL for URL Metric freshness. In practice, the value should be at least an hour.
-* A negative value (-1) disables timestamp-based freshness checks, making URL Metrics stay fresh indefinitely unless the ETag changes.
+The freshness TTL (time to live) value can be one of the following values:
 
-For sites where content doesn't change frequently, you can disable the timestamp-based staleness check:
+* A positive integer (e.g. `3600`, `HOUR_IN_SECONDS`) allows a URL Metric to be fresh for a given period of time into the future.
+* A negative integer (`-1`) disables timestamp-based freshness checks, making URL Metrics stay fresh indefinitely unless the current ETag changes.
+* A value of zero (`0`) considers URL Metrics to always be stale, which is useful during development. _Never do this on a production site since this can cause a database write for every visitor!_
+
+The default value is `WEEK_IN_SECONDS` since changes to the post/page (or the site overall) will cause a change to the current ETag used for URL Metrics. This causes the relevant existing URL Metrics with the previous ETag to be considered stale, allowing new URL Metrics to be collected before the freshness TTL has expired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
+
+For sites where content doesn't change frequently, you can disable the timestamp-based staleness check as follows:
 
 ```php
 add_filter( 'od_url_metric_freshness_ttl', static function (): int {
@@ -252,14 +256,10 @@ add_filter( 'od_url_metric_freshness_ttl', static function (): int {
 } );
 ```
 
-Note that even if you set a large freshness TTL or use `-1`, a URL Metric can still become stale sooner if the page state changes. This change results in an updated ETag associated with the URL Metric, allowing new URL Metrics to be collected before the freshness TTL has expired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
-
-During development, this can be useful to set to zero so that you don't have to wait for new URL Metrics to be requested when engineering a new optimization:
+As noted above, during development you can set the freshness TTL to zero so that you don't have to wait for new URL Metrics to be requested when developing a new optimization:
 
 ```php
-add_filter( 'od_url_metric_freshness_ttl', static function (): int {
-	return 0;
-} );
+add_filter( 'od_url_metric_freshness_ttl', '__return_zero' );
 ```
 
 ### Filter: `od_minimum_viewport_aspect_ratio` (default: 0.4)

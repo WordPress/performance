@@ -24,17 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given URL Metric.
-	 *
-	 * The freshness TTL can be:
-	 * - Zero: URL Metrics are always considered stale based on timestamp
-	 * - Positive: URL Metrics older than this value (in seconds) are considered stale
-	 * - Negative: Timestamp-based staleness checks are disabled, relying solely on ETag changes
-	 *
-	 * In practice, the value should be at least an hour.
+	 * Filters age (TTL) for which a URL Metric can be considered fresh.
 	 *
 	 * @since 0.1.0
 	 * @since n.e.x.t Negative values disable timestamp-based freshness checks.
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_freshness_ttl
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
@@ -238,6 +232,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 	 * Filters the data that goes into computing the current ETag for URL Metrics.
 	 *
 	 * @since 0.9.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_current_url_metrics_etag_data
 	 *
 	 * @param array<string, mixed> $data Data.
 	 */
