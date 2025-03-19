@@ -434,7 +434,8 @@ export default async function detect( {
 		);
 		if (
 			! isNaN( previousVisitTime ) &&
-			( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL
+			( freshnessTTL < 0 ||
+				( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL )
 		) {
 			log(
 				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
