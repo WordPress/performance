@@ -165,6 +165,12 @@ After a URL Metric has been submitted to the REST API storage endpoint and is va
 | `post_content` | A JSON array of all the URL Metric objects.                                                                               |
 | `post_title`   | The `url` property of the most recent URL Metric stored in the post. (This is useful when listing out posts with WP-CLI.) |
 
+When an `od_url_metrics` post has not been updated in a month then it is garbage-collected, since it is likely the original URL has gone away.
+
+Extensions to Optimization Detective rarely need to directly interface with the custom post type, so far. See the experimental [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility/) plugin which interfaces with the `od_url_metrics` post at submission time to add post meta via the `od_url_metric_stored` action, and then retrieves post meta in the tag visitor via the context object’s `url_metrics_id` property.
+
+## Varying URL Metrics for Dynamic Responses
+
 The slug (`post_name`) of the post is derived from the public WP query vars (`$wp->query_vars`) since site traffic may often request URLs that contain arbitrary query parameters that have no impact on the rendered page (e.g. UTM parameters). So using these WP query vars ensures that such insignificant URL variations are normalized. If there are URL Metrics for separate distinct URLs being stored in the same `od_url_metrics` post unexpectedly, it may be due to a significant GET query parameter not being registered among the public query vars via the `query_vars` filter. For example, if you have a contact form which redirects back to itself with a `?thank_you=1` in the URL to show a "thank you" message instead of the submission form, and this template contains the following:
 
 ```php
@@ -186,9 +192,25 @@ add_filter( 'query_vars', function ( $query_vars ) {
 
 Then in your template code you may continue to use `isset( $_GET['thank_you'] )` but you might as well use `get_query_var( 'thank_you' )` instead.
 
-When an `od_url_metrics` post has not been updated in a month then it is garbage-collected, since it is likely the original URL has gone away.
+This is also important if you are serving different pages for mobile versus desktop (i.e. not responsive web design but adaptive web design). For this you'll want to populate the query vars with whether it is a mobile request:
 
-Extensions to Optimization Detective rarely need to directly interface with the custom post type, so far. See the experimental [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility/) plugin which interfaces with the `od_url_metrics` post at submission time to add post meta via the `od_url_metric_stored` action, and then retrieves post meta in the tag visitor via the context object’s `url_metrics_id` property.
+```php
+add_action( 'wp', function ( WP $wp ) {
+	if ( wp_is_mobile() ) {
+		$wp->add_query_var( 'is_mobile', true );
+	}
+} );
+```
+
+The same goes for sites that serve different pages content based on geolocation, for example if you serve different content specifically to North America:
+
+```php
+add_action( 'wp', function ( WP $wp ) {
+	if ( in_array( Geo\get_geo( 'country-code' ), array( 'CA', 'US', 'MX' ) ) ) {
+		$wp->add_query_var( 'is_north_america', true );
+	}
+} );
+```
 
 # Conditional Optimization
 
