@@ -49,15 +49,16 @@ function od_get_url_metric_freshness_ttl(): int {
 function od_get_normalized_query_vars(): array {
 	global $wp;
 
-	// Note that the order of this array is naturally normalized since it is
-	// assembled by iterating over public_query_vars.
-	$normalized_query_vars = $wp->query_vars;
-
 	// Normalize unbounded query vars.
 	if ( is_404() ) {
 		$normalized_query_vars = array(
 			'error' => 404,
 		);
+	} else {
+		$normalized_query_vars = $wp->query_vars;
+
+		// Re-sorted to account for query vars added via $wp->set_query_var().
+		asort( $normalized_query_vars );
 	}
 
 	return $normalized_query_vars;
