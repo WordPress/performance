@@ -128,19 +128,6 @@ jobs:
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Update Composer Dependencies
         run: composer update --with-all-dependencies --no-interaction --no-progress
-      - name: Download Codecov CLI
-        if: ${{ matrix.coverage == true }}
-        run: |
-          # Create a temporary directory for GPG operations
-          mkdir -p .gpg
-
-          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --import
-          curl -Os https://cli.codecov.io/latest/linux/codecov
-          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
-          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
-          gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
-          shasum -a 256 -c codecov.SHA256SUM
-          chmod +x codecov
       - name: Install PHPUnit
         run: |
           if [ "${{ matrix.php }}" == "8.2" ]; then
@@ -154,13 +141,6 @@ jobs:
           if [ "${{ matrix.coverage }}" == "true" ]; then
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php:$PLUGIN -- -- -- --coverage-clover=./single-site-reports/coverage-$PLUGIN.xml
-
-              # Upload coverage report to Codecov.
-              ./codecov --verbose upload-process --disable-search --fail-on-error \
-              -t ${{ secrets.CODECOV_TOKEN }} \
-              -n ${{ matrix.php }}-$PLUGIN-single-site-coverage \
-              -F $PLUGIN \
-              -f ./single-site-reports/coverage-$PLUGIN.xml
             done
           else
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
@@ -172,16 +152,57 @@ jobs:
           if [ "${{ matrix.coverage }}" == "true" ]; then
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php-multisite:$PLUGIN -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-$PLUGIN.xml
-
-              # Upload coverage report to Codecov.
-              ./codecov --verbose upload-process --disable-search --fail-on-error \
-              -t ${{ secrets.CODECOV_TOKEN }} \
-              -n ${{ matrix.php }}-$PLUGIN-multisite-coverage \
-              -F $PLUGIN \
-              -f ./multisite-reports/coverage-multisite-$PLUGIN.xml
             done
           else
             for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
               npm run test-php-multisite:$PLUGIN
             done
           fi
+      - name: Download Codecov CLI
+        if: ${{ matrix.coverage == true }}
+        run: |
+          # Create a temporary directory for GPG operations
+          mkdir -p .gpg
+
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://cli.codecov.io/latest/linux/codecov
+          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpg --homedir .gpg --no-default-keyring --keyring trustedkeys.gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod +x codecov
+      - name: Upload coverage reports to Codecov
+        if: ${{ matrix.coverage == true }}
+        run: |
+          # Build common arguments for all uploads
+          cc_args=()
+          cc_args+=(--fail-on-error)
+          cc_args+=(--disable-search)
+          cc_args+=(--git-service github)
+          cc_args+=(--gcov-executable "gcov")
+
+          # Add SHA for PRs
+          if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
+            cc_args+=(--sha "${{ github.event.pull_request.head.sha }}")
+          fi
+
+          # Handle authentication differently for forks vs. internal PRs
+          if [ -n "${{ github.event.pull_request.head.repo.full_name }}" ] && \
+            [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "::notice::Processing PR from fork - using tokenless upload with branch override."
+            cc_args+=(--branch "${{ github.event.pull_request.head.label }}")
+          else
+            echo "::notice::Processing internal PR or push - using token."
+            cc_args+=(--token "${{ secrets.CODECOV_TOKEN }}")
+          fi
+
+          # Upload reports for each changed plugin
+          for PLUGIN in ${{ steps.changed-plugins.outputs.all_changed_plugins }}; do
+            echo "::group::Uploading coverage for plugin: $PLUGIN"
+            ./codecov upload-coverage "${cc_args[@]}" \
+            --file ./single-site-reports/coverage-$PLUGIN.xml \
+            --file ./multisite-reports/coverage-multisite-$PLUGIN.xml \
+            --flag $PLUGIN \
+            --name $PLUGIN-coverage
+            echo "::endgroup::"
+          done
