@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
 	$required_od_version = '1.0.0-beta3';
-
 	if ( ! version_compare( $optimization_detective_version, $required_od_version, '>=' ) ) {
 		add_action(
 			'admin_notices',
