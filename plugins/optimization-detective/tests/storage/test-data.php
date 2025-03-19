@@ -46,20 +46,19 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test bad od_get_url_metric_freshness_ttl().
+	 * Test negative od_get_url_metric_freshness_ttl().
 	 *
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
-	public function test_bad_od_get_url_metric_freshness_ttl(): void {
-		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_url_metric_freshness_ttl&#039;' );
+	public function test_negative_od_get_url_metric_freshness_ttl(): void {
 		add_filter(
 			'od_url_metric_freshness_ttl',
 			static function (): int {
-				return -1;
+				return -12345;
 			}
 		);
 
-		$this->assertSame( 0, od_get_url_metric_freshness_ttl() );
+		$this->assertSame( -1, od_get_url_metric_freshness_ttl() );
 	}
 
 	/**
