@@ -30,6 +30,17 @@ final class Embed_Optimizer_Tag_Visitor {
 	private $added_lazy_script = false;
 
 	/**
+	 * Pending styles to insert after the document has been processed.
+	 *
+	 * The keys are the media features to be used in `@media` queries, and the values are arrays of the rules.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @var array<string, string[]>
+	 */
+	private $pending_styles = array();
+
+	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
 	 *
 	 * @since 0.3.0
@@ -183,7 +194,6 @@ final class Embed_Optimizer_Tag_Visitor {
 				$processor->set_attribute( 'id', $element_id );
 			}
 
-			$style_rules = array();
 			foreach ( $minimums as $minimum ) {
 				$style_rule = sprintf(
 					'#%s { min-height: %dpx; }',
@@ -192,17 +202,11 @@ final class Embed_Optimizer_Tag_Visitor {
 				);
 
 				$media_feature = od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() );
-				if ( null !== $media_feature ) {
-					$style_rule = sprintf(
-						'@media %s { %s }',
-						$media_feature,
-						$style_rule
-					);
+				if ( null === $media_feature ) {
+					$media_feature = '';
 				}
-				$style_rules[] = $style_rule;
+				$this->pending_styles[ $media_feature ][] = $style_rule;
 			}
-
-			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
 		}
 	}
 
@@ -330,6 +334,32 @@ final class Embed_Optimizer_Tag_Visitor {
 		if ( $max_intersection_ratio < PHP_FLOAT_EPSILON && embed_optimizer_update_markup( $processor, false ) && ! $this->added_lazy_script ) {
 			$processor->append_body_html( wp_get_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_script = true;
+		}
+	}
+
+	/**
+	 * Adds styles after the document has been processed.
+	 *
+	 * @since n.e.x.t
+	 * @see self::reduce_layout_shifts()
+	 *
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 */
+	public function add_styles( OD_Template_Optimization_Context $context ): void {
+		$root_rules = array();
+		foreach ( $this->pending_styles as $media_feature => $style_rules ) {
+			if ( '' === $media_feature ) {
+				$root_rules[] = join( "\n", $style_rules );
+			} else {
+				$root_rules[] = sprintf(
+					"@media %s {\n\t%s\n}",
+					$media_feature,
+					join( "\n\t", $style_rules )
+				);
+			}
+		}
+		if ( count( $root_rules ) > 0 ) {
+			$context->append_head_html( "<style>\n" . join( "\n", $root_rules ) . "\n</style>\n" );
 		}
 	}
 }

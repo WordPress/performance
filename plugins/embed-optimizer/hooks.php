@@ -77,7 +77,10 @@ function embed_optimizer_init_optimization_detective( string $optimization_detec
 function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
 	// Note: This class is loaded on the fly since it is only needed here when Optimization Detective is active.
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
-	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor() );
+	$tag_visitor = new Embed_Optimizer_Tag_Visitor();
+	$registry->register( 'embeds', $tag_visitor );
+
+	add_action( 'od_finish_template_optimization', array( $tag_visitor, 'add_styles' ) );
 }
 
 /**
