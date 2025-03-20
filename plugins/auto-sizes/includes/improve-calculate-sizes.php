@@ -100,7 +100,6 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
 			$container_relative_width = $block->context['container_relative_width'] ?? '';
-			$ancestor_block_width     = $block->context['block_width_data'] ?? array();
 
 			/*
 			 * Update width for cover block.
@@ -110,7 +109,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 				$size = array( 420, 420 );
 			}
 
-			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment, $ancestor_block_width );
+			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment, $container_relative_width );
 
 			// If better sizes can't be calculated, use the default sizes.
 			return false !== $better_sizes ? $better_sizes : $sizes;
@@ -147,15 +146,15 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
  *
  * @since 1.4.0
  *
- * @param int                    $id                   The image attachment post ID.
- * @param string|array{int, int} $size                 Image size name or array of width and height.
- * @param string                 $align                The image alignment.
- * @param int                    $resize_width         Resize image width.
- * @param string                 $max_alignment        The maximum usable layout alignment.
- * @param array<string, mixed>   $ancestor_block_width Ancestor block context.
+ * @param int                    $id                       The image attachment post ID.
+ * @param string|array{int, int} $size                     Image size name or array of width and height.
+ * @param string                 $align                    The image alignment.
+ * @param int                    $resize_width             Resize image width.
+ * @param string                 $max_alignment            The maximum usable layout alignment.
+ * @param float                  $container_relative_width Container relative width.
  * @return string|false An improved sizes attribute or false if a better size cannot be calculated.
  */
-function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $resize_width, string $max_alignment, array $ancestor_block_width ) {
+function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $resize_width, string $max_alignment, float $container_relative_width ) {
 	// Bail early if not a block theme.
 	if ( ! wp_is_block_theme() ) {
 		return false;
@@ -185,43 +184,7 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 		$image_width = min( $image_width, $resize_width );
 	}
 
-	// Calculate the smallest width using the ancestor block context.
-	$img_smallest_width = 0;
-	if ( count( $ancestor_block_width ) > 0 ) {
-		$img_parents_block_width = 0;
-		foreach ( $ancestor_block_width as $width ) {
-			foreach ( $width as $block_name => $w ) {
-				if ( in_array( $w, array( 'wide', 'default' ), true ) ) {
-					$img_parents_block_width = auto_sizes_get_layout_width( $w );
-
-					if ( ! str_ends_with( $img_parents_block_width, 'px' ) ) {
-						// Set parent block width to zero so it doesn't take value other than the px.
-						$img_parents_block_width = 0;
-						continue;
-					}
-					$img_parents_block_width = (int) $img_parents_block_width;
-
-					if ( $img_parents_block_width < $img_smallest_width ) {
-						$img_parents_block_width = $img_smallest_width;
-					}
-				}
-
-				if ( 'core/column' === $block_name ) {
-					if ( str_ends_with( $w, '%' ) && is_int( $img_parents_block_width ) ) {
-						$img_smallest_width = $img_parents_block_width * ( (int) $w / 100 );
-					}
-				}
-			}
-		}
-
-		if ( $img_smallest_width <= 0 ) {
-			$img_smallest_width = $img_parents_block_width;
-		}
-
-		if ( 0 !== $img_smallest_width ) {
-			$img_smallest_width = sprintf( '%dpx', (int) $img_smallest_width );
-		}
-	}
+	$container_relative_width_for_image_width = $container_relative_width;
 
 	// Normalize default alignment values.
 	$align = '' !== $align ? $align : 'default';
@@ -263,10 +226,6 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 
 	// Format layout width when not 'full'.
 	if ( 'full' !== $alignment ) {
-		// Format layout width when smaller width found.
-		if ( is_string( $img_smallest_width ) && str_ends_with( $img_smallest_width, 'px' ) ) {
-			$layout_width = sprintf( '%1$spx', min( (int) $layout_width, (int) $img_smallest_width ) );
-		}
 		$layout_width = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout_width );
 	}
 
