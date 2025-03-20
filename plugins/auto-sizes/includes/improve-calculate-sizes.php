@@ -95,11 +95,11 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
 
-			$id            = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
-			$alignment     = $block->attributes['align'] ?? '';
-			$width         = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
-			$max_alignment = $block->context['max_alignment'] ?? '';
-			$column_width  = $block->context['column_width'] ?? '';
+			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
+			$alignment                = $block->attributes['align'] ?? '';
+			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
+			$max_alignment            = $block->context['max_alignment'] ?? '';
+			$container_relative_width = $block->context['container_relative_width'] ?? '';
 
 			/*
 			 * Update width for cover block.
@@ -262,9 +262,9 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 	// Define block-specific context usage.
 	$block_specific_context = array(
 		'core/cover'   => array( 'max_alignment' ),
-		'core/image'   => array( 'max_alignment', 'column_width' ),
+		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'   => array( 'max_alignment' ),
-		'core/columns' => array( 'max_alignment', 'column_width' ),
+		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
 		'core/column'  => array( 'column_count' ),
 	);
 
@@ -327,10 +327,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			}
 
 			// Multiply with parent's width if available.
-			if ( isset( $parent_block->context['column_width'] ) ) {
-				$context['column_width'] = $parent_block->context['column_width'] * $current_width;
+			if ( isset( $parent_block->context['container_relative_width'] ) ) {
+				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
-				$context['column_width'] = $current_width;
+				$context['container_relative_width'] = $current_width;
 			}
 		}
 	}
