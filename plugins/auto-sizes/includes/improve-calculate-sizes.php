@@ -99,7 +99,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$alignment                = $block->attributes['align'] ?? '';
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
-			$container_relative_width = $block->context['container_relative_width'] ?? '';
+			$container_relative_width = $block->context['container_relative_width'] ?? '1.0';
 
 			/*
 			 * Update width for cover block.
@@ -184,8 +184,6 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 		$image_width = min( $image_width, $resize_width );
 	}
 
-	$container_relative_width_for_image_width = $container_relative_width;
-
 	// Normalize default alignment values.
 	$align = '' !== $align ? $align : 'default';
 
@@ -202,6 +200,10 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 
 		case 'wide':
 			$layout_width = auto_sizes_get_layout_width( 'wide' );
+			if ( str_ends_with( $layout_width, 'px' ) ) {
+				$layout_width = (int) $layout_width * $container_relative_width;
+				$layout_width = sprintf( '%dpx', (int) $layout_width );
+			}
 			break;
 
 		case 'left':
@@ -216,6 +218,7 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			 * on the server. Otherwise, we need to rely on CSS functions.
 			 */
 			if ( str_ends_with( $layout_width, 'px' ) ) {
+				$layout_width = (int) $layout_width * $container_relative_width;
 				$layout_width = sprintf( '%dpx', min( (int) $layout_width, $image_width ) );
 			} else {
 				$layout_width = sprintf( 'min(%1$s, %2$spx)', $layout_width, $image_width );
@@ -268,7 +271,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'   => array( 'max_alignment' ),
 		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
-		'core/column'  => array( 'column_count' ),
+		'core/column'  => array( 'max_alignment', 'column_count' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
