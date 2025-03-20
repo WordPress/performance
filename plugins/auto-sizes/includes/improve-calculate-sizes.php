@@ -94,12 +94,13 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * @param string $size  The image size data.
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
-			$id                   = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
-			$alignment            = $block->attributes['align'] ?? '';
-			$width                = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
-			$max_alignment        = $block->context['max_alignment'] ?? '';
-			$column_width         = $block->context['column_width'] ?? '';
-			$ancestor_block_width = $block->context['block_width_data'] ?? array();
+
+			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
+			$alignment                = $block->attributes['align'] ?? '';
+			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
+			$max_alignment            = $block->context['max_alignment'] ?? '';
+			$container_relative_width = $block->context['container_relative_width'] ?? '';
+			$ancestor_block_width     = $block->context['block_width_data'] ?? array();
 
 			/*
 			 * Update width for cover block.
@@ -302,18 +303,18 @@ function auto_sizes_get_layout_width( string $alignment ): string {
  * @return string[] The filtered context keys used by the block type.
  */
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
-	// The list of blocks that can consume outer layout context.
-	$consumer_blocks = array(
-		'core/cover',
-		'core/image',
-		'core/group',
-		'core/columns',
-		'core/column',
+	// Define block-specific context usage.
+	$block_specific_context = array(
+		'core/cover'   => array( 'max_alignment' ),
+		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
+		'core/group'   => array( 'max_alignment' ),
+		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
+		'core/column'  => array( 'column_count' ),
 	);
 
-	if ( in_array( $block_type->name, $consumer_blocks, true ) ) {
-		// Use array_values to reset the array keys after merging.
-		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'column_count', 'column_width' ) ) ) );
+	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
+		// Use array_values to reset array keys after merging.
+		return array_values( array_unique( array_merge( $uses_context, $block_specific_context[ $block_type->name ] ) ) );
 	}
 	return $uses_context;
 }
@@ -363,17 +364,17 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
 				// Default to equally divided width if not explicitly set.
-				$current_width = 1 / $parent_block->context['column_count'];
+				$current_width = 1.0 / $parent_block->context['column_count'];
 			} else {
 				// Full width fallback.
-				$current_width = 1;
+				$current_width = 1.0;
 			}
 
 			// Multiply with parent's width if available.
-			if ( isset( $parent_block->context['column_width'] ) ) {
-				$context['column_width'] = $parent_block->context['column_width'] * $current_width;
+			if ( isset( $parent_block->context['container_relative_width'] ) ) {
+				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
-				$context['column_width'] = $current_width;
+				$context['container_relative_width'] = $current_width;
 			}
 		}
 	}

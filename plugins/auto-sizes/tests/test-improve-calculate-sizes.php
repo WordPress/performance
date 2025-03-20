@@ -1120,7 +1120,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 */
 	public function get_columns_block_markup( string $content, array $atts = array(), array $column_width = array() ): string {
 		// Generate alignment class if align attribute is provided.
-		$align_class  = ! empty( $atts['align'] ) ? ' align' . $atts['align'] : '';
+		$align_class  = isset( $atts['align'] ) && '' !== $atts['align'] ? $atts['align'] : '';
 		$column_block = '';
 
 		// Generate individual column markup based on provided widths and content flags.
