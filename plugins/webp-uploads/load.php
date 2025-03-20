@@ -27,6 +27,7 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 
 define( 'WEBP_UPLOADS_VERSION', '2.5.0' );
 define( 'WEBP_UPLOADS_MAIN_FILE', plugin_basename( __FILE__ ) );
+// @codeCoverageIgnoreEnd
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
@@ -35,4 +36,3 @@ require_once __DIR__ . '/settings.php';
 require_once __DIR__ . '/picture-element.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/deprecated.php';
-// @codeCoverageIgnoreEnd

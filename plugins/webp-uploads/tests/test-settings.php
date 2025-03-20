@@ -56,10 +56,7 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 	 * @covers ::webp_uploads_generate_webp_jpeg_setting_callback
 	 */
 	public function test_webp_uploads_generate_webp_jpeg_setting_callback(): void {
-		ob_start();
-		webp_uploads_generate_webp_jpeg_setting_callback();
-		$output = ob_get_clean();
-
+		$output = get_echo( 'webp_uploads_generate_webp_jpeg_setting_callback' );
 		$this->assertStringContainsString( 'perflab_generate_webp_and_jpeg', $output );
 	}
 
@@ -67,10 +64,7 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 	 * @covers ::webp_uploads_generate_all_fallback_sizes_callback
 	 */
 	public function test_webp_uploads_generate_all_fallback_sizes_callback(): void {
-		ob_start();
-		webp_uploads_generate_all_fallback_sizes_callback();
-		$output = ob_get_clean();
-
+		$output = get_echo( 'webp_uploads_generate_all_fallback_sizes_callback' );
 		$this->assertStringContainsString( 'perflab_generate_all_fallback_sizes', $output );
 	}
 
@@ -78,10 +72,7 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 	 * @covers ::webp_uploads_use_picture_element_callback
 	 */
 	public function test_webp_uploads_use_picture_element_callback(): void {
-		ob_start();
-		webp_uploads_use_picture_element_callback();
-		$output = ob_get_clean();
-
+		$output = get_echo( 'webp_uploads_use_picture_element_callback' );
 		$this->assertStringContainsString( 'webp_uploads_use_picture_element', $output );
 	}
 
@@ -89,10 +80,7 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
 	 */
 	public function test_webp_uploads_generate_avif_webp_setting_callback(): void {
-		ob_start();
-		webp_uploads_generate_avif_webp_setting_callback();
-		$output = ob_get_clean();
-
+		$output = get_echo( 'webp_uploads_generate_avif_webp_setting_callback' );
 		$this->assertStringContainsString( 'perflab_modern_image_format', $output );
 	}
 }
