@@ -320,10 +320,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
 				// Default to equally divided width if not explicitly set.
-				$current_width = 1 / $parent_block->context['column_count'];
+				$current_width = 1.0 / $parent_block->context['column_count'];
 			} else {
 				// Full width fallback.
-				$current_width = 1;
+				$current_width = 1.0;
 			}
 
 			// Multiply with parent's width if available.
