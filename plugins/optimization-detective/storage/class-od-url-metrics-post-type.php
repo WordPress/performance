@@ -299,31 +299,16 @@ class OD_URL_Metrics_Post_Type {
 	 */
 	public static function delete_stale_posts(): void {
 
-		// Default period for the garbage collection time window.
-		$default_period = array(
-			'value' => 1,
-			'unit'  => 'month',
-		);
-
 		/**
-		 * Filters the period for the garbage collection ttl for the stale posts.
+		 * Filters the time for the garbage collection ttl for the stale posts.
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param array $default_period {
-		 *    value: int    The numeric value of the time period. Default 1.
-		 *    unit:  string The unit of time ('day', 'week', 'month', 'year', etc). Default 'month'.
-		 * }
-		 *
-		 * @return array Modified time period configuration.
+		 * @return int Number of previous months to check the older post for url metrics.
 		 */
-		$updated_period = (array) apply_filters( 'od_garbage_collection_ttl_period', $default_period );
-
-		$period_value = isset( $updated_period['value'] ) && is_numeric( $updated_period['value'] ) ? absint( $updated_period['value'] ) : $default_period['value'];
-		$period_unit  = isset( $updated_period['unit'] ) && is_string( $updated_period['unit'] ) ? sanitize_text_field( $updated_period['unit'] ) : $default_period['unit'];
-
-		$time_string = sprintf( '-%d %s', absint( $period_value ), $period_unit );
-		$before_time = gmdate( 'Y-m-d H:i:s', (int) strtotime( $time_string ) );
+		$updated_time = (int) apply_filters( 'od_url_metric_garbage_collection_ttl', 1 );
+		$time_string  = sprintf( '-%d month', absint( $updated_time ) );
+		$before_time  = gmdate( 'Y-m-d H:i:s', (int) strtotime( $time_string ) );
 
 		$query = new WP_Query(
 			array(
