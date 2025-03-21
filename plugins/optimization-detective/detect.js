@@ -519,72 +519,6 @@ export default async function detect( {
 
 	log( 'Proceeding with detection' );
 
-	/** @type {Map<string, Extension>} */
-	const extensions = new Map();
-
-	/** @type {Promise[]} */
-	const extensionInitializePromises = [];
-
-	/** @type {string[]} */
-	const initializingExtensionModuleUrls = [];
-
-	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		try {
-			/** @type {Extension} */
-			const extension = await import( extensionModuleUrl );
-			extensions.set( extensionModuleUrl, extension );
-
-			const extensionLogger = createLogger(
-				isDebug,
-				`[Optimization Detective: ${
-					extension.name || 'Unnamed Extension'
-				}]`
-			);
-
-			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
-			if ( extension.initialize instanceof Function ) {
-				const initializePromise = extension.initialize( {
-					isDebug,
-					...extensionLogger,
-					onTTFB,
-					onFCP,
-					onLCP,
-					onINP,
-					onCLS,
-					getRootData,
-					extendRootData,
-					getElementData,
-					extendElementData,
-				} );
-				if ( initializePromise instanceof Promise ) {
-					extensionInitializePromises.push( initializePromise );
-					initializingExtensionModuleUrls.push( extensionModuleUrl );
-				}
-			}
-		} catch ( err ) {
-			error(
-				`Failed to start initializing extension '${ extensionModuleUrl }':`,
-				err
-			);
-		}
-	}
-
-	// Wait for all extensions to finish initializing.
-	const settledInitializePromises = await Promise.allSettled(
-		extensionInitializePromises
-	);
-	for ( const [
-		i,
-		settledInitializePromise,
-	] of settledInitializePromises.entries() ) {
-		if ( settledInitializePromise.status === 'rejected' ) {
-			error(
-				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
-				settledInitializePromise.reason
-			);
-		}
-	}
-
 	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
 	/** @type {Map<Element, string>} */
@@ -675,6 +609,72 @@ export default async function detect( {
 		},
 		elements: [],
 	};
+
+	/** @type {Map<string, Extension>} */
+	const extensions = new Map();
+
+	/** @type {Promise[]} */
+	const extensionInitializePromises = [];
+
+	/** @type {string[]} */
+	const initializingExtensionModuleUrls = [];
+
+	for ( const extensionModuleUrl of extensionModuleUrls ) {
+		try {
+			/** @type {Extension} */
+			const extension = await import( extensionModuleUrl );
+			extensions.set( extensionModuleUrl, extension );
+
+			const extensionLogger = createLogger(
+				isDebug,
+				`[Optimization Detective: ${
+					extension.name || 'Unnamed Extension'
+				}]`
+			);
+
+			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
+			if ( extension.initialize instanceof Function ) {
+				const initializePromise = extension.initialize( {
+					isDebug,
+					...extensionLogger,
+					onTTFB,
+					onFCP,
+					onLCP,
+					onINP,
+					onCLS,
+					getRootData,
+					extendRootData,
+					getElementData,
+					extendElementData,
+				} );
+				if ( initializePromise instanceof Promise ) {
+					extensionInitializePromises.push( initializePromise );
+					initializingExtensionModuleUrls.push( extensionModuleUrl );
+				}
+			}
+		} catch ( err ) {
+			error(
+				`Failed to start initializing extension '${ extensionModuleUrl }':`,
+				err
+			);
+		}
+	}
+
+	// Wait for all extensions to finish initializing.
+	const settledInitializePromises = await Promise.allSettled(
+		extensionInitializePromises
+	);
+	for ( const [
+		i,
+		settledInitializePromise,
+	] of settledInitializePromises.entries() ) {
+		if ( settledInitializePromise.status === 'rejected' ) {
+			error(
+				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
+				settledInitializePromise.reason
+			);
+		}
+	}
 
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 
