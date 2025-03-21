@@ -186,7 +186,7 @@ add_filter( 'query_vars', function ( $query_vars ) {
 
 Then in your template code you may continue to use `isset( $_GET['thank_you'] )` but you might as well use `get_query_var( 'thank_you' )` instead.
 
-When an `od_url_metrics` post has not been updated within the default value i.e., a month or the filtered value via `od_url_metric_garbage_collection_ttl` then it is garbage-collected, as it is likely that the original URL has gone away.
+When an `od_url_metrics` post has not been updated within the default value i.e., a month or the filtered value via `od_url_metric_garbage_collection_ttl` then it is garbage-collected, since it is likely the original URL has gone away.
 
 Extensions to Optimization Detective rarely need to directly interface with the custom post type, so far. See the experimental [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility/) plugin which interfaces with the `od_url_metrics` post at submission time to add post meta via the `od_url_metric_stored` action, and then retrieves post meta in the tag visitor via the context object’s `url_metrics_id` property.
 
