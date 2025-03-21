@@ -664,9 +664,8 @@ export default async function detect( {
 		);
 	} );
 
-	// Stop observing.
+	// Stop observing initial viewport.
 	disconnectIntersectionObserver();
-	log( 'Detection is stopping.' );
 
 	urlMetric = {
 		url: currentUrl,
