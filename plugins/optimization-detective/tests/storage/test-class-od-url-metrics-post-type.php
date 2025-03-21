@@ -323,6 +323,46 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, get_post( $old_generic_post ), 'Expected old generic post to not have been deleted.' );
 		$this->assertInstanceOf( WP_Post::class, get_post( $new_url_metrics_post ), 'Expected new URL Metrics post to not have been deleted.' );
 		$this->assertNull( get_post( $old_url_metrics_post ), 'Expected old URL Metrics post to have been deleted.' );
+
+		// Check for the stale posts using ttl filter for older posts.
+		add_filter(
+			'od_url_metric_garbage_collection_ttl',
+			static function (): int {
+				return 2;
+			}
+		);
+
+		// Update timestamp to 2 months older.
+		$new_stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', strtotime( '-2 month' ) - HOUR_IN_SECONDS );
+
+		$older_generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_generic_post )
+		);
+		clean_post_cache( $older_generic_post );
+
+		$older_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $older_generic_post ) );
+		$older_url_metrics_post = $this->store_url_metric( $older_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $older_generic_post ) ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_url_metrics_post )
+		);
+		clean_post_cache( $older_url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $older_generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertNull( get_post( $older_url_metrics_post ), 'Expected old URL Metrics post to not have been deleted.' );
 	}
 
 	/**
