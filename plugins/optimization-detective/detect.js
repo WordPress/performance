@@ -711,6 +711,9 @@ export default async function detect( {
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
+	// Clean up.
+	breadcrumbedElementsMap.clear();
+
 	log( 'Current URL Metric:', urlMetric );
 
 	// Wait for the page to be hidden.
@@ -862,7 +865,4 @@ export default async function detect( {
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
 	navigator.sendBeacon( url, payloadBlob );
-
-	// Clean up.
-	breadcrumbedElementsMap.clear();
 }
