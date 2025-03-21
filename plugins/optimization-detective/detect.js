@@ -551,6 +551,10 @@ export default async function detect( {
 					onLCP,
 					onINP,
 					onCLS,
+					getRootData,
+					extendRootData,
+					getElementData,
+					extendElementData,
 				} );
 				if ( initializePromise instanceof Promise ) {
 					extensionInitializePromises.push( initializePromise );

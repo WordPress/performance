@@ -69,6 +69,13 @@ export type InitializeArgs = {
 	readonly onLCP: OnLCPFunction | OnLCPWithAttributionFunction;
 	readonly onINP: OnINPFunction | OnINPWithAttributionFunction;
 	readonly onCLS: OnCLSFunction | OnCLSWithAttributionFunction;
+	readonly getRootData: () => URLMetric;
+	readonly extendRootData: ( properties: ExtendedRootData ) => void;
+	readonly getElementData: ( xpath: string ) => ElementData | null;
+	readonly extendElementData: (
+		xpath: string,
+		properties: ExtendedElementData
+	) => void;
 };
 
 export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
