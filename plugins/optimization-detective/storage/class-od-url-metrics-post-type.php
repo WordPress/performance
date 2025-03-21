@@ -298,7 +298,6 @@ class OD_URL_Metrics_Post_Type {
 	 * @since 0.1.0
 	 */
 	public static function delete_stale_posts(): void {
-
 		/**
 		 * Filters the time for the garbage collection ttl for the stale posts.
 		 *
