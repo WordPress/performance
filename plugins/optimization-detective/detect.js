@@ -610,6 +610,9 @@ export default async function detect( {
 		elements: [],
 	};
 
+	/** @type {Map<string, Extension>} */
+	const extensions = new Map();
+
 	/** @type {Promise[]} */
 	const extensionInitializePromises = [];
 
@@ -620,6 +623,7 @@ export default async function detect( {
 		try {
 			/** @type {Extension} */
 			const extension = await import( extensionModuleUrl );
+			extensions.set( extensionModuleUrl, extension );
 
 			const extensionLogger = createLogger(
 				isDebug,
@@ -733,6 +737,71 @@ export default async function detect( {
 	if ( didWindowResize ) {
 		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
+	}
+
+	// Finalize extensions.
+	if ( extensions.size > 0 ) {
+		/** @type {Promise[]} */
+		const extensionFinalizePromises = [];
+
+		/** @type {string[]} */
+		const finalizingExtensionModuleUrls = [];
+
+		for ( const [
+			extensionModuleUrl,
+			extension,
+		] of extensions.entries() ) {
+			if ( extension.finalize instanceof Function ) {
+				const extensionLogger = createLogger(
+					isDebug,
+					`[Optimization Detective: ${
+						extension.name || 'Unnamed Extension'
+					}]`
+				);
+
+				extensionLogger.warn(
+					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
+				);
+
+				try {
+					const finalizePromise = extension.finalize( {
+						isDebug,
+						...extensionLogger,
+						getRootData,
+						getElementData,
+						extendElementData,
+						extendRootData,
+					} );
+					if ( finalizePromise instanceof Promise ) {
+						extensionFinalizePromises.push( finalizePromise );
+						finalizingExtensionModuleUrls.push(
+							extensionModuleUrl
+						);
+					}
+				} catch ( err ) {
+					error(
+						`Unable to start finalizing extension '${ extensionModuleUrl }':`,
+						err
+					);
+				}
+			}
+		}
+
+		// Wait for all extensions to finish finalizing.
+		const settledFinalizePromises = await Promise.allSettled(
+			extensionFinalizePromises
+		);
+		for ( const [
+			i,
+			settledFinalizePromise,
+		] of settledFinalizePromises.entries() ) {
+			if ( settledFinalizePromise.status === 'rejected' ) {
+				error(
+					`Failed to finalize extension '${ finalizingExtensionModuleUrls[ i ] }':`,
+					settledFinalizePromise.reason
+				);
+			}
+		}
 	}
 
 	/*

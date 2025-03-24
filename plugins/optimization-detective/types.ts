@@ -80,7 +80,25 @@ export type InitializeArgs = {
 
 export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
 
+export type FinalizeArgs = {
+	readonly getRootData: () => URLMetric;
+	readonly extendRootData: ( properties: ExtendedRootData ) => void;
+	readonly getElementData: ( xpath: string ) => ElementData | null;
+	readonly extendElementData: (
+		xpath: string,
+		properties: ExtendedElementData
+	) => void;
+	readonly isDebug: boolean;
+	readonly log: LogFunction;
+	readonly info: LogFunction;
+	readonly warn: LogFunction;
+	readonly error: LogFunction;
+};
+
+export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
+
 export interface Extension {
 	readonly name?: string;
 	readonly initialize?: InitializeCallback;
+	readonly finalize?: FinalizeCallback;
 }
