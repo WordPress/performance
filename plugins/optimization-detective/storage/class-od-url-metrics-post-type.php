@@ -299,8 +299,7 @@ class OD_URL_Metrics_Post_Type {
 	 */
 	public static function delete_stale_posts(): void {
 		/**
-		 * Filters the expiration time (TTL) after which an unmodified od_url_metrics post not touched since
-		 * that time will be garbage collected.
+		 * Filters the expiration time (TTL) after which a since-unmodified od_url_metrics post will be garbage collected.
 		 *
 		 * @since n.e.x.t
 		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl

@@ -368,9 +368,9 @@ The ETag is a unique identifier that changes whenever the underlying data used t
 
 A change in ETag means that any previously-collected URL Metrics will be immediately considered stale. When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag.
 
-### Filter: `od_url_metric_garbage_collection_ttl` (default: 3 * MONTH_IN_SECONDS)
+### Filter: `od_url_metric_garbage_collection_ttl` (default: 3 months in seconds)
 
-Filters the expiration time (TTL) after which an unmodified od_url_metrics post not touched since that time will be garbage collected.
+Filters the expiration time (TTL) after which an unmodified `od_url_metrics` post not touched since that time will be garbage collected.
 
 ```php
 add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
@@ -378,7 +378,7 @@ add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
 } );
 ```
 
-To prevent garbage collection for od_url_metrics post, add the filter and return zero.
+To prevent garbage collection of `od_url_metrics` posts, add return zero from the filter:
 
 ```php
 add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
