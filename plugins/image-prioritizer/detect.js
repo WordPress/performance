@@ -53,18 +53,6 @@ export async function initialize( { log: _log, onLCP, extendRootData } ) {
  * @param {LogFunction} log            - The function to call with log messages.
  */
 function handleLCPMetric( metric, extendRootData, log ) {
-	/**
-	 * Detected LCP external background image candidates.
-	 *
-	 * @type {Array<{
-	 *     url: string,
-	 *     tag: string,
-	 *     id: string|null,
-	 *     class: string|null,
-	 * }>}
-	 */
-	const externalBackgroundImages = [];
-
 	for ( const entry of metric.entries ) {
 		// Look only for LCP entries that have a URL and a corresponding element which is not an IMG or VIDEO.
 		if (
@@ -126,21 +114,8 @@ function handleLCPMetric( metric, extendRootData, log ) {
 			'Detected external LCP background image:',
 			externalBackgroundImage
 		);
-
-		externalBackgroundImages.push( externalBackgroundImage );
+		extendRootData( {
+			lcpElementExternalBackgroundImage: externalBackgroundImage,
+		} );
 	}
-
-	if ( externalBackgroundImages.length === 0 ) {
-		return;
-	}
-
-	// Get the last detected external background image which is going to be for the LCP element (or very likely will be).
-	const lcpElementExternalBackgroundImage = externalBackgroundImages.pop();
-
-	log(
-		'Sending external background image for LCP element:',
-		lcpElementExternalBackgroundImage
-	);
-
-	extendRootData( { lcpElementExternalBackgroundImage } );
 }
