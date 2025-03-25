@@ -16,6 +16,7 @@ export const name = 'Image Prioritizer';
  * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
  * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
+ * @typedef {import("../optimization-detective/types.ts").ExtendRootDataFunction} ExtendRootDataFunction
  */
 
 /**
@@ -48,9 +49,9 @@ export async function initialize( { log: _log, onLCP, extendRootData } ) {
  *
  * @since 0.3.0
  *
- * @param {LCPMetric}   metric         - LCP Metric.
- * @param {Function}    extendRootData - Function to extend root data with.
- * @param {LogFunction} log            - The function to call with log messages.
+ * @param {LCPMetric}              metric         - LCP Metric.
+ * @param {ExtendRootDataFunction} extendRootData - Function to extend root data with.
+ * @param {LogFunction}            log            - The function to call with log messages.
  */
 function handleLCPMetric( metric, extendRootData, log ) {
 	for ( const entry of metric.entries ) {

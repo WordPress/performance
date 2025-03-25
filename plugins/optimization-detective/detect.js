@@ -19,6 +19,10 @@
  * @typedef {import("./types.ts").Extension} Extension
  * @typedef {import("./types.ts").ExtendedRootData} ExtendedRootData
  * @typedef {import("./types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("./types.ts").GetRootDataFunction} GetRootDataFunction
+ * @typedef {import("./types.ts").ExtendRootDataFunction} ExtendRootDataFunction
+ * @typedef {import("./types.ts").GetElementDataFunction} GetElementDataFunction
+ * @typedef {import("./types.ts").ExtendElementDataFunction} ExtendElementDataFunction
  * @typedef {import("./types.ts").Logger} Logger
  */
 
@@ -247,6 +251,7 @@ const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
 /**
  * Gets root URL Metric data.
  *
+ * @type {GetRootDataFunction}
  * @return {URLMetric} URL Metric.
  */
 function getRootData() {
@@ -258,6 +263,7 @@ function getRootData() {
 /**
  * Extends root URL Metric data.
  *
+ * @type {ExtendRootDataFunction}
  * @param {ExtendedRootData} properties
  */
 function extendRootData( properties ) {
@@ -295,6 +301,7 @@ const reservedElementPropertyKeys = new Set( [
 /**
  * Gets element data.
  *
+ * @type {GetElementDataFunction}
  * @param {string} xpath - XPath.
  * @return {ElementData|null} Element data, or null if no element for the XPath exists.
  */
@@ -311,6 +318,7 @@ function getElementData( xpath ) {
 /**
  * Extends element data.
  *
+ * @type {ExtendElementDataFunction}
  * @param {string}              xpath      - XPath.
  * @param {ExtendedElementData} properties - Properties.
  */

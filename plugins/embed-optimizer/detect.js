@@ -13,6 +13,8 @@ export const name = 'Embed Optimizer';
  * @typedef {import("../optimization-detective/types.ts").Extension} Extension
  * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
+ * @typedef {import("../optimization-detective/types.ts").GetElementDataFunction} GetElementDataFunction
+ * @typedef {import("../optimization-detective/types.ts").ExtendElementDataFunction} ExtendElementDataFunction
  * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
  * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
  */
@@ -54,11 +56,11 @@ export async function initialize( {
 /**
  * Monitors embed wrapper for resizes.
  *
- * @param {HTMLDivElement} embedWrapper      Embed wrapper DIV.
- * @param {Function}       extendElementData Function to extend element data with.
- * @param {Function}       getElementData    Function to get element data.
- * @param {LogFunction}    log               The function to call with log messages.
- * @param {LogFunction}    error             The function to call with error messages.
+ * @param {HTMLDivElement}            embedWrapper      - Embed wrapper DIV.
+ * @param {ExtendElementDataFunction} extendElementData - Function to extend element data with.
+ * @param {GetElementDataFunction}    getElementData    - Function to get element data.
+ * @param {LogFunction}               log               - The function to call with log messages.
+ * @param {LogFunction}               error             - The function to call with error messages.
  */
 function monitorEmbedWrapperForResizes(
 	embedWrapper,
