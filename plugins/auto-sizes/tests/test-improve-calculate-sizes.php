@@ -1036,6 +1036,161 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the layout property of a column block is passed by context to the image block.
+	 *
+	 * @dataProvider data_image_block_with_parent_columns_and_its_parent_group_block
+	 *
+	 * @param string $group_block_alignment   Group block alignment.
+	 * @param string $columns_block_alignment Columns block alignment.
+	 * @param string $image_block_alignment   Image block alignment.
+	 * @param string $expected                Expected output.
+	 */
+	public function test_image_block_with_parent_columns_and_its_parent_group_block( string $group_block_alignment, string $columns_block_alignment, string $image_block_alignment, string $expected ): void {
+		$block_content = $this->get_group_block_markup(
+			$this->get_columns_block_markup(
+				$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
+				array(
+					'align' => $columns_block_alignment,
+				),
+				array(
+					'66.66%' => true,
+					'33.33%' => false,
+				)
+			),
+			array(
+				'align' => $group_block_alignment,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array<int, string>> The ancestor and image alignments.
+	 */
+	public function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
+		return array(
+			// Parent default alignment.
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block default alignment' => array(
+				'',
+				'',
+				'',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block wide alignment' => array(
+				'',
+				'',
+				'wide',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block full alignment' => array(
+				'',
+				'',
+				'full',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block left alignment' => array(
+				'',
+				'',
+				'left',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block center alignment' => array(
+				'',
+				'',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block default alignment, image block right alignment' => array(
+				'',
+				'',
+				'right',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+
+			// Parent wide alignment.
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block default alignment' => array(
+				'wide',
+				'',
+				'',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block wide alignment' => array(
+				'wide',
+				'',
+				'wide',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block full alignment' => array(
+				'wide',
+				'',
+				'full',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block left alignment' => array(
+				'wide',
+				'',
+				'left',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block center alignment' => array(
+				'wide',
+				'',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block right alignment' => array(
+				'wide',
+				'',
+				'right',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+
+			// Parent full alignment.
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block default alignment' => array(
+				'full',
+				'',
+				'',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block wide alignment' => array(
+				'full',
+				'',
+				'wide',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block full alignment' => array(
+				'full',
+				'',
+				'full',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block left alignment' => array(
+				'full',
+				'',
+				'left',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block center alignment' => array(
+				'full',
+				'',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of contentSize 413px, parent block full alignment, image block right alignment' => array(
+				'full',
+				'',
+				'right',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
