@@ -292,7 +292,6 @@ function image_prioritizer_validate_background_image_url( string $url ) {
  *
  * @return WP_REST_Response|WP_HTTP_Response|WP_Error|mixed Result to send to the client.
  * @noinspection PhpDocMissingThrowsInspection
- * @noinspection PhpDeprecationInspection
  */
 function image_prioritizer_filter_rest_request_before_callbacks( $response, array $handler, WP_REST_Request $request ) {
 	unset( $handler ); // Unused.
