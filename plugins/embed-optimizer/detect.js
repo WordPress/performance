@@ -26,17 +26,11 @@ export const name = 'Embed Optimizer';
  * @param {InitializeArgs} args Args.
  */
 export async function initialize( {
-	log: _log,
-	error: _error,
+	log,
+	error,
 	getElementData,
 	extendElementData,
 } ) {
-	/* eslint-disable no-console */
-	// TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
-	const log = _log || console.log;
-	const error = _error || console.error;
-	/* eslint-enable no-console */
-
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'

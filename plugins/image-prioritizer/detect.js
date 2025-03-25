@@ -27,10 +27,7 @@ export const name = 'Image Prioritizer';
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { log: _log, onLCP, extendRootData } ) {
-	// eslint-disable-next-line no-console
-	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
-
+export async function initialize( { log, onLCP, extendRootData } ) {
 	onLCP(
 		( metric ) => {
 			handleLCPMetric( metric, extendRootData, log );
