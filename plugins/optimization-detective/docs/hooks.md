@@ -370,7 +370,7 @@ A change in ETag means that any previously-collected URL Metrics will be immedia
 
 ### Filter: `od_url_metric_garbage_collection_ttl` (default: 3 months in seconds)
 
-Filters the expiration time (TTL) after which an unmodified `od_url_metrics` post not touched since that time will be garbage collected.
+Filters the expiration age (TTL) after which an `od_url_metrics` post will be garbage collected if it has not been modified since that time.
 
 ```php
 add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
@@ -378,7 +378,7 @@ add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
 } );
 ```
 
-To prevent garbage collection of `od_url_metrics` posts, add return zero from the filter:
+To prevent garbage collection of `od_url_metrics` posts, add a filter that returns zero:
 
 ```php
 add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
