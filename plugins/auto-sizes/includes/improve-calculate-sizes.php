@@ -201,7 +201,10 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 		case 'wide':
 			$layout_width = auto_sizes_get_layout_width( 'wide' );
 			if ( str_ends_with( $layout_width, 'px' ) ) {
-				$layout_width = (int) $layout_width * $container_relative_width;
+				// First remove 'px' from width.
+				$layout_width = str_replace( 'px', '', $layout_width );
+				// Convert to float for better precision.
+				$layout_width = (float) $layout_width * $container_relative_width;
 				$layout_width = sprintf( '%dpx', (int) $layout_width );
 			}
 			break;
@@ -218,7 +221,10 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			 * on the server. Otherwise, we need to rely on CSS functions.
 			 */
 			if ( str_ends_with( $layout_width, 'px' ) ) {
-				$layout_width = (int) $layout_width * $container_relative_width;
+				// First remove 'px' from width.
+				$layout_width = str_replace( 'px', '', $layout_width );
+				// Convert to float for better precision.
+				$layout_width = (float) $layout_width * $container_relative_width;
 				$layout_width = sprintf( '%dpx', min( (int) $layout_width, $image_width ) );
 			} else {
 				$layout_width = sprintf( 'min(%1$s, %2$spx)', $layout_width, $image_width );
