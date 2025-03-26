@@ -340,7 +340,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 					$status = 'populated';
 				}
 
-				$viewport_group_status[] = sprintf( '%s: %s', $min_width, $status );
+				$viewport_group_status[] = sprintf( '%s:%s', $min_width, $status );
 			}
 			$content .= '; url_metric_groups={' . implode( ', ', $viewport_group_status ) . '}';
 			$processor->set_attribute( 'content', $content );
