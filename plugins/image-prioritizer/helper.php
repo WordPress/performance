@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
-	$required_od_version = '1.0.0-beta3';
+	$required_od_version = '1.0.0-beta4';
 	if ( ! version_compare( $optimization_detective_version, $required_od_version, '>=' ) ) {
 		add_action(
 			'admin_notices',
@@ -292,7 +292,6 @@ function image_prioritizer_validate_background_image_url( string $url ) {
  *
  * @return WP_REST_Response|WP_HTTP_Response|WP_Error|mixed Result to send to the client.
  * @noinspection PhpDocMissingThrowsInspection
- * @noinspection PhpDeprecationInspection
  */
 function image_prioritizer_filter_rest_request_before_callbacks( $response, array $handler, WP_REST_Request $request ) {
 	unset( $handler ); // Unused.

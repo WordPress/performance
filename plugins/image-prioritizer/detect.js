@@ -12,24 +12,11 @@
 export const name = 'Image Prioritizer';
 
 /**
- * Detected LCP external background image candidates.
- *
- * @type {Array<{
- *     url: string,
- *     tag: string,
- *     id: string|null,
- *     class: string|null,
- * }>}
- */
-const externalBackgroundImages = [];
-
-/**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
- * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
- * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
  * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
+ * @typedef {import("../optimization-detective/types.ts").ExtendRootDataFunction} ExtendRootDataFunction
  */
 
 /**
@@ -40,13 +27,10 @@ const externalBackgroundImages = [];
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { log: _log, onLCP } ) {
-	// eslint-disable-next-line no-console
-	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
-
+export async function initialize( { log, onLCP, extendRootData } ) {
 	onLCP(
 		( metric ) => {
-			handleLCPMetric( metric, log );
+			handleLCPMetric( metric, extendRootData, log );
 		},
 		{
 			// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
@@ -62,10 +46,11 @@ export async function initialize( { log: _log, onLCP } ) {
  *
  * @since 0.3.0
  *
- * @param {LCPMetric}   metric - LCP Metric.
- * @param {LogFunction} log    - The function to call with log messages.
+ * @param {LCPMetric}              metric         - LCP Metric.
+ * @param {ExtendRootDataFunction} extendRootData - Function to extend root data with.
+ * @param {LogFunction}            log            - The function to call with log messages.
  */
-function handleLCPMetric( metric, log ) {
+function handleLCPMetric( metric, extendRootData, log ) {
 	for ( const entry of metric.entries ) {
 		// Look only for LCP entries that have a URL and a corresponding element which is not an IMG or VIDEO.
 		if (
@@ -127,34 +112,8 @@ function handleLCPMetric( metric, log ) {
 			'Detected external LCP background image:',
 			externalBackgroundImage
 		);
-
-		externalBackgroundImages.push( externalBackgroundImage );
+		extendRootData( {
+			lcpElementExternalBackgroundImage: externalBackgroundImage,
+		} );
 	}
-}
-
-/**
- * Finalizes extension.
- *
- * @since 0.3.0
- *
- * @type {FinalizeCallback}
- * @param {FinalizeArgs} args Args.
- */
-export async function finalize( { extendRootData, log: _log } ) {
-	// eslint-disable-next-line no-console
-	const log = _log || console.log; // TODO: Remove once Optimization Detective likely updated, or when strict version requirement added in od_init action.
-
-	if ( externalBackgroundImages.length === 0 ) {
-		return;
-	}
-
-	// Get the last detected external background image which is going to be for the LCP element (or very likely will be).
-	const lcpElementExternalBackgroundImage = externalBackgroundImages.pop();
-
-	log(
-		'Sending external background image for LCP element:',
-		lcpElementExternalBackgroundImage
-	);
-
-	extendRootData( { lcpElementExternalBackgroundImage } );
 }
