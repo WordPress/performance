@@ -326,7 +326,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			! $did_amend_meta_generator &&
 			'meta' === strtolower( $processor->get_tag() ) &&
 			'generator' === $processor->get_attribute( 'name' ) &&
-			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective' )
+			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective ' )
 		) {
 			$content               = (string) $processor->get_attribute( 'content' );
 			$viewport_group_status = array();
