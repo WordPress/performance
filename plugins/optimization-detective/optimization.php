@@ -323,8 +323,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 		// Amend the META generator tag if it's the right one and hasn't been amended already.
 		if (
-			! $did_amend_meta_generator &&
-			'meta' === strtolower( $processor->get_tag() ) &&
+			! $did_amend_meta_generator && // @phpstan-ignore booleanNot.alwaysTrue, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse (False positives in PHPStan due to the following line.)
+			'META' === $processor->get_tag() && // @phpstan-ignore identical.alwaysFalse (False positive in PHPStan since it isn't aware of the do/while loop apparently.)
 			'generator' === $processor->get_attribute( 'name' ) &&
 			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective ' )
 		) {
