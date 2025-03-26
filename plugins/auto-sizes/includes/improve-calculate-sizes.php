@@ -99,7 +99,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$alignment                = $block->attributes['align'] ?? '';
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
-			$container_relative_width = $block->context['container_relative_width'] ?? '1.0';
+			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
 
 			/*
 			 * Update width for cover block.
