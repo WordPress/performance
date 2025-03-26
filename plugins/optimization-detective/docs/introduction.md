@@ -420,7 +420,6 @@ The following are the properties passed to the `initialize` async function:
 * `onLCP`: Function from web-vitals.js which registers a callback to obtain the LCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onlcp).
 * `onINP`: Function from web-vitals.js which registers a callback to obtain the INP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oninp).
 * `onCLS`: Function from web-vitals.js which registers a callback to obtain the CLS metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oncls).
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `getRootData`: Function which returns an immutable copy of the current URL Metric data pending submission.
 * `getElementData`: Function which returns an immutable copy of the element data for a given XPath.
 * `extendRootData`: Function which merges additional properties onto the root of the URL Metric (which may not override core properties).
