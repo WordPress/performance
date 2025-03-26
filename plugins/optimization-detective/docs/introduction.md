@@ -382,22 +382,15 @@ add_filter(
 );
 ```
 
-The `detect.js` file is a script module which exports two async functions: `initialize` and `finalize`. The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission. The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/optimization-detective/types.ts#L52-L79). Here is an example `detect.js` module script which amends the URL Metric with these exported functions:
+The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
 
 ```js
-/**
- * Embed element heights.
- *
- * @type {Map<string, DOMRectReadOnly>}
- */
-const loadedElementContentRects = new Map();
-
 /**
  * Initializes extension.
  *
  * @type {InitializeCallback}
  */
-export async function initialize() {
+export async function initialize( { extendElementData } ) {
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
@@ -406,30 +399,18 @@ export async function initialize() {
 		const xpath = embedWrapper.dataset.odXpath;
 		const observer = new ResizeObserver( ( entries ) => {
 			const [ entry ] = entries;
-			loadedElementContentRects.set( xpath, entry.contentRect );
+			extendElementData( xpath, {
+				resizedBoundingClientRect: entry.contentRect,
+			} );
 		} );
 		observer.observe( embedWrapper, { box: 'content-box' } );
-	}
-}
-
-/**
- * Finalizes extension.
- *
- * @type {FinalizeCallback}
- * @param {FinalizeArgs} args Args.
- */
-export async function finalize( { extendElementData } ) {
-	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
-		extendElementData( xpath, {
-			resizedBoundingClientRect: domRect,
-		} );
 	}
 }
 ```
 
 Note that this depends on a tag visitor to have been registered which opts in the `.wp-block-embed__wrapper` elements for tracking. With the resized data captured in URL Metrics, the tag visitor can use this data to construct responsive `min-height` styles that target the parent `.wp-block-embed` elements. A full implementation of this tag visitor and detection extension can be found in the [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) plugin: [`Embed_Optimizer_Tag_Visitor::reduce_layout_shifts()`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L131-L207) and [`detect.js`](https://github.com/WordPress/performance/blob/trunk/plugins/embed-optimizer/detect.js).
 
-## Properties Passed to `initialize` and `finalize`
+## Properties Passed to `initialize` ~and `finalize`~
 
 The following are the properties passed to the `initialize` async function:
 
@@ -439,16 +420,13 @@ The following are the properties passed to the `initialize` async function:
 * `onLCP`: Function from web-vitals.js which registers a callback to obtain the LCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onlcp).
 * `onINP`: Function from web-vitals.js which registers a callback to obtain the INP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oninp).
 * `onCLS`: Function from web-vitals.js which registers a callback to obtain the CLS metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oncls).
-
-The following are the properties passed to the `finalize` async function:
-
 * `isDebug`: Whether `WP_DEBUG` is enabled.
 * `getRootData`: Function which returns an immutable copy of the current URL Metric data pending submission.
 * `getElementData`: Function which returns an immutable copy of the element data for a given XPath.
 * `extendRootData`: Function which merges additional properties onto the root of the URL Metric (which may not override core properties).
 * `extendElementData`: Function which merges additional properties onto the root of the element for the supplied XPath (which may not override core properties).
 
-The `initialize` and `finalize` functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
+The `initialize` ~and `finalize`~ functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
 
 Note that by default the [“standard” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=1.%20The%20%22standard%22%20build) of web-vitals.js is loaded during detection. Extensions can opt in to serving the [“attribution” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=2.%20The%20%22attribution%22%20build) via the `od_use_web_vitals_attribution_build` filter. The attribution build is slightly larger and includes additional data which can be useful to store in a URL Metric, such as LoAF data with the INP metric. See [attribution docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution) for what additional properties are made available.
 
