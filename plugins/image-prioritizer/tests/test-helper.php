@@ -449,20 +449,20 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 */
 	public function data_provider_to_test_image_prioritizer_validate_background_image_url(): array {
 		return array(
-			'bad_url_parse_error'         => array(
+			'bad_url_parse_error'                    => array(
 				'set_up'       => static function (): string {
 					return 'https:///www.example.com';
 				},
 				'expect_error' => 'background_image_url_lacks_host',
 			),
-			'bad_url_no_host'             => array(
+			'bad_url_no_host'                        => array(
 				'set_up'       => static function (): string {
 					return '/foo/bar?baz=1';
 				},
 				'expect_error' => 'background_image_url_lacks_host',
 			),
 
-			'bad_url_disallowed_origin'   => array(
+			'bad_url_disallowed_origin'              => array(
 				'set_up'       => static function (): string {
 					return 'https://bad.example.com/foo.jpg';
 				},
@@ -508,7 +508,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => null,
 			),
 
-			'good_url_allowed_cdn_origin' => array(
+			'good_url_allowed_cdn_origin'            => array(
 				'set_up'       => function (): string {
 					$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 					$this->assertIsInt( $attachment_id );
@@ -552,7 +552,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => null,
 			),
 
-			'bad_not_found'               => array(
+			'bad_not_found'                          => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/bad.jpg' );
 
@@ -583,7 +583,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_response_not_ok',
 			),
 
-			'bad_content_type'            => array(
+			'bad_content_type'                       => array(
 				'set_up'       => static function (): string {
 					$video_url = home_url( '/bad.mp4' );
 
@@ -614,7 +614,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_response_not_image',
 			),
 
-			'bad_content_length'          => array(
+			'bad_content_length'                     => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/massive-image.jpg' );
 
@@ -645,7 +645,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_content_length_too_large',
 			),
 
-			'bad_redirect'                => array(
+			'bad_redirect'                           => array(
 				'set_up'       => static function (): string {
 					$redirect_url = home_url( '/redirect.jpg' );
 
@@ -666,7 +666,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'http_request_failed',
 			),
 
-			'good_same_origin'            => array(
+			'good_same_origin'                       => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/good.jpg' );
 
@@ -695,6 +695,68 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					return $image_url;
 				},
 				'expect_error' => null,
+			),
+
+			'good_image_with_octet_stream_mime_type' => array(
+				'set_up'       => static function (): string {
+					$image_url = home_url( '/test-image.avif' );
+
+					add_filter(
+						'pre_http_request',
+						static function ( $pre, $parsed_args, $url ) use ( $image_url ) {
+							if ( 'HEAD' !== $parsed_args['method'] || $image_url !== $url ) {
+								return $pre;
+							}
+							return array(
+								'headers'  => array(
+									'content-type'   => 'application/octet-stream',
+									'content-length' => '288449',
+								),
+								'body'     => '',
+								'response' => array(
+									'code'    => 200,
+									'message' => 'OK',
+								),
+							);
+						},
+						10,
+						3
+					);
+
+					return $image_url;
+				},
+				'expect_error' => null,
+			),
+
+			'bad_file_with_octet_stream_mime_type'   => array(
+				'set_up'       => static function (): string {
+					$image_url = home_url( '/test-document.pdf' );
+
+					add_filter(
+						'pre_http_request',
+						static function ( $pre, $parsed_args, $url ) use ( $image_url ) {
+							if ( 'HEAD' !== $parsed_args['method'] || $image_url !== $url ) {
+								return $pre;
+							}
+							return array(
+								'headers'  => array(
+									'content-type'   => 'application/octet-stream',
+									'content-length' => '288449',
+								),
+								'body'     => '',
+								'response' => array(
+									'code'    => 200,
+									'message' => 'OK',
+								),
+							);
+						},
+						10,
+						3
+					);
+
+					return $image_url;
+				},
+				'expect_error' => 'background_image_response_not_image',
 			),
 		);
 	}
