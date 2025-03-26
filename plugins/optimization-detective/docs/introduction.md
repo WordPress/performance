@@ -382,13 +382,16 @@ add_filter(
 );
 ```
 
-The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`; extensions should use `initialize` instead and call the supplied `extendRootData` and `extendElementData` whenever a relevant mutation occurs rather than waiting until the page is left). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
+The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`; extensions should use `initialize` instead and call the supplied `extendRootData` and `extendElementData` whenever a relevant mutation occurs rather than waiting until the page is left). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). An extension may also export a `name` which is used as a prefix when logging out messages. Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
 
 ```js
+export name = 'My Resized Embed Optimizer';
+
 /**
  * Initializes extension.
  *
  * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
  */
 export async function initialize( { extendElementData } ) {
 	const embedWrappers = document.querySelectorAll(
@@ -414,7 +417,6 @@ Note that this depends on a tag visitor to have been registered which opts in th
 
 The following are the properties passed to the `initialize` async function:
 
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `onTTFB`: Function from web-vitals.js which registers a callback to obtain the TTFB metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onttfb).
 * `onFCP`: Function from web-vitals.js which registers a callback to obtain the FCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onfcp).
 * `onLCP`: Function from web-vitals.js which registers a callback to obtain the LCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onlcp).
@@ -424,6 +426,11 @@ The following are the properties passed to the `initialize` async function:
 * `getElementData`: Function which returns an immutable copy of the element data for a given XPath.
 * `extendRootData`: Function which merges additional properties onto the root of the URL Metric (which may not override core properties).
 * `extendElementData`: Function which merges additional properties onto the root of the element for the supplied XPath (which may not override core properties).
+* `isDebug`: Whether `WP_DEBUG` is enabled.
+* `log`: Logs a message to the console via `console.log()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `info`: Logs a message to the console via `console.info()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `warn`: Logs a message to the console via `console.warn()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `error`: Logs a message to the console via `console.error()` _regardless_ of whether `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
 
 The `initialize` ~and `finalize`~ functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
 
