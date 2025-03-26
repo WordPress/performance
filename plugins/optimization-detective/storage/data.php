@@ -444,3 +444,40 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 
 	return $sample_size;
 }
+
+/**
+ * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return positive-int Maximum allowed byte size.
+ */
+function od_get_maximum_url_metric_size(): int {
+	/**
+	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+	 *
+	 * The default value is 1 MB.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $max_size Maximum allowed byte size.
+	 * @return int Filtered maximum allowed byte size.
+	 */
+	$size = (int) apply_filters( 'od_maximum_url_metric_size', MB_IN_BYTES );
+	if ( $size <= 0 ) {
+		_doing_it_wrong(
+			esc_html( "Filter: 'od_maximum_url_metric_size'" ),
+			esc_html(
+				sprintf(
+					/* translators: %s: size */
+					__( 'Invalid size "%s". Must be greater than zero.', 'optimization-detective' ),
+					$size
+				)
+			),
+			'Optimization Detective 1.0.0'
+		);
+		$size = MB_IN_BYTES;
+	}
+	return $size;
+}

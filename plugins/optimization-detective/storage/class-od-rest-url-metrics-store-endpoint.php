@@ -230,13 +230,8 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			);
 		}
 
-		/*
-		 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
-		 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
-		 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
-		 * getting sent.
-		 */
-		$max_size       = 64 * 1024; // 64 KB
+		// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
+		$max_size       = od_get_maximum_url_metric_size();
 		$content_length = strlen( (string) wp_json_encode( $url_metric ) );
 		if ( $content_length > $max_size ) {
 			return new WP_Error(
@@ -311,5 +306,66 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'success' => true,
 			)
 		);
+	}
+
+	/**
+	 * Decompresses the REST API request body for the URL Metrics endpoint.
+	 *
+	 * @since n.e.x.t
+	 * @access private
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param mixed           $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
+	 * @param WP_REST_Server  $server  Server instance.
+	 * @param WP_REST_Request $request Request used to generate the response.
+	 * @return mixed Passed through $result if successful, or otherwise a WP_Error.
+	 */
+	public function decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
+		unset( $server ); // Unused.
+
+		if (
+			$request->get_route() === '/' . self::ROUTE_NAMESPACE . self::ROUTE_BASE &&
+			'application/gzip' === $request->get_header( 'Content-Type' ) &&
+			function_exists( 'gzdecode' )
+		) {
+			$compressed_body = $request->get_body();
+
+			/*
+			 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+			 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+			 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+			 * getting sent.
+			 */
+			$max_size       = 64 * 1024; // 64 KB
+			$content_length = strlen( $compressed_body );
+			if ( $content_length > $max_size ) {
+				return new WP_Error(
+					'rest_content_too_large',
+					sprintf(
+					/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+						__( 'Compressed JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+						number_format_i18n( $content_length ),
+						number_format_i18n( $max_size )
+					),
+					array( 'status' => 413 )
+				);
+			}
+
+			$decompressed_body = @gzdecode( $compressed_body ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- We need to suppress errors here.
+
+			if ( false === $decompressed_body ) {
+				return new WP_Error(
+					'rest_invalid_payload',
+					__( 'Unable to decompress the gzip payload.', 'optimization-detective' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// Update the request so later handlers see the decompressed JSON.
+			$request->set_body( $decompressed_body );
+			$request->set_header( 'Content-Type', 'application/json' );
+		}
+		return $result;
 	}
 }

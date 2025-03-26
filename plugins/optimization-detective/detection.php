@@ -140,6 +140,8 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
 		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
+		'gzdecodeAvailable'      => function_exists( 'gzdecode' ),
+		'maxUrlMetricSize'       => od_get_maximum_url_metric_size(),
 	);
 	if ( is_user_logged_in() ) {
 		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );
@@ -172,6 +174,8 @@ function od_register_rest_url_metric_store_endpoint(): void {
 		$endpoint_controller::ROUTE_BASE,
 		$endpoint_controller->get_registration_args()
 	);
+
+	add_filter( 'rest_pre_dispatch', array( $endpoint_controller, 'decompress_rest_request_body' ), 10, 3 );
 }
 
 /**
