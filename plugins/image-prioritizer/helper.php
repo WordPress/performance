@@ -234,7 +234,15 @@ function image_prioritizer_validate_background_image_url( string $url ) {
 
 	// Validate that the Content-Type is an image.
 	$content_type = (array) wp_remote_retrieve_header( $r, 'content-type' );
-	if ( ! is_string( $content_type[0] ) || ! str_starts_with( $content_type[0], 'image/' ) ) {
+	if ( 'application/octet-stream' === $content_type[0] ) {
+		// This is a special case for images that are not served with the correct Content-Type.
+		$file_extension              = pathinfo( (string) wp_parse_url( $url, PHP_URL_PATH ), PATHINFO_EXTENSION );
+		$valid_image_file_extensions = array( 'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic', 'heif', 'svg' );
+		$is_valid_content_type       = in_array( strtolower( $file_extension ), $valid_image_file_extensions, true );
+	} else {
+		$is_valid_content_type = is_string( $content_type[0] ) && str_starts_with( $content_type[0], 'image/' );
+	}
+	if ( ! $is_valid_content_type ) {
 		return new WP_Error(
 			'background_image_response_not_image',
 			sprintf(

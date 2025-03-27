@@ -367,3 +367,19 @@ The ETag is a unique identifier that changes whenever the underlying data used t
 6. The list of active plugins.
 
 A change in ETag means that any previously-collected URL Metrics will be immediately considered stale. When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag.
+
+### Filter: `od_url_metric_garbage_collection_ttl` (default: 3 months in seconds)
+
+Filters the expiration age (TTL) after which an `od_url_metrics` post will be garbage collected if it has not been modified since that time.
+
+```php
+add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
+	return 6 * MONTH_IN_SECONDS;
+} );
+```
+
+To prevent garbage collection of `od_url_metrics` posts, add a filter that returns zero:
+
+```php
+add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
+```
