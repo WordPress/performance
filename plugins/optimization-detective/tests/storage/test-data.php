@@ -98,9 +98,9 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 						)
 					);
 					return array(
-						'year'     => $date->format( 'Y' ),
-						'monthnum' => $date->format( 'm' ),
 						'day'      => $date->format( 'j' ),
+						'monthnum' => $date->format( 'm' ),
+						'year'     => $date->format( 'Y' ),
 					);
 				},
 			),
