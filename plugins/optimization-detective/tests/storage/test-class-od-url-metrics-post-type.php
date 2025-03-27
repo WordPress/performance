@@ -288,7 +288,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_delete_stale_posts(): void {
 		global $wpdb;
 
-		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 3 * MONTH_IN_SECONDS * HOUR_IN_SECONDS ) );
+		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 3 * MONTH_IN_SECONDS + 1 ) );
 
 		$new_generic_post = self::factory()->post->create();
 		$old_generic_post = self::factory()->post->create();
@@ -333,7 +333,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		);
 
 		// Update timestamp to 6 months older.
-		$new_stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 6 * MONTH_IN_SECONDS * HOUR_IN_SECONDS ) );
+		$new_stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 6 * MONTH_IN_SECONDS + 1 ) );
 
 		$older_generic_post = self::factory()->post->create();
 		$wpdb->update(
