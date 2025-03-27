@@ -273,6 +273,7 @@ function extendRootData( properties ) {
 		}
 	}
 	Object.assign( urlMetric, properties );
+	debouncedCompressUrlMetric();
 }
 
 /**
@@ -335,6 +336,7 @@ function extendElementData( xpath, properties ) {
 	}
 	const elementData = elementsByXPath.get( xpath );
 	Object.assign( elementData, properties );
+	debouncedCompressUrlMetric();
 }
 
 /**
@@ -352,6 +354,46 @@ async function compress( jsonString ) {
 		compressedDataStream
 	).arrayBuffer();
 	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
+}
+
+/**
+ * Stores the compressed URL metric data.
+ *
+ * @type {Blob|null}
+ */
+let compressedPayload = null;
+
+/**
+ * Timeout ID for debouncing URL metric compression.
+ *
+ * @type {ReturnType<typeof setTimeout> | null}
+ */
+let recompressionTimeout = null;
+
+/**
+ * Whether compression is enabled.
+ *
+ * @type {boolean}
+ */
+let compressionEnabled = true;
+
+/**
+ * Debounces the compression of the URL Metric.
+ */
+function debouncedCompressUrlMetric() {
+	if ( ! compressionEnabled || recompressionTimeout ) {
+		return;
+	}
+	recompressionTimeout = setTimeout( async () => {
+		if ( typeof requestIdleCallback === 'function' ) {
+			await new Promise( ( resolve ) => {
+				requestIdleCallback( resolve );
+			} );
+		}
+		compressedPayload = await compress( JSON.stringify( urlMetric ) );
+		clearTimeout( recompressionTimeout );
+		recompressionTimeout = null;
+	}, 1000 );
 }
 
 /**
@@ -404,6 +446,7 @@ export default async function detect( {
 } ) {
 	const logger = createLogger( isDebug, consoleLogPrefix );
 	const { log, warn, error } = logger;
+	compressionEnabled = gzdecodeAvailable;
 
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
@@ -681,6 +724,10 @@ export default async function detect( {
 					initializingExtensionModuleUrls.push( extensionModuleUrl );
 				}
 			}
+
+			if ( extension.finalize instanceof Function ) {
+				compressionEnabled = false;
+			}
 		} catch ( err ) {
 			error(
 				`Failed to start initializing extension '${ extensionModuleUrl }':`,
@@ -745,6 +792,9 @@ export default async function detect( {
 	breadcrumbedElementsMap.clear();
 
 	log( 'Current URL Metric:', urlMetric );
+
+	// Compress the URL Metric once so that even if there are no extensions available or extending the URL Metric, it is compressed.
+	debouncedCompressUrlMetric();
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
@@ -849,9 +899,9 @@ export default async function detect( {
 		);
 		return;
 	}
-
-	const payloadBlob = gzdecodeAvailable
-		? await compress( jsonBody )
+	compressionEnabled = compressionEnabled && null !== compressedPayload;
+	const payloadBlob = compressionEnabled
+		? compressedPayload
 		: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
 		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
@@ -889,7 +939,7 @@ export default async function detect( {
 	message += `, ${ Math.round(
 		percentOfBudget
 	) }% of ${ maxBodyLengthKiB } KiB limit`;
-	if ( gzdecodeAvailable ) {
+	if ( compressionEnabled ) {
 		message += `, gzip compressed -${ Math.round(
 			( ( jsonBody.length - payloadBlob.size ) / jsonBody.length ) * 100
 		) }%`;
@@ -922,7 +972,7 @@ export default async function detect( {
 	const headers = {
 		'Content-Type': 'application/json',
 	};
-	if ( gzdecodeAvailable ) {
+	if ( compressionEnabled ) {
 		headers[ 'Content-Encoding' ] = 'gzip';
 	}
 
