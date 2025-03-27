@@ -19,6 +19,10 @@
  * @typedef {import("./types.ts").Extension} Extension
  * @typedef {import("./types.ts").ExtendedRootData} ExtendedRootData
  * @typedef {import("./types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("./types.ts").GetRootDataFunction} GetRootDataFunction
+ * @typedef {import("./types.ts").ExtendRootDataFunction} ExtendRootDataFunction
+ * @typedef {import("./types.ts").GetElementDataFunction} GetElementDataFunction
+ * @typedef {import("./types.ts").ExtendElementDataFunction} ExtendElementDataFunction
  * @typedef {import("./types.ts").Logger} Logger
  */
 
@@ -247,6 +251,7 @@ const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
 /**
  * Gets root URL Metric data.
  *
+ * @type {GetRootDataFunction}
  * @return {URLMetric} URL Metric.
  */
 function getRootData() {
@@ -258,6 +263,7 @@ function getRootData() {
 /**
  * Extends root URL Metric data.
  *
+ * @type {ExtendRootDataFunction}
  * @param {ExtendedRootData} properties
  */
 function extendRootData( properties ) {
@@ -295,6 +301,7 @@ const reservedElementPropertyKeys = new Set( [
 /**
  * Gets element data.
  *
+ * @type {GetElementDataFunction}
  * @param {string} xpath - XPath.
  * @return {ElementData|null} Element data, or null if no element for the XPath exists.
  */
@@ -311,6 +318,7 @@ function getElementData( xpath ) {
 /**
  * Extends element data.
  *
+ * @type {ExtendElementDataFunction}
  * @param {string}              xpath      - XPath.
  * @param {ExtendedElementData} properties - Properties.
  */
@@ -519,68 +527,6 @@ export default async function detect( {
 
 	log( 'Proceeding with detection' );
 
-	/** @type {Map<string, Extension>} */
-	const extensions = new Map();
-
-	/** @type {Promise[]} */
-	const extensionInitializePromises = [];
-
-	/** @type {string[]} */
-	const initializingExtensionModuleUrls = [];
-
-	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		try {
-			/** @type {Extension} */
-			const extension = await import( extensionModuleUrl );
-			extensions.set( extensionModuleUrl, extension );
-
-			const extensionLogger = createLogger(
-				isDebug,
-				`[Optimization Detective: ${
-					extension.name || 'Unnamed Extension'
-				}]`
-			);
-
-			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
-			if ( extension.initialize instanceof Function ) {
-				const initializePromise = extension.initialize( {
-					isDebug,
-					...extensionLogger,
-					onTTFB,
-					onFCP,
-					onLCP,
-					onINP,
-					onCLS,
-				} );
-				if ( initializePromise instanceof Promise ) {
-					extensionInitializePromises.push( initializePromise );
-					initializingExtensionModuleUrls.push( extensionModuleUrl );
-				}
-			}
-		} catch ( err ) {
-			error(
-				`Failed to start initializing extension '${ extensionModuleUrl }':`,
-				err
-			);
-		}
-	}
-
-	// Wait for all extensions to finish initializing.
-	const settledInitializePromises = await Promise.allSettled(
-		extensionInitializePromises
-	);
-	for ( const [
-		i,
-		settledInitializePromise,
-	] of settledInitializePromises.entries() ) {
-		if ( settledInitializePromise.status === 'rejected' ) {
-			error(
-				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
-				settledInitializePromise.reason
-			);
-		}
-	}
-
 	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
 	/** @type {Map<Element, string>} */
@@ -660,9 +606,8 @@ export default async function detect( {
 		);
 	} );
 
-	// Stop observing.
+	// Stop observing initial viewport.
 	disconnectIntersectionObserver();
-	log( 'Detection is stopping.' );
 
 	urlMetric = {
 		url: currentUrl,
@@ -672,6 +617,72 @@ export default async function detect( {
 		},
 		elements: [],
 	};
+
+	/** @type {Map<string, Extension>} */
+	const extensions = new Map();
+
+	/** @type {Promise[]} */
+	const extensionInitializePromises = [];
+
+	/** @type {string[]} */
+	const initializingExtensionModuleUrls = [];
+
+	for ( const extensionModuleUrl of extensionModuleUrls ) {
+		try {
+			/** @type {Extension} */
+			const extension = await import( extensionModuleUrl );
+			extensions.set( extensionModuleUrl, extension );
+
+			const extensionLogger = createLogger(
+				isDebug,
+				`[Optimization Detective: ${
+					extension.name || 'Unnamed Extension'
+				}]`
+			);
+
+			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
+			if ( extension.initialize instanceof Function ) {
+				const initializePromise = extension.initialize( {
+					isDebug,
+					...extensionLogger,
+					onTTFB,
+					onFCP,
+					onLCP,
+					onINP,
+					onCLS,
+					getRootData,
+					extendRootData,
+					getElementData,
+					extendElementData,
+				} );
+				if ( initializePromise instanceof Promise ) {
+					extensionInitializePromises.push( initializePromise );
+					initializingExtensionModuleUrls.push( extensionModuleUrl );
+				}
+			}
+		} catch ( err ) {
+			error(
+				`Failed to start initializing extension '${ extensionModuleUrl }':`,
+				err
+			);
+		}
+	}
+
+	// Wait for all extensions to finish initializing.
+	const settledInitializePromises = await Promise.allSettled(
+		extensionInitializePromises
+	);
+	for ( const [
+		i,
+		settledInitializePromise,
+	] of settledInitializePromises.entries() ) {
+		if ( settledInitializePromise.status === 'rejected' ) {
+			error(
+				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
+				settledInitializePromise.reason
+			);
+		}
+	}
 
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 
@@ -707,6 +718,9 @@ export default async function detect( {
 		urlMetric.elements.push( elementData );
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
+
+	// Clean up.
+	breadcrumbedElementsMap.clear();
 
 	log( 'Current URL Metric:', urlMetric );
 
@@ -751,6 +765,10 @@ export default async function detect( {
 					`[Optimization Detective: ${
 						extension.name || 'Unnamed Extension'
 					}]`
+				);
+
+				extensionLogger.warn(
+					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
 				);
 
 				try {
@@ -859,7 +877,4 @@ export default async function detect( {
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
 	navigator.sendBeacon( url, payloadBlob );
-
-	// Clean up.
-	breadcrumbedElementsMap.clear();
 }
