@@ -381,8 +381,11 @@ let compressionEnabled = true;
  * Debounces the compression of the URL Metric.
  */
 function debouncedCompressUrlMetric() {
-	if ( ! compressionEnabled || recompressionTimeout ) {
+	if ( ! compressionEnabled ) {
 		return;
+	}
+	if ( null !== recompressionTimeout ) {
+		clearTimeout( recompressionTimeout );
 	}
 	recompressionTimeout = setTimeout( async () => {
 		if ( typeof requestIdleCallback === 'function' ) {
@@ -391,7 +394,6 @@ function debouncedCompressUrlMetric() {
 			} );
 		}
 		compressedPayload = await compress( JSON.stringify( urlMetric ) );
-		clearTimeout( recompressionTimeout );
 		recompressionTimeout = null;
 	}, 1000 );
 }
