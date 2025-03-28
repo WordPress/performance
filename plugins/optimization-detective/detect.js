@@ -371,6 +371,13 @@ let compressedPayload = null;
 let recompressionTimeout = null;
 
 /**
+ * Handle for requestIdleCallback for URL metric compression.
+ *
+ * @type {number | null}
+ */
+let idleCallbackHandle = null;
+
+/**
  * Whether compression is enabled.
  *
  * @type {boolean}
@@ -386,12 +393,21 @@ function debouncedCompressUrlMetric() {
 	}
 	if ( null !== recompressionTimeout ) {
 		clearTimeout( recompressionTimeout );
+		recompressionTimeout = null;
+	}
+	if (
+		null !== idleCallbackHandle &&
+		typeof cancelIdleCallback === 'function'
+	) {
+		cancelIdleCallback( idleCallbackHandle );
+		idleCallbackHandle = null;
 	}
 	recompressionTimeout = setTimeout( async () => {
 		if ( typeof requestIdleCallback === 'function' ) {
 			await new Promise( ( resolve ) => {
-				requestIdleCallback( resolve );
+				idleCallbackHandle = requestIdleCallback( resolve );
 			} );
+			idleCallbackHandle = null;
 		}
 		compressedPayload = await compress( JSON.stringify( urlMetric ) );
 		recompressionTimeout = null;
