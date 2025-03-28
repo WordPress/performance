@@ -709,6 +709,9 @@ export default async function detect( {
 	/** @type {string[]} */
 	const initializingExtensionModuleUrls = [];
 
+	/** @type {boolean} */
+	let extensionHasFinalize = false;
+
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
 		try {
 			/** @type {Extension} */
@@ -744,7 +747,7 @@ export default async function detect( {
 			}
 
 			if ( extension.finalize instanceof Function ) {
-				compressionEnabled = false;
+				extensionHasFinalize = true;
 			}
 		} catch ( err ) {
 			error(
@@ -752,6 +755,13 @@ export default async function detect( {
 				err
 			);
 		}
+	}
+
+	if ( extensionHasFinalize ) {
+		compressionEnabled = false;
+		warn(
+			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
+		);
 	}
 
 	// Wait for all extensions to finish initializing.
