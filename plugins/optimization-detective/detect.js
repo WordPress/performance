@@ -409,7 +409,16 @@ function debouncedCompressUrlMetric() {
 			} );
 			idleCallbackHandle = null;
 		}
-		compressedPayload = await compress( JSON.stringify( urlMetric ) );
+		try {
+			compressedPayload = await compress( JSON.stringify( urlMetric ) );
+		} catch ( err ) {
+			const { error } = createLogger( false, consoleLogPrefix );
+			error(
+				'Failed to compress URL Metric falling back to sending uncompressed data:',
+				err
+			);
+			compressionEnabled = false;
+		}
 		recompressionTimeout = null;
 	}, 1000 );
 }
