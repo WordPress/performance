@@ -1090,37 +1090,37 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	public function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
 		return array(
 			// Parent default alignment.
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block default alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block default alignment' => array(
 				'',
 				'',
 				'',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block wide alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block wide alignment' => array(
 				'',
 				'',
 				'wide',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block full alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block full alignment' => array(
 				'',
 				'',
 				'full',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block left alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block left alignment' => array(
 				'',
 				'',
 				'left',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block center alignment' => array(
+			'Return 66.66% width of contentSize 413px,group block default alignment, columns block default alignment, image block center alignment' => array(
 				'',
 				'',
 				'center',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block default alignment, image block right alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block right alignment' => array(
 				'',
 				'',
 				'right',
@@ -1128,37 +1128,37 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			),
 
 			// Parent wide alignment.
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block default alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block default alignment' => array(
 				'wide',
 				'',
 				'',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block wide alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block wide alignment' => array(
 				'wide',
 				'',
 				'wide',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block full alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block full alignment' => array(
 				'wide',
 				'',
 				'full',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block left alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block left alignment' => array(
 				'wide',
 				'',
 				'left',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block center alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block center alignment' => array(
 				'wide',
 				'',
 				'center',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block wide alignment, image block right alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block default alignment, image block right alignment' => array(
 				'wide',
 				'',
 				'right',
@@ -1166,41 +1166,95 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			),
 
 			// Parent full alignment.
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block default alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block default alignment' => array(
 				'full',
 				'',
 				'',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block wide alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block wide alignment' => array(
 				'full',
 				'',
 				'wide',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block full alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block full alignment' => array(
 				'full',
 				'',
 				'full',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block left alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block left alignment' => array(
 				'full',
 				'',
 				'left',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block center alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block center alignment' => array(
 				'full',
 				'',
 				'center',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
 			),
-			'Return 66.66% width of contentSize 413px, parent block full alignment, image block right alignment' => array(
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block default alignment, image block right alignment' => array(
 				'full',
 				'',
 				'right',
 				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block full alignment, columns block wide alignment, image block left alignment' => array(
+				'full',
+				'wide',
+				'left',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block wide alignment, image block center alignment' => array(
+				'full',
+				'wide',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block full alignment, columns block wide alignment, image block right alignment' => array(
+				'full',
+				'wide',
+				'right',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block wide alignment, columns block wide alignment, image block left alignment' => array(
+				'wide',
+				'wide',
+				'left',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+			'Return 66.66% width of contentSize 413px, group block wide alignment, columns block wide alignment, image block center alignment' => array(
+				'wide',
+				'wide',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block wide alignment, columns block wide alignment, image block right alignment' => array(
+				'wide',
+				'wide',
+				'right',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block full alignment, columns block full alignment, image block left alignment' => array(
+				'full',
+				'full',
+				'left',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+			'Return 66.66% width of contentSize 413px, group block full alignment, columns block full alignment, image block center alignment' => array(
+				'full',
+				'full',
+				'center',
+				'sizes="(max-width: 413px) 100vw, 413px" ',
+			),
+			'Return 66.66% width of wideSize 853px, group block full alignment, columns block full alignment, image block right alignment' => array(
+				'full',
+				'full',
+				'right',
+				'sizes="(max-width: 853px) 100vw, 853px" ',
 			),
 		);
 	}
