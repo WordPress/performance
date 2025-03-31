@@ -73,7 +73,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * A freshness age of zero means a URL Metric will always be considered stale.
 	 *
 	 * @since 0.1.0
-	 * @var int<0, max>
+	 * @var int<-1, max>
 	 */
 	private $freshness_ttl;
 
@@ -104,7 +104,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @phpstan-param positive-int[] $breakpoints
 	 * @phpstan-param int<1, max>    $sample_size
-	 * @phpstan-param int<0, max>    $freshness_ttl
+	 * @phpstan-param int<-1, max>   $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]  $url_metrics   URL Metrics.
 	 * @param non-empty-string $current_etag  The current ETag.
@@ -168,18 +168,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		$this->sample_size = $sample_size;
 
 		// Set freshness TTL.
-		if ( $freshness_ttl < 0 ) {
-			throw new InvalidArgumentException(
-				esc_html(
-					sprintf(
-						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'optimization-detective' ),
-						$freshness_ttl
-					)
-				)
-			);
-		}
-		$this->freshness_ttl = $freshness_ttl;
+		$this->freshness_ttl = max( -1, $freshness_ttl );
 
 		// Create groups and the URL Metrics to them.
 		$this->groups = $this->create_groups();
@@ -226,7 +215,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return int<0, max> Freshness age (TTL) for a given URL Metric.
+	 * @return int<-1, max> Freshness age (TTL) for a given URL Metric.
 	 */
 	public function get_freshness_ttl(): int {
 		return $this->freshness_ttl;
@@ -702,7 +691,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @return array{
 	 *             current_etag: non-empty-string,
 	 *             breakpoints: positive-int[],
-	 *             freshness_ttl: 0|positive-int,
+	 *             freshness_ttl: int<-1, max>,
 	 *             sample_size: positive-int,
 	 *             all_element_max_intersection_ratios: array<string, float>,
 	 *             common_lcp_element: ?OD_Element,

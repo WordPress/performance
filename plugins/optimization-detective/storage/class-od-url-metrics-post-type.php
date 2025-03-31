@@ -298,7 +298,21 @@ class OD_URL_Metrics_Post_Type {
 	 * @since 0.1.0
 	 */
 	public static function delete_stale_posts(): void {
-		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
+		/**
+		 * Filters the expiration time (TTL) after which a since-unmodified od_url_metrics post will be garbage collected.
+		 *
+		 * @since n.e.x.t
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl
+		 *
+		 * @return int TTL for garbage collection in seconds. Defaults to 3 months.
+		 */
+		$ttl = (int) apply_filters( 'od_url_metric_garbage_collection_ttl', 3 * MONTH_IN_SECONDS );
+
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
+		$before_time = gmdate( 'Y-m-d H:i:s', time() - $ttl );
 
 		$query = new WP_Query(
 			array(
@@ -306,7 +320,7 @@ class OD_URL_Metrics_Post_Type {
 				'posts_per_page' => 100,
 				'date_query'     => array(
 					'column' => 'post_modified_gmt',
-					'before' => $one_month_ago,
+					'before' => $before_time,
 				),
 			)
 		);
