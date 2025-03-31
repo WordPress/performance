@@ -76,7 +76,7 @@
 	async function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
-				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
+				if ( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' === event.data ) {
 					cleanup();
 					resolve();
 				}

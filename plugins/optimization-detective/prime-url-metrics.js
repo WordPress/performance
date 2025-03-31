@@ -1,5 +1,5 @@
 /**
- * Helper script for the Prime URL Metrics.
+ * Helper script for Priming URL Metrics through WordPress admin dashboard.
  */
 ( function () {
 	// @ts-ignore
@@ -41,6 +41,7 @@
 		'span#od-prime-url-metrics-total-tasks-in-batch'
 	);
 
+	// Ensure all required elements are present.
 	if (
 		! controlButton ||
 		! progressBar ||
@@ -53,6 +54,7 @@
 		return;
 	}
 
+	// Initialize state variables.
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
@@ -91,63 +93,22 @@
 	}
 
 	/**
-	 * Processes batches of URLs.
+	 * Main processing controller function.
 	 */
 	async function processBatches() {
 		try {
 			while ( isProcessing ) {
 				if ( ! currentBatch ) {
-					controlButton.textContent = __(
-						'Getting next batch…',
-						'optimization-detective'
-					);
-
-					currentBatch = await getBatch( cursor );
-
-					controlButton.textContent = __(
-						'Pause',
-						'optimization-detective'
-					);
-
-					if ( ! currentBatch.batch.length ) {
-						isNextBatchAvailable = false;
+					await prepareNextBatch();
+					if ( ! isNextBatchAvailable ) {
 						break;
 					}
-
-					currentBatchNumber++;
-					currentBatchElement.textContent =
-						currentBatchNumber.toString();
-
-					// Initialize batch state
-					verificationToken = currentBatch.verificationToken;
-					isDebug = currentBatch.isDebug;
-					currentTasks = flattenBatchToTasks( currentBatch );
-					currentTaskIndex = 0;
-					progressBar.max = currentTasks.length;
-					progressBar.value = 0;
-					totalTasksInBatchElement.textContent =
-						currentTasks.length.toString();
-					currentTaskElement.textContent = '0';
 				}
 
-				// Process tasks in current batch
-				while (
-					isProcessing &&
-					currentTaskIndex < currentTasks.length
-				) {
-					abortController = new AbortController();
-					await processTask(
-						currentTasks[ currentTaskIndex ],
-						abortController.signal
-					);
-					currentTaskIndex++;
-					progressBar.value = currentTaskIndex;
-					currentTaskElement.textContent =
-						currentTaskIndex.toString();
-				}
+				await processCurrentBatch();
 
+				// Reset batch state if all tasks in the batch are processed.
 				if ( currentTaskIndex >= currentTasks.length ) {
-					// Complete current batch
 					cursor = currentBatch.cursor;
 					currentBatch = null;
 					currentTasks = [];
@@ -178,6 +139,55 @@
 				iframe.height = '0';
 				currentBatchElement.textContent = '0';
 			}
+		}
+	}
+
+	/**
+	 * Prepares the next batch for processing.
+	 */
+	async function prepareNextBatch() {
+		controlButton.textContent = __(
+			'Getting next batch…',
+			'optimization-detective'
+		);
+		currentBatch = await getBatch( cursor );
+
+		if ( ! currentBatch.batch.length ) {
+			isNextBatchAvailable = false;
+			return;
+		}
+
+		currentBatchNumber++;
+		currentBatchElement.textContent = currentBatchNumber.toString();
+
+		// Initialize batch state.
+		verificationToken = currentBatch.verificationToken;
+		isDebug = currentBatch.isDebug;
+		currentTasks = flattenBatchToTasks( currentBatch );
+		currentTaskIndex = 0;
+
+		// Update UI for new batch.
+		progressBar.max = currentTasks.length;
+		progressBar.value = 0;
+		totalTasksInBatchElement.textContent = currentTasks.length.toString();
+		currentTaskElement.textContent = '0';
+		controlButton.textContent = __( 'Pause', 'optimization-detective' );
+	}
+
+	/**
+	 * Processes tasks in the current batch.
+	 */
+	async function processCurrentBatch() {
+		while ( isProcessing && currentTaskIndex < currentTasks.length ) {
+			abortController = new AbortController();
+			await processTask(
+				currentTasks[ currentTaskIndex ],
+				abortController.signal
+			);
+
+			currentTaskIndex++;
+			progressBar.value = currentTaskIndex;
+			currentTaskElement.textContent = currentTaskIndex.toString();
 		}
 	}
 
@@ -223,7 +233,7 @@
 	function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
-				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
+				if ( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' === event.data ) {
 					cleanup();
 					resolve();
 				}
@@ -259,7 +269,7 @@
 				reject( new Error( 'Iframe failed to load' ) );
 			};
 
-			// Load the iframe
+			// Load the iframe.
 			iframe.src = task.url;
 			iframe.width = task.width.toString();
 			iframe.height = task.height.toString();
