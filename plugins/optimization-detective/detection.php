@@ -226,7 +226,7 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 			return new WP_Error(
 				'rest_content_too_large',
 				sprintf(
-				/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+					/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
 					__( 'Compressed JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
 					number_format_i18n( $content_length ),
 					number_format_i18n( $max_size )

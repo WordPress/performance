@@ -359,21 +359,21 @@ async function compress( jsonString ) {
 /**
  * Stores the compressed URL metric data.
  *
- * @type {Blob|null}
+ * @type {?Blob}
  */
 let compressedPayload = null;
 
 /**
  * Timeout ID for debouncing URL metric compression.
  *
- * @type {ReturnType<typeof setTimeout> | null}
+ * @type {?ReturnType<typeof setTimeout>}
  */
 let recompressionTimeout = null;
 
 /**
  * Handle for requestIdleCallback for URL metric compression.
  *
- * @type {number | null}
+ * @type {?number}
  */
 let idleCallbackHandle = null;
 
