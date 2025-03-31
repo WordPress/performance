@@ -33,6 +33,8 @@ const consoleLogPrefix = '[Optimization Detective]';
 
 const storageLockTimeSessionKey = 'odStorageLockTime';
 
+const compressionDebounceWaitDuration = 1000;
+
 /**
  * Checks whether storage is locked.
  *
@@ -420,7 +422,7 @@ function debouncedCompressUrlMetric() {
 			compressionEnabled = false;
 		}
 		recompressionTimeout = null;
-	}, 1000 );
+	}, compressionDebounceWaitDuration );
 }
 
 /**
