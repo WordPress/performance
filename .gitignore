@@ -3,6 +3,8 @@
 ############
 
 plugins/*/tests/**/actual.html
+artifacts
+test-results
 
 ############
 ## IDEs

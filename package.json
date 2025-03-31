@@ -12,6 +12,8 @@
   },
   "devDependencies": {
     "@octokit/rest": "^21.1.1",
+    "@playwright/test": "^1.51.1",
+    "@wordpress/e2e-test-utils-playwright": "^1.21.0",
     "@wordpress/env": "^10.19.0",
     "@wordpress/prettier-config": "^4.19.0",
     "@wordpress/scripts": "^30.12.0",
@@ -51,6 +53,8 @@
     "tsc": "tsc",
     "format-php": "composer format:all",
     "phpstan": "composer phpstan",
+    "test-e2e": "wp-scripts test-playwright --config plugins/auto-sizes/tests/e2e/playwright.config.ts",
+    "test-e2e:debug": "wp-scripts test-playwright --config plugins/auto-sizes/tests/e2e/playwright.config.ts --ui",
     "lint-php": "composer lint:all",
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:plugins",
     "test-php-watch": "./bin/test-php-watch.sh",
