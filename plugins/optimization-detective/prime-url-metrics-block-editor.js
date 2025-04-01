@@ -13,7 +13,8 @@
 	let currentTasks = [];
 	let currentTaskIndex = 0;
 	let isTabHidden = false;
-	let abortController = null;
+	let abortController = new AbortController();
+	let processTasksPromise = null;
 
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
@@ -54,7 +55,6 @@
 			} ) );
 
 			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
-				abortController = new AbortController();
 				await processTask(
 					currentTasks[ currentTaskIndex ],
 					abortController.signal
@@ -88,6 +88,7 @@
 			};
 
 			const cleanup = () => {
+				signal.removeEventListener( 'abort', abortHandler );
 				window.removeEventListener( 'message', handleMessage );
 				clearTimeout( timeoutId );
 				iframe.onerror = null;
@@ -123,17 +124,25 @@
 
 	// Listen for post save/publish events.
 	let wasSaving = false;
-	subscribe( () => {
+	subscribe( async () => {
 		const isSaving = select( 'core/editor' ).isSavingPost();
 		const isAutosaving = select( 'core/editor' ).isAutosavingPost();
 
 		// Trigger when saving transitions from true to false (save completed).
 		if ( wasSaving && ! isSaving && ! isAutosaving ) {
-			currentTaskIndex = 0;
-			processTasks();
+			wasSaving = false;
+			if ( processTasksPromise ) {
+				if ( ! abortController.signal.aborted ) {
+					abortController.abort();
+				}
+				await processTasksPromise;
+				currentTaskIndex = 0;
+				abortController = new AbortController();
+			}
+			processTasksPromise = processTasks();
+		} else {
+			wasSaving = isSaving;
 		}
-
-		wasSaving = isSaving;
 	} );
 
 	/**
@@ -143,14 +152,16 @@
 		if ( 'hidden' === document.visibilityState && isProcessing ) {
 			isProcessing = false;
 			isTabHidden = true;
-			if ( abortController ) {
+			if ( ! abortController.signal.aborted ) {
 				abortController.abort();
-				abortController = null;
 			}
 		} else if ( 'visible' === document.visibilityState && isTabHidden ) {
 			isTabHidden = false;
 			if ( ! isProcessing ) {
 				isProcessing = true;
+				if ( abortController.signal.aborted ) {
+					abortController = new AbortController();
+				}
 				processTasks();
 			}
 		}

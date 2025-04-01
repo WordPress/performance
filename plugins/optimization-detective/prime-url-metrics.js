@@ -65,7 +65,7 @@
 	let currentTaskIndex = 0;
 	let currentBatchNumber = 0;
 	let isTabHidden = false;
-	let abortController = null;
+	let abortController = new AbortController();
 
 	/**
 	 * Toggles the processing state.
@@ -79,15 +79,17 @@
 				'optimization-detective'
 			);
 			controlButton.classList.remove( 'updating-message' );
-			if ( abortController ) {
+			if ( ! abortController.signal.aborted ) {
 				abortController.abort();
-				abortController = null;
 			}
 		} else {
 			// Start/resume processing
 			isProcessing = true;
 			controlButton.textContent = __( 'Pause', 'optimization-detective' );
 			controlButton.classList.add( 'updating-message' );
+			if ( abortController.signal.aborted ) {
+				abortController = new AbortController();
+			}
 			processBatches();
 		}
 	}
@@ -179,7 +181,6 @@
 	 */
 	async function processCurrentBatch() {
 		while ( isProcessing && currentTaskIndex < currentTasks.length ) {
-			abortController = new AbortController();
 			await processTask(
 				currentTasks[ currentTaskIndex ],
 				abortController.signal
@@ -245,6 +246,7 @@
 			};
 
 			const cleanup = () => {
+				signal.removeEventListener( 'abort', abortHandler );
 				window.removeEventListener( 'message', handleMessage );
 				clearTimeout( timeoutId );
 				iframe.onerror = null;
@@ -308,9 +310,8 @@
 			if ( isProcessing ) {
 				isProcessing = false;
 				isTabHidden = true;
-				if ( abortController ) {
+				if ( ! abortController.signal.aborted ) {
 					abortController.abort();
-					abortController = null;
 				}
 				controlButton.textContent = __(
 					'Resume',
@@ -325,6 +326,9 @@
 					'Pause',
 					'optimization-detective'
 				);
+				if ( abortController.signal.aborted ) {
+					abortController = new AbortController();
+				}
 				processBatches();
 			}
 		}

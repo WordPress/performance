@@ -18,7 +18,7 @@
 	let currentTasks = [];
 	let currentTaskIndex = 0;
 	let isTabHidden = false;
-	let abortController = null;
+	let abortController = new AbortController();
 
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
@@ -58,7 +58,6 @@
 			} ) );
 
 			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
-				abortController = new AbortController();
 				await processTask(
 					currentTasks[ currentTaskIndex ],
 					abortController.signal
@@ -92,6 +91,7 @@
 			};
 
 			const cleanup = () => {
+				signal.removeEventListener( 'abort', abortHandler );
 				window.removeEventListener( 'message', handleMessage );
 				clearTimeout( timeoutId );
 				iframe.onerror = null;
@@ -140,14 +140,16 @@
 		if ( 'hidden' === document.visibilityState && isProcessing ) {
 			isProcessing = false;
 			isTabHidden = true;
-			if ( abortController ) {
+			if ( ! abortController.signal.aborted ) {
 				abortController.abort();
-				abortController = null;
 			}
 		} else if ( 'visible' === document.visibilityState && isTabHidden ) {
 			isTabHidden = false;
 			if ( ! isProcessing ) {
 				isProcessing = true;
+				if ( abortController.signal.aborted ) {
+					abortController = new AbortController();
+				}
 				processTasks();
 			}
 		}
