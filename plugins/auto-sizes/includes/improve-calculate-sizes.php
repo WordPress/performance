@@ -260,7 +260,7 @@ function auto_sizes_get_layout_width( string $alignment ): string {
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
 	// Define block-specific context usage.
 	$block_specific_context = array(
-		'core/cover'   => array( 'max_alignment' ),
+		'core/cover'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'   => array( 'max_alignment' ),
 		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
