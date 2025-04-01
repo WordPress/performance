@@ -300,9 +300,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		if ( 'default' === $alignment || 'wide' === $alignment ) {
-			$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
-		}
+		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {
