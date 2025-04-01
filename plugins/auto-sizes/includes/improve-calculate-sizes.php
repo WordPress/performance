@@ -273,7 +273,7 @@ function auto_sizes_get_layout_width( string $alignment ): string {
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
 	// Define block-specific context usage.
 	$block_specific_context = array(
-		'core/cover'   => array( 'max_alignment' ),
+		'core/cover'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'   => array( 'max_alignment' ),
 		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
@@ -313,9 +313,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		if ( 'default' === $alignment || 'wide' === $alignment ) {
-			$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
-		}
+		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {
