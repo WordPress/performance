@@ -1,5 +1,5 @@
 {
-  "core": null,
+  "core": "WordPress/WordPress#master",
   "plugins": [
     "./plugins/optimization-detective",
     "./plugins/auto-sizes",

@@ -6,6 +6,19 @@
  * @since 1.4.0
  */
 
+/*
+ * Map alignment values to a weighting value so they can be compared.
+ * Note that 'left' and 'right' alignments are only constrained by max alignment.
+ */
+const AUTO_SIZES_CONSTRAINTS = array(
+	'full'    => 0,
+	'wide'    => 1,
+	'left'    => 2,
+	'right'   => 2,
+	'default' => 3,
+	'center'  => 3,
+);
+
 /**
  * Primes attachment into the cache with a single database query.
  *
@@ -172,18 +185,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 	// Normalize default alignment values.
 	$align = '' !== $align ? $align : 'default';
 
-	/*
-	 * Map alignment values to a weighting value so they can be compared.
-	 * Note that 'left' and 'right' alignments are only constrained by max alignment.
-	 */
-	$constraints = array(
-		'full'    => 0,
-		'wide'    => 1,
-		'left'    => 2,
-		'right'   => 2,
-		'default' => 3,
-		'center'  => 3,
-	);
+	// Use the defined constant for constraints.
+	$constraints = AUTO_SIZES_CONSTRAINTS;
 
 	$alignment = $constraints[ $align ] > $constraints[ $max_alignment ] ? $align : $max_alignment;
 
@@ -255,15 +258,18 @@ function auto_sizes_get_layout_width( string $alignment ): string {
  * @return string[] The filtered context keys used by the block type.
  */
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
-	// The list of blocks that can consume outer layout context.
-	$consumer_blocks = array(
-		'core/cover',
-		'core/image',
+	// Define block-specific context usage.
+	$block_specific_context = array(
+		'core/cover'   => array( 'max_alignment', 'container_relative_width' ),
+		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
+		'core/group'   => array( 'max_alignment' ),
+		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
+		'core/column'  => array( 'max_alignment', 'column_count' ),
 	);
 
-	if ( in_array( $block_type->name, $consumer_blocks, true ) ) {
-		// Use array_values to reset the array keys after merging.
-		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment' ) ) ) );
+	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
+		// Use array_values to reset array keys after merging.
+		return array_values( array_unique( array_merge( $uses_context, $block_specific_context[ $block_type->name ] ) ) );
 	}
 	return $uses_context;
 }
@@ -273,11 +279,12 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
  *
  * @since 1.4.0
  *
- * @param array<string, mixed> $context Current block context.
- * @param array<string, mixed> $block   The block being rendered.
+ * @param array<string, mixed> $context      Current block context.
+ * @param array<string, mixed> $block        The block being rendered.
+ * @param WP_Block|null        $parent_block If this is a nested block, a reference to the parent block.
  * @return array<string, mixed> Modified block context.
  */
-function auto_sizes_filter_render_block_context( array $context, array $block ): array {
+function auto_sizes_filter_render_block_context( array $context, array $block, ?WP_Block $parent_block ): array {
 	// When no max alignment is set, the maximum is assumed to be 'full'.
 	$context['max_alignment'] = $context['max_alignment'] ?? 'full';
 
@@ -288,15 +295,41 @@ function auto_sizes_filter_render_block_context( array $context, array $block ):
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
-		$alignment = $block['attrs']['align'] ?? '';
+		// Normalize default alignment values.
+		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? $block['attrs']['align'] : 'default';
+		// Use the defined constant for constraints.
+		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		// If the container block doesn't have alignment, it's assumed to be 'default'.
-		if ( '' === $alignment ) {
-			$context['max_alignment'] = 'default';
-		} elseif ( 'wide' === $alignment ) {
-			$context['max_alignment'] = 'wide';
-		}
+		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
 
+	if ( 'core/columns' === $block['blockName'] ) {
+		// This is a special context key just to pass to the child 'core/column' block.
+		$context['column_count'] = count( $block['innerBlocks'] );
+	}
+
+	if ( 'core/column' === $block['blockName'] ) {
+		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
+		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
+		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
+			// Get column width, if explicitly set.
+			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
+				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
+			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
+				// Default to equally divided width if not explicitly set.
+				$current_width = 1.0 / $parent_block->context['column_count'];
+			} else {
+				// Full width fallback.
+				$current_width = 1.0;
+			}
+
+			// Multiply with parent's width if available.
+			if ( isset( $parent_block->context['container_relative_width'] ) ) {
+				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
+			} else {
+				$context['container_relative_width'] = $current_width;
+			}
+		}
+	}
 	return $context;
 }
