@@ -767,7 +767,7 @@ export default async function detect( {
 			const extensionLogger = createLogger(
 				isDebug,
 				`[Optimization Detective: ${
-					extension.name || 'Unnamed Extension'
+					extension.name || extensionModuleUrl
 				}]`
 			);
 
@@ -909,7 +909,7 @@ export default async function detect( {
 				const extensionLogger = createLogger(
 					isDebug,
 					`[Optimization Detective: ${
-						extension.name || 'Unnamed Extension'
+						extension.name || extensionModuleUrl
 					}]`
 				);
 
