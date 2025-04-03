@@ -4,6 +4,7 @@ import { launch, Page } from 'puppeteer';
 import { program } from 'commander';
 import ora from 'ora';
 import { execSync } from 'child_process';
+import chalk from 'chalk';
 
 program
 	.name( 'od-prime' )
@@ -13,13 +14,12 @@ program
 const spinner = ora( 'Starting...' ).start();
 let browser;
 let browserPage;
+const abortController = new AbortController();
+const { signal } = abortController;
 
 process.on( 'SIGINT', async () => {
-	if ( browser ) {
-		await browser.close();
-	}
-	spinner.fail( 'Process aborted.' );
-	process.exit( 0 );
+	spinner.start( 'Aborting...' );
+	abortController.abort();
 } );
 
 /**
@@ -63,30 +63,55 @@ function flattenBatchToTasks( batch ) {
  * @param {Page}                                           page              - The Puppeteer page to use.
  * @param {{ url: string, width: number, height: number }} task              - The task parameters.
  * @param {string}                                         verificationToken - The verification token.
+ * @param {AbortSignal}                                    abortSignal       - The abort signal.
  * @return {Promise<void>}
  */
-async function processTask( page, task, verificationToken ) {
-	// Before each navigation, reset the success flag.
-	await page.evaluate( () => {
-		window.success = false;
+async function processTask( page, task, verificationToken, abortSignal ) {
+	return new Promise( async ( resolve, reject ) => {
+		function onAbort() {
+			reject( new Error( 'Task aborted.' ) );
+		}
+		abortSignal.addEventListener( 'abort', onAbort );
+
+		try {
+			// Before each navigation, reset the success flag.
+			await page.evaluate( () => {
+				// @ts-ignore
+				window.success = false;
+			} );
+
+			const urlToLoad = new URL( task.url );
+			urlToLoad.searchParams.append(
+				'od-verification-token',
+				verificationToken
+			);
+
+			// Set viewport dimensions.
+			await page.setViewport( {
+				width: task.width,
+				height: task.height,
+			} );
+
+			// Navigate to the URL.
+			await page.goto( urlToLoad.toString(), {
+				waitUntil: 'load',
+			} );
+
+			// Wait for the success flag to become true (with a 30-second timeout).
+			await page.waitForFunction( 'window.success === true', {
+				timeout: 30000,
+			} );
+		} catch ( error ) {
+			reject( error );
+		} finally {
+			abortSignal.removeEventListener( 'abort', onAbort );
+			resolve();
+		}
 	} );
-
-	const urlToLoad = new URL( task.url );
-	urlToLoad.searchParams.append( 'od-verification-token', verificationToken );
-
-	await page.setViewport( { width: task.width, height: task.height } );
-
-	await page.goto( urlToLoad.toString(), {
-		waitUntil: 'load',
-		timeout: 30000,
-	} );
-
-	// Wait for the success flag to become true (with a 30-second timeout).
-	await page.waitForFunction( 'window.success === true', { timeout: 30000 } );
 }
 
 async function main() {
-	browser = await launch();
+	browser = await launch( { headless: true } );
 	browserPage = await browser.newPage();
 
 	await browserPage.evaluateOnNewDocument( () => {
@@ -105,6 +130,9 @@ async function main() {
 
 	// Process batches until no more are available.
 	while ( isNextBatchAvailable ) {
+		if ( signal.aborted ) {
+			break;
+		}
 		spinner.start( 'Fetching next batch...' );
 		const currentBatch = await getBatch( cursor );
 		// If no URLs remain in the batch, finish processing.
@@ -120,33 +148,70 @@ async function main() {
 		);
 
 		const currentTasks = flattenBatchToTasks( currentBatch );
-		spinner.succeed(
-			`Batch ${ currentBatchNumber } processed successfully.`
-		);
 
 		// Process each task sequentially.
 		for ( let i = 0; i < currentTasks.length; i++ ) {
+			if ( signal.aborted ) {
+				break;
+			}
 			const task = currentTasks[ i ];
+			const taskStartTime = Date.now();
+
 			spinner.start(
-				`Processing task ${ i + 1 }/${ currentTasks.length }`
+				`Processing task ${ chalk.green(
+					i + 1 + '/' + currentTasks.length
+				) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
+					task.width + 'x' + task.height
+				) }`
 			);
 			try {
-				await processTask( browserPage, task, verificationToken );
+				await processTask(
+					browserPage,
+					task,
+					verificationToken,
+					signal
+				);
+				const taskEndTime = Date.now();
+				const taskDuration = (
+					( taskEndTime - taskStartTime ) /
+					1000
+				).toFixed( 2 );
 				spinner.succeed(
-					`Task ${ i + 1 }/${
-						currentTasks.length
-					} completed successfully.`
+					`Task ${ chalk.green(
+						i + 1 + '/' + currentTasks.length
+					) } completed successfully in ${ chalk.blue(
+						taskDuration
+					) } seconds for ${ chalk.blue(
+						task.url
+					) } at ${ chalk.blue( task.width + 'x' + task.height ) }.`
 				);
 			} catch ( error ) {
+				const taskEndTime = Date.now();
+				const taskDuration = (
+					( taskEndTime - taskStartTime ) /
+					1000
+				).toFixed( 2 );
 				spinner.fail(
-					`Task ${ i + 1 }/${ currentTasks.length } failed.`
+					`Task ${ chalk.green(
+						i + 1 + '/' + currentTasks.length
+					) } failed after ${ chalk.blue(
+						taskDuration
+					) } seconds for ${ chalk.blue(
+						task.url
+					) } at ${ chalk.blue( task.width + 'x' + task.height ) }.
+					Error: ${ chalk.red( error.message ) }`
 				);
 			}
 		}
 		cursor = currentBatch.cursor;
 	}
 
-	spinner.succeed( 'All batches processed.' );
+	if ( signal.aborted ) {
+		spinner.fail( 'Aborted.' );
+	} else {
+		spinner.succeed( 'All batches processed.' );
+	}
 	await browser.close();
+	process.exit( 0 );
 }
 main();
