@@ -793,6 +793,9 @@ export default async function detect( {
 			}
 
 			if ( extension.finalize instanceof Function ) {
+				extensionLogger.warn(
+					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
+				);
 				extensionHasFinalize = true;
 			}
 		} catch ( err ) {
@@ -911,10 +914,6 @@ export default async function detect( {
 					`[Optimization Detective: ${
 						extension.name || extensionModuleUrl
 					}]`
-				);
-
-				extensionLogger.warn(
-					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
 				);
 
 				try {
