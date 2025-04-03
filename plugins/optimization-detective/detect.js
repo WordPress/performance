@@ -117,13 +117,10 @@ function createLogger(
 	prefix = null,
 	scriptModuleUrl = null
 ) {
-	let logSource = null;
-	if ( scriptModuleUrl ) {
-		logSource = `\nSource: ${ scriptModuleUrl }`;
-	}
+	const logSource = scriptModuleUrl ? `\nSource: ${ scriptModuleUrl }` : null;
 
 	/**
-	 * Constricts the args to pass to the logging function.
+	 * Constructs the args to pass to the logging function.
 	 *
 	 * @param {Array}   message       - The message(s) to log.
 	 * @param {boolean} includeSource - Whether to include the source. This should be true for warnings or errors.
