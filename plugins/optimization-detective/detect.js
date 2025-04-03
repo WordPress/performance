@@ -806,7 +806,7 @@ export default async function detect( {
 		}
 	}
 
-	if ( extensionHasFinalize ) {
+	if ( compressionEnabled && extensionHasFinalize ) {
 		compressionEnabled = false;
 		warn(
 			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
