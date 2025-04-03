@@ -107,11 +107,34 @@ function setStorageLock( currentTime ) {
 /**
  * Creates a logger object with log, warn, and error methods.
  *
- * @param {boolean} [debugMode=false] - Whether to enable debug mode.
- * @param {string}  [prefix='']       - Prefix to prepend to the console message.
+ * @param {boolean} [debugMode=false]      - Whether to enable debug mode.
+ * @param {?string} [prefix=null]          - Prefix to prepend to the console message.
+ * @param {?string} [scriptModuleUrl=null] - The URL for the script module which is emitting the log. This is used for extensions.
  * @return {Logger} Logger object with log, info, warn, and error methods.
  */
-function createLogger( debugMode = false, prefix = '' ) {
+function createLogger(
+	debugMode = false,
+	prefix = null,
+	scriptModuleUrl = null
+) {
+	let logSource = null;
+	if ( scriptModuleUrl ) {
+		logSource = `\nSource: ${ scriptModuleUrl }`;
+	}
+
+	/**
+	 * Constricts the args to pass to the logging function.
+	 *
+	 * @param {Array}   message       - The message(s) to log.
+	 * @param {boolean} includeSource - Whether to include the source. This should be true for warnings or errors.
+	 * @return {Array} Amended message.
+	 */
+	const constructLogArgs = ( message, includeSource = false ) => {
+		return [ prefix, ...message, includeSource ? logSource : null ].filter(
+			( value ) => value !== null
+		);
+	};
+
 	return {
 		/**
 		 * Logs a message if debug mode is enabled.
@@ -121,7 +144,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		log( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.log( prefix, ...message );
+				console.log( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -133,7 +156,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		info( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.info( prefix, ...message );
+				console.info( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -145,7 +168,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		warn( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.warn( prefix, ...message );
+				console.warn( ...constructLogArgs( message, true ) );
 			}
 		},
 
@@ -156,7 +179,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		 */
 		error( ...message ) {
 			// eslint-disable-next-line no-console
-			console.error( prefix, ...message );
+			console.error( ...constructLogArgs( message, true ) );
 		},
 	};
 }
@@ -792,7 +815,8 @@ export default async function detect( {
 				`[Optimization Detective: ${
 					extension.name ||
 					getExtensionNameFromScriptModuleUrl( extensionModuleUrl )
-				}]`
+				}]`,
+				extensionModuleUrl
 			);
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
@@ -940,7 +964,8 @@ export default async function detect( {
 						getExtensionNameFromScriptModuleUrl(
 							extensionModuleUrl
 						)
-					}]`
+					}]`,
+					extensionModuleUrl
 				);
 
 				try {
