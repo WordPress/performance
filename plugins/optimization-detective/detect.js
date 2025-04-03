@@ -107,7 +107,7 @@ function setStorageLock( currentTime ) {
 /**
  * Creates a logger object with log, warn, and error methods.
  *
- * @param {boolean} [debugMode=false]      - Whether to enable debug mode.
+ * @param {boolean} [debugMode=false]      - Whether all messages should be logged. If false, then only errors are logged.
  * @param {?string} [prefix=null]          - Prefix to prepend to the console message.
  * @param {?string} [scriptModuleUrl=null] - The URL for the script module which is emitting the log. This is used for extensions.
  * @return {Logger} Logger object with log, info, warn, and error methods.
@@ -191,7 +191,7 @@ function createLogger(
  */
 function getExtensionNameFromScriptModuleUrl( scriptModuleUrl ) {
 	try {
-		const url = new URL( scriptModuleUrl );
+		const url = new URL( scriptModuleUrl, win.location.href );
 		const matches = url.pathname.match(
 			/\/(?:themes|plugins)\/([^\/]+)\//
 		);
@@ -415,7 +415,7 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
- * Compresses a (JSON) string using CompressionStream API.
+ * Compresses a JSON string using CompressionStream API.
  *
  * @param {string} jsonString - JSON string to compress.
  * @return {Promise<Blob>} Compressed data.
@@ -432,7 +432,7 @@ async function compress( jsonString ) {
 }
 
 /**
- * Stores the compressed URL metric data.
+ * The compressed URL metric data.
  *
  * @see {debounceCompressUrlMetric}
  * @type {?Blob}
