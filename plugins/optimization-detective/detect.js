@@ -162,6 +162,29 @@ function createLogger( debugMode = false, prefix = '' ) {
 }
 
 /**
+ * Attempts to get the extension name (i.e. slug for plugin or theme) from the script module URL.
+ *
+ * If extraction of the slug fails then the entire URL is returned.
+ *
+ * @param {string} scriptModuleUrl - Script module URL.
+ * @return {string} Derived extension name.
+ */
+function getExtensionNameFromScriptModuleUrl( scriptModuleUrl ) {
+	try {
+		const url = new URL( scriptModuleUrl );
+		const matches = url.pathname.match(
+			/\/(?:themes|plugins)\/([^\/]+)\//
+		);
+		if ( matches ) {
+			return matches[ 1 ];
+		}
+		return url.pathname;
+	} catch ( err ) {
+		return scriptModuleUrl;
+	}
+}
+
+/**
  * Gets the status for the URL Metric group for the provided viewport width.
  *
  * The comparison logic here corresponds with the PHP logic in `OD_URL_Metric_Group::is_viewport_width_in_range()`.
@@ -767,7 +790,8 @@ export default async function detect( {
 			const extensionLogger = createLogger(
 				isDebug,
 				`[Optimization Detective: ${
-					extension.name || extensionModuleUrl
+					extension.name ||
+					getExtensionNameFromScriptModuleUrl( extensionModuleUrl )
 				}]`
 			);
 
@@ -912,7 +936,10 @@ export default async function detect( {
 				const extensionLogger = createLogger(
 					isDebug,
 					`[Optimization Detective: ${
-						extension.name || extensionModuleUrl
+						extension.name ||
+						getExtensionNameFromScriptModuleUrl(
+							extensionModuleUrl
+						)
 					}]`
 				);
 
