@@ -26,13 +26,43 @@
  * @typedef {import("./types.ts").Logger} Logger
  */
 
+/**
+ * Window reference to reduce size when script is minified.
+ *
+ * @type {Window}
+ */
 const win = window;
+
+/**
+ * Document reference to reduce size when script is minified.
+ *
+ * @type {Document}
+ */
 const doc = win.document;
 
+/**
+ * Prefix which is prepended to all messages logged to the console.
+ *
+ * @see {createLogger}
+ * @type {string}
+ */
 const consoleLogPrefix = '[Optimization Detective]';
 
+/**
+ * Session storage key for client-side storage lock to prevent clients attempting to submit URL Metrics when there is a server-side storage lock.
+ *
+ * @see {isStorageLocked}
+ * @see {setStorageLock}
+ * @type {string}
+ */
 const storageLockTimeSessionKey = 'odStorageLockTime';
 
+/**
+ * Wait duration in milliseconds for debounced calls to re-compress the URL Metric JSON data.
+ *
+ * @see {debounceCompressUrlMetric}
+ * @type {number}
+ */
 const compressionDebounceWaitDuration = 1000;
 
 /**
@@ -275,7 +305,7 @@ function extendRootData( properties ) {
 		}
 	}
 	Object.assign( urlMetric, properties );
-	debouncedCompressUrlMetric();
+	debounceCompressUrlMetric();
 }
 
 /**
@@ -338,7 +368,7 @@ function extendElementData( xpath, properties ) {
 	}
 	const elementData = elementsByXPath.get( xpath );
 	Object.assign( elementData, properties );
-	debouncedCompressUrlMetric();
+	debounceCompressUrlMetric();
 }
 
 /**
@@ -361,6 +391,7 @@ async function compress( jsonString ) {
 /**
  * Stores the compressed URL metric data.
  *
+ * @see {debounceCompressUrlMetric}
  * @type {?Blob}
  */
 let compressedPayload = null;
@@ -368,6 +399,7 @@ let compressedPayload = null;
 /**
  * Timeout ID for debouncing URL metric compression.
  *
+ * @see {debounceCompressUrlMetric}
  * @type {?ReturnType<typeof setTimeout>}
  */
 let recompressionTimeout = null;
@@ -375,6 +407,7 @@ let recompressionTimeout = null;
 /**
  * Handle for requestIdleCallback for URL metric compression.
  *
+ * @see {debounceCompressUrlMetric}
  * @type {?number}
  */
 let idleCallbackHandle = null;
@@ -382,6 +415,8 @@ let idleCallbackHandle = null;
 /**
  * Whether compression is enabled.
  *
+ * @see {detect}
+ * @see {debounceCompressUrlMetric}
  * @type {boolean}
  */
 let compressionEnabled = true;
@@ -389,7 +424,7 @@ let compressionEnabled = true;
 /**
  * Debounces the compression of the URL Metric.
  */
-function debouncedCompressUrlMetric() {
+function debounceCompressUrlMetric() {
 	if ( ! compressionEnabled ) {
 		return;
 	}
@@ -833,7 +868,7 @@ export default async function detect( {
 	log( 'Current URL Metric:', urlMetric );
 
 	// Compress the URL Metric once so that even if there are no extensions available or extending the URL Metric, it is compressed.
-	debouncedCompressUrlMetric();
+	debounceCompressUrlMetric();
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
