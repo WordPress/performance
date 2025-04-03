@@ -922,5 +922,9 @@ export default async function detect( {
 			'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
 			'*'
 		);
+
+		document.dispatchEvent(
+			new CustomEvent( 'odPrimeUrlMetricsRequestSuccess' )
+		);
 	}
 }

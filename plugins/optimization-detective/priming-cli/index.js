@@ -74,12 +74,6 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 		abortSignal.addEventListener( 'abort', onAbort );
 
 		try {
-			// Before each navigation, reset the success flag.
-			await page.evaluate( () => {
-				// @ts-ignore
-				window.success = false;
-			} );
-
 			const urlToLoad = new URL( task.url );
 			urlToLoad.searchParams.append(
 				'od-verification-token',
@@ -97,9 +91,14 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 				waitUntil: 'load',
 			} );
 
-			// Wait for the success flag to become true (with a 30-second timeout).
-			await page.waitForFunction( 'window.success === true', {
-				timeout: 30000,
+			await page.evaluate( () => {
+				return new Promise( ( requestSuccessResolve ) => {
+					document.addEventListener(
+						'odPrimeUrlMetricsRequestSuccess',
+						requestSuccessResolve,
+						{ once: true }
+					);
+				} );
 			} );
 		} catch ( error ) {
 			reject( error );
@@ -110,18 +109,13 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 	} );
 }
 
-async function main() {
+/**
+ * Init function to process all batches.
+ * @return {Promise<void>}
+ */
+async function init() {
 	browser = await launch( { headless: true } );
 	browserPage = await browser.newPage();
-
-	await browserPage.evaluateOnNewDocument( () => {
-		window.success = false;
-		window.addEventListener( 'message', ( event ) => {
-			if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
-				window.success = true;
-			}
-		} );
-	} );
 
 	let isNextBatchAvailable = true;
 	let cursor = {};
@@ -133,7 +127,7 @@ async function main() {
 		if ( signal.aborted ) {
 			break;
 		}
-		spinner.start( 'Fetching next batch...' );
+		spinner.text = 'Fetching next batch';
 		const currentBatch = await getBatch( cursor );
 		// If no URLs remain in the batch, finish processing.
 		if ( ! currentBatch.batch || currentBatch.batch.length === 0 ) {
@@ -143,9 +137,7 @@ async function main() {
 		verificationToken = currentBatch.verificationToken;
 		currentBatchNumber++;
 
-		spinner.succeed(
-			`Batch ${ currentBatchNumber } fetched successfully.`
-		);
+		spinner.text = `Batch ${ currentBatchNumber } fetched successfully.`;
 
 		const currentTasks = flattenBatchToTasks( currentBatch );
 
@@ -155,15 +147,12 @@ async function main() {
 				break;
 			}
 			const task = currentTasks[ i ];
-			const taskStartTime = Date.now();
 
-			spinner.start(
-				`Processing task ${ chalk.green(
-					i + 1 + '/' + currentTasks.length
-				) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
-					task.width + 'x' + task.height
-				) }`
-			);
+			spinner.text = `Processing task ${ chalk.green(
+				i + 1 + '/' + currentTasks.length
+			) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
+				task.width + 'x' + task.height
+			) }`;
 			try {
 				await processTask(
 					browserPage,
@@ -171,36 +160,10 @@ async function main() {
 					verificationToken,
 					signal
 				);
-				const taskEndTime = Date.now();
-				const taskDuration = (
-					( taskEndTime - taskStartTime ) /
-					1000
-				).toFixed( 2 );
-				spinner.succeed(
-					`Task ${ chalk.green(
-						i + 1 + '/' + currentTasks.length
-					) } completed successfully in ${ chalk.blue(
-						taskDuration
-					) } seconds for ${ chalk.blue(
-						task.url
-					) } at ${ chalk.blue( task.width + 'x' + task.height ) }.`
-				);
 			} catch ( error ) {
-				const taskEndTime = Date.now();
-				const taskDuration = (
-					( taskEndTime - taskStartTime ) /
-					1000
-				).toFixed( 2 );
-				spinner.fail(
-					`Task ${ chalk.green(
-						i + 1 + '/' + currentTasks.length
-					) } failed after ${ chalk.blue(
-						taskDuration
-					) } seconds for ${ chalk.blue(
-						task.url
-					) } at ${ chalk.blue( task.width + 'x' + task.height ) }.
-					Error: ${ chalk.red( error.message ) }`
-				);
+				spinner.text = `Error processing task ${ i + 1 }. Error: ${
+					error.message
+				}`;
 			}
 		}
 		cursor = currentBatch.cursor;
@@ -214,4 +177,6 @@ async function main() {
 	await browser.close();
 	process.exit( 0 );
 }
-main();
+
+// Start the process.
+init();
