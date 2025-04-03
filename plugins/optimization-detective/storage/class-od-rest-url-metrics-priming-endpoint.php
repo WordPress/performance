@@ -133,62 +133,7 @@ final class OD_REST_URL_Metrics_Priming_Endpoint {
 	 */
 	public function handle_generate_batch_urls_request( WP_REST_Request $request ): WP_REST_Response {
 		$cursor = $request->get_param( 'cursor' );
-
-		$default_cursor = array(
-			'provider_index'     => 0,
-			'subtype_index'      => 0,
-			'page_number'        => 1,
-			'offset_within_page' => 0,
-			'batch_size'         => 10,
-		);
-
-		// Initialize cursor with default values.
-		$cursor = wp_parse_args( $cursor, $default_cursor );
-
-		if ( $default_cursor === $cursor ) {
-			$last_cursor = get_option( 'od_prime_url_metrics_batch_cursor' );
-			if ( false !== $last_cursor ) {
-				$cursor = wp_parse_args( $last_cursor, $cursor );
-			}
-		} else {
-			update_option( 'od_prime_url_metrics_batch_cursor', $cursor );
-		}
-
-		$batch               = array();
-		$filtered_batch_urls = array();
-		$prevent_infinite    = 0;
-		while ( $prevent_infinite < 100 ) {
-			if ( count( $filtered_batch_urls ) > 0 ) {
-				break;
-			}
-
-			$batch               = od_get_batch_for_iframe_url_metrics_priming( $cursor );
-			$filtered_batch_urls = od_filter_batch_urls_for_iframe_url_metrics_priming( $batch['urls'] );
-
-			if ( $cursor === $batch['cursor'] ) {
-				delete_option( 'od_prime_url_metrics_batch_cursor' );
-				break;
-			}
-			$cursor = $batch['cursor'];
-
-			++$prevent_infinite;
-		}
-
-		$verification_token = get_transient( 'od_prime_url_metrics_verification_token' );
-
-		if ( false === $verification_token ) {
-			$verification_token = wp_generate_uuid4();
-			set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
-		}
-
-		return new WP_REST_Response(
-			array(
-				'batch'             => $filtered_batch_urls,
-				'cursor'            => $batch['cursor'],
-				'verificationToken' => $verification_token,
-				'isDebug'           => defined( 'WP_DEBUG' ) && WP_DEBUG,
-			)
-		);
+		return new WP_REST_Response( od_generate_final_batch_urls( $cursor ) );
 	}
 
 	/**

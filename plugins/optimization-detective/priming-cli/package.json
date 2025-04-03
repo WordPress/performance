@@ -1,0 +1,24 @@
+{
+	"name": "optimization-detective-priming-cli",
+	"version": "1.0.0",
+	"description": "CLI tool to prime URL metrics for Optimization Detective",
+	"main": "index.js",
+	"type": "module",
+	"bin": {
+		"od-prime": "./index.js"
+	},
+	"scripts": {
+		"start": "node index.js"
+	},
+	"author": "WordPress Performance Team",
+	"license": "GPL-2.0-or-later",
+	"dependencies": {
+		"chalk": "^5.4.1",
+		"commander": "^13.1.0",
+		"ora": "^8.2.0",
+		"puppeteer": "^24.4.0"
+	},
+	"devDependencies": {
+		"typescript": "^5.8.2"
+	}
+}

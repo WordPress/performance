@@ -442,6 +442,12 @@ export default async function detect( {
 			urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken;
 	}
 
+	if ( location.search.includes( 'od-verification-token' ) ) {
+		odPrimeUrlMetricsVerificationToken = new URLSearchParams(
+			location.search
+		).get( 'od-verification-token' );
+	}
+
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
 	const alreadySubmittedSessionStorageKey =
 		await getAlreadySubmittedSessionStorageKey(
@@ -502,7 +508,10 @@ export default async function detect( {
 	} );
 
 	// Wait yet further until idle.
-	if ( typeof requestIdleCallback === 'function' ) {
+	if (
+		'' === odPrimeUrlMetricsVerificationToken &&
+		typeof requestIdleCallback === 'function'
+	) {
 		await new Promise( ( resolve ) => {
 			requestIdleCallback( resolve );
 		} );

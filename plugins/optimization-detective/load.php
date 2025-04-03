@@ -139,5 +139,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		// Load the settings page.
 		require_once __DIR__ . '/settings.php';
+
+		// Load WP-CLI commands.
+		require_once __DIR__ . '/storage/class-od-wp-cli.php';
 	}
 );

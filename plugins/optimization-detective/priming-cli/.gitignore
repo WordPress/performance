@@ -1,0 +1,78 @@
+############
+## Generated files during testing
+############
+
+plugins/*/tests/**/actual.html
+
+############
+## IDEs
+############
+
+*.pydevproject
+.project
+.metadata
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.externalToolBuilders/
+*.launch
+.cproject
+.buildpath
+nbproject/
+.vscode
+
+############
+## Build
+############
+
+build
+.wp-env.override.json
+*.min.js
+*.min.css
+*.asset.php
+
+############
+## Vendor
+############
+
+node_modules/
+vendor/
+
+############
+## OSes
+############
+
+[Tt]humbs.db
+[Dd]esktop.ini
+*.DS_store
+.DS_store?
+
+############
+## Config overrides for CS tools
+############
+phpcs.xml
+phpunit.xml
+phpstan.neon
+
+############
+## Misc
+############
+
+tests/logs
+tmp/
+*.tmp
+*.bak
+*.log
+*.[Cc]ache
+*.cpr
+*.orig
+*.php.in
+.idea/
+.sass-cache/*
+temp/
+._*
+.Trashes
+.svn
