@@ -1,0 +1,91 @@
+name: Bump WordPress Compatibility Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        type: string
+        description: 'Plugin slug (leave empty for all plugins)'
+        required: false
+
+jobs:
+  prepare-matrix:
+    name: Prepare plugins matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.plugins }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure plugin matrix
+        id: set-matrix
+        run: |
+          PLUGINS=$(jq -r '.plugins' plugins.json)
+          if [[ -n "${{ inputs.plugin }}" ]]; then
+            SLUG="${{ inputs.plugin }}"
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$SLUG\" ]"
+            else
+              echo "::error::Plugin '$SLUG' not found in plugins.json"
+              exit 1
+            fi
+          fi
+          echo "::notice::Updating plugins: $(echo ${PLUGINS[@]})"
+          echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
+
+  update-compatibility:
+    name: Update ${{ matrix.plugin }} compatibility
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compare versions
+        id: version-compare
+        run: |
+          # Get WordPress.org version.
+          curl -sSL --retry 3 --retry-delay 5 --retry-all-errors --fail -o /tmp/wp-org-readme.txt "https://plugins.svn.wordpress.org/${{ matrix.plugin }}/trunk/readme.txt"
+          if [ $? -ne 0 ]; then
+            echo "::error::Could not fetch readme.txt from WordPress.org for ${{ matrix.plugin }}"
+            exit 1
+          fi
+
+          WP_ORG_VERSION=$(grep -E "^Tested up to:" /tmp/wp-org-readme.txt | sed -E 's/Tested up to:[[:space:]]*([0-9.]+)/\1/')
+          REPO_VERSION=$(grep -E "^Tested up to:" ./plugins/${{ matrix.plugin }}/readme.txt | sed -E 's/Tested up to:[[:space:]]*([0-9.]+)/\1/')
+
+          echo "wp_org_version=$WP_ORG_VERSION" >> $GITHUB_OUTPUT
+          echo "repo_version=$REPO_VERSION" >> $GITHUB_OUTPUT
+
+          if [ "$WP_ORG_VERSION" = "$REPO_VERSION" ]; then
+            echo "Versions match ($WP_ORG_VERSION). No update needed."
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version mismatch: WordPress.org=$WP_ORG_VERSION, Repo=$REPO_VERSION"
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare and update readme.txt
+        if: steps.version-compare.outputs.needs_update == 'true'
+        run: |
+          # Replace local readme.txt with WordPress.org version, updating only compatibility.
+          cp /tmp/wp-org-readme.txt ./plugins/${{ matrix.plugin }}/readme.txt
+          sed -i -E 's/^(Tested up to:)[[:space:]]*[0-9.]+/\1 ${{ steps.version-compare.outputs.repo_version }}/' ./plugins/${{ matrix.plugin }}/readme.txt
+
+          # Show the diff of what's being updated.
+          echo "Changes made to readme.txt:"
+          diff -u /tmp/wp-org-readme.txt ./plugins/${{ matrix.plugin }}/readme.txt || true
+
+      - name: Push to WordPress.org
+        if: steps.version-compare.outputs.needs_update == 'true'
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SLUG: ${{ matrix.plugin }}
+          SKIP_ASSETS: true
+          IGNORE_OTHER_FILES: true
