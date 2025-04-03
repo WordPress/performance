@@ -312,8 +312,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ! $group_collection->is_every_group_complete();
-
+	$needs_detection          = ! $group_collection->is_every_group_complete();
+	$did_amend_meta_generator = false;
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
 		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
@@ -323,6 +323,32 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			$processor->is_admin_bar()
 		) {
 			continue;
+		}
+
+		// Amend the META generator tag if it's the right one and hasn't been amended already.
+		if (
+			! $did_amend_meta_generator && // @phpstan-ignore booleanNot.alwaysTrue, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse (False positives in PHPStan due to the following line.)
+			'META' === $processor->get_tag() && // @phpstan-ignore identical.alwaysFalse (False positive in PHPStan since it isn't aware of the do/while loop apparently.)
+			'generator' === $processor->get_attribute( 'name' ) &&
+			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective ' )
+		) {
+			$content               = (string) $processor->get_attribute( 'content' );
+			$viewport_group_status = array();
+			foreach ( $group_collection as $group ) {
+				$min_width = $group->get_minimum_viewport_width();
+
+				$status = 'empty';
+				if ( $group->is_complete() ) {
+					$status = 'complete';
+				} elseif ( $group->count() > 0 ) {
+					$status = 'populated';
+				}
+
+				$viewport_group_status[] = sprintf( '%s:%s', $min_width, $status );
+			}
+			$content .= '; url_metric_groups={' . implode( ', ', $viewport_group_status ) . '}';
+			$processor->set_attribute( 'content', $content );
+			$did_amend_meta_generator = true;
 		}
 
 		$tracked_in_url_metrics = false;
