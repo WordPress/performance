@@ -26,12 +26,44 @@
  * @typedef {import("./types.ts").Logger} Logger
  */
 
+/**
+ * Window reference to reduce size when script is minified.
+ *
+ * @type {Window}
+ */
 const win = window;
+
+/**
+ * Document reference to reduce size when script is minified.
+ *
+ * @type {Document}
+ */
 const doc = win.document;
 
+/**
+ * Prefix which is prepended to all messages logged to the console.
+ *
+ * @see {createLogger}
+ * @type {string}
+ */
 const consoleLogPrefix = '[Optimization Detective]';
 
+/**
+ * Session storage key for client-side storage lock to prevent clients attempting to submit URL Metrics when there is a server-side storage lock.
+ *
+ * @see {isStorageLocked}
+ * @see {setStorageLock}
+ * @type {string}
+ */
 const storageLockTimeSessionKey = 'odStorageLockTime';
+
+/**
+ * Wait duration in milliseconds for debounced calls to re-compress the URL Metric JSON data.
+ *
+ * @see {debounceCompressUrlMetric}
+ * @type {number}
+ */
+const compressionDebounceWaitDuration = 1000;
 
 /**
  * Checks whether storage is locked.
@@ -75,11 +107,31 @@ function setStorageLock( currentTime ) {
 /**
  * Creates a logger object with log, warn, and error methods.
  *
- * @param {boolean} [debugMode=false] - Whether to enable debug mode.
- * @param {string}  [prefix='']       - Prefix to prepend to the console message.
+ * @param {boolean} [debugMode=false]      - Whether all messages should be logged. If false, then only errors are logged.
+ * @param {?string} [prefix=null]          - Prefix to prepend to the console message.
+ * @param {?string} [scriptModuleUrl=null] - The URL for the script module which is emitting the log. This is used for extensions.
  * @return {Logger} Logger object with log, info, warn, and error methods.
  */
-function createLogger( debugMode = false, prefix = '' ) {
+function createLogger(
+	debugMode = false,
+	prefix = null,
+	scriptModuleUrl = null
+) {
+	const logSource = scriptModuleUrl ? `\nSource: ${ scriptModuleUrl }` : null;
+
+	/**
+	 * Constructs the args to pass to the logging function.
+	 *
+	 * @param {Array}   message       - The message(s) to log.
+	 * @param {boolean} includeSource - Whether to include the source. This should be true for warnings or errors.
+	 * @return {Array} Amended message.
+	 */
+	const constructLogArgs = ( message, includeSource = false ) => {
+		return [ prefix, ...message, includeSource ? logSource : null ].filter(
+			( value ) => value !== null
+		);
+	};
+
 	return {
 		/**
 		 * Logs a message if debug mode is enabled.
@@ -89,7 +141,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		log( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.log( prefix, ...message );
+				console.log( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -101,7 +153,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		info( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.info( prefix, ...message );
+				console.info( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -113,7 +165,7 @@ function createLogger( debugMode = false, prefix = '' ) {
 		warn( ...message ) {
 			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.warn( prefix, ...message );
+				console.warn( ...constructLogArgs( message, true ) );
 			}
 		},
 
@@ -124,9 +176,32 @@ function createLogger( debugMode = false, prefix = '' ) {
 		 */
 		error( ...message ) {
 			// eslint-disable-next-line no-console
-			console.error( prefix, ...message );
+			console.error( ...constructLogArgs( message, true ) );
 		},
 	};
+}
+
+/**
+ * Attempts to get the extension name (i.e. slug for plugin or theme) from the script module URL.
+ *
+ * If extraction of the slug fails then the entire URL is returned.
+ *
+ * @param {string} scriptModuleUrl - Script module URL.
+ * @return {string} Derived extension name.
+ */
+function getExtensionNameFromScriptModuleUrl( scriptModuleUrl ) {
+	try {
+		const url = new URL( scriptModuleUrl, win.location.href );
+		const matches = url.pathname.match(
+			/\/(?:themes|plugins)\/([^\/]+)\//
+		);
+		if ( matches ) {
+			return matches[ 1 ];
+		}
+		return url.pathname;
+	} catch ( err ) {
+		return scriptModuleUrl;
+	}
 }
 
 /**
@@ -273,6 +348,7 @@ function extendRootData( properties ) {
 		}
 	}
 	Object.assign( urlMetric, properties );
+	debounceCompressUrlMetric();
 }
 
 /**
@@ -335,6 +411,96 @@ function extendElementData( xpath, properties ) {
 	}
 	const elementData = elementsByXPath.get( xpath );
 	Object.assign( elementData, properties );
+	debounceCompressUrlMetric();
+}
+
+/**
+ * Compresses a JSON string using CompressionStream API.
+ *
+ * @param {string} jsonString - JSON string to compress.
+ * @return {Promise<Blob>} Compressed data.
+ */
+async function compress( jsonString ) {
+	const encodedData = new TextEncoder().encode( jsonString );
+	const compressedDataStream = new Blob( [ encodedData ] )
+		.stream()
+		.pipeThrough( new CompressionStream( 'gzip' ) );
+	const compressedDataBuffer = await new Response(
+		compressedDataStream
+	).arrayBuffer();
+	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
+}
+
+/**
+ * The compressed URL metric data.
+ *
+ * @see {debounceCompressUrlMetric}
+ * @type {?Blob}
+ */
+let compressedPayload = null;
+
+/**
+ * Timeout ID for debouncing URL metric compression.
+ *
+ * @see {debounceCompressUrlMetric}
+ * @type {?ReturnType<typeof setTimeout>}
+ */
+let recompressionTimeout = null;
+
+/**
+ * Handle for requestIdleCallback for URL metric compression.
+ *
+ * @see {debounceCompressUrlMetric}
+ * @type {?number}
+ */
+let idleCallbackHandle = null;
+
+/**
+ * Whether compression is enabled.
+ *
+ * @see {detect}
+ * @see {debounceCompressUrlMetric}
+ * @type {boolean}
+ */
+let compressionEnabled = true;
+
+/**
+ * Debounces the compression of the URL Metric.
+ */
+function debounceCompressUrlMetric() {
+	if ( ! compressionEnabled ) {
+		return;
+	}
+	if ( null !== recompressionTimeout ) {
+		clearTimeout( recompressionTimeout );
+		recompressionTimeout = null;
+	}
+	if (
+		null !== idleCallbackHandle &&
+		typeof cancelIdleCallback === 'function'
+	) {
+		cancelIdleCallback( idleCallbackHandle );
+		idleCallbackHandle = null;
+	}
+	recompressionTimeout = setTimeout( async () => {
+		if ( typeof requestIdleCallback === 'function' ) {
+			await new Promise( ( resolve ) => {
+				idleCallbackHandle = requestIdleCallback( resolve );
+			} );
+			idleCallbackHandle = null;
+		}
+		try {
+			compressedPayload = await compress( JSON.stringify( urlMetric ) );
+		} catch ( err ) {
+			const { error } = createLogger( false, consoleLogPrefix );
+			error(
+				'Failed to compress URL Metric falling back to sending uncompressed data:',
+				err
+			);
+			compressionEnabled = false;
+		}
+		recompressionTimeout = null;
+	}, compressionDebounceWaitDuration );
 }
 
 /**
@@ -352,6 +518,8 @@ function extendElementData( xpath, properties ) {
  * @param {boolean}                args.isDebug                    - Whether to show debug messages.
  * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
  * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
+ * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
+ * @param {number}                 args.maxUrlMetricSize           - Maximum size of the URL Metric to send.
  * @param {string}                 args.currentETag                - Current ETag.
  * @param {string}                 args.currentUrl                 - Current URL.
  * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
@@ -370,6 +538,8 @@ export default async function detect( {
 	extensionModuleUrls,
 	restApiEndpoint,
 	restApiNonce,
+	gzdecodeAvailable,
+	maxUrlMetricSize,
 	currentETag,
 	currentUrl,
 	urlMetricSlug,
@@ -383,6 +553,7 @@ export default async function detect( {
 } ) {
 	const logger = createLogger( isDebug, consoleLogPrefix );
 	const { log, warn, error } = logger;
+	compressionEnabled = gzdecodeAvailable;
 
 	if ( isDebug ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
@@ -627,6 +798,9 @@ export default async function detect( {
 	/** @type {string[]} */
 	const initializingExtensionModuleUrls = [];
 
+	/** @type {boolean} */
+	let extensionHasFinalize = false;
+
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
 		try {
 			/** @type {Extension} */
@@ -636,8 +810,10 @@ export default async function detect( {
 			const extensionLogger = createLogger(
 				isDebug,
 				`[Optimization Detective: ${
-					extension.name || 'Unnamed Extension'
-				}]`
+					extension.name ||
+					getExtensionNameFromScriptModuleUrl( extensionModuleUrl )
+				}]`,
+				extensionModuleUrl
 			);
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
@@ -660,12 +836,26 @@ export default async function detect( {
 					initializingExtensionModuleUrls.push( extensionModuleUrl );
 				}
 			}
+
+			if ( extension.finalize instanceof Function ) {
+				extensionLogger.warn(
+					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
+				);
+				extensionHasFinalize = true;
+			}
 		} catch ( err ) {
 			error(
 				`Failed to start initializing extension '${ extensionModuleUrl }':`,
 				err
 			);
 		}
+	}
+
+	if ( compressionEnabled && extensionHasFinalize ) {
+		compressionEnabled = false;
+		warn(
+			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
+		);
 	}
 
 	// Wait for all extensions to finish initializing.
@@ -718,11 +908,15 @@ export default async function detect( {
 		urlMetric.elements.push( elementData );
 		elementsByXPath.set( elementData.xpath, elementData );
 	}
+	breadcrumbedElementsMap.clear();
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
 
 	log( 'Current URL Metric:', urlMetric );
+
+	// Compress the URL Metric once so that even if there are no extensions available or extending the URL Metric, it is compressed.
+	debounceCompressUrlMetric();
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
@@ -763,12 +957,12 @@ export default async function detect( {
 				const extensionLogger = createLogger(
 					isDebug,
 					`[Optimization Detective: ${
-						extension.name || 'Unnamed Extension'
-					}]`
-				);
-
-				extensionLogger.warn(
-					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
+						extension.name ||
+						getExtensionNameFromScriptModuleUrl(
+							extensionModuleUrl
+						)
+					}]`,
+					extensionModuleUrl
 				);
 
 				try {
@@ -820,7 +1014,17 @@ export default async function detect( {
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
 	const jsonBody = JSON.stringify( urlMetric );
-	const payloadBlob = new Blob( [ jsonBody ], { type: 'application/json' } );
+	if ( jsonBody.length > maxUrlMetricSize ) {
+		error(
+			`URL Metric is ${ jsonBody.length.toLocaleString() } bytes, exceeding the maximum size of ${ maxUrlMetricSize.toLocaleString() } bytes:`,
+			urlMetric
+		);
+		return;
+	}
+	compressionEnabled = compressionEnabled && null !== compressedPayload;
+	const payloadBlob = compressionEnabled
+		? compressedPayload
+		: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
 		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
@@ -852,9 +1056,19 @@ export default async function detect( {
 		);
 	}
 
-	const message = `Sending URL Metric (${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
+	let message = 'Sending URL Metric (';
+	message += `${ payloadBlob.size.toLocaleString() } bytes`;
+	message += `, ${ Math.round(
 		percentOfBudget
-	) }% of ${ maxBodyLengthKiB } KiB limit):`;
+	) }% of ${ maxBodyLengthKiB } KiB limit`;
+	if ( compressionEnabled ) {
+		message += `, gzip compressed -${ Math.round(
+			( ( jsonBody.length - payloadBlob.size ) / jsonBody.length ) * 100
+		) }%`;
+	} else {
+		message += ', uncompressed';
+	}
+	message += '):';
 
 	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
 	if ( percentOfBudget < 50 ) {
@@ -876,5 +1090,19 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon( url, payloadBlob );
+
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	if ( compressionEnabled ) {
+		headers[ 'Content-Encoding' ] = 'gzip';
+	}
+
+	const request = new Request( url, {
+		method: 'POST',
+		body: payloadBlob,
+		headers,
+		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
+	} );
+	await fetch( request );
 }
