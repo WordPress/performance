@@ -287,6 +287,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 		 * Fires whenever a URL Metric was successfully stored.
 		 *
 		 * @since 0.7.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_url_metric_stored
 		 *
 		 * @param OD_URL_Metric_Store_Request_Context $context Context about the successful URL Metric collection.
 		 */

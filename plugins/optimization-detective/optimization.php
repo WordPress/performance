@@ -61,6 +61,7 @@ function od_buffer_output( $passthrough ) {
 			 * Filters the template output buffer prior to sending to the client.
 			 *
 			 * @since 0.1.0
+			 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_template_output_buffer
 			 *
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.
@@ -182,6 +183,7 @@ function od_can_optimize_response(): bool {
 	 * Filters whether the current response can be optimized.
 	 *
 	 * @since 0.1.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
@@ -262,6 +264,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
 	 * @since 0.3.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_register_tag_visitors
 	 *
 	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
 	 */
@@ -291,6 +294,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * This is before any of the registered tag visitors have been invoked.
 	 *
 	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_start_template_optimization
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */
@@ -362,6 +366,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * This is after all the registered tag visitors have been invoked.
 	 *
 	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A-,od_finish_template_optimization
 	 *
 	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
 	 */

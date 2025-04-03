@@ -184,7 +184,11 @@ The additional attribution data is made available to client-side extension scrip
 
 ### Filter: `od_breakpoint_max_widths` (default: `array(480, 600, 782)`)
 
-Filters the breakpoint max widths to group URL Metrics for various viewports. Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).
+Filters the breakpoint max widths to group URL Metrics for various viewports. 
+
+Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).
+This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a single group.
+A breakpoint must be greater than zero or else a usage warning will occur.
 
 These default breakpoints are reused from Gutenberg which appear to be used the most in media queries that affect frontend styles.
 
@@ -206,7 +210,11 @@ add_filter( 'od_can_optimize_response', '__return_true' );
 
 ### Filter: `od_url_metrics_breakpoint_sample_size` (default: 3)
 
-Filters the sample size for a breakpoint's URL Metrics on a given URL. The sample size must be greater than zero. You can increase the sample size if you want better guarantees that the applied optimizations will be accurate. During development, it may be helpful to reduce the sample size to 1 (along with setting the `od_url_metric_storage_lock_ttl` and `od_url_metric_freshness_ttl` filters below) so that you don't have to keep reloading the page to collect new URL Metrics to flush out stale ones during active development:
+Filters the sample size for a breakpoint's URL Metrics on a given URL. 
+
+The filtered value must be greater than zero; otherwise it will be ignored and a usage warning will result.
+
+You can increase the sample size if you want better guarantees that the applied optimizations will be accurate. During development, it may be helpful to reduce the sample size to 1 (along with setting the `od_url_metric_storage_lock_ttl` and `od_url_metric_freshness_ttl` filters below) so that you don't have to keep reloading the page to collect new URL Metrics to flush out stale ones during active development:
 
 ```php
 add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
@@ -383,3 +391,17 @@ To prevent garbage collection of `od_url_metrics` posts, add a filter that retur
 ```php
 add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
 ```
+
+### Filter: `od_maximum_url_metric_size` (default: 1 MB in bytes)
+
+Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+
+The filtered value must be greater than zero; otherwise it will be ignored and a usage warning will result.
+
+### Filter: `od_gzip_url_metric_store_request_payloads` (default: `true` if the `gzdecode()` function exists)
+
+Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
+
+The URL Metric JSON request bodies are compressed by default since there is a maximum payload of 64 KiB allowed in `fetch()` keepalive requests (which is the same as with `navigator.sendBeacon()`). The request body size is significantly reduced with gzip compression.
+
+This filter only applies if the `gzdecode()` function actually exists. Sites may want to turn off gzip compression during development to more easily inspect the request payloads in DevTools, or they may want to turn off gzip if there is an unexpected incompatibility with the server receiving compressed request bodies.
