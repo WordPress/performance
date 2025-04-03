@@ -430,22 +430,32 @@ export default async function detect( {
 		return;
 	}
 
-	/** @type {HTMLIFrameElement|null} */
-	const urlPrimeIframeElement = win.parent.document.querySelector(
-		'iframe#od-prime-url-metrics-iframe'
-	);
-	if (
-		urlPrimeIframeElement &&
-		urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
-	) {
-		odPrimeUrlMetricsVerificationToken =
-			urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken;
+	try {
+		if (
+			win.parent &&
+			win.location.origin === win.parent.location.origin
+		) {
+			/** @type {HTMLIFrameElement|null} */
+			const urlPrimeIframeElement = win.parent.document.querySelector(
+				'iframe#od-prime-url-metrics-iframe'
+			);
+			if (
+				urlPrimeIframeElement &&
+				urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
+			) {
+				odPrimeUrlMetricsVerificationToken =
+					urlPrimeIframeElement.dataset
+						.odPrimeUrlMetricsVerificationToken;
+			}
+		}
+	} catch ( e ) {
+		// Ignoring error caused possibly due to cross-origin iframe access.
 	}
 
-	if ( location.search.includes( 'od-verification-token' ) ) {
-		odPrimeUrlMetricsVerificationToken = new URLSearchParams(
-			location.search
-		).get( 'od-verification-token' );
+	// Only available when page is loaded by Puppeteer script.
+	if ( win.__odPrimeUrlMetricsVerificationToken ) {
+		odPrimeUrlMetricsVerificationToken =
+			win.__odPrimeUrlMetricsVerificationToken;
 	}
 
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
@@ -508,10 +518,7 @@ export default async function detect( {
 	} );
 
 	// Wait yet further until idle.
-	if (
-		'' === odPrimeUrlMetricsVerificationToken &&
-		typeof requestIdleCallback === 'function'
-	) {
+	if ( typeof requestIdleCallback === 'function' ) {
 		await new Promise( ( resolve ) => {
 			requestIdleCallback( resolve );
 		} );
@@ -922,9 +929,8 @@ export default async function detect( {
 			'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
 			'*'
 		);
-
 		document.dispatchEvent(
-			new CustomEvent( 'odPrimeUrlMetricsRequestSuccess' )
+			new CustomEvent( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' )
 		);
 	}
 }

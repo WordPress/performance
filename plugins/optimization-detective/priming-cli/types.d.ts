@@ -2,6 +2,6 @@ export {};
 
 declare global {
 	interface Window {
-		success: boolean;
+		__odPrimeUrlMetricsVerificationToken: string;
 	}
 }

@@ -74,31 +74,42 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 		abortSignal.addEventListener( 'abort', onAbort );
 
 		try {
-			const urlToLoad = new URL( task.url );
-			urlToLoad.searchParams.append(
-				'od-verification-token',
-				verificationToken
-			);
-
-			// Set viewport dimensions.
 			await page.setViewport( {
 				width: task.width,
 				height: task.height,
 			} );
 
-			// Navigate to the URL.
-			await page.goto( urlToLoad.toString(), {
+			await page.evaluateOnNewDocument( ( token ) => {
+				window.__odPrimeUrlMetricsVerificationToken = token;
+			}, verificationToken );
+
+			await page.goto( task.url, {
 				waitUntil: 'load',
+				timeout: 30000,
 			} );
 
 			await page.evaluate( () => {
-				return new Promise( ( requestSuccessResolve ) => {
-					document.addEventListener(
-						'odPrimeUrlMetricsRequestSuccess',
-						requestSuccessResolve,
-						{ once: true }
-					);
-				} );
+				return new Promise(
+					( requestSuccessResolve, requestSuccessReject ) => {
+						// Set timeout for 30 seconds.
+						const timeoutId = setTimeout( () => {
+							requestSuccessReject(
+								new Error(
+									'Timed out waiting for event "OD_PRIME_URL_METRICS_REQUEST_SUCCESS".'
+								)
+							);
+						}, 30000 );
+
+						document.addEventListener(
+							'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
+							async () => {
+								clearTimeout( timeoutId );
+								requestSuccessResolve();
+							},
+							{ once: true }
+						);
+					}
+				);
 			} );
 		} catch ( error ) {
 			reject( error );
