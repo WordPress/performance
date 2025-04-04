@@ -789,17 +789,58 @@ export default async function detect( {
 		elements: [],
 	};
 
+	const lcpMetric = lcpMetricCandidates.at( -1 );
+
+	// Populate the elements in the URL Metric.
+	for ( const elementIntersection of elementIntersections ) {
+		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
+		if ( ! xpath ) {
+			warn( 'Unable to look up XPath for element' );
+			continue;
+		}
+
+		const element = /** @type {Element|null} */ (
+			lcpMetric?.entries[ 0 ]?.element
+		);
+		const isLCP = elementIntersection.target === element;
+
+		/** @type {ElementData} */
+		const elementData = {
+			isLCP,
+			isLCPCandidate: !! lcpMetricCandidates.find(
+				( lcpMetricCandidate ) => {
+					const candidateElement = /** @type {Element|null} */ (
+						lcpMetricCandidate.entries[ 0 ]?.element
+					);
+					return candidateElement === elementIntersection.target;
+				}
+			),
+			xpath,
+			intersectionRatio: elementIntersection.intersectionRatio,
+			intersectionRect: elementIntersection.intersectionRect,
+			boundingClientRect: elementIntersection.boundingClientRect,
+		};
+
+		urlMetric.elements.push( elementData );
+		elementsByXPath.set( elementData.xpath, elementData );
+	}
+	breadcrumbedElementsMap.clear(); // No longer needed.
+
+	/**
+	 * Initialize extensions.
+	 */
+
 	/** @type {Map<string, Extension>} */
 	const extensions = new Map();
+
+	/** @type {boolean} */
+	let extensionHasFinalize = false;
 
 	/** @type {Promise[]} */
 	const extensionInitializePromises = [];
 
 	/** @type {string[]} */
 	const initializingExtensionModuleUrls = [];
-
-	/** @type {boolean} */
-	let extensionHasFinalize = false;
 
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
 		try {
@@ -851,13 +892,6 @@ export default async function detect( {
 		}
 	}
 
-	if ( compressionEnabled && extensionHasFinalize ) {
-		compressionEnabled = false;
-		warn(
-			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
-		);
-	}
-
 	// Wait for all extensions to finish initializing.
 	const settledInitializePromises = await Promise.allSettled(
 		extensionInitializePromises
@@ -874,44 +908,12 @@ export default async function detect( {
 		}
 	}
 
-	const lcpMetric = lcpMetricCandidates.at( -1 );
-
-	for ( const elementIntersection of elementIntersections ) {
-		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
-		if ( ! xpath ) {
-			warn( 'Unable to look up XPath for element' );
-			continue;
-		}
-
-		const element = /** @type {Element|null} */ (
-			lcpMetric?.entries[ 0 ]?.element
+	if ( compressionEnabled && extensionHasFinalize ) {
+		compressionEnabled = false;
+		warn(
+			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
 		);
-		const isLCP = elementIntersection.target === element;
-
-		/** @type {ElementData} */
-		const elementData = {
-			isLCP,
-			isLCPCandidate: !! lcpMetricCandidates.find(
-				( lcpMetricCandidate ) => {
-					const candidateElement = /** @type {Element|null} */ (
-						lcpMetricCandidate.entries[ 0 ]?.element
-					);
-					return candidateElement === elementIntersection.target;
-				}
-			),
-			xpath,
-			intersectionRatio: elementIntersection.intersectionRatio,
-			intersectionRect: elementIntersection.intersectionRect,
-			boundingClientRect: elementIntersection.boundingClientRect,
-		};
-
-		urlMetric.elements.push( elementData );
-		elementsByXPath.set( elementData.xpath, elementData );
 	}
-	breadcrumbedElementsMap.clear();
-
-	// Clean up.
-	breadcrumbedElementsMap.clear();
 
 	log( 'Current URL Metric:', urlMetric );
 
