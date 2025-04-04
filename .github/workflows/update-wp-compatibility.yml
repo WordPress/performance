@@ -82,7 +82,7 @@ jobs:
         run: |
           # Replace local readme.txt with WordPress.org version, updating only compatibility.
           cp /tmp/wp-org-readme.txt ./plugins/${{ matrix.plugin }}/readme.txt
-          sed -i -E 's/^(Tested up to:)[[:space:]]*[0-9.]+/\1 ${{ steps.version-compare.outputs.repo_version }}/' ./plugins/${{ matrix.plugin }}/readme.txt
+          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1${{ steps.version-compare.outputs.repo_version }}/' ./plugins/${{ matrix.plugin }}/readme.txt
 
           # Show the diff of what's being updated.
           echo "Changes made to readme.txt:"
