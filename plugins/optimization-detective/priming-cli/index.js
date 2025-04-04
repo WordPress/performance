@@ -2,8 +2,8 @@
 
 import { launch, Page } from 'puppeteer';
 import { program } from 'commander';
-import ora from 'ora';
 import { execSync } from 'child_process';
+import ora from 'ora';
 import chalk from 'chalk';
 
 program
@@ -11,31 +11,94 @@ program
 	.description( 'CLI tool to prime URL metrics for Optimization Detective' )
 	.parse( process.argv );
 
+/**
+ * Instance of ora spinner for displaying status messages.
+ * @type {import('ora').Ora}
+ */
 const spinner = ora( 'Starting...' ).start();
-let browser;
-let browserPage;
-const abortController = new AbortController();
-const { signal } = abortController;
 
+/**
+ * Instance of AbortController to handle aborting tasks.
+ * @type {AbortController}
+ */
+const abortController = new AbortController();
+
+/**
+ * Abort signal to be used to detect abort events.
+ * @type {AbortSignal}
+ */
+const signal = abortController.signal;
+
+// Listen for the SIGINT signal (Ctrl+C) to abort the process.
 process.on( 'SIGINT', async () => {
 	spinner.start( 'Aborting...' );
 	abortController.abort();
 } );
 
 /**
+ * Checks the environment for required tools and plugins.
+ * @return {boolean} - True if all checks passed, false otherwise.
+ */
+function checkEnvironment() {
+	const checks = [
+		{
+			name: 'WP CLI Availability',
+			command: 'wp --info',
+			errorMessage:
+				'WP CLI is not installed. Please install WP CLI and try again.',
+		},
+		{
+			name: 'WordPress Availability',
+			command: 'wp core is-installed',
+			errorMessage:
+				'WordPress is not installed or not accessible in this context.',
+		},
+		{
+			name: 'Optimization Detective WP_CLI command',
+			command: 'wp help od get_url_batch',
+			errorMessage:
+				'Optimization Detective plugin is not installed or activated. Please install and activate the plugin.',
+		},
+	];
+
+	for ( const check of checks ) {
+		try {
+			execSync( check.command, { stdio: 'ignore' } );
+		} catch ( error ) {
+			spinner.fail(
+				chalk.red(
+					`${ check.name } check failed: ${ check.errorMessage }`
+				)
+			);
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
  * Fetches the next batch of URLs.
  * @param {Object} lastCursor - The cursor to fetch the next batch.
- * @return {Object} - The batch of URLs.
+ * @return {?Object} - The batch of URLs.
  */
 function getBatch( lastCursor ) {
-	const batch = JSON.parse(
-		execSync(
+	try {
+		const batchOutput = execSync(
 			`wp od get_url_batch --format=json --cursor='${ JSON.stringify(
 				lastCursor
 			) }'`
-		).toString()
-	);
-	return batch[ 0 ];
+		).toString();
+		const parsedBatch = JSON.parse( batchOutput );
+
+		if ( ! parsedBatch || parsedBatch.length === 0 ) {
+			throw new Error( 'Invalid batch data received.' );
+		}
+		return JSON.parse( batchOutput )[ 0 ];
+	} catch ( error ) {
+		spinner.fail( 'Error occurred while fetching batch: ' + error.message );
+		abortController.abort();
+		return null;
+	}
 }
 
 /**
@@ -68,6 +131,9 @@ function flattenBatchToTasks( batch ) {
  */
 async function processTask( page, task, verificationToken, abortSignal ) {
 	return new Promise( async ( resolve, reject ) => {
+		/**
+		 * Handles the abort event.
+		 */
 		function onAbort() {
 			reject( new Error( 'Task aborted.' ) );
 		}
@@ -125,9 +191,8 @@ async function processTask( page, task, verificationToken, abortSignal ) {
  * @return {Promise<void>}
  */
 async function init() {
-	browser = await launch( { headless: true } );
-	browserPage = await browser.newPage();
-
+	const browser = await launch( { headless: true } );
+	const browserPage = await browser.newPage();
 	let isNextBatchAvailable = true;
 	let cursor = {};
 	let currentBatchNumber = 0;
@@ -140,8 +205,13 @@ async function init() {
 		}
 		spinner.text = 'Fetching next batch';
 		const currentBatch = await getBatch( cursor );
+
 		// If no URLs remain in the batch, finish processing.
-		if ( ! currentBatch.batch || currentBatch.batch.length === 0 ) {
+		if (
+			null === currentBatch ||
+			! currentBatch.batch ||
+			currentBatch.batch.length === 0
+		) {
 			isNextBatchAvailable = false;
 			break;
 		}
@@ -180,14 +250,17 @@ async function init() {
 		cursor = currentBatch.cursor;
 	}
 
-	if ( signal.aborted ) {
-		spinner.fail( 'Aborted.' );
-	} else {
-		spinner.succeed( 'All batches processed.' );
-	}
+	// Close the browser.
 	await browser.close();
-	process.exit( 0 );
+
+	if ( signal.aborted ) {
+		spinner.fail( chalk.red( 'Aborted.' ) );
+	} else {
+		spinner.succeed( chalk.green( 'All tasks completed.' ) );
+	}
 }
 
 // Start the process.
-init();
+if ( checkEnvironment() ) {
+	init();
+}

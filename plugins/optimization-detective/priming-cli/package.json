@@ -1,5 +1,5 @@
 {
-	"name": "optimization-detective-priming-cli",
+	"name": "@wordpress/performance-od-url-metric-collector",
 	"version": "1.0.0",
 	"description": "CLI tool to prime URL metrics for Optimization Detective",
 	"main": "index.js",
