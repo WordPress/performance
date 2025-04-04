@@ -58,11 +58,11 @@ jobs:
           WP_ORG_VERSION=$(grep -E "^Tested up to:" /tmp/wp-org-readme.txt | awk -F ': +' '{print $2}')
           REPO_VERSION=$(grep -E "^Tested up to:" ./plugins/${{ matrix.plugin }}/readme.txt | awk -F ': +' '{print $2}')
 
-          if [ -n "$WP_ORG_VERSION" ]; then
+          if [ -z "$WP_ORG_VERSION" ]; then
             echo "Unable to parse WP_ORG_VERSION"
             exit 1
           fi
-          if [ -n "$REPO_VERSION" ]; then
+          if [ -z "$REPO_VERSION" ]; then
             echo "Unable to parse REPO_VERSION"
             exit 1
           fi
