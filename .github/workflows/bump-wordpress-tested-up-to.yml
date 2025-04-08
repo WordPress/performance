@@ -57,27 +57,27 @@ jobs:
             exit 1
           fi
 
-      - name: Extract repository version
+      - name: Extract "Tested up to" version from repository
         env:
           PLUGIN_SLUG: ${{ matrix.plugin }}
-        id: repo-version
+        id: extract-tested-up-to
         run: |
-          REPO_VERSION=$(grep -E "^Tested up to:" "./plugins/$PLUGIN_SLUG/readme.txt" | awk -F ': +' '{print $2}')
-          if [ -z "$REPO_VERSION" ]; then
+          LOCAL_TESTED_UP_TO=$(grep -E "^Tested up to:" "./plugins/$PLUGIN_SLUG/readme.txt" | awk -F ': +' '{print $2}')
+          if [ -z "$LOCAL_TESTED_UP_TO" ]; then
             echo "::error::Unable to parse Tested up to version from repository readme.txt"
             exit 1
           fi
 
-          echo "repo_version=$REPO_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$LOCAL_TESTED_UP_TO" >> $GITHUB_OUTPUT
 
       - name: Prepare and update readme.txt
         env:
           PLUGIN_SLUG: ${{ matrix.plugin }}
-          REPO_VERSION: ${{ steps.repo-version.outputs.repo_version }}
+          LOCAL_TESTED_UP_TO: ${{ steps.extract-tested-up-to.outputs.version }}
         run: |
           # Replace local readme.txt with WordPress.org version, updating only the "Tested up to" line.
           cp /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt"
-          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1'"$REPO_VERSION"'/' "./plugins/$PLUGIN_SLUG/readme.txt"
+          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1'"$LOCAL_TESTED_UP_TO"'/' "./plugins/$PLUGIN_SLUG/readme.txt"
 
           # Show the diff of what's being updated.
           echo "Changes made to readme.txt:"
