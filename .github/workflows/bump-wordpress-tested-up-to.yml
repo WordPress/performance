@@ -20,14 +20,15 @@ jobs:
 
       - name: Configure plugin matrix
         id: set-matrix
+        env:
+          PLUGIN_SLUG: ${{ inputs.plugin }}
         run: |
           PLUGINS=$(jq -r '.plugins' plugins.json)
-          if [[ -n "${{ inputs.plugin }}" ]]; then
-            SLUG="${{ inputs.plugin }}"
-            if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
-              PLUGINS="[ \"$SLUG\" ]"
+          if [[ -n "$PLUGIN_SLUG" ]]; then
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$PLUGIN_SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$PLUGIN_SLUG\" ]"
             else
-              echo "::error::Plugin '$SLUG' not found in plugins.json"
+              echo "::error::Plugin '$PLUGIN_SLUG' not found in plugins.json"
               exit 1
             fi
           fi
@@ -79,14 +80,17 @@ jobs:
 
       - name: Prepare and update readme.txt
         if: steps.version-compare.outputs.needs_update == 'true'
+        env:
+          PLUGIN_SLUG: ${{ matrix.plugin }}
+          REPO_VERSION: ${{ steps.version-compare.outputs.repo_version }}
         run: |
           # Replace local readme.txt with WordPress.org version, updating only compatibility.
-          cp /tmp/wp-org-readme.txt ./plugins/${{ matrix.plugin }}/readme.txt
-          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1${{ steps.version-compare.outputs.repo_version }}/' ./plugins/${{ matrix.plugin }}/readme.txt
+          cp /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt"
+          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1'"$REPO_VERSION"'/' "./plugins/$PLUGIN_SLUG/readme.txt"
 
           # Show the diff of what's being updated.
           echo "Changes made to readme.txt:"
-          diff -u /tmp/wp-org-readme.txt ./plugins/${{ matrix.plugin }}/readme.txt || true
+          diff -u /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt" || true
 
       - name: Push to WordPress.org
         if: steps.version-compare.outputs.needs_update == 'true'
