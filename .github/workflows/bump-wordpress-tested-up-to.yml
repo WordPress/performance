@@ -88,3 +88,4 @@ jobs:
           SLUG: ${{ matrix.plugin }}
           SKIP_ASSETS: true
           IGNORE_OTHER_FILES: true
+          README_NAME: ./plugins/${{ matrix.plugin }}/readme.txt
