@@ -14,7 +14,7 @@
     "@octokit/rest": "^21.1.1",
     "@wordpress/env": "^10.21.0",
     "@wordpress/prettier-config": "^4.20.0",
-    "@wordpress/scripts": "^30.14.0",
+    "@wordpress/scripts": "^30.14.1",
     "commander": "13.1.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-minimizer-webpack-plugin": "^7.0.2",
