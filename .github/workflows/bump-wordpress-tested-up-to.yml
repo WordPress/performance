@@ -68,9 +68,6 @@ jobs:
 
           echo "version=$LOCAL_TESTED_UP_TO" >> $GITHUB_OUTPUT
 
-      - name: Copy readme.txt to workspace root for SVN upload
-        run: cp "./plugins/$PLUGIN_SLUG/readme.txt" "$GITHUB_WORKSPACE/readme.txt"
-
       - name: Prepare and update readme.txt
         env:
           LOCAL_TESTED_UP_TO: ${{ steps.extract-tested-up-to.outputs.version }}
@@ -82,6 +79,9 @@ jobs:
           # Show the diff of what's being updated.
           echo "Changes made to readme.txt:"
           diff -u /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt" || true
+
+      - name: Copy readme.txt to workspace root for SVN upload
+        run: cp "./plugins/$PLUGIN_SLUG/readme.txt" "$GITHUB_WORKSPACE/readme.txt"
 
       - name: Push to WordPress.org
         uses: 10up/action-wordpress-plugin-asset-update@stable
