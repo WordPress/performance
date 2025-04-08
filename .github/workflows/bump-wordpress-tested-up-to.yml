@@ -46,45 +46,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Compare versions
-        id: version-compare
-        run: |
-          # Get WordPress.org version.
-          curl -sSL --retry 3 --retry-delay 5 --retry-all-errors --fail -o /tmp/wp-org-readme.txt "https://plugins.svn.wordpress.org/${{ matrix.plugin }}/trunk/readme.txt"
-          if [ $? -ne 0 ]; then
-            echo "::error::Could not fetch readme.txt from WordPress.org for ${{ matrix.plugin }}"
-            exit 1
-          fi
-
-          WP_ORG_VERSION=$(grep -E "^Tested up to:" /tmp/wp-org-readme.txt | awk -F ': +' '{print $2}')
-          REPO_VERSION=$(grep -E "^Tested up to:" ./plugins/${{ matrix.plugin }}/readme.txt | awk -F ': +' '{print $2}')
-
-          if [ -z "$WP_ORG_VERSION" ]; then
-            echo "Unable to parse WP_ORG_VERSION"
-            exit 1
-          fi
-          if [ -z "$REPO_VERSION" ]; then
-            echo "Unable to parse REPO_VERSION"
-            exit 1
-          fi
-          echo "wp_org_version=$WP_ORG_VERSION" >> $GITHUB_OUTPUT
-          echo "repo_version=$REPO_VERSION" >> $GITHUB_OUTPUT
-
-          if [ "$WP_ORG_VERSION" = "$REPO_VERSION" ]; then
-            echo "Versions match ($WP_ORG_VERSION). No update needed."
-            echo "needs_update=false" >> $GITHUB_OUTPUT
-          else
-            echo "Version mismatch: WordPress.org=$WP_ORG_VERSION, Repo=$REPO_VERSION"
-            echo "needs_update=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Prepare and update readme.txt
-        if: steps.version-compare.outputs.needs_update == 'true'
+      - name: Download WordPress.org readme
         env:
           PLUGIN_SLUG: ${{ matrix.plugin }}
-          REPO_VERSION: ${{ steps.version-compare.outputs.repo_version }}
         run: |
-          # Replace local readme.txt with WordPress.org version, updating only compatibility.
+          # Download the current readme.txt from WordPress.org
+          curl -sSL --retry 3 --retry-delay 5 --retry-all-errors --fail -o /tmp/wp-org-readme.txt "https://plugins.svn.wordpress.org/$PLUGIN_SLUG/trunk/readme.txt"
+          if [ $? -ne 0 ]; then
+            echo "::error::Could not fetch readme.txt from WordPress.org for $PLUGIN_SLUG"
+            exit 1
+          fi
+
+      - name: Extract repository version
+        env:
+          PLUGIN_SLUG: ${{ matrix.plugin }}
+        id: repo-version
+        run: |
+          REPO_VERSION=$(grep -E "^Tested up to:" "./plugins/$PLUGIN_SLUG/readme.txt" | awk -F ': +' '{print $2}')
+          if [ -z "$REPO_VERSION" ]; then
+            echo "::error::Unable to parse Tested up to version from repository readme.txt"
+            exit 1
+          fi
+
+          echo "repo_version=$REPO_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Prepare and update readme.txt
+        env:
+          PLUGIN_SLUG: ${{ matrix.plugin }}
+          REPO_VERSION: ${{ steps.repo-version.outputs.repo_version }}
+        run: |
+          # Replace local readme.txt with WordPress.org version, updating only the "Tested up to" line.
           cp /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt"
           sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1'"$REPO_VERSION"'/' "./plugins/$PLUGIN_SLUG/readme.txt"
 
@@ -93,7 +84,6 @@ jobs:
           diff -u /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt" || true
 
       - name: Push to WordPress.org
-        if: steps.version-compare.outputs.needs_update == 'true'
         uses: 10up/action-wordpress-plugin-asset-update@stable
         env:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
