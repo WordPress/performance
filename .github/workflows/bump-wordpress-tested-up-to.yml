@@ -35,7 +35,7 @@ jobs:
           echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
 
   update-compatibility:
-    name: Update ${{ matrix.plugin }} compatibility
+    name: Update "Tested up to" value for ${{ matrix.plugin }}
     needs: prepare-matrix
     runs-on: ubuntu-latest
     strategy:
