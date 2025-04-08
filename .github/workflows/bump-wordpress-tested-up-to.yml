@@ -39,6 +39,8 @@ jobs:
     name: Update "Tested up to" value for ${{ matrix.plugin }}
     needs: prepare-matrix
     runs-on: ubuntu-latest
+    env:
+      PLUGIN_SLUG: ${{ matrix.plugin }}
     strategy:
       matrix:
         plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
@@ -47,8 +49,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download WordPress.org readme
-        env:
-          PLUGIN_SLUG: ${{ matrix.plugin }}
         run: |
           # Download the current readme.txt from WordPress.org
           curl -sSL --retry 3 --retry-delay 5 --retry-all-errors --fail -o /tmp/wp-org-readme.txt "https://plugins.svn.wordpress.org/$PLUGIN_SLUG/trunk/readme.txt"
@@ -58,8 +58,6 @@ jobs:
           fi
 
       - name: Extract "Tested up to" version from repository
-        env:
-          PLUGIN_SLUG: ${{ matrix.plugin }}
         id: extract-tested-up-to
         run: |
           LOCAL_TESTED_UP_TO=$(grep -E "^Tested up to:" "./plugins/$PLUGIN_SLUG/readme.txt" | awk -F ': +' '{print $2}')
@@ -72,7 +70,6 @@ jobs:
 
       - name: Prepare and update readme.txt
         env:
-          PLUGIN_SLUG: ${{ matrix.plugin }}
           LOCAL_TESTED_UP_TO: ${{ steps.extract-tested-up-to.outputs.version }}
         run: |
           # Replace local readme.txt with WordPress.org version, updating only the "Tested up to" line.
