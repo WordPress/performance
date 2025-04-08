@@ -200,6 +200,7 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 
 		case 'wide':
 			$layout_width = auto_sizes_get_layout_width( 'wide' );
+			// TODO: Add support for em, rem, vh, and vw.
 			if (
 				str_ends_with( $layout_width, 'px' ) &&
 				( $container_relative_width > 0.0 ||
@@ -223,6 +224,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			/*
 			 * If the layout width is in pixels, we can compare against the image width
 			 * on the server. Otherwise, we need to rely on CSS functions.
+			 *
+			 * TODO: Add support for em, rem, vh, and vw.
 			 */
 			if (
 				str_ends_with( $layout_width, 'px' ) &&
