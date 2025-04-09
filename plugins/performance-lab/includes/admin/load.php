@@ -284,9 +284,8 @@ function perflab_enqueue_features_page_scripts(): void {
 function perflab_sanitize_plugin_slug( $unsanitized_plugin_slug ): ?string {
 	if ( in_array( $unsanitized_plugin_slug, perflab_get_standalone_plugins(), true ) ) {
 		return $unsanitized_plugin_slug;
-	} else {
-		return null;
 	}
+	return null;
 }
 
 /**
