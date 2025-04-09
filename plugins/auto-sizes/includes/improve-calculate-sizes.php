@@ -95,10 +95,11 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
 
-			$id            = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
-			$alignment     = $block->attributes['align'] ?? '';
-			$width         = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
-			$max_alignment = $block->context['max_alignment'] ?? '';
+			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
+			$alignment                = $block->attributes['align'] ?? '';
+			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
+			$max_alignment            = $block->context['max_alignment'] ?? '';
+			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
 
 			/*
 			 * Update width for cover block.
@@ -108,7 +109,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 				$size = array( 420, 420 );
 			}
 
-			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment );
+			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment, $container_relative_width );
 
 			// If better sizes can't be calculated, use the default sizes.
 			return false !== $better_sizes ? $better_sizes : $sizes;
@@ -145,14 +146,15 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
  *
  * @since 1.4.0
  *
- * @param int                    $id            The image attachment post ID.
- * @param string|array{int, int} $size          Image size name or array of width and height.
- * @param string                 $align         The image alignment.
- * @param int                    $resize_width  Resize image width.
- * @param string                 $max_alignment The maximum usable layout alignment.
+ * @param int                    $id                       The image attachment post ID.
+ * @param string|array{int, int} $size                     Image size name or array of width and height.
+ * @param string                 $align                    The image alignment.
+ * @param int                    $resize_width             Resize image width.
+ * @param string                 $max_alignment            The maximum usable layout alignment.
+ * @param float                  $container_relative_width Container relative width.
  * @return string|false An improved sizes attribute or false if a better size cannot be calculated.
  */
-function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $resize_width, string $max_alignment ) {
+function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $resize_width, string $max_alignment, float $container_relative_width ) {
 	// Bail early if not a block theme.
 	if ( ! wp_is_block_theme() ) {
 		return false;
@@ -198,6 +200,18 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 
 		case 'wide':
 			$layout_width = auto_sizes_get_layout_width( 'wide' );
+			// TODO: Add support for em, rem, vh, and vw.
+			if (
+				str_ends_with( $layout_width, 'px' ) &&
+				( $container_relative_width > 0.0 ||
+				$container_relative_width < 1.0 )
+			) {
+				// First remove 'px' from width.
+				$layout_width = str_replace( 'px', '', $layout_width );
+				// Convert to float for better precision.
+				$layout_width = (float) $layout_width * $container_relative_width;
+				$layout_width = sprintf( '%dpx', (int) $layout_width );
+			}
 			break;
 
 		case 'left':
@@ -210,8 +224,18 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			/*
 			 * If the layout width is in pixels, we can compare against the image width
 			 * on the server. Otherwise, we need to rely on CSS functions.
+			 *
+			 * TODO: Add support for em, rem, vh, and vw.
 			 */
-			if ( str_ends_with( $layout_width, 'px' ) ) {
+			if (
+				str_ends_with( $layout_width, 'px' ) &&
+				( $container_relative_width > 0.0 ||
+				$container_relative_width < 1.0 )
+			) {
+				// First remove 'px' from width.
+				$layout_width = str_replace( 'px', '', $layout_width );
+				// Convert to float for better precision.
+				$layout_width = (float) $layout_width * $container_relative_width;
 				$layout_width = sprintf( '%dpx', min( (int) $layout_width, $image_width ) );
 			} else {
 				$layout_width = sprintf( 'min(%1$s, %2$spx)', $layout_width, $image_width );
@@ -324,7 +348,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			}
 
 			// Multiply with parent's width if available.
-			if ( isset( $parent_block->context['container_relative_width'] ) ) {
+			if (
+				isset( $parent_block->context['container_relative_width'] ) &&
+				( $current_width > 0.0 || $current_width < 1.0 )
+			) {
 				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
 				$context['container_relative_width'] = $current_width;
