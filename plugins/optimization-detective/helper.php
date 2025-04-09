@@ -61,7 +61,7 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 }
 
 /**
- * Gets the reasons why Optimization Detective is disabled for the current request.
+ * Gets the reasons why Optimization Detective is disabled for the current response.
  *
  * @since n.e.x.t
  * @access private
