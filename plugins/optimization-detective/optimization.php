@@ -81,32 +81,13 @@ function od_buffer_output( $passthrough ) {
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter(): void {
-	$conditions = array(
-		array(
-			'test'   => od_can_optimize_response(),
-			'reason' => __( 'Page is not optimized because od_can_optimize_response() returned false. This can be overridden with the od_can_optimize_response filter.', 'optimization-detective' ),
-		),
-		array(
-			'test'   => ! od_is_rest_api_unavailable() || ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ),
-			'reason' => __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' ),
-		),
-		array(
-			'test'   => ! isset( $_GET['optimization_detective_disabled'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			'reason' => __( 'Page is not optimized because the URL has the optimization_detective_disabled query parameter.', 'optimization-detective' ),
-		),
-	);
-	$reasons    = array();
-	foreach ( $conditions as $condition ) {
-		if ( ! $condition['test'] ) {
-			$reasons[] = $condition['reason'];
-		}
-	}
-	if ( count( $reasons ) > 0 ) {
+	$disabled_reasons = od_get_disabled_reasons();
+	if ( count( $disabled_reasons ) > 0 ) {
 		if ( WP_DEBUG ) {
 			add_action(
 				'wp_print_footer_scripts',
-				static function () use ( $reasons ): void {
-					od_print_disabled_reasons( $reasons );
+				static function () use ( $disabled_reasons ): void {
+					od_print_disabled_reasons( array_values( $disabled_reasons ) );
 				}
 			);
 		}

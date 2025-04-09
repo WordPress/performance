@@ -61,6 +61,40 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 }
 
 /**
+ * Gets the reasons why Optimization Detective is disabled for the current request.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return array<string, string> Array of disabled reason codes and their messages.
+ */
+function od_get_disabled_reasons(): array {
+	$conditions = array(
+		'can_optimize_response_false' => array(
+			'test'   => od_can_optimize_response(),
+			'reason' => __( 'Page is not optimized because od_can_optimize_response() returned false. This can be overridden with the od_can_optimize_response filter.', 'optimization-detective' ),
+		),
+		'rest_api_unavailable'        => array(
+			'test'   => ! od_is_rest_api_unavailable() || ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ),
+			'reason' => __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' ),
+		),
+		'query_param_disabled'        => array(
+			'test'   => ! isset( $_GET['optimization_detective_disabled'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'reason' => __( 'Page is not optimized because the URL has the optimization_detective_disabled query parameter.', 'optimization-detective' ),
+		),
+	);
+
+	$reasons = array();
+	foreach ( $conditions as $key => $condition ) {
+		if ( ! $condition['test'] ) {
+			$reasons[ $key ] = $condition['reason'];
+		}
+	}
+
+	return $reasons;
+}
+
+/**
  * Displays the HTML generator meta tag for the Optimization Detective plugin.
  *
  * See {@see 'wp_head'}.
@@ -72,9 +106,11 @@ function od_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	$content = 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION;
 
-	// Indicate that the plugin will not be doing anything because the REST API is unavailable.
-	if ( od_is_rest_api_unavailable() ) {
-		$content .= '; rest_api_unavailable';
+	// Add any reasons why Optimization Detective is disabled.
+	$disabled_reasons = od_get_disabled_reasons();
+	if ( count( $disabled_reasons ) > 0 ) {
+		$flags    = array_keys( $disabled_reasons );
+		$content .= '; ' . implode( '; ', $flags );
 	}
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
