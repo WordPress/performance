@@ -199,6 +199,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_od_maybe_add_template_output_buffer_filter
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
+	 * @covers ::od_get_disabled_reasons
 	 * @covers ::od_can_optimize_response
 	 * @covers ::od_is_rest_api_unavailable
 	 */
