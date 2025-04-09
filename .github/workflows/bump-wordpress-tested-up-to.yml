@@ -80,6 +80,9 @@ jobs:
           echo "Changes made to readme.txt:"
           diff -u /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt" || true
 
+      - name: Copy readme.txt to workspace root for SVN upload
+        run: cp "./plugins/$PLUGIN_SLUG/readme.txt" "$GITHUB_WORKSPACE/readme.txt"
+
       - name: Push to WordPress.org
         uses: 10up/action-wordpress-plugin-asset-update@stable
         env:
@@ -88,4 +91,3 @@ jobs:
           SLUG: ${{ matrix.plugin }}
           SKIP_ASSETS: true
           IGNORE_OTHER_FILES: true
-          README_NAME: ./plugins/${{ matrix.plugin }}/readme.txt

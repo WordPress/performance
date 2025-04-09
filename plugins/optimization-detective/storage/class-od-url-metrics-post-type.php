@@ -108,9 +108,8 @@ class OD_URL_Metrics_Post_Type {
 		$post = current( $post_query->posts );
 		if ( $post instanceof WP_Post ) {
 			return $post;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
