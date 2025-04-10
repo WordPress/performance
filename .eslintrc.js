@@ -23,7 +23,7 @@ const config = {
 		'/node_modules',
 		'/build',
 		'/dist',
-		'/*.min.js',
+		'/**/*.min.js',
 	],
 };
 

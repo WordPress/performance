@@ -186,7 +186,7 @@ add_filter( 'query_vars', function ( $query_vars ) {
 
 Then in your template code you may continue to use `isset( $_GET['thank_you'] )` but you might as well use `get_query_var( 'thank_you' )` instead.
 
-When an `od_url_metrics` post has not been updated in a month then it is garbage-collected, since it is likely the original URL has gone away.
+When an `od_url_metrics` post has not been modified for three (3) months, it will then be garbage collected since it is likely the original URL for the metrics has gone away. If you have a site that gets very little traffic and you want to increase the TTL to prevent premature garbage collection, you can use the [`od_url_metric_garbage_collection_ttl`](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl) filter to increase this.
 
 Extensions to Optimization Detective rarely need to directly interface with the custom post type, so far. See the experimental [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility/) plugin which interfaces with the `od_url_metrics` post at submission time to add post meta via the `od_url_metric_stored` action, and then retrieves post meta in the tag visitor via the context object’s `url_metrics_id` property.
 
@@ -382,22 +382,18 @@ add_filter(
 );
 ```
 
-The `detect.js` file is a script module which exports two async functions: `initialize` and `finalize`. The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission. The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/optimization-detective/types.ts#L52-L79). Here is an example `detect.js` module script which amends the URL Metric with these exported functions:
+The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`; extensions should use `initialize` instead and call the supplied `extendRootData` and `extendElementData` whenever a relevant mutation occurs rather than waiting until the page is left). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). An extension may also export a `name` which is used as a prefix when logging out messages. Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
 
 ```js
-/**
- * Embed element heights.
- *
- * @type {Map<string, DOMRectReadOnly>}
- */
-const loadedElementContentRects = new Map();
+export name = 'My Resized Embed Optimizer';
 
 /**
  * Initializes extension.
  *
  * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
  */
-export async function initialize() {
+export async function initialize( { extendElementData } ) {
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
@@ -406,49 +402,37 @@ export async function initialize() {
 		const xpath = embedWrapper.dataset.odXpath;
 		const observer = new ResizeObserver( ( entries ) => {
 			const [ entry ] = entries;
-			loadedElementContentRects.set( xpath, entry.contentRect );
+			extendElementData( xpath, {
+				resizedBoundingClientRect: entry.contentRect,
+			} );
 		} );
 		observer.observe( embedWrapper, { box: 'content-box' } );
-	}
-}
-
-/**
- * Finalizes extension.
- *
- * @type {FinalizeCallback}
- * @param {FinalizeArgs} args Args.
- */
-export async function finalize( { extendElementData } ) {
-	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
-		extendElementData( xpath, {
-			resizedBoundingClientRect: domRect,
-		} );
 	}
 }
 ```
 
 Note that this depends on a tag visitor to have been registered which opts in the `.wp-block-embed__wrapper` elements for tracking. With the resized data captured in URL Metrics, the tag visitor can use this data to construct responsive `min-height` styles that target the parent `.wp-block-embed` elements. A full implementation of this tag visitor and detection extension can be found in the [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) plugin: [`Embed_Optimizer_Tag_Visitor::reduce_layout_shifts()`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L131-L207) and [`detect.js`](https://github.com/WordPress/performance/blob/trunk/plugins/embed-optimizer/detect.js).
 
-## Properties Passed to `initialize` and `finalize`
+## Properties Passed to `initialize` ~and `finalize`~
 
 The following are the properties passed to the `initialize` async function:
 
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `onTTFB`: Function from web-vitals.js which registers a callback to obtain the TTFB metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onttfb).
 * `onFCP`: Function from web-vitals.js which registers a callback to obtain the FCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onfcp).
 * `onLCP`: Function from web-vitals.js which registers a callback to obtain the LCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onlcp).
 * `onINP`: Function from web-vitals.js which registers a callback to obtain the INP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oninp).
 * `onCLS`: Function from web-vitals.js which registers a callback to obtain the CLS metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oncls).
-
-The following are the properties passed to the `finalize` async function:
-
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `getRootData`: Function which returns an immutable copy of the current URL Metric data pending submission.
 * `getElementData`: Function which returns an immutable copy of the element data for a given XPath.
 * `extendRootData`: Function which merges additional properties onto the root of the URL Metric (which may not override core properties).
 * `extendElementData`: Function which merges additional properties onto the root of the element for the supplied XPath (which may not override core properties).
+* `isDebug`: Whether `WP_DEBUG` is enabled.
+* `log`: Logs a message to the console via `console.log()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `info`: Logs a message to the console via `console.info()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `warn`: Logs a message to the console via `console.warn()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `error`: Logs a message to the console via `console.error()` _regardless_ of whether `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
 
-The `initialize` and `finalize` functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
+The `initialize` ~and `finalize`~ functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
 
 Note that by default the [“standard” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=1.%20The%20%22standard%22%20build) of web-vitals.js is loaded during detection. Extensions can opt in to serving the [“attribution” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=2.%20The%20%22attribution%22%20build) via the `od_use_web_vitals_attribution_build` filter. The attribution build is slightly larger and includes additional data which can be useful to store in a URL Metric, such as LoAF data with the INP metric. See [attribution docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution) for what additional properties are made available.
 

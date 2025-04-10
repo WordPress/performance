@@ -19,12 +19,9 @@ class Test_Dominant_Color extends TestCase {
 	 * @param string[] $expected_color Expected color.
 	 */
 	public function test_dominant_color_metadata( string $image_path, array $expected_color ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
-		// Non existing attachment.
+		// Non-existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $dominant_color_metadata );
 
@@ -42,16 +39,20 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::dominant_color_get_dominant_color
-	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
 	 */
 	public function test_dominant_color_get_dominant_color( string $image_path, array $expected_color ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
+
+		// Test when attachment is not an image.
+		$non_image_attachment = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$this->assertNull( dominant_color_get_dominant_color( $non_image_attachment ) );
 
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -70,10 +71,7 @@ class Test_Dominant_Color extends TestCase {
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_has_transparency_metadata( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
 		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
@@ -91,17 +89,26 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::dominant_color_get_dominant_color
-	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_dominant_color_has_transparency( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
+
+		// Test when metadata is not an array.
+		$invalid_meta_attachment = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata', 'not_an_array' );
+		$this->assertNull( dominant_color_has_transparency( $invalid_meta_attachment ) );
+
+		// Test when has_transparency is not set in metadata.
+		delete_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata' );
+		update_post_meta( $invalid_meta_attachment, '_wp_attachment_metadata', array( 'other_key' => 'value' ) );
+		$this->assertNull( dominant_color_has_transparency( $invalid_meta_attachment ) );
 
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -120,17 +127,14 @@ class Test_Dominant_Color extends TestCase {
 	 * @param bool     $expected_transparency Expected transparency.
 	 */
 	public function test_tag_add_adjust_to_image_attributes( string $image_path, array $expected_color, bool $expected_transparency ): void {
-		$mime_type = wp_check_filetype( $image_path )['type'];
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
+		$this->skip_if_mime_type_unsupported( $image_path );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
 		// Testing tag_add_adjust() with image being lazy load.
-		$filtered_image_mock_lazy_load = sprintf( '<img loading="lazy" class="test" src="%s" width="%d" height="%d" />', $src, $width, $height );
+		$filtered_image_mock_lazy_load = sprintf( '<img loading="lazy" class="test" src="%s" width="%d" height="%d" alt="" />', $src, $width, $height );
 
 		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
@@ -184,11 +188,11 @@ class Test_Dominant_Color extends TestCase {
 	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes(): array {
 		return array(
 			'double quotes' => array(
-				'image'    => '<img src="%s">',
+				'image'    => '<img src="%s" alt="">',
 				'expected' => true,
 			),
 			'single quotes' => array(
-				'image'    => "<img src='%s'>",
+				'image'    => "<img src='%s' alt=''>",
 				'expected' => true,
 			),
 		);
@@ -227,11 +231,11 @@ class Test_Dominant_Color extends TestCase {
 	public function data_provider_dominant_color_check_inline_style(): array {
 		return array(
 			'no existing inline styles' => array(
-				'filtered_image' => '<img src="%s" width="%d" height="%d" />',
+				'filtered_image' => '<img src="%s" width="%d" height="%d" alt="" />',
 				'expected'       => 'style="--dominant-color: #fe0000;"',
 			),
 			'existing inline styles'    => array(
-				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />',
+				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" alt="" />',
 				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
 			),
 		);
@@ -303,24 +307,24 @@ class Test_Dominant_Color extends TestCase {
 			),
 			'filtered' => array(
 				'existing' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 				),
 				'expected' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 				),
 			),
 			'added'    => array(
 				'existing' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 					'WP_Image_Editor_GD',
 					'WP_Image_Editor_Imagick',
 				),
 				'expected' => array(
-					'WP_Image_Editor_Filered_GD',
-					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_Filtered_GD',
+					'WP_Image_Editor_Filtered_Imagick',
 					'Dominant_Color_Image_Editor_GD',
 					'Dominant_Color_Image_Editor_Imagick',
 				),
@@ -407,5 +411,114 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'dominant-color-images ' . DOMINANT_COLOR_IMAGES_VERSION, $tag );
+	}
+
+	/**
+	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 */
+	public function test_invalid_image_type(): void {
+		$editor = new Dominant_Color_Image_Editor_GD( '/invalid/type' );
+		$result = $editor->get_dominant_color();
+		$this->assertWPError( $result );
+		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
+	}
+
+	/**
+	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 */
+	public function test_corrupted_image_file(): void {
+		$editor = new Dominant_Color_Image_Editor_GD( 'path/to/corrupted/file.jpg' );
+		$result = $editor->get_dominant_color();
+		$this->assertWPError( $result );
+		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
+	}
+
+	/**
+	 * @covers ::dominant_color_add_inline_style
+	 */
+	public function test_dominant_color_add_inline_style(): void {
+		dominant_color_add_inline_style();
+
+		// Verify the style was registered.
+		$this->assertTrue( wp_style_is( 'dominant-color-styles', 'registered' ) );
+
+		// Verify the style was enqueued.
+		$this->assertTrue( wp_style_is( 'dominant-color-styles', 'enqueued' ) );
+
+		// Verify the inline style was added.
+		$inline_styles = wp_styles()->get_data( 'dominant-color-styles', 'after' );
+		$this->assertNotEmpty( $inline_styles );
+		$this->assertStringContainsString(
+			'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
+			implode( '', $inline_styles )
+		);
+	}
+
+	/**
+	 * @covers ::dominant_color_admin_inline_style
+	 */
+	public function test_dominant_color_admin_inline_style(): void {
+		dominant_color_admin_inline_style();
+
+		// Verify the style was registered.
+		$this->assertTrue( wp_style_is( 'dominant-color-admin-styles', 'registered' ) );
+
+		// Verify the style was enqueued.
+		$this->assertTrue( wp_style_is( 'dominant-color-admin-styles', 'enqueued' ) );
+
+		// Verify the inline style was added.
+		$inline_styles = wp_styles()->get_data( 'dominant-color-admin-styles', 'after' );
+		$this->assertNotEmpty( $inline_styles );
+		$this->assertStringContainsString(
+			'.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
+			implode( '', $inline_styles )
+		);
+	}
+
+	/**
+	 * @covers ::dominant_color_admin_script
+	 */
+	public function test_dominant_color_admin_script(): void {
+		$output = get_echo( 'dominant_color_admin_script' );
+
+		// Verify if script tag exists.
+		$this->assertStringEndsWith( '</script>', trim( $output ) );
+
+		// Verify the key elements of the script.
+		$this->assertStringContainsString( 'tmpl.textContent.replace', $output );
+		$this->assertStringContainsString( 'data-dominant-color', $output );
+		$this->assertStringContainsString( 'data-has-transparency', $output );
+		$this->assertStringContainsString( '--dominant-color', $output );
+	}
+
+	/**
+	 * @covers ::dominant_color_prepare_attachment_for_js
+	 */
+	public function test_dominant_color_prepare_attachment_for_js(): void {
+		$attachment = self::factory()->post->create_and_get( array( 'post_type' => 'attachment' ) );
+
+		$meta = array(
+			'dominant_color'   => 'ff0000',
+			'has_transparency' => true,
+		);
+
+		$response = dominant_color_prepare_attachment_for_js( array(), $attachment, $meta );
+
+		$this->assertArrayHasKey( 'dominantColor', $response );
+		$this->assertArrayHasKey( 'hasTransparency', $response );
+		$this->assertEquals( 'ff0000', $response['dominantColor'] );
+		$this->assertTrue( $response['hasTransparency'] );
+	}
+
+	/**
+	 * Skips if MIME type is not supported.
+	 *
+	 * @param string $image_path Image path.
+	 */
+	private function skip_if_mime_type_unsupported( string $image_path ): void {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
 	}
 }

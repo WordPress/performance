@@ -322,6 +322,7 @@ class OD_URL_Metric implements JsonSerializable {
 		 * Filters additional schema properties which should be allowed at the root of a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_root_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -334,6 +335,7 @@ class OD_URL_Metric implements JsonSerializable {
 		 * Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_element_item_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */

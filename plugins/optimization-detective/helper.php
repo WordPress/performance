@@ -23,6 +23,7 @@ function od_initialize_extensions(): void {
 	 * Fires when extensions to Optimization Detective can be loaded and initialized.
 	 *
 	 * @since 0.7.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_init
 	 *
 	 * @param string $version Optimization Detective version.
 	 */

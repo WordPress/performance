@@ -17,7 +17,8 @@
   },
   "suggest": {
     "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class",
-    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class"
+    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class",
+    "ext-zlib": "Required for compression of URL Metric data submitted to the REST API for storage in Optimization Detective"
   },
   "require-dev": {
     "phpcompatibility/php-compatibility": "^9.3",

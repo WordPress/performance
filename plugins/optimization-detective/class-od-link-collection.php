@@ -323,7 +323,7 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Encodes a URL for serving in an HTTP response header.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param string $url URL to percent encode.
 	 * @return string Percent-encoded URL.

@@ -61,6 +61,7 @@ function od_buffer_output( $passthrough ) {
 			 * Filters the template output buffer prior to sending to the client.
 			 *
 			 * @since 0.1.0
+			 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_template_output_buffer
 			 *
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.
@@ -182,6 +183,7 @@ function od_can_optimize_response(): bool {
 	 * Filters whether the current response can be optimized.
 	 *
 	 * @since 0.1.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
@@ -245,8 +247,16 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		return $buffer;
 	}
 
-	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
+	$query_vars = od_get_normalized_query_vars();
+	$slug       = od_get_url_metrics_slug( $query_vars );
+	$post       = OD_URL_Metrics_Post_Type::get_post( $slug );
+
+	/**
+	 * Post ID.
+	 *
+	 * @var positive-int|null $post_id
+	 */
+	$post_id = $post instanceof WP_Post ? $post->ID : null;
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
@@ -254,34 +264,56 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
 	 * @since 0.3.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_register_tag_visitors
 	 *
 	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
-	$current_etag         = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
-	$group_collection     = new OD_URL_Metric_Group_Collection(
+	$current_etag     = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
+	$group_collection = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		$current_etag,
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()
 	);
-	$link_collection      = new OD_Link_Collection();
+	$link_collection  = new OD_Link_Collection();
+
+	$template_optimization_context = new OD_Template_Optimization_Context(
+		$group_collection,
+		$link_collection,
+		$query_vars,
+		$slug,
+		$post_id
+	);
+
+	/**
+	 * Fires before Optimization Detective starts iterating over the document in the output buffer.
+	 *
+	 * This is before any of the registered tag visitors have been invoked.
+	 *
+	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_start_template_optimization
+	 *
+	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
+	 */
+	do_action( 'od_start_template_optimization', $template_optimization_context );
+
 	$visited_tag_state    = new OD_Visited_Tag_State();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context(
 		$processor,
 		$group_collection,
 		$link_collection,
 		$visited_tag_state,
-		$post instanceof WP_Post && $post->ID > 0 ? $post->ID : null
+		$post_id
 	);
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ! $group_collection->is_every_group_complete();
-
+	$needs_detection          = ! $group_collection->is_every_group_complete();
+	$did_amend_meta_generator = false;
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
 		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
@@ -291,6 +323,32 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			$processor->is_admin_bar()
 		) {
 			continue;
+		}
+
+		// Amend the META generator tag if it's the right one and hasn't been amended already.
+		if (
+			! $did_amend_meta_generator && // @phpstan-ignore booleanNot.alwaysTrue, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse (False positives in PHPStan due to the following line.)
+			'META' === $processor->get_tag() && // @phpstan-ignore identical.alwaysFalse (False positive in PHPStan since it isn't aware of the do/while loop apparently.)
+			'generator' === $processor->get_attribute( 'name' ) &&
+			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective ' )
+		) {
+			$content               = (string) $processor->get_attribute( 'content' );
+			$viewport_group_status = array();
+			foreach ( $group_collection as $group ) {
+				$min_width = $group->get_minimum_viewport_width();
+
+				$status = 'empty';
+				if ( $group->is_complete() ) {
+					$status = 'complete';
+				} elseif ( $group->count() > 0 ) {
+					$status = 'populated';
+				}
+
+				$viewport_group_status[] = sprintf( '%s:%s', $min_width, $status );
+			}
+			$content .= '; url_metric_groups={' . implode( ', ', $viewport_group_status ) . '}';
+			$processor->set_attribute( 'content', $content );
+			$did_amend_meta_generator = true;
 		}
 
 		$tracked_in_url_metrics = false;
@@ -316,27 +374,38 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $tracked_in_url_metrics && $needs_detection ) {
-			// TODO: Replace get_stored_xpath with get_xpath once the transitional period is over.
-			$xpath = $processor->get_stored_xpath();
-			$processor->set_meta_attribute( 'xpath', $xpath );
+			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
 
 		$visited_tag_state->reset();
 	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
+	// Inject detection script.
+	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
+	if ( $needs_detection ) {
+		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+	}
+
+	/**
+	 * Fires after Optimization Detective has finished iterating over the document in the output buffer.
+	 *
+	 * This is after all the registered tag visitors have been invoked.
+	 *
+	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A-,od_finish_template_optimization
+	 *
+	 * @param OD_Template_Optimization_Context $template_optimization_context Template optimization context.
+	 */
+	do_action( 'od_finish_template_optimization', $template_optimization_context );
+
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
+	// Additional links may have been added at the od_finish_template_optimization action, so this must come after.
 	if ( count( $link_collection ) > 0 ) {
 		$response_header_links = $link_collection->get_response_header();
 		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
 			header( $response_header_links, false );
 		}
 		$processor->append_head_html( $link_collection->get_html() );
-	}
-
-	// Inject detection script.
-	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
-	if ( $needs_detection ) {
-		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
 	return $processor->get_updated_html();

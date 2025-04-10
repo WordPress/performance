@@ -443,26 +443,16 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 */
 	public function test_next_tag_and_get_xpath( string $document, array $open_tags, array $xpath_breadcrumbs ): void {
 		$p = new OD_HTML_Tag_Processor( $document );
-		$this->assertSame( '', $p->get_stored_xpath(), 'Expected empty XPath since iteration has not started.' );
+		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags                 = array();
 		$actual_xpath_breadcrumbs_mapping = array();
 		while ( $p->next_tag( array( 'tag_closers' => 'skip' ) ) ) {
 			$actual_open_tags[] = $p->get_tag();
 
-			$xpath = $p->get_stored_xpath();
+			$xpath = $p->get_xpath();
 			$this->assertArrayNotHasKey( $xpath, $actual_xpath_breadcrumbs_mapping, 'Each tag must have a unique XPath.' );
 
 			$actual_xpath_breadcrumbs_mapping[ $xpath ] = $p->get_breadcrumbs();
-
-			$transitional_xpath = $p->get_xpath();
-			$this->assertRegExp(
-				'#^/HTML(
-					/HEAD(/\*\[\d+]\[self::\w+])?
-					|
-					/BODY(/DIV(/\*\[\d+]\[self::\w+])*)?
-				)?$#x',
-				$transitional_xpath
-			);
 		}
 
 		$this->assertSame( $open_tags, $actual_open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
@@ -840,7 +830,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						$bookmarks[]              = $bookmark;
 						$actual_figure_contents[] = array(
 							'tag'   => $processor->get_tag(),
-							'xpath' => $processor->get_stored_xpath(),
+							'xpath' => $processor->get_xpath(),
 							'depth' => $processor->get_current_depth(),
 						);
 					}
@@ -881,7 +871,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			$processor->seek( $bookmark );
 			$sought_actual_contents[] = array(
 				'tag'   => $processor->get_tag(),
-				'xpath' => $processor->get_stored_xpath(),
+				'xpath' => $processor->get_xpath(),
 				'depth' => $processor->get_current_depth(),
 			);
 		}
