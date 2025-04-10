@@ -200,7 +200,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
 	 * @covers ::od_get_disabled_reasons
-	 * @covers ::od_get_cannot_optimize_reasons
 	 * @covers ::od_is_rest_api_unavailable
 	 */
 	public function test_od_maybe_add_template_output_buffer_filter( Closure $set_up, bool $expected_has_filter ): void {
@@ -342,7 +341,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * Test od_can_optimize_response().
 	 *
 	 * @covers ::od_can_optimize_response
-	 * @covers ::od_get_cannot_optimize_reasons
+	 * @covers ::od_get_disabled_reasons
 	 * @covers ::od_get_cache_purge_post_id
 	 *
 	 * @dataProvider data_provider_test_od_can_optimize_response
