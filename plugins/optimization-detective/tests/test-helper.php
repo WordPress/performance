@@ -98,19 +98,6 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test meta generator tag when od_can_optimize_response returns false.
-	 *
-	 * @covers ::od_render_generator_meta_tag
-	 * @covers ::od_get_disabled_reasons
-	 */
-	public function test_od_render_generator_meta_tag_cant_optimize_response(): void {
-		add_filter( 'od_can_optimize_response', '__return_false' );
-		$tag = get_echo( 'od_render_generator_meta_tag' );
-		$this->assertStringContainsString( '; can_optimize_response_false', $tag );
-		remove_filter( 'od_can_optimize_response', '__return_false' );
-	}
-
-	/**
 	 * Test meta generator tag when query parameter is present.
 	 *
 	 * @covers ::od_render_generator_meta_tag

@@ -130,35 +130,53 @@ function od_print_disabled_reasons( array $reasons ): void {
 }
 
 /**
- * Determines whether the current response can be optimized.
+ * Gets the specific reasons why the response cannot be optimized.
  *
- * @since 0.1.0
- * @since 0.9.0 Response is optimized for admin users as well when in 'plugin' development mode.
- *
+ * @since n.e.x.t
  * @access private
  *
- * @return bool Whether response can be optimized.
+ * @return array<string, string> Array of reason codes and their messages.
  */
-function od_can_optimize_response(): bool {
-	$able = ! (
-		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
-		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
-		is_search() ||
-		// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
-		// "allow-scripts" but without "allow-same-origin". This can result in an error in the console:
-		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
-		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
-		is_embed() ||
-		// Skip posts that aren't published yet.
-		is_preview() ||
-		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
-		is_customize_preview() ||
-		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
-		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
-		// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
-		// the relevant actions on.
-		null === od_get_cache_purge_post_id()
-	);
+function od_get_cannot_optimize_reasons(): array {
+	$reasons = array();
+
+	// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
+	// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
+	if ( is_search() ) {
+		$reasons['is_search'] = __( 'Page is not optimized because it is a search results page.', 'optimization-detective' );
+	}
+
+	// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
+	// "allow-scripts" but without "allow-same-origin". This can result in an error in the console:
+	// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+	// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
+	if ( is_embed() ) {
+		$reasons['is_embed'] = __( 'Page is not optimized because it is an embed.', 'optimization-detective' );
+	}
+
+	// Skip posts that aren't published yet.
+	if ( is_preview() ) {
+		$reasons['is_preview'] = __( 'Page is not optimized because it is a preview.', 'optimization-detective' );
+	}
+
+	// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+	if ( is_customize_preview() ) {
+		$reasons['is_customize_preview'] = __( 'Page is not optimized because it is a customize preview.', 'optimization-detective' );
+	}
+
+	// Since the images detected in the response body of a POST request cannot, by definition, be cached.
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
+		$reasons['not_get_request'] = __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' );
+	}
+
+	// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
+	// the relevant actions on.
+	if ( null === od_get_cache_purge_post_id() ) {
+		$reasons['no_cache_purge_post_id'] = __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' );
+	}
+
+	// Check if there are no technical reasons preventing optimization.
+	$can_optimize_by_default = 0 === count( $reasons );
 
 	/**
 	 * Filters whether the current response can be optimized.
@@ -168,7 +186,19 @@ function od_can_optimize_response(): bool {
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
-	return (bool) apply_filters( 'od_can_optimize_response', $able );
+	$can_optimize_after_filter = (bool) apply_filters( 'od_can_optimize_response', $can_optimize_by_default );
+
+	if ( $can_optimize_after_filter ) {
+		// If the filter allows optimization, return empty array (no reasons to prevent optimization).
+		// This happens either when there were no technical reasons, or when the filter overrode technical reasons.
+		return array();
+	} elseif ( $can_optimize_by_default ) {
+		// If there were no technical reasons but filter still disallowed optimization,
+		// add a specific reason indicating that the filter explicitly blocked optimization.
+		$reasons['filter_disabled'] = __( 'Page is not optimized because the od_can_optimize_response filter returned false.', 'optimization-detective' );
+	}
+
+	return $reasons;
 }
 
 /**
