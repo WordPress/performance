@@ -281,6 +281,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected' => false,
 			),
+			'post_embed_as_anonymous'              => array(
+				'set_up'   => static function (): string {
+					$post_id = self::factory()->post->create( array( 'post_title' => 'Hello' ) );
+					return (string) get_post_embed_url( $post_id );
+				},
+				'expected' => false,
+			),
 			'home_customizer_preview_as_anonymous' => array(
 				'set_up'   => static function (): string {
 					global $wp_customize;
