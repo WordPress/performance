@@ -205,7 +205,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 */
 	public function test_od_maybe_add_template_output_buffer_filter( Closure $set_up, bool $expected_has_filter ): void {
 		// There needs to be a post so that there is a post in the loop so that od_get_cache_purge_post_id() returns a post ID.
-		// Otherwise, od_get_cannot_optimize_reasons() will return a non-empty array unless forced by a filter.
+		// Otherwise, od_can_optimize_response() will return false unless forced by a filter.
 		self::factory()->post->create();
 
 		$url = $set_up();
@@ -240,7 +240,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider_test_od_get_cannot_optimize_reasons(): array {
+	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
 			'home_as_anonymous'                    => array(
 				'set_up'   => function (): void {
@@ -339,21 +339,22 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_get_cannot_optimize_reasons().
+	 * Test od_can_optimize_response().
 	 *
+	 * @covers ::od_can_optimize_response
 	 * @covers ::od_get_cannot_optimize_reasons
 	 * @covers ::od_get_cache_purge_post_id
 	 *
-	 * @dataProvider data_provider_test_od_get_cannot_optimize_reasons
+	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
-	public function test_od_get_cannot_optimize_reasons( Closure $set_up, bool $expected ): void {
+	public function test_od_can_optimize_response( Closure $set_up, bool $expected ): void {
 		// Make sure there is at least one post in the DB as otherwise od_get_cache_purge_post_id() will return false,
-		// causing od_get_cannot_optimize_reasons() to return false.
+		// causing od_can_optimize_response() to return false.
 		self::factory()->post->create();
 
 		$url = $set_up();
 		$this->go_to( $url );
-		$this->assertSame( $expected, count( od_get_cannot_optimize_reasons() ) === 0 );
+		$this->assertSame( $expected, od_can_optimize_response() );
 	}
 
 	/**

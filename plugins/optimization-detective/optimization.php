@@ -130,6 +130,20 @@ function od_print_disabled_reasons( array $reasons ): void {
 }
 
 /**
+ * Determines whether the current response can be optimized.
+ *
+ * @since 0.1.0
+ * @since 0.9.0 Response is optimized for admin users as well when in 'plugin' development mode.
+ *
+ * @access private
+ *
+ * @return bool Whether response can be optimized.
+ */
+function od_can_optimize_response(): bool {
+	return count( od_get_cannot_optimize_reasons() ) === 0;
+}
+
+/**
  * Gets the specific reasons why the response cannot be optimized.
  *
  * @since n.e.x.t

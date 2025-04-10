@@ -69,7 +69,12 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
  * @return array<string, string> Array of disabled reason codes and their messages.
  */
 function od_get_disabled_reasons(): array {
-	$reasons = od_get_cannot_optimize_reasons();
+	$reasons = array();
+
+	$cannot_optimize_reasons = od_get_cannot_optimize_reasons();
+	if ( count( $cannot_optimize_reasons ) > 0 ) {
+		$reasons = array_merge( $reasons, $cannot_optimize_reasons );
+	}
 
 	if ( od_is_rest_api_unavailable() && ! ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ) ) {
 		$reasons['rest_api_unavailable'] = __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' );
