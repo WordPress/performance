@@ -107,6 +107,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'extensionModuleUrls' => array(),
 					'cachePurgePostId'    => null,
 					'freshnessTTL'        => WEEK_IN_SECONDS,
+					'gzdecodeAvailable'   => function_exists( 'gzencode' ),
 				),
 				'expected_standard_build' => true,
 			),
@@ -161,6 +162,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return WEEK_IN_SECONDS;
 						}
 					);
+					add_filter( 'od_gzip_url_metric_store_request_payloads', '__return_false' );
 				},
 				'expected_exports'        => array(
 					'storageLockTTL'         => DAY_IN_SECONDS,
@@ -168,6 +170,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'extensionModuleUrls'    => array( home_url( '/my-extension.js', 'https' ) ),
 					'minViewportAspectRatio' => 0,
 					'maxViewportAspectRatio' => 2,
+					'gzdecodeAvailable'      => false,
 				),
 				'expected_standard_build' => false,
 			),

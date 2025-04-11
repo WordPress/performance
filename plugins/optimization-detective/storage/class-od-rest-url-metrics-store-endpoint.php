@@ -243,13 +243,8 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			);
 		}
 
-		/*
-		 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
-		 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
-		 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
-		 * getting sent.
-		 */
-		$max_size       = 64 * 1024; // 64 KB
+		// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
+		$max_size       = od_get_maximum_url_metric_size();
 		$content_length = strlen( (string) wp_json_encode( $url_metric ) );
 		if ( $content_length > $max_size ) {
 			return new WP_Error(
@@ -305,6 +300,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 		 * Fires whenever a URL Metric was successfully stored.
 		 *
 		 * @since 0.7.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_url_metric_stored
 		 *
 		 * @param OD_URL_Metric_Store_Request_Context $context Context about the successful URL Metric collection.
 		 */
