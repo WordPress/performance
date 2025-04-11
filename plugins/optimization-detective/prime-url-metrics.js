@@ -66,6 +66,17 @@
 	let currentBatchNumber = 0;
 	let isTabHidden = false;
 	let abortController = new AbortController();
+	const consoleLogPrefix = '[Optimization Detective Priming URL Metrics]';
+
+	/**
+	 * Logs messages to the console.
+	 *
+	 * @param {...*} message - The message(s) to log.
+	 */
+	function log( ...message ) {
+		// eslint-disable-next-line no-console
+		console.log( consoleLogPrefix, ...message );
+	}
 
 	/**
 	 * Toggles the processing state.
@@ -181,19 +192,27 @@
 	 */
 	async function processCurrentBatch() {
 		while ( isProcessing && currentTaskIndex < currentTasks.length ) {
-			await processTask(
-				currentTasks[ currentTaskIndex ],
-				abortController.signal
-			);
+			try {
+				await processTask(
+					currentTasks[ currentTaskIndex ],
+					abortController.signal
+				);
 
-			currentTaskIndex++;
-			progressBar.value = currentTaskIndex;
-			currentTaskElement.textContent = currentTaskIndex.toString();
+				currentTaskIndex++;
+				progressBar.value = currentTaskIndex;
+				currentTaskElement.textContent = currentTaskIndex.toString();
+			} catch ( error ) {
+				log( error.message );
+				if ( 'Task Aborted' === error.message ) {
+					throw error;
+				}
+			}
 		}
 	}
 
 	/**
 	 * Flattens the batch to tasks.
+	 *
 	 * @param {Object} batch - The batch to flatten.
 	 * @return {Array<{ url: string, width: number, height: number }>} - The flattened tasks.
 	 */
@@ -213,6 +232,7 @@
 
 	/**
 	 * Fetches the next batch of URLs.
+	 *
 	 * @param {Object} lastCursor - The cursor to fetch the next batch.
 	 * @return {Promise<Object>} - The promise that resolves to the batch of URLs.
 	 */
@@ -227,24 +247,49 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
+	 *
 	 * @param {{ url: string, width: number, height: number }} task   - The breakpoint to set for the iframe.
 	 * @param {AbortSignal}                                    signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
+			/**
+			 * Handles the message from the iframe.
+			 *
+			 * @param {MessageEvent} event - The message event.
+			 */
 			const handleMessage = ( event ) => {
-				if ( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' === event.data ) {
-					cleanup();
-					resolve();
+				if (
+					event.data &&
+					event.data.type &&
+					'OD_PRIME_URL_METRICS_REQUEST_STATUS' === event.data.type
+				) {
+					if ( event.data.success ) {
+						cleanup();
+						resolve();
+					} else {
+						cleanup();
+						reject(
+							new Error(
+								event.data.error || 'URL Metric request failed'
+							)
+						);
+					}
 				}
 			};
 
+			/**
+			 * Handles the aborting of the task on abort signal.
+			 */
 			const abortHandler = () => {
 				cleanup();
 				reject( new Error( 'Task Aborted' ) );
 			};
 
+			/**
+			 * Cleans up the event listeners and iframe.
+			 */
 			const cleanup = () => {
 				signal.removeEventListener( 'abort', abortHandler );
 				window.removeEventListener( 'message', handleMessage );
@@ -279,6 +324,9 @@
 				verificationToken;
 
 			if ( isDebug ) {
+				/**
+				 * Fits the iframe to the container.
+				 */
 				function fitIframe() {
 					const containerWidth = iframeContainer.clientWidth;
 					if ( containerWidth <= 0 ) {

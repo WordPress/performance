@@ -15,6 +15,7 @@
 	let isTabHidden = false;
 	let abortController = new AbortController();
 	let processTasksPromise = null;
+	const consoleLogPrefix = '[Optimization Detective Priming URL Metrics]';
 
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
@@ -29,7 +30,18 @@
 	document.body.appendChild( iframe );
 
 	/**
+	 * Logs messages to the console.
+	 *
+	 * @param {...*} message - The message(s) to log.
+	 */
+	function log( ...message ) {
+		// eslint-disable-next-line no-console
+		console.log( consoleLogPrefix, ...message );
+	}
+
+	/**
 	 * Primes the URL metrics for all breakpoints.
+	 *
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function processTasks() {
@@ -55,10 +67,17 @@
 			} ) );
 
 			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
-				await processTask(
-					currentTasks[ currentTaskIndex ],
-					abortController.signal
-				);
+				try {
+					await processTask(
+						currentTasks[ currentTaskIndex ],
+						abortController.signal
+					);
+				} catch ( error ) {
+					log( error.message );
+					if ( 'Task Aborted' === error.message ) {
+						throw error;
+					}
+				}
 				currentTaskIndex++;
 			}
 			isProcessing = false;
@@ -69,24 +88,48 @@
 
 	/**
 	 * Loads the iframe and waits for the message.
+	 *
 	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
 	 * @param {AbortSignal}                                  signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function processTask( task, signal ) {
 		return new Promise( ( resolve, reject ) => {
+			/**
+			 * Handles the message from the iframe.
+			 * @param {MessageEvent} event - The message event.
+			 */
 			const handleMessage = ( event ) => {
-				if ( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' === event.data ) {
-					cleanup();
-					resolve();
+				if (
+					event.data &&
+					event.data.type &&
+					'OD_PRIME_URL_METRICS_REQUEST_STATUS' === event.data.type
+				) {
+					if ( event.data.success ) {
+						cleanup();
+						resolve();
+					} else {
+						cleanup();
+						reject(
+							new Error(
+								event.data.error || 'URL Metric request failed'
+							)
+						);
+					}
 				}
 			};
 
+			/**
+			 * Handles the aborting of the task on abort signal.
+			 */
 			const abortHandler = () => {
 				cleanup();
 				reject( new Error( 'Task Aborted' ) );
 			};
 
+			/**
+			 * Cleans up the event listeners and iframe.
+			 */
 			const cleanup = () => {
 				signal.removeEventListener( 'abort', abortHandler );
 				window.removeEventListener( 'message', handleMessage );
@@ -113,7 +156,7 @@
 				reject( new Error( 'Iframe failed to load' ) );
 			};
 
-			// Load the iframe
+			// Load the iframe.
 			iframe.src = task.url;
 			iframe.width = task.width.toString();
 			iframe.height = task.height.toString();

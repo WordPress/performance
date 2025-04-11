@@ -166,12 +166,28 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 							);
 						}, 30000 );
 
-						document.addEventListener(
-							'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
-							async () => {
+						/**
+						 * Handles the message from the page.
+						 * @param {CustomEvent} event - The message event.
+						 */
+						function handleMessage( event ) {
+							if ( event.detail && event.detail.success ) {
 								clearTimeout( timeoutId );
 								requestSuccessResolve();
-							},
+							} else {
+								clearTimeout( timeoutId );
+								requestSuccessReject(
+									new Error(
+										event.detail.error ||
+											'URL Metric request failed'
+									)
+								);
+							}
+						}
+
+						document.addEventListener(
+							'OD_PRIME_URL_METRICS_REQUEST_STATUS',
+							handleMessage,
 							{ once: true }
 						);
 					}

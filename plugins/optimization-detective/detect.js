@@ -65,7 +65,13 @@ const storageLockTimeSessionKey = 'odStorageLockTime';
  */
 const compressionDebounceWaitDuration = 1000;
 
-let odPrimeUrlMetricsVerificationToken = '';
+/**
+ * Verification token for skipping the storage lock check while priming URL Metrics.
+ *
+ * @see {detect}
+ * @type {?string}
+ */
+let odPrimeUrlMetricsVerificationToken = null;
 
 /**
  * Checks whether storage is locked.
@@ -75,7 +81,7 @@ let odPrimeUrlMetricsVerificationToken = '';
  * @return {boolean} Whether storage is locked.
  */
 function isStorageLocked( currentTime, storageLockTTL ) {
-	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+	if ( odPrimeUrlMetricsVerificationToken ) {
 		return false;
 	}
 
@@ -510,6 +516,38 @@ function debounceCompressUrlMetric() {
 }
 
 /**
+ * Notifies about the URL Metric request status.
+ *
+ * @param {Object}  status                  - The status details.
+ * @param {boolean} status.success          - Indicates if the request succeeded.
+ * @param {string}  [status.error]          - An error message if the request failed.
+ * @param {Object}  [options]               - Options for where to dispatch the message.
+ * @param {boolean} [options.toParent=true] - Whether to send the message to the parent window.
+ * @param {boolean} [options.toLocal=true]  - Whether to dispatch a custom event locally.
+ */
+function notifyStatus( status, options = { toParent: true, toLocal: true } ) {
+	const message = {
+		type: 'OD_PRIME_URL_METRICS_REQUEST_STATUS',
+		success: status.success,
+		...( status.error && { error: status.error } ),
+	};
+
+	// This will be used when URL metrics are primed using a IFRAME.
+	if ( options.toParent && window.parent && window.parent !== window ) {
+		window.parent.postMessage( message, '*' );
+	}
+
+	// This will be used when URL metrics are primed using Puppeteer script.
+	if ( options.toLocal ) {
+		document.dispatchEvent(
+			new CustomEvent( message.type, {
+				detail: { ...status },
+			} )
+		);
+	}
+}
+
+/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -638,7 +676,7 @@ export default async function detect( {
 			logger
 		);
 	if (
-		'' === odPrimeUrlMetricsVerificationToken &&
+		! odPrimeUrlMetricsVerificationToken &&
 		null !== alreadySubmittedSessionStorageKey &&
 		alreadySubmittedSessionStorageKey in sessionStorage
 	) {
@@ -957,7 +995,7 @@ export default async function detect( {
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
-		if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+		if ( odPrimeUrlMetricsVerificationToken ) {
 			resolve();
 		}
 
@@ -1131,7 +1169,7 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+	if ( odPrimeUrlMetricsVerificationToken ) {
 		url.searchParams.set(
 			'prime_url_metrics_verification_token',
 			odPrimeUrlMetricsVerificationToken
@@ -1149,17 +1187,22 @@ export default async function detect( {
 		method: 'POST',
 		body: payloadBlob,
 		headers,
-		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
+		keepalive: odPrimeUrlMetricsVerificationToken ? false : true, // Setting keepalive to true makes fetch() behave the same as navigator.sendBeacon().
 	} );
-	await fetch( request );
 
-	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
-		window.parent.postMessage(
-			'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
-			'*'
-		);
-		document.dispatchEvent(
-			new CustomEvent( 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' )
-		);
+	if ( ! odPrimeUrlMetricsVerificationToken ) {
+		await fetch( request );
+	} else {
+		try {
+			const response = await fetch( request );
+			if ( ! response.ok ) {
+				throw new Error(
+					`Failed to send URL Metric. Status: ${ response.status }`
+				);
+			}
+			notifyStatus( { success: true } );
+		} catch ( err ) {
+			notifyStatus( { success: false, error: err.message } );
+		}
 	}
 }
