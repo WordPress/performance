@@ -69,12 +69,19 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
  * @return array<string, string> Array of disabled reason codes and their messages.
  */
 function od_get_disabled_reasons(): array {
-	$reasons = array();
+	$disabled_flags = array(
+		'is_search'              => false,
+		'is_embed'               => false,
+		'is_preview'             => false,
+		'is_customize_preview'   => false,
+		'not_get_request'        => false,
+		'no_cache_purge_post_id' => false,
+	);
 
 	// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
 	// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
 	if ( is_search() ) {
-		$reasons['is_search'] = __( 'Page is not optimized because it is a search results page.', 'optimization-detective' );
+		$disabled_flags['is_search'] = true;
 	}
 
 	// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
@@ -82,51 +89,66 @@ function od_get_disabled_reasons(): array {
 	// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 	// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
 	if ( is_embed() ) {
-		$reasons['is_embed'] = __( 'Page is not optimized because it is an embed.', 'optimization-detective' );
+		$disabled_flags['is_embed'] = true;
 	}
 
 	// Skip posts that aren't published yet.
 	if ( is_preview() ) {
-		$reasons['is_preview'] = __( 'Page is not optimized because it is a preview.', 'optimization-detective' );
+		$disabled_flags['is_preview'] = true;
 	}
 
 	// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 	if ( is_customize_preview() ) {
-		$reasons['is_customize_preview'] = __( 'Page is not optimized because it is a customize preview.', 'optimization-detective' );
+		$disabled_flags['is_customize_preview'] = true;
 	}
 
 	// Since the images detected in the response body of a POST request cannot, by definition, be cached.
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
-		$reasons['not_get_request'] = __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' );
+		$disabled_flags['not_get_request'] = true;
 	}
 
 	// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
 	// the relevant actions on.
 	if ( null === od_get_cache_purge_post_id() ) {
-		$reasons['no_cache_purge_post_id'] = __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' );
+		$disabled_flags['no_cache_purge_post_id'] = true;
 	}
 
-	// Check if there are no technical reasons preventing optimization.
-	$can_optimize_by_default = 0 === count( $reasons );
+	// Check if any flags are set to true.
+	$has_disabled_flags = count( array_filter( $disabled_flags ) ) > 0;
 
 	/**
 	 * Filters whether the current response can be optimized.
 	 *
 	 * @since 0.1.0
+	 * @since n.e.x.t Added $disabled_flags parameter
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
-	 * @param bool $able Whether response can be optimized.
+	 * @param bool                $can_optimize    Whether response can be optimized.
+	 * @param array<string, bool> $disabled_flags  Flags indicating which conditions are disabling optimization.
 	 */
-	$can_optimize_after_filter = (bool) apply_filters( 'od_can_optimize_response', $can_optimize_by_default );
+	$can_optimize = (bool) apply_filters( 'od_can_optimize_response', ! $has_disabled_flags, $disabled_flags );
 
-	if ( $can_optimize_after_filter ) {
-		// If the filter allows optimization, return empty array (no reasons to prevent optimization).
-		// This happens either when there were no technical reasons, or when the filter overrode technical reasons.
-		$reasons = array();
-	} elseif ( $can_optimize_by_default ) {
-		// If there were no technical reasons but filter still disallowed optimization,
-		// add a specific reason indicating that the filter explicitly blocked optimization.
-		$reasons['filter_disabled'] = __( 'Page is not optimized because the od_can_optimize_response filter returned false.', 'optimization-detective' );
+	$reasons = array();
+	if ( ! $can_optimize ) {
+		$reason_messages = array(
+			'is_search'              => __( 'Page is not optimized because it is a search results page.', 'optimization-detective' ),
+			'is_embed'               => __( 'Page is not optimized because it is an embed.', 'optimization-detective' ),
+			'is_preview'             => __( 'Page is not optimized because it is a preview.', 'optimization-detective' ),
+			'is_customize_preview'   => __( 'Page is not optimized because it is a customize preview.', 'optimization-detective' ),
+			'not_get_request'        => __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' ),
+			'no_cache_purge_post_id' => __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' ),
+		);
+
+		foreach ( $disabled_flags as $flag => $is_disabled ) {
+			if ( $is_disabled && isset( $reason_messages[ $flag ] ) ) {
+				$reasons[ $flag ] = $reason_messages[ $flag ];
+			}
+		}
+
+		// If no technical reasons but optimization still disabled, it's because of the filter.
+		if ( 0 === count( $reasons ) ) {
+			$reasons['filter_disabled'] = __( 'Page is not optimized because the od_can_optimize_response filter returned false.', 'optimization-detective' );
+		}
 	}
 
 	if ( od_is_rest_api_unavailable() && ! ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ) ) {
