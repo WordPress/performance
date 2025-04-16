@@ -19,7 +19,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
+
 
 // Define required constants.
 if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {
@@ -30,3 +30,4 @@ define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.2.0' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+// @codeCoverageIgnoreEnd

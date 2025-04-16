@@ -20,37 +20,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @return int<0, max> Expiration TTL in seconds.
+ * @return int<-1, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given URL Metric.
-	 *
-	 * The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale.
-	 * In practice, the value should be at least an hour.
+	 * Filters age (TTL) for which a URL Metric can be considered fresh.
 	 *
 	 * @since 0.1.0
+	 * @since n.e.x.t Negative values disable timestamp-based freshness checks.
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_freshness_ttl
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
-
-	if ( $freshness_ttl < 0 ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			esc_html(
-				sprintf(
-					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'optimization-detective' ),
-					$freshness_ttl
-				)
-			),
-			''
-		);
-		$freshness_ttl = 0;
-	}
-
-	return $freshness_ttl;
+	$ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
+	return max( -1, $ttl );
 }
 
 /**
@@ -249,6 +232,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 	 * Filters the data that goes into computing the current ETag for URL Metrics.
 	 *
 	 * @since 0.9.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_current_url_metrics_etag_data
 	 *
 	 * @param array<string, mixed> $data Data.
 	 */
@@ -320,10 +304,8 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the minimum allowed viewport aspect ratio for URL Metrics.
 	 *
-	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
-	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_minimum_viewport_aspect_ratio
 	 *
 	 * @param float $minimum_viewport_aspect_ratio Minimum viewport aspect ratio.
 	 */
@@ -342,10 +324,8 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the maximum allowed viewport aspect ratio for URL Metrics.
 	 *
-	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 (2.333).
-	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_viewport_aspect_ratio
 	 *
 	 * @param float $maximum_viewport_aspect_ratio Maximum viewport aspect ratio.
 	 */
@@ -382,15 +362,13 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  * @return positive-int[] Breakpoint max widths, sorted in ascending order.
  */
 function od_get_breakpoint_max_widths(): array {
-	$function_name = __FUNCTION__;
-
 	$breakpoint_max_widths = array_map(
-		static function ( $original_breakpoint ) use ( $function_name ): int {
+		static function ( $original_breakpoint ): int {
 			$breakpoint = $original_breakpoint;
 			if ( $breakpoint <= 0 ) {
 				$breakpoint = 1;
 				_doing_it_wrong(
-					esc_html( $function_name ),
+					esc_html( "Filter: 'od_breakpoint_max_widths'" ),
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
@@ -406,10 +384,8 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero. This array may be empty in which case there
-		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
-		 *
 		 * @since 0.1.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_breakpoint_max_widths
 		 *
 		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
@@ -437,9 +413,8 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL Metrics on a given URL.
 	 *
-	 * The sample size must be greater than zero.
-	 *
 	 * @since 0.1.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metrics_breakpoint_sample_size
 	 *
 	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
@@ -447,7 +422,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 
 	if ( $sample_size <= 0 ) {
 		_doing_it_wrong(
-			__FUNCTION__,
+			esc_html( "Filter: 'od_url_metrics_breakpoint_sample_size'" ),
 			esc_html(
 				sprintf(
 					/* translators: %s is the sample size */
@@ -461,4 +436,40 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	}
 
 	return $sample_size;
+}
+
+/**
+ * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return positive-int Maximum allowed byte size.
+ */
+function od_get_maximum_url_metric_size(): int {
+	/**
+	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+	 *
+	 * @since n.e.x.t
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_url_metric_size
+	 *
+	 * @param int $max_size Maximum allowed byte size.
+	 * @return int Filtered maximum allowed byte size.
+	 */
+	$size = (int) apply_filters( 'od_maximum_url_metric_size', MB_IN_BYTES );
+	if ( $size <= 0 ) {
+		_doing_it_wrong(
+			esc_html( "Filter: 'od_maximum_url_metric_size'" ),
+			esc_html(
+				sprintf(
+					/* translators: %s: size */
+					__( 'Invalid size "%s". Must be greater than zero.', 'optimization-detective' ),
+					$size
+				)
+			),
+			'Optimization Detective 1.0.0'
+		);
+		$size = MB_IN_BYTES;
+	}
+	return $size;
 }

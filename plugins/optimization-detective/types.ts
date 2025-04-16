@@ -58,6 +58,14 @@ export interface Logger {
 	error: LogFunction;
 }
 
+export type GetRootDataFunction = () => URLMetric;
+export type ExtendRootDataFunction = ( properties: ExtendedRootData ) => void;
+export type GetElementDataFunction = ( xpath: string ) => ElementData | null;
+export type ExtendElementDataFunction = (
+	xpath: string,
+	properties: ExtendedElementData
+) => void;
+
 export type InitializeArgs = {
 	readonly isDebug: boolean;
 	readonly log: LogFunction;
@@ -69,18 +77,19 @@ export type InitializeArgs = {
 	readonly onLCP: OnLCPFunction | OnLCPWithAttributionFunction;
 	readonly onINP: OnINPFunction | OnINPWithAttributionFunction;
 	readonly onCLS: OnCLSFunction | OnCLSWithAttributionFunction;
+	readonly getRootData: GetRootDataFunction;
+	readonly extendRootData: ExtendRootDataFunction;
+	readonly getElementData: GetElementDataFunction;
+	readonly extendElementData: ExtendElementDataFunction;
 };
 
 export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
 
 export type FinalizeArgs = {
-	readonly getRootData: () => URLMetric;
-	readonly extendRootData: ( properties: ExtendedRootData ) => void;
-	readonly getElementData: ( xpath: string ) => ElementData | null;
-	readonly extendElementData: (
-		xpath: string,
-		properties: ExtendedElementData
-	) => void;
+	readonly getRootData: GetRootDataFunction;
+	readonly extendRootData: ExtendRootDataFunction;
+	readonly getElementData: GetElementDataFunction;
+	readonly extendElementData: ExtendElementDataFunction;
 	readonly isDebug: boolean;
 	readonly log: LogFunction;
 	readonly info: LogFunction;

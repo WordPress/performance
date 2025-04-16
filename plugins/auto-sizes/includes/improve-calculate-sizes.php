@@ -200,7 +200,12 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 
 		case 'wide':
 			$layout_width = auto_sizes_get_layout_width( 'wide' );
-			if ( str_ends_with( $layout_width, 'px' ) ) {
+			// TODO: Add support for em, rem, vh, and vw.
+			if (
+				str_ends_with( $layout_width, 'px' ) &&
+				( $container_relative_width > 0.0 ||
+				$container_relative_width < 1.0 )
+			) {
 				// First remove 'px' from width.
 				$layout_width = str_replace( 'px', '', $layout_width );
 				// Convert to float for better precision.
@@ -219,8 +224,14 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			/*
 			 * If the layout width is in pixels, we can compare against the image width
 			 * on the server. Otherwise, we need to rely on CSS functions.
+			 *
+			 * TODO: Add support for em, rem, vh, and vw.
 			 */
-			if ( str_ends_with( $layout_width, 'px' ) ) {
+			if (
+				str_ends_with( $layout_width, 'px' ) &&
+				( $container_relative_width > 0.0 ||
+				$container_relative_width < 1.0 )
+			) {
 				// First remove 'px' from width.
 				$layout_width = str_replace( 'px', '', $layout_width );
 				// Convert to float for better precision.
@@ -273,7 +284,7 @@ function auto_sizes_get_layout_width( string $alignment ): string {
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
 	// Define block-specific context usage.
 	$block_specific_context = array(
-		'core/cover'   => array( 'max_alignment' ),
+		'core/cover'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'   => array( 'max_alignment' ),
 		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
@@ -313,9 +324,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
-		if ( 'default' === $alignment || 'wide' === $alignment ) {
-			$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
-		}
+		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {
@@ -339,7 +348,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			}
 
 			// Multiply with parent's width if available.
-			if ( isset( $parent_block->context['container_relative_width'] ) ) {
+			if (
+				isset( $parent_block->context['container_relative_width'] ) &&
+				( $current_width > 0.0 || $current_width < 1.0 )
+			) {
 				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
 				$context['container_relative_width'] = $current_width;
