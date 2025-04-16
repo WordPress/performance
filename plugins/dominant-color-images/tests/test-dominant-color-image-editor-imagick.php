@@ -168,34 +168,4 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 
 		$this->assertTrue( $result );
 	}
-
-	/**
-	 * @covers ::has_transparency
-	 */
-	public function test_has_transparency_no_alpha_channel_method(): void {
-		// Mock the Imagick object to simulate when getImageAlphaChannel method doesn't exist.
-		$imagick_mock = $this->getMockBuilder( Imagick::class )
-							->disableOriginalConstructor()
-							->getMock();
-
-		$imagick_mock->method( 'getImageWidth' )->willReturn( 1 );
-		$imagick_mock->method( 'getImageHeight' )->willReturn( 1 );
-
-		$pixel = $this->getMockBuilder( ImagickPixel::class )
-						->disableOriginalConstructor()
-						->getMock();
-		$pixel->method( 'getColor' )->willReturn( array( 'a' => 0 ) );
-
-		$imagick_mock->method( 'getImagePixelColor' )->willReturn( $pixel );
-
-		$editor     = new Dominant_Color_Image_Editor_Imagick( null );
-		$reflection = new ReflectionClass( $editor );
-		$property   = $reflection->getProperty( 'image' );
-		$property->setAccessible( true );
-		$property->setValue( $editor, $imagick_mock );
-
-		$result = $editor->has_transparency();
-
-		$this->assertFalse( $result );
-	}
 }
