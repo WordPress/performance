@@ -6,7 +6,7 @@ const path = require( 'path' );
 /**
  * WordPress dependencies
  */
-const { test } = require( '@wordpress/e2e-test-utils-playwright' );
+const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 
 test.describe( 'changing image size', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
@@ -17,10 +17,11 @@ test.describe( 'changing image size', () => {
 		await requestUtils.deleteAllMedia();
 	} );
 
-	test( 'should insert and change my image size', async ( {
+	test( 'should insert and check image size on front end', async ( {
 		admin,
 		editor,
 		requestUtils,
+		page,
 	} ) => {
 		const filename = 'leaves.jpg';
 		const filepath = path.join(
@@ -34,11 +35,19 @@ test.describe( 'changing image size', () => {
 		await editor.insertBlock( {
 			name: 'core/image',
 			attributes: {
-				// Specify alt text so that it can be queried by role selectors.
 				alt: filename,
 				id: media.id,
 				url: media.source_url,
 			},
 		} );
+
+		const postId = await editor.publishPost();
+		await page.goto( `/?p=${ postId }` );
+
+		// Verify the image is present on the frontend
+		const imageLocator = page.locator(
+			'.entry-content .wp-block-image img'
+		);
+		await expect( imageLocator ).toHaveAttribute( 'src', media.source_url );
 	} );
 } );
