@@ -197,15 +197,15 @@
 					currentTasks[ currentTaskIndex ],
 					abortController.signal
 				);
-
-				currentTaskIndex++;
-				progressBar.value = currentTaskIndex;
-				currentTaskElement.textContent = currentTaskIndex.toString();
 			} catch ( error ) {
 				log( error.message );
 				if ( 'Task Aborted' === error.message ) {
 					throw error;
 				}
+			} finally {
+				currentTaskIndex++;
+				progressBar.value = currentTaskIndex;
+				currentTaskElement.textContent = currentTaskIndex.toString();
 			}
 		}
 	}
@@ -258,18 +258,19 @@
 			 * Handles the message from the iframe.
 			 *
 			 * @param {MessageEvent} event - The message event.
+			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const handleMessage = ( event ) => {
+			const handleMessage = async ( event ) => {
 				if (
 					event.data &&
 					event.data.type &&
 					'OD_PRIME_URL_METRICS_REQUEST_STATUS' === event.data.type
 				) {
 					if ( event.data.success ) {
-						cleanup();
+						await cleanup();
 						resolve();
 					} else {
-						cleanup();
+						await cleanup();
 						reject(
 							new Error(
 								event.data.error || 'URL Metric request failed'
@@ -281,25 +282,38 @@
 
 			/**
 			 * Handles the aborting of the task on abort signal.
+			 *
+			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const abortHandler = () => {
-				cleanup();
+			const abortHandler = async () => {
+				await cleanup();
 				reject( new Error( 'Task Aborted' ) );
 			};
 
 			/**
 			 * Cleans up the event listeners and iframe.
+			 *
+			 * @return {Promise<void>} The promise that resolves to void.
 			 */
 			const cleanup = () => {
-				signal.removeEventListener( 'abort', abortHandler );
-				window.removeEventListener( 'message', handleMessage );
-				clearTimeout( timeoutId );
-				iframe.onerror = null;
-				iframe.src = 'about:blank';
+				return new Promise( ( cleanUpResolve ) => {
+					signal.removeEventListener( 'abort', abortHandler );
+					window.removeEventListener( 'message', handleMessage );
+					clearTimeout( timeoutId );
+					iframe.onerror = null;
+					iframe.src = 'about:blank';
+					iframe.addEventListener(
+						'load',
+						() => {
+							cleanUpResolve();
+						},
+						{ once: true }
+					);
+				} );
 			};
 
-			const timeoutId = setTimeout( () => {
-				cleanup();
+			const timeoutId = setTimeout( async () => {
+				await cleanup();
 				reject( new Error( 'Timeout waiting for message' ) );
 			}, 30000 ); // 30-second timeout
 
@@ -311,17 +325,20 @@
 			signal.addEventListener( 'abort', abortHandler );
 			window.addEventListener( 'message', handleMessage );
 
-			iframe.onerror = () => {
-				cleanup();
+			iframe.onerror = async () => {
+				await cleanup();
 				reject( new Error( 'Iframe failed to load' ) );
 			};
 
+			const url = new URL( task.url );
+			url.hash = `odPrimeUrlMetricsVerificationToken=${ encodeURIComponent(
+				verificationToken
+			) }`;
+
 			// Load the iframe.
-			iframe.src = task.url;
+			iframe.src = url.toString();
 			iframe.width = task.width.toString();
 			iframe.height = task.height.toString();
-			iframe.dataset.odPrimeUrlMetricsVerificationToken =
-				verificationToken;
 
 			if ( isDebug ) {
 				/**

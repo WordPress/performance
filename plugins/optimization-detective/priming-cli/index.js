@@ -13,18 +13,21 @@ program
 
 /**
  * Instance of ora spinner for displaying status messages.
+ *
  * @type {import('ora').Ora}
  */
 const spinner = ora( 'Starting...' ).start();
 
 /**
  * Instance of AbortController to handle aborting tasks.
+ *
  * @type {AbortController}
  */
 const abortController = new AbortController();
 
 /**
  * Abort signal to be used to detect abort events.
+ *
  * @type {AbortSignal}
  */
 const signal = abortController.signal;
@@ -37,6 +40,7 @@ process.on( 'SIGINT', async () => {
 
 /**
  * Checks the environment for required tools and plugins.
+ *
  * @return {boolean} - True if all checks passed, false otherwise.
  */
 function checkEnvironment() {
@@ -78,6 +82,7 @@ function checkEnvironment() {
 
 /**
  * Fetches the next batch of URLs.
+ *
  * @param {Object} lastCursor - The cursor to fetch the next batch.
  * @return {?Object} - The batch of URLs.
  */
@@ -103,6 +108,7 @@ function getBatch( lastCursor ) {
 
 /**
  * Flattens the batch into individual tasks.
+ *
  * @param {Object} batch - The batch to flatten.
  * @return {Array<{ url: string, width: number, height: number }>} The list of tasks.
  */
@@ -135,9 +141,32 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 		 * Handles the abort event.
 		 */
 		function onAbort() {
-			reject( new Error( 'Task aborted.' ) );
+			page.evaluate( () => {
+				window.dispatchEvent(
+					new CustomEvent( 'OD_PRIME_URL_METRICS_REQUEST_STATUS', {
+						detail: {
+							success: false,
+							error: 'Task aborted.',
+						},
+					} )
+				);
+			} );
 		}
 		abortSignal.addEventListener( 'abort', onAbort );
+
+		/**
+		 * Cleans up the page and abort signal listeners.
+		 *
+		 * @return {Promise<void>} The promise that resolves to void.
+		 */
+		async function cleanup() {
+			abortSignal.removeEventListener( 'abort', onAbort );
+			await page.goto( 'about:blank', {
+				waitUntil: 'load',
+				timeout: 30000,
+				signal: abortSignal,
+			} );
+		}
 
 		try {
 			await page.setViewport( {
@@ -145,13 +174,15 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 				height: task.height,
 			} );
 
-			await page.evaluateOnNewDocument( ( token ) => {
-				window.__odPrimeUrlMetricsVerificationToken = token;
-			}, verificationToken );
+			const url = new URL( task.url );
+			url.hash = `odPrimeUrlMetricsVerificationToken=${ encodeURIComponent(
+				verificationToken
+			) }`;
 
-			await page.goto( task.url, {
+			await page.goto( url.toString(), {
 				waitUntil: 'load',
 				timeout: 30000,
+				signal: abortSignal,
 			} );
 
 			await page.evaluate( () => {
@@ -168,6 +199,7 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 
 						/**
 						 * Handles the message from the page.
+						 *
 						 * @param {CustomEvent} event - The message event.
 						 */
 						function handleMessage( event ) {
@@ -193,11 +225,12 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 					}
 				);
 			} );
-		} catch ( error ) {
-			reject( error );
-		} finally {
-			abortSignal.removeEventListener( 'abort', onAbort );
+
+			await cleanup();
 			resolve();
+		} catch ( error ) {
+			await cleanup();
+			reject( error );
 		}
 	} );
 }
@@ -266,7 +299,6 @@ async function init() {
 		cursor = currentBatch.cursor;
 	}
 
-	// Close the browser.
 	await browser.close();
 
 	if ( signal.aborted ) {

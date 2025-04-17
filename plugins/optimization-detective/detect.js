@@ -639,32 +639,13 @@ export default async function detect( {
 		return;
 	}
 
-	try {
-		if (
-			win.parent &&
-			win.location.origin === win.parent.location.origin
-		) {
-			/** @type {HTMLIFrameElement|null} */
-			const urlPrimeIframeElement = win.parent.document.querySelector(
-				'iframe#od-prime-url-metrics-iframe'
-			);
-			if (
-				urlPrimeIframeElement &&
-				urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
-			) {
-				odPrimeUrlMetricsVerificationToken =
-					urlPrimeIframeElement.dataset
-						.odPrimeUrlMetricsVerificationToken;
-			}
-		}
-	} catch ( e ) {
-		// Ignoring error caused possibly due to cross-origin iframe access.
-	}
-
-	// Only available when page is loaded by Puppeteer script.
-	if ( win.__odPrimeUrlMetricsVerificationToken ) {
-		odPrimeUrlMetricsVerificationToken =
-			win.__odPrimeUrlMetricsVerificationToken;
+	// Retrieve verification token from the URL hash for priming URL Metrics.
+	// Presence of the token indicates that the URL Metric is being primed
+	// through the Puppeteer script or WordPress admin dashboard.
+	if ( '' !== window.location.hash ) {
+		odPrimeUrlMetricsVerificationToken = new URLSearchParams(
+			window.location.hash.slice( 1 )
+		).get( 'odPrimeUrlMetricsVerificationToken' );
 	}
 
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
