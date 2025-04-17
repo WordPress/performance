@@ -8,9 +8,26 @@
 class Test_WebP_Uploads_Uninstall extends WP_UnitTestCase {
 
 	/**
+	 * Runs the routine before setting up all tests.
+	 */
+	public static function set_up_before_class(): void {
+		parent::set_up_before_class();
+
+		// Mock uninstall const.
+		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+			define( 'WP_UNINSTALL_PLUGIN', true );
+		}
+	}
+
+	/**
 	 * Test uninstall on a single site.
 	 */
 	public function test_uninstall_single_site(): void {
+
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'This test is for single site only.' );
+		}
+
 		// Set options to ensure they exist before uninstall.
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 		update_option( 'perflab_generate_all_fallback_sizes', true );
@@ -41,9 +58,6 @@ class Test_WebP_Uploads_Uninstall extends WP_UnitTestCase {
 			restore_current_blog();
 		}
 
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-		}
 		include_once __DIR__ . '/../uninstall.php';
 
 		foreach ( $site_ids as $site_id ) {
