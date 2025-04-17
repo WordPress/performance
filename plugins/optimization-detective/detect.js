@@ -841,7 +841,12 @@ export default async function detect( {
 			height: win.innerHeight,
 		},
 		elements: [],
+		source: restApiNonce ? 'user' : 'visitor',
 	};
+
+	if ( odPrimeUrlMetricsVerificationToken ) {
+		urlMetric.source = 'synthetic';
+	}
 
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 
