@@ -78,7 +78,7 @@ function od_get_disabled_reasons(): array {
 		'no_cache_purge_post_id' => false,
 	);
 
-	// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
+	// Disable the search template since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
 	// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
 	if ( is_search() ) {
 		$disabled_flags['is_search'] = true;
@@ -97,7 +97,7 @@ function od_get_disabled_reasons(): array {
 		$disabled_flags['is_preview'] = true;
 	}
 
-	// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+	// Disable in Customizer preview since injection of inline-editing controls can interfere with XPath. Optimization is also not necessary in this context.
 	if ( is_customize_preview() ) {
 		$disabled_flags['is_customize_preview'] = true;
 	}
@@ -107,7 +107,7 @@ function od_get_disabled_reasons(): array {
 		$disabled_flags['not_get_request'] = true;
 	}
 
-	// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
+	// Disable when there is no post ID available for cache purging. Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
 	// the relevant actions on.
 	if ( null === od_get_cache_purge_post_id() ) {
 		$disabled_flags['no_cache_purge_post_id'] = true;
