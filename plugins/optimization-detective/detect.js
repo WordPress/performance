@@ -548,6 +548,51 @@ function notifyStatus( status, options = { toParent: true, toLocal: true } ) {
 }
 
 /**
+ * Scrolls to the bottom of the page.
+ *
+ * @return {Promise<void>} A promise that resolves when the scroll is complete.
+ */
+async function scrollToBottomOfPage() {
+	return new Promise( ( resolve ) => {
+		const viewportHeight = window.innerHeight;
+		const maxScrollAttempts = 20;
+		const maxHeightChangeAmount = viewportHeight * 0.5;
+		const maxHeightChangeAttempts = 3;
+
+		let scrollAttempts = 0;
+		let heightChangeAttempts = 0;
+		let lastScrollPosition = 0;
+		let lastHeight = document.documentElement.scrollHeight;
+
+		function scroll() {
+			const newHeight = document.documentElement.scrollHeight;
+			if (
+				window.innerHeight + window.scrollY >= newHeight - 10 ||
+				scrollAttempts >= maxScrollAttempts ||
+				heightChangeAttempts >= maxHeightChangeAttempts
+			) {
+				resolve();
+				return;
+			}
+
+			lastScrollPosition += viewportHeight;
+			window.scrollTo( { top: lastScrollPosition, behavior: 'smooth' } );
+
+			const heightChange = newHeight - lastHeight;
+			if ( heightChange >= maxHeightChangeAmount ) {
+				lastHeight = newHeight;
+				heightChangeAttempts++;
+			}
+
+			scrollAttempts++;
+			setTimeout( scroll, 300 );
+		}
+
+		scroll();
+	} );
+}
+
+/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -980,23 +1025,24 @@ export default async function detect( {
 	debounceCompressUrlMetric();
 
 	// Wait for the page to be hidden.
-	await new Promise( ( resolve ) => {
-		if ( odPrimeUrlMetricsVerificationToken ) {
+	await new Promise( async ( resolve ) => {
+		if ( ! odPrimeUrlMetricsVerificationToken ) {
+			win.addEventListener( 'pagehide', resolve, { once: true } );
+			win.addEventListener( 'pageswap', resolve, { once: true } );
+			doc.addEventListener(
+				'visibilitychange',
+				() => {
+					if ( document.visibilityState === 'hidden' ) {
+						// TODO: This will fire even when switching tabs.
+						resolve();
+					}
+				},
+				{ once: true }
+			);
+		} else {
+			await scrollToBottomOfPage();
 			resolve();
 		}
-
-		win.addEventListener( 'pagehide', resolve, { once: true } );
-		win.addEventListener( 'pageswap', resolve, { once: true } );
-		doc.addEventListener(
-			'visibilitychange',
-			() => {
-				if ( document.visibilityState === 'hidden' ) {
-					// TODO: This will fire even when switching tabs.
-					resolve();
-				}
-			},
-			{ once: true }
-		);
 	} );
 
 	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
