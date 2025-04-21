@@ -139,11 +139,7 @@ function od_get_disabled_reasons(): array {
 			'no_cache_purge_post_id' => __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' ),
 		);
 
-		foreach ( $disabled_flags as $flag => $is_disabled ) {
-			if ( $is_disabled && isset( $reason_messages[ $flag ] ) ) {
-				$reasons[ $flag ] = $reason_messages[ $flag ];
-			}
-		}
+		$reasons = wp_array_slice_assoc( $reason_messages, array_keys( array_filter( $disabled_flags ) ) );
 
 		// If no technical reasons but optimization still disabled, it's because of the filter.
 		if ( 0 === count( $reasons ) ) {
