@@ -66,7 +66,17 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
  * @since n.e.x.t
  * @access private
  *
- * @return array<string, string> Array of disabled reason codes and their messages.
+ * @return array{
+ *     is_search?: string,
+ *     is_embed?: string,
+ *     is_preview?: string,
+ *     is_customize_preview?: string,
+ *     not_get_request?: string,
+ *     no_cache_purge_post_id?: string,
+ *     filter_disabled?: string,
+ *     rest_api_unavailable?: string,
+ *     query_param_disabled?: string
+ * } Array of disabled reason codes and their messages.
  */
 function od_get_disabled_reasons(): array {
 	$disabled_flags = array(
@@ -123,8 +133,15 @@ function od_get_disabled_reasons(): array {
 	 * @since n.e.x.t Added $disabled_flags parameter
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
-	 * @param bool                $can_optimize    Whether response can be optimized.
-	 * @param array<string, bool> $disabled_flags  Flags indicating which conditions are disabling optimization.
+	 * @param bool $can_optimize Whether response can be optimized.
+	 * @param array{
+	 *     is_search: bool,
+	 *     is_embed: bool,
+	 *     is_preview: bool,
+	 *     is_customize_preview: bool,
+	 *     not_get_request: bool,
+	 *     no_cache_purge_post_id: bool
+	 * } $disabled_flags Flags indicating which conditions are disabling optimization.
 	 */
 	$can_optimize = (bool) apply_filters( 'od_can_optimize_response', ! $has_disabled_flags, $disabled_flags );
 
