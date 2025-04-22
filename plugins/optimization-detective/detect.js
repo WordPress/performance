@@ -516,6 +516,39 @@ function debounceCompressUrlMetric() {
 }
 
 /**
+ * Forces immediate compression of the URL Metric, bypassing debounce and idle callbacks.
+ *
+ * @return {Promise<void>} A promise that resolves when the compression is complete.
+ */
+async function forceCompressUrlMetric() {
+	if ( ! compressionEnabled ) {
+		return null;
+	}
+	if ( null !== recompressionTimeout ) {
+		clearTimeout( recompressionTimeout );
+		recompressionTimeout = null;
+	}
+	if (
+		null !== idleCallbackHandle &&
+		typeof cancelIdleCallback === 'function'
+	) {
+		cancelIdleCallback( idleCallbackHandle );
+		idleCallbackHandle = null;
+	}
+
+	try {
+		compressedPayload = await compress( JSON.stringify( urlMetric ) );
+	} catch ( err ) {
+		const { error } = createLogger( false, consoleLogPrefix );
+		error(
+			'Failed to compress URL Metric falling back to sending uncompressed data:',
+			err
+		);
+		compressionEnabled = false;
+	}
+}
+
+/**
  * Notifies about the URL Metric request status.
  *
  * @param {Object}  status                  - The status details.
@@ -1041,6 +1074,7 @@ export default async function detect( {
 			);
 		} else {
 			await scrollToBottomOfPage();
+			await forceCompressUrlMetric();
 			resolve();
 		}
 	} );
