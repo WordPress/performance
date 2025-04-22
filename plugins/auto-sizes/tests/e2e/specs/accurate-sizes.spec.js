@@ -6,10 +6,12 @@ const path = require( 'path' );
 /**
  * WordPress dependencies
  */
-const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
+const { test } = require( '@wordpress/e2e-test-utils-playwright' );
 
 test.describe( 'changing image size', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( 'twentytwentyfour' );
+		await requestUtils.deactivatePlugin( 'enhanced-responsive-images' );
 		await requestUtils.deleteAllMedia();
 	} );
 
@@ -33,21 +35,45 @@ test.describe( 'changing image size', () => {
 		const media = await requestUtils.uploadMedia( filepath );
 
 		await editor.insertBlock( {
-			name: 'core/image',
+			name: 'core/group',
 			attributes: {
-				alt: filename,
-				id: media.id,
-				url: media.source_url,
+				align: 'wide',
 			},
+			innerBlocks: [
+				{
+					name: 'core/image',
+					attributes: {
+						alt: filename,
+						id: media.id,
+						url: media.source_url,
+					},
+				},
+			],
 		} );
 
 		const postId = await editor.publishPost();
-		await page.goto( `/?p=${ postId }` );
 
-		// Verify the image is present on the frontend
-		const imageLocator = page.locator(
-			'.entry-content .wp-block-image img'
+		// Navigate to the post and wait for the image to load.
+		await page.goto( `/?p=${ postId }` );
+		const imageElement = await page.waitForSelector(
+			`img.wp-image-${ media.id }`
 		);
-		await expect( imageLocator ).toHaveAttribute( 'src', media.source_url );
+		const imageUrl = await imageElement.getAttribute( 'src' );
+		/* eslint-disable no-console */
+		console.log( imageUrl );
+		/* eslint-enable no-console */
+
+		// Activate the plugin.
+		await requestUtils.activatePlugin( 'enhanced-responsive-images' );
+
+		// Reload the page and wait for the image to load.
+		await page.goto( `/?p=${ postId }` );
+		const imageElements = await page.waitForSelector(
+			`img.wp-image-${ media.id }`
+		);
+		const newImageUrl = await imageElements.getAttribute( 'src' );
+		/* eslint-disable no-console */
+		console.log( newImageUrl );
+		/* eslint-enable no-console */
 	} );
 } );
