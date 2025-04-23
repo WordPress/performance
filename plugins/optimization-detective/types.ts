@@ -28,7 +28,6 @@ export interface URLMetric {
 		height: number;
 	};
 	elements: ElementData[];
-	source: 'visitor' | 'user' | 'synthetic';
 }
 
 export type ExtendedRootData = ExcludeProps< URLMetric >;

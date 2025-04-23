@@ -228,6 +228,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 						'timestamp' => microtime( true ),
 						'uuid'      => wp_generate_uuid4(),
 						'etag'      => $request->get_param( 'current_etag' ),
+						'source'    => '' !== (string) $request->get_param( 'prime_url_metrics_verification_token' ) ? 'synthetic' : ( is_user_logged_in() ? 'user' : 'visitor' ),
 					)
 				)
 			);

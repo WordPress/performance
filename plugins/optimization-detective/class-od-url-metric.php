@@ -44,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[],
- *                                source?: non-empty-string,
+ *                                source?: 'visitor'|'user'|'synthetic',
  *                            }
  * @phpstan-type JSONSchema   array{
  *                                type: string|string[],
@@ -315,6 +315,7 @@ class OD_URL_Metric implements JsonSerializable {
 					'description' => __( 'The source of the URL Metric.', 'optimization-detective' ),
 					'type'        => 'string',
 					'required'    => false,
+					'readonly'    => true, // Omit from REST API.
 					'enum'        => array(
 						'visitor',
 						'user',
@@ -542,7 +543,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return non-empty-string|null Source.
+	 * @return 'visitor'|'user'|'synthetic'|null Source.
 	 */
 	public function get_source(): ?string {
 		return $this->data['source'] ?? null;
