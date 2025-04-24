@@ -199,7 +199,7 @@ Filters whether the current response can be optimized. By default, detection and
 1. It’s not a search template (`is_search()`).
 2. It’s not a post embed template (`is_embed()`).
 3. It’s not a preview (`is_preview()`).
-4. It’s not the Customizer preview (`is_customize_preview()`);
+4. It’s not the Customizer preview (`is_customize_preview()`).
 5. It’s not the response to a `POST` request.
 6. There is at least one queried post on the page. This is used to facilitate the purging of page caches after a new URL Metric is stored.
 
@@ -208,8 +208,8 @@ The filter now receives an additional `$disabled_flags` parameter that contains 
 For example, to enable optimization specifically for search pages:
 
 ```php
-add_filter( 'od_can_optimize_response', function( $can_optimize, $disabled_flags ) {
-    if ( ! $can_optimize && isset( $disabled_flags['is_search'] ) && $disabled_flags['is_search'] ) {
+add_filter( 'od_can_optimize_response', function( $can_optimize, array $disabled_flags ): bool {
+    if ( ! $can_optimize && $disabled_flags['is_search'] ) {
         unset( $disabled_flags['is_search'] );
         $can_optimize = count( array_filter( $disabled_flags ) ) === 0;
     }
