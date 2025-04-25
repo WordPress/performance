@@ -14,6 +14,9 @@ program
 /**
  * Instance of ora spinner for displaying status messages.
  *
+ * @see {init}
+ * @see {getBatch}
+ * @see {checkEnvironment}
  * @type {import('ora').Ora}
  */
 const spinner = ora( 'Starting...' ).start();
@@ -21,6 +24,7 @@ const spinner = ora( 'Starting...' ).start();
 /**
  * Instance of AbortController to handle aborting tasks.
  *
+ * @see {getBatch}
  * @type {AbortController}
  */
 const abortController = new AbortController();
@@ -28,12 +32,13 @@ const abortController = new AbortController();
 /**
  * Abort signal to be used to detect abort events.
  *
+ * @see {processTask}
  * @type {AbortSignal}
  */
 const signal = abortController.signal;
 
 // Listen for the SIGINT signal (Ctrl+C) to abort the process.
-process.on( 'SIGINT', async () => {
+process.on( 'SIGINT', () => {
 	spinner.start( 'Aborting...' );
 	abortController.abort();
 } );
@@ -240,11 +245,46 @@ async function processTask( page, task, verificationToken, abortSignal ) {
  * @return {Promise<void>}
  */
 async function init() {
+	/**
+	 * Puppeteer browser instance used for headless page navigation and rendering.
+	 *
+	 * @type {import('puppeteer').Browser}
+	 */
 	const browser = await launch( { headless: true } );
+
+	/**
+	 * Main Puppeteer page object used to navigate to URLs.
+	 *
+	 * @type {import('puppeteer').Page}
+	 */
 	const browserPage = await browser.newPage();
+
+	/**
+	 * Flag indicating whether more URL batches are available for processing.
+	 *
+	 * @type {boolean}
+	 */
 	let isNextBatchAvailable = true;
+
+	/**
+	 * Cursor object to track position in pagination when fetching URL batches.
+	 *
+	 * @type {Object}
+	 */
 	let cursor = {};
+
+	/**
+	 * Counter tracking the number of URL batches processed so far.
+	 *
+	 * @type {number}
+	 */
 	let currentBatchNumber = 0;
+
+	/**
+	 * Token used to verify REST API requests server side when in priming mode.
+	 *
+	 * @type {string}
+	 */
 	let verificationToken;
 
 	// Process batches until no more are available.
@@ -252,7 +292,7 @@ async function init() {
 		if ( signal.aborted ) {
 			break;
 		}
-		spinner.text = 'Fetching next batch';
+		spinner.start( 'Fetching next batch' );
 		const currentBatch = await getBatch( cursor );
 
 		// If no URLs remain in the batch, finish processing.
@@ -278,11 +318,13 @@ async function init() {
 			}
 			const task = currentTasks[ i ];
 
-			spinner.text = `Processing task ${ chalk.green(
-				i + 1 + '/' + currentTasks.length
-			) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
-				task.width + 'x' + task.height
-			) }`;
+			spinner.start(
+				`Processing task ${ chalk.green(
+					i + 1 + '/' + currentTasks.length
+				) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
+					task.width + 'x' + task.height
+				) }`
+			);
 			try {
 				await processTask(
 					browserPage,
@@ -291,9 +333,12 @@ async function init() {
 					signal
 				);
 			} catch ( error ) {
-				spinner.text = `Error processing task ${ i + 1 }. Error: ${
-					error.message
-				}`;
+				// Log the error and continue processing the next task.
+				spinner.fail(
+					`Error processing task ${ i + 1 }. Error: ${
+						error.message
+					}`
+				);
 			}
 		}
 		cursor = currentBatch.cursor;
