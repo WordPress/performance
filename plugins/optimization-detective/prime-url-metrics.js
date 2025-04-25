@@ -66,7 +66,11 @@
 	let currentBatchNumber = 0;
 	let isTabHidden = false;
 	let abortController = new AbortController();
-	const consoleLogPrefix = '[Optimization Detective Priming URL Metrics]';
+	const consoleLogPrefix = '[Optimization Detective Priming Mode]';
+
+	// Create a ResizeObserver to fit the iframe when iframe resizes.
+	const iframeObserver = new ResizeObserver( fitIframe );
+	iframeObserver.observe( iframe );
 
 	/**
 	 * Logs messages to the console.
@@ -260,7 +264,7 @@
 			 * @param {MessageEvent} event - The message event.
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const handleMessage = async ( event ) => {
+			async function handleMessage( event ) {
 				if (
 					event.data &&
 					event.data.type &&
@@ -278,39 +282,35 @@
 						);
 					}
 				}
-			};
+			}
 
 			/**
 			 * Handles the aborting of the task on abort signal.
 			 *
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const abortHandler = async () => {
+			async function abortHandler() {
 				await cleanup();
 				reject( new Error( 'Task Aborted' ) );
-			};
+			}
 
 			/**
 			 * Cleans up the event listeners and iframe.
 			 *
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const cleanup = () => {
+			function cleanup() {
 				return new Promise( ( cleanUpResolve ) => {
 					signal.removeEventListener( 'abort', abortHandler );
 					window.removeEventListener( 'message', handleMessage );
 					clearTimeout( timeoutId );
 					iframe.onerror = null;
 					iframe.src = 'about:blank';
-					iframe.addEventListener(
-						'load',
-						() => {
-							cleanUpResolve();
-						},
-						{ once: true }
-					);
+					iframe.addEventListener( 'load', () => cleanUpResolve(), {
+						once: true,
+					} );
 				} );
-			};
+			}
 
 			const timeoutId = setTimeout( async () => {
 				await cleanup();
@@ -339,38 +339,35 @@
 			iframe.src = url.toString();
 			iframe.width = task.width.toString();
 			iframe.height = task.height.toString();
-
-			if ( isDebug ) {
-				/**
-				 * Fits the iframe to the container.
-				 */
-				function fitIframe() {
-					const containerWidth = iframeContainer.clientWidth;
-					if ( containerWidth <= 0 ) {
-						return;
-					}
-
-					const nativeWidth = parseInt( iframe.width, 10 ) || 1;
-					const scale = containerWidth / nativeWidth;
-
-					iframe.style.position = 'unset';
-					iframe.style.transform = `scale(${ scale })`;
-					iframe.style.pointerEvents = 'auto';
-					iframe.style.opacity = '1';
-					iframe.style.zIndex = '9999';
-				}
-				window.addEventListener( 'resize', fitIframe );
-				fitIframe();
-			}
 		} );
 	}
 
-	controlButton.addEventListener( 'click', toggleProcessing );
+	/**
+	 * Fits the iframe to the container.
+	 */
+	function fitIframe() {
+		if ( ! isDebug ) {
+			return;
+		}
+		const containerWidth = iframeContainer.clientWidth;
+		if ( containerWidth <= 0 ) {
+			return;
+		}
+
+		const nativeWidth = parseInt( iframe.width, 10 ) || 1;
+		const scale = containerWidth / nativeWidth;
+
+		iframe.style.position = 'unset';
+		iframe.style.transform = `scale(${ scale })`;
+		iframe.style.pointerEvents = 'auto';
+		iframe.style.opacity = '1';
+		iframe.style.zIndex = '9999';
+	}
 
 	/**
-	 * Pause processing when the tab/window becomes hidden, resume when visible.
+	 * Handles visibility change events to pause/resume processing when tab/window visibility changes.
 	 */
-	document.addEventListener( 'visibilitychange', () => {
+	function handleVisibilityChange() {
 		if ( 'hidden' === document.visibilityState ) {
 			if ( isProcessing ) {
 				isProcessing = false;
@@ -397,14 +394,22 @@
 				processBatches();
 			}
 		}
-	} );
+	}
 
 	/**
-	 * Prevent the user from leaving the page while processing.
+	 * Handler for the beforeunload event to prevent accidental page navigation.
+	 *
+	 * @param {BeforeUnloadEvent} event - The beforeunload event
 	 */
-	window.addEventListener( 'beforeunload', function ( event ) {
+	function handleBeforeUnload( event ) {
 		if ( isProcessing ) {
 			event.preventDefault();
 		}
-	} );
+	}
+
+	// Attach event listeners.
+	controlButton.addEventListener( 'click', toggleProcessing );
+	document.addEventListener( 'visibilitychange', handleVisibilityChange );
+	window.addEventListener( 'beforeunload', handleBeforeUnload );
+	window.addEventListener( 'resize', fitIframe );
 } )();

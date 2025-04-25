@@ -15,7 +15,7 @@
 	let isTabHidden = false;
 	let abortController = new AbortController();
 	let processTasksPromise = null;
-	const consoleLogPrefix = '[Optimization Detective Priming URL Metrics]';
+	const consoleLogPrefix = '[Optimization Detective Priming Mode]';
 
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
@@ -101,7 +101,7 @@
 			 * @param {MessageEvent} event - The message event.
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const handleMessage = async ( event ) => {
+			async function handleMessage( event ) {
 				if (
 					event.data &&
 					event.data.type &&
@@ -119,39 +119,35 @@
 						);
 					}
 				}
-			};
+			}
 
 			/**
 			 * Handles the aborting of the task on abort signal.
 			 *
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const abortHandler = async () => {
+			async function abortHandler() {
 				await cleanup();
 				reject( new Error( 'Task Aborted' ) );
-			};
+			}
 
 			/**
 			 * Cleans up the event listeners and iframe.
 			 *
 			 * @return {Promise<void>} The promise that resolves to void.
 			 */
-			const cleanup = () => {
+			function cleanup() {
 				return new Promise( ( cleanUpResolve ) => {
 					signal.removeEventListener( 'abort', abortHandler );
 					window.removeEventListener( 'message', handleMessage );
 					clearTimeout( timeoutId );
 					iframe.onerror = null;
 					iframe.src = 'about:blank';
-					iframe.addEventListener(
-						'load',
-						() => {
-							cleanUpResolve();
-						},
-						{ once: true }
-					);
+					iframe.addEventListener( 'load', () => cleanUpResolve(), {
+						once: true,
+					} );
 				} );
-			};
+			}
 
 			const timeoutId = setTimeout( async () => {
 				await cleanup();
@@ -207,9 +203,9 @@
 	} );
 
 	/**
-	 * Pause processing when the tab/window becomes hidden.
+	 * Handles visibility change events to pause/resume processing when tab/window visibility changes.
 	 */
-	document.addEventListener( 'visibilitychange', () => {
+	function handleVisibilityChange() {
 		if ( 'hidden' === document.visibilityState && isProcessing ) {
 			isProcessing = false;
 			isTabHidden = true;
@@ -226,14 +222,20 @@
 				processTasks();
 			}
 		}
-	} );
+	}
 
 	/**
-	 * Prevent the user from leaving the page while processing.
+	 * Handler for the beforeunload event to prevent accidental page navigation.
+	 *
+	 * @param {BeforeUnloadEvent} event - The beforeunload event
 	 */
-	window.addEventListener( 'beforeunload', function ( event ) {
+	function handleBeforeUnload( event ) {
 		if ( isProcessing ) {
 			event.preventDefault();
 		}
-	} );
+	}
+
+	// Attach event listeners.
+	document.addEventListener( 'visibilitychange', handleVisibilityChange );
+	window.addEventListener( 'beforeunload', handleBeforeUnload );
 } )();
