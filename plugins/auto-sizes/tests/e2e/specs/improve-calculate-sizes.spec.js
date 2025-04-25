@@ -8,7 +8,7 @@ const path = require( 'path' );
  */
 const { test } = require( '@wordpress/e2e-test-utils-playwright' );
 
-test.describe( 'changing image size', () => {
+test.describe( 'check accurate sizes', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( 'twentytwentyfour' );
 		await requestUtils.deactivatePlugin( 'enhanced-responsive-images' );
@@ -19,7 +19,7 @@ test.describe( 'changing image size', () => {
 		await requestUtils.deleteAllMedia();
 	} );
 
-	test( 'should insert and check image size on front end', async ( {
+	test( 'should get smaller version of image', async ( {
 		admin,
 		editor,
 		requestUtils,
@@ -58,22 +58,34 @@ test.describe( 'changing image size', () => {
 		const imageElement = await page.waitForSelector(
 			`img.wp-image-${ media.id }`
 		);
-		const imageUrl = await imageElement.getAttribute( 'src' );
-		/* eslint-disable no-console */
-		console.log( imageUrl );
-		/* eslint-enable no-console */
+		const imageSizes = await imageElement.getAttribute( 'sizes' );
 
 		// Activate the plugin.
 		await requestUtils.activatePlugin( 'enhanced-responsive-images' );
 
 		// Reload the page and wait for the image to load.
 		await page.goto( `/?p=${ postId }` );
-		const imageElements = await page.waitForSelector(
+		const updatedImageElement = await page.waitForSelector(
 			`img.wp-image-${ media.id }`
 		);
-		const newImageUrl = await imageElements.getAttribute( 'src' );
-		/* eslint-disable no-console */
-		console.log( newImageUrl );
-		/* eslint-enable no-console */
+
+		const updatedImageSizes =
+			await updatedImageElement.getAttribute( 'sizes' );
+		if ( imageSizes === updatedImageSizes ) {
+			throw new Error(
+				'Image sizes did not update after activating the plugin.'
+			);
+		}
+
+		if ( '(max-width: 620px) 100vw, 620px' !== updatedImageSizes ) {
+			throw new Error(
+				`Unexpected image sizes: ${ updatedImageSizes }. Expected: (max-width: 620px) 100vw, 620px`
+			);
+		}
+
+		const currentSrc = await updatedImageElement.evaluate( ( img ) =>
+			img instanceof HTMLImageElement ? img.currentSrc : null
+		);
+		currentSrc.endsWith( 'leaves-768x512.jpg' );
 	} );
 } );
