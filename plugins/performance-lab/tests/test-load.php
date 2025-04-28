@@ -7,6 +7,17 @@
 
 class Test_Load extends WP_UnitTestCase {
 
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+
+		if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) ) {
+			define( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN', true );
+		}
+	}
+
 	public function test_perflab_get_generator_content(): void {
 		$expected = 'performance-lab ' . PERFLAB_VERSION . '; plugins: ';
 		$content  = perflab_get_generator_content();
