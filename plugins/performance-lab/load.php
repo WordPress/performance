@@ -145,8 +145,9 @@ function perflab_get_standalone_plugin_version_constants(): array {
  * the frontend.
  *
  * This function will short-circuit if at least one of the constants
- * 'PERFLAB_DISABLE_SERVER_TIMING' or 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is
- * set as true.
+ * 'PERFLAB_DISABLE_SERVER_TIMING' or
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true or if the
+ * 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant is not set to a truthy value.
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
@@ -155,6 +156,11 @@ function perflab_get_standalone_plugin_version_constants(): array {
  */
 function perflab_maybe_set_object_cache_dropin(): void {
 	global $wp_filesystem;
+
+	// Bail if the drop-in is not enabled.
+	if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) || ! PERFLAB_PLACE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
 
 	// Bail if Server-Timing is disabled entirely.
 	if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
