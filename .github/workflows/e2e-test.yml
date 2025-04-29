@@ -54,4 +54,6 @@ jobs:
         run: npm run wp-env start
 
       - name: Run tests
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
         run: npm run test-e2e
