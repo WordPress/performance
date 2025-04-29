@@ -72,11 +72,6 @@ test.describe( 'check accurate sizes', () => {
 		const updatedImageSizes =
 			await updatedImageElement.getAttribute( 'sizes' );
 
-		/* eslint-disable no-console */
-		console.log( 'image sizes', imageSizes );
-		console.log( 'updated image sizes', updatedImageSizes );
-		/* eslint-enable no-console */
-
 		if ( imageSizes === updatedImageSizes ) {
 			throw new Error(
 				'Image sizes did not update after activating the plugin.'
