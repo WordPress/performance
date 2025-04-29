@@ -47,5 +47,11 @@ jobs:
       - name: Build assets
         run: npm run build
 
+      - name: Install Playwright dependencies
+        run: npx playwright install chromium --with-deps
+
+      - name: Install WordPress
+        run: npm run wp-env start
+
       - name: Run tests
         run: npm run test-e2e
