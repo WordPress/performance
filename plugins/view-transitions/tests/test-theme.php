@@ -1,0 +1,43 @@
+<?php
+/**
+ * Tests for the View Transitions plugin includes/theme.php file.
+ *
+ * @package view-transitions
+ * @group   view-transitions
+ */
+
+class Test_ViewTransitions_Theme extends WP_UnitTestCase {
+
+	public function test_plvt_polyfill_theme_support(): void {
+		// Test polyfill without support registered.
+		remove_theme_support( 'view-transitions' );
+		plvt_polyfill_theme_support();
+		$this->assertTrue( current_theme_supports( 'view-transitions' ) );
+		$this->assertTrue( get_theme_support( 'view-transitions' ) );
+
+		// Test polyfill does not override theme support arguments if already provided by the actual theme.
+		add_theme_support( 'view-transitions', array( 'custom_key' => 'custom_value' ) );
+		plvt_polyfill_theme_support();
+		$this->assertTrue( current_theme_supports( 'view-transitions' ) );
+		$this->assertSame( array( array( 'custom_key' => 'custom_value' ) ), get_theme_support( 'view-transitions' ) );
+	}
+
+	public function test_plvt_load_view_transitions(): void {
+		// Clear up style if it is already registered.
+		if ( wp_style_is( 'wp-view-transitions', 'registered' ) ) {
+			unset( wp_styles()->registered['wp-view-transitions'] );
+		}
+
+		// Test that without theme support this does nothing.
+		remove_theme_support( 'view-transitions' );
+		plvt_load_view_transitions();
+		$this->assertFalse( wp_style_is( 'wp-view-transitions', 'registered' ) );
+		$this->assertFalse( wp_style_is( 'wp-view-transitions', 'enqueued' ) );
+
+		// Test that with theme support it registers and enqueues the style.
+		add_theme_support( 'view-transitions' );
+		plvt_load_view_transitions();
+		$this->assertTrue( wp_style_is( 'wp-view-transitions', 'registered' ) );
+		$this->assertTrue( wp_style_is( 'wp-view-transitions', 'enqueued' ) );
+	}
+}
