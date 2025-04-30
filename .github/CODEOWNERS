@@ -32,3 +32,6 @@
 
 # Plugin: Speculative Loading
 /plugins/speculation-rules                  @felixarntz
+
+# Plugin: View Transitions
+/plugins/view-transitions                   @felixarntz
