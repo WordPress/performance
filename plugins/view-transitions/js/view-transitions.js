@@ -1,16 +1,27 @@
 /**
+ * @typedef {import("./types.ts").ExtendedWindow} ExtendedWindow
+ * @typedef {import("./types.ts").ViewTransitionsConfig} ViewTransitionsConfig
+ * @typedef {import("./types.ts").InitViewTransitionsFunction} InitViewTransitionsFunction
+ * @typedef {import("./types.ts").PageSwapListenerFunction} PageSwapListenerFunction
+ * @typedef {import("./types.ts").PageRevealListenerFunction} PageRevealListenerFunction
+ */
+
+/**
+ * Window reference to reduce size when script is minified.
+ *
+ * @type {ExtendedWindow}
+ */
+const win = window;
+
+/**
  * Initializes view transitions for the current URL.
  *
- * @param {Object} config                       The view transitions configuration.
- * @param {string} config.postSelector          General selector for post elements in the DOM.
- * @param {Object} config.globalTransitionNames Map of selectors for global elements (queried relative to 'body')
- *                                              and their view transition names.
- * @param {Object} config.postTransitionNames   Map of selectors for post elements (queried relative to an element
- *                                              identified by config.postSelector) and their view transition names.
+ * @type {InitViewTransitionsFunction}
+ * @param {ViewTransitionsConfig} config - The view transitions configuration.
  */
-window.plvtInitViewTransitions = ( config ) => {
-	if ( ! window.navigation || ! ( 'CSSViewTransitionRule' in window ) ) {
-		window.console.warn(
+win.plvtInitViewTransitions = ( config ) => {
+	if ( ! win.navigation || ! ( 'CSSViewTransitionRule' in win ) ) {
+		win.console.warn(
 			'View transitions not loaded as the browser is lacking support.'
 		);
 		return;
@@ -121,9 +132,10 @@ window.plvtInitViewTransitions = ( config ) => {
 	/**
 	 * Customizes view transition behavior on the URL that is being navigated from.
 	 *
-	 * @param {Event} event Event fired as the previous URL is about to unload.
+	 * @type {PageSwapListenerFunction}
+	 * @param {PageSwapEvent} event - Event fired as the previous URL is about to unload.
 	 */
-	window.addEventListener( 'pageswap', ( event ) => {
+	win.addEventListener( 'pageswap', ( event ) => {
 		if ( event.viewTransition ) {
 			let viewTransitionEntries;
 			if ( document.body.classList.contains( 'single' ) ) {
@@ -152,9 +164,10 @@ window.plvtInitViewTransitions = ( config ) => {
 	/**
 	 * Customizes view transition behavior on the URL that is being navigated to.
 	 *
-	 * @param {Event} event Event fired as the new URL being navigated to is loaded.
+	 * @type {PageRevealListenerFunction}
+	 * @param {PageRevealEvent} event - Event fired as the new URL being navigated to is loaded.
 	 */
-	window.addEventListener( 'pagereveal', ( event ) => {
+	win.addEventListener( 'pagereveal', ( event ) => {
 		if ( event.viewTransition ) {
 			let viewTransitionEntries;
 			if ( document.body.classList.contains( 'single' ) ) {
@@ -168,10 +181,8 @@ window.plvtInitViewTransitions = ( config ) => {
 			) {
 				viewTransitionEntries = getViewTransitionEntries(
 					document.body,
-					window.navigation.activation.from
-						? getArticleForUrl(
-								window.navigation.activation.from.url
-						  )
+					win.navigation.activation.from
+						? getArticleForUrl( win.navigation.activation.from.url )
 						: null
 				);
 			}
