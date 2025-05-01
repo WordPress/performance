@@ -25,6 +25,15 @@ const config = {
 		'/dist',
 		'/**/*.min.js',
 	],
+	overrides: [
+		...( wpConfig?.overrides || [] ),
+		{
+			files: [ 'plugins/view-transitions/js/**/*.js' ],
+			rules: {
+				'jsdoc/no-undefined-types': 'off',
+			},
+		},
+	],
 };
 
 module.exports = config;
