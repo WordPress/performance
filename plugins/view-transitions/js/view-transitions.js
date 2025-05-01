@@ -1,5 +1,4 @@
 /**
- * @typedef {import("./types.ts").ExtendedWindow} ExtendedWindow
  * @typedef {import("./types.ts").ViewTransitionsConfig} ViewTransitionsConfig
  * @typedef {import("./types.ts").InitViewTransitionsFunction} InitViewTransitionsFunction
  * @typedef {import("./types.ts").PageSwapListenerFunction} PageSwapListenerFunction
@@ -7,21 +6,14 @@
  */
 
 /**
- * Window reference to reduce size when script is minified.
- *
- * @type {ExtendedWindow}
- */
-const win = window;
-
-/**
  * Initializes view transitions for the current URL.
  *
  * @type {InitViewTransitionsFunction}
  * @param {ViewTransitionsConfig} config - The view transitions configuration.
  */
-win.plvtInitViewTransitions = ( config ) => {
-	if ( ! win.navigation || ! ( 'CSSViewTransitionRule' in win ) ) {
-		win.console.warn(
+window.plvtInitViewTransitions = ( config ) => {
+	if ( ! window.navigation || ! ( 'CSSViewTransitionRule' in window ) ) {
+		window.console.warn(
 			'View transitions not loaded as the browser is lacking support.'
 		);
 		return;
@@ -135,7 +127,7 @@ win.plvtInitViewTransitions = ( config ) => {
 	 * @type {PageSwapListenerFunction}
 	 * @param {PageSwapEvent} event - Event fired as the previous URL is about to unload.
 	 */
-	win.addEventListener(
+	window.addEventListener(
 		'pageswap',
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
@@ -170,7 +162,7 @@ win.plvtInitViewTransitions = ( config ) => {
 	 * @type {PageRevealListenerFunction}
 	 * @param {PageRevealEvent} event - Event fired as the new URL being navigated to is loaded.
 	 */
-	win.addEventListener(
+	window.addEventListener(
 		'pagereveal',
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
@@ -186,9 +178,9 @@ win.plvtInitViewTransitions = ( config ) => {
 				) {
 					viewTransitionEntries = getViewTransitionEntries(
 						document.body,
-						win.navigation.activation.from
+						window.navigation.activation.from
 							? getArticleForUrl(
-									win.navigation.activation.from.url
+									window.navigation.activation.from.url
 							  )
 							: null
 					);

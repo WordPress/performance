@@ -8,13 +8,14 @@ export type InitViewTransitionsFunction = (
 	config: ViewTransitionsConfig
 ) => void;
 
-export type ExtendedWindow = Window &
-	typeof globalThis & {
+declare global {
+	interface Window {
 		plvtInitViewTransitions?: InitViewTransitionsFunction;
 		navigation?: {
 			activation: NavigationActivation;
 		};
-	};
+	}
+}
 
 export type PageSwapListenerFunction = ( event: PageSwapEvent ) => void;
 export type PageRevealListenerFunction = ( event: PageRevealEvent ) => void;
