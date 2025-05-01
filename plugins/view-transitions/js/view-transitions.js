@@ -135,31 +135,34 @@ win.plvtInitViewTransitions = ( config ) => {
 	 * @type {PageSwapListenerFunction}
 	 * @param {PageSwapEvent} event - Event fired as the previous URL is about to unload.
 	 */
-	win.addEventListener( 'pageswap', ( event ) => {
-		if ( event.viewTransition ) {
-			let viewTransitionEntries;
-			if ( document.body.classList.contains( 'single' ) ) {
-				viewTransitionEntries = getViewTransitionEntries(
-					document.body,
-					getArticle()
-				);
-			} else if (
-				document.body.classList.contains( 'home' ) ||
-				document.body.classList.contains( 'archive' )
-			) {
-				viewTransitionEntries = getViewTransitionEntries(
-					document.body,
-					getArticleForUrl( event.activation.entry.url )
-				);
-			}
-			if ( viewTransitionEntries ) {
-				setTemporaryViewTransitionNames(
-					viewTransitionEntries,
-					event.viewTransition.finished
-				);
+	win.addEventListener(
+		'pageswap',
+		( /** @type {PageSwapEvent} */ event ) => {
+			if ( event.viewTransition ) {
+				let viewTransitionEntries;
+				if ( document.body.classList.contains( 'single' ) ) {
+					viewTransitionEntries = getViewTransitionEntries(
+						document.body,
+						getArticle()
+					);
+				} else if (
+					document.body.classList.contains( 'home' ) ||
+					document.body.classList.contains( 'archive' )
+				) {
+					viewTransitionEntries = getViewTransitionEntries(
+						document.body,
+						getArticleForUrl( event.activation.entry.url )
+					);
+				}
+				if ( viewTransitionEntries ) {
+					setTemporaryViewTransitionNames(
+						viewTransitionEntries,
+						event.viewTransition.finished
+					);
+				}
 			}
 		}
-	} );
+	);
 
 	/**
 	 * Customizes view transition behavior on the URL that is being navigated to.
@@ -167,31 +170,36 @@ win.plvtInitViewTransitions = ( config ) => {
 	 * @type {PageRevealListenerFunction}
 	 * @param {PageRevealEvent} event - Event fired as the new URL being navigated to is loaded.
 	 */
-	win.addEventListener( 'pagereveal', ( event ) => {
-		if ( event.viewTransition ) {
-			let viewTransitionEntries;
-			if ( document.body.classList.contains( 'single' ) ) {
-				viewTransitionEntries = getViewTransitionEntries(
-					document.body,
-					getArticle()
-				);
-			} else if (
-				document.body.classList.contains( 'home' ) ||
-				document.body.classList.contains( 'archive' )
-			) {
-				viewTransitionEntries = getViewTransitionEntries(
-					document.body,
-					win.navigation.activation.from
-						? getArticleForUrl( win.navigation.activation.from.url )
-						: null
-				);
-			}
-			if ( viewTransitionEntries ) {
-				setTemporaryViewTransitionNames(
-					viewTransitionEntries,
-					event.viewTransition.ready
-				);
+	win.addEventListener(
+		'pagereveal',
+		( /** @type {PageRevealEvent} */ event ) => {
+			if ( event.viewTransition ) {
+				let viewTransitionEntries;
+				if ( document.body.classList.contains( 'single' ) ) {
+					viewTransitionEntries = getViewTransitionEntries(
+						document.body,
+						getArticle()
+					);
+				} else if (
+					document.body.classList.contains( 'home' ) ||
+					document.body.classList.contains( 'archive' )
+				) {
+					viewTransitionEntries = getViewTransitionEntries(
+						document.body,
+						win.navigation.activation.from
+							? getArticleForUrl(
+									win.navigation.activation.from.url
+							  )
+							: null
+					);
+				}
+				if ( viewTransitionEntries ) {
+					setTemporaryViewTransitionNames(
+						viewTransitionEntries,
+						event.viewTransition.ready
+					);
+				}
 			}
 		}
-	} );
+	);
 };
