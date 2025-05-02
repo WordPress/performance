@@ -62,10 +62,12 @@ function od_render_optimization_detective_page(): void {
 				<div class="od-prime-url-metrics-controls">
 					<button id="od-prime-url-metrics-control-button" class="button button-primary"><?php esc_html_e( 'Start', 'optimization-detective' ); ?></button>
 				</div>
-				<progress id="od-prime-url-metrics-progress" value="0" max="0"></progress>
-				<div class="od-prime-url-metrics-status">
-					<span id="od-prime-url-metrics-batch-status"><?php esc_html_e( 'Batch:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-batch">0</span></span>
-					<span id="od-prime-url-metrics-task-status"><?php esc_html_e( 'Task:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-task">0</span> / <span id="od-prime-url-metrics-total-tasks-in-batch">0</span></span>
+				<div id="od-prime-url-metrics-status-container" style="display: none;">
+					<progress id="od-prime-url-metrics-progress" value="0" max="0"></progress>
+					<div class="od-prime-url-metrics-status">
+						<span id="od-prime-url-metrics-batch-status"><?php esc_html_e( 'Batch:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-batch">0</span></span>
+						<span id="od-prime-url-metrics-task-status"><?php esc_html_e( 'Task:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-task">0</span> / <span id="od-prime-url-metrics-total-tasks-in-batch">0</span></span>
+					</div>
 				</div>
 				<div id="od-prime-url-metrics-iframe-container">
 					<iframe id="od-prime-url-metrics-iframe" src="" style="position: fixed; transform: scale(0.05); top: 0px; left: 0px; transform-origin: 0px 0px; pointer-events: none; opacity: 1e-06; z-index: -99999;"></iframe>

@@ -26,10 +26,34 @@ class OD_WP_CLI {
 	 *
 	 * ## OPTIONS
 	 *
-	 * [--cursor=<string>]
-	 * : JSON encoded cursor to paginate through the URLs.
+	 * [--provider-index=<int>]
+	 * : Index of the provider.
 	 * ---
-	 * default: []
+	 * default: 0
+	 * ---
+	 *
+	 * [--subtype-index=<int>]
+	 * : Index of the subtype.
+	 * ---
+	 * default: 0
+	 * ---
+	 *
+	 * [--page-number=<int>]
+	 * : Page number for pagination.
+	 * ---
+	 * default: 0
+	 * ---
+	 *
+	 * [--offset-within-page=<int>]
+	 * : Offset within the current page.
+	 * ---
+	 * default: 0
+	 * ---
+	 *
+	 * [--batch-size=<int>]
+	 * : Number of items to return.
+	 * ---
+	 * default: 10
 	 * ---
 	 *
 	 * [--format=<format>]
@@ -43,25 +67,25 @@ class OD_WP_CLI {
 	 *     # Get a batch of URLs that need to be primed
 	 *     $ wp od get_url_batch --format=json
 	 *
-	 *     # List 20 URL metrics in JSON format
-	 *     $ wp od get_url_batch --cursor='{"provider_index":0,"subtype_index":0,"page_number":1,"offset_within_page":0,"batch_size":10}' --format=json
+	 *     # List 20 URL metrics with specific pagination parameters
+	 *     $ wp od get_url_batch --provider-index=0 --subtype-index=0 --page-number=1 --offset-within-page=0 --batch-size=20 --format=json
 	 *
 	 * @param array<string>         $args       Command arguments.
 	 * @param array<string, string> $assoc_args Command associated arguments.
 	 */
 	public function get_url_batch( array $args, array $assoc_args ): void {
-		$cursor = array();
-		if ( isset( $assoc_args['cursor'] ) ) {
-			$cursor = json_decode( $assoc_args['cursor'], true );
+		$cursor = array(
+			'provider_index'     => isset( $assoc_args['provider-index'] ) ? (int) $assoc_args['provider-index'] : 0,
+			'subtype_index'      => isset( $assoc_args['subtype-index'] ) ? (int) $assoc_args['subtype-index'] : 0,
+			'page_number'        => isset( $assoc_args['page-number'] ) ? (int) $assoc_args['page-number'] : 0,
+			'offset_within_page' => isset( $assoc_args['offset-within-page'] ) ? (int) $assoc_args['offset-within-page'] : 0,
+			'batch_size'         => isset( $assoc_args['batch-size'] ) ? (int) $assoc_args['batch-size'] : 10,
+		);
 
-			if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $cursor ) ) {
-				$cursor = array();
-			}
-		}
 		$format = isset( $assoc_args['format'] ) ? $assoc_args['format'] : 'table';
 
 		if ( function_exists( '\\WP_CLI\\Utils\\format_items' ) ) {
-			WP_CLI\Utils\format_items( $format, array( od_generate_batch_for_url_metrics_priming_mode( $cursor ) ), array( 'batch', 'cursor', 'verificationToken', 'isDebug' ) );
+			WP_CLI\Utils\format_items( $format, array( od_generate_batch_for_url_metrics_priming_mode( $cursor ) ), array( 'urlGroups', 'cursor', 'verificationToken', 'isDebug' ) );
 		}
 	}
 }

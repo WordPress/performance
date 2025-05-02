@@ -25,6 +25,15 @@
 	);
 
 	/**
+	 * Container element displaying the status of URL metrics priming.
+	 *
+	 * @type {HTMLDivElement}
+	 */
+	const statusContainer = document.querySelector(
+		'div#od-prime-url-metrics-status-container'
+	);
+
+	/**
 	 * Iframe used to load pages for priming URL metrics.
 	 *
 	 * @type {HTMLIFrameElement}
@@ -73,6 +82,7 @@
 	if (
 		! controlButton ||
 		! progressBar ||
+		! statusContainer ||
 		! iframe ||
 		! iframeContainer ||
 		! currentBatchElement ||
@@ -207,6 +217,7 @@
 			if ( abortController.signal.aborted ) {
 				abortController = new AbortController();
 			}
+			statusContainer.style.display = 'block';
 			processBatches();
 		}
 	}
@@ -256,7 +267,11 @@
 				iframe.src = 'about:blank';
 				iframe.width = '0';
 				iframe.height = '0';
+				progressBar.value = 0;
 				currentBatchElement.textContent = '0';
+				currentTaskElement.textContent = '0';
+				totalTasksInBatchElement.textContent = '0';
+				statusContainer.style.display = 'none';
 			}
 		}
 	}

@@ -88,22 +88,30 @@ function checkEnvironment() {
 /**
  * Fetches the next batch of URLs.
  *
- * @param {import("../types.ts").URLBatchCursor} lastCursor - The cursor to fetch the next batch.
+ * @param {?import("../types.ts").URLBatchCursor} lastCursor - The cursor to fetch the next batch.
  * @return {?import("../types.ts").URLBatchResponse} - The batch of URLs.
  */
 function getBatch( lastCursor ) {
 	try {
-		const batchOutput = execSync(
-			`wp od get_url_batch --format=json --cursor='${ JSON.stringify(
-				lastCursor
-			) }'`
-		).toString();
+		let command = 'wp od get_url_batch --format=json';
+
+		if ( lastCursor ) {
+			command += ` --provider-index=${ lastCursor.provider_index || 0 }`;
+			command += ` --subtype-index=${ lastCursor.subtype_index || 0 }`;
+			command += ` --page-number=${ lastCursor.page_number || 0 }`;
+			command += ` --offset-within-page=${
+				lastCursor.offset_within_page || 0
+			}`;
+			command += ` --batch-size=${ lastCursor.batch_size || 10 }`;
+		}
+
+		const batchOutput = execSync( command ).toString();
 		const parsedBatch = JSON.parse( batchOutput );
 
 		if ( ! parsedBatch || parsedBatch.length === 0 ) {
 			throw new Error( 'Invalid batch data received.' );
 		}
-		return JSON.parse( batchOutput )[ 0 ];
+		return parsedBatch[ 0 ];
 	} catch ( error ) {
 		spinner.fail( 'Error occurred while fetching batch: ' + error.message );
 		abortController.abort();
@@ -315,7 +323,9 @@ async function init() {
 			const task = currentTasks[ i ];
 
 			spinner.start(
-				`Processing task ${ chalk.green(
+				`Processing batch ${ chalk.green(
+					currentBatchNumber
+				) } task ${ chalk.green(
 					i + 1 + '/' + currentTasks.length
 				) } for ${ chalk.blue( task.url ) } at ${ chalk.blue(
 					task.width + 'x' + task.height
