@@ -6,37 +6,65 @@
 	const { i18n, apiFetch } = wp;
 	const { __ } = i18n;
 
-	/** @type {HTMLButtonElement} */
+	/**
+	 * Button element that toggles processing state.
+	 *
+	 * @type {HTMLButtonElement}
+	 */
 	const controlButton = document.querySelector(
 		'button#od-prime-url-metrics-control-button'
 	);
 
-	/** @type {HTMLProgressElement} */
+	/**
+	 * Progress bar element displaying current task completion progress.
+	 *
+	 * @type {HTMLProgressElement}
+	 */
 	const progressBar = document.querySelector(
 		'progress#od-prime-url-metrics-progress'
 	);
 
-	/** @type {HTMLIFrameElement} */
+	/**
+	 * Iframe used to load pages for priming URL metrics.
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
 	const iframe = document.querySelector(
 		'iframe#od-prime-url-metrics-iframe'
 	);
 
-	/** @type {HTMLDivElement} */
+	/**
+	 * Container that holds the iframe.
+	 *
+	 * @type {HTMLDivElement}
+	 */
 	const iframeContainer = document.querySelector(
 		'div#od-prime-url-metrics-iframe-container'
 	);
 
-	/** @type {HTMLSpanElement} */
+	/**
+	 * Element that displays the current batch number being processed.
+	 *
+	 * @type {HTMLSpanElement}
+	 */
 	const currentBatchElement = document.querySelector(
 		'span#od-prime-url-metrics-current-batch'
 	);
 
-	/** @type {HTMLSpanElement} */
+	/**
+	 *  Element that displays the current task number being processed.
+	 *
+	 * @type {HTMLSpanElement}
+	 */
 	const currentTaskElement = document.querySelector(
 		'span#od-prime-url-metrics-current-task'
 	);
 
-	/** @type {HTMLSpanElement} */
+	/**
+	 * Element that displays the total number of tasks in the current batch.
+	 *
+	 * @type {HTMLSpanElement}
+	 */
 	const totalTasksInBatchElement = document.querySelector(
 		'span#od-prime-url-metrics-total-tasks-in-batch'
 	);
@@ -54,21 +82,95 @@
 		return;
 	}
 
-	// Initialize state variables.
+	/**
+	 * Flag indicating whether priming is currently in progress.
+	 *
+	 * @type {boolean}
+	 */
 	let isProcessing = false;
+
+	/**
+	 * Indicates whether more batches are available for processing.
+	 *
+	 * @type {boolean}
+	 */
 	let isNextBatchAvailable = true;
-	let cursor = {};
+
+	/**
+	 * Pagination cursor for retrieving the next batch of URLs.
+	 *
+	 * @type {?import("./types.ts").URLBatchCursor}
+	 */
+	let cursor = null;
+
+	/**
+	 * Flag indicating if debug mode is enabled.
+	 *
+	 * @type {boolean}
+	 */
 	let isDebug = false;
+
+	/**
+	 * Token used for verifying REST API requests server side.
+	 *
+	 * @type {string}
+	 */
 	let verificationToken = '';
+
+	/**
+	 * Currently active batch of data from the REST API.
+	 *
+	 * @type {?import("./types.ts").URLBatchResponse}
+	 */
 	let currentBatch = null;
+
+	/**
+	 * Array of URL priming tasks extracted from the current batch.
+	 *
+	 * @type {import("./types.ts").URLPrimingTask[]}
+	 */
 	let currentTasks = [];
+
+	/**
+	 * Index of the currently executing task in the batch.
+	 *
+	 * @type {number}
+	 */
 	let currentTaskIndex = 0;
+
+	/**
+	 * Running count of how many batches have been processed.
+	 *
+	 * @type {number}
+	 */
 	let currentBatchNumber = 0;
+
+	/**
+	 * Flag indicating whether the tab/window is hidden.
+	 *
+	 * @type {boolean}
+	 */
 	let isTabHidden = false;
+
+	/**
+	 * AbortController instance to support aborting ongoing task.
+	 *
+	 * @type {AbortController}
+	 */
 	let abortController = new AbortController();
+
+	/**
+	 * Prefix which is prepended to messages logged to the console while in priming mode.
+	 *
+	 * @type {string}
+	 */
 	const consoleLogPrefix = '[Optimization Detective Priming Mode]';
 
-	// Create a ResizeObserver to fit the iframe when iframe resizes.
+	/**
+	 * ResizeObserver instance that adjusts iframe scale within container.
+	 *
+	 * @type {ResizeObserver}
+	 */
 	const iframeObserver = new ResizeObserver( fitIframe );
 	iframeObserver.observe( iframe );
 
@@ -83,11 +185,11 @@
 	}
 
 	/**
-	 * Toggles the processing state.
+	 * Toggles the processing state of the priming task.
 	 */
 	function toggleProcessing() {
 		if ( isProcessing ) {
-			// Pause processing
+			// Pause processing.
 			isProcessing = false;
 			controlButton.textContent = __(
 				'Resume',
@@ -98,7 +200,7 @@
 				abortController.abort();
 			}
 		} else {
-			// Start/resume processing
+			// Start/resume processing.
 			isProcessing = true;
 			controlButton.textContent = __( 'Pause', 'optimization-detective' );
 			controlButton.classList.add( 'updating-message' );
@@ -110,7 +212,7 @@
 	}
 
 	/**
-	 * Main processing controller function.
+	 * Processes batches of URL priming tasks.
 	 */
 	async function processBatches() {
 		try {
@@ -135,7 +237,7 @@
 				}
 			}
 		} catch ( error ) {
-			if ( ! isTabHidden && 'Task Aborted' !== error.message ) {
+			if ( ! isTabHidden && ! abortController.signal.aborted ) {
 				isProcessing = false;
 				controlButton.textContent = __(
 					'Click to retry',
@@ -169,7 +271,7 @@
 		);
 		currentBatch = await getBatch( cursor );
 
-		if ( ! currentBatch.batch.length ) {
+		if ( ! currentBatch.urlGroups.length ) {
 			isNextBatchAvailable = false;
 			return;
 		}
@@ -180,14 +282,14 @@
 		// Initialize batch state.
 		verificationToken = currentBatch.verificationToken;
 		isDebug = currentBatch.isDebug;
-		currentTasks = flattenBatchToTasks( currentBatch );
+		currentTasks = flattenBatchToTasks( currentBatch.urlGroups );
 		currentTaskIndex = 0;
 
 		// Update UI for new batch.
 		progressBar.max = currentTasks.length;
-		progressBar.value = 0;
+		progressBar.value = currentTaskIndex + 1;
 		totalTasksInBatchElement.textContent = currentTasks.length.toString();
-		currentTaskElement.textContent = '0';
+		currentTaskElement.textContent = ( currentTaskIndex + 1 ).toString();
 		controlButton.textContent = __( 'Pause', 'optimization-detective' );
 	}
 
@@ -203,57 +305,54 @@
 				);
 			} catch ( error ) {
 				log( error.message );
-				if ( 'Task Aborted' === error.message ) {
+				if ( abortController.signal.aborted ) {
 					throw error;
 				}
-			} finally {
-				currentTaskIndex++;
-				progressBar.value = currentTaskIndex;
-				currentTaskElement.textContent = currentTaskIndex.toString();
 			}
+			currentTaskIndex++;
+			progressBar.value = currentTaskIndex + 1;
+			currentTaskElement.textContent = (
+				currentTaskIndex + 1
+			).toString();
 		}
 	}
 
 	/**
-	 * Flattens the batch to tasks.
+	 * Flattens the url groups to tasks.
 	 *
-	 * @param {Object} batch - The batch to flatten.
-	 * @return {Array<{ url: string, width: number, height: number }>} - The flattened tasks.
+	 * @param {import("./types.ts").URLGroup[]} urlGroups - The url groups to flatten.
+	 * @return {import("./types.ts").URLPrimingTask[]} - The flattened tasks.
 	 */
-	function flattenBatchToTasks( batch ) {
-		const tasks = [];
-		for ( const url of batch.batch ) {
-			for ( const breakpoint of url.breakpoints ) {
-				tasks.push( {
-					url: url.url,
-					width: breakpoint.width,
-					height: breakpoint.height,
-				} );
-			}
-		}
-		return tasks;
+	function flattenBatchToTasks( urlGroups ) {
+		return urlGroups.flatMap( ( urlGroup ) =>
+			urlGroup.breakpoints.map( ( breakpoint ) => ( {
+				url: urlGroup.url,
+				width: breakpoint.width,
+				height: breakpoint.height,
+			} ) )
+		);
 	}
 
 	/**
-	 * Fetches the next batch of URLs.
+	 * Fetches the next batch of URLs for metric priming.
 	 *
-	 * @param {Object} lastCursor - The cursor to fetch the next batch.
-	 * @return {Promise<Object>} - The promise that resolves to the batch of URLs.
+	 * @param {?import("./types.ts").URLBatchCursor} lastCursor - The pagination cursor from the last batch or null for the first batch.
+	 * @return {Promise<import("./types.ts").URLBatchResponse>} - Resolves with the next batch of URLs and metadata.
 	 */
+
 	async function getBatch( lastCursor ) {
-		const response = await apiFetch( {
+		return await apiFetch( {
 			path: '/optimization-detective/v1/prime-urls',
 			method: 'POST',
 			data: { cursor: lastCursor },
 		} );
-		return response;
 	}
 
 	/**
 	 * Loads the iframe and waits for the message.
 	 *
-	 * @param {{ url: string, width: number, height: number }} task   - The breakpoint to set for the iframe.
-	 * @param {AbortSignal}                                    signal - The signal to abort the task.
+	 * @param {import("./types.ts").URLPrimingTask} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                         signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	function processTask( task, signal ) {

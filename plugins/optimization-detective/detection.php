@@ -243,7 +243,7 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
  * @access private
  */
 function od_register_rest_url_metric_priming_endpoint(): void {
-	$endpoint_controller = new OD_REST_URL_Metrics_Priming_Endpoint();
+	$endpoint_controller = new OD_REST_URL_Metrics_Priming_Mode_Endpoint();
 	register_rest_route(
 		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,
 		$endpoint_controller::PRIME_URLS_ROUTE,

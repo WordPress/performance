@@ -61,7 +61,7 @@ class OD_WP_CLI {
 		$format = isset( $assoc_args['format'] ) ? $assoc_args['format'] : 'table';
 
 		if ( function_exists( '\\WP_CLI\\Utils\\format_items' ) ) {
-			WP_CLI\Utils\format_items( $format, array( od_generate_final_batch_urls( $cursor ) ), array( 'batch', 'cursor', 'verificationToken', 'isDebug' ) );
+			WP_CLI\Utils\format_items( $format, array( od_generate_batch_for_url_metrics_priming_mode( $cursor ) ), array( 'batch', 'cursor', 'verificationToken', 'isDebug' ) );
 		}
 	}
 }

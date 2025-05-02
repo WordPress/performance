@@ -1,5 +1,5 @@
 /**
- * Helper script for the Priming URL Metrics in block editor.
+ * Helper script for the Priming URL Metrics in classic editor.
  */
 
 /* global odPrimeURLMetricsClassicEditor */
@@ -8,19 +8,92 @@
 	if ( 'undefined' === typeof odPrimeURLMetricsClassicEditor ) {
 		return;
 	}
+
+	/**
+	 * Permalink URL for the current post in classic editor.
+	 *
+	 * @type {string}
+	 */
 	const permalink = odPrimeURLMetricsClassicEditor.permalink;
+
 	// @ts-ignore
 	const { apiFetch } = wp;
 
+	/**
+	 * Flag indicating whether URL priming is currently in progress.
+	 *
+	 * @type {boolean}
+	 */
 	let isProcessing = false;
+
+	/**
+	 * Token used for verifying REST API requests server side.
+	 *
+	 * @type {string}
+	 */
 	let verificationToken = '';
+
+	/**
+	 * Array of viewport breakpoint objects defining dimensions.
+	 *
+	 * @type {import("./types.ts").ViewportBreakpoint[]}
+	 */
 	let breakpoints = [];
+
+	/**
+	 * Queue of URL priming tasks generated from breakpoints.
+	 *
+	 * @type {import("./types.ts").URLPrimingTask[]}
+	 */
 	let currentTasks = [];
+
+	/**
+	 * Index of the current task within currentTasks being processed.
+	 *
+	 * @type {number}
+	 */
 	let currentTaskIndex = 0;
+
+	/**
+	 * Flag indicating whether the document tab/window is hidden.
+	 *
+	 * @type {boolean}
+	 */
 	let isTabHidden = false;
+
+	/**
+	 * AbortController instance to support aborting ongoing task.
+	 *
+	 * @type {AbortController}
+	 */
 	let abortController = new AbortController();
+
+	/**
+	 * Prefix which is prepended to messages logged to the console while in priming mode.
+	 *
+	 * @type {string}
+	 */
 	const consoleLogPrefix = '[Optimization Detective Priming Mode]';
 
+	/**
+	 * Button element for publishing, allowing page leave after click.
+	 *
+	 * @type {HTMLInputElement}
+	 */
+	const updateButton = document.querySelector( 'input#publish' );
+
+	/**
+	 * Flag that indicates if navigation away from page is allowed.
+	 *
+	 * @type {boolean}
+	 */
+	let allowLeavingPage = false;
+
+	/**
+	 * Hidden iframe element used to load pages for metric priming.
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
 	iframe.style.position = 'fixed';
@@ -77,7 +150,7 @@
 					);
 				} catch ( error ) {
 					log( error );
-					if ( 'Task Aborted' === error.message ) {
+					if ( abortController.signal.aborted ) {
 						throw error;
 					}
 				}
@@ -92,8 +165,8 @@
 	/**
 	 * Loads the iframe and waits for the message.
 	 *
-	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
-	 * @param {AbortSignal}                                  signal - The signal to abort the task.
+	 * @param {import("./types.ts").URLPrimingTask} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                         signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	function processTask( task, signal ) {
@@ -210,7 +283,7 @@
 	 * @param {BeforeUnloadEvent} event - The beforeunload event
 	 */
 	function handleBeforeUnload( event ) {
-		if ( isProcessing ) {
+		if ( isProcessing && ! allowLeavingPage ) {
 			event.preventDefault();
 		}
 	}
@@ -224,6 +297,9 @@
 	document.addEventListener( 'DOMContentLoaded', processTasks );
 	document.addEventListener( 'visibilitychange', handleVisibilityChange );
 	window.addEventListener( 'beforeunload', handleBeforeUnload );
+	updateButton.addEventListener( 'click', () => {
+		allowLeavingPage = true;
+	} );
 
 	// @ts-ignore
 } )( odPrimeURLMetricsClassicEditor );

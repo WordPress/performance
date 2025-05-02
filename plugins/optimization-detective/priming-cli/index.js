@@ -88,8 +88,8 @@ function checkEnvironment() {
 /**
  * Fetches the next batch of URLs.
  *
- * @param {Object} lastCursor - The cursor to fetch the next batch.
- * @return {?Object} - The batch of URLs.
+ * @param {import("../types.ts").URLBatchCursor} lastCursor - The cursor to fetch the next batch.
+ * @return {?import("../types.ts").URLBatchResponse} - The batch of URLs.
  */
 function getBatch( lastCursor ) {
 	try {
@@ -112,32 +112,28 @@ function getBatch( lastCursor ) {
 }
 
 /**
- * Flattens the batch into individual tasks.
+ * Flattens the url groups to tasks.
  *
- * @param {Object} batch - The batch to flatten.
- * @return {Array<{ url: string, width: number, height: number }>} The list of tasks.
+ * @param {import("../types.ts").URLGroup[]} urlGroups - The url groups to flatten.
+ * @return {import("../types.ts").URLPrimingTask[]} - The flattened tasks.
  */
-function flattenBatchToTasks( batch ) {
-	const tasks = [];
-	for ( const urlObj of batch.batch ) {
-		for ( const breakpoint of urlObj.breakpoints ) {
-			tasks.push( {
-				url: urlObj.url,
-				width: breakpoint.width,
-				height: breakpoint.height,
-			} );
-		}
-	}
-	return tasks;
+function flattenBatchToTasks( urlGroups ) {
+	return urlGroups.flatMap( ( urlGroup ) =>
+		urlGroup.breakpoints.map( ( breakpoint ) => ( {
+			url: urlGroup.url,
+			width: breakpoint.width,
+			height: breakpoint.height,
+		} ) )
+	);
 }
 
 /**
  * Processes a single task using Puppeteer.
  *
- * @param {Page}                                           page              - The Puppeteer page to use.
- * @param {{ url: string, width: number, height: number }} task              - The task parameters.
- * @param {string}                                         verificationToken - The verification token.
- * @param {AbortSignal}                                    abortSignal       - The abort signal.
+ * @param {Page}                                 page              - The Puppeteer page to use.
+ * @param {import("../types.ts").URLPrimingTask} task              - The task parameters.
+ * @param {string}                               verificationToken - The verification token.
+ * @param {AbortSignal}                          abortSignal       - The abort signal.
  * @return {Promise<void>}
  */
 async function processTask( page, task, verificationToken, abortSignal ) {
@@ -269,9 +265,9 @@ async function init() {
 	/**
 	 * Cursor object to track position in pagination when fetching URL batches.
 	 *
-	 * @type {Object}
+	 * @type {import("../types.ts").URLBatchCursor}
 	 */
-	let cursor = {};
+	let cursor = null;
 
 	/**
 	 * Counter tracking the number of URL batches processed so far.
@@ -298,8 +294,8 @@ async function init() {
 		// If no URLs remain in the batch, finish processing.
 		if (
 			null === currentBatch ||
-			! currentBatch.batch ||
-			currentBatch.batch.length === 0
+			! currentBatch.urlGroups ||
+			currentBatch.urlGroups.length === 0
 		) {
 			isNextBatchAvailable = false;
 			break;
@@ -309,7 +305,7 @@ async function init() {
 
 		spinner.text = `Batch ${ currentBatchNumber } fetched successfully.`;
 
-		const currentTasks = flattenBatchToTasks( currentBatch );
+		const currentTasks = flattenBatchToTasks( currentBatch.urlGroups );
 
 		// Process each task sequentially.
 		for ( let i = 0; i < currentTasks.length; i++ ) {

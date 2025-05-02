@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API integration for the plugin: OD_REST_URL_Metrics_Priming_Endpoint.
+ * REST API integration for the plugin: OD_REST_URL_Metrics_Priming_Mode_Endpoint.
  *
  * @package optimization-detective
  * @since n.e.x.t
@@ -13,11 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * OD_REST_URL_Metrics_Priming_Endpoint class
+ * OD_REST_URL_Metrics_Priming_Mode_Endpoint class
  *
  * @since n.e.x.t
  */
-final class OD_REST_URL_Metrics_Priming_Endpoint {
+final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 
 	/**
 	 * Route for getting URLs that need to be primed.
@@ -133,7 +133,7 @@ final class OD_REST_URL_Metrics_Priming_Endpoint {
 	 */
 	public function handle_generate_batch_urls_request( WP_REST_Request $request ): WP_REST_Response {
 		$cursor = $request->get_param( 'cursor' );
-		return new WP_REST_Response( od_generate_final_batch_urls( $cursor ) );
+		return new WP_REST_Response( od_generate_batch_for_url_metrics_priming_mode( $cursor ) );
 	}
 
 	/**
@@ -157,11 +157,6 @@ final class OD_REST_URL_Metrics_Priming_Endpoint {
 	 * @return WP_REST_Response Response.
 	 */
 	public function handle_get_verification_token_request(): WP_REST_Response {
-		$verification_token = get_transient( 'od_prime_url_metrics_verification_token' );
-		if ( false === $verification_token ) {
-			$verification_token = wp_generate_uuid4();
-			set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
-		}
-		return new WP_REST_Response( $verification_token );
+		return new WP_REST_Response( od_get_verification_token_for_priming_mode() );
 	}
 }

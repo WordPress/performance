@@ -7,16 +7,74 @@
 	// @ts-ignore
 	const { apiFetch } = wp;
 
+	/**
+	 * Flag indicating whether URL priming is currently in progress.
+	 *
+	 * @type {boolean}
+	 */
 	let isProcessing = false;
+
+	/**
+	 * Token used for verifying REST API requests server side.
+	 *
+	 * @type {string}
+	 */
 	let verificationToken = '';
+
+	/**
+	 * Array of breakpoint objects defining viewport dimensions.
+	 *
+	 * @type {import("./types.ts").ViewportBreakpoint[]}
+	 */
 	let breakpoints = [];
+
+	/**
+	 * Queue of URL priming tasks generated from breakpoints.
+	 *
+	 * @type {import("./types.ts").URLPrimingTask[]}
+	 */
 	let currentTasks = [];
+
+	/**
+	 * Index of the current task within currentTasks being processed.
+	 *
+	 * @type {number}
+	 */
 	let currentTaskIndex = 0;
+
+	/**
+	 * Flag indicating whether the document tab/window is hidden.
+	 *
+	 * @type {boolean}
+	 */
 	let isTabHidden = false;
+
+	/**
+	 * AbortController instance to support aborting ongoing task.
+	 *
+	 * @type {AbortController}
+	 */
 	let abortController = new AbortController();
+
+	/**
+	 * Promise tracking the processing of tasks to ensure sequential execution.
+	 *
+	 * @type {?Promise<void>}
+	 */
 	let processTasksPromise = null;
+
+	/**
+	 * Prefix which is prepended to messages logged to the console while in priming mode.
+	 *
+	 * @type {string}
+	 */
 	const consoleLogPrefix = '[Optimization Detective Priming Mode]';
 
+	/**
+	 * Hidden iframe element used to load pages for metric priming.
+	 *
+	 * @type {HTMLIFrameElement}
+	 */
 	const iframe = document.createElement( 'iframe' );
 	iframe.id = 'od-prime-url-metrics-iframe';
 	iframe.style.position = 'fixed';
@@ -74,7 +132,7 @@
 					);
 				} catch ( error ) {
 					log( error.message );
-					if ( 'Task Aborted' === error.message ) {
+					if ( abortController.signal.aborted ) {
 						throw error;
 					}
 				}
@@ -89,8 +147,8 @@
 	/**
 	 * Loads the iframe and waits for the message.
 	 *
-	 * @param {{url: string, width: number, height: number}} task   - The breakpoint to set for the iframe.
-	 * @param {AbortSignal}                                  signal - The signal to abort the task.
+	 * @param {import("./types.ts").URLPrimingTask} task   - The breakpoint to set for the iframe.
+	 * @param {AbortSignal}                         signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function processTask( task, signal ) {
@@ -179,29 +237,6 @@
 		} );
 	}
 
-	// Listen for post save/publish events.
-	let wasSaving = false;
-	subscribe( async () => {
-		const isSaving = select( 'core/editor' ).isSavingPost();
-		const isAutosaving = select( 'core/editor' ).isAutosavingPost();
-
-		// Trigger when saving transitions from true to false (save completed).
-		if ( wasSaving && ! isSaving && ! isAutosaving ) {
-			wasSaving = false;
-			if ( processTasksPromise ) {
-				if ( ! abortController.signal.aborted ) {
-					abortController.abort();
-				}
-				await processTasksPromise;
-				currentTaskIndex = 0;
-				abortController = new AbortController();
-			}
-			processTasksPromise = processTasks();
-		} else {
-			wasSaving = isSaving;
-		}
-	} );
-
 	/**
 	 * Handles visibility change events to pause/resume processing when tab/window visibility changes.
 	 */
@@ -234,6 +269,29 @@
 			event.preventDefault();
 		}
 	}
+
+	// Listen for post save/publish events.
+	let wasSaving = false;
+	subscribe( async () => {
+		const isSaving = select( 'core/editor' ).isSavingPost();
+		const isAutosaving = select( 'core/editor' ).isAutosavingPost();
+
+		// Trigger when saving transitions from true to false (save completed).
+		if ( wasSaving && ! isSaving && ! isAutosaving ) {
+			wasSaving = false;
+			if ( processTasksPromise ) {
+				if ( ! abortController.signal.aborted ) {
+					abortController.abort();
+				}
+				await processTasksPromise;
+				currentTaskIndex = 0;
+				abortController = new AbortController();
+			}
+			processTasksPromise = processTasks();
+		} else {
+			wasSaving = isSaving;
+		}
+	} );
 
 	// Attach event listeners.
 	document.addEventListener( 'visibilitychange', handleVisibilityChange );
