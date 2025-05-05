@@ -63,9 +63,7 @@ test.describe( 'check accurate sizes', () => {
 
 		// Reload the page and wait for the image to load.
 		await page.goto( `/?p=${ postId }` );
-		const updatedImageElement = await page.waitForSelector(
-			`img.wp-image-${ media.id }`
-		);
+		const updatedImageElement = await page.getByAltText( filename );
 
 		const updatedImageSizes =
 			await updatedImageElement.getAttribute( 'sizes' );
