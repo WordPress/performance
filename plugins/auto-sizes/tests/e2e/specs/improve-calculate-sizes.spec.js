@@ -6,12 +6,13 @@ const path = require( 'path' );
 /**
  * WordPress dependencies
  */
-const { test } = require( '@wordpress/e2e-test-utils-playwright' );
+const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 
 test.describe( 'check accurate sizes', () => {
 	test.beforeAll( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( 'twentytwentyfour' );
 		await requestUtils.deactivatePlugin( 'enhanced-responsive-images' );
+		await requestUtils.deactivatePlugin( 'modern-image-formats' );
 		await requestUtils.deleteAllMedia();
 	} );
 
@@ -83,6 +84,6 @@ test.describe( 'check accurate sizes', () => {
 		const currentSrc = await updatedImageElement.evaluate( ( img ) =>
 			img instanceof HTMLImageElement ? img.currentSrc : null
 		);
-		currentSrc.endsWith( 'leaves-768x512.jpg' );
+		await expect( currentSrc ).toContain( 'leaves-768x512.jpg' );
 	} );
 } );
