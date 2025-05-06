@@ -15,6 +15,7 @@ on:
       - 'phpunit.xml.dist'
       - 'composer.json'
       - 'composer.lock'
+      - 'webpack.config.js'
   pull_request:
     # Only run if PHP-related files changed.
     paths:
@@ -26,6 +27,7 @@ on:
       - 'phpunit.xml.dist'
       - 'composer.json'
       - 'composer.lock'
+      - 'webpack.config.js'
     types:
       - opened
       - reopened

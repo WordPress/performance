@@ -35,128 +35,62 @@ const sharedConfig = {
 };
 
 // Store plugins that require build process.
-const pluginsWithBuild = [
-	'performance-lab',
-	'embed-optimizer',
-	'image-prioritizer',
-	'optimization-detective',
-	'web-worker-offloading',
-];
+const pluginsWithBuild = [ 'optimization-detective', 'web-worker-offloading' ];
 
 /**
- * Webpack Config: Performance Lab
+ * Webpack Config: Minify Plugin Assets
  *
  * @param {*} env Webpack environment
  * @return {Object} Webpack configuration
  */
-const performanceLab = ( env ) => {
-	if ( env.plugin && env.plugin !== 'performance-lab' ) {
+const minifyPluginAssets = ( env ) => {
+	if ( env.plugin && ! standalonePlugins.includes( env.plugin ) ) {
+		// eslint-disable-next-line no-console
+		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
+
 		return defaultBuildConfig;
 	}
 
-	const pluginDir = path.resolve( __dirname, 'plugins/performance-lab' );
+	const sourcePath = env.plugin
+		? path.resolve( __dirname, 'plugins', env.plugin )
+		: path.resolve( __dirname, 'plugins' );
 
 	return {
 		...sharedConfig,
-		name: 'performance-lab',
+		name: 'minify-plugin-assets',
 		plugins: [
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
-						from: `${ pluginDir }/includes/admin/plugin-activate-ajax.js`,
-						to: `${ pluginDir }/includes/admin/plugin-activate-ajax.min.js`,
-					},
-				],
-			} ),
-			new WebpackBar( {
-				name: 'Building Performance Lab Assets',
-				color: '#2196f3',
-			} ),
-		],
-	};
-};
-
-/**
- * Webpack Config: Embed Optimizer
- *
- * @param {*} env Webpack environment
- * @return {Object} Webpack configuration
- */
-const embedOptimizer = ( env ) => {
-	if ( env.plugin && env.plugin !== 'embed-optimizer' ) {
-		return defaultBuildConfig;
-	}
-
-	const pluginDir = path.resolve( __dirname, 'plugins/embed-optimizer' );
-
-	return {
-		...sharedConfig,
-		name: 'embed-optimizer',
-		plugins: [
-			new CopyWebpackPlugin( {
-				patterns: [
-					{
-						from: `${ pluginDir }/detect.js`,
-						to: `${ pluginDir }/detect.min.js`,
+						// NOTE: Automatically minifies JavaScript files with Terser during the copy process.
+						from: `${ sourcePath }/**/*.js`,
+						to: ( { absoluteFilename } ) =>
+							absoluteFilename.replace( /\.js$/, '.min.js' ),
+						// Exclude already-minified files and those in the build directory
+						globOptions: {
+							ignore: [ '**/build/**', '**/*.min.js' ],
+						},
+						// Prevents errors for plugins without JavaScript files.
+						noErrorOnMissing: true,
 					},
 					{
-						from: `${ pluginDir }/lazy-load.js`,
-						to: `${ pluginDir }/lazy-load.min.js`,
-					},
-				],
-			} ),
-			new WebpackBar( {
-				name: 'Building Embed Optimizer Assets',
-				color: '#2196f3',
-			} ),
-		],
-	};
-};
-
-/**
- * Webpack Config: Image Prioritizer
- *
- * @param {*} env Webpack environment
- * @return {Object} Webpack configuration
- */
-const imagePrioritizer = ( env ) => {
-	if ( env.plugin && env.plugin !== 'image-prioritizer' ) {
-		return defaultBuildConfig;
-	}
-
-	const pluginDir = path.resolve( __dirname, 'plugins/image-prioritizer' );
-
-	return {
-		...sharedConfig,
-		name: 'image-prioritizer',
-		plugins: [
-			new CopyWebpackPlugin( {
-				patterns: [
-					{
-						from: `${ pluginDir }/detect.js`,
-						to: `${ pluginDir }/detect.min.js`,
-					},
-					{
-						from: `${ pluginDir }/lazy-load-video.js`,
-						to: `${ pluginDir }/lazy-load-video.min.js`,
-					},
-					{
-						from: `${ pluginDir }/lazy-load-bg-image.js`,
-						to: `${ pluginDir }/lazy-load-bg-image.min.js`,
-					},
-					{
-						from: `${ pluginDir }/lazy-load-bg-image.css`,
-						to: `${ pluginDir }/lazy-load-bg-image.min.css`,
+						from: `${ sourcePath }/**/*.css`,
+						to: ( { absoluteFilename } ) =>
+							absoluteFilename.replace( /\.css$/, '.min.css' ),
 						transform: {
 							transformer: cssMinifyTransformer,
 							cache: false,
 						},
+						globOptions: {
+							ignore: [ '**/build/**', '**/*.min.css' ],
+						},
+						noErrorOnMissing: true,
 					},
 				],
 			} ),
 			new WebpackBar( {
-				name: 'Building Image Prioritizer Assets',
-				color: '#2196f3',
+				name: `Minifying Assets for ${ env.plugin ?? 'All Plugins' }`,
+				color: '#f5e0dc',
 			} ),
 		],
 	};
@@ -188,6 +122,7 @@ const optimizationDetective = ( env ) => {
 					{
 						from: `${ source }/dist/web-vitals.js`,
 						to: `${ destination }/build/web-vitals.js`,
+						// Ensures the file is copied without minification, preserving its original form.
 						info: { minimized: true },
 					},
 					{
@@ -202,10 +137,6 @@ const optimizationDetective = ( env ) => {
 							transformer: assetDataTransformer,
 							cache: false,
 						},
-					},
-					{
-						from: `${ destination }/detect.js`,
-						to: `${ destination }/detect.min.js`,
 					},
 				],
 			} ),
@@ -288,9 +219,12 @@ const buildPlugin = ( env ) => {
 	const buildDir = path.resolve( __dirname, 'build' );
 	const to = path.resolve( buildDir, env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
-	const dependencies = pluginsWithBuild.includes( env.plugin )
-		? [ `${ env.plugin }` ]
-		: [];
+	// Ensures minification and the plugin's build process (if defined) run before building the plugin.
+	const dependencies = [ 'minify-plugin-assets' ];
+
+	if ( pluginsWithBuild.includes( env.plugin ) ) {
+		dependencies.push( env.plugin );
+	}
 
 	return {
 		...sharedConfig,
@@ -343,9 +277,7 @@ const buildPlugin = ( env ) => {
 };
 
 module.exports = [
-	performanceLab,
-	embedOptimizer,
-	imagePrioritizer,
+	minifyPluginAssets,
 	optimizationDetective,
 	webWorkerOffloading,
 	buildPlugin,
