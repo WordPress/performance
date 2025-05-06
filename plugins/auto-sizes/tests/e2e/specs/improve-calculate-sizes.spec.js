@@ -69,17 +69,11 @@ test.describe( 'check accurate sizes', () => {
 		const updatedImageSizes =
 			await updatedImageElement.getAttribute( 'sizes' );
 
-		if ( imageSizes === updatedImageSizes ) {
-			throw new Error(
-				'Image sizes did not update after activating the plugin.'
-			);
-		}
+		expect( imageSizes ).not.toStrictEqual( updatedImageSizes );
 
-		if ( '(max-width: 620px) 100vw, 620px' !== updatedImageSizes ) {
-			throw new Error(
-				`Unexpected image sizes: ${ updatedImageSizes }. Expected: (max-width: 620px) 100vw, 620px`
-			);
-		}
+		expect( updatedImageSizes ).toStrictEqual(
+			'(max-width: 620px) 100vw, 620px'
+		);
 
 		const currentSrc = await updatedImageElement.evaluate( ( img ) =>
 			img instanceof HTMLImageElement ? img.currentSrc : null

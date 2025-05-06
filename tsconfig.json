@@ -10,7 +10,8 @@
   },
   "include": [
     "plugins/**/*.js",
-    "plugins/**/*.ts", "tools/**/*.ts",
+    "plugins/**/*.ts",
+    "tools/**/*.ts",
   ],
   "exclude": [
     "plugins/*/build/*"
