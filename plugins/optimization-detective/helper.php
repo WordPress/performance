@@ -176,7 +176,7 @@ function od_get_disabled_reasons(): array {
 }
 
 /**
- * Displays the HTML generator meta tag for the Optimization Detective plugin.
+ * Displays the HTML generator META tag for the Optimization Detective plugin.
  *
  * See {@see 'wp_head'}.
  *
@@ -203,7 +203,7 @@ function od_render_generator_meta_tag(): void {
  * @since 0.9.0
  * @access private
  *
- * @param string      $src_path Source path, relative to plugin root.
+ * @param string      $src_path Source path, relative to the plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.
  * @return string URL to script or stylesheet.
  *

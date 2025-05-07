@@ -84,7 +84,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the meta generator tag.
+	 * Test printing the META generator tag.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 */
@@ -98,7 +98,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test meta generator tag when query parameter is present.
+	 * Test META generator tag when query parameter is present.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 * @covers ::od_get_disabled_reasons
@@ -111,7 +111,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the meta generator tag when the REST API is not available.
+	 * Test printing the META generator tag when the REST API is not available.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 * @covers ::od_get_disabled_reasons

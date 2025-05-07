@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This is to implement #43258 in core.
  *
- * This is a hack which would eventually be replaced with something like this in wp-includes/template-loader.php:
+ * This is a hack that would eventually be replaced with something like this in wp-includes/template-loader.php:
  *
  *          $template = apply_filters( 'template_include', $template );
  *     +    ob_start( 'wp_template_output_buffer_callback' );
@@ -40,7 +40,7 @@ function od_buffer_output( $passthrough ) {
 	 * response as an HTML document, this would result in broken HTML processing.
 	 *
 	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
-	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any subsequent
+	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any later
 	 * processing while also emitting a _doing_it_wrong().
 	 *
 	 * The output buffer needs to be removable because WordPress calls wp_ob_end_flush_all() and then calls
@@ -52,13 +52,13 @@ function od_buffer_output( $passthrough ) {
 
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
-			// When the output is being cleaned (e.g. pending template is replaced with error page), do not send it through the filter.
+			// When the output is being cleaned (e.g. the pending template is replaced with an error page), do not send it through the filter.
 			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) !== 0 ) {
 				return $output;
 			}
 
 			/**
-			 * Filters the template output buffer prior to sending to the client.
+			 * Filters the template output buffer before sending it to the client.
 			 *
 			 * @since 0.1.0
 			 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_template_output_buffer

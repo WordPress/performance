@@ -50,7 +50,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$original = 'Hello World!';
 		$expected = '¡Hola Mundo!';
 
-		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
+		// To test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		ob_start();
 
@@ -88,7 +88,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$template_middle  = ', the middle';
 		$template_end     = ', and the end!';
 
-		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
+		// To test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		$initial_level = ob_get_level();
 		$this->assertTrue( ob_start() );
