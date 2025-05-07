@@ -112,7 +112,7 @@ function od_get_disabled_reasons(): array {
 		$disabled_flags['is_customize_preview'] = true;
 	}
 
-	// Disable for POST responses since since they cannot, by definition, be cached.
+	// Disable for POST responses since they cannot, by definition, be cached.
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
 		$disabled_flags['not_get_request'] = true;
 	}
