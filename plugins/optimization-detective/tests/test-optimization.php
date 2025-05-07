@@ -185,7 +185,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 					add_filter(
 						'od_can_optimize_response',
 						function ( $can_optimize, array $disabled_flags ): bool {
-							$expected_keys = array( 'is_search', 'is_embed', 'is_preview', 'is_customize_preview', 'not_get_request', 'no_cache_purge_post_id' );
+							$expected_keys = array( 'is_search', 'is_embed', 'is_preview', 'is_customize_preview', 'non_get_request', 'no_cache_purge_post_id' );
 							$this->assertCount( count( $expected_keys ), $disabled_flags );
 							foreach ( $expected_keys as $key ) {
 								$this->assertArrayHasKey( $key, $disabled_flags );
@@ -395,7 +395,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			'is_embed',
 			'is_preview',
 			'is_customize_preview',
-			'not_get_request',
+			'non_get_request',
 			'no_cache_purge_post_id',
 			'filter_disabled',
 			'rest_api_unavailable',

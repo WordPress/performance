@@ -71,7 +71,7 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
  *     is_embed?: string,
  *     is_preview?: string,
  *     is_customize_preview?: string,
- *     not_get_request?: string,
+ *     non_get_request?: string,
  *     no_cache_purge_post_id?: string,
  *     filter_disabled?: string,
  *     rest_api_unavailable?: string,
@@ -84,7 +84,7 @@ function od_get_disabled_reasons(): array {
 		'is_embed'               => false,
 		'is_preview'             => false,
 		'is_customize_preview'   => false,
-		'not_get_request'        => false,
+		'non_get_request'        => false,
 		'no_cache_purge_post_id' => false,
 	);
 
@@ -114,7 +114,7 @@ function od_get_disabled_reasons(): array {
 
 	// Disable for POST responses since they cannot, by definition, be cached.
 	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
-		$disabled_flags['not_get_request'] = true;
+		$disabled_flags['non_get_request'] = true;
 	}
 
 	// Disable when there is no post ID available for cache purging. Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
@@ -139,7 +139,7 @@ function od_get_disabled_reasons(): array {
 	 *     is_embed: bool,
 	 *     is_preview: bool,
 	 *     is_customize_preview: bool,
-	 *     not_get_request: bool,
+	 *     non_get_request: bool,
 	 *     no_cache_purge_post_id: bool
 	 * } $disabled_flags Flags indicating which conditions are disabling optimization.
 	 */
@@ -152,7 +152,7 @@ function od_get_disabled_reasons(): array {
 			'is_embed'               => __( 'Page is not optimized because it is an embed.', 'optimization-detective' ),
 			'is_preview'             => __( 'Page is not optimized because it is a preview.', 'optimization-detective' ),
 			'is_customize_preview'   => __( 'Page is not optimized because it is a customize preview.', 'optimization-detective' ),
-			'not_get_request'        => __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' ),
+			'non_get_request'        => __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' ),
 			'no_cache_purge_post_id' => __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' ),
 		);
 
