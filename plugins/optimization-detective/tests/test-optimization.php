@@ -177,6 +177,27 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected_has_filter' => true,
 			),
+			'search_enabled_by_filter_using_flags'  => array(
+				'set_up'              => static function (): string {
+					// This is needed because otherwise no_cache_purge_post_id will be true.
+					self::factory()->post->create( array( 'post_title' => 'foo' ) );
+
+					add_filter(
+						'od_can_optimize_response',
+						static function ( $can_optimize, array $disabled_flags ): bool {
+							if ( ! $can_optimize && $disabled_flags['is_search'] ) {
+								unset( $disabled_flags['is_search'] );
+								$can_optimize = count( array_filter( $disabled_flags ) ) === 0;
+							}
+							return $can_optimize;
+						},
+						10,
+						2
+					);
+					return home_url( '/?s=foo' );
+				},
+				'expected_has_filter' => true,
+			),
 			'home_disabled_by_get_param'            => array(
 				'set_up'              => static function (): string {
 					return home_url( '/?optimization_detective_disabled=1' );

@@ -214,7 +214,7 @@ add_filter( 'od_can_optimize_response', function( $can_optimize, array $disabled
         $can_optimize = count( array_filter( $disabled_flags ) ) === 0;
     }
     return $can_optimize;
-} );
+}, 10, 2 );
 ```
 
 Note that some conditions cannot be overridden by this filter. Even if the filter returns `true`, optimization will still be disabled when:
