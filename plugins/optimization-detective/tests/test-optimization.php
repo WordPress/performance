@@ -178,13 +178,20 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				'expected_has_filter' => true,
 			),
 			'search_enabled_by_filter_using_flags'  => array(
-				'set_up'              => static function (): string {
+				'set_up'              => function (): string {
 					// This is needed because otherwise no_cache_purge_post_id will be true.
 					self::factory()->post->create( array( 'post_title' => 'foo' ) );
 
 					add_filter(
 						'od_can_optimize_response',
-						static function ( $can_optimize, array $disabled_flags ): bool {
+						function ( $can_optimize, array $disabled_flags ): bool {
+							$expected_keys = array( 'is_search', 'is_embed', 'is_preview', 'is_customize_preview', 'not_get_request', 'no_cache_purge_post_id' );
+							$this->assertCount( count( $expected_keys ), $disabled_flags );
+							foreach ( $expected_keys as $key ) {
+								$this->assertArrayHasKey( $key, $disabled_flags );
+								$this->assertIsBool( $disabled_flags[ $key ] );
+							}
+
 							if ( ! $can_optimize && $disabled_flags['is_search'] ) {
 								unset( $disabled_flags['is_search'] );
 								$can_optimize = count( array_filter( $disabled_flags ) ) === 0;
@@ -382,6 +389,27 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$url = $set_up();
 		$this->go_to( $url );
 		$this->assertSame( $expected, od_can_optimize_response() );
+		$disabled_reasons = od_get_disabled_reasons();
+		$possible_keys    = array(
+			'is_search',
+			'is_embed',
+			'is_preview',
+			'is_customize_preview',
+			'not_get_request',
+			'no_cache_purge_post_id',
+			'filter_disabled',
+			'rest_api_unavailable',
+			'query_param_disabled',
+		);
+		foreach ( $disabled_reasons as $key => $reason ) {
+			$this->assertContains( $key, $possible_keys );
+			$this->assertIsString( $reason );
+		}
+		if ( $expected ) {
+			$this->assertCount( 0, $disabled_reasons );
+		} else {
+			$this->assertNotCount( 0, $disabled_reasons );
+		}
 	}
 
 	/**
