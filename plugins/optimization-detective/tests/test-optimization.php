@@ -50,7 +50,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$original = 'Hello World!';
 		$expected = '¡Hola Mundo!';
 
-		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
+		// To test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		ob_start();
 
@@ -88,7 +88,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$template_middle  = ', the middle';
 		$template_end     = ', and the end!';
 
-		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
+		// To test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		$initial_level = ob_get_level();
 		$this->assertTrue( ob_start() );
@@ -177,6 +177,34 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected_has_filter' => true,
 			),
+			'search_enabled_by_filter_using_flags'  => array(
+				'set_up'              => function (): string {
+					// This is needed because otherwise no_cache_purge_post_id will be true.
+					self::factory()->post->create( array( 'post_title' => 'foo' ) );
+
+					add_filter(
+						'od_can_optimize_response',
+						function ( $can_optimize, array $disabled_flags ): bool {
+							$expected_keys = array( 'is_search', 'is_embed', 'is_preview', 'is_customize_preview', 'non_get_request', 'no_cache_purge_post_id' );
+							$this->assertCount( count( $expected_keys ), $disabled_flags );
+							foreach ( $expected_keys as $key ) {
+								$this->assertArrayHasKey( $key, $disabled_flags );
+								$this->assertIsBool( $disabled_flags[ $key ] );
+							}
+
+							if ( ! $can_optimize && $disabled_flags['is_search'] ) {
+								unset( $disabled_flags['is_search'] );
+								$can_optimize = count( array_filter( $disabled_flags ) ) === 0;
+							}
+							return $can_optimize;
+						},
+						10,
+						2
+					);
+					return home_url( '/?s=foo' );
+				},
+				'expected_has_filter' => true,
+			),
 			'home_disabled_by_get_param'            => array(
 				'set_up'              => static function (): string {
 					return home_url( '/?optimization_detective_disabled=1' );
@@ -199,7 +227,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_od_maybe_add_template_output_buffer_filter
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
-	 * @covers ::od_can_optimize_response
+	 * @covers ::od_get_disabled_reasons
 	 * @covers ::od_is_rest_api_unavailable
 	 */
 	public function test_od_maybe_add_template_output_buffer_filter( Closure $set_up, bool $expected_has_filter ): void {
@@ -281,6 +309,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected' => false,
 			),
+			'post_embed_as_anonymous'              => array(
+				'set_up'   => static function (): string {
+					$post_id = self::factory()->post->create( array( 'post_title' => 'Hello' ) );
+					return (string) get_post_embed_url( $post_id );
+				},
+				'expected' => false,
+			),
 			'home_customizer_preview_as_anonymous' => array(
 				'set_up'   => static function (): string {
 					global $wp_customize;
@@ -341,6 +376,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * Test od_can_optimize_response().
 	 *
 	 * @covers ::od_can_optimize_response
+	 * @covers ::od_get_disabled_reasons
 	 * @covers ::od_get_cache_purge_post_id
 	 *
 	 * @dataProvider data_provider_test_od_can_optimize_response
@@ -353,6 +389,27 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$url = $set_up();
 		$this->go_to( $url );
 		$this->assertSame( $expected, od_can_optimize_response() );
+		$disabled_reasons = od_get_disabled_reasons();
+		$possible_keys    = array(
+			'is_search',
+			'is_embed',
+			'is_preview',
+			'is_customize_preview',
+			'non_get_request',
+			'no_cache_purge_post_id',
+			'filter_disabled',
+			'rest_api_unavailable',
+			'query_param_disabled',
+		);
+		foreach ( $disabled_reasons as $key => $reason ) {
+			$this->assertContains( $key, $possible_keys );
+			$this->assertIsString( $reason );
+		}
+		if ( $expected ) {
+			$this->assertCount( 0, $disabled_reasons );
+		} else {
+			$this->assertNotCount( 0, $disabled_reasons );
+		}
 	}
 
 	/**

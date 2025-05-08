@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This is to implement #43258 in core.
  *
- * This is a hack which would eventually be replaced with something like this in wp-includes/template-loader.php:
+ * This is a hack that would eventually be replaced with something like this in wp-includes/template-loader.php:
  *
  *          $template = apply_filters( 'template_include', $template );
  *     +    ob_start( 'wp_template_output_buffer_callback' );
@@ -40,7 +40,7 @@ function od_buffer_output( $passthrough ) {
 	 * response as an HTML document, this would result in broken HTML processing.
 	 *
 	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
-	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any subsequent
+	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any later
 	 * processing while also emitting a _doing_it_wrong().
 	 *
 	 * The output buffer needs to be removable because WordPress calls wp_ob_end_flush_all() and then calls
@@ -52,13 +52,13 @@ function od_buffer_output( $passthrough ) {
 
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
-			// When the output is being cleaned (e.g. pending template is replaced with error page), do not send it through the filter.
+			// When the output is being cleaned (e.g. the pending template is replaced with an error page), do not send it through the filter.
 			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) !== 0 ) {
 				return $output;
 			}
 
 			/**
-			 * Filters the template output buffer prior to sending to the client.
+			 * Filters the template output buffer before sending it to the client.
 			 *
 			 * @since 0.1.0
 			 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_template_output_buffer
@@ -81,32 +81,13 @@ function od_buffer_output( $passthrough ) {
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter(): void {
-	$conditions = array(
-		array(
-			'test'   => od_can_optimize_response(),
-			'reason' => __( 'Page is not optimized because od_can_optimize_response() returned false. This can be overridden with the od_can_optimize_response filter.', 'optimization-detective' ),
-		),
-		array(
-			'test'   => ! od_is_rest_api_unavailable() || ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ),
-			'reason' => __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' ),
-		),
-		array(
-			'test'   => ! isset( $_GET['optimization_detective_disabled'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			'reason' => __( 'Page is not optimized because the URL has the optimization_detective_disabled query parameter.', 'optimization-detective' ),
-		),
-	);
-	$reasons    = array();
-	foreach ( $conditions as $condition ) {
-		if ( ! $condition['test'] ) {
-			$reasons[] = $condition['reason'];
-		}
-	}
-	if ( count( $reasons ) > 0 ) {
+	$disabled_reasons = od_get_disabled_reasons();
+	if ( count( $disabled_reasons ) > 0 ) {
 		if ( WP_DEBUG ) {
 			add_action(
 				'wp_print_footer_scripts',
-				static function () use ( $reasons ): void {
-					od_print_disabled_reasons( $reasons );
+				static function () use ( $disabled_reasons ): void {
+					od_print_disabled_reasons( array_values( $disabled_reasons ) );
 				}
 			);
 		}
@@ -141,7 +122,7 @@ function od_print_disabled_reasons( array $reasons ): void {
 		wp_print_inline_script_tag(
 			sprintf(
 				'console.info( %s );',
-				(string) wp_json_encode( '[Optimization Detective] ' . $reason )
+				wp_json_encode( '[Optimization Detective] ' . $reason )
 			),
 			array( 'type' => 'module' )
 		);
@@ -159,35 +140,7 @@ function od_print_disabled_reasons( array $reasons ): void {
  * @return bool Whether response can be optimized.
  */
 function od_can_optimize_response(): bool {
-	$able = ! (
-		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
-		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
-		is_search() ||
-		// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
-		// "allow-scripts" but without "allow-same-origin". This can result in an error in the console:
-		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
-		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
-		is_embed() ||
-		// Skip posts that aren't published yet.
-		is_preview() ||
-		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
-		is_customize_preview() ||
-		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
-		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
-		// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
-		// the relevant actions on.
-		null === od_get_cache_purge_post_id()
-	);
-
-	/**
-	 * Filters whether the current response can be optimized.
-	 *
-	 * @since 0.1.0
-	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
-	 *
-	 * @param bool $able Whether response can be optimized.
-	 */
-	return (bool) apply_filters( 'od_can_optimize_response', $able );
+	return count( od_get_disabled_reasons() ) === 0;
 }
 
 /**
