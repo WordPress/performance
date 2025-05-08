@@ -244,7 +244,7 @@ async function getAlreadySubmittedSessionStorageKey(
 	urlMetricGroupStatus,
 	{ warn, error }
 ) {
-	if ( ! window.crypto || ! window.crypto.subtle ) {
+	if ( ! win.crypto || ! win.crypto.subtle ) {
 		warn(
 			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
 		);
@@ -580,7 +580,7 @@ export default async function detect( {
 		return;
 	}
 
-	if ( document.visibilityState === 'hidden' && ! document.prerendering ) {
+	if ( doc.visibilityState === 'hidden' && ! doc.prerendering ) {
 		log( 'Page opened in background tab so URL Metric is not collected.' );
 		return;
 	}
@@ -671,7 +671,7 @@ export default async function detect( {
 
 	// Keep track of whether the window resized. If it was resized, we abort sending the URLMetric.
 	let didWindowResize = false;
-	window.addEventListener(
+	win.addEventListener(
 		'resize',
 		() => {
 			didWindowResize = true;
@@ -927,7 +927,7 @@ export default async function detect( {
 		doc.addEventListener(
 			'visibilitychange',
 			() => {
-				if ( document.visibilityState === 'hidden' ) {
+				if ( doc.visibilityState === 'hidden' ) {
 					// TODO: This will fire even when switching tabs.
 					resolve();
 				}
