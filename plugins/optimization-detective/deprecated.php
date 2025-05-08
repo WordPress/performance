@@ -5,6 +5,8 @@
  * @package optimization-detective
  *
  * @since 1.0.0
+ *
+ * @noinspection PhpUnused
  */
 
 // @codeCoverageIgnoreStart

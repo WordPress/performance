@@ -268,7 +268,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Determines whether the URL Metric group is complete.
 	 *
-	 * A group is complete if it has the full sample size of URL Metrics
+	 * A group is complete if it has the full sample size of URL Metrics,
 	 * and all of these URL Metrics are fresh (with a current ETag and a
 	 * timestamp that is not older than the freshness TTL).
 	 *
@@ -322,7 +322,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 
 		$result = ( function () {
 
-			// No metrics have been gathered for this group so there is no LCP element.
+			// No metrics have been gathered for this group, so there is no LCP element.
 			if ( count( $this->url_metrics ) === 0 ) {
 				return null;
 			}
@@ -330,7 +330,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			// The following arrays all share array indices.
 
 			/**
-			 * Seen breadcrumbs counts.
+			 * Seen breadcrumb counts.
 			 *
 			 * @var array<int, non-empty-string> $seen_breadcrumbs
 			 */
@@ -350,7 +350,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			 */
 			$breadcrumb_element = array();
 
-			// Prefer to use URL Metrics which have a current ETag.
+			// Prefer to use URL Metrics, which have a current ETag.
 			$url_metrics = array_filter(
 				$this->url_metrics,
 				function ( OD_URL_Metric $url_metric ): bool {
@@ -459,7 +459,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.9.0
 	 *
 	 * @param string $xpath XPath for the element.
-	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
+	 * @return float|null Max intersection ratio or null if the tag is unknown (not captured).
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;

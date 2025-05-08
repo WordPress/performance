@@ -58,7 +58,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Registers post type for URL Metrics storage.
 	 *
-	 * This the configuration for this post type is similar to the oembed_cache in core.
+	 * The configuration for this post type is similar to the oembed_cache in core.
 	 *
 	 * @since 0.1.0
 	 */
@@ -152,7 +152,7 @@ class OD_URL_Metrics_Post_Type {
 		} elseif ( ! is_array( $url_metrics_data ) ) {
 			$trigger_error(
 				sprintf(
-					/* translators: %s is post type slug */
+					/* translators: %s is the post type slug */
 					__( 'Contents of %s post type was not a JSON array.', 'optimization-detective' ),
 					self::SLUG
 				),
