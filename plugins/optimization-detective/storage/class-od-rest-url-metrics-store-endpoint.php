@@ -126,7 +126,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	}
 
 	/**
-	 * Determines if the HTTP origin is an authorized one.
+	 * Determines if the HTTP origin is authorized.
 	 *
 	 * Note that `is_allowed_http_origin()` is not used directly because the underlying `get_allowed_http_origins()` does
 	 * not account for the URL port (although there is a to-do comment committed in core to address this). Additionally,
@@ -157,7 +157,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @return WP_REST_Response|WP_Error Response.
 	 */
 	public function handle_rest_request( WP_REST_Request $request ) {
-		// Block cross-origin storage requests since by definition URL Metrics data can only be sourced from the frontend of the site.
+		// Block cross-origin storage requests since, by definition, URL Metrics data can only be sourced from the frontend of the site.
 		$origin = $request->get_header( 'origin' );
 		if ( null === $origin || ! self::is_allowed_http_origin( $origin ) ) {
 			return new WP_Error(
@@ -222,7 +222,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			return new WP_Error(
 				'rest_invalid_param',
 				sprintf(
-					/* translators: %s is exception message */
+					/* translators: %s is the exception message */
 					__( 'Failed to validate URL Metric: %s', 'optimization-detective' ),
 					$e->getMessage()
 				),

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets the freshness age (TTL) for a given URL Metric.
  *
- * When a URL Metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
+ * When a URL Metric expires, it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
  * @since 0.1.0
  * @access private
@@ -67,7 +67,7 @@ function od_get_normalized_query_vars(): array {
  * Get the URL for the current request.
  *
  * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
- * This is needed in particular due to subdirectory installs.
+ * This is needed in particular due to subdirectory installations.
  *
  * @since 0.1.1
  * @access private
@@ -135,7 +135,7 @@ function od_get_current_theme_template() {
 	global $template, $_wp_current_template_id;
 
 	if ( wp_is_block_theme() && isset( $_wp_current_template_id ) ) {
-		$block_template = get_block_template( $_wp_current_template_id, 'wp_template' );
+		$block_template = get_block_template( $_wp_current_template_id );
 		if ( $block_template instanceof WP_Block_Template ) {
 			return $block_template;
 		}
@@ -337,7 +337,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
- * provided breakpoints (320, 480, 576) then this means there will be four groups:
+ * provided breakpoints (320, 480, 576), then this means there will be four groups:
  *
  *  1. 0-320 (small smartphone)
  *  2. 321-480 (normal smartphone)
@@ -352,7 +352,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
  *
- * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * This array may be empty, in which case there are no responsive breakpoints, and all URL Metrics are collected in a
  * single group.
  *
  * @since 0.1.0
