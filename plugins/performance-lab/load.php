@@ -157,17 +157,19 @@ function perflab_get_standalone_plugin_version_constants(): array {
 function perflab_maybe_set_object_cache_dropin(): void {
 	global $wp_filesystem;
 
-	// Bail if the drop-in is not enabled.
-	if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) || ! PERFLAB_PLACE_OBJECT_CACHE_DROPIN ) {
-		return;
-	}
-
 	// Bail if Server-Timing is disabled entirely.
 	if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
 		return;
 	}
 
+	// Bail if the drop-in is not enabled.
+	if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) || ! PERFLAB_PLACE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
 	// Bail if disabled via constant.
+	// This constant is maintained only for backward compatibility and should not be relied upon in new implementations.
+	// Use the 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant instead to control drop-in placement.
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
 		return;
 	}
