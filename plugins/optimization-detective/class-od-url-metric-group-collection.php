@@ -51,7 +51,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * value of 1, and the breakpoints are used as the maximum viewport widths for the viewport groups, with the addition of
 	 * a final viewport group which has a maximum viewport width of infinity.
 	 *
-	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+	 * This array may be empty, in which case there are no responsive breakpoints, and all URL Metrics are collected in a
 	 * single group.
 	 *
 	 * @since 0.1.0
@@ -153,7 +153,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		 */
 		$this->breakpoints = $breakpoints;
 
-		// Set sample size.
+		// Set the sample size.
 		if ( $sample_size <= 0 ) {
 			throw new InvalidArgumentException(
 				esc_html(
@@ -211,7 +211,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the freshness age (TTL) for a given URL Metric..
+	 * Gets the freshness age (TTL) for a given URL Metric.
 	 *
 	 * @since 1.0.0
 	 *
@@ -224,7 +224,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the first URL Metric group (with the lowest minimum viewport width, e.g. for mobile).
 	 *
-	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0
+	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0,
 	 * and the maximum viewport width corresponds to the smallest defined breakpoint returned by
 	 * {@see od_get_breakpoint_max_widths()}.
 	 *
@@ -241,7 +241,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * This group normally represents viewports for desktop devices.  This group always has a minimum viewport width
 	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
-	 * The maximum viewport width of this group is always `null`, or in other words it is unbounded.
+	 * The maximum viewport width of this group is always `null`, or in other words, it is unbounded.
 	 *
 	 * @since 0.7.0
 	 *
@@ -404,7 +404,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether every group is complete (full sample of non-stale URL Metrics).
 	 *
-	 * Completeness means the full sample size of URL Metrics has been collected,
+	 * Completeness means the full sample size of URL Metrics has been collected;
 	 * none of the collected URL Metrics are stale (with a mismatching ETag or a
 	 * timestamp older than the freshness TTL).
 	 *
@@ -520,9 +520,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets all elements from all URL Metrics from all groups keyed by the elements' XPaths.
 	 *
-	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
-	 * more than the default number of breakpoints) and the number of URL Metrics for each group should be 3
-	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+	 * This is an O(n^3) function, so its results must be cached. This being said, the number of groups should be 4 (one
+	 * more than the default number of breakpoints), and the number of URL Metrics for each group should be 3
+	 * (the default sample size). Therefore, given the number (n) of visited elements on the page, this will only
 	 * end up running n*4*3 times.
 	 *
 	 * @since 0.7.0
@@ -584,8 +584,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
 	 * `viewport.height` for any of its recorded URL Metrics. Note that even though the element may be positioned in the
-	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel in which
-	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
+	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel, in which
+	 * case it will have an intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
 	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
 	 * is positioned in any initial viewport, it should not get `loading=lazy` but rather `fetchpriority=low`.
 	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
@@ -624,7 +624,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.3.0
 	 *
 	 * @param string $xpath XPath for the element.
-	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
+	 * @return float|null Max intersection ratio or null if the tag is unknown (not captured).
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
@@ -636,7 +636,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.7.0
 	 *
 	 * @param string $xpath XPath for the element.
-	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.
+	 * @return bool|null Whether an element is positioned in any initial viewport or null if unknown.
 	 */
 	public function is_element_positioned_in_any_initial_viewport( string $xpath ): ?bool {
 		return $this->get_all_elements_positioned_in_any_initial_viewport()[ $xpath ] ?? null;
@@ -651,8 +651,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 */
 	public function get_flattened_url_metrics(): array {
 		// The duplication of iterator_to_array is not a mistake. This collection is an
-		// iterator and the collection contains iterator instances. So to flatten the
-		// two levels of iterators we need to nest calls to iterator_to_array().
+		// iterator, and the collection contains iterator instances. So to flatten the
+		// two levels of iterators, we need to nest calls to iterator_to_array().
 		return array_merge(
 			...array_map(
 				'iterator_to_array',

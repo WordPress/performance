@@ -79,7 +79,7 @@ final class OD_Storage_Lock {
 	}
 
 	/**
-	 * Gets transient key for locking URL Metric storage (for the current IP).
+	 * Gets the transient key for locking URL Metric storage (for the current IP).
 	 *
 	 * @since 0.1.0
 	 *

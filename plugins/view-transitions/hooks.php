@@ -29,4 +29,5 @@ add_action( 'wp_head', 'plvt_render_generator' );
  * Filters related to the View Transitions functionality.
  */
 add_action( 'after_setup_theme', 'plvt_polyfill_theme_support', PHP_INT_MAX );
+add_action( 'init', 'plvt_sanitize_view_transitions_theme_support', 1 );
 add_action( 'wp_enqueue_scripts', 'plvt_load_view_transitions' );

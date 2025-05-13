@@ -124,7 +124,7 @@ final class OD_Tag_Visitor_Context {
 				throw new Error(
 					esc_html(
 						sprintf(
-							/* translators: %s is class member variable name */
+							/* translators: %s is the class member variable name */
 							__( 'Unknown property %s.', 'optimization-detective' ),
 							__CLASS__ . '::$' . $name
 						)

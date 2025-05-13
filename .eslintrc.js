@@ -25,6 +25,18 @@ const config = {
 		'/dist',
 		'/**/*.min.js',
 	],
+	overrides: [
+		...( wpConfig?.overrides || [] ),
+		{
+			files: [ 'plugins/view-transitions/js/**/*.js' ],
+			rules: {
+				'jsdoc/no-undefined-types': [
+					'error',
+					{ definedTypes: [ 'PageSwapEvent', 'PageRevealEvent' ] },
+				],
+			},
+		},
+	],
 };
 
 module.exports = config;
