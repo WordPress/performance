@@ -26,8 +26,8 @@ $od_delete_site_data = static function (): void {
 $od_delete_site_data();
 
 /*
- * For a multisite, delete the URL Metrics for all other sites (however limited to 100 sites to avoid memory limit or
- * timeout problems in large scale networks).
+ * For a multisite install, delete the URL Metrics for all other sites (however, this is limited to 100 sites to avoid memory limit
+ * and timeout problems in large scale networks).
  */
 if ( is_multisite() ) {
 	$site_ids = get_sites(

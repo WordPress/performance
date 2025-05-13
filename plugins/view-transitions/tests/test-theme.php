@@ -36,6 +36,7 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 
 		// Test that with theme support it registers and enqueues the style.
 		add_theme_support( 'view-transitions' );
+		plvt_sanitize_view_transitions_theme_support(); // This must be called to sanitize the arguments (normally on 'init').
 		plvt_load_view_transitions();
 		$this->assertTrue( wp_style_is( 'wp-view-transitions', 'registered' ) );
 		$this->assertTrue( wp_style_is( 'wp-view-transitions', 'enqueued' ) );

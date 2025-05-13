@@ -84,7 +84,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the meta generator tag.
+	 * Test printing the META generator tag.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 */
@@ -98,9 +98,23 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the meta generator tag when the REST API is not available.
+	 * Test META generator tag when query parameter is present.
 	 *
 	 * @covers ::od_render_generator_meta_tag
+	 * @covers ::od_get_disabled_reasons
+	 */
+	public function test_od_render_generator_meta_tag_query_param_disabled(): void {
+		$_GET['optimization_detective_disabled'] = '1';
+		$tag                                     = get_echo( 'od_render_generator_meta_tag' );
+		$this->assertStringContainsString( '; query_param_disabled', $tag );
+		unset( $_GET['optimization_detective_disabled'] );
+	}
+
+	/**
+	 * Test printing the META generator tag when the REST API is not available.
+	 *
+	 * @covers ::od_render_generator_meta_tag
+	 * @covers ::od_get_disabled_reasons
 	 */
 	public function test_od_render_generator_meta_tag_rest_api_unavailable(): void {
 		update_option( 'od_rest_api_unavailable', '1' );

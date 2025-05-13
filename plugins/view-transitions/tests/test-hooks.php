@@ -11,6 +11,7 @@ class Test_ViewTransitions_Hooks extends WP_UnitTestCase {
 	public function test_hooks(): void {
 		$this->assertSame( 10, has_action( 'wp_head', 'plvt_render_generator' ) );
 		$this->assertSame( PHP_INT_MAX, has_action( 'after_setup_theme', 'plvt_polyfill_theme_support' ) );
+		$this->assertSame( 1, has_action( 'init', 'plvt_sanitize_view_transitions_theme_support' ) );
 		$this->assertSame( 10, has_action( 'wp_enqueue_scripts', 'plvt_load_view_transitions' ) );
 	}
 

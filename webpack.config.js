@@ -22,6 +22,13 @@ const {
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
+/*
+ * Temporary workaround because 'view-transitions' should not be added to `plugins.json` just yet, since it is not
+ * ready to be released.
+ * TODO: Remove this workaround once the plugin is added to `plugins.json`.
+ */
+standalonePlugins.push( 'view-transitions' );
+
 const defaultBuildConfig = {
 	entry: {},
 	output: {
@@ -40,6 +47,7 @@ const pluginsWithBuild = [
 	'embed-optimizer',
 	'image-prioritizer',
 	'optimization-detective',
+	'view-transitions',
 	'web-worker-offloading',
 ];
 
@@ -218,6 +226,39 @@ const optimizationDetective = ( env ) => {
 };
 
 /**
+ * Webpack Config: View Transitions
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const viewTransitions = ( env ) => {
+	if ( env.plugin && env.plugin !== 'view-transitions' ) {
+		return defaultBuildConfig;
+	}
+
+	const destination = path.resolve( __dirname, 'plugins/view-transitions' );
+
+	return {
+		...sharedConfig,
+		name: 'view-transitions',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ destination }/js/view-transitions.js`,
+						to: `${ destination }/js/view-transitions.min.js`,
+					},
+				],
+			} ),
+			new WebpackBar( {
+				name: 'Building View Transitions Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
  * Webpack Config: Web Worker Offloading
  *
  * @param {*} env Webpack environment
@@ -347,6 +388,7 @@ module.exports = [
 	embedOptimizer,
 	imagePrioritizer,
 	optimizationDetective,
+	viewTransitions,
 	webWorkerOffloading,
 	buildPlugin,
 ];
