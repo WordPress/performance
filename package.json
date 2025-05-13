@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@octokit/rest": "^21.1.1",
-    "@wordpress/env": "^10.22.0",
+    "@wordpress/env": "^10.23.0",
     "@wordpress/prettier-config": "^4.23.0",
     "@wordpress/scripts": "^30.16.0",
     "commander": "13.1.0",
