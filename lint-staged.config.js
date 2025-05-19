@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const micromatch = require( 'micromatch' );
+const fs = require( 'fs' );
 
 /**
  * Internal dependencies
@@ -10,54 +9,24 @@ const micromatch = require( 'micromatch' );
 const { plugins } = require( './plugins.json' );
 
 /**
- * Join and escape filenames for shell.
- *
- * @param {string[]} files Files to join.
- *
- * @return {string} Joined files.
+ * @type {import('lint-staged').Configuration}
  */
-const joinFiles = ( files ) => {
-	return files.map( ( file ) => `'${ file }'` ).join( ' ' );
+const config = {
+	'**/*.{js,ts,mjs}': [ 'npm run lint-js', () => 'npm run tsc' ],
+	'**/*.php': () => 'composer phpstan',
+	'*.php': 'composer lint',
+	'/tools/**.php': 'composer lint',
+	// Note: Instead of the preceding two lines, the following line was tried but it is not working:
+	// [ `!(plugins/{${ plugins.join( '|' ) }})/**/*.php` ]: 'composer lint',
 };
 
-// Get plugin base name to match regex more accurately.
-// Else it can cause issues when this plugin is placed in `wp-content/plugins` directory.
-const PLUGIN_BASE_NAME = path.basename( __dirname );
+for ( const plugin of plugins ) {
+	const phpcsConfig = fs.existsSync( `plugins/${ plugin }/phpcs.xml` )
+		? `plugins/${ plugin }/phpcs.xml`
+		: `plugins/${ plugin }/phpcs.xml.dist`;
+	config[
+		`plugins/${ plugin }/**/*.php`
+	] = `composer lint -- --standard=${ phpcsConfig }`;
+}
 
-module.exports = {
-	'**/*.{js,ts}': ( files ) => {
-		return [ `npm run lint-js -- ${ joinFiles( files ) }`, `npm run tsc` ];
-	},
-	'**/*.php': ( files ) => {
-		const commands = [ 'composer phpstan' ];
-
-		plugins.forEach( ( plugin ) => {
-			const pluginFiles = micromatch(
-				files,
-				`**/${ PLUGIN_BASE_NAME }/plugins/${ plugin }/**`,
-				{ dot: true }
-			);
-
-			if ( pluginFiles.length ) {
-				// Note: The lint command has to be used directly because the plugin-specific lint command includes the entire plugin directory as an argument.
-				commands.push(
-					`composer lint -- --standard=./plugins/${ plugin }/phpcs.xml.dist ${ joinFiles(
-						pluginFiles
-					) }`
-				);
-			}
-		} );
-
-		const otherFiles = micromatch(
-			files,
-			`!**/${ PLUGIN_BASE_NAME }/plugins/**`,
-			{ dot: true }
-		);
-
-		if ( otherFiles.length ) {
-			commands.push( `composer lint -- ${ joinFiles( otherFiles ) }` );
-		}
-
-		return commands;
-	},
-};
+module.exports = config;
