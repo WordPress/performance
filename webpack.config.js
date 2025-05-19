@@ -76,6 +76,7 @@ const performanceLab = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Performance Lab Assets',
 				color: '#2196f3',
@@ -113,6 +114,7 @@ const embedOptimizer = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Embed Optimizer Assets',
 				color: '#2196f3',
@@ -162,6 +164,7 @@ const imagePrioritizer = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Image Prioritizer Assets',
 				color: '#2196f3',
@@ -217,6 +220,7 @@ const optimizationDetective = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Optimization Detective Assets',
 				color: '#2196f3',
@@ -250,6 +254,7 @@ const viewTransitions = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building View Transitions Assets',
 				color: '#2196f3',
@@ -299,6 +304,7 @@ const webWorkerOffloading = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Web Worker Offloading Assets',
 				color: '#FFC107',
@@ -374,6 +380,7 @@ const buildPlugin = ( env ) => {
 					} );
 				},
 			},
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: `Building ${ env.plugin } Plugin`,
 				color: '#4caf50',
