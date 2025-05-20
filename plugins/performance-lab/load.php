@@ -151,6 +151,7 @@ function perflab_get_standalone_plugin_version_constants(): array {
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
+ * @since n.e.x.t No longer places the drop-in on new sites by default, unless the `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` constant is set to true.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
