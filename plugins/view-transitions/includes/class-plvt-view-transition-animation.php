@@ -100,7 +100,7 @@ final class PLVT_View_Transition_Animation {
 	 *                                                      Default true.
 	 *     @type bool|callable $use_post_transition_names   Whether to apply the post specific view transition names
 	 *                                                      while using this animation. Alternatively to a concrete
-	 *                                                      value, acallback can be specified to determine it
+	 *                                                      value, a callback can be specified to determine it
 	 *                                                      dynamically. Default true.
 	 *     @type callable|null $get_stylesheet_callback     Callback to get the stylesheet for the animation, as
 	 *                                                      inline CSS. This can be used if the animation CSS requires
