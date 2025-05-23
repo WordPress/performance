@@ -62,9 +62,8 @@ final class PLVT_View_Transition_Animation {
 	 * This can be used if the animation CSS requires further preparation other than simply loading its stylesheet from
 	 * the animation's corresponding CSS file.
 	 *
-	 * If the animation is configured with `$use_stylesheet = true`, the callback will receive the CSS from that file,
-	 * and the `$alias` and `$args` used as parameters. Otherwise, the callback will receive the `$alias` and `$args`
-	 * used as parameters.
+	 * The callback will receive the CSS from the assigned stylesheet (or empty string if none), and the `$alias` and
+	 * `$args` used as parameters.
 	 *
 	 * @since 1.0.0
 	 * @var callable|null
@@ -163,6 +162,7 @@ final class PLVT_View_Transition_Animation {
 	 * @return string Animation stylesheet, as inline CSS, or empty string if none.
 	 */
 	public function get_stylesheet( string $alias = '', array $args = array() ): string {
+		$css = '';
 		if ( $this->use_stylesheet ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			$css = file_get_contents( plvt_get_asset_path( "css/view-transition-animation-{$this->slug}.css" ) );
@@ -171,6 +171,7 @@ final class PLVT_View_Transition_Animation {
 				return '';
 			}
 		}
+
 		if ( is_callable( $this->get_stylesheet_callback ) ) {
 			if ( '' === $alias ) {
 				$alias = $this->slug;
@@ -178,10 +179,11 @@ final class PLVT_View_Transition_Animation {
 			$args = wp_parse_args( $args, $this->default_args );
 			return (string) call_user_func_array(
 				$this->get_stylesheet_callback,
-				isset( $css ) ? array( $css, $alias, $args ) : array( $alias, $args )
+				array( $css, $alias, $args )
 			);
 		}
-		return '';
+
+		return $css;
 	}
 
 	/**
