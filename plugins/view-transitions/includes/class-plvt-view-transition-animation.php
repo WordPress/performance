@@ -31,12 +31,13 @@ final class PLVT_View_Transition_Animation {
 	private $aliases = array();
 
 	/**
-	 * Whether the animation uses a stylesheet.
+	 * Whether the animation uses a stylesheet, optionally a concrete file path.
 	 *
-	 * If so, the stylesheet will be `/css/view-transitions-animation-{$slug}.css`.
+	 * If no concrete path is provided, it is assumed to be internal to the plugin, in
+	 * `css/view-transition-animation-{$slug}.css`.
 	 *
 	 * @since 1.0.0
-	 * @var bool
+	 * @var bool|string
 	 */
 	private $use_stylesheet = false;
 
@@ -92,7 +93,10 @@ final class PLVT_View_Transition_Animation {
 	 *
 	 *     @type string[]      $aliases                     Unique aliases for the animation, if any. Default empty
 	 *                                                      array.
-	 *     @type bool          $use_stylesheet              Whether the animation uses a stylesheet. Default false.
+	 *     @type bool|string   $use_stylesheet              Whether the animation uses a stylesheet, optionally a
+	 *                                                      concrete file path. If no concrete path is provided, it is
+	 *                                                      assumed to be internal to the plugin, in
+	 *                                                      `css/view-transition-animation-{$slug}.css`. Default false.
 	 *     @type bool|callable $use_global_transition_names Whether to apply the global view transition names while
 	 *                                                      using this animation. Alternatively to a concrete value, a
 	 *                                                      callback can be specified to determine it dynamically.
@@ -163,9 +167,13 @@ final class PLVT_View_Transition_Animation {
 	 */
 	public function get_stylesheet( string $alias = '', array $args = array() ): string {
 		$css = '';
-		if ( $this->use_stylesheet ) {
+		if ( (bool) $this->use_stylesheet ) {
+			$stylesheet_path = $this->use_stylesheet;
+			if ( ! is_string( $stylesheet_path ) ) {
+				$stylesheet_path = plvt_get_asset_path( "css/view-transition-animation-{$this->slug}.css" );
+			}
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			$css = file_get_contents( plvt_get_asset_path( "css/view-transition-animation-{$this->slug}.css" ) );
+			$css = file_get_contents( $stylesheet_path );
 			if ( false === $css || '' === $css ) {
 				// This clause should never be entered, but is needed to please PHPStan. Can't hurt to be safe.
 				return '';
@@ -254,7 +262,7 @@ final class PLVT_View_Transition_Animation {
 			}
 		}
 		if ( isset( $config['use_stylesheet'] ) ) {
-			$this->use_stylesheet = (bool) $config['use_stylesheet'];
+			$this->use_stylesheet = is_string( $config['use_stylesheet'] ) ? $config['use_stylesheet'] : (bool) $config['use_stylesheet'];
 		}
 		if ( isset( $config['use_global_transition_names'] ) ) {
 			$this->use_global_transition_names = is_callable( $config['use_global_transition_names'] ) ?
