@@ -1,26 +1,26 @@
-@property --wp-view-transition-animation-swipe-horizontal-offset {
+@property --plvt-view-transition-animation-swipe-horizontal-offset {
 	syntax: "<number>";
 	initial-value: 1;
 	inherits: false;
 }
 
-@property --wp-view-transition-animation-swipe-vertical-offset {
+@property --plvt-view-transition-animation-swipe-vertical-offset {
 	syntax: "<number>";
 	initial-value: 0;
 	inherits: false;
 }
 
-@keyframes wp-view-transition-animation-swipe-old {
+@keyframes plvt-view-transition-animation-swipe-old {
 	to {
 		opacity: 0;
-		translate: calc(100vw * var(--wp-view-transition-animation-swipe-horizontal-offset) * -1) calc(100vw * var(--wp-view-transition-animation-swipe-vertical-offset) * -1);
+		translate: calc(100vw * var(--plvt-view-transition-animation-swipe-horizontal-offset) * -1) calc(100vw * var(--plvt-view-transition-animation-swipe-vertical-offset) * -1);
 	}
 }
 
-@keyframes wp-view-transition-animation-swipe-new {
+@keyframes plvt-view-transition-animation-swipe-new {
 	from {
 		opacity: 0;
-		translate: calc(100vw * var(--wp-view-transition-animation-swipe-horizontal-offset)) calc(100vw * var(--wp-view-transition-animation-swipe-vertical-offset));
+		translate: calc(100vw * var(--plvt-view-transition-animation-swipe-horizontal-offset)) calc(100vw * var(--plvt-view-transition-animation-swipe-vertical-offset));
 	}
 }
 
@@ -29,9 +29,9 @@
 }
 
 ::view-transition-old(*) {
-	animation-name: wp-view-transition-animation-swipe-old;
+	animation-name: plvt-view-transition-animation-swipe-old;
 }
 
 ::view-transition-new(*) {
-	animation-name: wp-view-transition-animation-swipe-new;
+	animation-name: plvt-view-transition-animation-swipe-new;
 }

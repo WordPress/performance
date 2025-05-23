@@ -143,7 +143,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 
 				// Inject offsets as CSS variable to take effect.
 				$css .= sprintf(
-					'::view-transition-old(*), ::view-transition-new(*) { --wp-view-transition-animation-slide-horizontal-offset: %d; --wp-view-transition-animation-slide-vertical-offset: %d; }',
+					'::view-transition-old(*), ::view-transition-new(*) { --plvt-view-transition-animation-slide-horizontal-offset: %d; --plvt-view-transition-animation-slide-vertical-offset: %d; }',
 					$args['horizontal-offset'],
 					$args['vertical-offset']
 				);
@@ -198,7 +198,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 
 				// Inject offsets as CSS variable to take effect.
 				$css .= sprintf(
-					'::view-transition-old(*), ::view-transition-new(*) { --wp-view-transition-animation-swipe-horizontal-offset: %d; --wp-view-transition-animation-swipe-vertical-offset: %d; }',
+					'::view-transition-old(*), ::view-transition-new(*) { --plvt-view-transition-animation-swipe-horizontal-offset: %d; --plvt-view-transition-animation-swipe-vertical-offset: %d; }',
 					$args['horizontal-offset'],
 					$args['vertical-offset']
 				);
@@ -243,7 +243,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 
 				// Inject angle as CSS variable to take effect.
 				$css .= sprintf(
-					'::view-transition-new(root) { --wp-view-transition-animation-wipe-angle: %ddeg; }',
+					'::view-transition-new(root) { --plvt-view-transition-animation-wipe-angle: %ddeg; }',
 					$args['angle']
 				);
 
@@ -283,9 +283,9 @@ function plvt_load_view_transitions(): void {
 
 	// Use an inline style to avoid an extra request.
 	$stylesheet = '@view-transition { navigation: auto; }';
-	wp_register_style( 'wp-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-	wp_add_inline_style( 'wp-view-transitions', $stylesheet );
-	wp_enqueue_style( 'wp-view-transitions' );
+	wp_register_style( 'plvt-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_add_inline_style( 'plvt-view-transitions', $stylesheet );
+	wp_enqueue_style( 'plvt-view-transitions' );
 
 	$theme_support = get_theme_support( 'view-transitions' );
 
@@ -295,7 +295,7 @@ function plvt_load_view_transitions(): void {
 	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	if ( '' !== $default_animation_stylesheet ) {
-		wp_add_inline_style( 'wp-view-transitions', $default_animation_stylesheet );
+		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 	}
 
 	/*
@@ -339,8 +339,8 @@ function plvt_load_view_transitions(): void {
 	 * This is because the pagereveal event listener must be added before the first rAF occurs since that is when the event fires. See <https://issues.chromium.org/issues/40949146#comment10>.
 	 * An inline script is used to avoid an extra request.
 	 */
-	wp_register_script( 'wp-view-transitions', false, array(), null, array() ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-	wp_add_inline_script( 'wp-view-transitions', $src_script );
-	wp_add_inline_script( 'wp-view-transitions', $init_script );
-	wp_enqueue_script( 'wp-view-transitions' );
+	wp_register_script( 'plvt-view-transitions', false, array(), null, array() ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_add_inline_script( 'plvt-view-transitions', $src_script );
+	wp_add_inline_script( 'plvt-view-transitions', $init_script );
+	wp_enqueue_script( 'plvt-view-transitions' );
 }
