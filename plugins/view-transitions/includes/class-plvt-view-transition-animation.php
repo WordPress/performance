@@ -33,7 +33,7 @@ final class PLVT_View_Transition_Animation {
 	/**
 	 * Whether the animation uses a stylesheet.
 	 *
-	 * If so, the stylesheet will be `/wp-includes/css/view-transitions-animation-{$slug}.css`.
+	 * If so, the stylesheet will be `/css/view-transitions-animation-{$slug}.css`.
 	 *
 	 * @since 1.0.0
 	 * @var bool
