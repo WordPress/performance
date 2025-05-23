@@ -98,6 +98,37 @@ function plvt_sanitize_view_transitions_theme_support(): void {
  * @param PLVT_View_Transition_Animation_Registry $animation_registry Registry instance to register animations on.
  */
 function plvt_register_view_transition_animations( PLVT_View_Transition_Animation_Registry $animation_registry ): void {
+	/*
+	 * This callback is used for certain kinds of animations that move content around, to determine whether specific
+	 * view transition names should be applied for an animation or not. If a specific target name (i.e. not '*') is
+	 * provided, they should be applied. But if the entire page is the target, they would visually mess with the
+	 * animation.
+	 */
+	$is_specific_target_name = static function ( string $alias, array $args ): bool {
+		return '*' === $args['target-name'] ? false : true;
+	};
+
+	/*
+	 * This callback is used to return horizontal and vertical offsets (-1, 0, or 1) based on whether the given alias
+	 * ends in a certain directional term ('left', 'top', 'bottom', 'right'). If none is used, the callback returns
+	 * `null` for both offsets.
+	 */
+	$get_hv_offsets_based_on_alias = static function ( string $alias ): array {
+		if ( str_ends_with( $alias, 'left' ) ) {
+			return array( -1, 0 );
+		}
+		if ( str_ends_with( $alias, 'top' ) ) {
+			return array( 0, -1 );
+		}
+		if ( str_ends_with( $alias, 'bottom' ) ) {
+			return array( 0, 1 );
+		}
+		if ( str_ends_with( $alias, 'right' ) ) {
+			return array( 1, 0 );
+		}
+		return array( null, null );
+	};
+
 	// Register default animations.
 	$animation_registry->register_animation(
 		'fade', // This is how view transitions are animated without any extra CSS.
@@ -117,28 +148,14 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 				'slide-from-top',
 			),
 			'use_stylesheet'              => true,
-			'use_global_transition_names' => static function ( string $alias, array $args ) {
-				// If no specific element is targeted, the entire screen should be moved.
-				return '*' === $args['target-name'] ? false : true;
-			},
-			'use_post_transition_names'   => static function ( string $alias, array $args ) {
-				// If no specific element is targeted, the entire screen should be moved.
-				return '*' === $args['target-name'] ? false : true;
-			},
-			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) {
+			'use_global_transition_names' => $is_specific_target_name,
+			'use_post_transition_names'   => $is_specific_target_name,
+			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) use ( $get_hv_offsets_based_on_alias ) {
 				// Set offsets based on alias, if relevant.
-				if ( str_ends_with( $alias, 'left' ) ) {
-					$args['horizontal-offset'] = -1;
-					$args['vertical-offset']   = 0;
-				} elseif ( str_ends_with( $alias, 'top' ) ) {
-					$args['horizontal-offset'] = 0;
-					$args['vertical-offset']   = -1;
-				} elseif ( str_ends_with( $alias, 'bottom' ) ) {
-					$args['horizontal-offset'] = 0;
-					$args['vertical-offset']   = 1;
-				} elseif ( str_ends_with( $alias, 'right' ) ) {
-					$args['horizontal-offset'] = 1;
-					$args['vertical-offset']   = 0;
+				list( $horizontal_offset, $vertical_offset ) = $get_hv_offsets_based_on_alias( $alias );
+				if ( null !== $horizontal_offset && null !== $vertical_offset ) {
+					$args['horizontal-offset'] = $horizontal_offset;
+					$args['vertical-offset']   = $vertical_offset;
 				}
 
 				// Inject offsets as CSS variable to take effect.
@@ -172,28 +189,14 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 				'swipe-from-top',
 			),
 			'use_stylesheet'              => true,
-			'use_global_transition_names' => static function ( string $alias, array $args ) {
-				// If no specific element is targeted, the entire screen should be moved.
-				return '*' === $args['target-name'] ? false : true;
-			},
-			'use_post_transition_names'   => static function ( string $alias, array $args ) {
-				// If no specific element is targeted, the entire screen should be moved.
-				return '*' === $args['target-name'] ? false : true;
-			},
-			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) {
+			'use_global_transition_names' => $is_specific_target_name,
+			'use_post_transition_names'   => $is_specific_target_name,
+			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) use ( $get_hv_offsets_based_on_alias ) {
 				// Set offsets based on alias, if relevant.
-				if ( str_ends_with( $alias, 'left' ) ) {
-					$args['horizontal-offset'] = -1;
-					$args['vertical-offset']   = 0;
-				} elseif ( str_ends_with( $alias, 'top' ) ) {
-					$args['horizontal-offset'] = 0;
-					$args['vertical-offset']   = -1;
-				} elseif ( str_ends_with( $alias, 'bottom' ) ) {
-					$args['horizontal-offset'] = 0;
-					$args['vertical-offset']   = 1;
-				} elseif ( str_ends_with( $alias, 'right' ) ) {
-					$args['horizontal-offset'] = 1;
-					$args['vertical-offset']   = 0;
+				list( $horizontal_offset, $vertical_offset ) = $get_hv_offsets_based_on_alias( $alias );
+				if ( null !== $horizontal_offset && null !== $vertical_offset ) {
+					$args['horizontal-offset'] = $horizontal_offset;
+					$args['vertical-offset']   = $vertical_offset;
 				}
 
 				// Inject offsets as CSS variable to take effect.
