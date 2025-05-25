@@ -635,31 +635,6 @@ export default async function detect( {
 		return;
 	}
 
-	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
-	await new Promise( ( resolve ) => {
-		if ( doc.readyState !== 'loading' ) {
-			resolve();
-		} else {
-			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
-		}
-	} );
-
-	// Wait until the resources on the page have fully loaded.
-	await new Promise( ( resolve ) => {
-		if ( doc.readyState === 'complete' ) {
-			resolve();
-		} else {
-			win.addEventListener( 'load', resolve, { once: true } );
-		}
-	} );
-
-	// Wait yet further until idle.
-	if ( typeof requestIdleCallback === 'function' ) {
-		await new Promise( ( resolve ) => {
-			requestIdleCallback( resolve );
-		} );
-	}
-
 	// TODO: Does this make sense here? Should it be moved up above the isViewportNeeded condition?
 	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
