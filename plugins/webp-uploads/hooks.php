@@ -803,3 +803,71 @@ function webp_uploads_enable_additional_mime_type_support_for_all_sizes( array $
 	return $allowed_sizes;
 }
 add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_uploads_enable_additional_mime_type_support_for_all_sizes' );
+
+/**
+ * Converts palette PNG images to true color PNG images.
+ *
+ * GD cannot convert palette-based PNGs to WebP/AVIF formats, causing conversion failures.
+ * This function detects and converts palette PNGs to truecolor during upload.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $file The uploaded file data.
+ * @return array<string, mixed> The modified file data.
+ */
+function webp_uploads_convert_palette_png_to_truecolor( array $file ): array {
+	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
+		return $file;
+	}
+
+	if ( 'png' !== strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) ) ) {
+		return $file;
+	}
+
+	$editor = wp_get_image_editor( $file['tmp_name'] );
+
+	if ( is_wp_error( $editor ) || ! $editor instanceof WP_Image_Editor_GD ) {
+		return $file;
+	}
+
+	// Check if required GD functions exist.
+	if (
+		! function_exists( 'imagecreatefrompng' ) ||
+		! function_exists( 'imageistruecolor' ) ||
+		! function_exists( 'imagesx' ) ||
+		! function_exists( 'imagesy' ) ||
+		! function_exists( 'imagecreatetruecolor' ) ||
+		! function_exists( 'imagealphablending' ) ||
+		! function_exists( 'imagesavealpha' ) ||
+		! function_exists( 'imagecopyresampled' ) ||
+		! function_exists( 'imagepng' ) ||
+		! function_exists( 'imagedestroy' )
+	) {
+		return $file;
+	}
+
+	$image = imagecreatefrompng( $file['tmp_name'] );
+
+	// Only process if image is not already truecolor.
+	if ( false !== $image && ! imageistruecolor( $image ) ) {
+		$width     = imagesx( $image );
+		$height    = imagesy( $image );
+		$truecolor = imagecreatetruecolor( $width, $height );
+
+		if ( false !== $truecolor ) {
+			// Preserve transparency.
+			imagealphablending( $truecolor, false );
+			imagesavealpha( $truecolor, true );
+
+			// Copy palette image to truecolor image.
+			if ( imagecopyresampled( $truecolor, $image, 0, 0, 0, 0, $width, $height, $width, $height ) ) {
+				imagepng( $truecolor, $file['tmp_name'] );
+			}
+			imagedestroy( $truecolor );
+		}
+		imagedestroy( $image );
+	}
+
+	return $file;
+}
+add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
