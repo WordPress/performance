@@ -58,6 +58,7 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 			'.wp-post-image'                         => 'post-thumbnail',
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
+		'default-animation'       => 'wipe-from-left',
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.
@@ -89,6 +90,187 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 }
 
 /**
+ * Registers the default view transition animations and fires an action to register additional ones.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @param PLVT_View_Transition_Animation_Registry $animation_registry Registry instance to register animations on.
+ */
+function plvt_register_view_transition_animations( PLVT_View_Transition_Animation_Registry $animation_registry ): void {
+	/*
+	 * This callback is used for certain kinds of animations that move content around, to determine whether specific
+	 * view transition names should be applied for an animation or not. If a specific target name (i.e. not '*') is
+	 * provided, they should be applied. But if the entire page is the target, they would visually mess with the
+	 * animation.
+	 */
+	$is_specific_target_name = static function ( string $alias, array $args ): bool {
+		return '*' === $args['target-name'] ? false : true;
+	};
+
+	/*
+	 * This callback is used to return horizontal and vertical offsets (-1, 0, or 1) based on whether the given alias
+	 * ends in a certain directional term ('left', 'top', 'bottom', 'right'). If none is used, the callback returns
+	 * `null` for both offsets.
+	 */
+	$get_hv_offsets_based_on_alias = static function ( string $alias ): array {
+		if ( str_ends_with( $alias, 'left' ) ) {
+			return array( -1, 0 );
+		}
+		if ( str_ends_with( $alias, 'top' ) ) {
+			return array( 0, -1 );
+		}
+		if ( str_ends_with( $alias, 'bottom' ) ) {
+			return array( 0, 1 );
+		}
+		if ( str_ends_with( $alias, 'right' ) ) {
+			return array( 1, 0 );
+		}
+		return array( null, null );
+	};
+
+	// Register default animations.
+	$animation_registry->register_animation(
+		'fade', // This is how view transitions are animated without any extra CSS.
+		array(
+			'use_stylesheet'              => false,
+			'use_global_transition_names' => true,
+			'use_post_transition_names'   => true,
+		)
+	);
+	$animation_registry->register_animation(
+		'slide',
+		array(
+			'aliases'                     => array(
+				'slide-from-right',
+				'slide-from-bottom',
+				'slide-from-left',
+				'slide-from-top',
+			),
+			'use_stylesheet'              => true,
+			'use_global_transition_names' => $is_specific_target_name,
+			'use_post_transition_names'   => $is_specific_target_name,
+			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) use ( $get_hv_offsets_based_on_alias ) {
+				// Set offsets based on alias, if relevant.
+				list( $horizontal_offset, $vertical_offset ) = $get_hv_offsets_based_on_alias( $alias );
+				if ( null !== $horizontal_offset && null !== $vertical_offset ) {
+					$args['horizontal-offset'] = $horizontal_offset;
+					$args['vertical-offset']   = $vertical_offset;
+				}
+
+				// Inject offsets as CSS variable to take effect.
+				$css .= sprintf(
+					'::view-transition-old(*), ::view-transition-new(*) { --plvt-view-transition-animation-slide-horizontal-offset: %d; --plvt-view-transition-animation-slide-vertical-offset: %d; }',
+					$args['horizontal-offset'],
+					$args['vertical-offset']
+				);
+
+				// If a specific element view transition name is targeted, scope the animation to only that name.
+				if ( '*' !== $args['target-name'] ) {
+					$css = str_replace( '(*)', "({$args['target-name']})", $css );
+				}
+
+				return $css;
+			},
+		),
+		array(
+			'horizontal-offset' => 1,
+			'vertical-offset'   => 0,
+			'target-name'       => '*',
+		)
+	);
+	$animation_registry->register_animation(
+		'swipe',
+		array(
+			'aliases'                     => array(
+				'swipe-from-right',
+				'swipe-from-bottom',
+				'swipe-from-left',
+				'swipe-from-top',
+			),
+			'use_stylesheet'              => true,
+			'use_global_transition_names' => $is_specific_target_name,
+			'use_post_transition_names'   => $is_specific_target_name,
+			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) use ( $get_hv_offsets_based_on_alias ) {
+				// Set offsets based on alias, if relevant.
+				list( $horizontal_offset, $vertical_offset ) = $get_hv_offsets_based_on_alias( $alias );
+				if ( null !== $horizontal_offset && null !== $vertical_offset ) {
+					$args['horizontal-offset'] = $horizontal_offset;
+					$args['vertical-offset']   = $vertical_offset;
+				}
+
+				// Inject offsets as CSS variable to take effect.
+				$css .= sprintf(
+					'::view-transition-old(*), ::view-transition-new(*) { --plvt-view-transition-animation-swipe-horizontal-offset: %d; --plvt-view-transition-animation-swipe-vertical-offset: %d; }',
+					$args['horizontal-offset'],
+					$args['vertical-offset']
+				);
+
+				// If a specific element view transition name is targeted, scope the animation to only that name.
+				if ( '*' !== $args['target-name'] ) {
+					$css = str_replace( '(*)', "({$args['target-name']})", $css );
+				}
+
+				return $css;
+			},
+		),
+		array(
+			'horizontal-offset' => 1,
+			'vertical-offset'   => 0,
+			'target-name'       => '*',
+		)
+	);
+	$animation_registry->register_animation(
+		'wipe',
+		array(
+			'aliases'                     => array(
+				'wipe-from-right',
+				'wipe-from-bottom',
+				'wipe-from-left',
+				'wipe-from-top',
+			),
+			'use_stylesheet'              => true,
+			'use_global_transition_names' => false,
+			'use_post_transition_names'   => true,
+			'get_stylesheet_callback'     => static function ( string $css, string $alias, array $args ) {
+				// Set angle based on alias, if relevant.
+				if ( str_ends_with( $alias, 'left' ) ) {
+					$args['angle'] = 90;
+				} elseif ( str_ends_with( $alias, 'top' ) ) {
+					$args['angle'] = 180;
+				} elseif ( str_ends_with( $alias, 'bottom' ) ) {
+					$args['angle'] = 0;
+				} elseif ( str_ends_with( $alias, 'right' ) ) {
+					$args['angle'] = 270;
+				}
+
+				// Inject angle as CSS variable to take effect.
+				$css .= sprintf(
+					'::view-transition-new(root) { --plvt-view-transition-animation-wipe-angle: %ddeg; }',
+					$args['angle']
+				);
+
+				return $css;
+			},
+		),
+		array( 'angle' => 270 )
+	);
+
+	/**
+	 * Fires when view transition animations are being registered.
+	 *
+	 * This is only triggered if the theme supports view transitions, as otherwise the functionality is not relevant.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param PLVT_View_Transition_Animation_Registry $animation_registry Registry instance on which to register view
+	 *                                                                    transition animations which can be used by
+	 *                                                                    the theme.
+	 */
+	do_action( 'plvt_register_view_transition_animations', $animation_registry );
+}
+
+/**
  * Loads view transitions based on the current configuration.
  *
  * @since 1.0.0
@@ -98,13 +280,26 @@ function plvt_load_view_transitions(): void {
 		return;
 	}
 
+	// Instantiate transition animation registry and register available animations on it.
+	$animation_registry = new PLVT_View_Transition_Animation_Registry();
+	plvt_register_view_transition_animations( $animation_registry );
+
 	// Use an inline style to avoid an extra request.
 	$stylesheet = '@view-transition { navigation: auto; }';
-	wp_register_style( 'wp-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-	wp_add_inline_style( 'wp-view-transitions', $stylesheet );
-	wp_enqueue_style( 'wp-view-transitions' );
+	wp_register_style( 'plvt-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_add_inline_style( 'plvt-view-transitions', $stylesheet );
+	wp_enqueue_style( 'plvt-view-transitions' );
 
 	$theme_support = get_theme_support( 'view-transitions' );
+
+	/*
+	 * Add the animation stylesheet for the default animation, if any.
+	 */
+	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
+	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
+	if ( '' !== $default_animation_stylesheet ) {
+		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
+	}
 
 	/*
 	 * No point in loading the script if no specific view transition names are configured.
@@ -116,10 +311,18 @@ function plvt_load_view_transitions(): void {
 		return;
 	}
 
+	$animations_js_config = array(
+		'default' => array(
+			'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $theme_support['default-animation'], $default_animation_args ),
+			'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $theme_support['default-animation'], $default_animation_args ),
+		),
+	);
+
 	$config = array(
 		'postSelector'          => $theme_support['post-selector'],
 		'globalTransitionNames' => $theme_support['global-transition-names'],
 		'postTransitionNames'   => $theme_support['post-transition-names'],
+		'animations'            => $animations_js_config,
 	);
 
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -139,8 +342,8 @@ function plvt_load_view_transitions(): void {
 	 * This is because the pagereveal event listener must be added before the first rAF occurs since that is when the event fires. See <https://issues.chromium.org/issues/40949146#comment10>.
 	 * An inline script is used to avoid an extra request.
 	 */
-	wp_register_script( 'wp-view-transitions', false, array(), null, array() ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-	wp_add_inline_script( 'wp-view-transitions', $src_script );
-	wp_add_inline_script( 'wp-view-transitions', $init_script );
-	wp_enqueue_script( 'wp-view-transitions' );
+	wp_register_script( 'plvt-view-transitions', false, array(), null, array() ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_add_inline_script( 'plvt-view-transitions', $src_script );
+	wp_add_inline_script( 'plvt-view-transitions', $init_script );
+	wp_enqueue_script( 'plvt-view-transitions' );
 }

@@ -252,6 +252,30 @@ const viewTransitions = ( env ) => {
 						from: `${ destination }/js/view-transitions.js`,
 						to: `${ destination }/js/view-transitions.min.js`,
 					},
+					{
+						from: `${ destination }/css/view-transition-animation-slide.css`,
+						to: `${ destination }/css/view-transition-animation-slide.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+					{
+						from: `${ destination }/css/view-transition-animation-swipe.css`,
+						to: `${ destination }/css/view-transition-animation-swipe.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+					{
+						from: `${ destination }/css/view-transition-animation-wipe.css`,
+						to: `${ destination }/css/view-transition-animation-wipe.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
 				],
 			} ),
 			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
