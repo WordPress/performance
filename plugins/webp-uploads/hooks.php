@@ -834,12 +834,9 @@ function webp_uploads_convert_palette_png_to_truecolor( array $file ): array {
 	if (
 		! function_exists( 'imagecreatefrompng' ) ||
 		! function_exists( 'imageistruecolor' ) ||
-		! function_exists( 'imagesx' ) ||
-		! function_exists( 'imagesy' ) ||
-		! function_exists( 'imagecreatetruecolor' ) ||
 		! function_exists( 'imagealphablending' ) ||
 		! function_exists( 'imagesavealpha' ) ||
-		! function_exists( 'imagecopyresampled' ) ||
+		! function_exists( 'imagepalettetotruecolor' ) ||
 		! function_exists( 'imagepng' ) ||
 		! function_exists( 'imagedestroy' )
 	) {
@@ -847,26 +844,20 @@ function webp_uploads_convert_palette_png_to_truecolor( array $file ): array {
 	}
 
 	$image = imagecreatefrompng( $file['tmp_name'] );
-
-	// Only process if image is not already truecolor.
-	if ( false !== $image && ! imageistruecolor( $image ) ) {
-		$width     = imagesx( $image );
-		$height    = imagesy( $image );
-		$truecolor = imagecreatetruecolor( $width, $height );
-
-		if ( false !== $truecolor ) {
-			// Preserve transparency.
-			imagealphablending( $truecolor, false );
-			imagesavealpha( $truecolor, true );
-
-			// Copy palette image to truecolor image.
-			if ( imagecopyresampled( $truecolor, $image, 0, 0, 0, 0, $width, $height, $width, $height ) ) {
-				imagepng( $truecolor, $file['tmp_name'] );
-			}
-			imagedestroy( $truecolor );
-		}
-		imagedestroy( $image );
+	if ( false === $image || imageistruecolor( $image ) ) {
+		return $file;
 	}
+
+	// Preserve transparency.
+	imagealphablending( $image, false );
+	imagesavealpha( $image, true );
+
+	// Convert the palette to truecolor.
+	if ( imagepalettetotruecolor( $image ) ) {
+		// Overwrite the upload with the new truecolor PNG.
+		imagepng( $image, $file['tmp_name'] );
+	}
+	imagedestroy( $image );
 
 	return $file;
 }
