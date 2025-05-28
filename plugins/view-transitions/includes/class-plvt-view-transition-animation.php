@@ -6,6 +6,12 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Class representing a view transition animation.
  *
