@@ -17,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @phpstan-type AnimationConfig array{
  *     aliases?: non-empty-string[],
- *     use_stylesheet: bool|string,
- *     use_global_transition_names: bool|callable(string, array<string,string>):bool,
- *     use_post_transition_names: bool|callable(string, array<string,string>):bool,
+ *     use_stylesheet?: bool|non-empty-string,
+ *     use_global_transition_names?: bool|callable(string, array<string,string>):bool,
+ *     use_post_transition_names?: bool|callable(string, array<string,string>):bool,
  *     get_stylesheet_callback?: callable(string, string, array<string,string>):string|null
  * }
  *
@@ -117,7 +117,7 @@ final class PLVT_View_Transition_Animation {
 	 *                                                      using this animation. Alternatively to a concrete value, a
 	 *                                                      callback can be specified to determine it dynamically.
 	 *                                                      Default true.
-	 *     @type bool|callable $use_post_transition_names   Whether to apply the post specific view transition names
+	 *     @type bool|callable $use_post_transition_names   Whether to apply the post-specific view transition names
 	 *                                                      while using this animation. Alternatively to a concrete
 	 *                                                      value, a callback can be specified to determine it
 	 *                                                      dynamically. Default true.
@@ -232,14 +232,14 @@ final class PLVT_View_Transition_Animation {
 	}
 
 	/**
-	 * Returns whether to apply the post specific view transition names while using this animation.
+	 * Returns whether to apply the post-specific view transition names while using this animation.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param string               $alias Optional. Slug or alias to reference the animation with. May be used to alter
 	 *                                    the animation's behavior. Default is the animation's slug.
 	 * @param array<string, mixed> $args  Optional. Animation arguments. Default is the animation's default arguments.
-	 * @return bool True if the post specific view transition names should be applied, false otherwise.
+	 * @return bool True if the post-specific view transition names should be applied, false otherwise.
 	 */
 	public function use_post_transition_names( string $alias = '', array $args = array() ): bool {
 		if ( is_bool( $this->use_post_transition_names ) ) {
