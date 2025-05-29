@@ -389,11 +389,14 @@ function plvt_add_settings_action_link( $links ): array {
 		$links = array();
 	}
 
-	$links['settings'] = sprintf(
-		'<a href="%1$s">%2$s</a>',
-		esc_url( admin_url( 'options-reading.php#view-transitions' ) ),
-		esc_html__( 'Settings', 'view-transitions' )
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-reading.php#view-transitions' ) ),
+				esc_html__( 'Settings', 'view-transitions' )
+			),
+		),
+		$links
 	);
-
-	return $links;
 }
