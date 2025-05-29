@@ -56,7 +56,7 @@ final class PLVT_View_Transition_Animation {
 	private $use_global_transition_names = true;
 
 	/**
-	 * Whether to apply the post specific view transition names while using this animation.
+	 * Whether to apply the post-specific view transition names while using this animation.
 	 *
 	 * @since 1.0.0
 	 * @var bool|callable
