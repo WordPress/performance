@@ -382,21 +382,18 @@ function plvt_render_settings_field( array $args ): void {
  * @since 1.2.1
  *
  * @param string[]|mixed $links An array of plugin action links.
- * @return string[]|mixed The modified list of actions.
+ * @return non-empty-array<string> The modified list of actions.
  */
-function plvt_add_settings_action_link( $links ) {
+function plvt_add_settings_action_link( $links ): array {
 	if ( ! is_array( $links ) ) {
-		return $links;
+		$links = array();
 	}
 
-	return array_merge(
-		array(
-			'settings' => sprintf(
-				'<a href="%1$s">%2$s</a>',
-				esc_url( admin_url( 'options-reading.php#view-transitions' ) ),
-				esc_html__( 'Settings', 'view-transitions' )
-			),
-		),
-		$links
+	$links['settings'] = sprintf(
+		'<a href="%1$s">%2$s</a>',
+		esc_url( admin_url( 'options-reading.php#view-transitions' ) ),
+		esc_html__( 'Settings', 'view-transitions' )
 	);
+
+	return $links;
 }
