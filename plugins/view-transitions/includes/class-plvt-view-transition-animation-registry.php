@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class representing a view transition animation registry.
  *
+ * @phpstan-import-type AnimationConfig from PLVT_View_Transition_Animation
+ *
  * @since 1.0.0
  */
 final class PLVT_View_Transition_Animation_Registry {
@@ -23,7 +25,7 @@ final class PLVT_View_Transition_Animation_Registry {
 	 * Registered animation class instances, keyed by slug.
 	 *
 	 * @since 1.0.0
-	 * @var array<string, PLVT_View_Transition_Animation>
+	 * @var array<non-empty-string, PLVT_View_Transition_Animation>
 	 */
 	private $registered_animations = array();
 
@@ -33,16 +35,18 @@ final class PLVT_View_Transition_Animation_Registry {
 	 * Includes the animation slug itself to avoid unnecessary conditionals.
 	 *
 	 * @since 1.0.0
-	 * @var array<string, string>
+	 * @var array<non-empty-string, non-empty-string>
 	 */
 	private $alias_map = array();
 
 	/**
 	 * Registers a view transition animation.
 	 *
-	 * @since 1.0.0
+	 * @since 1.0.0xx
 	 *
-	 * @param string               $slug         Unique animation slug.
+	 * @phpstan-param AnimationConfig $config Animation config.
+	 *
+	 * @param non-empty-string     $slug         Unique animation slug.
 	 * @param array<string, mixed> $config       Animation configuration. See
 	 *                                           {@see PLVT_View_Transition_Animation::__construct()} for possible
 	 *                                           values.
@@ -138,14 +142,14 @@ final class PLVT_View_Transition_Animation_Registry {
 	}
 
 	/**
-	 * Returns whether to apply the post specific view transition names for the given animation alias.
+	 * Returns whether to apply the post-specific view transition names for the given animation alias.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param string               $alias Slug or alias to reference the animation with. May be used to alter the
 	 *                                    animation's behavior.
 	 * @param array<string, mixed> $args  Optional. Animation arguments. Default is the animation's default arguments.
-	 * @return bool True if the post specific view transition names should be applied, false otherwise.
+	 * @return bool True if the post-specific view transition names should be applied, false otherwise.
 	 */
 	public function use_animation_post_transition_names( string $alias, array $args = array() ): bool {
 		if ( ! isset( $this->alias_map[ $alias ] ) ) {

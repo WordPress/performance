@@ -15,6 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class representing a view transition animation.
  *
+ * @phpstan-type AnimationConfig array{
+ *     aliases?: non-empty-string[],
+ *     use_stylesheet: bool|string,
+ *     use_global_transition_names: bool|callable(string, array<string,string>):bool,
+ *     use_post_transition_names: bool|callable(string, array<string,string>):bool,
+ *     get_stylesheet_callback?: callable(string, string, array<string,string>):string|null
+ * }
+ *
  * @since 1.0.0
  * @access private
  */
@@ -24,7 +32,7 @@ final class PLVT_View_Transition_Animation {
 	 * The unique animation slug.
 	 *
 	 * @since 1.0.0
-	 * @var string
+	 * @var non-empty-string
 	 */
 	private $slug;
 
@@ -32,7 +40,7 @@ final class PLVT_View_Transition_Animation {
 	 * Unique aliases for the animation, if any.
 	 *
 	 * @since 1.0.0
-	 * @var string[]
+	 * @var non-empty-string[]
 	 */
 	private $aliases = array();
 
@@ -93,7 +101,9 @@ final class PLVT_View_Transition_Animation {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string               $slug         Unique animation slug.
+	 * @phpstan-param AnimationConfig $config Animation config.
+	 *
+	 * @param non-empty-string     $slug         Unique animation slug.
 	 * @param array<string, mixed> $config       {
 	 *     Animation configuration.
 	 *
@@ -144,7 +154,7 @@ final class PLVT_View_Transition_Animation {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string Unique animation slug.
+	 * @return non-empty-string Unique animation slug.
 	 */
 	public function get_slug(): string {
 		return $this->slug;
@@ -155,7 +165,7 @@ final class PLVT_View_Transition_Animation {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string[] Unique aliases for the animation, or empty array if none.
+	 * @return non-empty-string[] Unique aliases for the animation, or empty array if none.
 	 */
 	public function get_aliases(): array {
 		return $this->aliases;
