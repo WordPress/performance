@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array<string, string> Associative array of `$animation => $label` pairs.
+ * @return array<non-empty-string, string> Associative array of `$animation => $label` pairs.
  */
 function plvt_get_view_transition_animation_labels(): array {
 	return array(
@@ -111,14 +111,13 @@ function plvt_sanitize_setting( $input ): array {
 		return $default_value;
 	}
 
-	// Ensure only valid keys are present.
-	$value = array_intersect_key( array_merge( $default_value, $input ), $default_value );
+	$value = $default_value;
 
-	// Constrain values to what is allowed.
-	if ( ! in_array( (string) $value['default_transition_animation'], array_keys( plvt_get_view_transition_animation_labels() ), true ) ) {
-		$value['default_transition_animation'] = $default_value['default_transition_animation'];
-	} else {
-		$value['default_transition_animation'] = (string) $value['default_transition_animation'];
+	if (
+		isset( $input['default_transition_animation'] ) &&
+		in_array( $input['default_transition_animation'], array_keys( plvt_get_view_transition_animation_labels() ), true )
+	) {
+		$value['default_transition_animation'] = $input['default_transition_animation'];
 	}
 
 	$selector_options = array(
@@ -129,9 +128,11 @@ function plvt_sanitize_setting( $input ): array {
 		'post_content_selector',
 	);
 	foreach ( $selector_options as $selector_option ) {
-		$value[ $selector_option ] = trim( sanitize_text_field( (string) $value[ $selector_option ] ) );
-		if ( '' === $value[ $selector_option ] ) {
-			$value[ $selector_option ] = $default_value[ $selector_option ];
+		if ( isset( $value[ $selector_option ] ) && is_string( $value[ $selector_option ] ) ) {
+			$selector_option_value = trim( sanitize_text_field( $value[ $selector_option ] ) );
+			if ( '' !== $selector_option_value ) {
+				$value[ $selector_option ] = $selector_option_value;
+			}
 		}
 	}
 
