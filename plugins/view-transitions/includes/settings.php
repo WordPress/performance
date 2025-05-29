@@ -379,7 +379,7 @@ function plvt_render_settings_field( array $args ): void {
 /**
  * Adds a settings link to the plugin's action links.
  *
- * @since 1.2.1
+ * @since 1.0.0
  *
  * @param string[]|mixed $links An array of plugin action links.
  * @return non-empty-array<string> The modified list of actions.

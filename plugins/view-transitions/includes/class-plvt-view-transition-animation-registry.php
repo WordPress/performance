@@ -42,7 +42,7 @@ final class PLVT_View_Transition_Animation_Registry {
 	/**
 	 * Registers a view transition animation.
 	 *
-	 * @since 1.0.0xx
+	 * @since 1.0.0
 	 *
 	 * @phpstan-param AnimationConfig $config Animation config.
 	 *
