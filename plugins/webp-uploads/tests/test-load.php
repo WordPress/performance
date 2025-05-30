@@ -1118,6 +1118,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Tests that the `webp_uploads_convert_palette_png_to_truecolor` function is hooked to the upload filters.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_hooks(): void {
+		$this->assertSame( 10, has_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+		$this->assertSame( 10, has_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+	}
+
+	/**
 	 * Tests converting a palette PNG to a truecolor PNG.
 	 *
 	 * @dataProvider data_to_test_webp_uploads_convert_palette_png_to_truecolor
@@ -1148,10 +1156,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		// Store the original file hash to compare later.
 		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
 
-		// Need to use wp_handle_sideload_prefilter for simulated upload as wp_handle_upload_prefilter is not called in this case.
-		add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+		// This will trigger the `wp_handle_sideload_prefilter` filter.
 		$attachment_id = media_handle_sideload( $file );
-		remove_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
 
 		try {
 			$this->assertIsNumeric( $attachment_id );

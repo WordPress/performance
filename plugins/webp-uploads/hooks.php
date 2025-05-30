@@ -862,3 +862,4 @@ function webp_uploads_convert_palette_png_to_truecolor( array $file ): array {
 	return $file;
 }
 add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
