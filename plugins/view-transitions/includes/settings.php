@@ -313,7 +313,8 @@ function plvt_render_settings_field( array $args ): void {
 			$choices = plvt_get_view_transition_animation_labels();
 			break;
 		default:
-			$type = 'text';
+			$type    = 'text';
+			$choices = array(); // Defined just for consistency.
 	}
 
 	$value = $option[ $args['field'] ] ?? '';
