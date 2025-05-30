@@ -1116,4 +1116,130 @@ class Test_WebP_Uploads_Load extends TestCase {
 		}
 		wp_delete_attachment( $attachment_id );
 	}
+
+	/**
+	 * Tests converting a palette PNG to a truecolor PNG.
+	 *
+	 * @dataProvider data_to_test_webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @param string|null   $image_path      The path to the image file to test.
+	 * @param bool          $expect_changed  Whether the png should be converted to truecolor.
+	 * @param callable|null $set_up          Optional setup function to run before the test.
+	 * @param callable|null $tear_down       Optional teardown function to run after the test.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed, ?callable $set_up, ?callable $tear_down ): void {
+		if ( null !== $set_up ) {
+			$set_up();
+		}
+
+		// Temp file will be copied and unlinked by WordPress core during sideload processing.
+		$tmp_file = wp_tempnam();
+		copy( $image_path, $tmp_file );
+		$file = array(
+			'name'     => basename( $image_path ),
+			'tmp_name' => $tmp_file,
+			'type'     => wp_check_filetype( $image_path )['type'],
+			'size'     => filesize( $tmp_file ),
+			'error'    => UPLOAD_ERR_OK,
+		);
+
+		// Store the original file hash to compare later.
+		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
+
+		// Need to use wp_handle_sideload_prefilter for simulated upload as wp_handle_upload_prefilter is not called in this case.
+		add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+		$attachment_id = media_handle_sideload( $file );
+		remove_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+
+		try {
+			$this->assertIsNumeric( $attachment_id );
+
+			// For getting a original image path for computation of the file hash.
+			$meta       = wp_get_attachment_metadata( $attachment_id );
+			$upload_dir = wp_get_upload_dir();
+			$path       = null;
+			if ( isset( $meta['original_image'], $meta['file'] ) ) {
+				$path = path_join(
+					$upload_dir['basedir'],
+					dirname( $meta['file'] ) . '/' . $meta['original_image']
+				);
+			}
+			$this->assertNotNull( $path );
+			$this->assertFileExists( $path );
+
+			// Hash will be modified if the image was converted to truecolor.
+			$modified_file_hash = md5_file( $path );
+
+			if ( ! $expect_changed ) {
+				$this->assertSame( $original_file_hash, $modified_file_hash );
+			} else {
+				$this->assertNotSame( $original_file_hash, $modified_file_hash );
+				$img = imagecreatefrompng( $path );
+				$this->assertTrue( imageistruecolor( $img ) );
+				imagedestroy( $img );
+
+				// Make sure the image converted to modern image format is not 0 bytes.
+				$modern_image_format_path = get_attached_file( $attachment_id );
+				$this->assertNotFalse( $modern_image_format_path );
+				$this->assertFileExists( $modern_image_format_path );
+				$this->assertGreaterThan( 0, (int) filesize( $modern_image_format_path ) );
+			}
+		} finally {
+			if ( null !== $tear_down ) {
+				$tear_down();
+			}
+			wp_delete_attachment( $attachment_id );
+		}
+	}
+
+	/**
+	 * Data provider for `test_webp_uploads_convert_palette_png_to_truecolor`.
+	 *
+	 * @return array<string, mixed> Returns an array of test cases.
+	 */
+	public function data_to_test_webp_uploads_convert_palette_png_to_truecolor(): array {
+		$non_palette_png = TESTS_PLUGIN_DIR . '/tests/data/images/dice.png';
+		$palette_png     = TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png';
+		$test_jpg        = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
+
+		return array(
+			'wrong_extension' => array(
+				'image_path'       => $test_jpg,
+				'expected_changed' => false,
+				'set_up'           => null,
+				'tear_down'        => null,
+			),
+			'non_palette_png' => array(
+				'image_path'       => $non_palette_png,
+				'expected_changed' => false,
+				'set_up'           => function (): void {
+					add_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
+				},
+				'tear_down'        => function (): void {
+					remove_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
+				},
+			),
+			'palette_png'     => array(
+				'image_path'       => $palette_png,
+				'expected_changed' => true,
+				'set_up'           => function (): void {
+					add_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
+				},
+				'tear_down'        => function (): void {
+					remove_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
+				},
+			),
+		);
+	}
+
+	/**
+	 * Use GD image editor.
+	 *
+	 * @return array<string>
+	 */
+	public function use_gd_image_editor(): array {
+		return array( 'WP_Image_Editor_GD' );
+	}
 }

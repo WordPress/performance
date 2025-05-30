@@ -807,8 +807,8 @@ add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_
 /**
  * Converts palette PNG images to true color PNG images.
  *
- * GD cannot convert palette-based PNGs to WebP/AVIF formats, causing conversion failures.
- * This function detects and converts palette PNGs to truecolor during upload.
+ * GD cannot convert palette-based PNG to WebP/AVIF formats, causing conversion failures.
+ * This function detects and converts palette PNG to truecolor during upload.
  *
  * @since n.e.x.t
  *
