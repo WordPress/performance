@@ -316,7 +316,7 @@ function plvt_render_settings_field( array $args ): void {
 			$type = 'text';
 	}
 
-	$value = $option[ $args['field'] ];
+	$value = $option[ $args['field'] ] ?? '';
 
 	if ( 'select' === $type ) {
 		?>
