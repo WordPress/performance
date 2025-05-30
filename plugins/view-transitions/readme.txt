@@ -53,4 +53,4 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.0 =
 
-* Initial release.
+* Initial release. ([1997](https://github.com/WordPress/performance/issues/1997))
