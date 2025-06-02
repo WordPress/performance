@@ -1,14 +1,14 @@
-export interface ViewTransitionAnimationConfig {
+export type ViewTransitionAnimationConfig = {
 	useGlobalTransitionNames: boolean;
 	usePostTransitionNames: boolean;
-}
+};
 
-export interface ViewTransitionsConfig {
+export type ViewTransitionsConfig = {
 	postSelector?: string;
 	globalTransitionNames?: Record< string, string >;
 	postTransitionNames?: Record< string, string >;
-	animations: Record< string, ViewTransitionAnimationConfig >;
-}
+	animations?: Record< string, ViewTransitionAnimationConfig >;
+};
 
 export type InitViewTransitionsFunction = (
 	config: ViewTransitionsConfig

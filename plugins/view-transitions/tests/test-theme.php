@@ -8,6 +8,9 @@
 
 class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 
+	/**
+	 * @covers ::plvt_polyfill_theme_support
+	 */
 	public function test_plvt_polyfill_theme_support(): void {
 		// Test polyfill without support registered.
 		remove_theme_support( 'view-transitions' );
@@ -22,6 +25,10 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 		$this->assertSame( array( array( 'custom_key' => 'custom_value' ) ), get_theme_support( 'view-transitions' ) );
 	}
 
+	/**
+	 * @covers ::plvt_load_view_transitions
+	 * @covers ::plvt_sanitize_view_transitions_theme_support
+	 */
 	public function test_plvt_load_view_transitions(): void {
 		// Clear up style if it is already registered.
 		if ( wp_style_is( 'plvt-view-transitions', 'registered' ) ) {

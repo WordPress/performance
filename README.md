@@ -21,6 +21,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [Performant Translations][3]    | `performant-translations` | No           | [Source][11], [Issues][19], [PRs][27]
 [Speculative Loading][4]        | `speculation-rules`       | No           | [Source][12], [Issues][20], [PRs][28]
 [Enhanced Responsive Images][6] | `auto-sizes`              | Yes          | [Source][14], [Issues][22], [PRs][30]
+[View Transitions][37]          | `view-transitions`        | Yes          | [Source][38], [Issues][39], [PRs][40]
 [Web Worker Offloading][8]      | `web-worker-offloading`   | Yes          | [Source][16], [Issues][24], [PRs][32]
 
 [1]: https://wordpress.org/plugins/dominant-color-images/
@@ -32,6 +33,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [7]: https://wordpress.org/plugins/image-prioritizer/
 [8]: https://wordpress.org/plugins/web-worker-offloading/
 [33]: https://wordpress.org/plugins/optimization-detective/
+[37]: https://wordpress.org/plugins/view-transitions/
 
 [9]: https://github.com/WordPress/performance/tree/trunk/plugins/dominant-color-images
 [10]: https://github.com/WordPress/performance/tree/trunk/plugins/webp-uploads
@@ -42,6 +44,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [15]: https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer
 [16]: https://github.com/WordPress/performance/tree/trunk/plugins/web-worker-offloading
 [34]: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
+[38]: https://github.com/WordPress/performance/tree/trunk/plugins/view-transitions
 
 [17]: https://github.com/WordPress/performance/issues?q=is%3Aopen+label%3A%22%5BPlugin%5D+Image+Placeholders%22
 [18]: https://github.com/WordPress/performance/issues?q=is%3Aopen+label%3A%22%5BPlugin%5D+Modern+Image+Formats%22
@@ -52,6 +55,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [23]: https://github.com/WordPress/performance/issues?q=is%3Aopen+label%3A%22%5BPlugin%5D+Image+Prioritizer%22
 [24]: https://github.com/WordPress/performance/issues?q=is%3Aopen%20label%3A%22%5BPlugin%5D%20Web%20Worker%20Offloading%22
 [35]: https://github.com/WordPress/performance/issues?q=is%3Aopen%20label%3A%22%5BPlugin%5D%20Optimization%20Detective%22
+[39]: https://github.com/WordPress/performance/issues?q=is%3Aopen%20label%3A%22%5BPlugin%5D%20View%20Transitions%22
 
 [25]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Image+Placeholders%22
 [26]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Modern+Image+Formats%22
@@ -62,5 +66,6 @@ Plugin                          | Slug                      | Experimental | Lin
 [31]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Image+Prioritizer%22
 [32]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Web%20Worker%20Offloading%22
 [36]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Optimization%20Detective%22
+[40]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+View%20Transitions%22
 
 Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin's purpose may change as some of its features are merged into WordPress core.
