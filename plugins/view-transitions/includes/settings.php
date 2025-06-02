@@ -233,6 +233,8 @@ function plvt_add_setting_ui(): void {
 			?>
 			<p class="description">
 				<?php esc_html_e( 'This section allows you to control how view transitions are used to enhance the navigation user experience.', 'view-transitions' ); ?>
+				<br>
+				<?php esc_html_e( 'To reset any of the selector text inputs, clear the field and save the changes.', 'view-transitions' ); ?>
 			</p>
 			<?php
 		},
@@ -243,8 +245,6 @@ function plvt_add_setting_ui(): void {
 		)
 	);
 
-	$reset_explanation = __( 'To reset, clear the field and save the changes.', 'view-transitions' );
-
 	$fields = array(
 		'default_transition_animation' => array(
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
@@ -252,23 +252,23 @@ function plvt_add_setting_ui(): void {
 		),
 		'header_selector'              => array(
 			'title'       => __( 'Header Selector', 'view-transitions' ),
-			'description' => __( 'Provide the CSS selector to detect the global header element.', 'view-transitions' ) . ' ' . $reset_explanation,
+			'description' => __( 'Provide the CSS selector to detect the global header element.', 'view-transitions' ),
 		),
 		'main_selector'                => array(
 			'title'       => __( 'Main Selector', 'view-transitions' ),
-			'description' => __( 'Provide the CSS selector to detect the global main element.', 'view-transitions' ) . ' ' . $reset_explanation,
+			'description' => __( 'Provide the CSS selector to detect the global main element.', 'view-transitions' ),
 		),
 		'post_title_selector'          => array(
 			'title'       => __( 'Post Title Selector', 'view-transitions' ),
-			'description' => __( 'Provide the CSS selector to detect the post title element.', 'view-transitions' ) . ' ' . $reset_explanation,
+			'description' => __( 'Provide the CSS selector to detect the post title element.', 'view-transitions' ),
 		),
 		'post_thumbnail_selector'      => array(
 			'title'       => __( 'Post Thumbnail Selector', 'view-transitions' ),
-			'description' => __( 'Provide the CSS selector to detect the post thumbnail element.', 'view-transitions' ) . ' ' . $reset_explanation,
+			'description' => __( 'Provide the CSS selector to detect the post thumbnail element.', 'view-transitions' ),
 		),
 		'post_content_selector'        => array(
 			'title'       => __( 'Post Content Selector', 'view-transitions' ),
-			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ) . ' ' . $reset_explanation,
+			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
