@@ -24,7 +24,7 @@ const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
 const SKIP_CHANGELOG_LABEL = 'skip changelog';
 
 /** @typedef {import('@octokit/rest').Octokit} GitHub */
-/** @typedef {import('@octokit/rest').RestEndpointMethodTypes['issues']['listForRepo']['response']} IssuesListForRepoResponseItem */
+/** @typedef {import('@octokit/rest').RestEndpointMethodTypes['issues']['listForRepo']['response']['data'][0]} IssuesListForRepoResponseItem */
 
 /**
  * @typedef WPChangelogCommandOptions
@@ -115,7 +115,7 @@ async function fetchAllPullRequests( octokit, settings ) {
  */
 function getIssueType( issue ) {
 	const typeLabels = issue.labels
-		.map( ( { name } ) => name )
+		.map( ( label ) => ( typeof label === 'string' ? label : label.name ) )
 		.filter( ( label ) => label.startsWith( TYPE_PREFIX ) );
 
 	if ( ! typeLabels.length ) {
@@ -141,7 +141,10 @@ function formatChangelog( milestone, pullRequests ) {
 	let changelog = '';
 
 	// Group PRs by type.
-	const typeGroups = groupBy( pullRequests, getIssueType );
+	const typeGroups =
+		/** @type {Object<string, IssuesListForRepoResponseItem[]>} */ (
+			groupBy( pullRequests, getIssueType )
+		);
 	if ( typeGroups[ MISSING_TYPE ] ) {
 		const prURLs = typeGroups[ MISSING_TYPE ].map(
 			( { html_url } ) => html_url // eslint-disable-line camelcase
@@ -161,7 +164,7 @@ function formatChangelog( milestone, pullRequests ) {
 			return aIndex - bIndex;
 		}
 		if ( aIndex === -1 && bIndex === -1 ) {
-			return a - b;
+			return a.localeCompare( b );
 		}
 		return aIndex > -1 ? -1 : 1;
 	} );
@@ -219,9 +222,11 @@ async function getChangelog( settings ) {
 
 	const nonSkippedPullRequests = pullRequests.filter(
 		( pullRequest ) =>
-			! pullRequest.labels.find(
-				( { name } ) => name === SKIP_CHANGELOG_LABEL
-			)
+			! pullRequest.labels
+				.map( ( label ) =>
+					typeof label === 'string' ? label : label.name
+				)
+				.find( ( name ) => name === SKIP_CHANGELOG_LABEL )
 	);
 	if ( ! nonSkippedPullRequests.length ) {
 		throw new Error(

@@ -14,7 +14,7 @@
  * @param {string} repo    Repository name.
  * @param {string} title   Milestone title.
  *
- * @return {Promise<IssuesListMilestonesForRepoResponseItem|void>} Promise resolving to milestone, if exists.
+ * @return {Promise<import('@octokit/rest').RestEndpointMethodTypes['issues']['listMilestones']['response']['data'][0]|void>} Promise resolving to milestone, if exists.
  */
 async function getMilestoneByTitle( octokit, owner, repo, title ) {
 	const options = octokit.issues.listMilestones.endpoint.merge( {
@@ -45,9 +45,7 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
  * @param {IssueState} [state]       Optional issue state.
  * @param {string}     [closedSince] Optional timestamp.
  *
- * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to pull
- *                                                    requests for the given
- *                                                    milestone.
+ * @return {Promise<import('@octokit/rest').RestEndpointMethodTypes['issues']['listForRepo']['response']['data']>} Promise resolving to pull requests for the given milestone.
  */
 async function getIssuesByMilestone(
 	octokit,
