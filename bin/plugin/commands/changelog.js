@@ -23,8 +23,8 @@ const PRIMARY_TYPE_LABELS = {
 const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
 const SKIP_CHANGELOG_LABEL = 'skip changelog';
 
-/** @typedef {import('@octokit/rest')} GitHub */
-/** @typedef {import('@octokit/rest').IssuesListForRepoResponseItem} IssuesListForRepoResponseItem */
+/** @typedef {import('@octokit/rest').Octokit} GitHub */
+/** @typedef {import('@octokit/rest').RestEndpointMethodTypes['issues']['listForRepo']['response']} IssuesListForRepoResponseItem */
 
 /**
  * @typedef WPChangelogCommandOptions
