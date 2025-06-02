@@ -22,27 +22,39 @@ window.plvtInitViewTransitions = ( config ) => {
 	/**
 	 * Gets all view transition entries relevant for a view transition.
 	 *
+	 * @param {string}       transitionType View transition type. Only 'default' is supported so far, but more to be added.
 	 * @param {Element}      bodyElement    The body element.
 	 * @param {Element|null} articleElement The post element relevant for the view transition, if any.
 	 * @return {Array[]} View transition entries with each one containing the element and its view transition name.
 	 */
-	const getViewTransitionEntries = ( bodyElement, articleElement ) => {
-		const globalEntries = Object.entries(
-			config.globalTransitionNames || {}
-		).map( ( [ selector, name ] ) => {
-			const element = bodyElement.querySelector( selector );
-			return [ element, name ];
-		} );
+	const getViewTransitionEntries = (
+		transitionType,
+		bodyElement,
+		articleElement
+	) => {
+		const animations = config.animations || {};
 
-		const postEntries = articleElement
-			? Object.entries( config.postTransitionNames || {} ).map(
+		const globalEntries = animations[ transitionType ]
+			.useGlobalTransitionNames
+			? Object.entries( config.globalTransitionNames || {} ).map(
 					( [ selector, name ] ) => {
-						const element =
-							articleElement.querySelector( selector );
+						const element = bodyElement.querySelector( selector );
 						return [ element, name ];
 					}
 			  )
 			: [];
+
+		const postEntries =
+			animations[ transitionType ].usePostTransitionNames &&
+			articleElement
+				? Object.entries( config.postTransitionNames || {} ).map(
+						( [ selector, name ] ) => {
+							const element =
+								articleElement.querySelector( selector );
+							return [ element, name ];
+						}
+				  )
+				: [];
 
 		return [ ...globalEntries, ...postEntries ];
 	};
@@ -131,9 +143,13 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pageswap',
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
+				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				event.viewTransition.types.add( transitionType );
+
 				let viewTransitionEntries;
 				if ( document.body.classList.contains( 'single' ) ) {
 					viewTransitionEntries = getViewTransitionEntries(
+						transitionType,
 						document.body,
 						getArticle()
 					);
@@ -142,6 +158,7 @@ window.plvtInitViewTransitions = ( config ) => {
 					document.body.classList.contains( 'archive' )
 				) {
 					viewTransitionEntries = getViewTransitionEntries(
+						transitionType,
 						document.body,
 						getArticleForUrl( event.activation.entry.url )
 					);
@@ -166,9 +183,13 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pagereveal',
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
+				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				event.viewTransition.types.add( transitionType );
+
 				let viewTransitionEntries;
 				if ( document.body.classList.contains( 'single' ) ) {
 					viewTransitionEntries = getViewTransitionEntries(
+						transitionType,
 						document.body,
 						getArticle()
 					);
@@ -177,6 +198,7 @@ window.plvtInitViewTransitions = ( config ) => {
 					document.body.classList.contains( 'archive' )
 				) {
 					viewTransitionEntries = getViewTransitionEntries(
+						transitionType,
 						document.body,
 						window.navigation.activation.from
 							? getArticleForUrl(

@@ -116,6 +116,10 @@ function perflab_get_standalone_plugin_data(): array {
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
 		),
+		'view-transitions'        => array(
+			'constant'     => 'VIEW_TRANSITIONS_VERSION',
+			'experimental' => true,
+		),
 		'web-worker-offloading'   => array(
 			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',
 			'experimental' => true,

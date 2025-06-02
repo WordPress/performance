@@ -8,15 +8,15 @@
   },
   "dependencies": {
     "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-    "web-vitals": "4.2.4"
+    "web-vitals": "5.0.1"
   },
   "devDependencies": {
-    "@octokit/rest": "^21.1.1",
+    "@octokit/rest": "^22.0.0",
     "@playwright/test": "^1.51.1",
     "@wordpress/e2e-test-utils-playwright": "^1.21.0",
-    "@wordpress/env": "^10.23.0",
-    "@wordpress/prettier-config": "^4.23.0",
-    "@wordpress/scripts": "^30.16.0",
+    "@wordpress/env": "^10.24.0",
+    "@wordpress/prettier-config": "^4.24.0",
+    "@wordpress/scripts": "^30.17.0",
     "commander": "14.0.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-minimizer-webpack-plugin": "^7.0.2",
