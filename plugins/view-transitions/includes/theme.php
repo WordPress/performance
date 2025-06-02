@@ -6,6 +6,12 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Polyfills theme support for 'view-transitions', regardless of the theme.
  *
@@ -19,6 +25,7 @@
  * This function must run at the latest possible priority for `after_setup_theme`.
  *
  * @since 1.0.0
+ * @access private
  */
 function plvt_polyfill_theme_support(): void {
 	if ( current_theme_supports( 'view-transitions' ) ) {
@@ -35,6 +42,7 @@ function plvt_polyfill_theme_support(): void {
  * function that runs after `after_setup_theme`, but before the 'view-transitions' feature arguments are possibly used.
  *
  * @since 1.0.0
+ * @access private
  *
  * @global array<string, mixed> $_wp_theme_features Theme support features added and their arguments.
  */
@@ -58,7 +66,7 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 			'.wp-post-image'                         => 'post-thumbnail',
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
-		'default-animation'       => 'wipe-from-left',
+		'default-animation'       => 'fade',
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.

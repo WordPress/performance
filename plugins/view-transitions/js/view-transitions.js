@@ -32,7 +32,9 @@ window.plvtInitViewTransitions = ( config ) => {
 		bodyElement,
 		articleElement
 	) => {
-		const globalEntries = config.animations[ transitionType ]
+		const animations = config.animations || {};
+
+		const globalEntries = animations[ transitionType ]
 			.useGlobalTransitionNames
 			? Object.entries( config.globalTransitionNames || {} ).map(
 					( [ selector, name ] ) => {
@@ -43,7 +45,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			: [];
 
 		const postEntries =
-			config.animations[ transitionType ].usePostTransitionNames &&
+			animations[ transitionType ].usePostTransitionNames &&
 			articleElement
 				? Object.entries( config.postTransitionNames || {} ).map(
 						( [ selector, name ] ) => {

@@ -15,6 +15,9 @@ class Test_ViewTransitions_Hooks extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'wp_enqueue_scripts', 'plvt_load_view_transitions' ) );
 	}
 
+	/**
+	 * @covers ::plvt_render_generator
+	 */
 	public function test_plvt_render_generator(): void {
 		$expected = '<meta name="generator" content="view-transitions ' . VIEW_TRANSITIONS_VERSION . '">' . "\n";
 		$output   = get_echo( 'plvt_render_generator' );
