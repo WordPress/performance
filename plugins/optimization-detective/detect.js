@@ -27,14 +27,14 @@
  */
 
 /**
- * Window reference to reduce size when script is minified.
+ * Window reference to reduce size when the script is minified.
  *
  * @type {Window}
  */
 const win = window;
 
 /**
- * Document reference to reduce size when script is minified.
+ * Document reference to reduce size when the script is minified.
  *
  * @type {Document}
  */
@@ -196,7 +196,7 @@ function createLogger(
 /**
  * Attempts to get the extension name (i.e. slug for plugin or theme) from the script module URL.
  *
- * If extraction of the slug fails then the entire URL is returned.
+ * If extraction of the slug fails, then the entire URL is returned.
  *
  * @param {string} scriptModuleUrl - Script module URL.
  * @return {string} Derived extension name.
@@ -256,7 +256,7 @@ async function getAlreadySubmittedSessionStorageKey(
 	urlMetricGroupStatus,
 	{ warn, error }
 ) {
-	if ( ! window.crypto || ! window.crypto.subtle ) {
+	if ( ! win.crypto || ! win.crypto.subtle ) {
 		warn(
 			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
 		);
@@ -631,7 +631,7 @@ async function scrollToBottomOfPage() {
  */
 
 /**
- * Detects the LCP element, loaded images, client viewport and store for future optimizations.
+ * Detects the LCP element, loaded images, client viewport, and store for future optimizations.
  *
  * @param {Object}                 args                            - Args.
  * @param {string[]}               args.extensionModuleUrls        - URLs for extension script modules to import.
@@ -702,7 +702,7 @@ export default async function detect( {
 		return;
 	}
 
-	if ( document.visibilityState === 'hidden' && ! document.prerendering ) {
+	if ( doc.visibilityState === 'hidden' && ! doc.prerendering ) {
 		log( 'Page opened in background tab so URL Metric is not collected.' );
 		return;
 	}
@@ -801,9 +801,9 @@ export default async function detect( {
 		return;
 	}
 
-	// Keep track of whether the window resized. If it resized, we abort sending the URLMetric.
+	// Keep track of whether the window resized. If it was resized, we abort sending the URLMetric.
 	let didWindowResize = false;
-	window.addEventListener(
+	win.addEventListener(
 		'resize',
 		() => {
 			didWindowResize = true;
@@ -836,10 +836,10 @@ export default async function detect( {
 	const breadcrumbedElementsMap = new Map(
 		[ ...breadcrumbedElements ].map(
 			/**
-			 * @param {HTMLElement} element
-			 * @return {[HTMLElement, string]} Tuple of element and its XPath.
+			 * @param {Element} element
+			 * @return {[Element, string]} Tuple of an element and its XPath.
 			 */
-			( element ) => [ element, element.dataset.odXpath ]
+			( element ) => [ element, element.getAttribute( 'data-od-xpath' ) ]
 		)
 	);
 
@@ -856,7 +856,7 @@ export default async function detect( {
 		}
 	}
 
-	// Wait for the intersection observer to report back on the initially-visible elements.
+	// Wait for the intersection observer to report back on the initially visible elements.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
 	if ( breadcrumbedElementsMap.size > 0 ) {
 		await new Promise( ( resolve ) => {
@@ -888,7 +888,7 @@ export default async function detect( {
 	/** @type {(LCPMetric|LCPMetricWithAttribution)[]} */
 	const lcpMetricCandidates = [];
 
-	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
+	// Get at least one LCP candidate. More may be reported before the page finishes loading.
 	await new Promise( ( resolve ) => {
 		onLCP(
 			/**
@@ -901,7 +901,7 @@ export default async function detect( {
 				resolve();
 			},
 			{
-				// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
+				// This avoids needing to click to finalize the LCP candidate. While this is helpful for testing, it also
 				// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
 				// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
 				reportAllChanges: true,
@@ -909,7 +909,7 @@ export default async function detect( {
 		);
 	} );
 
-	// Stop observing initial viewport.
+	// Stop observing the initial viewport.
 	disconnectIntersectionObserver();
 
 	urlMetric = {
@@ -1060,7 +1060,7 @@ export default async function detect( {
 			doc.addEventListener(
 				'visibilitychange',
 				() => {
-					if ( document.visibilityState === 'hidden' ) {
+					if ( doc.visibilityState === 'hidden' ) {
 						// TODO: This will fire even when switching tabs.
 						resolve();
 					}
@@ -1074,7 +1074,7 @@ export default async function detect( {
 		}
 	} );
 
-	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
+	// Only proceed with submitting the URL Metric if the viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
 	if ( didWindowResize ) {
 		log( 'Aborting URL Metric collection due to viewport size change.' );
@@ -1147,7 +1147,7 @@ export default async function detect( {
 	}
 
 	/*
-	 * Now prepare the URL Metric to be sent as JSON request body.
+	 * Now prepare the URL Metric to be sent in the JSON request body.
 	 */
 
 	const maxBodyLengthKiB = 64;

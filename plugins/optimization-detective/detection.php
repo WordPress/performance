@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Obtains the ID for a post related to this response so that page caches can be told to invalidate their cache.
+ * Gets the ID for a post related to this response so that page caches can be told to invalidate their cache.
  *
  * If the queried object for the response is a post, then that post's ID is used. Otherwise, it uses the ID of the first
  * post in The Loop.
@@ -23,15 +23,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * this ID if the relevant actions are triggered for the post (e.g. clean_post_cache, save_post, transition_post_status).
  *
  * Otherwise, if the response is an archive page or the front page where show_on_front=posts (i.e. is_home), then
- * there is no singular post object that represents the URL. In this case, we obtain the first post in the main
- * loop. By triggering the relevant actions for this post ID, page caches will have their best shot at invalidating
+ * there is no singular post object that represents the URL. In this case, we get the first post in the main
+ * loop. By triggering the relevant actions for this post ID, page caches will be more likely able to invalidate
  * the related URLs. Page caching plugins which leverage surrogate keys will be the most reliable here. Otherwise,
  * caching plugins may just resort to automatically purging the cache for the homepage whenever any post is edited,
  * which is better than nothing.
  *
  * There should not be any situation by default in which a page optimized with Optimization Detective does not have such
  * a post available for cache purging. As seen in {@see od_can_optimize_response()}, when such a post ID is not
- * available for cache purging then it returns false, as it also does in another case like if is_404().
+ * available for cache purging, then it returns false, as it also does in another case like if is_404().
  *
  * @since 0.8.0
  * @access private

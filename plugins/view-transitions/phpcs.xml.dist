@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-ViewTransitions">
+	<description>WordPress Coding Standards for View Transitions Plugin</description>
+
+	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="view-transitions"/>
+
+	<file>.</file>
+</ruleset>

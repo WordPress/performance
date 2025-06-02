@@ -95,6 +95,7 @@ jobs:
             npm run test-php:image-prioritizer -- -- -- --coverage-clover=./single-site-reports/coverage-image-prioritizer.xml
             npm run test-php:optimization-detective -- -- -- --coverage-clover=./single-site-reports/coverage-optimization-detective.xml
             npm run test-php:speculation-rules -- -- -- --coverage-clover=./single-site-reports/coverage-speculation-rules.xml
+            npm run test-php:view-transitions -- -- -- --coverage-clover=./single-site-reports/coverage-view-transitions.xml
             npm run test-php:web-worker-offloading -- -- -- --coverage-clover=./single-site-reports/coverage-web-worker-offloading.xml
             npm run test-php:webp-uploads -- -- -- --coverage-clover=./single-site-reports/coverage-webp-uploads.xml
           else
@@ -110,6 +111,7 @@ jobs:
             npm run test-php-multisite:image-prioritizer -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-image-prioritizer.xml
             npm run test-php-multisite:optimization-detective -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-optimization-detective.xml
             npm run test-php-multisite:speculation-rules -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-speculation-rules.xml
+            npm run test-php-multisite:view-transitions -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-view-transitions.xml
             npm run test-php-multisite:web-worker-offloading -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-web-worker-offloading.xml
             npm run test-php-multisite:webp-uploads -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-webp-uploads.xml
           else

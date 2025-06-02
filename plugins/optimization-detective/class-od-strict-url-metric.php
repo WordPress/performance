@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Representation of the measurements taken from a single client's visit to a specific URL without additionalProperties allowed.
  *
  * This is used exclusively in the REST API endpoint for capturing new URL Metrics to prevent invalid additional data from being
- * submitted in the request. For URL Metrics which have been stored the looser OD_URL_Metric class is used instead.
+ * submitted in the request. For URL Metrics which have been stored, the looser OD_URL_Metric class is used instead.
  *
  * @phpstan-import-type JSONSchema from OD_URL_Metric
  *

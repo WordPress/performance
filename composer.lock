@@ -659,16 +659,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.11",
+            "version": "0.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "8b29105305d85fa440ae0bce1d4d83fcdf5b47ca"
+                "reference": "d8f8290313e4fd1b4840c553a8492eff31ad54eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/8b29105305d85fa440ae0bce1d4d83fcdf5b47ca",
-                "reference": "8b29105305d85fa440ae0bce1d4d83fcdf5b47ca",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/d8f8290313e4fd1b4840c553a8492eff31ad54eb",
+                "reference": "d8f8290313e4fd1b4840c553a8492eff31ad54eb",
                 "shasum": ""
             },
             "type": "library",
@@ -685,9 +685,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.11"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.12"
             },
-            "time": "2025-02-12T00:19:27+00:00"
+            "time": "2025-04-15T00:22:00+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -2132,16 +2132,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.12.1",
+            "version": "3.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "ea16a1f3719783345febd3aab41beb55c8c84bfd"
+                "reference": "65ff2489553b83b4597e89c3b8b721487011d186"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/ea16a1f3719783345febd3aab41beb55c8c84bfd",
-                "reference": "ea16a1f3719783345febd3aab41beb55c8c84bfd",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/65ff2489553b83b4597e89c3b8b721487011d186",
+                "reference": "65ff2489553b83b4597e89c3b8b721487011d186",
                 "shasum": ""
             },
             "require": {
@@ -2212,7 +2212,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-04-04T12:57:55+00:00"
+            "time": "2025-05-11T03:36:00+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
@@ -2471,16 +2471,16 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.7.2",
+            "version": "6.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
-                "reference": "e2bb06bacc92a8e9e405e83f56989e8ed9359db1"
+                "reference": "a33d328dab5a4a9ddf0c560bcadbabb58b5ee67f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/e2bb06bacc92a8e9e405e83f56989e8ed9359db1",
-                "reference": "e2bb06bacc92a8e9e405e83f56989e8ed9359db1",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/a33d328dab5a4a9ddf0c560bcadbabb58b5ee67f",
+                "reference": "a33d328dab5a4a9ddf0c560bcadbabb58b5ee67f",
                 "shasum": ""
             },
             "type": "library",
@@ -2515,7 +2515,7 @@
                 "issues": "https://github.com/wp-phpunit/issues",
                 "source": "https://github.com/wp-phpunit/wp-phpunit"
             },
-            "time": "2025-02-12T01:22:52+00:00"
+            "time": "2025-04-16T01:40:54+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",
