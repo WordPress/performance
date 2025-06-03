@@ -40,6 +40,14 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 
 		$tests = perflab_effective_asset_cache_headers_add_test( $tests );
 
+		// Test for local env.
+		$this->assertArrayNotHasKey( 'effective_asset_cache_headers', $tests['direct'] );
+
+		// Mock the env to production and call test again.
+		// @todo Mock wp_get_environment_type here.
+		$tests = perflab_effective_asset_cache_headers_add_test( $tests );
+
+		// Test for production env.
 		$this->assertArrayHasKey( 'effective_asset_cache_headers', $tests['direct'] );
 		$this->assertEquals( 'Effective Caching Headers', $tests['direct']['effective_asset_cache_headers']['label'] );
 		$this->assertEquals( 'perflab_effective_asset_cache_headers_assets_test', $tests['direct']['effective_asset_cache_headers']['test'] );
@@ -51,7 +59,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 	 * @covers ::perflab_effective_asset_cache_headers_add_test
 	 */
 	public function test_perflab_effective_asset_cache_headers_add_test_is_attached_to_site_status_tests(): void {
-		$this->assertNotFalse( has_filter( 'site_status_tests', 'perflab_effective_asset_cache_headers_add_test' ) );
+		$this->assertEquals( 100, has_filter( 'site_status_tests', 'perflab_effective_asset_cache_headers_add_test' ) );
 	}
 
 	/**
