@@ -12,6 +12,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
+	 * @covers ::__construct
 	 * @covers ::get
 	 * @covers ::get_url_metric
 	 * @covers ::get_url_metric_group
@@ -39,7 +40,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 		);
 
 		$element_data = array(
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/HEADER/*[1][self::IMG]',
 			'isLCP'              => false,
 			'isLCPCandidate'     => true,
 			'intersectionRatio'  => 0.123,
@@ -71,7 +72,8 @@ class Test_OD_Element extends WP_UnitTestCase {
 		$this->assertInstanceOf( OD_Element::class, $element );
 		$this->assertSame( $url_metric, $element->get_url_metric() );
 		$this->assertNull( $element->get_url_metric_group() );
-		$collection = new OD_URL_Metric_Group_Collection( array( $url_metric ), array(), 1, DAY_IN_SECONDS );
+		$current_etag = md5( '' );
+		$collection   = new OD_URL_Metric_Group_Collection( array( $url_metric ), $current_etag, array(), 1, DAY_IN_SECONDS );
 		$collection->add_url_metric( $url_metric );
 		$this->assertSame( iterator_to_array( $collection )[0], $element->get_url_metric_group() );
 

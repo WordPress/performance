@@ -2,6 +2,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const { chdir } = require( 'process' );
 const { spawnSync } = require( 'child_process' );
+const CssMinimizerPlugin = require( 'css-minimizer-webpack-plugin' );
 
 /**
  * Return plugin root path.
@@ -36,7 +37,7 @@ const getPluginVersion = ( pluginPath ) => {
 	const readmePath = path.resolve( pluginPath, 'readme.txt' );
 
 	const fileContent = fs.readFileSync( readmePath, 'utf-8' );
-	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)/i;
 	const match = versionRegex.exec( fileContent );
 
 	if ( match ) {
@@ -100,6 +101,37 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
 };
 
 /**
+ * Transformer to minify CSS content.
+ *
+ * @param {Buffer} content      The content as a Buffer of the file being transformed.
+ * @param {string} absoluteFrom The absolute path to the file being transformed.
+ *
+ * @return {Promise<string>} A promise that resolves to the transformed (minified) content.
+ */
+const cssMinifyTransformer = ( content, absoluteFrom ) => {
+	const cssContent = content.toString();
+
+	return Promise.resolve(
+		CssMinimizerPlugin.cssnanoMinify(
+			{ [ absoluteFrom ]: cssContent },
+			undefined,
+			{
+				preset: [
+					'default',
+					{
+						discardComments: {
+							removeAll: true,
+						},
+					},
+				],
+			}
+		)
+	).then( ( result ) => {
+		return result.code;
+	} );
+};
+
+/**
  * Create plugins zip file using `zip` command.
  *
  * @param {string} pluginPath The path where the plugin build is located.
@@ -117,9 +149,11 @@ const createPluginZip = ( pluginPath, pluginName ) => {
 	] );
 
 	if ( 0 !== proc.status ) {
-		throw new Error(
-			proc.error || proc.stderr.toString() || proc.stdout.toString()
-		);
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
 	}
 };
 
@@ -129,5 +163,6 @@ module.exports = {
 	getPluginVersion,
 	generateBuildManifest,
 	assetDataTransformer,
+	cssMinifyTransformer,
 	createPluginZip,
 };

@@ -6,25 +6,24 @@
  * @since 1.0.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
-/**
- * Prints the speculation rules.
- *
- * For browsers that do not support speculation rules yet, the `script[type="speculationrules"]` tag will be ignored.
- *
- * @since 1.0.0
- */
-function plsr_print_speculation_rules(): void {
-	wp_print_inline_script_tag(
-		(string) wp_json_encode( plsr_get_speculation_rules() ),
-		array( 'type' => 'speculationrules' )
-	);
+// Conditionally use either the WordPress Core API, or load the plugin's API implementation otherwise.
+if ( function_exists( 'wp_get_speculation_rules_configuration' ) ) {
+	require_once __DIR__ . '/wp-core-api.php';
+
+	add_filter( 'wp_speculation_rules_configuration', 'plsr_filter_speculation_rules_configuration' );
+	add_filter( 'wp_speculation_rules_href_exclude_paths', 'plsr_filter_speculation_rules_exclude_paths', 10, 2 );
+} else {
+	require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
+	require_once __DIR__ . '/plugin-api.php';
+
+	add_action( 'wp_footer', 'plsr_print_speculation_rules' );
 }
-add_action( 'wp_footer', 'plsr_print_speculation_rules' );
 
 /**
  * Displays the HTML generator meta tag for the Speculative Loading plugin.

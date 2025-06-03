@@ -7,21 +7,20 @@
 	const { i18n, a11y, apiFetch } = wp;
 	const { __ } = i18n;
 
-	/**
-	 * Handles click events on elements with the class 'perflab-install-active-plugin'.
-	 *
-	 * This asynchronous function listens for click events on the document and executes
-	 * the provided callback function if triggered.
-	 *
-	 * @param {MouseEvent} event - The click event object that is triggered when the user clicks on the document.
-	 *
-	 * @return {Promise<void>} The asynchronous function returns a promise that resolves to void.
-	 */
-	async function handlePluginActivationClick( event ) {
-		const target = /** @type {HTMLElement} */ ( event.target );
+	// Queue to hold pending activation requests.
+	const activationQueue = [];
+	let isProcessingActivation = false;
 
+	/**
+	 * Enqueues plugin activation requests and starts processing if not already in progress.
+	 *
+	 * @param {MouseEvent} event - The click event object.
+	 */
+	function enqueuePluginActivation( event ) {
 		// Prevent the default link behavior.
 		event.preventDefault();
+
+		const target = /** @type {HTMLElement} */ ( event.target );
 
 		if (
 			target.classList.contains( 'updating-message' ) ||
@@ -31,11 +30,36 @@
 		}
 
 		target.classList.add( 'updating-message' );
+		target.textContent = __( 'Waiting…', 'performance-lab' );
+
+		const pluginSlug = target.dataset.pluginSlug;
+
+		activationQueue.push( { target, pluginSlug } );
+
+		// Start processing the queue if not already doing so.
+		if ( ! isProcessingActivation ) {
+			handlePluginActivation();
+		}
+	}
+
+	/**
+	 * Handles activation of feature/plugin using queue based approach.
+	 *
+	 * @return {Promise<void>} The asynchronous function returns a promise that resolves to void.
+	 */
+	async function handlePluginActivation() {
+		if ( 0 === activationQueue.length ) {
+			isProcessingActivation = false;
+			return;
+		}
+
+		isProcessingActivation = true;
+
+		const { target, pluginSlug } = activationQueue.shift();
+
 		target.textContent = __( 'Activating…', 'performance-lab' );
 
 		a11y.speak( __( 'Activating…', 'performance-lab' ) );
-
-		const pluginSlug = target.dataset.pluginSlug;
 
 		try {
 			// Activate the plugin/feature via the REST API.
@@ -76,6 +100,8 @@
 
 			target.classList.remove( 'updating-message' );
 			target.textContent = __( 'Activate', 'performance-lab' );
+		} finally {
+			handlePluginActivation();
 		}
 	}
 
@@ -83,6 +109,6 @@
 	document
 		.querySelectorAll( '.perflab-install-active-plugin' )
 		.forEach( ( item ) => {
-			item.addEventListener( 'click', handlePluginActivationClick );
+			item.addEventListener( 'click', enqueuePluginActivation );
 		} );
 } )();

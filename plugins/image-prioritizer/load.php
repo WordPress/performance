@@ -3,10 +3,10 @@
  * Plugin Name: Image Prioritizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer
  * Description: Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds <code>fetchpriority</code> and applies lazy-loading.
- * Requires at least: 6.5
+ * Requires at least: 6.6
  * Requires PHP: 7.2
  * Requires Plugins: optimization-detective
- * Version: 0.2.0
+ * Version: 1.0.0-beta2
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -16,10 +16,11 @@
  * @package image-prioritizer
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -71,28 +72,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.2.0',
+	'1.0.0-beta2',
 	static function ( string $version ): void {
 		if ( defined( 'IMAGE_PRIORITIZER_VERSION' ) ) {
 			return;
-		}
-
-		if (
-			( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) &&
-			! file_exists( __DIR__ . '/lazy-load.min.js' )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error(
-				esc_html(
-					sprintf(
-						/* translators: 1: File path. 2: CLI command. */
-						'[Image Prioritizer] ' . __( 'Unable to load %1$s. Please make sure you have run %2$s.', 'image-prioritizer' ),
-						'lazy-load.min.js',
-						'`npm install && npm run build:plugin:image-prioritizer`'
-					)
-				),
-				E_USER_ERROR
-			);
 		}
 
 		define( 'IMAGE_PRIORITIZER_VERSION', $version );

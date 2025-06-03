@@ -7,6 +7,21 @@
 
 class Test_Load extends WP_UnitTestCase {
 
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+
+		/*
+		 * This constant is not set by default in production.
+		 * However, it is needed for all tests that cover placement of the object cache drop-in.
+		 */
+		if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) ) {
+			define( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN', true );
+		}
+	}
+
 	public function test_perflab_get_generator_content(): void {
 		$expected = 'performance-lab ' . PERFLAB_VERSION . '; plugins: ';
 		$content  = perflab_get_generator_content();

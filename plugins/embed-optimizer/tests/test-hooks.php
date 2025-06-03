@@ -63,7 +63,7 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 				'expected' => false,
 			),
 			'with_new_version' => array(
-				'version'  => '0.7.0',
+				'version'  => '99.0.0',
 				'expected' => true,
 			),
 		);

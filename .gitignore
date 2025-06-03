@@ -1,4 +1,12 @@
 ############
+## Generated files during testing
+############
+
+plugins/*/tests/**/actual.html
+artifacts
+test-results
+
+############
 ## IDEs
 ############
 
@@ -25,6 +33,7 @@ nbproject/
 build
 .wp-env.override.json
 *.min.js
+*.min.css
 *.asset.php
 
 ############

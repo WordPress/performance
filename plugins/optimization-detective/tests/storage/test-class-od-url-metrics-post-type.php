@@ -90,12 +90,22 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$valid_content = array(
 			array(
 				'url'       => home_url( '/' ),
+				'etag'      => md5( '' ),
 				'viewport'  => array(
 					'width'  => 640,
 					'height' => 480,
 				),
 				'timestamp' => microtime( true ),
-				'elements'  => array(),
+				'elements'  => array(
+					array(
+						'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
+						'isLCP'              => false,
+						'isLCPCandidate'     => true,
+						'intersectionRatio'  => 0.123,
+						'intersectionRect'   => $this->get_sample_dom_rect(),
+						'boundingClientRect' => $this->get_sample_dom_rect(),
+					),
+				),
 			),
 		);
 
@@ -173,30 +183,64 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test store_url_metric().
+	 * Test update_post().
 	 *
-	 * @covers ::store_url_metric
+	 * @covers ::update_post
 	 */
-	public function test_store_url_metric(): void {
-		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
+	public function test_update_post(): void {
+		$slug         = od_get_url_metrics_slug( array( 'p' => 1 ) );
+		$current_etag = md5( '' );
 
-		$validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
+		$url_metric_group_collection = new OD_URL_Metric_Group_Collection(
+			array(),
+			$current_etag,
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
 
-		$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
+		// Test with empty URL Metric group collection.
+		$result = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'no_url_metrics', $result->get_error_code() );
+
+		$validated_url_metric         = $this->get_sample_url_metric(
+			array(
+				'url'  => home_url( '/' ),
+				'etag' => $current_etag,
+			)
+		);
+		$another_validated_url_metric = $this->get_sample_url_metric(
+			array(
+				'url'  => home_url( '/sample-page/' ),
+				'etag' => $current_etag,
+			)
+		);
+
+		$url_metric_group_collection->add_url_metric( $validated_url_metric );
+		$post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
 		$this->assertIsInt( $post_id );
 
 		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 		$this->assertInstanceOf( WP_Post::class, $post );
 		$this->assertSame( $post_id, $post->ID );
+		$parsed_json = json_decode( $post->post_content, true );
+		$this->assertIsArray( $parsed_json );
+		$this->assertSame( array( $validated_url_metric->jsonSerialize() ), $parsed_json );
 
 		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 
-		$again_post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
-		$post          = get_post( $again_post_id );
+		$url_metric_group_collection->add_url_metric( $another_validated_url_metric );
+		$again_post_id = OD_URL_Metrics_Post_Type::update_post( $slug, $url_metric_group_collection );
+		$again_post    = get_post( $again_post_id );
+		$this->assertInstanceOf( WP_Post::class, $again_post );
 		$this->assertSame( $post_id, $again_post_id );
-		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $again_post );
 		$this->assertCount( 2, $url_metrics );
+		$parsed_json = json_decode( $again_post->post_content, true );
+		$this->assertIsArray( $parsed_json );
+		$this->assertSame( array( $validated_url_metric->jsonSerialize(), $another_validated_url_metric->jsonSerialize() ), $parsed_json );
 	}
 
 	/**
@@ -244,7 +288,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_delete_stale_posts(): void {
 		global $wpdb;
 
-		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) - HOUR_IN_SECONDS );
+		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 3 * MONTH_IN_SECONDS + 1 ) );
 
 		$new_generic_post = self::factory()->post->create();
 		$old_generic_post = self::factory()->post->create();
@@ -259,9 +303,9 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		clean_post_cache( $old_generic_post );
 
 		$new_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $new_generic_post ) );
-		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $new_generic_post ) ) ) );
+		$new_url_metrics_post = $this->store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $new_generic_post ) ) ) );
 		$old_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $old_generic_post ) );
-		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $old_generic_post ) ) ) );
+		$old_url_metrics_post = $this->store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $old_generic_post ) ) ) );
 		$wpdb->update(
 			$wpdb->posts,
 			array(
@@ -279,6 +323,78 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, get_post( $old_generic_post ), 'Expected old generic post to not have been deleted.' );
 		$this->assertInstanceOf( WP_Post::class, get_post( $new_url_metrics_post ), 'Expected new URL Metrics post to not have been deleted.' );
 		$this->assertNull( get_post( $old_url_metrics_post ), 'Expected old URL Metrics post to have been deleted.' );
+
+		// Remove the URL Metrics post older than 6 months.
+		add_filter(
+			'od_url_metric_garbage_collection_ttl',
+			static function (): int {
+				return 6 * MONTH_IN_SECONDS;
+			}
+		);
+
+		// Update timestamp to 6 months older.
+		$new_stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 6 * MONTH_IN_SECONDS + 1 ) );
+
+		$older_generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_generic_post )
+		);
+		clean_post_cache( $older_generic_post );
+
+		$older_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $older_generic_post ) );
+		$older_url_metrics_post = $this->store_url_metric( $older_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $older_generic_post ) ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_url_metrics_post )
+		);
+		clean_post_cache( $older_url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $older_generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertNull( get_post( $older_url_metrics_post ), 'Expected old URL Metrics post to not have been deleted.' );
+
+		// Prevent garbage collection to happen.
+		add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
+
+		$generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $generic_post )
+		);
+		clean_post_cache( $generic_post );
+
+		$url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $generic_post ) );
+		$url_metrics_post = $this->store_url_metric( $url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $generic_post ) ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $url_metrics_post )
+		);
+		clean_post_cache( $url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertNotNull( get_post( $url_metrics_post ), 'Expected old URL Metrics post to not have been deleted.' );
 	}
 
 	/**
@@ -308,7 +424,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		// Now create sample URL Metrics posts.
 		for ( $i = 1; $i <= 101; $i++ ) {
 			$slug    = od_get_url_metrics_slug( array( 'p' => $i ) );
-			$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $this->get_sample_url_metric( array( 'url' => home_url( "/?p=$i" ) ) ) );
+			$post_id = $this->store_url_metric( $slug, $this->get_sample_url_metric( array( 'url' => home_url( "/?p=$i" ) ) ) );
 			update_post_meta( $post_id, $url_metrics_post_meta_key, '' );
 		}
 

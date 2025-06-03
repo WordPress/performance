@@ -6,9 +6,11 @@
  * @package web-worker-offloading
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds scripts to be offloaded to a worker.
@@ -39,9 +41,13 @@ function plwwo_mark_scripts_for_offloading( array $script_handles ): void {
  */
 function plwwo_load_third_party_integrations(): void {
 	$plugins_with_integrations = array(
-		// TODO: google-site-kit.
-		// TODO: seo-by-rank-math.
-		'woocommerce' => static function (): bool {
+		'google-site-kit'  => static function (): bool {
+			return defined( 'GOOGLESITEKIT_VERSION' );
+		},
+		'seo-by-rank-math' => static function (): bool {
+			return class_exists( 'RankMath' );
+		},
+		'woocommerce'      => static function (): bool {
 			// See <https://woocommerce.com/document/query-whether-woocommerce-is-activated/>.
 			return class_exists( 'WooCommerce' );
 		},

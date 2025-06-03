@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * URL Metrics Post Type.
@@ -21,6 +23,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Post type slug.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const SLUG = 'od_url_metrics';
@@ -28,6 +31,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Event name (hook) for garbage collection of stale URL Metrics posts.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const GC_CRON_EVENT_NAME = 'od_url_metrics_gc';
@@ -35,6 +39,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Recurrence for garbage collection of stale URL Metrics posts.
 	 *
+	 * @since 0.1.0
 	 * @var string
 	 */
 	const GC_CRON_RECURRENCE = 'daily';
@@ -53,7 +58,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Registers post type for URL Metrics storage.
 	 *
-	 * This the configuration for this post type is similar to the oembed_cache in core.
+	 * The configuration for this post type is similar to the oembed_cache in core.
 	 *
 	 * @since 0.1.0
 	 */
@@ -82,7 +87,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug URL Metrics slug.
+	 * @param non-empty-string $slug URL Metrics slug.
 	 * @return WP_Post|null Post object if exists.
 	 */
 	public static function get_post( string $slug ): ?WP_Post {
@@ -103,9 +108,8 @@ class OD_URL_Metrics_Post_Type {
 		$post = current( $post_query->posts );
 		if ( $post instanceof WP_Post ) {
 			return $post;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -115,6 +119,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @param WP_Post $post URL Metrics post.
 	 * @return OD_URL_Metric[] URL Metrics.
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function = __METHOD__;
@@ -123,6 +128,11 @@ class OD_URL_Metrics_Post_Type {
 			if ( ! in_array( $error_level, array( E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR, E_USER_DEPRECATED ), true ) ) {
 				$error_level = E_USER_NOTICE;
 			}
+			/**
+			 * No WP_Exception is thrown by wp_trigger_error() since E_USER_ERROR is not passed as the error level.
+			 *
+			 * @noinspection PhpUnhandledExceptionInspection
+			 */
 			wp_trigger_error( $this_function, esc_html( $message ), $error_level );
 		};
 
@@ -142,7 +152,7 @@ class OD_URL_Metrics_Post_Type {
 		} elseif ( ! is_array( $url_metrics_data ) ) {
 			$trigger_error(
 				sprintf(
-					/* translators: %s is post type slug */
+					/* translators: %s is the post type slug */
 					__( 'Contents of %s post type was not a JSON array.', 'optimization-detective' ),
 					self::SLUG
 				),
@@ -189,56 +199,49 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
+	 * Inserts or updates the od_url_metrics post with a provided collection of URL Metrics.
 	 *
-	 * @since 0.1.0
-	 * @todo There is duplicate logic here with od_handle_rest_request().
+	 * This method updates an existing URL Metrics post or creates a new one if it doesn't exist.
 	 *
-	 * @param string        $slug           Slug (hash of normalized query vars).
-	 * @param OD_URL_Metric $new_url_metric New URL Metric.
-	 * @return int|WP_Error Post ID or WP_Error otherwise.
+	 * @since 1.0.0
+	 *
+	 * @param non-empty-string               $slug Slug (hash of normalized query vars).
+	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection containing the metrics to be stored.
+	 * @return positive-int|WP_Error Post ID on success, or WP_Error on failure.
 	 */
-	public static function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
-		$post_data = array(
+	public static function update_post( string $slug, OD_URL_Metric_Group_Collection $url_metric_group_collection ) {
+		$url_metrics = $url_metric_group_collection->get_flattened_url_metrics();
+		if ( 0 === count( $url_metrics ) ) {
+			return new WP_Error( 'no_url_metrics', __( 'No URL Metrics in the group collection.', 'optimization-detective' ) );
+		}
+
+		// Sort URL Metrics in descending order by timestamp.
+		usort(
+			$url_metrics,
+			static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
+				return $b->get_timestamp() <=> $a->get_timestamp();
+			}
+		);
+		$latest_url_metric = $url_metrics[0];
+		$post_data         = array(
 			// The URL is supplied as the post title in order to aid with debugging. Note that an od-url-metrics post stores
 			// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
 			// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
 			// normalized query vars among them.
-			'post_title' => $new_url_metric->get_url(),
+			'post_title' => $latest_url_metric->get_url(),
 		);
 
 		$post = self::get_post( $slug );
 		if ( $post instanceof WP_Post ) {
 			$post_data['ID']        = $post->ID;
 			$post_data['post_name'] = $post->post_name;
-			$url_metrics            = self::get_url_metrics_from_post( $post );
 		} else {
 			$post_data['post_name'] = $slug;
-			$url_metrics            = array();
-		}
-
-		$group_collection = new OD_URL_Metric_Group_Collection(
-			$url_metrics,
-			od_get_breakpoint_max_widths(),
-			od_get_url_metrics_breakpoint_sample_size(),
-			od_get_url_metric_freshness_ttl()
-		);
-
-		try {
-			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
-			$group->add_url_metric( $new_url_metric );
-		} catch ( InvalidArgumentException $e ) {
-			return new WP_Error( 'invalid_url_metric', $e->getMessage() );
 		}
 
 		$post_data['post_content'] = wp_json_encode(
-			array_map(
-				static function ( OD_URL_Metric $url_metric ): array {
-					return $url_metric->jsonSerialize();
-				},
-				$group_collection->get_flattened_url_metrics()
-			),
-			JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
+			$url_metric_group_collection->get_flattened_url_metrics(),
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {
 			return new WP_Error( 'json_encode_error', json_last_error_msg() );
@@ -294,7 +297,21 @@ class OD_URL_Metrics_Post_Type {
 	 * @since 0.1.0
 	 */
 	public static function delete_stale_posts(): void {
-		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
+		/**
+		 * Filters the expiration time (TTL) after which a since-unmodified od_url_metrics post will be garbage collected.
+		 *
+		 * @since n.e.x.t
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl
+		 *
+		 * @return int TTL for garbage collection in seconds. Defaults to 3 months.
+		 */
+		$ttl = (int) apply_filters( 'od_url_metric_garbage_collection_ttl', 3 * MONTH_IN_SECONDS );
+
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
+		$before_time = gmdate( 'Y-m-d H:i:s', time() - $ttl );
 
 		$query = new WP_Query(
 			array(
@@ -302,7 +319,7 @@ class OD_URL_Metrics_Post_Type {
 				'posts_per_page' => 100,
 				'date_query'     => array(
 					'column' => 'post_modified_gmt',
-					'before' => $one_month_ago,
+					'before' => $before_time,
 				),
 			)
 		);

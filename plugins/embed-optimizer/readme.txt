@@ -1,8 +1,8 @@
 === Embed Optimizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   0.3.0
+Tested up to: 6.8
+Stable tag:   1.0.0-beta2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, embeds
@@ -15,11 +15,11 @@ This plugin's purpose is to optimize the performance of [embeds in WordPress](ht
 
 The current optimizations include:
 
-1. Lazy loading embeds just before they come into view
-2. Adding preconnect links for embeds in the initial viewport
-3. Reserving space for embeds that resize to reduce layout shifting
+1. Lazy loading embeds just before they come into view.
+2. Adding preconnect links for embeds in the initial viewport.
+3. Reserving space for embeds that resize to reduce layout shifting.
 
-**Lazy loading embeds** improves performance because embeds are generally very resource-intensive, so lazy loading them ensures that they don't compete with resources when the page is loading. Lazy loading of `IFRAME`\-based embeds is handled simply by adding the `loading=lazy` attribute. Lazy loading embeds that include `SCRIPT` tags is handled by using an Intersection Observer to watch for when the embed’s `FIGURE` container is going to enter the viewport and then it dynamically inserts the `SCRIPT` tag.
+**Lazy loading embeds** improves performance because embeds are generally very resource-intensive, so lazy loading them ensures that they don't compete with resources when the page is loading. Lazy loading of `IFRAME`\-based embeds is handled simply by adding the `loading=lazy` attribute. Lazy loading embeds that include `SCRIPT` tags is handled by using an Intersection Observer to watch for when the embed’s `FIGURE` container is going to enter the viewport, and then it dynamically inserts the `SCRIPT` tag.
 
 **This plugin also recommends that you install and activate the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin**, which unlocks several optimizations beyond just lazy loading. Without Optimization Detective, lazy loading can actually degrade performance *when an embed is positioned in the initial viewport*. This is because lazy loading such viewport-initial elements can degrade LCP since rendering is delayed by the logic to determine whether the element is visible. This is why WordPress Core tries its best to [avoid](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) [lazy loading](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) `IMG` tags which appear in the initial viewport, although the server-side heuristics aren’t perfect. This is where Optimization Detective comes in since it detects whether an embed appears in any breakpoint-specific viewports, like mobile, tablet, and desktop. (See also the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which extends Optimization Detective to ensure lazy loading is correctly applied based on whether an IMG is in the initial viewport.)
 
@@ -29,9 +29,9 @@ The other major feature in Embed Optimizer enabled by Optimization Detective is 
 
 Since Optimization Detective relies on page visits to learn how the page is laid out, you’ll need to wait until you have visits from a mobile and desktop device to start seeing optimizations applied. Also, note that Optimization Detective does not apply optimizations by default for logged-in admin users.
 
-Please note that the optimizations are intended to apply to Embed blocks. So if you do not see optimizations applied, make sure that your embeds are not inside of a Classic Block.
+Please note that the optimizations are intended to apply to Embed blocks. So if you do not see optimizations applied, make sure that your embeds are not inside a Classic Block.
 
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 
@@ -66,6 +66,33 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+
+= 0.4.1 =
+
+**Bug Fixes**
+
+* Remove requirement for both mobile and desktop URL metrics to be collected for `preconnect` links to be added. ([1764](https://github.com/WordPress/performance/pull/1764))
+
+= 0.4.0 =
+
+**Enhancements**
+
+* Incorporate media queries into preconnect links to account for whether embeds are in viewport. ([1654](https://github.com/WordPress/performance/pull/1654))
+* Serve unminified scripts when `SCRIPT_DEBUG` is enabled. ([1643](https://github.com/WordPress/performance/pull/1643))
 
 = 0.3.0 =
 

@@ -22,7 +22,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$valid_element = array(
 			'isLCP'              => true,
 			'isLCPCandidate'     => true,
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
 			'intersectionRatio'  => 1.0,
 			'intersectionRect'   => $this->get_sample_dom_rect(),
 			'boundingClientRect' => $this->get_sample_dom_rect(),
@@ -32,6 +32,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'valid_minimal'                   => array(
 				'data' => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -40,6 +41,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'valid_with_element'              => array(
 				'data' => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -51,6 +53,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			// This tests that sanitization converts values into their expected PHP types.
 			'valid_but_props_are_strings'     => array(
 				'data' => array(
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => array_map( 'strval', $viewport ),
 					'timestamp' => (string) microtime( true ),
@@ -71,6 +74,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'bad_uuid'                        => array(
 				'data'  => array(
 					'uuid'      => 'foo',
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -78,9 +82,64 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				),
 				'error' => 'OD_URL_Metric[uuid] is not a valid UUID.',
 			),
+			'etag_too_short'                  => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'etag'      => 'foo',
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'OD_URL_Metric[etag] must be at least 32 characters long.',
+			),
+			'etag_too_long'                   => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'etag'      => 'd41d8cd98f00b204e9800998ecf8427e1',
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'OD_URL_Metric[etag] must be at most 32 characters long.',
+			),
+			'bad_etag1'                       => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'etag'      => 'd41d8cd98f00b204e9800998ecf8427$',
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'OD_URL_Metric[etag] does not match pattern ^[0-9a-f]{32}\z.',
+			),
+			'bad_etag2'                       => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ) . "\n",
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'OD_URL_Metric[etag] must be at most 32 characters long.',
+			),
+			'missing_etag'                    => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'etag is a required property of OD_URL_Metric.',
+			),
 			'missing_viewport'                => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -90,6 +149,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'missing_viewport_width'          => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => array( 'height' => 640 ),
 					'timestamp' => microtime( true ),
@@ -100,6 +160,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'bad_viewport'                    => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'height' => 'tall',
@@ -113,6 +174,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'viewport_aspect_ratio_too_small' => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'width'  => 1000,
@@ -126,6 +188,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'viewport_aspect_ratio_too_large' => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'width'  => 10000,
@@ -139,6 +202,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'missing_timestamp'               => array(
 				'data'  => array(
 					'uuid'     => wp_generate_uuid4(),
+					'etag'     => md5( '' ),
 					'url'      => home_url( '/' ),
 					'viewport' => $viewport,
 					'elements' => array(),
@@ -148,6 +212,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'missing_elements'                => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -157,6 +222,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'missing_url'                     => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -166,6 +232,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'bad_elements'                    => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -180,6 +247,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'bad_intersection_width'          => array(
 				'data'  => array(
 					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -198,10 +266,15 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
+	 * @covers ::__construct
+	 * @covers ::prepare_data
+	 * @covers ::get_uuid
 	 * @covers ::get_viewport
 	 * @covers ::get_viewport_width
 	 * @covers ::get_timestamp
 	 * @covers ::get_elements
+	 * @covers ::get_url
+	 * @covers ::get_etag
 	 * @covers ::jsonSerialize
 	 * @covers ::get
 	 * @covers ::get_json_schema
@@ -220,7 +293,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		}
 		$url_metric = new OD_URL_Metric( $data );
 		$this->assertNull( $url_metric->get_group() );
-		$group = new OD_URL_Metric_Group( array( $url_metric ), 0, PHP_INT_MAX, 1, DAY_IN_SECONDS );
+		$current_etag = md5( '' );
+		$collection   = new OD_URL_Metric_Group_Collection( array(), $current_etag, array(), 1, DAY_IN_SECONDS );
+		$group        = $collection->get_first_group();
 		$url_metric->set_group( $group );
 		$this->assertSame( $group, $url_metric->get_group() );
 
@@ -252,6 +327,10 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$this->assertSame( $data['url'], $url_metric->get_url() );
 		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );
 
+		$this->assertSame( $data['etag'], $url_metric->get_etag() );
+		$this->assertSame( $data['etag'], $url_metric->get( 'etag' ) );
+		$this->assertTrue( 1 === preg_match( '/^[a-f0-9]{32}$/', $url_metric->get_etag() ) );
+
 		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
 		$this->assertSame( $url_metric->get_uuid(), $url_metric->get( 'uuid' ) );
 
@@ -278,10 +357,18 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$valid_element = array(
 			'isLCP'              => true,
 			'isLCPCandidate'     => true,
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
 			'intersectionRatio'  => 1.0,
 			'intersectionRect'   => $this->get_sample_dom_rect(),
 			'boundingClientRect' => $this->get_sample_dom_rect(),
+		);
+
+		$data = array(
+			'url'       => home_url( '/' ),
+			'etag'      => md5( '' ),
+			'viewport'  => $viewport,
+			'timestamp' => microtime( true ),
+			'elements'  => array( $valid_element ),
 		);
 
 		return array(
@@ -299,6 +386,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -333,6 +421,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -364,6 +453,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -387,6 +477,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
@@ -425,6 +516,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array( $valid_element ),
@@ -454,6 +546,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				'data'   => array(
 					'url'       => home_url( '/' ),
+					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
@@ -466,6 +559,112 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert' => static function (): void {},
 				'error'  => 'OD_URL_Metric[elements][0][isColorful] is not of type boolean.',
 			),
+
+			'added_immutable_element_property'           => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isLCP'] = array(
+								'type' => 'string',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => $data,
+				'assert' => static function (): void {},
+				'error'  => '',
+				'wrong'  => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
+			),
+
+			'added_element_property_without_type'        => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['foo'] = array(
+								'minimum' => 1,
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => $data,
+				'assert' => function (): void {
+					$this->assertArrayHasKey( 'isLCP', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertArrayNotHasKey( 'foo', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+				},
+				'error'  => '',
+				'wrong'  => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
+			),
+
+			'added_element_property_with_invalid_type'   => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['foo'] = array(
+								'type' => null,
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => $data,
+				'assert' => function (): void {
+					$this->assertArrayHasKey( 'isLCP', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertArrayNotHasKey( 'foo', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+				},
+				'error'  => '',
+				'wrong'  => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
+			),
+
+			'added_element_property_with_required'       => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['foo'] = array(
+								'type'     => 'string',
+								'required' => true,
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => $data,
+				'assert' => function (): void {
+					$this->assertArrayHasKey( 'isLCP', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertArrayHasKey( 'foo', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertFalse( OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties']['foo']['required'] );
+				},
+				'error'  => '',
+				'wrong'  => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
+			),
+
+			'added_element_property_invalid_default'     => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['foo'] = array(
+								'type'    => 'string',
+								'default' => 'bard',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => $data,
+				'assert' => function (): void {
+					$this->assertArrayHasKey( 'isLCP', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertArrayHasKey( 'foo', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties'] );
+					$this->assertArrayNotHasKey( 'default', OD_URL_Metric::get_json_schema()['properties']['elements']['items']['properties']['foo'] );
+				},
+				'error'  => '',
+				'wrong'  => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
+			),
 		);
 	}
 
@@ -473,6 +672,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * Tests construction with extended schema.
 	 *
 	 * @covers ::get_json_schema
+	 * @covers ::extend_schema_with_optional_properties
 	 *
 	 * @dataProvider data_provider_to_test_constructor_with_extended_schema
 	 *
@@ -480,11 +680,15 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * @param array<string, mixed> $data   Data.
 	 * @param Closure              $assert Assert.
 	 * @param string               $error  Error.
+	 * @param string               $wrong  Expected doing it wrong.
 	 */
-	public function test_constructor_with_extended_schema( Closure $set_up, array $data, Closure $assert, string $error = '' ): void {
+	public function test_constructor_with_extended_schema( Closure $set_up, array $data, Closure $assert, string $error = '', string $wrong = '' ): void {
 		if ( '' !== $error ) {
 			$this->expectException( OD_Data_Validation_Exception::class );
 			$this->expectExceptionMessage( $error );
+		}
+		if ( '' !== $wrong ) {
+			$this->setExpectedIncorrectUsage( $wrong );
 		}
 		$url_metric_sans_extended_schema = new OD_URL_Metric( $data );
 		$set_up();
@@ -626,7 +830,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert'                   => function ( array $original_schema, $extended_schema ): void {
 					$this->assertSame( $original_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_element_item_additional_properties&#039;',
 			),
 
 			'adding_root_string'             => array(

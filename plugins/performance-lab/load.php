@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
- * Requires at least: 6.5
+ * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 3.6.0
+ * Version: 3.9.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,11 +15,13 @@
  * @package performance-lab
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
-define( 'PERFLAB_VERSION', '3.6.0' );
+define( 'PERFLAB_VERSION', '3.9.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -102,17 +104,21 @@ function perflab_get_standalone_plugin_data(): array {
 		),
 		'embed-optimizer'         => array(
 			'constant'     => 'EMBED_OPTIMIZER_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'image-prioritizer'       => array(
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
+		),
+		'view-transitions'        => array(
+			'constant'     => 'VIEW_TRANSITIONS_VERSION',
+			'experimental' => true,
 		),
 		'web-worker-offloading'   => array(
 			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',
@@ -143,11 +149,13 @@ function perflab_get_standalone_plugin_version_constants(): array {
  * the frontend.
  *
  * This function will short-circuit if at least one of the constants
- * 'PERFLAB_DISABLE_SERVER_TIMING' or 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is
- * set as true.
+ * 'PERFLAB_DISABLE_SERVER_TIMING' or
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true or if the
+ * 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant is not set to a truthy value.
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
+ * @since n.e.x.t No longer places the drop-in on new sites by default, unless the `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` constant is set to true.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -159,7 +167,14 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		return;
 	}
 
+	// Bail if the drop-in is not enabled.
+	if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) || ! PERFLAB_PLACE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
 	// Bail if disabled via constant.
+	// This constant is maintained only for backward compatibility and should not be relied upon in new implementations.
+	// Use the 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant instead to control drop-in placement.
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
 		return;
 	}

@@ -6,10 +6,11 @@
  * @since 0.7.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Data for a single element in a URL Metric.
@@ -20,7 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
  *
  * @since 0.7.0
- * @access private
  */
 class OD_Element implements ArrayAccess, JsonSerializable {
 
@@ -51,7 +51,8 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @param OD_URL_Metric        $url_metric URL Metric.
 	 */
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
-		$this->data       = $data;
+		$this->data = $data;
+
 		$this->url_metric = $url_metric;
 	}
 

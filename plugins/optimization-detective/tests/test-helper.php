@@ -25,6 +25,8 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function data_to_test_od_generate_media_query(): array {
@@ -32,27 +34,27 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			'mobile'      => array(
 				'min_width' => 0,
 				'max_width' => 320,
-				'expected'  => '(max-width: 320px)',
+				'expected'  => '(width <= 320px)',
 			),
 			'mobile_alt'  => array(
 				'min_width' => null,
 				'max_width' => 320,
-				'expected'  => '(max-width: 320px)',
+				'expected'  => '(width <= 320px)',
 			),
 			'tablet'      => array(
-				'min_width' => 321,
+				'min_width' => 320,
 				'max_width' => 600,
-				'expected'  => '(min-width: 321px) and (max-width: 600px)',
+				'expected'  => '(320px < width <= 600px)',
 			),
 			'desktop'     => array(
-				'min_width' => 601,
+				'min_width' => 600,
 				'max_width' => PHP_INT_MAX,
-				'expected'  => '(min-width: 601px)',
+				'expected'  => '(600px < width)',
 			),
 			'desktop_alt' => array(
-				'min_width' => 601,
+				'min_width' => 600,
 				'max_width' => null,
-				'expected'  => '(min-width: 601px)',
+				'expected'  => '(600px < width)',
 			),
 			'no_widths'   => array(
 				'min_width' => null,
@@ -82,7 +84,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the meta generator tag.
+	 * Test printing the META generator tag.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 */
@@ -91,5 +93,36 @@ class Test_OD_Helper extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
+		$this->assertFalse( od_is_rest_api_unavailable() );
+		$this->assertStringNotContainsString( 'rest_api_unavailable', $tag );
+	}
+
+	/**
+	 * Test META generator tag when query parameter is present.
+	 *
+	 * @covers ::od_render_generator_meta_tag
+	 * @covers ::od_get_disabled_reasons
+	 */
+	public function test_od_render_generator_meta_tag_query_param_disabled(): void {
+		$_GET['optimization_detective_disabled'] = '1';
+		$tag                                     = get_echo( 'od_render_generator_meta_tag' );
+		$this->assertStringContainsString( '; query_param_disabled', $tag );
+		unset( $_GET['optimization_detective_disabled'] );
+	}
+
+	/**
+	 * Test printing the META generator tag when the REST API is not available.
+	 *
+	 * @covers ::od_render_generator_meta_tag
+	 * @covers ::od_get_disabled_reasons
+	 */
+	public function test_od_render_generator_meta_tag_rest_api_unavailable(): void {
+		update_option( 'od_rest_api_unavailable', '1' );
+		$tag = get_echo( 'od_render_generator_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
+		$this->assertTrue( od_is_rest_api_unavailable() );
+		$this->assertStringContainsString( '; rest_api_unavailable', $tag );
 	}
 }

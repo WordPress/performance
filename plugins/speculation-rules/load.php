@@ -3,9 +3,9 @@
  * Plugin Name: Speculative Loading
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
  * Description: Enables browsers to speculatively prerender or prefetch pages to achieve near-instant loads based on user interaction.
- * Requires at least: 6.5
+ * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 1.3.1
+ * Version: 1.5.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,9 +15,9 @@
  * @package speculation-rules
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
 
 (
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'plsr_pending_plugin_info',
-	'1.3.1',
+	'1.5.0',
 	static function ( string $version ): void {
 
 		// Define the constant.
@@ -76,9 +76,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		define( 'SPECULATION_RULES_VERSION', $version );
 		define( 'SPECULATION_RULES_MAIN_FILE', plugin_basename( __FILE__ ) );
 
-		require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
-		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 		require_once __DIR__ . '/settings.php';
 	}
 );
+// @codeCoverageIgnoreEnd

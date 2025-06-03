@@ -6,9 +6,11 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Callback for enqueued_js_assets test.
