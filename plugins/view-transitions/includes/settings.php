@@ -128,8 +128,8 @@ function plvt_sanitize_setting( $input ): array {
 		'post_content_selector',
 	);
 	foreach ( $selector_options as $selector_option ) {
-		if ( isset( $value[ $selector_option ] ) && is_string( $value[ $selector_option ] ) ) {
-			$selector_option_value = trim( sanitize_text_field( $value[ $selector_option ] ) );
+		if ( isset( $input[ $selector_option ] ) && is_string( $input[ $selector_option ] ) ) {
+			$selector_option_value = trim( sanitize_text_field( $input[ $selector_option ] ) );
 			if ( '' !== $selector_option_value ) {
 				$value[ $selector_option ] = $selector_option_value;
 			}
