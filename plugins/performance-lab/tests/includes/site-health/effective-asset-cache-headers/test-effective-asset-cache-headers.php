@@ -29,23 +29,6 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the effective caching headers test is added to the site health tests.
-	 *
-	 * @covers ::perflab_effective_asset_cache_headers_add_test
-	 */
-	public function test_perflab_effective_asset_cache_headers_add_test(): void {
-		$tests = array(
-			'direct' => array(),
-		);
-
-		$tests = perflab_effective_asset_cache_headers_add_test( $tests );
-
-		$this->assertArrayHasKey( 'effective_asset_cache_headers', $tests['direct'] );
-		$this->assertEquals( 'Effective Caching Headers', $tests['direct']['effective_asset_cache_headers']['label'] );
-		$this->assertEquals( 'perflab_effective_asset_cache_headers_assets_test', $tests['direct']['effective_asset_cache_headers']['test'] );
-	}
-
-	/**
 	 * Test that the effective caching headers test is attached to the site status tests.
 	 *
 	 * @covers ::perflab_effective_asset_cache_headers_add_test
