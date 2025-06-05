@@ -45,9 +45,11 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Default setting value.
  *
+ *     @type bool   $override_theme_config        Whether to override the current theme's configuration. Otherwise,
+ *                                                the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation Default view transition animation.
  *     @type string $header_selector              CSS selector for the global header element.
  *     @type string $main_selector                CSS selector for the global main element.
@@ -58,6 +60,7 @@ function plvt_get_view_transition_animation_labels(): array {
  */
 function plvt_get_setting_default(): array {
 	return array(
+		'override_theme_config'        => false,
 		'default_transition_animation' => 'fade',
 		'header_selector'              => 'header',
 		'main_selector'                => 'main',
@@ -72,9 +75,11 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Stored setting value.
  *
+ *     @type bool   $override_theme_config        Whether to override the current theme's configuration. Otherwise,
+ *                                                the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation Default view transition animation.
  *     @type string $header_selector              CSS selector for the global header element.
  *     @type string $main_selector                CSS selector for the global main element.
@@ -93,9 +98,11 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Sanitized setting.
  *
+ *     @type bool   $override_theme_config        Whether to override the current theme's configuration. Otherwise,
+ *                                                the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation Default view transition animation.
  *     @type string $header_selector              CSS selector for the global header element.
  *     @type string $main_selector                CSS selector for the global main element.
@@ -112,6 +119,10 @@ function plvt_sanitize_setting( $input ): array {
 	}
 
 	$value = $default_value;
+
+	if ( isset( $input['override_theme_config'] ) && (bool) $input['override_theme_config'] ) {
+		$value['override_theme_config'] = true;
+	}
 
 	if (
 		isset( $input['default_transition_animation'] ) &&
@@ -182,17 +193,22 @@ function plvt_register_setting(): void {
  * @global array<string, mixed> $_wp_theme_features Theme support features added and their arguments.
  */
 function plvt_apply_settings_to_theme_support(): void {
-	global $_wp_theme_features;
+	global $plvt_has_theme_support_with_args, $_wp_theme_features;
 
 	// Bail if the feature is disabled.
 	if ( ! isset( $_wp_theme_features['view-transitions'] ) ) {
 		return;
 	}
 
+	// Bail if the current theme explicitly supports view transitions and the option to override is turned off.
+	$options = plvt_get_stored_setting_value();
+	if ( $plvt_has_theme_support_with_args && ! $options['override_theme_config'] ) {
+		return;
+	}
+
 	$args = $_wp_theme_features['view-transitions'];
 
 	// Apply the settings.
-	$options                   = plvt_get_stored_setting_value();
 	$args['default-animation'] = $options['default_transition_animation'];
 	$selector_options          = array(
 		'global' => array(
@@ -230,6 +246,7 @@ function plvt_add_setting_ui(): void {
 		'plvt_view_transitions',
 		__( 'View Transitions', 'view-transitions' ),
 		static function (): void {
+			global $plvt_has_theme_support_with_args;
 			?>
 			<p class="description">
 				<?php esc_html_e( 'This section allows you to control how view transitions are used to enhance the navigation user experience.', 'view-transitions' ); ?>
@@ -237,6 +254,15 @@ function plvt_add_setting_ui(): void {
 				<?php esc_html_e( 'To reset any of the selector text inputs, clear the field and save the changes.', 'view-transitions' ); ?>
 			</p>
 			<?php
+			if ( $plvt_has_theme_support_with_args ) {
+				wp_admin_notice(
+					__( 'Your theme already supports view transitions with its own adapted configuration. The settings below will override those.', 'view-transitions' ),
+					array(
+						'type'               => 'warning',
+						'additional_classes' => array( 'inline' ),
+					)
+				);
+			}
 		},
 		'reading',
 		array(
@@ -246,6 +272,10 @@ function plvt_add_setting_ui(): void {
 	);
 
 	$fields = array(
+		'override_theme_config'        => array(
+			'title'       => __( 'Override Theme Configuration', 'view-transitions' ),
+			'description' => __( 'Check this to override the theme configuration with the settings below.', 'view-transitions' ),
+		),
 		'default_transition_animation' => array(
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
@@ -351,7 +381,7 @@ function plvt_render_settings_field( array $args ): void {
 		<input
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
-			value="<?php echo esc_attr( $value ); ?>"
+			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
 			<?php
 			if ( '' !== $args['description'] ) {

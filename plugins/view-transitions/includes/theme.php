@@ -28,9 +28,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  */
 function plvt_polyfill_theme_support(): void {
+	global $plvt_has_theme_support_with_args, $_wp_theme_features;
+
 	if ( current_theme_supports( 'view-transitions' ) ) {
+		// If the current theme actually supports view transitions with a custom config, set a flag to inform the user.
+		if ( isset( $_wp_theme_features['view-transitions'] ) && true !== $_wp_theme_features['view-transitions'] ) {
+			$plvt_has_theme_support_with_args = true;
+		}
 		return;
 	}
+
 	add_theme_support( 'view-transitions' );
 }
 
