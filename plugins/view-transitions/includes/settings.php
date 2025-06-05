@@ -242,6 +242,8 @@ function plvt_apply_settings_to_theme_support(): void {
  * @access private
  */
 function plvt_add_setting_ui(): void {
+	global $plvt_has_theme_support_with_args;
+
 	add_settings_section(
 		'plvt_view_transitions',
 		__( 'View Transitions', 'view-transitions' ),
@@ -301,6 +303,12 @@ function plvt_add_setting_ui(): void {
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
 	);
+
+	// Do not render the checkbox to override if there is no thing to override.
+	if ( ! $plvt_has_theme_support_with_args ) {
+		unset( $fields['override_theme_config'] );
+	}
+
 	foreach ( $fields as $slug => $args ) {
 		add_settings_field(
 			"plvt_view_transitions_{$slug}",
