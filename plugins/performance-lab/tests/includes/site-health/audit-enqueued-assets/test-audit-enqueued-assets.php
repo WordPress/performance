@@ -22,7 +22,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
-		perflab_aea_audit_enqueued_scripts();
+		perflab_aea_audit_enqueued_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
@@ -65,7 +65,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_add_inline_script( 'script1', $inline_script );
 
 		get_echo( 'wp_print_scripts' );
-		perflab_aea_audit_enqueued_scripts();
+		perflab_aea_audit_enqueued_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );
@@ -96,7 +96,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_styles();
+		perflab_aea_audit_enqueued_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
@@ -145,7 +145,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_styles();
+		perflab_aea_audit_enqueued_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );

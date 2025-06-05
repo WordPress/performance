@@ -293,6 +293,11 @@ function perflab_aea_get_path_from_resource_url( string $resource_url ): string 
 		return '';
 	}
 
+	// Remove query string if present.
+	if ( false !== strpos( $resource_url, '?' ) ) {
+		$resource_url = substr( $resource_url, 0, strpos( $resource_url, '?' ) );
+	}
+
 	// Different content folder ex. /content/.
 	if ( 0 === strpos( $resource_url, content_url() ) ) {
 		return WP_CONTENT_DIR . substr( $resource_url, strlen( content_url() ) );

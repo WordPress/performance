@@ -13,107 +13,140 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Audit enqueued and printed scripts in is_front_page(). Ignore /wp-includes scripts.
+ * Audit enqueued assets on the front page.
  *
- * It will save information in a transient for 12 hours.
- *
- * @since 1.0.0
- *
- * @global WP_Scripts $wp_scripts
+ * @since n.e.x.t
  */
-function perflab_aea_audit_enqueued_scripts(): void {
-	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_scripts' ) ) {
-		global $wp_scripts;
-		$enqueued_scripts = array();
-
-		foreach ( $wp_scripts->done as $handle ) {
-			$script = $wp_scripts->registered[ $handle ];
-
-			if ( ! $script->src || false !== strpos( $script->src, 'wp-includes' ) ) {
-				continue;
-			}
-
-			// Add any extra data (inlined) that was passed with the script.
-			$inline_size = 0;
-			if (
-				isset( $script->extra['after'] ) &&
-				is_array( $script->extra['after'] )
-			) {
-				foreach ( $script->extra['after'] as $extra ) {
-					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
-				}
-			}
-
-			$path = perflab_aea_get_path_from_resource_url( $script->src );
-			if ( '' === $path ) {
-				continue;
-			}
-
-			$enqueued_scripts[] = array(
-				'src'  => $script->src,
-				'size' => wp_filesize( $path ) + $inline_size,
-			);
-
-		}
-		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, 12 * HOUR_IN_SECONDS );
+function perflab_aea_audit_enqueued_assets(): void {
+	if (
+		! is_admin() ||
+		! current_user_can( 'view_site_health_checks' ) ||
+		( false !== get_transient( 'aea_enqueued_front_page_scripts' ) && false !== get_transient( 'aea_enqueued_front_page_styles' ) )
+	) {
+		return;
 	}
-}
-add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
 
-/**
- * Audit enqueued and printed styles in the frontend. Ignore /wp-includes styles.
- *
- * It will save information in a transient for 12 hours.
- *
- * @since 1.0.0
- *
- * @global WP_Styles $wp_styles The WP_Styles current instance.
- */
-function perflab_aea_audit_enqueued_styles(): void {
-	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
-		global $wp_styles;
-		$enqueued_styles = array();
-		foreach ( $wp_styles->done as $handle ) {
-			$style = $wp_styles->registered[ $handle ];
+	$response = wp_remote_get(
+		home_url( '/' ),
+		array(
+			'timeout' => 10,
+			'headers' => array(
+				'Accept'        => 'text/html',
+				'Cache-Control' => 'no-cache',
+			),
+		)
+	);
 
-			if ( ! $style->src || false !== strpos( $style->src, 'wp-includes' ) ) {
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return;
+	}
+
+	$html = wp_remote_retrieve_body( $response );
+	if ( '' === $html ) {
+		return;
+	}
+
+	$assets = array(
+		'scripts' => array(),
+		'styles'  => array(),
+	);
+
+	$processor = new WP_HTML_Tag_Processor( $html );
+	$processor->next_token();
+	$processor->set_bookmark( 'start' );
+
+	$current_script_handle = '';
+	while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+		$src = $processor->get_attribute( 'src' );
+
+		if ( null === $src && '' !== $current_script_handle ) {
+			$inline_script_handle = $processor->get_attribute( 'id' );
+			if ( is_string( $inline_script_handle ) && $inline_script_handle === $current_script_handle . '-after' ) {
+				$script_size = mb_strlen( $processor->get_modifiable_text(), '8bit' );
+				if ( false !== $script_size ) {
+					foreach ( $assets['scripts'] as &$script ) {
+						if ( $script['handle'] === $current_script_handle ) {
+							$script['size'] += $script_size;
+							break;
+						}
+					}
+				}
 				continue;
 			}
+		}
 
-			// Check if we already have the style's path ( part of a refactor for block styles from 5.9 ).
-			if (
-				isset( $style->extra['path'] ) &&
-				is_string( $style->extra['path'] ) &&
-				'' !== $style->extra['path']
-			) {
-				$path = $style->extra['path'];
-			} else { // Fallback to getting the path from the style's src.
-				$path = perflab_aea_get_path_from_resource_url( $style->src );
-				if ( '' === $path ) {
-					continue;
-				}
-			}
+		if ( ! is_string( $src ) || false !== strpos( $src, 'wp-includes' ) ) {
+			continue;
+		}
 
-			// Add any extra data (inlined) that was passed with the style.
-			$inline_size = 0;
-			if (
-				isset( $style->extra['after'] ) &&
-				is_array( $style->extra['after'] )
-			) {
-				foreach ( $style->extra['after'] as $extra ) {
-					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
-				}
-			}
+		$path = perflab_aea_get_path_from_resource_url( $src );
+		if ( '' === $path ) {
+			continue;
+		}
 
-			$enqueued_styles[] = array(
-				'src'  => $style->src,
-				'size' => wp_filesize( $path ) + $inline_size,
+		$script_size           = filesize( $path );
+		$current_script_handle = (string) $processor->get_attribute( 'id' );
+		if ( false !== $script_size ) {
+			$assets['scripts'][] = array(
+				'src'    => $src,
+				'size'   => $script_size,
+				'handle' => $current_script_handle,
 			);
 		}
-		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
+	}
+
+	$processor->seek( 'start' );
+	while ( $processor->next_tag( array( 'tag_name' => 'LINK' ) ) ) {
+		$rel = $processor->get_attribute( 'rel' );
+		if ( ! is_string( $rel ) || 'stylesheet' !== strtolower( $rel ) ) {
+			continue;
+		}
+
+		$href = $processor->get_attribute( 'href' );
+		if ( ! is_string( $href ) || false !== strpos( $href, 'wp-includes' ) ) {
+			continue;
+		}
+
+		$path = perflab_aea_get_path_from_resource_url( $href );
+		if ( '' === $path ) {
+			continue;
+		}
+
+		$style_size = filesize( $path );
+		if ( false !== $style_size ) {
+			$assets['styles'][] = array(
+				'src'    => $href,
+				'size'   => $style_size,
+				'handle' => (string) $processor->get_attribute( 'id' ),
+			);
+		}
+	}
+
+	$processor->seek( 'start' );
+	while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
+		$inline_script_handle = $processor->get_attribute( 'id' );
+		if ( ! is_string( $inline_script_handle ) || '' === $inline_script_handle ) {
+			continue;
+		}
+		foreach ( $assets['styles'] as &$style ) {
+			if ( preg_replace( '/-css$/', '', $style['handle'] ) . '-inline-css' === $inline_script_handle ) {
+				$style_size     = mb_strlen( $processor->get_modifiable_text(), '8bit' );
+				$style['size'] += $style_size;
+				break;
+			}
+		}
+	}
+
+	$processor->release_bookmark( 'start' );
+
+	if ( 0 !== count( $assets['scripts'] ) ) {
+		set_transient( 'aea_enqueued_front_page_scripts', $assets['scripts'], 12 * HOUR_IN_SECONDS );
+	}
+	if ( 0 !== count( $assets['styles'] ) ) {
+		set_transient( 'aea_enqueued_front_page_styles', $assets['styles'], 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'wp_footer', 'perflab_aea_audit_enqueued_styles', PHP_INT_MAX );
+add_action( 'admin_init', 'perflab_aea_audit_enqueued_assets' );
 
 /**
  * Adds tests to site health.
