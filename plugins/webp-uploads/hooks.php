@@ -812,10 +812,13 @@ add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_
  *
  * @since n.e.x.t
  *
- * @param array<string, mixed> $file The uploaded file data.
+ * @param array<string, mixed>|mixed $file The uploaded file data.
  * @return array<string, mixed> The modified file data.
  */
-function webp_uploads_convert_palette_png_to_truecolor( array $file ): array {
+function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
+	if ( ! is_array( $file ) ) {
+		$file = array();
+	}
 	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
 		return $file;
 	}
