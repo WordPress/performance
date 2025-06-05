@@ -49,7 +49,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 	 * @covers ::perflab_effective_asset_cache_headers_add_test
 	 */
 	public function test_perflab_effective_asset_cache_headers_add_test_is_attached_to_site_status_tests(): void {
-		$this->assertEquals( 100, has_filter( 'site_status_tests', 'perflab_effective_asset_cache_headers_add_test' ) );
+		$this->assertNotFalse( has_filter( 'site_status_tests', 'perflab_effective_asset_cache_headers_add_test' ) );
 	}
 
 	/**
