@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Add the dominant color metadata to the attachment.
  *
  * @since 1.0.0
+ * @access private
  *
  * @param array|mixed $metadata      The attachment metadata.
  * @param int         $attachment_id The attachment ID.
@@ -46,6 +47,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  * Filters various image attributes to add the dominant color to the image.
  *
  * @since 1.0.0
+ * @access private
  *
  * @param array|mixed $attr       Attributes for the image markup.
  * @param WP_Post     $attachment Image attachment post.
@@ -84,9 +86,10 @@ function dominant_color_update_attachment_image_attributes( $attr, WP_Post $atta
 add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachment_image_attributes', 10, 2 );
 
 /**
- * Filter image tags in content to add the dominant color to the image.
+ * Filters IMG tags in content to add the dominant color to the image.
  *
  * @since 1.0.0
+ * @access private
  *
  * @param string|mixed $filtered_image The filtered image.
  * @param string       $context        The context of the image.
@@ -141,6 +144,71 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 		return $filtered_image;
 	}
 
+	return dominant_color_get_updated_html( 'IMG', $filtered_image, $image_meta );
+}
+add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 20, 3 );
+
+/**
+ * Filters Video block markup to add the dominant color to the video.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @phpstan-param array{ attrs: array{ id?: int } } $attributes
+ *
+ * @param string|mixed $content    Markup.
+ * @param array        $attributes Block attributes.
+ * @return string Updated block markup.
+ */
+function dominant_color_video_tag_add_dominant_color( $content, array $attributes ): string {
+	if ( ! is_string( $content ) ) {
+		return '';
+	}
+
+	// TODO: Get the attachment for the provided poster which is not the featured image of the Video attachment.
+	if ( ! isset( $attributes['attrs']['id'] ) ) {
+		return $content;
+	}
+
+	$poster_attachment_id = get_post_thumbnail_id( $attributes['attrs']['id'] );
+	if ( false === $poster_attachment_id ) {
+		return $content;
+	}
+
+	$image_meta = wp_get_attachment_metadata( $poster_attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return $content;
+	}
+
+	// TODO: Add filter for whether the placeholder should be added.
+	return dominant_color_get_updated_html( 'VIDEO', $content, $image_meta );
+}
+add_filter(
+	'render_block_core/video',
+	'dominant_color_video_tag_add_dominant_color',
+	10,
+	2
+);
+
+/**
+ * Gets updated HTML with the dominant color applied.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @phpstan-param array{ dominany_color?: string, has_transparency?: bool } $image_meta
+ *
+ * @param non-empty-string     $tag_name    Tag name.
+ * @param string               $content     Markup.
+ * @param array<string, mixed> $image_meta  Image meta.
+ * @return string Possibly updated HTML.
+ */
+function dominant_color_get_updated_html( string $tag_name, string $content, array $image_meta ): string {
+	$processor = new WP_HTML_Tag_Processor( $content );
+	if ( ! $processor->next_tag( array( 'tag_name' => $tag_name ) ) ) {
+		return $content;
+	}
+
 	if ( isset( $image_meta['dominant_color'] ) && is_string( $image_meta['dominant_color'] ) && '' !== $image_meta['dominant_color'] ) {
 		$processor->set_attribute( 'data-dominant-color', $image_meta['dominant_color'] );
 
@@ -159,12 +227,13 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 
 	return $processor->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 20, 3 );
+
 
 /**
  * Add CSS needed for to show the dominant color as an image background.
  *
  * @since 1.0.0
+ * @access private
  */
 function dominant_color_add_inline_style(): void {
 	$handle = 'dominant-color-styles';
@@ -172,7 +241,7 @@ function dominant_color_add_inline_style(): void {
 	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 	wp_register_style( $handle, false );
 	wp_enqueue_style( $handle );
-	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
+	$custom_css = 'img,video[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
 	wp_add_inline_style( $handle, $custom_css );
 }
 add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
@@ -183,6 +252,7 @@ add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * See {@see 'wp_head'}.
  *
  * @since 1.0.0
+ * @access private
  */
 function dominant_color_render_generator(): void {
 	// Use the plugin slug as it is immutable.
@@ -198,6 +268,7 @@ add_action( 'wp_head', 'dominant_color_render_generator' );
  * in the WordPress admin interface.
  *
  * @since 1.2.0
+ * @access private
  */
 function dominant_color_admin_inline_style(): void {
 	$handle = 'dominant-color-admin-styles';
@@ -217,6 +288,7 @@ add_action( 'admin_enqueue_scripts', 'dominant_color_admin_inline_style' );
  * to the template, allowing these properties to be displayed in the media library.
  *
  * @since 1.2.0
+ * @access private
  * @see wp_print_media_templates()
  */
 function dominant_color_admin_script(): void {
@@ -253,6 +325,7 @@ add_action( 'admin_print_footer_scripts', 'dominant_color_admin_script' );
  * these additional properties, which can be used in the media library interface.
  *
  * @since 1.2.0
+ * @access private
  *
  * @param array<string, mixed>|mixed $response   The current response array for the attachment.
  * @param WP_Post                    $attachment The attachment post object.
