@@ -5,7 +5,7 @@
  * Description: Adds smooth transitions between navigations to your WordPress site.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'VIEW_TRANSITIONS_VERSION' ) ) {
 	return;
 }
 
-define( 'VIEW_TRANSITIONS_VERSION', '1.0.0' );
+define( 'VIEW_TRANSITIONS_VERSION', '1.0.1' );
 define( 'VIEW_TRANSITIONS_MAIN_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/class-plvt-view-transition-animation.php';
