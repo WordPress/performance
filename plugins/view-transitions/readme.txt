@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.8
-Stable tag:   1.0.0
+Stable tag:   1.0.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, view transitions, smooth transitions, animations
@@ -50,6 +50,10 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Fix view transitions setting values not being saved. ([2036](https://github.com/WordPress/performance/pull/2036))
 
 = 1.0.0 =
 
