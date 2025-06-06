@@ -24,18 +24,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 function perflab_effective_asset_cache_headers_add_test( array $tests ): array {
 	/*
 	 * Static assets are expected to not have effective cache headers in non-production environments.
-	 * Hence bail early.
 	 *
 	 * GH Issue: https://github.com/WordPress/performance/issues/2031
 	 */
-	if ( in_array( wp_get_environment_type(), array( 'local', 'development' ), true ) ) {
-		return $tests;
+	if ( ! in_array( wp_get_environment_type(), array( 'local', 'development' ), true ) ) {
+		$tests['direct']['effective_asset_cache_headers'] = array(
+			'label' => __( 'Effective Caching Headers', 'performance-lab' ),
+			'test'  => 'perflab_effective_asset_cache_headers_assets_test',
+		);
 	}
-
-	$tests['direct']['effective_asset_cache_headers'] = array(
-		'label' => __( 'Effective Caching Headers', 'performance-lab' ),
-		'test'  => 'perflab_effective_asset_cache_headers_assets_test',
-	);
 
 	return $tests;
 }
