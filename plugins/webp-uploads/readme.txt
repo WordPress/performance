@@ -31,6 +31,11 @@ _This plugin was formerly known as WebP Uploads._
 2. Visit **Plugins**.
 3. Activate the **Modern Image Formats** plugin.
 
+= After activation =
+
+1. Visit the new **Settings > Media** menu.
+2. Use the controls in the **Modern Image Formats** section to configure modern image formats.
+
 == Frequently Asked Questions ==
 
 = Where can I submit my plugin feedback? =

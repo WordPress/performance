@@ -42,6 +42,11 @@ _This plugin was formerly known as Speculation Rules._
 2. Visit **Plugins**.
 3. Activate the **Speculative Loading** plugin.
 
+= After activation =
+
+1. Visit the new **Settings > Reading** menu.
+2. Use the controls in the **Speculative Loading** section to configure speculative loading.
+
 == Frequently Asked Questions ==
 
 = How can I prevent certain URLs from being prefetched and prerendered? =
