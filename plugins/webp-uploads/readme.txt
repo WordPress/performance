@@ -33,7 +33,7 @@ _This plugin was formerly known as WebP Uploads._
 
 = After activation =
 
-1. Visit the new **Settings > Media** menu.
+1. Visit the **Settings > Media** admin screen.
 2. Use the controls in the **Modern Image Formats** section to configure modern image formats.
 
 == Frequently Asked Questions ==

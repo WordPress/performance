@@ -44,7 +44,7 @@ _This plugin was formerly known as Speculation Rules._
 
 = After activation =
 
-1. Visit the new **Settings > Reading** menu.
+1. Visit the **Settings > Reading** admin screen.
 2. Use the controls in the **Speculative Loading** section to configure speculative loading.
 
 == Frequently Asked Questions ==
