@@ -133,12 +133,15 @@
 	</rule>
 	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotValidated">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Security.ValidatedSanitizedInput.MissingUnslash">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotSanitized">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
 	</rule>
 
 	<!-- Exclude built plugins and built assets in plugins. -->
