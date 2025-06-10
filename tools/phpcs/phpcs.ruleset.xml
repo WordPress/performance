@@ -2,6 +2,9 @@
 <ruleset name="WPP-Base" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
 	<description>Sniffs for WordPress plugins</description>
 
+	<rule ref="../../vendor/wpackagist-plugin/plugin-check/vendor/plugin-check/phpcs-sniffs/PluginCheck/ruleset.xml" />
+	<rule ref="./plugin-check.ruleset.xml"/>
+
 	<rule ref="PHPCompatibility"/>
 	<config name="testVersion" value="7.2-"/>
 
