@@ -33,6 +33,11 @@ Cross-document view transitions are supported in a variety of browsers, includin
 2. Visit **Plugins**.
 3. Activate the **View Transitions** plugin.
 
+= After activation =
+
+1. Visit the **Settings > Reading** admin screen.
+2. Use the controls in the **View Transitions** section to configure view transitions.
+
 == Frequently Asked Questions ==
 
 = Where can I submit my plugin feedback? =
