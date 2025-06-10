@@ -5,7 +5,10 @@
 /dist
 
 # Minified files
-/*.min.js
+/**/*.min.js
+
+# Build files
+/plugins/*/build/*
 
 # Ignore Composer lock file
 composer.lock
