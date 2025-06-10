@@ -20,10 +20,14 @@
     "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class",
     "ext-zlib": "Required for compression of URL Metric data submitted to the REST API for storage in Optimization Detective"
   },
-  "repositories": [
+  "repositories":[
     {
-      "type": "composer",
-      "url": "https://wpackagist.org"
+      "type":"composer",
+      "url":"https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
     }
   ],
   "extra": {
