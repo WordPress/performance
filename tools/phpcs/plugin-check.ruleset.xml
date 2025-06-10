@@ -5,6 +5,7 @@
 	<description>Standards any plugin to be published on wordpress.org should comply with.</description>
 
 	<!-- The following rules have been copied from https://github.com/WordPress/plugin-check/blob/95c426228a23a3b290de7758a1708e95fd3c5345/phpcs-rulesets/plugin-review.xml#L33-L174 -->
+	<!-- The rules are copied here to exclude the undesired rules/configs, especially setting the testVersion to 5.2-. -->
 
 	<!-- All SQL queries should be prepared as close to the time of querying the database as possible. -->
 	<rule ref="WordPress.DB.PreparedSQL"/>
