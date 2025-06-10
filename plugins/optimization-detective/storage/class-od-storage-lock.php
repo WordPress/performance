@@ -93,7 +93,7 @@ final class OD_Storage_Lock {
 		} else {
 			$ip_address = '';
 		}
-		return 'url_metrics_storage_lock_' . wp_hash( $ip_address );
+		return 'url_metrics_storage_lock_' . wp_hash( (string) rest_is_ip_address( $ip_address ) );
 	}
 
 	/**
