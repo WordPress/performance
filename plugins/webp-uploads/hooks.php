@@ -822,8 +822,11 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
 		return $file;
 	}
-
-	if ( 'png' !== strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) ) ) {
+	if ( isset( $file['type'] ) && is_string( $file['type'] ) ) {
+		if ( 'image/png' !== strtolower( $file['type'] ) ) {
+			return $file;
+		}
+	} elseif ( 'image/png' !== wp_check_filetype( $file['name'] )['type'] ) {
 		return $file;
 	}
 
