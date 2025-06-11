@@ -276,7 +276,7 @@ function plvt_add_setting_ui(): void {
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
 		'admin_transition_animation'   => array(
-			'title'       => __( 'Use transiotion in WP Admin', 'view-transitions' ),
+			'title'       => __( 'Use transition in WP Admin', 'view-transitions' ),
 			'description' => __( 'Enable view transitions in the WordPress admin area. This will apply the default transition animation to all admin pages.', 'view-transitions' ),
 		),
 	);
