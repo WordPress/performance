@@ -850,7 +850,15 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 	}
 
 	$image = imagecreatefrompng( $file['tmp_name'] );
-	if ( false === $image || imageistruecolor( $image ) ) {
+
+	// Check if the image was created successfully.
+	if ( false === $image ) {
+		return $file;
+	}
+
+	// Check if the image is already truecolor.
+	if ( imageistruecolor( $image ) ) {
+		imagedestroy( $image );
 		return $file;
 	}
 
