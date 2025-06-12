@@ -228,7 +228,7 @@ function plvt_apply_settings_to_theme_support(): void {
 function plvt_add_setting_ui(): void {
 	add_settings_section(
 		'plvt_view_transitions',
-		__( 'View Transitions', 'view-transitions' ),
+		_x( 'View Transitions', 'Settings section', 'view-transitions' ),
 		static function (): void {
 			?>
 			<p class="description">
