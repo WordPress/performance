@@ -306,6 +306,10 @@ function plvt_load_view_transitions(): void {
 	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	if ( '' !== $default_animation_stylesheet ) {
+		$default_animation_stylesheet = plvt_replace_animation_duration(
+			$default_animation_stylesheet,
+			$theme_support['transition_speed'] ?? 1000
+		);
 		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 	}
 
@@ -354,4 +358,25 @@ function plvt_load_view_transitions(): void {
 	wp_add_inline_script( 'plvt-view-transitions', $src_script );
 	wp_add_inline_script( 'plvt-view-transitions', $init_script );
 	wp_enqueue_script( 'plvt-view-transitions' );
+}
+
+/**
+ * Replaces the animation duration placeholder in the provided CSS with a value based on the transition speed.
+ *
+ * @since 1.x.x
+ *
+ * @param string $css              The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
+ * @param mixed  $transition_speed Transition speed in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
+ * @return string Modified CSS with the actual animation duration in seconds.
+ */
+function plvt_replace_animation_duration( string $css, $transition_speed ): string {
+	$speed_ms = is_numeric( $transition_speed ) ? floatval( $transition_speed ) : 1000;
+	$seconds  = $speed_ms / 1000;
+
+	// Replace the placeholder with the actual duration value.
+	return str_replace(
+		'plvt-view-transition-duration',
+		$seconds . 's',
+		$css
+	);
 }

@@ -25,7 +25,7 @@
 }
 
 ::view-transition-group(*) {
-	animation-duration: 1s;
+	animation-duration: plvt-view-transition-duration;
 }
 
 ::view-transition-old(*) {
