@@ -10,11 +10,14 @@
     "resolveJsonModule": true
   },
   "include": [
-    "*.js",
-    "*.mjs",
-    "*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.ts",
   ],
   "exclude": [
-    "plugins/*/build/*"
+    "plugins/*/build/*",
+    "build/*",
+    "vendor/*",
+    "node_modules/*"
   ]
 }
