@@ -363,7 +363,7 @@ function plvt_load_view_transitions(): void {
  *
  * @since 1.x.x
  *
- * @param string $css               The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
+ * @param string $css                The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
  * @param mixed  $animation_duration Transition duration in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
  * @return string Modified CSS with the actual animation duration in seconds.
  */
