@@ -45,28 +45,28 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ default_transition_animation: non-empty-string, default_transition_speed: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Default setting value.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $default_transition_speed     Default transition animation speed in milliseconds.
- *                                                Added in 1.x.x.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *                                                         Added in 1.x.x.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
  * }
  */
 function plvt_get_setting_default(): array {
 	return array(
-		'default_transition_animation' => 'fade',
-		'default_transition_speed'     => '1000',
-		'header_selector'              => 'header',
-		'main_selector'                => 'main',
-		'post_title_selector'          => '.wp-block-post-title, .entry-title',
-		'post_thumbnail_selector'      => '.wp-post-image',
-		'post_content_selector'        => '.wp-block-post-content, .entry-content',
+		'default_transition_animation'          => 'fade',
+		'default_transition_animation_duration' => '1000',
+		'header_selector'                       => 'header',
+		'main_selector'                         => 'main',
+		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
+		'post_thumbnail_selector'               => '.wp-post-image',
+		'post_content_selector'                 => '.wp-block-post-content, .entry-content',
 	);
 }
 
@@ -75,17 +75,17 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, default_transition_speed: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Stored setting value.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $default_transition_speed     Default transition animation speed in milliseconds.
- *                                                Added in 1.x.x.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *                                                         Added in 1.x.x.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
  * }
  */
 function plvt_get_stored_setting_value(): array {
@@ -98,17 +98,17 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, default_transition_speed: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Sanitized setting.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $default_transition_speed     Default transition animation speed in milliseconds.
- *                                                Added in 1.x.x.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *                                                         Added in 1.x.x.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
  * }
  */
 function plvt_sanitize_setting( $input ): array {
@@ -128,7 +128,7 @@ function plvt_sanitize_setting( $input ): array {
 	}
 
 	$selector_options = array(
-		'default_transition_speed',
+		'default_transition_animation_duration',
 		'header_selector',
 		'main_selector',
 		'post_title_selector',
@@ -200,10 +200,10 @@ function plvt_apply_settings_to_theme_support(): void {
 	$args = $_wp_theme_features['view-transitions'];
 
 	// Apply the settings.
-	$options                   = plvt_get_stored_setting_value();
-	$args['default-animation'] = $options['default_transition_animation'];
-	$args['transition_speed']  = $options['default_transition_speed'];
-	$selector_options          = array(
+	$options                            = plvt_get_stored_setting_value();
+	$args['default-animation']          = $options['default_transition_animation'];
+	$args['default-animation-duration'] = $options['default_transition_animation_duration'];
+	$selector_options                   = array(
 		'global' => array(
 			'header_selector' => 'header',
 			'main_selector'   => 'main',
@@ -255,31 +255,31 @@ function plvt_add_setting_ui(): void {
 	);
 
 	$fields = array(
-		'default_transition_animation' => array(
+		'default_transition_animation'          => array(
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
-		'default_transition_speed'     => array(
-			'title'       => __( 'Transition Speed', 'view-transitions' ),
-			'description' => __( 'Control the speed of the view transition. Enter the value in milliseconds (e.g., 1000, 1500, 2000).', 'view-transitions' ),
+		'default_transition_animation_duration' => array(
+			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
+			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 1000, 1500, 2000).', 'view-transitions' ),
 		),
-		'header_selector'              => array(
+		'header_selector'                       => array(
 			'title'       => __( 'Header Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global header element.', 'view-transitions' ),
 		),
-		'main_selector'                => array(
+		'main_selector'                         => array(
 			'title'       => __( 'Main Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global main element.', 'view-transitions' ),
 		),
-		'post_title_selector'          => array(
+		'post_title_selector'                   => array(
 			'title'       => __( 'Post Title Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post title element.', 'view-transitions' ),
 		),
-		'post_thumbnail_selector'      => array(
+		'post_thumbnail_selector'               => array(
 			'title'       => __( 'Post Thumbnail Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post thumbnail element.', 'view-transitions' ),
 		),
-		'post_content_selector'        => array(
+		'post_content_selector'                 => array(
 			'title'       => __( 'Post Content Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
