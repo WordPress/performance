@@ -359,12 +359,12 @@ function plvt_load_view_transitions(): void {
 }
 
 /**
- * Replaces the animation duration placeholder in the provided CSS with a value based on the transition speed.
+ * Replaces the animation duration placeholder in the provided CSS with a value based on the transition duration.
  *
  * @since 1.x.x
  *
  * @param string $css               The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
- * @param mixed  $animation_duration Transition speed in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
+ * @param mixed  $animation_duration Transition duration in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
  * @return string Modified CSS with the actual animation duration in seconds.
  */
 function plvt_replace_animation_duration( string $css, $animation_duration ): string {

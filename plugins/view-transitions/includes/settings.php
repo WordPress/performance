@@ -49,7 +49,7 @@ function plvt_get_view_transition_animation_labels(): array {
  *     Default setting value.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in 1.x.x.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -79,7 +79,7 @@ function plvt_get_setting_default(): array {
  *     Stored setting value.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in 1.x.x.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -102,7 +102,7 @@ function plvt_get_stored_setting_value(): array {
  *     Sanitized setting.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation speed in milliseconds.
+ *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in 1.x.x.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
