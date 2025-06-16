@@ -1132,15 +1132,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 *
 	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
 	 *
-	 * @param string|null   $image_path      The path to the image file to test.
-	 * @param bool          $expect_changed  Whether the png should be converted to truecolor.
-	 * @param callable|null $set_up          Optional setup function to run before the test.
-	 * @param callable|null $tear_down       Optional teardown function to run after the test.
+	 * @param string|null $image_path     The path to the image file to test.
+	 * @param bool        $expect_changed Whether the png should be converted to truecolor.
 	 */
-	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed, ?callable $set_up, ?callable $tear_down ): void {
-		if ( null !== $set_up ) {
-			$set_up();
-		}
+	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed ): void {
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Editor_GD' );
+			}
+		);
 
 		// Temp file will be copied and unlinked by WordPress core during sideload processing.
 		$tmp_file = wp_tempnam();
@@ -1193,9 +1194,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 				$this->assertGreaterThan( 0, (int) filesize( $modern_image_format_path ) );
 			}
 		} finally {
-			if ( null !== $tear_down ) {
-				$tear_down();
-			}
 			wp_delete_attachment( $attachment_id );
 		}
 	}
@@ -1214,38 +1212,15 @@ class Test_WebP_Uploads_Load extends TestCase {
 			'wrong_extension' => array(
 				'image_path'       => $test_jpg,
 				'expected_changed' => false,
-				'set_up'           => null,
-				'tear_down'        => null,
 			),
 			'non_palette_png' => array(
 				'image_path'       => $non_palette_png,
 				'expected_changed' => false,
-				'set_up'           => function (): void {
-					add_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
-				},
-				'tear_down'        => function (): void {
-					remove_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
-				},
 			),
 			'palette_png'     => array(
 				'image_path'       => $palette_png,
 				'expected_changed' => true,
-				'set_up'           => function (): void {
-					add_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
-				},
-				'tear_down'        => function (): void {
-					remove_filter( 'wp_image_editors', array( $this, 'use_gd_image_editor' ) );
-				},
 			),
 		);
-	}
-
-	/**
-	 * Use GD image editor.
-	 *
-	 * @return array<string>
-	 */
-	public function use_gd_image_editor(): array {
-		return array( 'WP_Image_Editor_GD' );
 	}
 }
