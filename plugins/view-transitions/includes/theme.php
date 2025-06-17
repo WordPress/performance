@@ -364,7 +364,7 @@ function plvt_load_view_transitions(): void {
  * It should be hooked to an appropriate action to ensure the styles
  * are included in the page output.
  */
-function plvt_print_view_transitions_style(): void {
+function plvt_print_view_transitions_admin_style(): void {
 	if ( ! current_theme_supports( 'view-transitions' ) ) {
 		return;
 	}
@@ -376,7 +376,6 @@ function plvt_print_view_transitions_style(): void {
 	?>
 <style>
 	@view-transition { navigation: auto; }
-	
 </style>
 	<?php
 }
