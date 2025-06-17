@@ -5,6 +5,7 @@
  * @package webp-uploads
  */
 
+use PHP_CodeSniffer\Tokenizers\PHP;
 use WebP_Uploads\Tests\TestCase;
 
 class Test_WebP_Uploads_Load extends TestCase {
@@ -1154,8 +1155,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 			'error'    => UPLOAD_ERR_OK,
 		);
 
-		// Store the original file hash to compare later.
+		// Store the original file hash and the original file size for later comparison.
 		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
+		$original_file_size = (int) filesize( $file['tmp_name'] );
 
 		// This will trigger the `wp_handle_sideload_prefilter` filter.
 		$attachment_id = media_handle_sideload( $file );
@@ -1191,7 +1193,11 @@ class Test_WebP_Uploads_Load extends TestCase {
 				$modern_image_format_path = get_attached_file( $attachment_id );
 				$this->assertNotFalse( $modern_image_format_path );
 				$this->assertFileExists( $modern_image_format_path );
-				$this->assertGreaterThan( 0, (int) filesize( $modern_image_format_path ) );
+				$modern_image_format_filesize = (int) filesize( $modern_image_format_path );
+				$this->assertGreaterThan( 0, $modern_image_format_filesize );
+
+				// Ensure the file size of the converted image is less than or equal to the original indexed PNG file size.
+				$this->assertLessThanOrEqual( $original_file_size, $modern_image_format_filesize );
 			}
 		} finally {
 			wp_delete_attachment( $attachment_id );
