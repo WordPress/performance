@@ -130,7 +130,6 @@ function plvt_sanitize_setting( $input ): array {
 		'post_title_selector',
 		'post_thumbnail_selector',
 		'post_content_selector',
-		'admin_transition_animation',
 	);
 	foreach ( $selector_options as $selector_option ) {
 		if ( isset( $input[ $selector_option ] ) && is_string( $input[ $selector_option ] ) ) {
@@ -139,6 +138,11 @@ function plvt_sanitize_setting( $input ): array {
 				$value[ $selector_option ] = $selector_option_value;
 			}
 		}
+	}
+
+	// Sanitize "admin_transition_animation" as a boolean.
+	if ( isset( $input['admin_transition_animation'] ) ) {
+		$value['admin_transition_animation'] = (bool) $input['admin_transition_animation'];
 	}
 
 	return $value;
