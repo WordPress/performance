@@ -812,16 +812,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.12",
+            "version": "0.4.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "d8f8290313e4fd1b4840c553a8492eff31ad54eb"
+                "reference": "66b0ffe2d4dba18f12ffee663cdbe31640819e7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/d8f8290313e4fd1b4840c553a8492eff31ad54eb",
-                "reference": "d8f8290313e4fd1b4840c553a8492eff31ad54eb",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/66b0ffe2d4dba18f12ffee663cdbe31640819e7a",
+                "reference": "66b0ffe2d4dba18f12ffee663cdbe31640819e7a",
                 "shasum": ""
             },
             "type": "library",
@@ -838,9 +838,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.12"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.14"
             },
-            "time": "2025-04-15T00:22:00+00:00"
+            "time": "2025-06-16T07:31:03+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -2293,16 +2293,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.13.0",
+            "version": "3.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "65ff2489553b83b4597e89c3b8b721487011d186"
+                "reference": "1b71b4dd7e7ef651ac749cea67e513c0c832f4bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/65ff2489553b83b4597e89c3b8b721487011d186",
-                "reference": "65ff2489553b83b4597e89c3b8b721487011d186",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/1b71b4dd7e7ef651ac749cea67e513c0c832f4bd",
+                "reference": "1b71b4dd7e7ef651ac749cea67e513c0c832f4bd",
                 "shasum": ""
             },
             "require": {
@@ -2373,7 +2373,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-05-11T03:36:00+00:00"
+            "time": "2025-06-12T15:04:34+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
@@ -2762,16 +2762,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.2 || ^8.0",
         "ext-json": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
