@@ -370,7 +370,7 @@ function plvt_print_view_transitions_admin_style(): void {
 	}
 
 	$options = plvt_get_stored_setting_value();
-	if ( isset( $options['admin_transition_animation'] ) && '1' !== $options['admin_transition_animation'] ) {
+	if ( ! isset( $options['admin_transition_animation'] ) || true !== $options['admin_transition_animation'] ) {
 		return;
 	}
 	?>

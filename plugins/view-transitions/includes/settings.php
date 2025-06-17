@@ -285,6 +285,16 @@ function plvt_add_setting_ui(): void {
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
+		$additional_args = array(
+			'field'     => $slug,
+			'label_for' => "plvt-view-transitions-field-{$slug}",
+		);
+
+		// Remove 'label_for' for checkbox field to avoid duplicate label association.
+		if ( 'admin_transition_animation' === $slug ) {
+			unset( $additional_args['label_for'] );
+		}
+
 		add_settings_field(
 			"plvt_view_transitions_{$slug}",
 			$args['title'],
@@ -292,10 +302,7 @@ function plvt_add_setting_ui(): void {
 			'reading',
 			'plvt_view_transitions',
 			array_merge(
-				array(
-					'field'     => $slug,
-					'label_for' => "plvt-view-transitions-field-{$slug}",
-				),
+				$additional_args,
 				$args
 			)
 		);
@@ -365,9 +372,9 @@ function plvt_render_settings_field( array $args ): void {
 		<?php
 	} elseif ( 'checkbox' === $type ) {
 		?>
-		<label>
+		<label for="<?php echo esc_attr( "plvt-view-transitions-field-{$args['field']}" ); ?>">
 			<input
-				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				id="<?php echo esc_attr( "plvt-view-transitions-field-{$args['field']}" ); ?>"
 				name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 				type="checkbox"
 				value="1"
@@ -376,7 +383,7 @@ function plvt_render_settings_field( array $args ): void {
 				<?php
 				if ( '' !== $args['description'] ) {
 					?>
-					aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+					aria-describedby="<?php echo esc_attr( "plvt-view-transitions-field-{$args['field']}-description" ); ?>"
 					<?php
 				}
 				?>
