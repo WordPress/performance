@@ -281,7 +281,7 @@ function plvt_add_setting_ui(): void {
 		),
 		'admin_transition_animation'   => array(
 			'title'       => __( 'Use transition in WP Admin', 'view-transitions' ),
-			'description' => __( 'Enable view transitions in the WordPress admin area. This will apply the default transition animation to all admin pages.', 'view-transitions' ),
+			'description' => __( 'Enable view transitions in the WordPress admin area.', 'view-transitions' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
