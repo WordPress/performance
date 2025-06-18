@@ -365,10 +365,6 @@ function plvt_load_view_transitions(): void {
  * are included in the page output.
  */
 function plvt_print_view_transitions_admin_style(): void {
-	if ( ! current_theme_supports( 'view-transitions' ) ) {
-		return;
-	}
-
 	$options = plvt_get_stored_setting_value();
 	if ( ! isset( $options['enable_admin_transitions'] ) || true !== $options['enable_admin_transitions'] ) {
 		return;
