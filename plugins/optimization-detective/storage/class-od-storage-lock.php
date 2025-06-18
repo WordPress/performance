@@ -86,8 +86,14 @@ final class OD_Storage_Lock {
 	 * @return non-empty-string Transient key.
 	 */
 	public static function get_transient_key(): string {
-		$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-		return 'url_metrics_storage_lock_' . wp_hash( $ip_address );
+		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ip_address = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip_address = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		} else {
+			$ip_address = '';
+		}
+		return 'url_metrics_storage_lock_' . wp_hash( (string) rest_is_ip_address( $ip_address ) );
 	}
 
 	/**

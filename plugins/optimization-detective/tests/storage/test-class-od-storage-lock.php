@@ -170,15 +170,22 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	public function test_get_transient_key(): void {
 		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
+		$missing_ip_key = OD_Storage_Lock::get_transient_key();
+		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $missing_ip_key );
+
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 		$first_key              = OD_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $first_key );
+		$this->assertNotEquals( $first_key, $missing_ip_key, 'Expected setting REMOTE_ADDR header to take precedence over empty key.' );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.2';
 		$second_key                      = OD_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $second_key );
 
 		$this->assertNotEquals( $second_key, $first_key, 'Expected setting HTTP_X_FORWARDED_FOR header to take precedence over REMOTE_ADDR.' );
+
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '<script>EVIL IP</script>';
+		$this->assertSame( $missing_ip_key, OD_Storage_Lock::get_transient_key() );
 	}
 
 	/**
