@@ -52,92 +52,54 @@ function perflab_aea_audit_enqueued_assets(): void {
 	);
 
 	$processor = new WP_HTML_Tag_Processor( $html );
-	$processor->next_token();
-	$processor->set_bookmark( 'start' );
 
-	$current_script_handle = '';
-	while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-		$src = $processor->get_attribute( 'src' );
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
 
-		if ( null === $src && '' !== $current_script_handle ) {
-			$inline_script_handle = $processor->get_attribute( 'id' );
-			if ( is_string( $inline_script_handle ) && $inline_script_handle === $current_script_handle . '-after' ) {
-				$script_size = mb_strlen( $processor->get_modifiable_text(), '8bit' );
-				if ( false !== $script_size ) {
-					foreach ( $assets['scripts'] as &$script ) {
-						if ( $script['handle'] === $current_script_handle ) {
-							$script['size'] += $script_size;
-							break;
-						}
-					}
-				}
+		if ( 'SCRIPT' === $tag ) {
+			$src = $processor->get_attribute( 'src' );
+
+			if ( ! is_string( $src ) || false !== strpos( $src, 'wp-includes' ) ) {
 				continue;
 			}
-		}
 
-		if ( ! is_string( $src ) || false !== strpos( $src, 'wp-includes' ) ) {
-			continue;
-		}
+			$path = perflab_aea_get_path_from_resource_url( $src );
+			if ( '' === $path ) {
+				continue;
+			}
 
-		$path = perflab_aea_get_path_from_resource_url( $src );
-		if ( '' === $path ) {
-			continue;
-		}
+			$script_size = filesize( $path );
+			if ( false !== $script_size ) {
+				$assets['scripts'][] = array(
+					'src'  => $src,
+					'size' => $script_size,
+				);
+			}
+		} elseif ( 'LINK' === $tag ) {
+			$rel = $processor->get_attribute( 'rel' );
+			if ( ! is_string( $rel ) || 'stylesheet' !== strtolower( $rel ) ) {
+				continue;
+			}
 
-		$script_size           = filesize( $path );
-		$current_script_handle = (string) $processor->get_attribute( 'id' );
-		if ( false !== $script_size ) {
-			$assets['scripts'][] = array(
-				'src'    => $src,
-				'size'   => $script_size,
-				'handle' => $current_script_handle,
-			);
-		}
-	}
+			$href = $processor->get_attribute( 'href' );
+			if ( ! is_string( $href ) || false !== strpos( $href, 'wp-includes' ) ) {
+				continue;
+			}
 
-	$processor->seek( 'start' );
-	while ( $processor->next_tag( array( 'tag_name' => 'LINK' ) ) ) {
-		$rel = $processor->get_attribute( 'rel' );
-		if ( ! is_string( $rel ) || 'stylesheet' !== strtolower( $rel ) ) {
-			continue;
-		}
+			$path = perflab_aea_get_path_from_resource_url( $href );
+			if ( '' === $path ) {
+				continue;
+			}
 
-		$href = $processor->get_attribute( 'href' );
-		if ( ! is_string( $href ) || false !== strpos( $href, 'wp-includes' ) ) {
-			continue;
-		}
-
-		$path = perflab_aea_get_path_from_resource_url( $href );
-		if ( '' === $path ) {
-			continue;
-		}
-
-		$style_size = filesize( $path );
-		if ( false !== $style_size ) {
-			$assets['styles'][] = array(
-				'src'    => $href,
-				'size'   => $style_size,
-				'handle' => (string) $processor->get_attribute( 'id' ),
-			);
-		}
-	}
-
-	$processor->seek( 'start' );
-	while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
-		$inline_script_handle = $processor->get_attribute( 'id' );
-		if ( ! is_string( $inline_script_handle ) || '' === $inline_script_handle ) {
-			continue;
-		}
-		foreach ( $assets['styles'] as &$style ) {
-			if ( preg_replace( '/-css$/', '', $style['handle'] ) . '-inline-css' === $inline_script_handle ) {
-				$style_size     = mb_strlen( $processor->get_modifiable_text(), '8bit' );
-				$style['size'] += $style_size;
-				break;
+			$style_size = filesize( $path );
+			if ( false !== $style_size ) {
+				$assets['styles'][] = array(
+					'src'  => $href,
+					'size' => $style_size,
+				);
 			}
 		}
 	}
-
-	$processor->release_bookmark( 'start' );
 
 	if ( 0 !== count( $assets['scripts'] ) ) {
 		set_transient( 'aea_enqueued_front_page_scripts', $assets['scripts'], 12 * HOUR_IN_SECONDS );
