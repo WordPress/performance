@@ -45,7 +45,7 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, admin_transition_animation: bool } {
+ * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Default setting value.
  *
  *     @type string $default_transition_animation Default view transition animation.
@@ -54,7 +54,7 @@ function plvt_get_view_transition_animation_labels(): array {
  *     @type string $post_title_selector          CSS selector for the post title element.
  *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
  *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $admin_transition_animation   Whether to use view transitions in the admin area.
+ *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
  * }
  */
 function plvt_get_setting_default(): array {
@@ -65,7 +65,7 @@ function plvt_get_setting_default(): array {
 		'post_title_selector'          => '.wp-block-post-title, .entry-title',
 		'post_thumbnail_selector'      => '.wp-post-image',
 		'post_content_selector'        => '.wp-block-post-content, .entry-content',
-		'admin_transition_animation'   => false,
+		'enable_admin_transitions'     => false,
 	);
 }
 
@@ -74,7 +74,7 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, admin_transition_animation: bool|non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool|non-empty-string } {
  *     Stored setting value.
  *
  *     @type string $default_transition_animation Default view transition animation.
@@ -83,7 +83,7 @@ function plvt_get_setting_default(): array {
  *     @type string $post_title_selector          CSS selector for the post title element.
  *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
  *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $admin_transition_animation   Whether to use view transitions in the admin area.
+ *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
  * }
  */
 function plvt_get_stored_setting_value(): array {
@@ -96,7 +96,7 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, admin_transition_animation: bool|non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool|non-empty-string } {
  *     Sanitized setting.
  *
  *     @type string $default_transition_animation Default view transition animation.
@@ -105,7 +105,7 @@ function plvt_get_stored_setting_value(): array {
  *     @type string $post_title_selector          CSS selector for the post title element.
  *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
  *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $admin_transition_animation   Whether to use view transitions in the admin area.
+ *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
  * }
  */
 function plvt_sanitize_setting( $input ): array {
@@ -140,9 +140,9 @@ function plvt_sanitize_setting( $input ): array {
 		}
 	}
 
-	// Sanitize "admin_transition_animation" as a boolean.
-	if ( isset( $input['admin_transition_animation'] ) ) {
-		$value['admin_transition_animation'] = (bool) $input['admin_transition_animation'];
+	// Sanitize "enable_admin_transitions" as a boolean.
+	if ( isset( $input['enable_admin_transitions'] ) ) {
+		$value['enable_admin_transitions'] = (bool) $input['enable_admin_transitions'];
 	}
 
 	return $value;
@@ -279,7 +279,7 @@ function plvt_add_setting_ui(): void {
 			'title'       => __( 'Post Content Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
-		'admin_transition_animation'   => array(
+		'enable_admin_transitions'     => array(
 			'title'       => __( 'Use transition in WP Admin', 'view-transitions' ),
 			'description' => __( 'Enable view transitions in the WordPress admin area.', 'view-transitions' ),
 		),
@@ -291,7 +291,7 @@ function plvt_add_setting_ui(): void {
 		);
 
 		// Remove 'label_for' for checkbox field to avoid duplicate label association.
-		if ( 'admin_transition_animation' === $slug ) {
+		if ( 'enable_admin_transitions' === $slug ) {
 			unset( $additional_args['label_for'] );
 		}
 
@@ -332,7 +332,7 @@ function plvt_render_settings_field( array $args ): void {
 			$type    = 'select';
 			$choices = plvt_get_view_transition_animation_labels();
 			break;
-		case 'admin_transition_animation':
+		case 'enable_admin_transitions':
 			$type    = 'checkbox';
 			$choices = array(); // Defined just for consistency.
 			break;
