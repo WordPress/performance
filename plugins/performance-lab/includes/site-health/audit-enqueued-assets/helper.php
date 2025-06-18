@@ -33,7 +33,7 @@ function perflab_aea_enqueued_js_assets_test(): array {
 	}
 
 	$result = array(
-		'label'       => __( 'Enqueued scripts', 'performance-lab' ),
+		'label'       => __( 'Blocking scripts', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
 			'label' => __( 'Performance', 'performance-lab' ),
@@ -45,8 +45,8 @@ function perflab_aea_enqueued_js_assets_test(): array {
 				sprintf(
 					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
-						'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
-						'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking script (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking scripts (size: %2$s) is acceptable.',
 						$enqueued_scripts,
 						'performance-lab'
 					),
@@ -86,8 +86,8 @@ function perflab_aea_enqueued_js_assets_test(): array {
 				sprintf(
 					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
-						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking script (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking scripts (size: %2$s). Try to reduce the number or to concatenate them.',
 						$enqueued_scripts,
 						'performance-lab'
 					),
@@ -128,7 +128,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 		return array( 'omitted' => true );
 	}
 	$result = array(
-		'label'       => __( 'Enqueued styles', 'performance-lab' ),
+		'label'       => __( 'Blocking styles', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
 			'label' => __( 'Performance', 'performance-lab' ),
@@ -140,8 +140,8 @@ function perflab_aea_enqueued_css_assets_test(): array {
 				sprintf(
 					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
-						'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
-						'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking style (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking styles (size: %2$s) is acceptable.',
 						$enqueued_styles,
 						'performance-lab'
 					),
@@ -180,8 +180,8 @@ function perflab_aea_enqueued_css_assets_test(): array {
 				sprintf(
 					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
-						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking style (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking styles (size: %2$s). Try to reduce the number or to concatenate them.',
 						$enqueued_styles,
 						'performance-lab'
 					),

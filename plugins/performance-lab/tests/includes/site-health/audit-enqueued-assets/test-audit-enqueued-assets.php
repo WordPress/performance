@@ -18,11 +18,11 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
+		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
-		perflab_aea_audit_enqueued_assets();
+		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
@@ -53,7 +53,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
+		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_script( 'script1', 'example1.com', array() );
@@ -65,7 +65,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_add_inline_script( 'script1', $inline_script );
 
 		get_echo( 'wp_print_scripts' );
-		perflab_aea_audit_enqueued_assets();
+		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );
@@ -87,7 +87,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
+		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
@@ -96,7 +96,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_assets();
+		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
@@ -127,7 +127,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
+		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_style( 'style1', 'example1.com', array() );
@@ -145,7 +145,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_assets();
+		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );
@@ -277,11 +277,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Mock is_home in $wp_query.
+	 * Mocks the current screen to be the dashboard.
 	 */
-	public function mock_is_front_page(): void {
-		global $wp_query;
-		$wp_query->is_home = true;
+	public function mock_is_admin(): void {
+		set_current_screen( 'dashboard' );
 	}
 
 	/**

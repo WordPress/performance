@@ -13,11 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Audit enqueued assets on the front page.
+ * Audit blocking assets on the front page.
  *
  * @since n.e.x.t
  */
-function perflab_aea_audit_enqueued_assets(): void {
+function perflab_aea_audit_blocking_assets(): void {
 	if (
 		! is_admin() ||
 		! current_user_can( 'view_site_health_checks' ) ||
@@ -142,7 +142,7 @@ function perflab_aea_audit_enqueued_assets(): void {
 		set_transient( 'aea_enqueued_front_page_styles', $assets['styles'], 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'admin_init', 'perflab_aea_audit_enqueued_assets' );
+add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
 
 /**
  * Adds tests to site health.
