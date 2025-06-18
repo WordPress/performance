@@ -74,7 +74,7 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool|non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Stored setting value.
  *
  *     @type string $default_transition_animation Default view transition animation.
@@ -96,7 +96,7 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool|non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Sanitized setting.
  *
  *     @type string $default_transition_animation Default view transition animation.
