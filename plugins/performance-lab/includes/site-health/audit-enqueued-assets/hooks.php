@@ -123,6 +123,15 @@ function perflab_aea_audit_enqueued_assets(): void {
 					'size' => $style_size,
 				);
 			}
+		} elseif ( 'STYLE' === $tag ) {
+			// Process inline styles.
+			$style_size = mb_strlen( $processor->get_modifiable_text(), '8bit' );
+			if ( false !== $style_size ) {
+				$assets['styles'][] = array(
+					'src'  => 'inline',
+					'size' => $style_size,
+				);
+			}
 		}
 	}
 
