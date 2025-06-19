@@ -10,7 +10,7 @@
 	inherits: false;
 }
 
-@property --plvt-view-transition-duration {
+@property --plvt-view-transition-animation-duration {
 	syntax: "<time>";
 	initial-value: 1s;
 	inherits: false;
@@ -31,7 +31,7 @@
 }
 
 ::view-transition-group(*) {
-	animation-duration: var(--plvt-view-transition-duration);
+	animation-duration: var(--plvt-view-transition-animation-duration);
 }
 
 ::view-transition-old(*) {

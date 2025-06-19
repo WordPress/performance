@@ -50,7 +50,7 @@ function plvt_get_view_transition_animation_labels(): array {
  *
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in 1.x.x.
+ *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -80,7 +80,7 @@ function plvt_get_setting_default(): array {
  *
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in 1.x.x.
+ *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -103,7 +103,7 @@ function plvt_get_stored_setting_value(): array {
  *
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in 1.x.x.
+ *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -325,6 +325,10 @@ function plvt_render_settings_field( array $args ): void {
 			$type    = 'select';
 			$choices = plvt_get_view_transition_animation_labels();
 			break;
+		case 'default_transition_animation_duration':
+			$type    = 'number';
+			$choices = plvt_get_view_transition_animation_labels();
+			break;
 		default:
 			$type    = 'text';
 			$choices = array(); // Defined just for consistency.
@@ -358,6 +362,23 @@ function plvt_render_settings_field( array $args ): void {
 			}
 			?>
 		</select>
+		<?php
+	} elseif ( 'number' === $type ) {
+		?>
+		<input
+			type="number"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
+			value="<?php echo esc_attr( $value ); ?>"
+			class="regular-text code"
+			<?php
+			if ( '' !== $args['description'] ) {
+				?>
+				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+				<?php
+			}
+			?>
+		>
 		<?php
 	} else {
 		?>
