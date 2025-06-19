@@ -280,7 +280,7 @@ function plvt_add_setting_ui(): void {
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
 		'enable_admin_transitions'     => array(
-			'title'       => __( 'Use transition in WP Admin', 'view-transitions' ),
+			'title'       => __( 'WP Admin', 'view-transitions' ),
 			'description' => __( 'Enable view transitions in the WordPress admin area.', 'view-transitions' ),
 		),
 	);
