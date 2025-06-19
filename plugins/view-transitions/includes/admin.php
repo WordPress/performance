@@ -30,6 +30,7 @@ function plvt_print_view_transitions_admin_style(): void {
 	?>
 <style>
 	@view-transition { navigation: auto; }
+	#adminmenu > .menu-top { view-transition-name: attr(id type(<custom-ident>), none); }
 </style>
 	<?php
 }
