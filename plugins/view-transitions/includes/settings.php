@@ -45,11 +45,11 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Default setting value.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -61,7 +61,7 @@ function plvt_get_view_transition_animation_labels(): array {
 function plvt_get_setting_default(): array {
 	return array(
 		'default_transition_animation'          => 'fade',
-		'default_transition_animation_duration' => '1000',
+		'default_transition_animation_duration' => 1000,
 		'header_selector'                       => 'header',
 		'main_selector'                         => 'main',
 		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
@@ -75,11 +75,11 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Stored setting value.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -98,11 +98,11 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
+ * @return array{ default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string } {
  *     Sanitized setting.
  *
  *     @type string $default_transition_animation          Default view transition animation.
- *     @type string $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -127,8 +127,12 @@ function plvt_sanitize_setting( $input ): array {
 		$value['default_transition_animation'] = $input['default_transition_animation'];
 	}
 
+	// Handle default_transition_animation_duration separately.
+	if ( isset( $input['default_transition_animation_duration'] ) ) {
+		$value['default_transition_animation_duration'] = absint( $input['default_transition_animation_duration'] );
+	}
+
 	$selector_options = array(
-		'default_transition_animation_duration',
 		'header_selector',
 		'main_selector',
 		'post_title_selector',
@@ -202,7 +206,7 @@ function plvt_apply_settings_to_theme_support(): void {
 	// Apply the settings.
 	$options                            = plvt_get_stored_setting_value();
 	$args['default-animation']          = $options['default_transition_animation'];
-	$args['default-animation-duration'] = $options['default_transition_animation_duration'];
+	$args['default-animation-duration'] = absint( $options['default_transition_animation_duration'] );
 	$selector_options                   = array(
 		'global' => array(
 			'header_selector' => 'header',
@@ -369,8 +373,9 @@ function plvt_render_settings_field( array $args ): void {
 			type="number"
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
-			value="<?php echo esc_attr( $value ); ?>"
+			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
+			min="1"
 			<?php
 			if ( '' !== $args['description'] ) {
 				?>
@@ -385,7 +390,7 @@ function plvt_render_settings_field( array $args ): void {
 		<input
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
-			value="<?php echo esc_attr( $value ); ?>"
+			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
 			<?php
 			if ( '' !== $args['description'] ) {
