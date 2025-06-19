@@ -380,13 +380,6 @@ function plvt_render_settings_field( array $args ): void {
 				value="1"
 				<?php checked( $value, 1 ); ?>
 				class="regular-text code"
-				<?php
-				if ( '' !== $args['description'] ) {
-					?>
-					aria-describedby="<?php echo esc_attr( "plvt-view-transitions-field-{$args['field']}-description" ); ?>"
-					<?php
-				}
-				?>
 			>
 			<?php echo esc_html( $args['description'] ); ?>
 		</label>
