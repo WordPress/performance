@@ -64,11 +64,11 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$inline_script = 'console.log("after");';
 		wp_add_inline_script( 'script1', $inline_script );
 
-		get_echo( 'wp_print_scripts' );
+		$this->mock_loopback_request();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 1, count( $transient ) );
+		$this->assertEquals( 3, count( $transient ) );
 		$this->assertEqualSets(
 			array(
 				array(
@@ -130,9 +130,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		wp_enqueue_style( 'style1', 'example1.com', array() );
+		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
 		wp_enqueue_style( 'style_to_be_discarded', '/wp-includes/example2.com', array() );
-		wp_enqueue_style( 'style3', 'example3.com', array() );
+		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
 
 		// Adding inline style to style1.
@@ -143,16 +143,16 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		get_echo( 'wp_print_styles' );
 
+		$this->mock_loopback_request();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 1, count( $transient ) );
+		$this->assertEquals( 3, count( $transient ) );
 		$this->assertEqualSets(
 			array(
 				array(
-					'src'  => 'example1.com',
+					'src'  => 'https://example1.com',
 					'size' => 0 + mb_strlen( $style, '8bit' ),
 				),
 			),
@@ -311,5 +311,30 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_threshold( $number_of_assets );
 		}
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
+	}
+
+	/**
+	 * Mocks a loopback request to return a HTML document with blocking assets.
+	 */
+	public function mock_loopback_request(): void {
+		$mock_html  = '<!DOCTYPE html><head>';
+		$mock_html .= get_echo( 'wp_head' );
+		$mock_html .= '</head><body>';
+		$mock_html .= get_echo( 'wp_footer' );
+		$mock_html .= '</body></html>';
+
+		remove_all_filters( 'pre_http_request' );
+		add_filter(
+			'pre_http_request',
+			static function () use ( $mock_html ) {
+				return array(
+					'response' => array(
+						'code' => 200,
+					),
+					'body'     => $mock_html,
+					'headers'  => array(),
+				);
+			}
+		);
 	}
 }

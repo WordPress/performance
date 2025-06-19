@@ -92,7 +92,7 @@ function perflab_aea_audit_blocking_assets(): void {
 					continue;
 				}
 
-				$script_size = filesize( $path );
+				$script_size = wp_filesize( $path );
 				if ( false !== $script_size ) {
 					$assets['scripts'][] = array(
 						'src'  => $src,
@@ -110,13 +110,12 @@ function perflab_aea_audit_blocking_assets(): void {
 			if ( ! is_string( $href ) || false !== strpos( $href, 'wp-includes' ) ) {
 				continue;
 			}
-
 			$path = perflab_aea_get_path_from_resource_url( $href );
 			if ( '' === $path ) {
 				continue;
 			}
 
-			$style_size = filesize( $path );
+			$style_size = wp_filesize( $path );
 			if ( false !== $style_size ) {
 				$assets['styles'][] = array(
 					'src'  => $href,
