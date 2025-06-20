@@ -124,10 +124,6 @@ function plvt_sanitize_setting( $input ): array {
 
 	$value = $default_value;
 
-	if ( isset( $input['override_theme_config'] ) && (bool) $input['override_theme_config'] ) {
-		$value['override_theme_config'] = true;
-	}
-
 	if (
 		isset( $input['default_transition_animation'] ) &&
 		in_array( $input['default_transition_animation'], array_keys( plvt_get_view_transition_animation_labels() ), true )
@@ -151,9 +147,14 @@ function plvt_sanitize_setting( $input ): array {
 		}
 	}
 
-	// Sanitize "enable_admin_transitions" as a boolean.
-	if ( isset( $input['enable_admin_transitions'] ) ) {
-		$value['enable_admin_transitions'] = (bool) $input['enable_admin_transitions'];
+	$checkbox_options = array(
+		'override_theme_config',
+		'enable_admin_transitions',
+	);
+	foreach ( $checkbox_options as $checkbox_option ) {
+		if ( isset( $input[ $checkbox_option ] ) ) {
+			$value[ $checkbox_option ] = (bool) $input[ $checkbox_option ];
+		}
 	}
 
 	return $value;
@@ -285,7 +286,7 @@ function plvt_add_setting_ui(): void {
 	$fields = array(
 		'override_theme_config'        => array(
 			'title'       => __( 'Override Theme Configuration', 'view-transitions' ),
-			'description' => __( 'Check this to override the theme configuration with the settings below.', 'view-transitions' ),
+			'description' => __( 'Override the theme provided configuration with the settings below.', 'view-transitions' ),
 		),
 		'default_transition_animation' => array(
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
@@ -328,8 +329,8 @@ function plvt_add_setting_ui(): void {
 			'label_for' => "plvt-view-transitions-field-{$slug}",
 		);
 
-		// Remove 'label_for' for checkbox field to avoid duplicate label association.
-		if ( 'enable_admin_transitions' === $slug ) {
+		// Remove 'label_for' for checkbox fields to avoid duplicate label association.
+		if ( 'override_theme_config' === $slug || 'enable_admin_transitions' === $slug ) {
 			unset( $additional_args['label_for'] );
 		}
 
@@ -370,6 +371,7 @@ function plvt_render_settings_field( array $args ): void {
 			$type    = 'select';
 			$choices = plvt_get_view_transition_animation_labels();
 			break;
+		case 'override_theme_config':
 		case 'enable_admin_transitions':
 			$type    = 'checkbox';
 			$choices = array(); // Defined just for consistency.
