@@ -3,7 +3,7 @@
  * Admin related functions for View Transitions.
  *
  * @package view-transitions
- * @since 1.0.0
+ * @since n.e.x.t
  */
 
 // @codeCoverageIgnoreStart
