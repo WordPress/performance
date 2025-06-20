@@ -84,7 +84,7 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	}
 
 	if ( ! ( $editor instanceof Dominant_Color_Image_Editor_GD || $editor instanceof Dominant_Color_Image_Editor_Imagick ) ) {
-		return new WP_Error( 'image_no_editor', __( 'No editor could be selected.', 'default' ) );
+		return new WP_Error( 'image_no_editor', __( 'No editor could be selected.', 'dominant-color-images' ) );
 	}
 
 	$has_transparency = $editor->has_transparency();

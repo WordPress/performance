@@ -383,12 +383,12 @@ function embed_optimizer_print_row_meta_install_notice( string $plugin_file ): v
 				'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s">',
 				esc_url( $details_url ),
 				/* translators: %s: Plugin name and version. */
-				esc_attr( sprintf( __( 'More information about %s', 'default' ), $od_plugin_name ) )
+				esc_attr( sprintf( __( 'More information about %s', 'embed-optimizer' ), $od_plugin_name ) )
 			);
 		} else {
 			/* translators: %s: Plugin name. */
-			$aria_label  = sprintf( __( 'Visit plugin site for %s', 'default' ), $od_plugin_name );
-			$details_url = __( 'https://wordpress.org/plugins/', 'default' ) . $od_plugin_slug . '/';
+			$aria_label  = sprintf( __( 'Visit plugin site for %s', 'embed-optimizer' ), $od_plugin_name );
+			$details_url = __( 'https://wordpress.org/plugins/', 'embed-optimizer' ) . $od_plugin_slug . '/';
 
 			$link_start_tag = sprintf(
 				'<a href="%s" aria-label="%s" target="_blank">',
