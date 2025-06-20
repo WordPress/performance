@@ -28,6 +28,7 @@ if ( defined( 'VIEW_TRANSITIONS_VERSION' ) ) {
 define( 'VIEW_TRANSITIONS_VERSION', '1.0.1' );
 define( 'VIEW_TRANSITIONS_MAIN_FILE', __FILE__ );
 
+require_once __DIR__ . '/includes/admin.php';
 require_once __DIR__ . '/includes/class-plvt-view-transition-animation.php';
 require_once __DIR__ . '/includes/class-plvt-view-transition-animation-registry.php';
 require_once __DIR__ . '/includes/functions.php';
