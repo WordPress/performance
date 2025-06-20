@@ -56,28 +56,38 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		wp_enqueue_script( 'script1', 'example1.com', array() );
-		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array() );
-		wp_enqueue_script( 'script3', 'example3.com', array() );
+		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
+		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array(), null );
+		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
 		wp_dequeue_script( 'script3' );
 
-		$inline_script = 'console.log("after");';
-		wp_add_inline_script( 'script1', $inline_script );
+		$script = 'console.log("after");';
+		wp_add_inline_script( 'script1', $script );
+
+		// Avoid deprecation warning due to related change in WordPress 6.4.
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
 		$this->mock_loopback_request();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 3, count( $transient ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'  => 'example1.com',
-					'size' => 0 + mb_strlen( $inline_script, '8bit' ),
-				),
-			),
-			$transient
+
+		$external_script = array_filter(
+			$transient,
+			static function ( $item ) {
+				return 'https://example1.com' === $item['src'];
+			}
 		);
+		$this->assertEquals( 1, count( $external_script ) );
+
+		$inline_script = array_filter(
+			$transient,
+			static function ( $item ) {
+				return false !== strpos( $item['src'], 'script1' );
+			}
+		);
+		$this->assertEquals( 1, count( $inline_script ) );
+		$this->assertEquals( mb_strlen( $script, '8bit' ), reset( $inline_script )['size'] );
 	}
 
 	/**
@@ -148,16 +158,23 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 3, count( $transient ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'  => 'https://example1.com',
-					'size' => 0 + mb_strlen( $style, '8bit' ),
-				),
-			),
-			$transient
+
+		$external_style = array_filter(
+			$transient,
+			static function ( $item ) {
+				return 'https://example1.com' === $item['src'];
+			}
 		);
+		$this->assertEquals( 1, count( $external_style ) );
+
+		$inline_style = array_filter(
+			$transient,
+			static function ( $item ) {
+				return false !== strpos( $item['src'], 'style1' );
+			}
+		);
+		$this->assertEquals( 1, count( $inline_style ) );
+		$this->assertEquals( mb_strlen( $style, '8bit' ), reset( $inline_style )['size'] );
 	}
 
 	/**

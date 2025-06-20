@@ -79,10 +79,12 @@ function perflab_aea_audit_blocking_assets(): void {
 
 			// Process blocking inline scripts.
 			if ( ! is_string( $src ) ) {
-				$script_size = mb_strlen( $processor->get_modifiable_text(), '8bit' );
+				$script_size   = mb_strlen( trim( $processor->get_modifiable_text() ), '8bit' );
+				$script_id     = $processor->get_attribute( 'id' );
+				$script_handle = is_string( $script_id ) ? $script_id : 'inline';
 				if ( false !== $script_size ) {
 					$assets['scripts'][] = array(
-						'src'  => 'inline',
+						'src'  => $script_handle,
 						'size' => $script_size,
 					);
 				}
@@ -124,10 +126,12 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 		} elseif ( 'STYLE' === $tag ) {
 			// Process inline styles.
-			$style_size = mb_strlen( $processor->get_modifiable_text(), '8bit' );
+			$style_size   = mb_strlen( trim( $processor->get_modifiable_text() ), '8bit' );
+			$style_id     = $processor->get_attribute( 'id' );
+			$style_handle = is_string( $style_id ) ? $style_id : 'inline';
 			if ( false !== $style_size ) {
 				$assets['styles'][] = array(
-					'src'  => 'inline',
+					'src'  => $style_handle,
 					'size' => $style_size,
 				);
 			}
