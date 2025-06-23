@@ -308,15 +308,14 @@ function plvt_load_view_transitions(): void {
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	if ( '' !== $default_animation_stylesheet ) {
 		$default_animation_stylesheet = plvt_replace_animation_duration( $default_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
-		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 	} else {
 		$seconds                      = absint( $theme_support['default-animation-duration'] ) / 1000;
 		$default_animation_stylesheet = sprintf(
 			'::view-transition-old(*), ::view-transition-new(*) { animation-duration: %ss; }',
 			$seconds
 		);
-		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 	}
+	wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 
 	/*
 	 * No point in loading the script if no specific view transition names are configured.
