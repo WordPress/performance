@@ -61,9 +61,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
 		wp_dequeue_script( 'script3' );
 
-		$script = 'console.log("after");';
-		wp_add_inline_script( 'script1', $script );
-
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
@@ -79,15 +76,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_script ) );
-
-		$inline_script = array_filter(
-			$transient,
-			static function ( $item ) {
-				return false !== strpos( $item['src'], 'script1' );
-			}
-		);
-		$this->assertEquals( 1, count( $inline_script ) );
-		$this->assertEquals( mb_strlen( $script, '8bit' ), reset( $inline_script )['size'] );
 	}
 
 	/**
@@ -145,12 +133,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
 
-		// Adding inline style to style1.
-		$style  = ".test {\n";
-		$style .= "\tbackground: red;\n";
-		$style .= '}';
-		wp_add_inline_style( 'style1', $style );
-
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
@@ -166,15 +148,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_style ) );
-
-		$inline_style = array_filter(
-			$transient,
-			static function ( $item ) {
-				return false !== strpos( $item['src'], 'style1' );
-			}
-		);
-		$this->assertEquals( 1, count( $inline_style ) );
-		$this->assertEquals( mb_strlen( $style, '8bit' ), reset( $inline_style )['size'] );
 	}
 
 	/**

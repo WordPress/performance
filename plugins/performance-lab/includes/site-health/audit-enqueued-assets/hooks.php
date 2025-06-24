@@ -58,49 +58,39 @@ function perflab_aea_audit_blocking_assets(): void {
 
 		if ( 'SCRIPT' === $tag ) {
 			$src = $processor->get_attribute( 'src' );
+			if ( ! is_string( $src ) ) {
+				continue;
+			}
 
 			// Note that when the "type" attribute is absent or empty, the element is treated as a classic JavaScript script.
 			$type = $processor->get_attribute( 'type' );
 
 			// Skip external script with "async" or "defer" attributes.
-			if ( is_string( $src ) && ( null !== $processor->get_attribute( 'async' ) || null !== $processor->get_attribute( 'defer' ) ) ) {
+			if ( null !== $processor->get_attribute( 'async' ) || null !== $processor->get_attribute( 'defer' ) ) {
 				continue;
 			}
 
-			// Skip external and inline scripts with a "type" attribute set to "module" as they are deferred by default.
+			// Skip external script with a "type" attribute set to "module" as they are deferred by default.
 			if ( is_string( $type ) && '' !== $type && 'module' === strtolower( $type ) ) {
 				continue;
 			}
 
-			// Skip external and inline scripts with a "type" attribute that is not JavaScript.
+			// Skip external script with a "type" attribute that is not JavaScript.
 			if ( is_string( $type ) && '' !== $type && 'text/javascript' !== strtolower( $type ) ) {
 				continue;
 			}
 
-			// Process blocking inline scripts.
-			if ( ! is_string( $src ) ) {
-				$script_size   = mb_strlen( trim( $processor->get_modifiable_text() ), '8bit' );
-				$script_id     = $processor->get_attribute( 'id' );
-				$script_handle = is_string( $script_id ) ? $script_id : 'inline';
-				if ( false !== $script_size ) {
-					$assets['scripts'][] = array(
-						'src'  => $script_handle,
-						'size' => $script_size,
-					);
-				}
-			} else {
-				$path = perflab_aea_get_path_from_resource_url( $src );
-				if ( '' === $path ) {
-					continue;
-				}
+			$path = perflab_aea_get_path_from_resource_url( $src );
+			if ( '' === $path ) {
+				continue;
+			}
 
-				$script_size = wp_filesize( $path );
-				if ( false !== $script_size ) {
-					$assets['scripts'][] = array(
-						'src'  => $src,
-						'size' => $script_size,
-					);
-				}
+			$script_size = wp_filesize( $path );
+			if ( false !== $script_size ) {
+				$assets['scripts'][] = array(
+					'src'  => $src,
+					'size' => $script_size,
+				);
 			}
 		} elseif ( 'LINK' === $tag ) {
 			$rel = $processor->get_attribute( 'rel' );
@@ -121,17 +111,6 @@ function perflab_aea_audit_blocking_assets(): void {
 			if ( false !== $style_size ) {
 				$assets['styles'][] = array(
 					'src'  => $href,
-					'size' => $style_size,
-				);
-			}
-		} elseif ( 'STYLE' === $tag ) {
-			// Process inline styles.
-			$style_size   = mb_strlen( trim( $processor->get_modifiable_text() ), '8bit' );
-			$style_id     = $processor->get_attribute( 'id' );
-			$style_handle = is_string( $style_id ) ? $style_id : 'inline';
-			if ( false !== $style_size ) {
-				$assets['styles'][] = array(
-					'src'  => $style_handle,
 					'size' => $style_size,
 				);
 			}
