@@ -5,7 +5,6 @@
  * @package webp-uploads
  */
 
-use PHP_CodeSniffer\Tokenizers\PHP;
 use WebP_Uploads\Tests\TestCase;
 
 class Test_WebP_Uploads_Load extends TestCase {
