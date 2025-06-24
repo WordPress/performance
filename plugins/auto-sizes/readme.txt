@@ -54,10 +54,6 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.5.0 =
 
-**Features**
-
-* Add E2E tests setup for Auto Sizes. ([1988](https://github.com/WordPress/performance/pull/1988))
-
 **Enhancements**
 
 * Accurate sizes: Add ancestor block context for image and cover block that help in sizes calculate. ([1795](https://github.com/WordPress/performance/pull/1795))
