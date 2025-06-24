@@ -57,7 +57,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
-		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array(), null );
+		wp_enqueue_script( 'script2', '/wp-includes/example2.com', array(), null );
 		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
 		wp_dequeue_script( 'script3' );
 
@@ -141,7 +141,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
-		wp_enqueue_style( 'style_to_be_discarded', '/wp-includes/example2.com', array() );
+		wp_enqueue_style( 'style2', '/wp-includes/example2.com', array() );
 		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
 

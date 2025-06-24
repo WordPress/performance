@@ -88,7 +88,7 @@ function perflab_aea_audit_blocking_assets(): void {
 						'size' => $script_size,
 					);
 				}
-			} elseif ( false === strpos( $src, 'wp-includes' ) ) {
+			} else {
 				$path = perflab_aea_get_path_from_resource_url( $src );
 				if ( '' === $path ) {
 					continue;
@@ -109,7 +109,7 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			$href = $processor->get_attribute( 'href' );
-			if ( ! is_string( $href ) || false !== strpos( $href, 'wp-includes' ) ) {
+			if ( ! is_string( $href ) ) {
 				continue;
 			}
 			$path = perflab_aea_get_path_from_resource_url( $href );
