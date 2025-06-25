@@ -304,7 +304,7 @@ function plvt_load_view_transitions(): void {
 	plvt_register_view_transition_animations( $animation_registry );
 
 	// Use an inline style to avoid an extra request.
-	$stylesheet = '@view-transition { navigation: auto; }';
+	$stylesheet = '@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }';
 	wp_register_style( 'plvt-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 	wp_add_inline_style( 'plvt-view-transitions', $stylesheet );
 	wp_enqueue_style( 'plvt-view-transitions' );
