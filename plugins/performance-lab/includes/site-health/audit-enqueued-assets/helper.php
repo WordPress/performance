@@ -312,3 +312,28 @@ function perflab_aea_get_path_from_resource_url( string $resource_url ): string 
 	// Standard wp-content configuration.
 	return untrailingslashit( ABSPATH ) . wp_make_link_relative( $resource_url );
 }
+
+/**
+ * Gets the content length of an asset.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $resource_url URL of the resource.
+ * @return int|false Returns the content length in bytes or false if it cannot be determined.
+ */
+function perflab_aea_get_asset_content_length( string $resource_url ) {
+	$head_response = wp_remote_head( $resource_url, array( 'timeout' => 10 ) );
+	if ( is_wp_error( $head_response ) || 200 !== wp_remote_retrieve_response_code( $head_response ) ) {
+		return false;
+	}
+
+	$content_length = wp_remote_retrieve_header( $head_response, 'content-length' );
+	if ( is_array( $content_length ) && 0 < count( $content_length ) ) {
+		$content_length = $content_length[0];
+	}
+	if ( ! is_string( $content_length ) || '' === $content_length || ! ctype_digit( $content_length ) || 0 === (int) $content_length ) {
+		return false;
+	}
+
+	return (int) $content_length;
+}

@@ -80,16 +80,11 @@ function perflab_aea_audit_blocking_assets(): void {
 				continue;
 			}
 
-			$path = perflab_aea_get_path_from_resource_url( $src );
-			if ( '' === $path ) {
-				continue;
-			}
-
-			$script_size = wp_filesize( $path );
-			if ( false !== $script_size ) {
+			$size = perflab_aea_get_asset_content_length( $src );
+			if ( false !== $size ) {
 				$assets['scripts'][] = array(
 					'src'  => $src,
-					'size' => $script_size,
+					'size' => $size,
 				);
 			}
 		} elseif ( 'LINK' === $tag ) {
@@ -102,16 +97,12 @@ function perflab_aea_audit_blocking_assets(): void {
 			if ( ! is_string( $href ) ) {
 				continue;
 			}
-			$path = perflab_aea_get_path_from_resource_url( $href );
-			if ( '' === $path ) {
-				continue;
-			}
 
-			$style_size = wp_filesize( $path );
-			if ( false !== $style_size ) {
+			$size = perflab_aea_get_asset_content_length( $href );
+			if ( false !== $size ) {
 				$assets['styles'][] = array(
 					'src'  => $href,
-					'size' => $style_size,
+					'size' => $size,
 				);
 			}
 		}
