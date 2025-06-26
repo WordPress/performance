@@ -212,10 +212,10 @@ function perflab_aea_enqueued_css_assets_test(): array {
  * @return int|false Number of total scripts or false if transient hasn't been set.
  */
 function perflab_aea_get_total_enqueued_scripts() {
-	$enqueued_scripts      = false;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( is_array( $list_enqueued_scripts ) ) {
-		$enqueued_scripts = count( $list_enqueued_scripts );
+	$enqueued_scripts = false;
+	$blocking_assets  = get_transient( 'aea_blocking_assets' );
+	if ( is_array( $blocking_assets ) && is_array( $blocking_assets['scripts'] ) ) {
+		$enqueued_scripts = count( $blocking_assets['scripts'] );
 	}
 	return $enqueued_scripts;
 }
@@ -228,11 +228,11 @@ function perflab_aea_get_total_enqueued_scripts() {
  * @return int|false Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_scripts() {
-	$total_size            = false;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( is_array( $list_enqueued_scripts ) ) {
+	$total_size      = false;
+	$blocking_assets = get_transient( 'aea_blocking_assets' );
+	if ( is_array( $blocking_assets ) && isset( $blocking_assets['scripts'] ) && is_array( $blocking_assets['scripts'] ) ) {
 		$total_size = 0;
-		foreach ( $list_enqueued_scripts as $enqueued_script ) {
+		foreach ( $blocking_assets['scripts'] as $enqueued_script ) {
 			if ( is_array( $enqueued_script ) && array_key_exists( 'size', $enqueued_script ) && is_int( $enqueued_script['size'] ) ) {
 				$total_size += $enqueued_script['size'];
 			}
@@ -249,10 +249,10 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
  * @return int|false Number of total styles or false if transient hasn't been set.
  */
 function perflab_aea_get_total_enqueued_styles() {
-	$enqueued_styles      = false;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( is_array( $list_enqueued_styles ) ) {
-		$enqueued_styles = count( $list_enqueued_styles );
+	$enqueued_styles = false;
+	$blocking_assets = get_transient( 'aea_blocking_assets' );
+	if ( is_array( $blocking_assets ) && isset( $blocking_assets['styles'] ) && is_array( $blocking_assets['styles'] ) ) {
+		$enqueued_styles = count( $blocking_assets['styles'] );
 	}
 	return $enqueued_styles;
 }
@@ -265,11 +265,11 @@ function perflab_aea_get_total_enqueued_styles() {
  * @return int|false Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_styles() {
-	$total_size           = false;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( is_array( $list_enqueued_styles ) ) {
+	$total_size      = false;
+	$blocking_assets = get_transient( 'aea_blocking_assets' );
+	if ( is_array( $blocking_assets ) && isset( $blocking_assets['styles'] ) && is_array( $blocking_assets['styles'] ) ) {
 		$total_size = 0;
-		foreach ( $list_enqueued_styles as $enqueued_style ) {
+		foreach ( $blocking_assets['styles'] as $enqueued_style ) {
 			if ( is_array( $enqueued_style ) && array_key_exists( 'size', $enqueued_style ) && is_int( $enqueued_style['size'] ) ) {
 				$total_size += $enqueued_style['size'];
 			}

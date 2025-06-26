@@ -23,9 +23,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
 		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
+		$transient = get_transient( 'aea_blocking_assets' );
 		$this->assertIsArray( $transient );
-		$this->assertEquals( 3, count( $transient ) );
+		$this->assertArrayHasKey( 'scripts', $transient );
+		$this->assertEquals( 3, count( $transient['scripts'] ) );
 		$this->assertEqualSets(
 			array(
 				array(
@@ -41,7 +42,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					'size' => 1000,
 				),
 			),
-			$transient
+			$transient['scripts']
 		);
 	}
 
@@ -66,11 +67,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 		$this->mock_requests();
 		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
-		$this->assertNotEmpty( $transient );
+		$transient = get_transient( 'aea_blocking_assets' );
+		$this->assertIsArray( $transient );
+		$this->assertArrayHasKey( 'scripts', $transient );
+		$this->assertNotEmpty( $transient['scripts'] );
 
 		$external_script = array_filter(
-			$transient,
+			$transient['scripts'],
 			static function ( $item ) {
 				return 'https://example1.com' === $item['src'];
 			}
@@ -95,9 +98,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		get_echo( 'wp_print_styles' );
 
 		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_enqueued_front_page_styles' );
+		$transient = get_transient( 'aea_blocking_assets' );
 		$this->assertIsArray( $transient );
-		$this->assertEquals( 3, count( $transient ) );
+		$this->assertArrayHasKey( 'styles', $transient );
+		$this->assertEquals( 3, count( $transient['styles'] ) );
 		$this->assertEqualSets(
 			array(
 				array(
@@ -113,7 +117,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					'size' => 1000,
 				),
 			),
-			$transient
+			$transient['styles']
 		);
 	}
 
@@ -138,11 +142,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 		$this->mock_requests();
 		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_enqueued_front_page_styles' );
-		$this->assertNotEmpty( $transient );
+		$transient = get_transient( 'aea_blocking_assets' );
+		$this->assertIsArray( $transient );
+		$this->assertArrayHasKey( 'styles', $transient );
+		$this->assertNotEmpty( $transient['styles'] );
 
 		$external_style = array_filter(
-			$transient,
+			$transient['styles'],
 			static function ( $item ) {
 				return 'https://example1.com' === $item['src'];
 			}
@@ -232,8 +238,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		perflab_aea_invalidate_cache_transients();
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
+		$this->assertFalse( get_transient( 'aea_blocking_assets' ) );
 	}
 
 	/**
@@ -262,8 +267,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		);
 		perflab_aea_clean_aea_audit_action();
 		$this->assertSame( home_url( '/' ), $redirected_url );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
+		$this->assertFalse( get_transient( 'aea_blocking_assets' ) );
 	}
 
 	/**

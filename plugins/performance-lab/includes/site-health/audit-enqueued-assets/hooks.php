@@ -21,7 +21,7 @@ function perflab_aea_audit_blocking_assets(): void {
 	if (
 		! is_admin() ||
 		! current_user_can( 'view_site_health_checks' ) ||
-		( false !== get_transient( 'aea_enqueued_front_page_scripts' ) && false !== get_transient( 'aea_enqueued_front_page_styles' ) )
+		false !== get_transient( 'aea_blocking_assets' )
 	) {
 		return;
 	}
@@ -108,8 +108,7 @@ function perflab_aea_audit_blocking_assets(): void {
 		}
 	}
 
-	set_transient( 'aea_enqueued_front_page_scripts', $assets['scripts'], 12 * HOUR_IN_SECONDS );
-	set_transient( 'aea_enqueued_front_page_styles', $assets['styles'], 12 * HOUR_IN_SECONDS );
+	set_transient( 'aea_blocking_assets', $assets, 12 * HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
 
@@ -156,6 +155,8 @@ add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
  * @since 1.0.0
  */
 function perflab_aea_invalidate_cache_transients(): void {
+	delete_transient( 'aea_blocking_assets' );
+	// Keeping legacy transients deletion for backward compatibility.
 	delete_transient( 'aea_enqueued_front_page_scripts' );
 	delete_transient( 'aea_enqueued_front_page_styles' );
 }

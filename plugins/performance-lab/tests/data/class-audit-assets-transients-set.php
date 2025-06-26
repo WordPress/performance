@@ -11,8 +11,7 @@
  */
 class Audit_Assets_Transients_Set {
 
-	const SCRIPT_TRANSIENT = 'aea_enqueued_front_page_scripts';
-	const STYLES_TRANSIENT = 'aea_enqueued_front_page_styles';
+	const ASSETS_TRANSIENT = 'aea_blocking_assets';
 
 	/**
 	 * Setting up the Script transient.
@@ -20,22 +19,18 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_script_transient_with_data( int $number_of_assets = 5 ): void {
-		$scripts = array_fill(
-			0,
-			$number_of_assets,
-			array(
-				'src'  => 'script.js',
-				'size' => 1000,
-			)
+		$assets = array(
+			'scripts' => array_fill(
+				0,
+				$number_of_assets,
+				array(
+					'src'  => 'script.js',
+					'size' => 1000,
+				)
+			),
+			'styles'  => array(),
 		);
-		set_transient( self::SCRIPT_TRANSIENT, $scripts );
-	}
-
-	/**
-	 * Deleting the Script transient.
-	 */
-	public static function set_script_transient_with_no_data(): void {
-		delete_transient( self::SCRIPT_TRANSIENT );
+		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
 
 	/**
@@ -44,21 +39,24 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_style_transient_with_data( int $number_of_assets = 5 ): void {
-		$styles = array_fill(
-			0,
-			$number_of_assets,
-			array(
-				'src'  => 'style.css',
-				'size' => 1000,
-			)
+		$assets = array(
+			'scripts' => array(),
+			'styles'  => array_fill(
+				0,
+				$number_of_assets,
+				array(
+					'src'  => 'style.css',
+					'size' => 1000,
+				)
+			),
 		);
-		set_transient( self::STYLES_TRANSIENT, $styles );
+		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
 
 	/**
-	 * Deleting the Style transient.
+	 * Deleting the Assets transient.
 	 */
-	public static function set_style_transient_with_no_data(): void {
-		delete_transient( self::STYLES_TRANSIENT );
+	public static function set_asset_transient_with_no_data(): void {
+		delete_transient( self::ASSETS_TRANSIENT );
 	}
 }
