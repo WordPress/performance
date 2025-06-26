@@ -81,7 +81,7 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			$size = perflab_aea_get_asset_content_length( $src );
-			if ( false !== $size ) {
+			if ( null !== $size ) {
 				$assets['scripts'][] = array(
 					'src'  => $src,
 					'size' => $size,
@@ -99,7 +99,7 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			$size = perflab_aea_get_asset_content_length( $href );
-			if ( false !== $size ) {
+			if ( null !== $size ) {
 				$assets['styles'][] = array(
 					'src'  => $href,
 					'size' => $size,
