@@ -71,12 +71,12 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			// Skip external script with a "type" attribute set to "module" as they are deferred by default.
-			if ( is_string( $type ) && '' !== $type && 'module' === strtolower( $type ) ) {
+			if ( 'module' === strtolower( (string) $type ) ) {
 				continue;
 			}
 
 			// Skip external script with a "type" attribute that is not JavaScript.
-			if ( is_string( $type ) && '' !== $type && 'text/javascript' !== strtolower( $type ) ) {
+			if ( '' !== $type && 'text/javascript' !== strtolower( (string) $type ) ) {
 				continue;
 			}
 
@@ -89,7 +89,7 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 		} elseif ( 'LINK' === $tag ) {
 			$rel = $processor->get_attribute( 'rel' );
-			if ( ! is_string( $rel ) || 'stylesheet' !== strtolower( $rel ) ) {
+			if ( 'stylesheet' !== strtolower( (string) $rel ) ) {
 				continue;
 			}
 

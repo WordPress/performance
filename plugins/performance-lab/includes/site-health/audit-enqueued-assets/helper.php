@@ -328,12 +328,12 @@ function perflab_aea_get_asset_content_length( string $resource_url ): ?int {
 	}
 
 	$content_length = wp_remote_retrieve_header( $head_response, 'content-length' );
-	if ( is_array( $content_length ) && 0 < count( $content_length ) ) {
+	if ( is_array( $content_length ) && isset( $content_length[0] ) ) {
 		$content_length = $content_length[0];
 	}
-	if ( ! is_string( $content_length ) || '' === $content_length || ! ctype_digit( $content_length ) || 0 === (int) $content_length ) {
+	$content_length = (int) $content_length;
+	if ( $content_length <= 0 ) {
 		return null;
 	}
-
-	return (int) $content_length;
+	return $content_length;
 }
