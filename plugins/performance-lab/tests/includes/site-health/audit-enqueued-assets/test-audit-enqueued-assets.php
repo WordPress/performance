@@ -64,7 +64,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->mock_loopback_request();
+		$this->mock_requests();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
@@ -136,7 +136,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->mock_loopback_request();
+		$this->mock_requests();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
@@ -304,9 +304,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Mocks a loopback request to return a HTML document with blocking assets.
+	 * Mocks HTTP requests for tests.
 	 */
-	public function mock_loopback_request(): void {
+	public function mock_requests(): void {
 		$mock_html  = '<!DOCTYPE html><head>';
 		$mock_html .= get_echo( 'wp_head' );
 		$mock_html .= '</head><body>';
@@ -316,7 +316,21 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		add_filter(
 			'pre_http_request',
-			static function () use ( $mock_html ) {
+			static function ( $preempt, $parsed_args ) use ( $mock_html ) {
+				// Mock a HEAD request to return a content length header.
+				if ( isset( $parsed_args['method'] ) && 'HEAD' === $parsed_args['method'] ) {
+					return array(
+						'response' => array(
+							'code' => 200,
+						),
+						'body'     => '',
+						'headers'  => array(
+							'content-length' => '10000', // Mocked size of the asset.
+						),
+					);
+				}
+
+				// Mock a GET request to return the HTML content.
 				return array(
 					'response' => array(
 						'code' => 200,
@@ -324,7 +338,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					'body'     => $mock_html,
 					'headers'  => array(),
 				);
-			}
+			},
+			10,
+			2
 		);
 	}
 }
