@@ -108,12 +108,8 @@ function perflab_aea_audit_blocking_assets(): void {
 		}
 	}
 
-	if ( 0 !== count( $assets['scripts'] ) ) {
-		set_transient( 'aea_enqueued_front_page_scripts', $assets['scripts'], 12 * HOUR_IN_SECONDS );
-	}
-	if ( 0 !== count( $assets['styles'] ) ) {
-		set_transient( 'aea_enqueued_front_page_styles', $assets['styles'], 12 * HOUR_IN_SECONDS );
-	}
+	set_transient( 'aea_enqueued_front_page_scripts', $assets['scripts'], 12 * HOUR_IN_SECONDS );
+	set_transient( 'aea_enqueued_front_page_styles', $assets['styles'], 12 * HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
 
