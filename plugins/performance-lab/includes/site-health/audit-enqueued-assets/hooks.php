@@ -76,7 +76,17 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			// Skip external script with a "type" attribute that is not JavaScript.
-			if ( '' !== $type && 'text/javascript' !== strtolower( (string) $type ) ) {
+			if (
+				true !== $type &&
+				null !== $type &&
+				'' !== $type &&
+				! (
+					str_contains( (string) $type, 'javascript' ) ||
+					str_contains( (string) $type, 'ecmascript' ) ||
+					str_contains( (string) $type, 'jscript' ) ||
+					str_contains( (string) $type, 'livescript' )
+				)
+			) {
 				continue;
 			}
 
