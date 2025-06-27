@@ -279,41 +279,6 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
 }
 
 /**
- * Convert full URL paths to absolute paths.
- * Covers Standard WP configuration, wp-content outside WP directories and subdirectories.
- * Ex: https://example.com/content/themes/, https://example.com/wp/wp-includes/
- *
- * @since 1.0.0
- *
- * @param string $resource_url URl resource link.
- * @return string Returns absolute path to the resource.
- */
-function perflab_aea_get_path_from_resource_url( string $resource_url ): string {
-	if ( '' === $resource_url ) {
-		return '';
-	}
-
-	// Remove query string if present.
-	if ( false !== strpos( $resource_url, '?' ) ) {
-		$resource_url = substr( $resource_url, 0, strpos( $resource_url, '?' ) );
-	}
-
-	// Different content folder ex. /content/.
-	if ( 0 === strpos( $resource_url, content_url() ) ) {
-		return WP_CONTENT_DIR . substr( $resource_url, strlen( content_url() ) );
-	}
-
-	// wp-content in a subdirectory. ex. /blog/wp-content/.
-	$site_url = untrailingslashit( site_url() );
-	if ( 0 === strpos( $resource_url, $site_url ) ) {
-		return untrailingslashit( ABSPATH ) . substr( $resource_url, strlen( $site_url ) );
-	}
-
-	// Standard wp-content configuration.
-	return untrailingslashit( ABSPATH ) . wp_make_link_relative( $resource_url );
-}
-
-/**
  * Gets the content length of an asset.
  *
  * @since n.e.x.t
