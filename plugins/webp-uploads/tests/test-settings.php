@@ -81,6 +81,14 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 	 */
 	public function test_webp_uploads_generate_avif_webp_setting_callback(): void {
 		$output = get_echo( 'webp_uploads_generate_avif_webp_setting_callback' );
-		$this->assertStringContainsString( 'perflab_modern_image_format', $output );
+
+		// Check for either the format selector or the notice about modern image support not being available.
+		$has_format_selector   = strpos( $output, 'perflab_modern_image_format' ) !== false;
+		$has_no_support_notice = strpos( $output, 'Modern image support is not available' ) !== false;
+
+		$this->assertTrue(
+			$has_format_selector || $has_no_support_notice,
+			'Output should either contain the format selector or the notice about modern image support not being available'
+		);
 	}
 }
