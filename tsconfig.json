@@ -4,15 +4,20 @@
     "noEmit": true,
     "allowJs": true,
     "target": "es2020",
-    "moduleResolution": "node",
-    "module": "esnext",
-    "skipLibCheck": true
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
-    "plugins/**/*.js",
-    "plugins/**/*.ts",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.ts",
   ],
   "exclude": [
-    "plugins/*/build/*"
+    "plugins/*/build/*",
+    "build/*",
+    "vendor/*",
+    "node_modules/*"
   ]
 }

@@ -3,7 +3,7 @@
  * Support for WordPress Core API for Speculative Loading.
  *
  * @package speculation-rules
- * @since n.e.x.t
+ * @since 1.5.0
  */
 
 // @codeCoverageIgnoreStart
@@ -17,14 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * By default, this will override the Core implementation to use moderate prerender instead of conservative prefetch.
  *
- * @since n.e.x.t
+ * @since 1.5.0
  *
  * @param array<string, string>|null|mixed $config Associative array with 'mode' and 'eagerness' keys, or `null`.
  * @return array<string, string>|null Filtered $config.
  */
 function plsr_filter_speculation_rules_configuration( $config ): ?array {
 	/*
-	 * If speculative loading should be disable per the WordPress Core configuration, respect that value, unless pretty
+	 * If speculative loading should be disabled per the WordPress Core configuration, respect that value, unless pretty
 	 * permalinks are disabled and the plugin-specific filter to opt in to the feature despite that is set to true.
 	 * This is present for backward compatibility so that usage of the plugin-specific filter does not break.
 	 */
@@ -48,7 +48,7 @@ function plsr_filter_speculation_rules_configuration( $config ): ?array {
  *
  * This is present for backward compatibility so that usage of the plugin-specific filter does not break.
  *
- * @since n.e.x.t
+ * @since 1.5.0
  *
  * @param string[]|mixed $href_exclude_paths Additional path patterns to disable speculative loading for.
  * @param string         $mode               Mode used to apply speculative loading. Either 'prefetch' or 'prerender'.

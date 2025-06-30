@@ -143,6 +143,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	private function maybe_preload_external_lcp_background_image( OD_Tag_Visitor_Context $context ): void {
 		// Gather the tuples of URL Metric group and the common LCP element external background image.
 		// Note the groups of URL Metrics do not change across invocations, we just need to compute this once for all.
+		// TODO: Instead of populating this here, it could be done once per invocation during the od_start_template_optimization action since the page's OD_URL_Metric_Group_Collection is available there.
 		if ( ! is_array( $this->group_common_lcp_element_external_background_images ) ) {
 			$this->group_common_lcp_element_external_background_images = array();
 			foreach ( $context->url_metric_group_collection as $group ) {

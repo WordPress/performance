@@ -1,0 +1,93 @@
+name: Bump WordPress Tested up to
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        type: string
+        description: 'Plugin slug (leave empty for all plugins)'
+        required: false
+
+jobs:
+  prepare-matrix:
+    name: Prepare plugins matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.plugins }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure plugin matrix
+        id: set-matrix
+        env:
+          PLUGIN_SLUG: ${{ inputs.plugin }}
+        run: |
+          PLUGINS=$(jq -r '.plugins' plugins.json)
+          if [[ -n "$PLUGIN_SLUG" ]]; then
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$PLUGIN_SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$PLUGIN_SLUG\" ]"
+            else
+              echo "::error::Plugin '$PLUGIN_SLUG' not found in plugins.json"
+              exit 1
+            fi
+          fi
+          echo "::notice::Updating plugins: $(echo ${PLUGINS[@]})"
+          echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
+
+  update-compatibility:
+    name: Update "Tested up to" value for ${{ matrix.plugin }}
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    env:
+      PLUGIN_SLUG: ${{ matrix.plugin }}
+    strategy:
+      matrix:
+        plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download WordPress.org readme
+        run: |
+          # Download the current readme.txt from WordPress.org
+          curl -sSL --retry 3 --retry-delay 5 --retry-all-errors --fail -o /tmp/wp-org-readme.txt "https://plugins.svn.wordpress.org/$PLUGIN_SLUG/trunk/readme.txt"
+          if [ $? -ne 0 ]; then
+            echo "::error::Could not fetch readme.txt from WordPress.org for $PLUGIN_SLUG"
+            exit 1
+          fi
+
+      - name: Extract "Tested up to" version from repository
+        id: extract-tested-up-to
+        run: |
+          LOCAL_TESTED_UP_TO=$(grep -E "^Tested up to:" "./plugins/$PLUGIN_SLUG/readme.txt" | awk -F ': +' '{print $2}')
+          if [ -z "$LOCAL_TESTED_UP_TO" ]; then
+            echo "::error::Unable to parse Tested up to version from repository readme.txt"
+            exit 1
+          fi
+
+          echo "version=$LOCAL_TESTED_UP_TO" >> $GITHUB_OUTPUT
+
+      - name: Prepare and update readme.txt
+        env:
+          LOCAL_TESTED_UP_TO: ${{ steps.extract-tested-up-to.outputs.version }}
+        run: |
+          # Replace local readme.txt with WordPress.org version, updating only the "Tested up to" line.
+          cp /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt"
+          sed -i -E 's/^(Tested up to:[[:space:]]*).+/\1'"$LOCAL_TESTED_UP_TO"'/' "./plugins/$PLUGIN_SLUG/readme.txt"
+
+          # Show the diff of what's being updated.
+          echo "Changes made to readme.txt:"
+          diff -u /tmp/wp-org-readme.txt "./plugins/$PLUGIN_SLUG/readme.txt" || true
+
+      - name: Copy readme.txt to workspace root for SVN upload
+        run: cp "./plugins/$PLUGIN_SLUG/readme.txt" "$GITHUB_WORKSPACE/readme.txt"
+
+      - name: Push to WordPress.org
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SLUG: ${{ matrix.plugin }}
+          SKIP_ASSETS: true
+          IGNORE_OTHER_FILES: true

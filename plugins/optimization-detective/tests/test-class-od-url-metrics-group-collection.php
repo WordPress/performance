@@ -22,7 +22,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$current_etag = md5( '' );
 
 		return array(
-			'no_breakpoints_ok'          => array(
+			'no_breakpoints_ok'         => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array(),
@@ -30,7 +30,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => '',
 			),
-			'negative_breakpoint_bad'    => array(
+			'negative_breakpoint_bad'   => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( -1 ),
@@ -38,7 +38,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'zero_breakpoint_bad'        => array(
+			'zero_breakpoint_bad'       => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( 0 ),
@@ -46,7 +46,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'string_breakpoint_bad'      => array(
+			'string_breakpoint_bad'     => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( 'narrow' ),
@@ -54,7 +54,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'negative_sample_size_bad'   => array(
+			'negative_sample_size_bad'  => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( 400 ),
@@ -62,15 +62,15 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'negative_freshness_tll_bad' => array(
+			'negative_freshness_ttl_ok' => array(
 				'url_metrics'   => array(),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( 400 ),
 				'sample_size'   => 3,
 				'freshness_ttl' => -HOUR_IN_SECONDS,
-				'exception'     => InvalidArgumentException::class,
+				'exception'     => '',
 			),
-			'invalid_current_etag_bad'   => array(
+			'invalid_current_etag_bad'  => array(
 				'url_metrics'   => array(),
 				'current_etag'  => 'invalid_etag',
 				'breakpoints'   => array( 400 ),
@@ -78,7 +78,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'invalid_current_etag_bad2'  => array(
+			'invalid_current_etag_bad2' => array(
 				'url_metrics'   => array(),
 				'current_etag'  => md5( '' ) . PHP_EOL, // Note that /^[a-f0-9]{32}$/ would erroneously validate this. So the \z is required instead in /^[a-f0-9]{32}\z/.
 				'breakpoints'   => array( 400 ),
@@ -86,7 +86,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
-			'invalid_url_metrics_bad'    => array(
+			'invalid_url_metrics_bad'   => array(
 				'url_metrics'   => array( 'bad' ),
 				'current_etag'  => $current_etag,
 				'breakpoints'   => array( 400 ),
@@ -94,7 +94,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => TypeError::class,
 			),
-			'all_arguments_good'         => array(
+			'all_arguments_good'        => array(
 				'url_metrics'   => array(
 					$this->get_sample_url_metric( array( 'viewport_width' => 200 ) ),
 					$this->get_sample_url_metric( array( 'viewport_width' => 400 ) ),
@@ -135,7 +135,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertSame( $current_etag, $group_collection->get_current_etag() );
 		$this->assertSame( $sample_size, $group_collection->get_sample_size() );
 		$this->assertSame( $breakpoints, $group_collection->get_breakpoints() );
-		$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
+		if ( $freshness_ttl < 0 ) {
+			$this->assertSame( -1, $group_collection->get_freshness_ttl() );
+		} else {
+			$this->assertSame( $freshness_ttl, $group_collection->get_freshness_ttl() );
+		}
 	}
 
 	/**

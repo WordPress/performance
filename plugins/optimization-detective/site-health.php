@@ -66,7 +66,7 @@ function od_test_rest_api_availability(): array {
  * then at this point the check will be performed at {@see od_maybe_run_rest_api_health_check()}. In practice, this will
  * happen immediately after the user activates a plugin since the user is redirected back to the plugin list table in
  * the admin. The reason for storing the negative unavailable state as opposed to the positive available state is that
- * when an option does not exist then `get_option()` returns `false` which is the same falsy value as the stored `'0'`.
+ * when an option does not exist, then `get_option()` returns `false` which is the same falsy value as the stored `'0'`.
  *
  * @since 1.0.0
  * @access private
@@ -90,8 +90,8 @@ function od_compose_site_health_result( $response ): array {
 	$common_description_html = '<p>' . wp_kses(
 		sprintf(
 			/* translators: %s is the REST API endpoint */
-			__( 'To collect URL Metrics from visitors the REST API must be available to unauthenticated users. Specifically, visitors must be able to perform a <code>POST</code> request to the <code>%s</code> endpoint.', 'optimization-detective' ),
-			'/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE
+			__( 'To collect URL Metrics from visitors, the REST API must be available to unauthenticated users. Specifically, visitors must be able to perform a <code>POST</code> request to the <code>%s</code> endpoint.', 'optimization-detective' ),
+			'/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE
 		),
 		array( 'code' => array() )
 	) . '</p>';
@@ -192,7 +192,7 @@ function od_get_rest_api_health_check_response( bool $use_cached ) {
 	if ( false !== $response ) {
 		return $response;
 	}
-	$rest_url = get_rest_url( null, OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE );
+	$rest_url = get_rest_url( null, OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE );
 	$response = wp_remote_post(
 		$rest_url,
 		array(

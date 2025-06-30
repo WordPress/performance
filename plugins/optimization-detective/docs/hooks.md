@@ -9,7 +9,7 @@
 Fires when the Optimization Detective is initializing.
 
 This action is useful for loading extension code that depends on Optimization Detective to be running. The version
-of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
+of the plugin is passed as the sole argument so that if the required version is not present, the callback can short-circuit.
 
 Example:
 
@@ -105,6 +105,52 @@ Refer to [Image Prioritizer](https://github.com/WordPress/performance/tree/trunk
 [Embed Optimizer](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) for additional
 examples of how tag visitors are used.
 
+### Action: `od_start_template_optimization` (argument: `OD_Template_Optimization_Context`)
+
+Fires before Optimization Detective starts iterating over the document in the output buffer.
+
+This is before any of the registered tag visitors have been invoked.
+
+It is important to note that this action fires _after_ the entire template has been rendered into the output buffer. In
+other words, it will fire after the `wp_footer` action.
+
+This action runs before any of the registered tag visitors have been invoked in the current response. It is useful for
+an extension to gather the required information from the currently stored URL Metrics for tag visitors to later leverage.
+See [example](https://github.com/WordPress/performance/pull/1921) from the Image Prioritizer plugin where it can be used
+to determine what the common external LCP background-image is for each viewport group up front so that this doesn't have
+to be computed when a tag visitor is invoked.
+
+This action can be used if a site wants to prevent storing a response in the page cache until it has collected URL Metrics
+from both mobile and desktop:
+
+```php
+add_action(
+	'od_start_template_optimization',
+	static function ( OD_Template_Optimization_Context $context ) {
+		if ( 
+			$context->url_metric_group_collection->get_first_group()->count() === 0
+			||
+			$context->url_metric_group_collection->get_last_group()->count() === 0
+		 ) {
+			header( 'Cache-Control: private' );
+		}
+	}
+);
+```
+
+This could just as well be done at `od_finish_template_optimization` since the headers are not sent until after that
+action completes and the output buffer is returned.
+
+### Action: `od_finish_template_optimization` (argument: `OD_Template_Optimization_Context`)
+
+Fires after Optimization Detective has finished iterating over the document in the output buffer.
+
+This is after all the registered tag visitors have been invoked.
+
+This action runs after all the tags in a document have been visited and so no additional tag visitor will be invoked.
+This action has limited usefulness at the moment, but see [#1931](https://github.com/WordPress/performance/issues/1931)
+for possibilities for what it could be used for in the future.
+
 ### Action: `od_url_metric_stored` (argument: `OD_URL_Metric_Store_Request_Context`)
 
 Fires whenever a URL Metric was successfully stored.
@@ -138,9 +184,13 @@ The additional attribution data is made available to client-side extension scrip
 
 ### Filter: `od_breakpoint_max_widths` (default: `array(480, 600, 782)`)
 
-Filters the breakpoint max widths to group URL Metrics for various viewports. Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).
+Filters the breakpoint max widths to group URL Metrics for various viewports. 
 
-These default breakpoints are reused from Gutenberg which appear to be used the most in media queries that affect frontend styles.
+Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).
+This array may be empty, in which case there are no responsive breakpoints, and all URL Metrics are collected in a single group.
+A breakpoint must be greater than zero or else a usage warning will occur.
+
+These default breakpoints are reused from Gutenberg, which appear to be used the most in media queries that affect frontend styles.
 
 ### Filter: `od_can_optimize_response` (default: boolean condition, see below)
 
@@ -148,19 +198,37 @@ Filters whether the current response can be optimized. By default, detection and
 
 1. It’s not a search template (`is_search()`).
 2. It’s not a post embed template (`is_embed()`).
-3. It’s not the Customizer preview (`is_customize_preview()`)
-4. It’s not the response to a `POST` request.
-5. There is at least one queried post on the page. This is used to facilitate the purging of page caches after a new URL Metric is stored.
+3. It’s not a preview (`is_preview()`).
+4. It’s not the Customizer preview (`is_customize_preview()`).
+5. It’s not the response to a `POST` request.
+6. There is at least one queried post on the page. This is used to facilitate the purging of page caches after a new URL Metric is stored.
 
-To force every response to be optimized regardless of the conditions above, you can do:
+The filter now receives an additional `$disabled_flags` parameter that contains information about which specific conditions are preventing optimization. This allows for more granular control.
+
+For example, to enable optimization specifically for search pages:
 
 ```php
-add_filter( 'od_can_optimize_response', '__return_true' );
+add_filter( 'od_can_optimize_response', function( $can_optimize, array $disabled_flags ): bool {
+    if ( ! $can_optimize && $disabled_flags['is_search'] ) {
+        unset( $disabled_flags['is_search'] );
+        $can_optimize = count( array_filter( $disabled_flags ) ) === 0;
+    }
+    return $can_optimize;
+}, 10, 2 );
 ```
+
+Note that this filter cannot override some conditions. Even if the filter returns `true`, optimization will still be disabled when:
+
+1. The REST API for storing URL Metrics is not available.
+2. The URL has the `optimization_detective_disabled` query parameter.
 
 ### Filter: `od_url_metrics_breakpoint_sample_size` (default: 3)
 
-Filters the sample size for a breakpoint's URL Metrics on a given URL. The sample size must be greater than zero. You can increase the sample size if you want better guarantees that the applied optimizations will be accurate. During development, it may be helpful to reduce the sample size to 1 (along with setting the `od_url_metric_storage_lock_ttl` and `od_url_metric_freshness_ttl` filters below) so that you don't have to keep reloading the page to collect new URL Metrics to flush out stale ones during active development:
+Filters the sample size for a breakpoint's URL Metrics on a given URL. 
+
+The filtered value must be greater than zero; otherwise it will be ignored, and a usage warning will result.
+
+You can increase the sample size if you want better guarantees that the applied optimizations will be accurate. During development, it may be helpful to reduce the sample size to 1 (along with setting the `od_url_metric_storage_lock_ttl` and `od_url_metric_freshness_ttl` filters below) so that you don't have to keep reloading the page to collect new URL Metrics to flush out stale ones during active development:
 
 ```php
 add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
@@ -172,7 +240,7 @@ add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
 
 Filters how long the current IP is locked from submitting another URL metric storage REST API request.
 
-Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
+Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged in with code like the following:
 
 ```php
 add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
@@ -182,7 +250,7 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 
 By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
 
-During development this is useful to set to zero so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
+During development this is useful to set to zero, so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 
 ```php
 add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
@@ -192,29 +260,35 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 
 ### Filter: `od_url_metric_freshness_ttl` (default: 1 week in seconds)
 
-Filters the freshness age (TTL) for a given URL Metric. The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale. In practice, the value should be at least an hour. If your site content does not change frequently, you may want to increase the TTL even longer, say to a month:
+Filters age (TTL) for which a URL Metric can be considered fresh.
+
+The freshness TTL (time to live) value can be one of the following values:
+
+* A positive integer (e.g. `3600`, `HOUR_IN_SECONDS`) allows a URL Metric to be fresh for a given period of time into the future.
+* A negative integer (`-1`) disables timestamp-based freshness checks, making URL Metrics stay fresh indefinitely unless the current ETag changes.
+* A value of zero (`0`) considers URL Metrics to always be stale, which is useful during development. _Never do this on a production site since this can cause a database write for every visitor!_
+
+The default value is `WEEK_IN_SECONDS` since changes to the post/page (or the site overall) will cause a change to the current ETag used for URL Metrics. This causes the relevant existing URL Metrics with the previous ETag to be considered stale, allowing new URL Metrics to be collected before the freshness TTL has expired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
+
+For sites where content doesn't change frequently, you can disable the timestamp-based staleness check as follows:
 
 ```php
 add_filter( 'od_url_metric_freshness_ttl', static function (): int {
-	return MONTH_IN_SECONDS;
+    return -1;
 } );
 ```
 
-Note that even if you have large freshness TTL a URL Metric can still become stale sooner; if the page state changes then this results in a change to the ETag associated with a URL Metric. This will allow new URL Metrics to be collected before the freshness TTL has transpired. See the `od_current_url_metrics_etag_data` filter to customize the ETag data.
-
-During development, this can be useful to set to zero so that you don't have to wait for new URL Metrics to be requested when engineering a new optimization:
+As noted above, during development you can set the freshness TTL to zero so that you don't have to wait for new URL Metrics to be requested when developing a new optimization:
 
 ```php
-add_filter( 'od_url_metric_freshness_ttl', static function (): int {
-	return 0;
-} );
+add_filter( 'od_url_metric_freshness_ttl', '__return_zero' );
 ```
 
 ### Filter: `od_minimum_viewport_aspect_ratio` (default: 0.4)
 
 Filters the minimum allowed viewport aspect ratio for URL Metrics.
 
-The 0.4 value is intended to accommodate the phone with the greatest known aspect ratio at 21:9 when rotated 90 degrees to 9:21 (0.429). During development when you have the DevTools console open on the right, the viewport aspect ratio will be smaller than normal. In this case, you may want to set this to 0:
+The 0.4 value is intended to accommodate the phone with the greatest known aspect ratio at 21:9 when rotated 90 degrees to 9:21 (0.429). During development, when you have the DevTools console open on the right, the viewport aspect ratio will be smaller than normal. In this case, you may want to set this to 0:
 
 ```php
 add_filter( 'od_minimum_viewport_aspect_ratio', static function (): int {
@@ -238,13 +312,15 @@ add_filter( 'od_maximum_viewport_aspect_ratio', static function (): int {
 
 ### Filter: `od_template_output_buffer` (default: the HTML response)
 
-Filters the template output buffer prior to sending to the client. This filter is added to implement [\#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
+Filters the template output buffer before sending it to the client. 
+
+This filter is added to implement [\#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
 
 ### Filter: `od_url_metric_schema_element_item_additional_properties` (default: empty array)
 
 Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 
-For example to add a `resizedBoundingClientRect` property:
+For example, to add a `resizedBoundingClientRect` property:
 
 ```php
 <?php
@@ -315,3 +391,33 @@ The ETag is a unique identifier that changes whenever the underlying data used t
 6. The list of active plugins.
 
 A change in ETag means that any previously-collected URL Metrics will be immediately considered stale. When the ETag for URL Metrics in a complete viewport group no longer matches the current environment's ETag, new URL Metrics will then begin to be collected until there are no more stored URL Metrics with the old ETag.
+
+### Filter: `od_url_metric_garbage_collection_ttl` (default: 3 months in seconds)
+
+Filters the expiration age (TTL) after which an `od_url_metrics` post will be garbage collected if it has not been modified since that time.
+
+```php
+add_filter( 'od_url_metric_garbage_collection_ttl', function (): int {
+	return 6 * MONTH_IN_SECONDS;
+} );
+```
+
+To prevent garbage collection of `od_url_metrics` posts, add a filter that returns zero:
+
+```php
+add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
+```
+
+### Filter: `od_maximum_url_metric_size` (default: 1 MB in bytes)
+
+Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+
+The filtered value must be greater than zero; otherwise it will be ignored, and a usage warning will result.
+
+### Filter: `od_gzip_url_metric_store_request_payloads` (default: `true` if the `gzdecode()` function exists)
+
+Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
+
+The URL Metric JSON request bodies are compressed by default since there is a maximum payload of 64 KiB allowed in `fetch()` keepalive requests (which is the same as with `navigator.sendBeacon()`). The request body size is significantly reduced with gzip compression.
+
+This filter only applies if the `gzdecode()` function actually exists. Sites may want to turn off gzip compression during development to more easily inspect the request payloads in DevTools, or they may want to turn off gzip if there is an unexpected incompatibility with the server receiving compressed request bodies.

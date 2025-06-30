@@ -1,25 +1,44 @@
 <?php
 /**
- * Tests for optimization-detective plugin storage/rest-api.php.
+ * Tests for optimization-detective plugin storage/class-od-rest-url-metrics-store-endpoint.php aka OD_REST_URL_Metrics_Store_Endpoint.
  *
  * @package optimization-detective
  */
 
-class Test_OD_Storage_REST_API extends WP_UnitTestCase {
+/**
+ * Class Test_OD_REST_URL_Metrics_Store_Endpoint used to test `OD_REST_URL_Metrics_Store_Endpoint` class.
+ *
+ * @since 1.0.0
+ *
+ * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
+ */
+class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
 	/**
-	 * @var string
+	 * Sets up.
 	 */
-	const ROUTE = '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE;
+	public function set_up(): void {
+		parent::set_up();
+		unset( $GLOBALS['wp_rest_server'] );
+	}
 
 	/**
-	 * Test od_register_endpoint().
-	 *
-	 * @covers ::od_register_endpoint
+	 * Tears down.
 	 */
-	public function test_od_register_endpoint_hooked(): void {
-		$this->assertSame( 10, has_action( 'rest_api_init', 'od_register_endpoint' ) );
+	public function tear_down(): void {
+		parent::tear_down();
+		unset( $GLOBALS['wp_rest_server'] );
+	}
+
+	/**
+	 * Gets the route.
+	 *
+	 * @return string Route.
+	 */
+	private function get_route(): string {
+		return '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE;
 	}
 
 	/**
@@ -72,14 +91,15 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
-	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 * @covers OD_URL_Metric_Store_Request_Context::__construct
 	 * @covers OD_URL_Metric_Store_Request_Context::__get
 	 */
-	public function test_rest_request_good_params( Closure $set_up ): void {
+	public function test_rest_request_good_params_and_success( Closure $set_up ): void {
 		$stored_context = null;
 		add_action(
 			'od_url_metric_stored',
@@ -115,6 +135,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request  = $this->create_request( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
+		$this->assertFalse( $response->is_error(), $response->is_error() ? $response->as_error()->get_error_message() : '' );
 
 		$this->assertSame( 1, did_action( 'od_url_metric_stored' ) );
 
@@ -144,7 +165,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 
 		$this->assertInstanceOf( OD_URL_Metric_Store_Request_Context::class, $stored_context );
 
-		// Now check that od_trigger_page_cache_invalidation() cleaned caches as expected.
+		// Now check that od_trigger_post_update_actions() cleaned caches as expected.
 		$this->assertSame( $url_metrics[0]->jsonSerialize(), $stored_context->url_metric->jsonSerialize() );
 		if ( isset( $valid_params['cache_purge_post_id'] ) ) {
 			$cache_purge_post_id = $stored_context->request->get_param( 'cache_purge_post_id' );
@@ -152,6 +173,15 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			$scheduled = wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $cache_purge_post_id ) );
 			$this->assertIsInt( $scheduled );
 			$this->assertGreaterThan( time(), $scheduled );
+
+			$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
+			$before_transition_post_status_count = did_action( 'transition_post_status' );
+			$before_save_post_count              = did_action( 'save_post' );
+			$this->assertSame( 10, has_action( 'od_trigger_page_cache_invalidation', 'od_trigger_post_update_actions' ) );
+			do_action( 'od_trigger_page_cache_invalidation', $cache_purge_post_id );
+			$this->assertSame( $before_clean_post_cache_count + 1, did_action( 'clean_post_cache' ) );
+			$this->assertSame( $before_transition_post_status_count + 1, did_action( 'transition_post_status' ) );
+			$this->assertSame( $before_save_post_count + 1, did_action( 'save_post' ) );
 		}
 	}
 
@@ -160,8 +190,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 */
 	public function test_rest_request_good_params_but_post_save_failed( Closure $set_up ): void {
@@ -348,16 +380,32 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'params'          => array_merge(
 					$valid_params,
 					array(
-						// Repeat the elements until the JSON will surpass 64 KiB.
-						'elements' => array_fill(
-							0,
-							200,
+						// Fill the JSON with more than 64KB of incomprehensible data.
+						'elements' => array(
 							array_merge(
 								$valid_element,
 								array(
-									'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', bin2hex( random_bytes( KB_IN_BYTES * 65 ) ) ),
 								)
-							)
+							),
+						),
+					)
+				),
+				'expected_status' => 413,
+				'expected_code'   => 'rest_content_too_large',
+			),
+			'invalid_decoded_json_body_content_length' => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of highly compressible data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
 						),
 					)
 				),
@@ -455,8 +503,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test bad params.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
@@ -476,12 +526,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending data when no Origin request header is sent.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
-	 * @covers ::od_is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
 	 */
 	public function test_rest_request_without_origin(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -492,12 +544,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending data when a cross-domain Origin request header is sent.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
-	 * @covers ::od_is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
 	 */
 	public function test_rest_request_cross_origin(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Origin', 'https://cross-origin.example.com' );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
@@ -509,9 +563,11 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when 'home_url' is filtered.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
-	 * @covers ::od_is_allowed_http_origin
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::is_allowed_http_origin
 	 */
 	public function test_rest_request_origin_when_home_url_filtered(): void {
 		$request = $this->create_request( $this->get_valid_params() );
@@ -528,11 +584,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test not sending JSON data.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_not_json_data(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Origin', home_url() );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
@@ -544,11 +602,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test not sending JSON Content-Type.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_not_json_content_type(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( wp_json_encode( $this->get_valid_params() ) );
 		$request->set_header( 'Content-Type', 'text/plain' );
 		$response = rest_get_server()->dispatch( $request );
@@ -560,11 +620,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test empty array JSON body.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_empty_array_json_body(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( '[]' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$response = rest_get_server()->dispatch( $request );
@@ -576,11 +638,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test non-array JSON body.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_non_array_json_body(): void {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_body( '"Hello World!"' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$response = rest_get_server()->dispatch( $request );
@@ -589,11 +653,31 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
+
+	/**
+	 * Test invalid compressed JSON body.
+	 *
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
+	 */
+	public function test_rest_request_invalid_compressed_json_body(): void {
+		$request = $this->create_request( $this->get_valid_params() );
+		$request->set_body( 'Invalid compressed JSON body' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_invalid_payload', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
+	}
+
 	/**
 	 * Test timestamp ignored.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_timestamp_ignored(): void {
 		$initial_microtime = microtime( true );
@@ -625,8 +709,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when metric storage is locked.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_locked(): void {
 		OD_Storage_Lock::set_lock();
@@ -641,8 +727,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -673,8 +761,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -697,8 +787,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the wider viewport group and then adding one more.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_over_populate_wider_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -753,8 +845,10 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the narrower viewport group and then adding one more.
 	 *
-	 * @covers ::od_register_endpoint
-	 * @covers ::od_handle_rest_request
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
 	 */
 	public function test_rest_request_over_populate_narrower_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
@@ -785,74 +879,144 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_trigger_page_cache_invalidation().
+	 * Test that the request is modified by ::decompress_rest_request_body().
 	 *
-	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers ::od_decompress_rest_request_body
 	 */
-	public function test_od_trigger_page_cache_invalidation(): void {
-		$cache_purge_post_id = self::factory()->post->create();
+	public function test_od_decompress_rest_request_body_modifies_request(): void {
+		$params  = $this->get_valid_params();
+		$request = $this->create_request( $this->get_valid_params() );
+		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
+		$json_data = wp_json_encode( $params );
+		$result    = od_decompress_rest_request_body( null, rest_get_server(), $request );
 
-		$all_hook_callback_args = array();
-		add_action(
-			'all',
-			static function ( string $hook, ...$args ) use ( &$all_hook_callback_args ): void {
-				$all_hook_callback_args[ $hook ][] = $args;
-			},
-			10,
-			PHP_INT_MAX
-		);
-
-		od_trigger_page_cache_invalidation( $cache_purge_post_id );
-
-		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
-		$found = false;
-		foreach ( $all_hook_callback_args['clean_post_cache'] as $args ) {
-			if ( $args[0] === $cache_purge_post_id ) {
-				$this->assertInstanceOf( WP_Post::class, $args[1] );
-				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
-				$found = true;
-			}
-		}
-		$this->assertTrue( $found, 'Expected clean_post_cache to have been fired for the post queried object.' );
-
-		$this->assertArrayHasKey( 'transition_post_status', $all_hook_callback_args );
-		$found = false;
-		foreach ( $all_hook_callback_args['transition_post_status'] as $args ) {
-			$this->assertInstanceOf( WP_Post::class, $args[2] );
-			if ( $args[2]->ID === $cache_purge_post_id ) {
-				$this->assertSame( $args[2]->post_status, $args[0] );
-				$this->assertSame( $args[2]->post_status, $args[1] );
-				$found = true;
-			}
-		}
-		$this->assertTrue( $found, 'Expected transition_post_status to have been fired for the post queried object.' );
-
-		$this->assertArrayHasKey( 'save_post', $all_hook_callback_args );
-		$found = false;
-		foreach ( $all_hook_callback_args['save_post'] as $args ) {
-			if ( $args[0] === $cache_purge_post_id ) {
-				$this->assertInstanceOf( WP_Post::class, $args[1] );
-				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
-				$found = true;
-			}
-		}
-		$this->assertTrue( $found, 'Expected save_post to have been fired for the post queried object.' );
+		$this->assertNotWPError( $result );
+		$this->assertEquals( $json_data, $request->get_body() );
+		$this->assertEquals( 'application/json', $request->get_header( 'Content-Type' ) );
 	}
 
 	/**
-	 * Test od_trigger_page_cache_invalidation() for an invalid post.
+	 * Test that the `od_maximum_url_metric_size` filter can be used to modify the maximum size of URL Metrics.
 	 *
-	 * @covers ::od_trigger_page_cache_invalidation
+	 * @dataProvider data_provider_maximum_url_metrics_size_filter
+	 *
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::get_registration_args
+	 * @covers ::od_decompress_rest_request_body
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::store_permissions_check
+	 * @covers OD_REST_URL_Metrics_Store_Endpoint::handle_rest_request
+	 * @covers ::od_get_maximum_url_metric_size
+	 *
+	 * @param Closure              $set_up                   Set up function.
+	 * @param array<string, mixed> $params                   Params.
+	 * @param int                  $expected_status          Expected status.
+	 * @param string|null          $expected_code            Expected code.
+	 * @param bool                 $expected_incorrect_usage Expected incorrect usage.
 	 */
-	public function test_od_trigger_page_cache_invalidation_invalid_post_id(): void {
-		wp_delete_post( 1, true );
-		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
-		$before_transition_post_status_count = did_action( 'transition_post_status' );
-		$before_save_post_count              = did_action( 'save_post' );
-		od_trigger_page_cache_invalidation( 1 );
-		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
-		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
-		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
+	public function test_maximum_url_metrics_size_filter( Closure $set_up, array $params, int $expected_status, ?string $expected_code, bool $expected_incorrect_usage ): void {
+		$set_up();
+		if ( $expected_incorrect_usage ) {
+			$this->setExpectedIncorrectUsage( 'Filter: &#039;od_maximum_url_metric_size&#039;' );
+		}
+		$request  = $this->create_request( $params, array( 'gzip' => false ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( $expected_status, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+		if ( null !== $expected_code ) {
+			$this->assertSame( $expected_code, $response->get_data()['code'] );
+		}
+	}
+
+	/**
+	 * Data provider for test_maximum_url_metrics_size_filter.
+	 *
+	 * @return array<string, mixed> Test data.
+	 */
+	public function data_provider_maximum_url_metrics_size_filter(): array {
+		$valid_params  = $this->get_valid_params();
+		$valid_element = $valid_params['elements'][0];
+
+		return array(
+			'url_metrics_should_be_accepted_because_of_increased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES * 2;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => false,
+			),
+			'url_metrics_should_be_rejected_because_of_decreased_maximum_url_metrics_size' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return MB_IN_BYTES / 2;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 413,
+				'expected_code'            => 'rest_content_too_large',
+				'expected_incorrect_usage' => false,
+			),
+			'negative_maximum_url_metric_size_is_treated_as_1mb' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_maximum_url_metric_size',
+						static function (): int {
+							return -1;
+						}
+					);
+				},
+				'params'                   => array_merge(
+					$valid_params,
+					array(
+						// Fill the JSON with more than 1MB of data.
+						'elements' => array(
+							array_merge(
+								$valid_element,
+								array(
+									'xpath' => sprintf( '/HTML/BODY/DIV[@id=\'%s\']/*[1][self::DIV]', str_repeat( 'A', MB_IN_BYTES / 2 ) ),
+								)
+							),
+						),
+					)
+				),
+				'expected_status'          => 200,
+				'expected_code'            => null,
+				'expected_incorrect_usage' => true,
+			),
+		);
 	}
 
 	/**
@@ -927,21 +1091,33 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Creates a request to store a URL Metric.
 	 *
-	 * @param array<string, mixed> $params Params.
+	 * @param array<string, mixed> $params  Params.
+	 * @param array{ gzip?: bool } $options Options.
 	 * @return WP_REST_Request<array<string, mixed>> Request.
 	 */
-	private function create_request( array $params ): WP_REST_Request {
+	private function create_request( array $params, array $options = array() ): WP_REST_Request {
+		$options = wp_parse_args( $options, array( 'gzip' => true ) );
+
 		/**
 		 * Request.
 		 *
 		 * @var WP_REST_Request<array<string, mixed>> $request
 		 */
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
-		$request->set_body( wp_json_encode( $params ) );
+
+		if ( $options['gzip'] ) {
+			if ( ! function_exists( 'gzencode' ) ) {
+				throw new Exception( 'The gzencode() function is not available.' );
+			}
+			$request->set_header( 'Content-Encoding', 'gzip' );
+			$request->set_body( gzencode( wp_json_encode( $params ) ) );
+		} else {
+			$request->set_body( wp_json_encode( $params ) );
+		}
 		return $request;
 	}
 }

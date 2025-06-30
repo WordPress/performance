@@ -239,7 +239,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
-	 * @since n.e.x.t Passing a $query is now allowed. In the 1.0.0 release, this will default to skipping tag closers.
+	 * @since 1.0.0 Passing a $query is now allowed. TODO: In the final non-beta 1.0.0 release, also note that this will default to skipping tag closers.
 	 *
 	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
@@ -702,29 +702,33 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Append HTML to the HEAD.
+	 * Appends raw HTML to the HEAD.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 *  The provided HTML must be valid for insertion in the HEAD. No validation is currently performed. However, in the
+	 *  future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 *  HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $html HTML to inject.
+	 * @param string $raw_html Raw HTML to inject.
 	 */
-	public function append_head_html( string $html ): void {
-		$this->buffered_text_replacements[ self::END_OF_HEAD_BOOKMARK ][] = $html;
+	public function append_head_html( string $raw_html ): void {
+		$this->buffered_text_replacements[ self::END_OF_HEAD_BOOKMARK ][] = $raw_html;
 	}
 
 	/**
-	 * Append HTML to the BODY.
+	 * Appends raw HTML to the BODY.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 * The provided HTML must be valid for insertion in the BODY. No validation is currently performed. However, in the
+	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $html HTML to inject.
+	 * @param string $raw_html Raw HTML to inject.
 	 */
-	public function append_body_html( string $html ): void {
-		$this->buffered_text_replacements[ self::END_OF_BODY_BOOKMARK ][] = $html;
+	public function append_body_html( string $raw_html ): void {
+		$this->buffered_text_replacements[ self::END_OF_BODY_BOOKMARK ][] = $raw_html;
 	}
 
 	/**
