@@ -321,7 +321,7 @@ function plvt_add_setting_ui(): void {
 		),
 	);
 
-	// Do not render the checkbox to override if there is no thing to override.
+	// Do not render the checkbox to override if there is nothing to override.
 	if ( ! $plvt_has_theme_support_with_args ) {
 		unset( $fields['override_theme_config'] );
 	}
