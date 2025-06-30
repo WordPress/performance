@@ -26,6 +26,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @access private
+ *
+ * @global bool|null            $plvt_has_theme_support_with_args Whether the current theme explicitly supports view transitions with custom config.
+ * @global array<string, mixed> $_wp_theme_features               Theme support features added and their arguments.
  */
 function plvt_polyfill_theme_support(): void {
 	global $plvt_has_theme_support_with_args, $_wp_theme_features;
