@@ -30,9 +30,11 @@ function perflab_aea_audit_blocking_assets(): void {
 		home_url( '/' ),
 		array(
 			'timeout' => 10,
-			'headers' => array(
-				'Accept'        => 'text/html',
-				'Cache-Control' => 'no-cache',
+			'headers' => perflab_aea_copy_basic_auth_headers(
+				array(
+					'Accept'        => 'text/html',
+					'Cache-Control' => 'no-cache',
+				)
 			),
 		)
 	);

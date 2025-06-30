@@ -287,7 +287,14 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @return int|null Returns the content length in bytes or null if it cannot be determined.
  */
 function perflab_aea_get_asset_content_length( string $resource_url ): ?int {
-	$head_response = wp_remote_head( $resource_url, array( 'timeout' => 10 ) );
+	$head_response = wp_remote_head(
+		$resource_url,
+		array(
+			'timeout' => 10,
+			'headers' => perflab_aea_copy_basic_auth_headers( array() ),
+		)
+	);
+
 	if ( is_wp_error( $head_response ) || 200 !== wp_remote_retrieve_response_code( $head_response ) ) {
 		return null;
 	}
@@ -301,4 +308,24 @@ function perflab_aea_get_asset_content_length( string $resource_url ): ?int {
 		return null;
 	}
 	return $content_length;
+}
+
+/**
+ * Copies HTTP Basic auth headers if present.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $headers Headers to copy to.
+ * @return array<string, mixed> Headers with copied Basic auth headers.
+ */
+function perflab_aea_copy_basic_auth_headers( array $headers ): array {
+	$basic_auth_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ?? '' ) );
+	if ( str_starts_with( $basic_auth_header, 'Basic ' ) ) {
+		$headers['Authorization'] = $basic_auth_header;
+	} elseif ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
+		$user                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) );
+		$pass                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+		$headers['Authorization'] = 'Basic ' . base64_encode( $user . ':' . $pass ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to encode the credentials for forwarding basic auth headers.
+	}
+	return $headers;
 }
