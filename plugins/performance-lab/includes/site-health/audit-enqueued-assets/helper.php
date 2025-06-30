@@ -279,15 +279,15 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
 }
 
 /**
- * Gets the content length of an asset.
+ * Gets the size of the asset in bytes.
  *
  * @since n.e.x.t
  *
  * @param string $resource_url URL of the resource.
- * @return int|null Returns the content length in bytes or null if it cannot be determined.
+ * @return int|null Returns the size in bytes of the asset, or null if it cannot be determined.
  */
-function perflab_aea_get_asset_content_length( string $resource_url ): ?int {
-	$head_response = wp_remote_head(
+function perflab_aea_get_asset_size( string $resource_url ): ?int {
+	$head_response = wp_remote_get(
 		$resource_url,
 		array(
 			'timeout' => 10,
@@ -299,15 +299,17 @@ function perflab_aea_get_asset_content_length( string $resource_url ): ?int {
 		return null;
 	}
 
-	$content_length = wp_remote_retrieve_header( $head_response, 'content-length' );
-	if ( is_array( $content_length ) && isset( $content_length[0] ) ) {
-		$content_length = $content_length[0];
-	}
-	$content_length = (int) $content_length;
-	if ( $content_length <= 0 ) {
+	$body = wp_remote_retrieve_body( $head_response );
+	if ( '' === $body ) {
 		return null;
 	}
-	return $content_length;
+
+	$asset_size = strlen( $body );
+	if ( $asset_size <= 0 ) {
+		return null;
+	}
+
+	return $asset_size;
 }
 
 /**
