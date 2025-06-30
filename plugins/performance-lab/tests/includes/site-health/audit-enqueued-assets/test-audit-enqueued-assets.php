@@ -320,31 +320,30 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		remove_all_filters( 'pre_http_request' );
 		add_filter(
 			'pre_http_request',
-			static function ( $preempt, $parsed_args ) use ( $mock_html ) {
-				// Mock a HEAD request to return a content length header.
-				if ( isset( $parsed_args['method'] ) && 'HEAD' === $parsed_args['method'] ) {
+			static function ( $preempt, $parsed_args, $url ) use ( $mock_html ) {
+				// Mock GET request for the home page to return mocked HTML content.
+				if ( home_url( '/' ) === $url ) {
 					return array(
 						'response' => array(
 							'code' => 200,
 						),
-						'body'     => '',
-						'headers'  => array(
-							'content-length' => '10000', // Mocked size of the asset.
-						),
+						'body'     => $mock_html,
+						'headers'  => array(),
 					);
 				}
 
-				// Mock a GET request to return the HTML content.
+				// This simulates downloading the actual asset content.
+				$mock_asset_content = str_repeat( 'A', 5000 );
 				return array(
 					'response' => array(
 						'code' => 200,
 					),
-					'body'     => $mock_html,
+					'body'     => $mock_asset_content,
 					'headers'  => array(),
 				);
 			},
 			10,
-			2
+			3
 		);
 	}
 }
