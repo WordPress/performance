@@ -19,7 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 // Define the constant.
 if ( defined( 'WEB_WORKER_OFFLOADING_VERSION' ) ) {
@@ -49,3 +48,4 @@ define( 'WEB_WORKER_OFFLOADING_VERSION', '0.2.0' );
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/third-party.php';
+// @codeCoverageIgnoreEnd

@@ -1,7 +1,7 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag:   3.9.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
+* [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.

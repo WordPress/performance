@@ -2,6 +2,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>...</title>
+		<meta data-od-replaced-content="optimization-detective 0.0.0" name="generator" content="optimization-detective 0.0.0; url_metric_groups={0:complete, 480:complete, 600:complete, 782:complete}">
+		<meta name="generator" content="image-prioritizer 0.0.0">
 	</head>
 	<body>
 		<div id="page">
@@ -9,7 +11,7 @@
 			<img data-od-replaced-fetchpriority="high" src="https://example.com/bad-left-of-viewport.jpg" alt="Left of Viewport" width="10" height="10" fetchpriority="low">
 			<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="low" src="https://example.com/bad-above-viewport.jpg" alt="Above viewport" width="10" height="10" >
 			<img data-od-added-fetchpriority fetchpriority="low" src="https://example.com/bad-right-of-viewport.jpg" alt="Right of viewport" width="10" height="10">
-	
+
 			<!-- The only one that should get loading=lazy since user should be able to scroll to it. -->
 			<img data-od-added-loading loading="lazy" src="https://example.com/bad-below-viewport.jpg" alt="Below viewport" width="10" height="10">
 		</div>

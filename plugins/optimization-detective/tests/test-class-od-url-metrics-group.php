@@ -20,7 +20,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_construction(): array {
 		return array(
-			'bad_minimum_viewport_width'       => array(
+			'bad_minimum_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => -1,
 				'maximum_viewport_width' => 100,
@@ -28,7 +28,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_maximum_viewport_width'       => array(
+			'bad_maximum_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => -1,
@@ -36,7 +36,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_min_max_viewport_width'       => array(
+			'bad_min_max_viewport_width'     => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 200,
 				'maximum_viewport_width' => 100,
@@ -44,7 +44,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_sample_size_viewport_width'   => array(
+			'bad_sample_size_viewport_width' => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
@@ -52,15 +52,15 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => InvalidArgumentException::class,
 			),
-			'bad_freshness_ttl_viewport_width' => array(
+			'negative_freshness_ttl_ok'      => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
 				'sample_size'            => 3,
-				'freshness_ttl'          => -HOUR_IN_SECONDS,
-				'exception'              => InvalidArgumentException::class,
+				'freshness_ttl'          => -1,
+				'exception'              => '',
 			),
-			'good_empty_url_metrics'           => array(
+			'good_empty_url_metrics'         => array(
 				'url_metrics'            => array(),
 				'minimum_viewport_width' => 0,
 				'maximum_viewport_width' => 100,
@@ -68,7 +68,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'          => HOUR_IN_SECONDS,
 				'exception'              => '',
 			),
-			'good_one_url_metric'              => array(
+			'good_one_url_metric'            => array(
 				'url_metrics'            => array(
 					new OD_URL_Metric(
 						array(
@@ -260,22 +260,40 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	public function data_provider_test_is_complete(): array {
 		// Note: Test cases for empty URL Metrics and for exact sample size are already covered in the test_add_url_metric() method.
 		return array(
-			'old_url_metric' => array(
+			'old_url_metric'                   => array(
 				'url_metric'                 => $this->get_sample_url_metric(
 					array(
 						'timestamp' => microtime( true ) - ( HOUR_IN_SECONDS + 1 ),
 						'etag'      => md5( '' ),
 					)
 				),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => false,
 			),
-			'etag_mismatch'  => array(
+			'etag_mismatch'                    => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => false,
 			),
-			'etag_match'     => array(
+			'etag_match'                       => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( '' ) ) ),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
 				'expected_is_group_complete' => true,
+			),
+			'negative_ttl_with_old_url_metric' => array(
+				'url_metric'                 => $this->get_sample_url_metric(
+					array(
+						'timestamp' => microtime( true ) - ( WEEK_IN_SECONDS * 4 ),
+						'etag'      => md5( '' ),
+					)
+				),
+				'freshness_ttl'              => -1,
+				'expected_is_group_complete' => true,
+			),
+			'negative_ttl_with_etag_mismatch'  => array(
+				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
+				'freshness_ttl'              => -1,
+				'expected_is_group_complete' => false,
 			),
 		);
 	}
@@ -284,16 +302,25 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * Test is_complete().
 	 *
 	 * @covers ::is_complete
+	 * @covers ::get_freshness_ttl
+	 * @covers OD_URL_Metric_Group_Collection::get_freshness_ttl
 	 *
 	 * @dataProvider data_provider_test_is_complete
 	 */
-	public function test_is_complete( OD_URL_Metric $url_metric, bool $expected_is_group_complete ): void {
-		$collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 768 ), 1, HOUR_IN_SECONDS );
+	public function test_is_complete( OD_URL_Metric $url_metric, int $freshness_ttl, bool $expected_is_group_complete ): void {
+		$collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 768 ), 1, $freshness_ttl );
 		$group      = $collection->get_first_group();
 
 		$group->add_url_metric( $url_metric );
 
 		$this->assertSame( $expected_is_group_complete, $group->is_complete() );
+		if ( $freshness_ttl < 0 ) {
+			$this->assertSame( -1, $collection->get_freshness_ttl() );
+			$this->assertSame( -1, $group->get_freshness_ttl() );
+		} else {
+			$this->assertSame( $freshness_ttl, $collection->get_freshness_ttl() );
+			$this->assertSame( $freshness_ttl, $group->get_freshness_ttl() );
+		}
 	}
 
 	/**
@@ -415,6 +442,93 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		}
 
 		$this->assertSame( $expected_lcp_element_xpaths, $lcp_element_xpaths_by_minimum_viewport_widths );
+	}
+
+	/**
+	 * Data provider for test_get_lcp_element_when_group_half_stale.
+	 *
+	 * @return array<string, array{order_reversed: bool}> Data.
+	 */
+	public function data_provider_test_get_lcp_element_when_group_half_stale(): array {
+		return array(
+			'original_order' => array(
+				'order_reversed' => false,
+			),
+			'reverse_order'  => array(
+				'order_reversed' => true,
+			),
+		);
+	}
+
+	/**
+	 * Test get_lcp_element() when half of the URL Metrics in a group are stale.
+	 *
+	 * @covers ::get_lcp_element
+	 * @covers OD_URL_Metric_Group_Collection::get_common_lcp_element
+	 * @dataProvider data_provider_test_get_lcp_element_when_group_half_stale
+	 *
+	 * @param bool $order_reversed Whether the order of URL Metrics should be reversed.
+	 */
+	public function test_get_lcp_element_when_group_half_stale( bool $order_reversed ): void {
+		$url_metrics_data = json_decode( file_get_contents( __DIR__ . '/data/url-metrics/tablet-viewport-half-stale.json' ), true );
+		if ( $order_reversed ) {
+			$url_metrics_data = array_reverse( $url_metrics_data );
+		}
+		$url_metrics = array();
+		$etag_counts = array();
+		foreach ( $url_metrics_data as $url_metric_data ) {
+			// Make sure the timestamp is always current as otherwise groups will never be complete, regardless of having a current ETag.
+			$url_metric_data['timestamp'] = microtime( true );
+
+			$url_metric = new OD_URL_Metric( $url_metric_data );
+			$etag       = $url_metric->get_etag();
+			if ( ! isset( $etag_counts[ $etag ] ) ) {
+				$etag_counts[ $etag ] = 0;
+			}
+			++$etag_counts[ $etag ];
+			$url_metrics[] = $url_metric;
+		}
+		arsort( $etag_counts );
+		$current_etag = key( $etag_counts ); // The ETag used most often.
+
+		$collection = new OD_URL_Metric_Group_Collection(
+			$url_metrics,
+			$current_etag,
+			array( 480, 600, 782 ),
+			3,
+			WEEK_IN_SECONDS
+		);
+
+		$this->assertFalse( $collection->is_every_group_complete() );
+		$this->assertTrue( $collection->is_every_group_populated() );
+		$this->assertTrue( $collection->is_any_group_populated() );
+		$common_lcp_element = $collection->get_common_lcp_element();
+		$this->assertInstanceOf( OD_Element::class, $collection->get_common_lcp_element() );
+		$this->assertSame(
+			'/HTML/BODY/DIV[@class=\'wp-site-blocks\']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[1][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]',
+			$common_lcp_element->jsonSerialize()['xpath'] // TODO: Not using get_xpath() directly since it is currently normalized. This can be changed after <https://github.com/WordPress/performance/pull/1820> is merged.
+		);
+
+		// The tablet group is the only one that is not complete.
+		$tablet_group = $collection->get_group_for_viewport_width( 700 );
+		$this->assertCount( 2, $tablet_group );
+		$this->assertFalse( $tablet_group->is_complete() );
+
+		// All non-tablet groups should be complete.
+		$this->assertCount( 4, $collection );
+		foreach ( $collection as $group ) {
+			if ( $group !== $tablet_group ) {
+				$this->assertCount( 3, $group );
+				$this->assertTrue( $group->is_complete() );
+			}
+		}
+
+		// All groups should have the same LCP element.
+		foreach ( $collection as $group ) {
+			$lcp_element = $group->get_lcp_element();
+			$this->assertInstanceOf( OD_Element::class, $lcp_element );
+			$this->assertSame( $common_lcp_element->get_xpath(), $lcp_element->get_xpath() );
+		}
 	}
 
 	/**

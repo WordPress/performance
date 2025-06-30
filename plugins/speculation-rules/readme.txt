@@ -1,8 +1,8 @@
 === Speculative Loading ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   1.4.0
+Tested up to: 6.8
+Stable tag:   1.5.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, javascript, speculation rules, prerender, prefetch
@@ -41,6 +41,11 @@ _This plugin was formerly known as Speculation Rules._
 1. Upload the entire `speculation-rules` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
 3. Activate the **Speculative Loading** plugin.
+
+= After activation =
+
+1. Visit the **Settings > Reading** admin screen.
+2. Use the controls in the **Speculative Loading** section to configure speculative loading.
 
 == Frequently Asked Questions ==
 
@@ -118,6 +123,12 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.5.0 =
+
+**Enhancements**
+
+* Add support for Speculative Loading WP Core API, loading the plugin's own API implementation conditionally. ([1883](https://github.com/WordPress/performance/pull/1883))
 
 = 1.4.0 =
 
