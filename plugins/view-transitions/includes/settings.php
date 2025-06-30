@@ -270,7 +270,7 @@ function plvt_add_setting_ui(): void {
 				wp_admin_notice(
 					__( 'Your theme already supports view transitions with its own adapted configuration. The settings below will override those.', 'view-transitions' ),
 					array(
-						'type'               => 'warning',
+						'type'               => 'info',
 						'additional_classes' => array( 'inline' ),
 					)
 				);
