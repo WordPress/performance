@@ -264,7 +264,7 @@ function plvt_add_setting_ui(): void {
 			global $plvt_has_theme_support_with_args;
 			?>
 			<p class="description">
-				<?php esc_html_e( 'This section allows you to control how view transitions are used to enhance the navigation user experience.', 'view-transitions' ); ?>
+				<?php esc_html_e( 'This section allows you to control view transitions usage on your site to enhance the navigation user experience.', 'view-transitions' ); ?>
 				<br>
 				<?php esc_html_e( 'To reset any of the selector text inputs, clear the field and save the changes.', 'view-transitions' ); ?>
 			</p>
@@ -286,36 +286,61 @@ function plvt_add_setting_ui(): void {
 		)
 	);
 
+	add_settings_section(
+		'plvt_admin_view_transitions',
+		_x( 'Admin View Transitions', 'Settings section', 'view-transitions' ),
+		static function (): void {
+			?>
+			<p class="description">
+				<?php esc_html_e( 'This section allows you to control view transitions usage in the WordPress admin area.', 'view-transitions' ); ?>
+			</p>
+			<?php
+		},
+		'reading',
+		array(
+			'before_section' => '<div id="admin-view-transitions">',
+			'after_section'  => '</div>',
+		)
+	);
+
 	$fields = array(
 		'override_theme_config'        => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Override Theme Configuration', 'view-transitions' ),
 			'description' => __( 'Override the theme provided configuration with the settings below.', 'view-transitions' ),
 		),
 		'default_transition_animation' => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
 		'header_selector'              => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Header Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global header element.', 'view-transitions' ),
 		),
 		'main_selector'                => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Main Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global main element.', 'view-transitions' ),
 		),
 		'post_title_selector'          => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Title Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post title element.', 'view-transitions' ),
 		),
 		'post_thumbnail_selector'      => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Thumbnail Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post thumbnail element.', 'view-transitions' ),
 		),
 		'post_content_selector'        => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Content Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
 		'enable_admin_transitions'     => array(
+			'section'     => 'plvt_admin_view_transitions',
 			'title'       => __( 'WP Admin', 'view-transitions' ),
 			'description' => __( 'Enable view transitions in the WordPress admin area.', 'view-transitions' ),
 		),
@@ -327,6 +352,9 @@ function plvt_add_setting_ui(): void {
 	}
 
 	foreach ( $fields as $slug => $args ) {
+		$section = $args['section'];
+		unset( $args['section'] );
+
 		$additional_args = array(
 			'field'     => $slug,
 			'label_for' => "plvt-view-transitions-field-{$slug}",
@@ -342,7 +370,7 @@ function plvt_add_setting_ui(): void {
 			$args['title'],
 			'plvt_render_settings_field',
 			'reading',
-			'plvt_view_transitions',
+			$section,
 			array_merge(
 				$additional_args,
 				$args
