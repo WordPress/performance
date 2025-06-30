@@ -105,6 +105,11 @@ function perflab_aea_audit_blocking_assets(): void {
 				continue;
 			}
 
+			$media = $processor->get_attribute( 'media' );
+			if ( is_string( $media ) && ! (bool) preg_match( '/^(all|screen)\b/i', $media ) ) {
+				continue;
+			}
+
 			$href = $processor->get_attribute( 'href' );
 			if ( ! is_string( $href ) ) {
 				continue;
