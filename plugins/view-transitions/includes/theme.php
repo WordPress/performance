@@ -311,6 +311,7 @@ function plvt_load_view_transitions(): void {
 	} else {
 		$seconds                      = absint( $theme_support['default-animation-duration'] ) / 1000;
 		$default_animation_stylesheet = sprintf(
+			/* translators: %s is animation duration in seconds. */
 			'::view-transition-old(*), ::view-transition-new(*) { animation-duration: %ss; }',
 			$seconds
 		);
