@@ -287,7 +287,7 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @return int|null Returns the size in bytes of the asset, or null if it cannot be determined.
  */
 function perflab_aea_get_asset_size( string $resource_url ): ?int {
-	$head_response = wp_remote_get(
+	$response = wp_remote_get(
 		$resource_url,
 		array(
 			'timeout' => 10,
@@ -295,21 +295,16 @@ function perflab_aea_get_asset_size( string $resource_url ): ?int {
 		)
 	);
 
-	if ( is_wp_error( $head_response ) || 200 !== wp_remote_retrieve_response_code( $head_response ) ) {
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return null;
 	}
 
-	$body = wp_remote_retrieve_body( $head_response );
+	$body = wp_remote_retrieve_body( $response );
 	if ( '' === $body ) {
 		return null;
 	}
 
-	$asset_size = strlen( $body );
-	if ( $asset_size <= 0 ) {
-		return null;
-	}
-
-	return $asset_size;
+	return strlen( $body );
 }
 
 /**
