@@ -12,6 +12,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	const WARNING_STYLES_THRESHOLD  = 11;
 
 	/**
+	 * Mocked responses for HTTP requests.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $mocked_responses = array();
+
+	/**
 	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
@@ -65,7 +72,32 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->mock_requests();
+		$this->add_mock_responses(
+			array(
+				array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 200,
+						'body' => $this->get_mocked_html(),
+					),
+				),
+				array(
+					'url'      => 'https://example1.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Example 1");',
+					),
+				),
+				array(
+					'url'      => '/wp-includes/example2.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Example 2");',
+					),
+				),
+			)
+		);
+		$this->mock_request();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_blocking_assets' );
 		$this->assertIsArray( $transient );
@@ -140,7 +172,33 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->mock_requests();
+		$this->add_mock_responses(
+			array(
+				array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 200,
+						'body' => $this->get_mocked_html(),
+					),
+				),
+				array(
+					'url'      => 'https://example1.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: red; }',
+					),
+				),
+				array(
+					'url'      => '/wp-includes/example2.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: blue; }',
+					),
+				),
+			)
+		);
+
+		$this->mock_request();
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_blocking_assets' );
 		$this->assertIsArray( $transient );
@@ -271,6 +329,175 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests perflab_aea_audit_blocking_assets functionality.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
+	 * @dataProvider data_perflab_aea_audit_blocking_assets
+	 *
+	 * @param array<string|mixed>|WP_Error $response The response to be tested.
+	 * @param bool                         $expected The expected result of the test.
+	 */
+	public function test_perflab_aea_audit_blocking_assets( $response, bool $expected ): void {
+		$this->mock_is_admin();
+		$this->current_user_can_view_site_health_checks_cap();
+		$this->add_mock_responses(
+			array(
+				array(
+					'url'      => home_url( '/' ),
+					'response' => $response,
+				),
+			)
+		);
+		$this->mock_request();
+
+		// Avoid deprecation warning due to related change in WordPress 6.4.
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
+		delete_transient( 'aea_blocking_assets' );
+		perflab_aea_audit_blocking_assets();
+		$transient = get_transient( 'aea_blocking_assets' );
+		if ( $expected ) {
+			$this->assertIsArray( $transient );
+			$this->assertArrayHasKey( 'styles', $transient );
+			$this->assertNotEmpty( $transient['styles'] );
+		} else {
+			$this->assertFalse( $transient );
+		}
+	}
+
+	/**
+	 * Data provider for test_perflab_aea_audit_blocking_assets.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function data_perflab_aea_audit_blocking_assets(): array {
+		wp_enqueue_script( 'script1', 'https://script1.com', array(), null );
+		wp_enqueue_script( 'script2', '/wp-includes/script2.com', array(), null );
+		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
+		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
+		wp_enqueue_script_module( 'noscript', 'https://non-javascript.com', array(), null );
+
+		wp_enqueue_style( 'style1', 'https://style1.com', array(), null );
+		wp_enqueue_style( 'style2', '/wp-includes/style2.com', array(), null );
+		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
+		wp_enqueue_style( 'style-no-href', '', array(), null );
+
+		add_filter(
+			'script_loader_tag',
+			static function ( $tag, $handle ) {
+				if ( 'script-async' === $handle ) {
+					$tag = str_replace( '<script ', '<script async ', $tag );
+				} elseif ( 'script-defer' === $handle ) {
+					$tag = str_replace( '<script ', '<script defer ', $tag );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'style_loader_tag',
+			static function ( $tag, $handle ) {
+				if ( 'style-no-href' === $handle ) {
+					$tag = str_replace( 'href=""', ' ', $tag );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
+
+		$this->add_mock_responses(
+			array(
+				array(
+					'url'      => 'https://script1.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Script 1 loaded");',
+					),
+				),
+				array(
+					'url'      => '/wp-includes/script2.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Script 2 loaded");',
+					),
+				),
+				array(
+					'url'      => 'https://async-script.com',
+					'response' => array(
+						'code' => 200,
+						'body' => '',
+					),
+				),
+				array(
+					'url'      => 'https://defer-script.com',
+					'response' => array(
+						'code' => 200,
+						'body' => '',
+					),
+				),
+				array(
+					'url'      => 'https://non-javascript.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'This is a non-JavaScript resource.',
+					),
+				),
+				array(
+					'url'      => 'https://style1.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: red; }',
+					),
+				),
+				array(
+					'url'      => '/wp-includes/style2.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: blue; }',
+					),
+				),
+				array(
+					'url'      => 'https://print-style.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { color: green; }',
+					),
+				),
+			)
+		);
+
+		return array(
+			'home_page_request_error'               => array(
+				'response' => new WP_Error( 'error', 'Error message' ),
+				'expected' => false,
+			),
+			'home_page_request_non_200_status_code' => array(
+				'response' => array(
+					'code' => 404,
+				),
+				'expected' => false,
+			),
+			'home_page_request_empty_body'          => array(
+				'response' => array(
+					'code' => 200,
+					'body' => '',
+				),
+				'expected' => false,
+			),
+			'other_conditions'                      => array(
+				'response' => array(
+					'code' => 200,
+					'body' => $this->get_mocked_html(),
+				),
+				'expected' => true,
+			),
+		);
+	}
+
+	/**
 	 * Mocks the current screen to be the dashboard.
 	 */
 	public function mock_is_admin(): void {
@@ -307,40 +534,45 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 
-	/**
-	 * Mocks HTTP requests for tests.
-	 */
-	public function mock_requests(): void {
+	public function get_mocked_html(): string {
 		$mock_html  = '<!DOCTYPE html><head>';
 		$mock_html .= get_echo( 'wp_head' );
 		$mock_html .= '</head><body>';
 		$mock_html .= get_echo( 'wp_footer' );
 		$mock_html .= '</body></html>';
+		return $mock_html;
+	}
 
+	/**
+	 * Adds a mocked response for a specific URL.
+	 *
+	 * @param array<string|mixed> $responses An array containing the URLs and the mocked responses.
+	 */
+	public function add_mock_responses( array $responses ): void {
+		foreach ( $responses as $response ) {
+			$this->mocked_responses[ $response['url'] ] = $response['response'];
+		}
+	}
+
+	/**
+	 * Mocks HTTP requests for tests.
+	 */
+	public function mock_request(): void {
 		remove_all_filters( 'pre_http_request' );
 		add_filter(
 			'pre_http_request',
-			static function ( $preempt, $parsed_args, $url ) use ( $mock_html ) {
-				// Mock GET request for the home page to return mocked HTML content.
-				if ( home_url( '/' ) === $url ) {
+			function ( $preempt, $parsed_args, $url ) {
+				if ( isset( $this->mocked_responses[ $url ] ) ) {
+					if ( is_wp_error( $this->mocked_responses[ $url ] ) ) {
+						return $this->mocked_responses[ $url ];
+					}
+
 					return array(
-						'response' => array(
-							'code' => 200,
-						),
-						'body'     => $mock_html,
-						'headers'  => array(),
+						'response' => $this->mocked_responses[ $url ],
+						'body'     => $this->mocked_responses[ $url ]['body'] ?? '',
 					);
 				}
-
-				// This simulates downloading the actual asset content.
-				$mock_asset_content = str_repeat( 'A', 5000 );
-				return array(
-					'response' => array(
-						'code' => 200,
-					),
-					'body'     => $mock_asset_content,
-					'headers'  => array(),
-				);
+				return $preempt;
 			},
 			10,
 			3
