@@ -19,6 +19,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	private $mocked_responses = array();
 
 	/**
+	 * Test 'perflab_aea_audit_blocking_assets' is added to 'admin_init' action.
+	 */
+	public function test_perflab_aea_audit_blocking_assets_hook(): void {
+		$this->assertEquals( 10, has_action( 'admin_init', 'perflab_aea_audit_blocking_assets' ) );
+	}
+
+	/**
 	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
@@ -65,9 +72,26 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
-		wp_enqueue_script( 'script2', '/wp-includes/example2.com', array(), null );
+		wp_enqueue_script( 'script2', '/wp-includes/example2.js', array(), null );
 		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
 		wp_dequeue_script( 'script3' );
+		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
+		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
+		wp_enqueue_script( 'type-noscript', 'https://non-javascript.com', array(), null );
+
+		add_filter(
+			'wp_script_attributes',
+			static function ( $atts ) {
+				if ( 'script-async-js' === $atts['id'] ) {
+					$atts['async'] = true;
+				} elseif ( 'script-defer-js' === $atts['id'] ) {
+					$atts['defer'] = true;
+				} elseif ( 'type-noscript-js' === $atts['id'] ) {
+					$atts['type'] = 'noscript';
+				}
+				return $atts;
+			}
+		);
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
@@ -89,7 +113,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					),
 				),
 				array(
-					'url'      => '/wp-includes/example2.com',
+					'url'      => '/wp-includes/example2.js',
 					'response' => array(
 						'code' => 200,
 						'body' => 'console.log("Example 2");',
@@ -111,6 +135,30 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_script ) );
+
+		$async_script = array_filter(
+			$transient['scripts'],
+			static function ( $item ) {
+				return 'https://async-script.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $async_script );
+
+		$defer_script = array_filter(
+			$transient['scripts'],
+			static function ( $item ) {
+				return 'https://defer-script.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $defer_script );
+
+		$noscript_script = array_filter(
+			$transient['scripts'],
+			static function ( $item ) {
+				return 'https://non-javascript.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $noscript_script );
 	}
 
 	/**
@@ -165,9 +213,24 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
-		wp_enqueue_style( 'style2', '/wp-includes/example2.com', array() );
+		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array() );
 		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
+		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
+		wp_enqueue_style( 'style-no-href', 'https://no-href-style.com', array(), null );
+
+		// Filter to remove href attribute from a specific style handle.
+		add_filter(
+			'style_loader_tag',
+			static function ( $tag, $handle ) {
+				if ( 'style-no-href' === $handle ) {
+					$tag = str_replace( 'href=\'https://no-href-style.com\'', ' ', $tag );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
@@ -212,6 +275,22 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_style ) );
+
+		$print_style = array_filter(
+			$transient['styles'],
+			static function ( $item ) {
+				return 'https://print-style.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $print_style );
+
+		$no_href_style = array_filter(
+			$transient['styles'],
+			static function ( $item ) {
+				return 'https://no-href-style.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $no_href_style );
 	}
 
 	/**
@@ -329,25 +408,17 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_audit_blocking_assets functionality.
+	 * Tests perflab_aea_audit_blocking_assets functionality when the home request fails.
 	 *
 	 * @covers ::perflab_aea_audit_blocking_assets
-	 * @dataProvider data_perflab_aea_audit_blocking_assets
+	 * @dataProvider data_perflab_aea_audit_blocking_assets_home_request_failure
 	 *
-	 * @param array<string|mixed>|WP_Error $response The response to be tested.
-	 * @param bool                         $expected The expected result of the test.
+	 * @param array<string|mixed>|WP_Error $mocked_response The mocked response to simulate the HTTP request.
 	 */
-	public function test_perflab_aea_audit_blocking_assets( $response, bool $expected ): void {
+	public function test_perflab_aea_audit_blocking_assets_home_request_failure( $mocked_response ): void {
 		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
-		$this->add_mock_responses(
-			array(
-				array(
-					'url'      => home_url( '/' ),
-					'response' => $response,
-				),
-			)
-		);
+		$this->add_mock_responses( array( $mocked_response ) );
 		$this->mock_request();
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
@@ -356,143 +427,38 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		delete_transient( 'aea_blocking_assets' );
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_blocking_assets' );
-		if ( $expected ) {
-			$this->assertIsArray( $transient );
-			$this->assertArrayHasKey( 'styles', $transient );
-			$this->assertNotEmpty( $transient['styles'] );
-		} else {
-			$this->assertFalse( $transient );
-		}
+		$this->assertFalse( $transient );
 	}
 
 	/**
-	 * Data provider for test_perflab_aea_audit_blocking_assets.
+	 * Data provider for test_perflab_aea_audit_blocking_assets_home_request_failure.
 	 *
 	 * @return array<string, array<mixed>>
 	 */
-	public function data_perflab_aea_audit_blocking_assets(): array {
-		wp_enqueue_script( 'script1', 'https://script1.com', array(), null );
-		wp_enqueue_script( 'script2', '/wp-includes/script2.com', array(), null );
-		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
-		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
-		wp_enqueue_script_module( 'noscript', 'https://non-javascript.com', array(), null );
-
-		wp_enqueue_style( 'style1', 'https://style1.com', array(), null );
-		wp_enqueue_style( 'style2', '/wp-includes/style2.com', array(), null );
-		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
-		wp_enqueue_style( 'style-no-href', '', array(), null );
-
-		add_filter(
-			'script_loader_tag',
-			static function ( $tag, $handle ) {
-				if ( 'script-async' === $handle ) {
-					$tag = str_replace( '<script ', '<script async ', $tag );
-				} elseif ( 'script-defer' === $handle ) {
-					$tag = str_replace( '<script ', '<script defer ', $tag );
-				}
-				return $tag;
-			},
-			10,
-			2
-		);
-
-		add_filter(
-			'style_loader_tag',
-			static function ( $tag, $handle ) {
-				if ( 'style-no-href' === $handle ) {
-					$tag = str_replace( 'href=""', ' ', $tag );
-				}
-				return $tag;
-			},
-			10,
-			2
-		);
-
-		$this->add_mock_responses(
-			array(
-				array(
-					'url'      => 'https://script1.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'console.log("Script 1 loaded");',
-					),
-				),
-				array(
-					'url'      => '/wp-includes/script2.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'console.log("Script 2 loaded");',
-					),
-				),
-				array(
-					'url'      => 'https://async-script.com',
-					'response' => array(
-						'code' => 200,
-						'body' => '',
-					),
-				),
-				array(
-					'url'      => 'https://defer-script.com',
-					'response' => array(
-						'code' => 200,
-						'body' => '',
-					),
-				),
-				array(
-					'url'      => 'https://non-javascript.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'This is a non-JavaScript resource.',
-					),
-				),
-				array(
-					'url'      => 'https://style1.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'body { background-color: red; }',
-					),
-				),
-				array(
-					'url'      => '/wp-includes/style2.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'body { background-color: blue; }',
-					),
-				),
-				array(
-					'url'      => 'https://print-style.com',
-					'response' => array(
-						'code' => 200,
-						'body' => 'body { color: green; }',
-					),
-				),
-			)
-		);
-
+	public function data_perflab_aea_audit_blocking_assets_home_request_failure(): array {
 		return array(
 			'home_page_request_error'               => array(
-				'response' => new WP_Error( 'error', 'Error message' ),
-				'expected' => false,
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => new WP_Error( 'error', 'Error message' ),
+				),
 			),
 			'home_page_request_non_200_status_code' => array(
-				'response' => array(
-					'code' => 404,
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 404,
+					),
 				),
-				'expected' => false,
 			),
 			'home_page_request_empty_body'          => array(
-				'response' => array(
-					'code' => 200,
-					'body' => '',
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 200,
+						'body' => '',
+					),
 				),
-				'expected' => false,
-			),
-			'other_conditions'                      => array(
-				'response' => array(
-					'code' => 200,
-					'body' => $this->get_mocked_html(),
-				),
-				'expected' => true,
 			),
 		);
 	}
