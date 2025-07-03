@@ -214,7 +214,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts = false;
 	$blocking_assets  = get_transient( 'aea_blocking_assets' );
-	if ( is_array( $blocking_assets ) && is_array( $blocking_assets['scripts'] ) ) {
+	if ( isset( $blocking_assets['scripts'] ) && is_array( $blocking_assets['scripts'] ) ) {
 		$enqueued_scripts = count( $blocking_assets['scripts'] );
 	}
 	return $enqueued_scripts;

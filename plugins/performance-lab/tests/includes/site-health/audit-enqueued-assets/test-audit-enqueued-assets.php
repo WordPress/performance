@@ -113,7 +113,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					),
 				),
 				array(
-					'url'      => '/wp-includes/example2.js',
+					'url'      => home_url( '/wp-includes/example2.js' ),
 					'response' => array(
 						'code' => 200,
 						'body' => 'console.log("Example 2");',
@@ -135,6 +135,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_script ) );
+
+		$internal_script = array_filter(
+			$transient['scripts'],
+			static function ( $item ) {
+				return home_url( '/wp-includes/example2.js' ) === $item['src'];
+			}
+		);
+		$this->assertEquals( 1, count( $internal_script ) );
 
 		$async_script = array_filter(
 			$transient['scripts'],
@@ -213,7 +221,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
-		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array() );
+		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array(), null );
 		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
 		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
@@ -252,7 +260,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					),
 				),
 				array(
-					'url'      => '/wp-includes/example2.com',
+					'url'      => home_url( '/wp-includes/example2.css' ),
 					'response' => array(
 						'code' => 200,
 						'body' => 'body { background-color: blue; }',
@@ -275,6 +283,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEquals( 1, count( $external_style ) );
+
+		$internal_style = array_filter(
+			$transient['styles'],
+			static function ( $item ) {
+				return home_url( '/wp-includes/example2.css' ) === $item['src'];
+			}
+		);
+		$this->assertEquals( 1, count( $internal_style ) );
 
 		$print_style = array_filter(
 			$transient['styles'],

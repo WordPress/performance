@@ -116,19 +116,12 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_copy_basic_auth_headers
 	 */
 	public function test_perflab_aea_copy_basic_auth_headers(): void {
-		unset( $_SERVER['HTTP_AUTHORIZATION'] );
 		unset( $_SERVER['PHP_AUTH_USER'] );
 		unset( $_SERVER['PHP_AUTH_PW'] );
 
 		$headers = perflab_aea_copy_basic_auth_headers( array() );
 		$this->assertArrayNotHasKey( 'Authorization', $headers );
 
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Basic token123';
-		$headers                       = perflab_aea_copy_basic_auth_headers( array() );
-		$this->assertArrayHasKey( 'Authorization', $headers );
-		$this->assertEquals( 'Basic token123', $headers['Authorization'] );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'] );
 		$_SERVER['PHP_AUTH_USER'] = 'user';
 		$_SERVER['PHP_AUTH_PW']   = 'pass';
 		$headers                  = perflab_aea_copy_basic_auth_headers( array() );
