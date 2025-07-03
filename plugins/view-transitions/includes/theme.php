@@ -304,7 +304,7 @@ function plvt_load_view_transitions(): void {
 	plvt_register_view_transition_animations( $animation_registry );
 
 	// Use an inline style to avoid an extra request.
-	$stylesheet = '@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }';
+	$stylesheet = '@view-transition { navigation: auto; }';
 	wp_register_style( 'plvt-view-transitions', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 	wp_add_inline_style( 'plvt-view-transitions', $stylesheet );
 	wp_enqueue_style( 'plvt-view-transitions' );
@@ -317,7 +317,7 @@ function plvt_load_view_transitions(): void {
 	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	$default_animation_stylesheet = plvt_inject_animation_duration( $default_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
-	wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
+	wp_add_inline_style( 'plvt-view-transitions', '@media (prefers-reduced-motion: no-preference) {' . $default_animation_stylesheet . '}' );
 
 	/*
 	 * No point in loading the script if no specific view transition names are configured.
