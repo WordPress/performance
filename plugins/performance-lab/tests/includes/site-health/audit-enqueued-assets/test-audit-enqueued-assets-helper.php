@@ -97,7 +97,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 				'body'     => '',
 			)
 		);
-		$this->assertNull( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
+		$this->assertEquals( 0, perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
 
 		$this->mock_request(
 			'https://example.com/script.js',

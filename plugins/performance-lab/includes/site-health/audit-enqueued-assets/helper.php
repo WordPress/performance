@@ -299,12 +299,7 @@ function perflab_aea_get_asset_size( string $resource_url ): ?int {
 		return null;
 	}
 
-	$body = wp_remote_retrieve_body( $response );
-	if ( '' === $body ) {
-		return null;
-	}
-
-	return strlen( $body );
+	return strlen( wp_remote_retrieve_body( $response ) );
 }
 
 /**
