@@ -82,10 +82,10 @@ function perflab_aea_audit_blocking_assets(): void {
 				is_string( $type ) &&
 				'' !== $type &&
 				! (
-					str_contains( (string) $type, 'javascript' ) ||
-					str_contains( (string) $type, 'ecmascript' ) ||
-					str_contains( (string) $type, 'jscript' ) ||
-					str_contains( (string) $type, 'livescript' )
+					str_contains( $type, 'javascript' ) ||
+					str_contains( $type, 'ecmascript' ) ||
+					str_contains( $type, 'jscript' ) ||
+					str_contains( $type, 'livescript' )
 				)
 			) {
 				continue;
