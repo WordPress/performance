@@ -105,7 +105,7 @@ function perflab_aea_audit_blocking_assets(): void {
 			}
 
 			$media = $processor->get_attribute( 'media' );
-			if ( is_string( $media ) && ! (bool) preg_match( '/^(all|screen)\b/i', $media ) ) {
+			if ( is_string( $media ) && ! (bool) preg_match( '/^\s*(all|screen)\b/i', $media ) ) {
 				continue;
 			}
 
