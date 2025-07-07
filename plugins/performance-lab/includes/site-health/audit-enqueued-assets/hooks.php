@@ -39,12 +39,15 @@ function perflab_aea_audit_blocking_assets(): void {
 		)
 	);
 
+	delete_transient( 'aea_blocking_assets_response' );
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
 		return;
 	}
 
 	$html = wp_remote_retrieve_body( $response );
 	if ( '' === $html ) {
+		set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
 		return;
 	}
 
@@ -137,13 +140,17 @@ add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
  * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
 function perflab_aea_add_enqueued_assets_test( array $tests ): array {
-	$tests['direct']['enqueued_js_assets']  = array(
+	$tests['direct']['enqueued_js_assets']                         = array(
 		'label' => __( 'JS assets', 'performance-lab' ),
 		'test'  => 'perflab_aea_enqueued_js_assets_test',
 	);
-	$tests['direct']['enqueued_css_assets'] = array(
+	$tests['direct']['enqueued_css_assets']                        = array(
 		'label' => __( 'CSS assets', 'performance-lab' ),
 		'test'  => 'perflab_aea_enqueued_css_assets_test',
+	);
+	$tests['direct']['enqueued_blocking_assets_retrieval_failure'] = array(
+		'label' => __( 'Blocking assets retrieval failure', 'performance-lab' ),
+		'test'  => 'perflab_aea_enqueued_blocking_assets_retrieval_failure_test',
 	);
 
 	return $tests;

@@ -25,7 +25,7 @@ function perflab_aea_enqueued_js_assets_test(): array {
 	 */
 	$enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
 	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_scripts();
-	if ( false === $enqueued_scripts || false === $bytes_enqueued ) {
+	if ( false === $enqueued_scripts || false === $bytes_enqueued || false !== get_transient( 'aea_blocking_assets_response' ) ) {
 		// The return value is validated in JavaScript at:
 		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
 		// If the value lacks the required keys of test, label, and description then it is omitted.
@@ -121,7 +121,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 	// Omit if the test didn't run yet, omit.
 	$enqueued_styles = perflab_aea_get_total_enqueued_styles();
 	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_styles();
-	if ( false === $enqueued_styles || false === $bytes_enqueued ) {
+	if ( false === $enqueued_styles || false === $bytes_enqueued || false !== get_transient( 'aea_blocking_assets_response' ) ) {
 		// The return value is validated in JavaScript at:
 		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
 		// If the value lacks the required keys of test, label, and description then it is omitted.
@@ -202,6 +202,86 @@ function perflab_aea_enqueued_css_assets_test(): array {
 	}
 
 	return $result;
+}
+
+/**
+ * Callback for enqueued_blocking_assets_retrieval_failure test.
+ *
+ * This triggers when the retrieval of the home page to analyze the blocking assets fails.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, test: string}|array{omitted: true} Result.
+ */
+function perflab_aea_enqueued_blocking_assets_retrieval_failure_test(): array {
+	$result = array(
+		'label'       => __( 'Blocking assets retrieval failure', 'performance-lab' ),
+		'status'      => 'recommended',
+		'badge'       => array(
+			'label' => __( 'Performance', 'performance-lab' ),
+			'color' => 'blue',
+		),
+		'description' => '',
+		'test'        => 'enqueued_blocking_assets_retrieval_failure',
+	);
+
+	$response = get_transient( 'aea_blocking_assets_response' );
+	if ( is_wp_error( $response ) ) {
+		$result['status']      = 'recommended';
+		$result['description'] = '<p>' . wp_kses(
+			sprintf(
+				/* translators: %1$s is the error code */
+				__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code <code>%1$s</code> and the following message:', 'performance-lab' ),
+				esc_html( (string) $response->get_error_code() )
+			),
+			array( 'code' => array() )
+		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
+		return $result;
+	} elseif ( is_array( $response ) ) {
+		$code    = wp_remote_retrieve_response_code( $response );
+		$message = wp_remote_retrieve_response_message( $response );
+		$body    = wp_remote_retrieve_body( $response );
+		$header  = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_array( $header ) ) {
+			$header = array_pop( $header );
+		}
+
+		$result['status'] = 'recommended';
+
+		if ( 200 === $code && '' === $body ) {
+			$result['description'] .= '<p>' . esc_html__( 'While retrieving the home page to analyze the blocking assets, the request was successfully but response body was empty.', 'performance-lab' ) . '</p>';
+			return $result;
+		}
+
+		$result['description'] .= '<p>' . wp_kses(
+			sprintf(
+				/* translators: %d is the HTTP status code, %s is the status header description */
+				__( 'While retrieving the home page to analyze the blocking assets, the request returned with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
+				(int) $code,
+				esc_html( $message )
+			),
+			array( 'code' => array() )
+		) . '</p>';
+
+		if ( '' !== $body ) {
+			$result['description'] .= '<details>';
+			$result['description'] .= '<summary>' . esc_html__( 'Raw response:', 'performance-lab' ) . '</summary>';
+
+			if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
+				$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
+				$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe>';
+			} else {
+				$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre>';
+			}
+			$result['description'] .= '</details>';
+		}
+		return $result;
+	}
+
+	// The return value is validated in JavaScript at:
+	// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
+	// If the value lacks the required keys of test, label, and description then it is omitted.
+	return array( 'omitted' => true );
 }
 
 /**

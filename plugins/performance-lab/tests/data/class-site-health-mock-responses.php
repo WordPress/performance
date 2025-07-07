@@ -26,6 +26,10 @@ class Site_Health_Mock_Responses {
 			'label' => esc_html__( 'CSS assets', 'performance-lab' ),
 			'test'  => 'perflab_aea_enqueued_css_assets_test',
 		);
+		$added_tests['direct']['enqueued_blocking_assets_retrieval_failure'] = array(
+			'label' => esc_html__( 'Blocking assets retrieval failure', 'performance-lab' ),
+			'test'  => 'perflab_aea_enqueued_blocking_assets_retrieval_failure_test',
+		);
 		return $added_tests;
 	}
 
