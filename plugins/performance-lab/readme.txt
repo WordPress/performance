@@ -16,13 +16,13 @@ The Performance Lab plugin is a collection of features focused on enhancing perf
 The feature plugins which are currently featured by this plugin are:
 
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
