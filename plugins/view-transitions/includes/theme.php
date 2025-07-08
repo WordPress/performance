@@ -376,7 +376,7 @@ function plvt_load_view_transitions(): void {
 }
 
 /**
- * Replaces the animation duration placeholder in the provided CSS with a value based on the transition duration.
+ * Injects the animation duration placeholder in the provided CSS with a value based on the transition duration.
  *
  * @since n.e.x.t
  * @access private
