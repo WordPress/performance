@@ -66,17 +66,18 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 	$args = $_wp_theme_features['view-transitions'];
 
 	$defaults = array(
-		'post-selector'           => '.wp-block-post.post, article.post, body.single main',
-		'global-transition-names' => array(
+		'post-selector'              => '.wp-block-post.post, article.post, body.single main',
+		'global-transition-names'    => array(
 			'header' => 'header',
 			'main'   => 'main',
 		),
-		'post-transition-names'   => array(
+		'post-transition-names'      => array(
 			'.wp-block-post-title, .entry-title'     => 'post-title',
 			'.wp-post-image'                         => 'post-thumbnail',
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
-		'default-animation'       => 'fade',
+		'default-animation'          => 'fade',
+		'default-animation-duration' => 1000,
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.
@@ -316,8 +317,16 @@ function plvt_load_view_transitions(): void {
 	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	if ( '' !== $default_animation_stylesheet ) {
-		wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
+		$default_animation_stylesheet = plvt_inject_animation_duration( $default_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
+	} else {
+		$seconds                      = absint( $theme_support['default-animation-duration'] ) / 1000;
+		$default_animation_stylesheet = sprintf(
+			/* translators: %s is animation duration in seconds. */
+			'::view-transition-group(*) { animation-duration: %ss; }',
+			$seconds
+		);
 	}
+	wp_add_inline_style( 'plvt-view-transitions', $default_animation_stylesheet );
 
 	/*
 	 * No point in loading the script if no specific view transition names are configured.
@@ -364,4 +373,27 @@ function plvt_load_view_transitions(): void {
 	wp_add_inline_script( 'plvt-view-transitions', $src_script );
 	wp_add_inline_script( 'plvt-view-transitions', $init_script );
 	wp_enqueue_script( 'plvt-view-transitions' );
+}
+
+/**
+ * Injects the animation duration placeholder in the provided CSS with a value based on the transition duration.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $css                The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
+ * @param int    $animation_duration Transition duration in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
+ * @return string Modified CSS with the actual animation duration in seconds.
+ */
+function plvt_inject_animation_duration( string $css, int $animation_duration ): string {
+	$seconds = $animation_duration / 1000;
+
+	// Inject animation duration as CSS variable to take effect.
+	$css .= sprintf(
+		/* translators: %s is animation duration in seconds. */
+		'::view-transition-group(*) { --plvt-view-transition-animation-duration: %ss; }',
+		$seconds
+	);
+
+	return $css;
 }
