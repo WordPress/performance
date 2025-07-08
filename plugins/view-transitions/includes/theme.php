@@ -317,12 +317,12 @@ function plvt_load_view_transitions(): void {
 	$default_animation_args       = isset( $theme_support['default-animation-args'] ) ? (array) $theme_support['default-animation-args'] : array();
 	$default_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support['default-animation'], $default_animation_args );
 	if ( '' !== $default_animation_stylesheet ) {
-		$default_animation_stylesheet = plvt_replace_animation_duration( $default_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
+		$default_animation_stylesheet = plvt_inject_animation_duration( $default_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
 	} else {
 		$seconds                      = absint( $theme_support['default-animation-duration'] ) / 1000;
 		$default_animation_stylesheet = sprintf(
 			/* translators: %s is animation duration in seconds. */
-			'::view-transition-old(*), ::view-transition-new(*) { animation-duration: %ss; }',
+			'::view-transition-group(*) { animation-duration: %ss; }',
 			$seconds
 		);
 	}
@@ -379,12 +379,13 @@ function plvt_load_view_transitions(): void {
  * Replaces the animation duration placeholder in the provided CSS with a value based on the transition duration.
  *
  * @since n.e.x.t
+ * @access private
  *
  * @param string $css                The raw CSS string containing the placeholder `plvt-view-transition-duration;`.
  * @param int    $animation_duration Transition duration in milliseconds. Will be converted to seconds. Defaults to 1000ms if invalid.
  * @return string Modified CSS with the actual animation duration in seconds.
  */
-function plvt_replace_animation_duration( string $css, int $animation_duration ): string {
+function plvt_inject_animation_duration( string $css, int $animation_duration ): string {
 	$seconds = $animation_duration / 1000;
 
 	// Inject animation duration as CSS variable to take effect.

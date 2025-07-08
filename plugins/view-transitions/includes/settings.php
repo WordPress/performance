@@ -463,24 +463,6 @@ function plvt_render_settings_field( array $args ): void {
 			?>
 		</select>
 		<?php
-	} elseif ( 'number' === $type ) {
-		?>
-		<input
-			type="number"
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
-			value="<?php echo esc_attr( (string) $value ); ?>"
-			class="regular-text code"
-			min="1"
-			<?php
-			if ( '' !== $args['description'] ) {
-				?>
-				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
-				<?php
-			}
-			?>
-		>
-		<?php
 	} elseif ( 'checkbox' === $type ) {
 		?>
 		<label for="<?php echo esc_attr( "plvt-view-transitions-field-{$args['field']}" ); ?>">
@@ -498,6 +480,7 @@ function plvt_render_settings_field( array $args ): void {
 	} else {
 		?>
 		<input
+			<?php echo ( 'number' === $type ) ? 'type="number"' : ''; ?>
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			value="<?php echo esc_attr( (string) $value ); ?>"
