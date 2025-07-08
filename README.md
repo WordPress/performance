@@ -20,7 +20,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [Optimization Detective][33]    | `optimization-detective`  | No           | [Source][34], [Issues][35], [PRs][36]
 [Performant Translations][3]    | `performant-translations` | No           | [Source][11], [Issues][19], [PRs][27]
 [Speculative Loading][4]        | `speculation-rules`       | No           | [Source][12], [Issues][20], [PRs][28]
-[Enhanced Responsive Images][6] | `auto-sizes`              | Yes          | [Source][14], [Issues][22], [PRs][30]
+[Enhanced Responsive Images][6] | `auto-sizes`              | No           | [Source][14], [Issues][22], [PRs][30]
 [View Transitions][37]          | `view-transitions`        | Yes          | [Source][38], [Issues][39], [PRs][40]
 [Web Worker Offloading][8]      | `web-worker-offloading`   | Yes          | [Source][16], [Issues][24], [PRs][32]
 

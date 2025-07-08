@@ -22,7 +22,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
