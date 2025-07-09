@@ -17,18 +17,10 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_added_test_info_site_health(): array {
-		$added_tests                                  = array();
-		$added_tests['direct']['enqueued_js_assets']  = array(
-			'label' => esc_html__( 'JS assets', 'performance-lab' ),
-			'test'  => 'perflab_aea_enqueued_js_assets_test',
-		);
-		$added_tests['direct']['enqueued_css_assets'] = array(
-			'label' => esc_html__( 'CSS assets', 'performance-lab' ),
-			'test'  => 'perflab_aea_enqueued_css_assets_test',
-		);
-		$added_tests['direct']['enqueued_blocking_assets_retrieval_failure'] = array(
-			'label' => esc_html__( 'Blocking assets retrieval failure', 'performance-lab' ),
-			'test'  => 'perflab_aea_enqueued_blocking_assets_retrieval_failure_test',
+		$added_tests                                       = array();
+		$added_tests['direct']['enqueued_blocking_assets'] = array(
+			'label' => esc_html__( 'Blocking assets', 'performance-lab' ),
+			'test'  => 'perflab_aea_enqueued_blocking_assets_test',
 		);
 		return $added_tests;
 	}
@@ -41,12 +33,7 @@ class Site_Health_Mock_Responses {
 	 */
 	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( int $enqueued_scripts = 1 ): array {
 		$result = array(
-			'label'       => esc_html__( 'Blocking scripts', 'performance-lab' ),
 			'status'      => 'good',
-			'badge'       => array(
-				'label' => esc_html__( 'Performance', 'performance-lab' ),
-				'color' => 'blue',
-			),
 			'description' => sprintf(
 				'<p>%s</p>',
 				esc_html(
@@ -63,8 +50,6 @@ class Site_Health_Mock_Responses {
 					)
 				)
 			),
-			'actions'     => '',
-			'test'        => 'enqueued_js_assets',
 		);
 		return $result;
 	}
@@ -76,31 +61,24 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( int $enqueued_scripts ): array {
-		$result                = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
-		$result['status']      = 'recommended';
-		$result['description'] = sprintf(
-			'<p>%s</p>',
-			esc_html(
-				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
-					_n(
-						'Your website has %1$s blocking script (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website has %1$s blocking scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+		$result = array(
+			'status'      => 'recommended',
+			'description' => sprintf(
+				'<p>%s</p>',
+				esc_html(
+					sprintf(
+						/* translators: 1: Number of enqueued styles. 2.Styles size. */
+						_n(
+							'Your website has %1$s blocking script (size: %2$s). Try to reduce the number or to concatenate them.',
+							'Your website has %1$s blocking scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+							$enqueued_scripts,
+							'performance-lab'
+						),
 						$enqueued_scripts,
-						'performance-lab'
-					),
-					$enqueued_scripts,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+					)
 				)
-			)
-		);
-		$result['actions'] = sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
-			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' ),
-			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			esc_html__( 'Clean Test Cache', 'performance-lab' )
+			),
 		);
 		return $result;
 	}
@@ -113,12 +91,7 @@ class Site_Health_Mock_Responses {
 	 */
 	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( int $enqueued_styles = 1 ): array {
 		$result = array(
-			'label'       => esc_html__( 'Blocking styles', 'performance-lab' ),
 			'status'      => 'good',
-			'badge'       => array(
-				'label' => esc_html__( 'Performance', 'performance-lab' ),
-				'color' => 'blue',
-			),
 			'description' => sprintf(
 				'<p>%s</p>',
 				esc_html(
@@ -135,8 +108,6 @@ class Site_Health_Mock_Responses {
 					)
 				)
 			),
-			'actions'     => '',
-			'test'        => 'enqueued_css_assets',
 		);
 		return $result;
 	}
@@ -148,31 +119,24 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( int $enqueued_styles ): array {
-		$result                = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
-		$result['status']      = 'recommended';
-		$result['description'] = sprintf(
-			'<p>%s</p>',
-			esc_html(
-				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
-					_n(
-						'Your website has %1$s blocking style (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website has %1$s blocking styles (size: %2$s). Try to reduce the number or to concatenate them.',
+		$result = array(
+			'status'      => 'recommended',
+			'description' => sprintf(
+				'<p>%s</p>',
+				esc_html(
+					sprintf(
+						/* translators: 1: Number of enqueued styles. 2.Styles size. */
+						_n(
+							'Your website has %1$s blocking style (size: %2$s). Try to reduce the number or to concatenate them.',
+							'Your website has %1$s blocking styles (size: %2$s). Try to reduce the number or to concatenate them.',
+							$enqueued_styles,
+							'performance-lab'
+						),
 						$enqueued_styles,
-						'performance-lab'
-					),
-					$enqueued_styles,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+					)
 				)
-			)
-		);
-		$result['actions'] = sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
-			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' ),
-			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			esc_html__( 'Clean Test Cache', 'performance-lab' )
+			),
 		);
 		return $result;
 	}
