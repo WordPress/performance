@@ -381,8 +381,8 @@ function plvt_inject_animation_duration( string $css, int $animation_duration ):
 
 	// Inject animation duration as CSS variable to take effect.
 	$css .= sprintf(
-		/* translators: %s is animation duration in seconds. */
-		'::view-transition-group(*) { %s: %ss; }',
+		/* translators: %1$s: CSS property name. %2$s: Animation duration in seconds. */
+		'::view-transition-group(*) { %1$s: %2$ss; }',
 		'' !== $css ? '--plvt-view-transition-animation-duration' : 'animation-duration',
 		$seconds
 	);
