@@ -56,6 +56,8 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		return array( 'omitted' => true );
 	}
 
+	$result['description'] .= perflab_aea_generate_blocking_assets_table();
+
 	if ( isset( $scripts_result['description'] ) ) {
 		$result['description'] .= $scripts_result['description'];
 	}
@@ -383,9 +385,9 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @since n.e.x.t
  *
  * @param string $resource_url URL of the resource.
- * @return int|null Returns the size in bytes of the asset, or null if it cannot be determined.
+ * @return int|WP_Error Size of the asset in bytes or WP_Error if the request fails.
  */
-function perflab_aea_get_asset_size( string $resource_url ): ?int {
+function perflab_aea_get_asset_size( string $resource_url ) {
 	$response = wp_remote_get(
 		$resource_url,
 		array(
@@ -394,8 +396,23 @@ function perflab_aea_get_asset_size( string $resource_url ): ?int {
 		)
 	);
 
-	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		return null;
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+
+	if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return new WP_Error(
+			'http_error',
+			wp_kses(
+				sprintf(
+					/* translators: %d is the HTTP status code, %s is the status header description */
+					__( 'Failed to retrieve the above asset with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
+					(int) wp_remote_retrieve_response_code( $response ),
+					esc_html( wp_remote_retrieve_response_message( $response ) )
+				),
+				array( 'code' => array() )
+			)
+		);
 	}
 
 	return strlen( wp_remote_retrieve_body( $response ) );
@@ -416,4 +433,52 @@ function perflab_aea_copy_basic_auth_headers( array $headers ): array {
 		$headers['Authorization'] = 'Basic ' . base64_encode( $user . ':' . $pass ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to encode the credentials for forwarding basic auth headers.
 	}
 	return $headers;
+}
+
+/**
+ * Generates a table of blocking assets.
+ *
+ * @since n.e.x.t
+ *
+ * @return string HTML table of blocking assets.
+ */
+function perflab_aea_generate_blocking_assets_table(): string {
+	$blocking_assets = get_transient( 'aea_blocking_assets' );
+	if ( ! is_array( $blocking_assets ) || 0 === count( $blocking_assets ) ) {
+		return '';
+	}
+
+	$table  = '<table class="wp-list-table widefat striped"><thead><tr>';
+	$table .= '<th scope="col">' . esc_html__( 'Type', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Source', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Size', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Status', 'performance-lab' ) . '</th>';
+	$table .= '</tr></thead><tbody>';
+
+	$asset_types = array(
+		'scripts' => __( 'Script', 'performance-lab' ),
+		'styles'  => __( 'Style', 'performance-lab' ),
+	);
+	foreach ( $asset_types as $type => $label ) {
+		if ( isset( $blocking_assets[ $type ] ) && is_array( $blocking_assets[ $type ] ) ) {
+			foreach ( $blocking_assets[ $type ] as $asset ) {
+				$has_error = is_wp_error( $asset['error'] );
+
+				$table .= $has_error ? '<tr style="background-color: #ffecec;">' : '<tr>';
+				$table .= '<td>' . esc_html( $label ) . '</td>';
+				$table .= '<td>' . esc_url( $asset['src'] ) . '</td>';
+				$table .= '<td>' . ( $has_error ? esc_html__( 'NA', 'performance-lab' ) : size_format( $asset['size'] ) ) . '</td>';
+				$table .= '<td>' . esc_html( $has_error ? __( 'Error', 'performance-lab' ) : __( 'OK', 'performance-lab' ) ) . '</td>';
+				$table .= '</tr>';
+
+				if ( $has_error ) {
+					$table .= '<tr style="background-color: #ffecec;"><td colspan="4">' . wp_kses( $asset['error']->get_error_message(), array( 'code' => array() ) ) . '</td></tr>';
+				}
+			}
+		}
+	}
+
+	$table .= '</tbody></table>';
+
+	return $table;
 }

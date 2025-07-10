@@ -94,13 +94,12 @@ function perflab_aea_audit_blocking_assets(): void {
 				continue;
 			}
 
-			$size = perflab_aea_get_asset_size( $src );
-			if ( null !== $size ) {
-				$assets['scripts'][] = array(
-					'src'  => $src,
-					'size' => $size,
-				);
-			}
+			$size                = perflab_aea_get_asset_size( $src );
+			$assets['scripts'][] = array(
+				'src'   => $src,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
 		} elseif ( 'LINK' === $tag ) {
 			$rel = $processor->get_attribute( 'rel' );
 			if ( 'stylesheet' !== strtolower( (string) $rel ) ) {
@@ -117,13 +116,12 @@ function perflab_aea_audit_blocking_assets(): void {
 				continue;
 			}
 
-			$size = perflab_aea_get_asset_size( $href );
-			if ( null !== $size ) {
-				$assets['styles'][] = array(
-					'src'  => $href,
-					'size' => $size,
-				);
-			}
+			$size               = perflab_aea_get_asset_size( $href );
+			$assets['styles'][] = array(
+				'src'   => $href,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
 		}
 	}
 
@@ -171,6 +169,7 @@ add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
  */
 function perflab_aea_invalidate_cache_transients(): void {
 	delete_transient( 'aea_blocking_assets' );
+	delete_transient( 'aea_blocking_assets_response' );
 	// Keeping legacy transients deletion for backward compatibility.
 	delete_transient( 'aea_enqueued_front_page_scripts' );
 	delete_transient( 'aea_enqueued_front_page_styles' );
