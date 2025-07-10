@@ -79,16 +79,19 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 				'Mocked HTTP error for testing.'
 			)
 		);
-		$this->assertNull( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
+		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
 
 		$this->mock_request(
 			'https://example.com/script.js',
 			array(
-				'response' => array( 'code' => 404 ),
+				'response' => array(
+					'code'    => 404,
+					'message' => 'Not Found',
+				),
 				'body'     => 'Not Found',
 			)
 		);
-		$this->assertNull( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
+		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
 
 		$this->mock_request(
 			'https://example.com/script.js',
