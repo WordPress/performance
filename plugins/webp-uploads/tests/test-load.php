@@ -1228,4 +1228,40 @@ class Test_WebP_Uploads_Load extends TestCase {
 			),
 		);
 	}
+
+	/**
+	 * Tests the webp_uploads_convert_palette_png_to_truecolor function with various conditions.
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_conditions(): void {
+		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( 'test' ) );
+		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( array() ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+			'type'     => 'image/jpeg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array();
+			}
+		);
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png',
+			'name'     => 'dice-palette.png',
+			'type'     => 'image/png',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+	}
 }
