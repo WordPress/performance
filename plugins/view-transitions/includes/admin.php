@@ -3,7 +3,7 @@
  * Admin related functions for View Transitions.
  *
  * @package view-transitions
- * @since n.e.x.t
+ * @since 1.1.0
  */
 
 // @codeCoverageIgnoreStart
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * It should be hooked to an appropriate action to ensure the styles
  * are included in the page output.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function plvt_print_view_transitions_admin_style(): void {
 	$options = plvt_get_stored_setting_value();
