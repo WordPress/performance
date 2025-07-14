@@ -65,7 +65,7 @@ function plvt_get_setting_default(): array {
 	return array(
 		'override_theme_config'                 => false,
 		'default_transition_animation'          => 'fade',
-		'default_transition_animation_duration' => 1000,
+		'default_transition_animation_duration' => 400,
 		'header_selector'                       => 'header',
 		'main_selector'                         => 'main',
 		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
@@ -330,7 +330,7 @@ function plvt_add_setting_ui(): void {
 		'default_transition_animation_duration' => array(
 			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
-			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 1000, 1500, 2000).', 'view-transitions' ),
+			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
 		),
 		'header_selector'                       => array(
 			'section'     => 'plvt_view_transitions',

@@ -77,7 +77,7 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
 		'default-animation'          => 'fade',
-		'default-animation-duration' => 1000,
+		'default-animation-duration' => 400,
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.
