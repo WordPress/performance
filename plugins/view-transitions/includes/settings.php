@@ -52,7 +52,6 @@ function plvt_get_view_transition_animation_labels(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -87,7 +86,6 @@ function plvt_get_setting_default(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -113,7 +111,6 @@ function plvt_get_stored_setting_value(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
