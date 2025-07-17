@@ -1324,16 +1324,77 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_post_featured_image_block_image_sizes(): array {
 		return array(
-			'Return full or wideSize 1280px instead of medium size 300px'  => array(
+			'Return medium image size 300px' => array(
 				'medium',
 				'sizes="(max-width: 300px) 100vw, 300px" ',
 			),
-			'Return full or wideSize 1280px instead of large size 1024px'  => array(
+			'Return contentSize 620px instead of large size 1024px' => array(
 				'large',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
-			'Return full or wideSize 1280px instead of full size 1080px'  => array(
+			'Return contentSize 620px instead of full size 1080px' => array(
 				'full',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the post featured image block renders correctly with different alignment.
+	 *
+	 * @dataProvider data_post_featured_image_block_alignment
+	 *
+	 * @param string $alignment Alignment of the image.
+	 * @param string $expected  Expected output.
+	 */
+	public function test_post_featured_image_block_with_different_alignment( string $alignment, string $expected ): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:post-featured-image {"align":"' . $alignment . '"} /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		// Check that the featured image block renders the image and has a sizes attribute.
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
+		$this->assertStringContainsString( $expected, $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes.
+	 */
+	public function data_post_featured_image_block_alignment(): array {
+		return array(
+			'Return contentSize 620px instead of image size 1080px, block default alignment'  => array(
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px instead of image size 1080px, block wide alignment'  => array(
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return full size instead of image size 1080px, block full alignment'  => array(
+				'full',
+				'sizes="100vw" ',
+			),
+			'Return image size 1080px, block left alignment'  => array(
+				'left',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+			),
+			'Return image size 1080px, block right alignment'  => array(
+				'right',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+			),
+			'Return contentSize 620px instead of image size 1080px, block center alignment'  => array(
+				'center',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
 		);
