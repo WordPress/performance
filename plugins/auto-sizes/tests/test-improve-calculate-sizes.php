@@ -1291,6 +1291,55 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the post featured image block renders correctly with different image sizes.
+	 *
+	 * @dataProvider data_post_featured_image_block_image_sizes
+	 *
+	 * @param string $image_size Image size.
+	 * @param string $expected   Expected output.
+	 */
+	public function test_post_featured_image_block_with_different_image_size( string $image_size, string $expected ): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:post-featured-image {"sizeSlug":"' . $image_size . '"} /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		// Check that the featured image block renders the image and has a sizes attribute.
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
+		$this->assertStringContainsString( $expected, $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes.
+	 */
+	public function data_post_featured_image_block_image_sizes(): array {
+		return array(
+			'Return full or wideSize 1280px instead of medium size 300px'  => array(
+				'medium',
+				'sizes="(max-width: 300px) 100vw, 300px" ',
+			),
+			'Return full or wideSize 1280px instead of large size 1024px'  => array(
+				'large',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return full or wideSize 1280px instead of full size 1080px'  => array(
+				'full',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
