@@ -16,6 +16,12 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	public static $image_id;
 
 	/**
+	 * Post ID.
+	 *
+	 * @var int
+	 */
+	public static $post_id;
+	/**
 	 * Set up the environment for the tests.
 	 */
 	public static function set_up_before_class(): void {
@@ -24,6 +30,13 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		switch_theme( 'twentytwentyfour' );
 
 		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		self::$post_id = self::factory()->post->create(
+			array(
+				'post_status' => 'publish',
+				'post_name'   => 'test-post',
+			)
+		);
 	}
 
 	public function set_up(): void {
@@ -1257,6 +1270,24 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 853px) 100vw, 853px" ',
 			),
 		);
+	}
+
+	/**
+	 * Verifies that the post featured image block does not render when no featured image is set for the post.
+	 */
+	public function test_post_featured_image_block_without_featured_image(): void {
+		$block_content = '<!-- wp:post-featured-image /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( '', $result );
+
+		wp_reset_postdata();
 	}
 
 	/**
