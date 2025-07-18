@@ -390,8 +390,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
  * @return int The featured image ID or 0 if not found.
  */
 function auto_sizes_get_featured_image_id_from_block( WP_Block $block ): int {
-	$image_size = $block->attributes['sizeSlug'] ?? 'full';
-	$post_id    = $block->context['postId'];
+	$post_id = $block->context['postId'];
 
 	$post = get_post( $post_id );
 
