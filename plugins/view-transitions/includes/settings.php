@@ -469,7 +469,6 @@ function plvt_render_settings_field( array $args ): void {
 				type="checkbox"
 				value="1"
 				<?php checked( $value, 1 ); ?>
-				class="regular-text code"
 			>
 			<?php echo esc_html( $args['description'] ); ?>
 		</label>
