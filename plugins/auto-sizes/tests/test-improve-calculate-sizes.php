@@ -121,7 +121,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_image_sizes(): array {
+	public static function data_image_sizes(): array {
 		return array(
 			'Return full or wideSize 1280px instead of medium size 300px'  => array(
 				'medium',
@@ -177,7 +177,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The image sizes.
 	 */
-	public function data_image_sizes_for_default_alignment(): array {
+	public static function data_image_sizes_for_default_alignment(): array {
 		return array(
 			'Return medium image size 300px instead of contentSize 620px'                          => array(
 				'medium',
@@ -252,7 +252,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The image sizes and alignments.
 	 */
-	public function data_image_sizes_for_left_right_center_alignment(): array {
+	public static function data_image_sizes_for_left_right_center_alignment(): array {
 		return array(
 			'Return medium image size 300px with left alignment'                                    => array(
 				'medium',
@@ -382,7 +382,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_image_left_right_center_alignment(): array {
+	public static function data_image_left_right_center_alignment(): array {
 		return array(
 			array( 'left', 'sizes="(max-width: 420px) 100vw, 420px' ),
 			array( 'right', 'sizes="(max-width: 420px) 100vw, 420px' ),
@@ -430,7 +430,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_ancestor_and_image_block_alignment(): array {
+	public static function data_ancestor_and_image_block_alignment(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 620px, parent block default alignment, image block default alignment' => array(
@@ -559,7 +559,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_blocks_with_relative_alignment(): array {
+	public static function data_image_blocks_with_relative_alignment(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 50vw, parent block default alignment, image block default alignment' => array(
@@ -649,7 +649,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The ancestor and image alignments.
 	 */
-	public function data_image_blocks_with_relative_alignment_for_classic_theme(): array {
+	public static function data_image_blocks_with_relative_alignment_for_classic_theme(): array {
 		return array(
 			array( '' ),
 			array( 'wide' ),
@@ -686,7 +686,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_column_block(): array {
+	public static function data_image_block_with_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 620px, parent block default alignment, image block default alignment' => array(
@@ -822,7 +822,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_two_equal_column_block(): array {
+	public static function data_image_block_with_two_equal_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return half size of contentSize 310px, parent block default alignment, image block default alignment' => array(
@@ -958,7 +958,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_two_different_width_column_block(): array {
+	public static function data_image_block_with_two_different_width_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return 66.66% width of contentSize 413px, parent block default alignment, image block default alignment' => array(
@@ -1100,7 +1100,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
+	public static function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block default alignment' => array(
@@ -1322,7 +1322,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_post_featured_image_block_image_sizes(): array {
+	public static function data_post_featured_image_block_image_sizes(): array {
 		return array(
 			'Return medium image size 300px' => array(
 				'medium',
@@ -1371,7 +1371,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_post_featured_image_block_alignment(): array {
+	public static function data_post_featured_image_block_alignment(): array {
 		return array(
 			'Return contentSize 620px instead of image size 1080px, block default alignment'  => array(
 				'',
