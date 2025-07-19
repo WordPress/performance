@@ -6,9 +6,8 @@ const { styleText } = require( 'node:util' );
 /**
  * Create a function that applies a style to text using `node:util.styleText`.
  *
- * @param {string} style Style to apply to the text
- *
- * @return {Function} Function that applies the style to the text
+ * @param {Parameters<typeof import('node:util').styleText>[0]} style - Style to apply to the text.
+ * @return {function(string):string} Function that applies the style to the text.
  */
 const createStyledText = ( style ) => ( text ) => styleText( style, text );
 
