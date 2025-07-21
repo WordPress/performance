@@ -105,7 +105,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 			 */
 			if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-				$id = auto_sizes_get_featured_image_id_from_block( $block->context['postId'] );
+				$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
 			}
 
 			/*
@@ -133,7 +133,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 		 */
 		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-			$id = auto_sizes_get_featured_image_id_from_block( $block->context['postId'] );
+			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
 		}
 
 		$sizes = wp_calculate_image_sizes(
@@ -382,14 +382,14 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 }
 
 /**
- * Retrieves the featured image ID for a post featured image block.
+ * Retrieves the featured image attachment ID for a given post ID.
  *
- * @since n.e.x.t
+ * @since 1.4.0
  *
- * @param int $post_id The post id.
- * @return int The featured image ID or 0 if not found.
+ * @param int $post_id The post ID.
+ * @return int The featured image attachment ID or 0 if not found.
  */
-function auto_sizes_get_featured_image_id_from_block( int $post_id ): int {
+function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
 	if ( 0 === $post_id ) {
 		return 0;
 	}
