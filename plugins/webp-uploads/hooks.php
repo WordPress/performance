@@ -836,19 +836,6 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 		return $file;
 	}
 
-	// Check if required GD functions exist.
-	if (
-		! function_exists( 'imagecreatefrompng' ) ||
-		! function_exists( 'imageistruecolor' ) ||
-		! function_exists( 'imagealphablending' ) ||
-		! function_exists( 'imagesavealpha' ) ||
-		! function_exists( 'imagepalettetotruecolor' ) ||
-		! function_exists( 'imagepng' ) ||
-		! function_exists( 'imagedestroy' )
-	) {
-		return $file;
-	}
-
 	$image = imagecreatefrompng( $file['tmp_name'] );
 
 	// Check if the image was created successfully.
