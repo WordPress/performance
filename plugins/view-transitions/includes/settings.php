@@ -52,7 +52,6 @@ function plvt_get_view_transition_animation_labels(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -65,7 +64,7 @@ function plvt_get_setting_default(): array {
 	return array(
 		'override_theme_config'                 => false,
 		'default_transition_animation'          => 'fade',
-		'default_transition_animation_duration' => 1000,
+		'default_transition_animation_duration' => 400,
 		'header_selector'                       => 'header',
 		'main_selector'                         => 'main',
 		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
@@ -87,7 +86,6 @@ function plvt_get_setting_default(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -113,7 +111,6 @@ function plvt_get_stored_setting_value(): array {
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
- *                                                         Added in n.e.x.t
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
  *     @type string $post_title_selector                   CSS selector for the post title element.
@@ -330,7 +327,7 @@ function plvt_add_setting_ui(): void {
 		'default_transition_animation_duration' => array(
 			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
-			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 1000, 1500, 2000).', 'view-transitions' ),
+			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
 		),
 		'header_selector'                       => array(
 			'section'     => 'plvt_view_transitions',
@@ -472,7 +469,6 @@ function plvt_render_settings_field( array $args ): void {
 				type="checkbox"
 				value="1"
 				<?php checked( $value, 1 ); ?>
-				class="regular-text code"
 			>
 			<?php echo esc_html( $args['description'] ); ?>
 		</label>
