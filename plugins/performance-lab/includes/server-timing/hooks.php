@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return WP_REST_Response|WP_Error Filtered response.
  */
 function perflab_rest_post_dispatch_add_server_timing( $response ) {
-	// TODO: Change condition to use wp_is_rest_endpoint() once minimum-supported version is WordPress 6.5.
 	if ( ! wp_is_rest_endpoint() || ! $response instanceof WP_REST_Response ) {
 		return $response;
 	}
