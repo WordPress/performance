@@ -817,7 +817,7 @@ add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_
  */
 function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 	if ( ! is_array( $file ) ) {
-		$file = array();
+		return $file;
 	}
 	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
 		return $file;
