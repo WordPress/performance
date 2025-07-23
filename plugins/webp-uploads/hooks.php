@@ -826,7 +826,7 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ) {
 		if ( 'image/png' !== strtolower( $file['type'] ) ) {
 			return $file;
 		}
-	} elseif ( 'image/png' !== wp_check_filetype( $file['name'] )['type'] ) {
+	} elseif ( 'image/png' !== wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] )['type'] ) {
 		return $file;
 	}
 
