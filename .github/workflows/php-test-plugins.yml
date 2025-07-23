@@ -47,6 +47,8 @@ jobs:
             wp: '6.6'
           - php: '8.3'
             wp: 'trunk'
+          - php: '8.4'
+            wp: 'trunk'
           - php: '8.2'
             phpunit: '9.6'
             wp: 'latest'

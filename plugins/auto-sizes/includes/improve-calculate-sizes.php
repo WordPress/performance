@@ -94,12 +94,19 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * @param string $size  The image size data.
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
-
 			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
 			$alignment                = $block->attributes['align'] ?? '';
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
 			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
+
+			/*
+			 * For the post featured image block, use the post ID to get the featured image attachment ID.
+			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
+			 */
+			if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
+				$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+			}
 
 			/*
 			 * Update width for cover block.
@@ -118,12 +125,23 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		// Hook this filter early, before default filters are run.
 		add_filter( 'wp_calculate_image_sizes', $filter, 9, 2 );
 
+		// Get the image ID from the block attributes or context.
+		$id = $parsed_block['attrs']['id'] ?? 0;
+
+		/*
+		 * For the post featured image block, use the post ID to get the featured image attachment ID.
+		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
+		 */
+		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
+			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+		}
+
 		$sizes = wp_calculate_image_sizes(
 			// If we don't have a size slug, assume the full size was used.
 			$parsed_block['attrs']['sizeSlug'] ?? 'full',
 			null,
 			null,
-			$parsed_block['attrs']['id'] ?? 0
+			$id
 		);
 
 		remove_filter( 'wp_calculate_image_sizes', $filter, 9 );
@@ -284,11 +302,12 @@ function auto_sizes_get_layout_width( string $alignment ): string {
 function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $block_type ): array {
 	// Define block-specific context usage.
 	$block_specific_context = array(
-		'core/cover'   => array( 'max_alignment', 'container_relative_width' ),
-		'core/image'   => array( 'max_alignment', 'container_relative_width' ),
-		'core/group'   => array( 'max_alignment' ),
-		'core/columns' => array( 'max_alignment', 'container_relative_width' ),
-		'core/column'  => array( 'max_alignment', 'column_count' ),
+		'core/cover'               => array( 'max_alignment', 'container_relative_width' ),
+		'core/image'               => array( 'max_alignment', 'container_relative_width' ),
+		'core/post-featured-image' => array( 'max_alignment', 'container_relative_width' ),
+		'core/group'               => array( 'max_alignment' ),
+		'core/columns'             => array( 'max_alignment', 'container_relative_width' ),
+		'core/column'              => array( 'max_alignment', 'column_count' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
@@ -316,6 +335,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	$provider_blocks = array(
 		'core/columns',
 		'core/group',
+		'core/post-featured-image',
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
@@ -359,4 +379,20 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		}
 	}
 	return $context;
+}
+
+/**
+ * Retrieves the featured image attachment ID for a given post ID.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $post_id The post ID.
+ * @return int The featured image attachment ID or 0 if not found.
+ */
+function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
+	if ( 0 === $post_id ) {
+		return 0;
+	}
+
+	return (int) get_post_thumbnail_id( $post_id );
 }
