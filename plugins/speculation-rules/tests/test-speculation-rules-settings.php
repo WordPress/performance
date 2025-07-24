@@ -11,6 +11,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * @covers ::plsr_register_setting
 	 * @covers ::plsr_get_mode_labels
 	 * @covers ::plsr_get_eagerness_labels
+	 * @covers ::plsr_get_authentication_labels
 	 * @covers ::plsr_get_setting_default
 	 */
 	public function test_plsr_register_setting(): void {
@@ -25,6 +26,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		$settings = plsr_get_setting_default();
 		$this->assertArrayHasKey( 'mode', $settings );
 		$this->assertArrayHasKey( 'eagerness', $settings );
+		$this->assertArrayHasKey( 'authentication', $settings );
 
 		// Test default settings applied correctly.
 		$default_settings = plsr_get_setting_default();
@@ -33,6 +35,9 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::plsr_sanitize_setting
+	 * @covers ::plsr_get_mode_labels
+	 * @covers ::plsr_get_eagerness_labels
+	 * @covers ::plsr_get_authentication_labels
 	 * @dataProvider data_plsr_sanitize_setting
 	 *
 	 * @param mixed                $input    Input.
@@ -54,19 +59,19 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		);
 
 		return array(
-			'invalid type null'   => array(
+			'invalid type null'               => array(
 				null,
 				$default_value,
 			),
-			'invalid type string' => array(
+			'invalid type string'             => array(
 				'prerender',
 				$default_value,
 			),
-			'missing fields'      => array(
+			'missing fields'                  => array(
 				array(),
 				$default_value,
 			),
-			'missing mode'        => array(
+			'missing mode'                    => array(
 				array( 'eagerness' => 'conservative' ),
 				array_merge(
 					$default_value,
@@ -75,7 +80,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'missing eagerness'   => array(
+			'missing eagerness'               => array(
 				array( 'mode' => 'prefetch' ),
 				array_merge(
 					$default_value,
@@ -84,7 +89,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'invalid mode'        => array(
+			'invalid mode'                    => array(
 				array(
 					'mode'      => 'something',
 					'eagerness' => 'eager',
@@ -97,7 +102,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'invalid eagerness'   => array(
+			'invalid eagerness'               => array(
 				array(
 					'mode'      => 'prefetch',
 					'eagerness' => 'something',
@@ -110,16 +115,57 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'valid fields'        => array(
+			'invalid authentication'          => array(
 				array(
-					'mode'      => 'prefetch',
-					'eagerness' => 'conservative',
+					'authentication' => 'bad',
+				),
+				$default_value,
+			),
+			'valid auth logged_out'           => array(
+				array(
+					'authentication' => 'logged_out',
 				),
 				array_merge(
 					$default_value,
 					array(
-						'mode'      => 'prefetch',
-						'eagerness' => 'conservative',
+						'authentication' => 'logged_out',
+					)
+				),
+			),
+			'valid auth logged_out_or_admins' => array(
+				array(
+					'authentication' => 'logged_out_or_admins',
+				),
+				array_merge(
+					$default_value,
+					array(
+						'authentication' => 'logged_out_or_admins',
+					)
+				),
+			),
+			'valid auth any'                  => array(
+				array(
+					'authentication' => 'any',
+				),
+				array_merge(
+					$default_value,
+					array(
+						'authentication' => 'any',
+					)
+				),
+			),
+			'valid fields'                    => array(
+				array(
+					'mode'           => 'prefetch',
+					'eagerness'      => 'conservative',
+					'authentication' => 'logged_out_or_admins',
+				),
+				array_merge(
+					$default_value,
+					array(
+						'mode'           => 'prefetch',
+						'eagerness'      => 'conservative',
+						'authentication' => 'logged_out_or_admins',
 					)
 				),
 			),
