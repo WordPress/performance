@@ -66,7 +66,7 @@ function plsr_get_authentication_labels(): array {
  *
  *     @type string $mode           Mode.
  *     @type string $eagerness      Eagerness.
- *     @type string $authenticaiton Authentication.
+ *     @type string $authentication Authentication.
  * }
  */
 function plsr_get_setting_default(): array {
@@ -85,9 +85,9 @@ function plsr_get_setting_default(): array {
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
  *     Stored setting value.
  *
- *     @type string $mode          Mode.
- *     @type string $eagerness     Eagerness.
- *     @type string $authenication Authentication.
+ *     @type string $mode           Mode.
+ *     @type string $eagerness      Eagerness.
+ *     @type string $authentication Authentication.
  * }
  */
 function plsr_get_stored_setting_value(): array {
@@ -104,9 +104,9 @@ function plsr_get_stored_setting_value(): array {
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
  *     Sanitized setting.
  *
- *     @type string $mode          Mode.
- *     @type string $eagerness     Eagerness.
- *     @type string $authenication Authentication.
+ *     @type string $mode           Mode.
+ *     @type string $eagerness      Eagerness.
+ *     @type string $authentication Authentication.
  * }
  */
 function plsr_sanitize_setting( $input ): array {
