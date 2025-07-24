@@ -48,8 +48,9 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	/** @return array<string, mixed> */
 	public function data_plsr_sanitize_setting(): array {
 		$default_value = array(
-			'mode'      => 'prerender',
-			'eagerness' => 'moderate',
+			'mode'           => 'prerender',
+			'eagerness'      => 'moderate',
+			'authentication' => 'logged_out',
 		);
 
 		return array(
@@ -67,16 +68,20 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 			),
 			'missing mode'        => array(
 				array( 'eagerness' => 'conservative' ),
-				array(
-					'mode'      => $default_value['mode'],
-					'eagerness' => 'conservative',
+				array_merge(
+					$default_value,
+					array(
+						'eagerness' => 'conservative',
+					)
 				),
 			),
 			'missing eagerness'   => array(
 				array( 'mode' => 'prefetch' ),
-				array(
-					'mode'      => 'prefetch',
-					'eagerness' => $default_value['eagerness'],
+				array_merge(
+					$default_value,
+					array(
+						'mode' => 'prefetch',
+					)
 				),
 			),
 			'invalid mode'        => array(
@@ -84,9 +89,12 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					'mode'      => 'something',
 					'eagerness' => 'eager',
 				),
-				array(
-					'mode'      => 'prerender',
-					'eagerness' => 'eager',
+				array_merge(
+					$default_value,
+					array(
+						'mode'      => 'prerender',
+						'eagerness' => 'eager',
+					)
 				),
 			),
 			'invalid eagerness'   => array(
@@ -94,9 +102,12 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					'mode'      => 'prefetch',
 					'eagerness' => 'something',
 				),
-				array(
-					'mode'      => 'prefetch',
-					'eagerness' => 'moderate',
+				array_merge(
+					$default_value,
+					array(
+						'mode'      => 'prefetch',
+						'eagerness' => 'moderate',
+					)
 				),
 			),
 			'valid fields'        => array(
@@ -104,9 +115,12 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					'mode'      => 'prefetch',
 					'eagerness' => 'conservative',
 				),
-				array(
-					'mode'      => 'prefetch',
-					'eagerness' => 'conservative',
+				array_merge(
+					$default_value,
+					array(
+						'mode'      => 'prefetch',
+						'eagerness' => 'conservative',
+					)
 				),
 			),
 		);
@@ -141,15 +155,17 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		update_option(
 			'plsr_speculation_rules',
 			array(
-				'mode'      => 'prefetch',
-				'eagerness' => 'moderate',
+				'mode'           => 'prefetch',
+				'eagerness'      => 'moderate',
+				'authentication' => 'logged_out',
 			)
 		);
 		$settings = plsr_get_stored_setting_value();
 		$this->assertEquals(
 			array(
-				'mode'      => 'prefetch',
-				'eagerness' => 'moderate',
+				'mode'           => 'prefetch',
+				'eagerness'      => 'moderate',
+				'authentication' => 'logged_out',
 			),
 			$settings
 		);
