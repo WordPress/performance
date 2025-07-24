@@ -42,21 +42,38 @@ function plsr_get_eagerness_labels(): array {
 }
 
 /**
+ * Returns the available options for the Speculative Loading authentication and their labels.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{ logged_out: string, logged_out_or_admins: string, any: string } Associative array of `$authentication => $label` pairs.
+ */
+function plsr_get_authentication_labels(): array {
+	return array(
+		'logged_out'           => _x( 'Logged out visitors only (default)', 'setting label', 'speculation-rules' ),
+		'logged_out_or_admins' => _x( 'Administrators or logged out visitors', 'setting label', 'speculation-rules' ),
+		'any'                  => _x( 'Any user (logged in or out)', 'setting label', 'speculation-rules' ),
+	);
+}
+
+/**
  * Returns the default setting value for Speculative Loading configuration.
  *
  * @since 1.0.0
  *
- * @return array{ mode: 'prerender', eagerness: 'moderate' } {
+ * @return array{ mode: 'prerender', eagerness: 'moderate', authentication: 'logged_out' } {
  *     Default setting value.
  *
- *     @type string $mode      Mode.
- *     @type string $eagerness Eagerness.
+ *     @type string $mode           Mode.
+ *     @type string $eagerness      Eagerness.
+ *     @type string $authenticaiton Authentication.
  * }
  */
 function plsr_get_setting_default(): array {
 	return array(
-		'mode'      => 'prerender',
-		'eagerness' => 'moderate',
+		'mode'           => 'prerender',
+		'eagerness'      => 'moderate',
+		'authentication' => 'logged_out',
 	);
 }
 
@@ -65,11 +82,12 @@ function plsr_get_setting_default(): array {
  *
  * @since 1.4.0
  *
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
  *     Stored setting value.
  *
- *     @type string $mode      Mode.
- *     @type string $eagerness Eagerness.
+ *     @type string $mode          Mode.
+ *     @type string $eagerness     Eagerness.
+ *     @type string $authenication Authentication.
  * }
  */
 function plsr_get_stored_setting_value(): array {
@@ -83,11 +101,12 @@ function plsr_get_stored_setting_value(): array {
  * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
  *     Sanitized setting.
  *
- *     @type string $mode      Mode.
- *     @type string $eagerness Eagerness.
+ *     @type string $mode          Mode.
+ *     @type string $eagerness     Eagerness.
+ *     @type string $authenication Authentication.
  * }
  */
 function plsr_sanitize_setting( $input ): array {
@@ -106,6 +125,9 @@ function plsr_sanitize_setting( $input ): array {
 	}
 	if ( ! in_array( $value['eagerness'], array_keys( plsr_get_eagerness_labels() ), true ) ) {
 		$value['eagerness'] = $default_value['eagerness'];
+	}
+	if ( ! in_array( $value['authentication'], array_keys( plsr_get_authentication_labels() ), true ) ) {
+		$value['authentication'] = $default_value['authentication'];
 	}
 
 	return $value;
@@ -130,15 +152,20 @@ function plsr_register_setting(): void {
 				'schema' => array(
 					'type'                 => 'object',
 					'properties'           => array(
-						'mode'      => array(
+						'mode'           => array(
 							'description' => __( 'Whether to prefetch or prerender URLs.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
-						'eagerness' => array(
+						'eagerness'      => array(
 							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
+						),
+						'authentication' => array(
+							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged in users. If your server can handle the additional load, you can opt in to speculative loading for all logged in users or administrator users only.', 'speculation-rules' ),
+							'type'        => 'string',
+							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
 					),
 					'additionalProperties' => false,
@@ -174,13 +201,17 @@ function plsr_add_setting_ui(): void {
 	);
 
 	$fields = array(
-		'mode'      => array(
+		'mode'           => array(
 			'title'       => __( 'Speculation Mode', 'speculation-rules' ),
 			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
 		),
-		'eagerness' => array(
+		'eagerness'      => array(
 			'title'       => __( 'Eagerness', 'speculation-rules' ),
 			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
+		),
+		'authentication' => array(
+			'title'       => __( 'Authentication', 'speculation-rules' ),
+			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged in users. If your server can handle the additional load, you can opt in to speculative loading for all logged in users or administrator users only.', 'speculation-rules' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
@@ -205,7 +236,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * @since 1.0.0
  * @access private
  *
- * @param array{ field: 'mode'|'eagerness', title: non-empty-string, description: non-empty-string } $args {
+ * @param array{ field: 'mode'|'eagerness'|'authentication', title: non-empty-string, description: non-empty-string } $args {
  *     Associative array of arguments.
  *
  *     @type string $field       The slug of the sub setting controlled by the field.
@@ -222,6 +253,9 @@ function plsr_render_settings_field( array $args ): void {
 			break;
 		case 'eagerness':
 			$choices = plsr_get_eagerness_labels();
+			break;
+		case 'authentication':
+			$choices = plsr_get_authentication_labels();
 			break;
 		default:
 			// Invalid (and this case should never occur).
