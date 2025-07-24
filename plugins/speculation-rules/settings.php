@@ -50,9 +50,9 @@ function plsr_get_eagerness_labels(): array {
  */
 function plsr_get_authentication_labels(): array {
 	return array(
-		'logged_out'           => _x( 'Logged out visitors only (default)', 'setting label', 'speculation-rules' ),
-		'logged_out_or_admins' => _x( 'Administrators or logged out visitors', 'setting label', 'speculation-rules' ),
-		'any'                  => _x( 'Any user (logged in or out)', 'setting label', 'speculation-rules' ),
+		'logged_out'           => _x( 'Logged-out visitors only (default)', 'setting label', 'speculation-rules' ),
+		'logged_out_or_admins' => _x( 'Administrators or logged-out visitors', 'setting label', 'speculation-rules' ),
+		'any'                  => _x( 'Any user (logged-in or logged-out)', 'setting label', 'speculation-rules' ),
 	);
 }
 
@@ -163,7 +163,7 @@ function plsr_register_setting(): void {
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 						'authentication' => array(
-							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged in users. If your server can handle the additional load, you can opt in to speculative loading for all logged in users or administrator users only.', 'speculation-rules' ),
+							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or administrator users only.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
@@ -211,7 +211,7 @@ function plsr_add_setting_ui(): void {
 		),
 		'authentication' => array(
 			'title'       => __( 'Authentication', 'speculation-rules' ),
-			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged in users. If your server can handle the additional load, you can opt in to speculative loading for all logged in users or administrator users only.', 'speculation-rules' ),
+			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or administrator users only.', 'speculation-rules' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
