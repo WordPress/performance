@@ -269,33 +269,23 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 */
 	public function data_provider_to_test_render_settings_field(): array {
 		return array(
-			'mode'      => array(
-				array(
-					'field'       => 'mode',
-					'title'       => 'Speculation Mode',
-					'description' => 'Prerendering will lead to faster load times than prefetching.',
-				),
-				array(
-					'mode'      => 'prefetch',
-					'eagerness' => 'moderate',
-				),
-				'name="plsr_speculation_rules[mode]"',
-				'value="prefetch"',
-				'Prerendering will lead to faster load times than prefetching.',
+			'mode'           => array(
+				'field'       => 'mode',
+				'value'       => 'prefetch',
+				'title'       => 'Speculation Mode',
+				'description' => 'The mode description',
 			),
-			'eagerness' => array(
-				array(
-					'field'       => 'eagerness',
-					'title'       => 'Eagerness',
-					'description' => 'The eagerness setting defines the heuristics based on which the loading is triggered.',
-				),
-				array(
-					'mode'      => 'prefetch',
-					'eagerness' => 'moderate',
-				),
-				'name="plsr_speculation_rules[eagerness]"',
-				'value="moderate"',
-				'The eagerness setting defines the heuristics based on which the loading is triggered.',
+			'eagerness'      => array(
+				'field'       => 'eagerness',
+				'value'       => 'moderate',
+				'title'       => 'Eagerness',
+				'description' => 'The eagerness description',
+			),
+			'authentication' => array(
+				'field'       => 'authentication',
+				'value'       => 'any',
+				'title'       => 'Authentication',
+				'description' => 'The authentication description.',
 			),
 		);
 	}
@@ -304,22 +294,34 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * Test rendering of settings fields using data provider.
 	 *
 	 * @dataProvider data_provider_to_test_render_settings_field
-	 * @param array<mixed> $args Arguments for the settings field.
-	 * @param array<mixed> $stored_settings Stored settings values.
-	 * @param string       $name_check HTML name attribute check.
-	 * @param string       $value_check HTML value attribute check.
-	 * @param string       $description_check Description check.
+	 *
+	 * @param string $field Field.
+	 * @param string $value Value.
+	 * @param string $title Title.
+	 * @param string $description Description.
 	 */
-	public function test_plsr_render_settings_field( array $args, array $stored_settings, string $name_check, string $value_check, string $description_check ): void {
+	public function test_plsr_render_settings_field( string $field, string $value, string $title, string $description ): void {
 		// Simulate getting stored settings.
-		update_option( 'plsr_speculation_rules', $stored_settings );
+		update_option( 'plsr_speculation_rules', array( $field => $value ) );
 
 		// Capture the output of the settings field rendering.
-		$output = get_echo( 'plsr_render_settings_field', array( $args ) );
+		$output = get_echo( 'plsr_render_settings_field', array( compact( 'field', 'title', 'description' ) ) );
 
 		// Check for the presence of form elements.
-		$this->assertStringContainsString( $name_check, $output );
-		$this->assertStringContainsString( $value_check, $output );
-		$this->assertStringContainsString( $description_check, $output );
+		$this->assertStringContainsString( $description, $output );
+
+		$p     = new WP_HTML_Tag_Processor( $output );
+		$found = false;
+		while ( $p->next_tag( array( 'tag_name' => 'INPUT' ) ) ) {
+			if (
+				$p->get_attribute( 'name' ) === sprintf( 'plsr_speculation_rules[%s]', $field )
+				&&
+				$p->get_attribute( 'value' ) === $value
+			) {
+				$found = null !== $p->get_attribute( 'checked' );
+				break;
+			}
+		}
+		$this->assertTrue( $found, $output );
 	}
 }
