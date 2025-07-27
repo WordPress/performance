@@ -45,29 +45,34 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
  *     Default setting value.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
- *     @type bool   $enable_frontend_transitions  Whether to use view transitions on the front-end.
+ *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
+ *                                                         the other frontend specific settings won't be applied.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
+ *     @type bool   $enable_admin_transitions              Whether to use view transitions in the admin area.
+ *     @type bool   $enable_frontend_transitions           Whether to use view transitions on the front-end.
  * }
  */
 function plvt_get_setting_default(): array {
 	return array(
-		'default_transition_animation' => 'fade',
-		'header_selector'              => 'header',
-		'main_selector'                => 'main',
-		'post_title_selector'          => '.wp-block-post-title, .entry-title',
-		'post_thumbnail_selector'      => '.wp-post-image',
-		'post_content_selector'        => '.wp-block-post-content, .entry-content',
-		'enable_admin_transitions'     => false,
-		'enable_frontend_transitions'  => true,
+		'override_theme_config'                 => false,
+		'default_transition_animation'          => 'fade',
+		'default_transition_animation_duration' => 400,
+		'header_selector'                       => 'header',
+		'main_selector'                         => 'main',
+		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
+		'post_thumbnail_selector'               => '.wp-post-image',
+		'post_content_selector'                 => '.wp-block-post-content, .entry-content',
+		'enable_admin_transitions'              => false,
+		'enable_frontend_transitions'           => true,
 	);
 }
 
@@ -76,17 +81,20 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
  *     Stored setting value.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
- *     @type bool   $enable_frontend_transitions  Whether to use view transitions on the front-end.
+ *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
+ *                                                         the other frontend specific settings won't be applied.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
+ *     @type bool   $enable_admin_transitions              Whether to use view transitions in the admin area.
+ *     @type bool   $enable_frontend_transitions           Whether to use view transitions on the front-end.
  * }
  */
 function plvt_get_stored_setting_value(): array {
@@ -99,17 +107,20 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ default_transition_animation: non-empty-string, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool, enable_frontend_transitions: bool } {
  *     Sanitized setting.
  *
- *     @type string $default_transition_animation Default view transition animation.
- *     @type string $header_selector              CSS selector for the global header element.
- *     @type string $main_selector                CSS selector for the global main element.
- *     @type string $post_title_selector          CSS selector for the post title element.
- *     @type string $post_thumbnail_selector      CSS selector for the post thumbnail element.
- *     @type string $post_content_selector        CSS selector for the post content element.
- *     @type bool   $enable_admin_transitions     Whether to use view transitions in the admin area.
- *     @type bool   $enable_frontend_transitions  Whether to use view transitions on the front-end.
+ *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
+ *                                                         the other frontend specific settings won't be applied.
+ *     @type string $default_transition_animation          Default view transition animation.
+ *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
+ *     @type string $header_selector                       CSS selector for the global header element.
+ *     @type string $main_selector                         CSS selector for the global main element.
+ *     @type string $post_title_selector                   CSS selector for the post title element.
+ *     @type string $post_thumbnail_selector               CSS selector for the post thumbnail element.
+ *     @type string $post_content_selector                 CSS selector for the post content element.
+ *     @type bool   $enable_admin_transitions              Whether to use view transitions in the admin area.
+ *     @type bool   $enable_frontend_transitions           Whether to use view transitions on the front-end.
  * }
  */
 function plvt_sanitize_setting( $input ): array {
@@ -128,6 +139,11 @@ function plvt_sanitize_setting( $input ): array {
 		$value['default_transition_animation'] = $input['default_transition_animation'];
 	}
 
+	// Handle default_transition_animation_duration separately.
+	if ( isset( $input['default_transition_animation_duration'] ) ) {
+		$value['default_transition_animation_duration'] = absint( $input['default_transition_animation_duration'] );
+	}
+
 	$selector_options = array(
 		'header_selector',
 		'main_selector',
@@ -144,14 +160,15 @@ function plvt_sanitize_setting( $input ): array {
 		}
 	}
 
-	// Sanitize "enable_admin_transitions" as a boolean.
-	if ( isset( $input['enable_admin_transitions'] ) ) {
-		$value['enable_admin_transitions'] = (bool) $input['enable_admin_transitions'];
-	}
-
-	// Sanitize "enable_frontend_transitions" as a boolean.
-	if ( isset( $input['enable_frontend_transitions'] ) ) {
-		$value['enable_frontend_transitions'] = (bool) $input['enable_frontend_transitions'];
+	$checkbox_options = array(
+		'override_theme_config',
+		'enable_admin_transitions',
+		'enable_frontend_transitions',
+	);
+	foreach ( $checkbox_options as $checkbox_option ) {
+		if ( isset( $input[ $checkbox_option ] ) ) {
+			$value[ $checkbox_option ] = (bool) $input[ $checkbox_option ];
+		}
 	}
 
 	return $value;
@@ -197,22 +214,29 @@ function plvt_register_setting(): void {
  * @since 1.0.0
  * @access private
  *
- * @global array<string, mixed> $_wp_theme_features Theme support features added and their arguments.
+ * @global bool|null            $plvt_has_theme_support_with_args Whether the current theme explicitly supports view transitions with custom config.
+ * @global array<string, mixed> $_wp_theme_features               Theme support features added and their arguments.
  */
 function plvt_apply_settings_to_theme_support(): void {
-	global $_wp_theme_features;
+	global $plvt_has_theme_support_with_args, $_wp_theme_features;
 
 	// Bail if the feature is disabled.
 	if ( ! isset( $_wp_theme_features['view-transitions'] ) ) {
 		return;
 	}
 
+	// Bail if the current theme explicitly supports view transitions and the option to override is turned off.
+	$options = plvt_get_stored_setting_value();
+	if ( $plvt_has_theme_support_with_args && ! $options['override_theme_config'] ) {
+		return;
+	}
+
 	$args = $_wp_theme_features['view-transitions'];
 
 	// Apply the settings.
-	$options                   = plvt_get_stored_setting_value();
-	$args['default-animation'] = $options['default_transition_animation'];
-	$selector_options          = array(
+	$args['default-animation']          = $options['default_transition_animation'];
+	$args['default-animation-duration'] = absint( $options['default_transition_animation_duration'] );
+	$selector_options                   = array(
 		'global' => array(
 			'header_selector' => 'header',
 			'main_selector'   => 'main',
@@ -242,19 +266,33 @@ function plvt_apply_settings_to_theme_support(): void {
  *
  * @since 1.0.0
  * @access private
+ *
+ * @global bool|null $plvt_has_theme_support_with_args Whether the current theme explicitly supports view transitions with custom config.
  */
 function plvt_add_setting_ui(): void {
+	global $plvt_has_theme_support_with_args;
+
 	add_settings_section(
 		'plvt_view_transitions',
 		_x( 'View Transitions', 'Settings section', 'view-transitions' ),
 		static function (): void {
+			global $plvt_has_theme_support_with_args;
 			?>
 			<p class="description">
-				<?php esc_html_e( 'This section allows you to control how view transitions are used to enhance the navigation user experience.', 'view-transitions' ); ?>
+				<?php esc_html_e( 'This section allows you to control view transitions usage on your site to enhance the navigation user experience.', 'view-transitions' ); ?>
 				<br>
 				<?php esc_html_e( 'To reset any of the selector text inputs, clear the field and save the changes.', 'view-transitions' ); ?>
 			</p>
 			<?php
+			if ( $plvt_has_theme_support_with_args ) {
+				wp_admin_notice(
+					__( 'Your theme already supports view transitions with its own adapted configuration. The settings below will override those.', 'view-transitions' ),
+					array(
+						'type'               => 'info',
+						'additional_classes' => array( 'inline' ),
+					)
+				);
+			}
 		},
 		'reading',
 		array(
@@ -263,48 +301,92 @@ function plvt_add_setting_ui(): void {
 		)
 	);
 
+	add_settings_section(
+		'plvt_admin_view_transitions',
+		_x( 'Admin View Transitions', 'Settings section', 'view-transitions' ),
+		static function (): void {
+			?>
+			<p class="description">
+				<?php esc_html_e( 'This section allows you to control view transitions usage in the WordPress admin area.', 'view-transitions' ); ?>
+			</p>
+			<?php
+		},
+		'reading',
+		array(
+			'before_section' => '<div id="admin-view-transitions">',
+			'after_section'  => '</div>',
+		)
+	);
+
 	$fields = array(
-		'default_transition_animation' => array(
+		'override_theme_config'                 => array(
+			'section'     => 'plvt_view_transitions',
+			'title'       => __( 'Override Theme Configuration', 'view-transitions' ),
+			'description' => __( 'Override the theme provided configuration with the settings below.', 'view-transitions' ),
+		),
+		'default_transition_animation'          => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
-		'header_selector'              => array(
+		'default_transition_animation_duration' => array(
+			'section'     => 'plvt_view_transitions',
+			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
+			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
+		),
+		'header_selector'                       => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Header Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global header element.', 'view-transitions' ),
 		),
-		'main_selector'                => array(
+		'main_selector'                         => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Main Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the global main element.', 'view-transitions' ),
 		),
-		'post_title_selector'          => array(
+		'post_title_selector'                   => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Title Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post title element.', 'view-transitions' ),
 		),
-		'post_thumbnail_selector'      => array(
+		'post_thumbnail_selector'               => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Thumbnail Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post thumbnail element.', 'view-transitions' ),
 		),
-		'post_content_selector'        => array(
+		'post_content_selector'                 => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Post Content Selector', 'view-transitions' ),
 			'description' => __( 'Provide the CSS selector to detect the post content element.', 'view-transitions' ),
 		),
-		'enable_admin_transitions'     => array(
+		'enable_admin_transitions'              => array(
+			'section'     => 'plvt_admin_view_transitions',
 			'title'       => __( 'WP Admin', 'view-transitions' ),
 			'description' => __( 'Enable view transitions in the WordPress admin area.', 'view-transitions' ),
 		),
-		'enable_frontend_transitions'  => array(
+		'enable_frontend_transitions'           => array(
+			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Front-end', 'view-transitions' ),
 			'description' => __( 'Enable view transitions on the front-end of your website.', 'view-transitions' ),
 		),
 	);
+
+	// Do not render the checkbox to override if there is nothing to override.
+	if ( ! $plvt_has_theme_support_with_args ) {
+		unset( $fields['override_theme_config'] );
+	}
+
 	foreach ( $fields as $slug => $args ) {
+		$section = $args['section'];
+		unset( $args['section'] );
+
 		$additional_args = array(
 			'field'     => $slug,
 			'label_for' => "plvt-view-transitions-field-{$slug}",
 		);
 
-		// Remove 'label_for' for checkbox fields to avoid duplicate label association.
-		if ( 'enable_admin_transitions' === $slug || 'enable_frontend_transitions' === $slug ) {
+		// Remove 'label_for' for checkbox fieldss to avoid duplicate label association.
+		if ( 'override_theme_config' === $slug || 'enable_admin_transitions' === $slug || 'enable_frontend_transitions' === $slug ) {
 			unset( $additional_args['label_for'] );
 		}
 
@@ -313,7 +395,7 @@ function plvt_add_setting_ui(): void {
 			$args['title'],
 			'plvt_render_settings_field',
 			'reading',
-			'plvt_view_transitions',
+			$section,
 			array_merge(
 				$additional_args,
 				$args
@@ -345,6 +427,11 @@ function plvt_render_settings_field( array $args ): void {
 			$type    = 'select';
 			$choices = plvt_get_view_transition_animation_labels();
 			break;
+		case 'default_transition_animation_duration':
+			$type    = 'number';
+			$choices = array(); // Defined just for consistency.
+			break;
+		case 'override_theme_config':
 		case 'enable_admin_transitions':
 		case 'enable_frontend_transitions':
 			$type    = 'checkbox';
@@ -393,7 +480,6 @@ function plvt_render_settings_field( array $args ): void {
 				type="checkbox"
 				value="1"
 				<?php checked( $value, 1 ); ?>
-				class="regular-text code"
 			>
 			<?php echo esc_html( $args['description'] ); ?>
 		</label>
@@ -401,6 +487,7 @@ function plvt_render_settings_field( array $args ): void {
 	} else {
 		?>
 		<input
+			<?php echo ( 'number' === $type ) ? 'type="number"' : ''; ?>
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			value="<?php echo esc_attr( (string) $value ); ?>"

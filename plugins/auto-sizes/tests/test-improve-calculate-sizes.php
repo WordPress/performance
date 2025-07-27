@@ -16,6 +16,12 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	public static $image_id;
 
 	/**
+	 * Post ID.
+	 *
+	 * @var int
+	 */
+	public static $post_id;
+	/**
 	 * Set up the environment for the tests.
 	 */
 	public static function set_up_before_class(): void {
@@ -24,6 +30,13 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		switch_theme( 'twentytwentyfour' );
 
 		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		self::$post_id = self::factory()->post->create(
+			array(
+				'post_status' => 'publish',
+				'post_name'   => 'test-post',
+			)
+		);
 	}
 
 	public function set_up(): void {
@@ -108,7 +121,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_image_sizes(): array {
+	public static function data_image_sizes(): array {
 		return array(
 			'Return full or wideSize 1280px instead of medium size 300px'  => array(
 				'medium',
@@ -164,7 +177,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The image sizes.
 	 */
-	public function data_image_sizes_for_default_alignment(): array {
+	public static function data_image_sizes_for_default_alignment(): array {
 		return array(
 			'Return medium image size 300px instead of contentSize 620px'                          => array(
 				'medium',
@@ -239,7 +252,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The image sizes and alignments.
 	 */
-	public function data_image_sizes_for_left_right_center_alignment(): array {
+	public static function data_image_sizes_for_left_right_center_alignment(): array {
 		return array(
 			'Return medium image size 300px with left alignment'                                    => array(
 				'medium',
@@ -369,7 +382,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_image_left_right_center_alignment(): array {
+	public static function data_image_left_right_center_alignment(): array {
 		return array(
 			array( 'left', 'sizes="(max-width: 420px) 100vw, 420px' ),
 			array( 'right', 'sizes="(max-width: 420px) 100vw, 420px' ),
@@ -417,7 +430,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_ancestor_and_image_block_alignment(): array {
+	public static function data_ancestor_and_image_block_alignment(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 620px, parent block default alignment, image block default alignment' => array(
@@ -546,7 +559,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_blocks_with_relative_alignment(): array {
+	public static function data_image_blocks_with_relative_alignment(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 50vw, parent block default alignment, image block default alignment' => array(
@@ -636,7 +649,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The ancestor and image alignments.
 	 */
-	public function data_image_blocks_with_relative_alignment_for_classic_theme(): array {
+	public static function data_image_blocks_with_relative_alignment_for_classic_theme(): array {
 		return array(
 			array( '' ),
 			array( 'wide' ),
@@ -673,7 +686,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_column_block(): array {
+	public static function data_image_block_with_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return contentSize 620px, parent block default alignment, image block default alignment' => array(
@@ -809,7 +822,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_two_equal_column_block(): array {
+	public static function data_image_block_with_two_equal_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return half size of contentSize 310px, parent block default alignment, image block default alignment' => array(
@@ -945,7 +958,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_two_different_width_column_block(): array {
+	public static function data_image_block_with_two_different_width_column_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return 66.66% width of contentSize 413px, parent block default alignment, image block default alignment' => array(
@@ -1087,7 +1100,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array<int, string>> The ancestor and image alignments.
 	 */
-	public function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
+	public static function data_image_block_with_parent_columns_and_its_parent_group_block(): array {
 		return array(
 			// Parent default alignment.
 			'Return 66.66% width of contentSize 413px, group block default alignment, columns block default alignment, image block default alignment' => array(
@@ -1255,6 +1268,134 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'full',
 				'right',
 				'sizes="(max-width: 853px) 100vw, 853px" ',
+			),
+		);
+	}
+
+	/**
+	 * Verifies that the post featured image block does not render when no featured image is set for the post.
+	 */
+	public function test_post_featured_image_block_without_featured_image(): void {
+		$block_content = '<!-- wp:post-featured-image /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( '', $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Test that the post featured image block renders correctly with different image sizes.
+	 *
+	 * @dataProvider data_post_featured_image_block_image_sizes
+	 *
+	 * @param string $image_size Image size.
+	 * @param string $expected   Expected output.
+	 */
+	public function test_post_featured_image_block_with_different_image_size( string $image_size, string $expected ): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:post-featured-image {"sizeSlug":"' . $image_size . '"} /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		// Check that the featured image block renders the image and has a sizes attribute.
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
+		$this->assertStringContainsString( $expected, $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes.
+	 */
+	public static function data_post_featured_image_block_image_sizes(): array {
+		return array(
+			'Return medium image size 300px' => array(
+				'medium',
+				'sizes="(max-width: 300px) 100vw, 300px" ',
+			),
+			'Return contentSize 620px instead of large size 1024px' => array(
+				'large',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px instead of full size 1080px' => array(
+				'full',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the post featured image block renders correctly with different alignment.
+	 *
+	 * @dataProvider data_post_featured_image_block_alignment
+	 *
+	 * @param string $alignment Alignment of the image.
+	 * @param string $expected  Expected output.
+	 */
+	public function test_post_featured_image_block_with_different_alignment( string $alignment, string $expected ): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:post-featured-image {"align":"' . $alignment . '"} /-->';
+
+		// Set up global $post so 'the_content' filter works as expected.
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		// Check that the featured image block renders the image and has a sizes attribute.
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
+		$this->assertStringContainsString( $expected, $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes.
+	 */
+	public static function data_post_featured_image_block_alignment(): array {
+		return array(
+			'Return contentSize 620px instead of image size 1080px, block default alignment'  => array(
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px instead of image size 1080px, block wide alignment'  => array(
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return full size instead of image size 1080px, block full alignment'  => array(
+				'full',
+				'sizes="100vw" ',
+			),
+			'Return image size 1080px, block left alignment'  => array(
+				'left',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+			),
+			'Return image size 1080px, block right alignment'  => array(
+				'right',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+			),
+			'Return contentSize 620px instead of image size 1080px, block center alignment'  => array(
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
 		);
 	}
