@@ -31,6 +31,13 @@ function plvt_polyfill_theme_support(): void {
 	if ( current_theme_supports( 'view-transitions' ) ) {
 		return;
 	}
+
+	// Check if front-end transitions are enabled.
+	$options = plvt_get_stored_setting_value();
+	if ( ! isset( $options['enable_frontend_transitions'] ) || true !== $options['enable_frontend_transitions'] ) {
+		return;
+	}
+
 	add_theme_support( 'view-transitions' );
 }
 
@@ -284,6 +291,12 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
  * @since 1.0.0
  */
 function plvt_load_view_transitions(): void {
+	// Check if front-end transitions are enabled.
+	$options = plvt_get_stored_setting_value();
+	if ( ! isset( $options['enable_frontend_transitions'] ) || true !== $options['enable_frontend_transitions'] ) {
+		return;
+	}
+
 	if ( ! current_theme_supports( 'view-transitions' ) ) {
 		return;
 	}
