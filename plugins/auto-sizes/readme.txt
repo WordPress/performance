@@ -11,7 +11,7 @@ Improvements for responsive images in WordPress.
 
 == Description ==
 
-This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes:
+This plugin implements enhancements for the responsive images functionality in WordPress. Currently, this includes:
 
 1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme.
 2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
