@@ -385,7 +385,7 @@ function plvt_add_setting_ui(): void {
 			'label_for' => "plvt-view-transitions-field-{$slug}",
 		);
 
-		// Remove 'label_for' for checkbox fieldss to avoid duplicate label association.
+		// Remove 'label_for' for checkbox fields to avoid duplicate label association.
 		if ( 'override_theme_config' === $slug || 'enable_admin_transitions' === $slug || 'enable_frontend_transitions' === $slug ) {
 			unset( $additional_args['label_for'] );
 		}
