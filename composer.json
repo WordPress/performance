@@ -51,7 +51,7 @@
     "yoast/phpunit-polyfills": "^4.0",
     "phpstan/php-8-stubs": "^0.4.0",
     "phpstan/phpstan-strict-rules": "^1.6",
-    "wpackagist-plugin/plugin-check": "^1.5"
+    "wpackagist-plugin/plugin-check": "^1.6"
   },
   "config": {
     "allow-plugins": {
