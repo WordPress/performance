@@ -125,9 +125,6 @@
 	<rule ref="PluginCheck.CodeAnalysis.Offloading.OffloadedContent">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
-	<rule ref="PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage">
-		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
-	</rule>
 	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
