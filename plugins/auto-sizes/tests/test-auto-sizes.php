@@ -294,12 +294,10 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 */
 	public function test_auto_sizes_attribute_includes_valid_auto(): void {
 		// Test when 'auto' is the first item in the list.
-		$sizes_attr = 'auto, 100vw';
-		$this->assertTrue( auto_sizes_attribute_includes_valid_auto( $sizes_attr ) );
+		$this->assertTrue( auto_sizes_attribute_includes_valid_auto( 'auto, 100vw' ) );
 
 		// Test when 'auto' is not the first item in the list.
-		$sizes_attr = '100vw, auto';
-		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( $sizes_attr ) );
+		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( '100vw, auto' ) );
 	}
 
 	/**
@@ -366,11 +364,11 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 */
 	public function test_auto_sizes_update_content_img_tag_non_string_input(): void {
 		/*
-			These tests are separate from the data provider approach because the function
-			auto_sizes_update_content_img_tag() expects a string as an argument. Passing a non-string
-			value would cause a TypeError. These tests ensure that the function behaves as expected
-			when it receives non-string inputs.
-		*/
+		 * These tests are separate from the data provider approach because the function
+		 * auto_sizes_update_content_img_tag() expects a string as an argument. Passing a non-string
+		 * value would cause a TypeError. These tests ensure that the function behaves as expected
+		 * when it receives non-string inputs.
+		 */
 		$this->assertSame( '', auto_sizes_update_content_img_tag( array() ) );
 	}
 
@@ -379,12 +377,12 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 */
 	public function test_auto_sizes_update_image_attributes_with_null_input(): void {
 		/*
-			This test is separate because the main test method uses a data provider
-			that expects the $attr parameter to be an array. Passing null directly
-			would cause a TypeError due to the type hint. By testing null separately,
-			we ensure that the function can handle null inputs gracefully without
-			modifying the type hint in the main test method.
-		*/
+		 * This test is separate because the main test method uses a data provider
+		 * that expects the $attr parameter to be an array. Passing null directly
+		 * would cause a TypeError due to the type hint. By testing null separately,
+		 * we ensure that the function can handle null inputs gracefully without
+		 * modifying the type hint in the main test method.
+		 */
 		$this->assertSame( array(), auto_sizes_update_image_attributes( null ) );
 	}
 }
