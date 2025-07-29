@@ -52,6 +52,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 1.6.0 =
+
+**Features**
+
+* Accurate sizes: Add support for `core/post-featured-image` block. ([2084](https://github.com/WordPress/performance/pull/2084))
+
+**Enhancements**
+
+* Remove experimental from Enhanced Responsive Images readme.txt. ([2077](https://github.com/WordPress/performance/pull/2077))
+
 = 1.5.0 =
 
 **Enhancements**
