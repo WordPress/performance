@@ -264,7 +264,7 @@ function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
 		'post.php' === $hook_suffix &&
 		function_exists( 'get_current_screen' ) &&
 		isset( $_GET['od_classic_editor_post_update_nonce'] ) &&
-		false !== wp_verify_nonce( $_GET['od_classic_editor_post_update_nonce'], 'od_classic_editor_post_update' ) &&
+		false !== wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['od_classic_editor_post_update_nonce'] ) ), 'od_classic_editor_post_update' ) &&
 		isset( $_GET['post'] ) &&
 		isset( $_GET['message'] ) &&
 		1 === (int) $_GET['message']
