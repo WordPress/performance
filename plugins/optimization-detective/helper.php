@@ -694,7 +694,7 @@ function od_show_admin_url_priming_feature(): bool {
  * @since n.e.x.t
  * @access private
  *
- * @param array<string, int> $cursor Cursor to resume from.
+ * @param array<string, int>|null $cursor Cursor to resume from.
  * @return array<string, mixed> Final batch of URLs to prime metrics for and the updated cursor.
  */
 function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array {
@@ -718,10 +718,10 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
 		update_option( 'od_prime_url_metrics_batch_cursor', $cursor );
 	}
 
-	$batch               = array();
-	$filtered_url_groups = array();
-	$prevent_infinite    = 0;
-	while ( $prevent_infinite < 100 ) {
+	$batch                 = array();
+	$filtered_url_groups   = array();
+	$prevent_infinite_loop = 0;
+	while ( $prevent_infinite_loop < 100 ) {
 		if ( count( $filtered_url_groups ) > 0 ) {
 			break;
 		}
@@ -735,7 +735,7 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
 		}
 		$cursor = $batch['cursor'];
 
-		++$prevent_infinite;
+		++$prevent_infinite_loop;
 	}
 
 	return array(
