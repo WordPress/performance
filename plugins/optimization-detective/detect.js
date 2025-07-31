@@ -931,7 +931,7 @@ export default async function detect( {
 		elements: [],
 	};
 
-	const lcpMetric = lcpMetricCandidates.at( -1 );
+	const lcpMetric = lcpMetricCandidates[ lcpMetricCandidates.length - 1 ];
 
 	// Populate the elements in the URL Metric.
 	for ( const elementIntersection of elementIntersections ) {

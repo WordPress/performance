@@ -10,6 +10,12 @@
 	inherits: false;
 }
 
+@property --plvt-view-transition-animation-duration {
+	syntax: "<time>";
+	initial-value: 1s;
+	inherits: false;
+}
+
 @keyframes plvt-view-transition-animation-swipe-old {
 	to {
 		opacity: 0;
@@ -25,7 +31,7 @@
 }
 
 ::view-transition-group(*) {
-	animation-duration: 1s;
+	animation-duration: var(--plvt-view-transition-animation-duration);
 }
 
 ::view-transition-old(*) {

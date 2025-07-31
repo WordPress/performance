@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.8
-Stable tag:   1.0.1
+Stable tag:   1.1.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, view transitions, smooth transitions, animations
@@ -33,6 +33,11 @@ Cross-document view transitions are supported in a variety of browsers, includin
 2. Visit **Plugins**.
 3. Activate the **View Transitions** plugin.
 
+= After activation =
+
+1. Visit the **Settings > Reading** admin screen.
+2. Use the controls in the **View Transitions** section to configure view transitions.
+
 == Frequently Asked Questions ==
 
 = Where can I submit my plugin feedback? =
@@ -50,6 +55,24 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.0 =
+
+**Features**
+
+* Add view transitions for WP Admin. ([2038](https://github.com/WordPress/performance/pull/2038))
+
+**Enhancements**
+
+* Allow control over view transition animation duration. ([2051](https://github.com/WordPress/performance/pull/2051))
+* Make `plvt_inject_animation_duration()` reusable for all transition types, including default fade. ([2078](https://github.com/WordPress/performance/pull/2078))
+* Make settings section title properly translatable. ([2042](https://github.com/WordPress/performance/pull/2042))
+
+**Bug Fixes**
+
+* Inform the user if the current theme explicitly supports view transitions with its own configuration, and add a UI control to make overriding that configuration via settings optional. ([2037](https://github.com/WordPress/performance/pull/2037))
+* Set default view transition duration to 400 for better alignment with browser default. ([2081](https://github.com/WordPress/performance/pull/2081))
+* Respect prefers-reduced-motion settings. ([2068](https://github.com/WordPress/performance/pull/2068))
 
 = 1.0.1 =
 
