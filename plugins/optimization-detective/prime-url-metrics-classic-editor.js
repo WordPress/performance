@@ -244,9 +244,9 @@
 			};
 
 			const url = new URL( task.url );
-			url.hash = `odPrimeUrlMetricsVerificationToken=${ encodeURIComponent(
+			url.hash = `odPrimeModeVerificationToken=${ encodeURIComponent(
 				verificationToken
-			) }`;
+			) }&odPrimeModeSource=admin-dashboard`;
 
 			// Load the iframe.
 			iframe.src = url.toString();

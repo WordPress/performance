@@ -50,7 +50,7 @@ function od_render_optimization_detective_page(): void {
 				<ol>
 					<li><?php esc_html_e( 'Click the "Start" button to begin the priming process.', 'optimization-detective' ); ?></li>
 					<li><?php esc_html_e( 'The progress bar will indicate the progress of current batch.', 'optimization-detective' ); ?></li>
-					<li><?php esc_html_e( 'You can "Pause" and "Resume" the process as needed..', 'optimization-detective' ); ?></li>
+					<li><?php esc_html_e( 'You can "Pause" and "Resume" the process as needed.', 'optimization-detective' ); ?></li>
 					<li><?php esc_html_e( 'Once finished, the button will display "Finished".', 'optimization-detective' ); ?></li>
 				</ol>
 				<h3><?php esc_html_e( 'Important Information:', 'optimization-detective' ); ?></h3>

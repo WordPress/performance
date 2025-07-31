@@ -184,9 +184,9 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 			} );
 
 			const url = new URL( task.url );
-			url.hash = `odPrimeUrlMetricsVerificationToken=${ encodeURIComponent(
+			url.hash = `odPrimeModeVerificationToken=${ encodeURIComponent(
 				verificationToken
-			) }`;
+			) }&odPrimeModeSource=priming-cli`;
 
 			await page.goto( url.toString(), {
 				waitUntil: 'load',

@@ -66,12 +66,20 @@ const storageLockTimeSessionKey = 'odStorageLockTime';
 const compressionDebounceWaitDuration = 1000;
 
 /**
- * Verification token for skipping the storage lock check while priming URL Metrics.
+ * Verification token for skipping the storage lock check while in priming mode.
  *
  * @see {detect}
  * @type {?string}
  */
-let odPrimeUrlMetricsVerificationToken = null;
+let primeModeVerificationToken = null;
+
+/**
+ * Source of the priming mode (i.e. admin-dashboard or priming-cli).
+ *
+ * @see {detect}
+ * @type {?string}
+ */
+let primeModeSource = null;
 
 /**
  * Checks whether storage is locked.
@@ -81,7 +89,7 @@ let odPrimeUrlMetricsVerificationToken = null;
  * @return {boolean} Whether storage is locked.
  */
 function isStorageLocked( currentTime, storageLockTTL ) {
-	if ( odPrimeUrlMetricsVerificationToken ) {
+	if ( primeModeVerificationToken ) {
 		return false;
 	}
 
@@ -551,27 +559,25 @@ async function forceCompressUrlMetric() {
 /**
  * Notifies about the URL Metric request status.
  *
- * @param {Object}  status                  - The status details.
- * @param {boolean} status.success          - Indicates if the request succeeded.
- * @param {string}  [status.error]          - An error message if the request failed.
- * @param {Object}  [options]               - Options for where to dispatch the message.
- * @param {boolean} [options.toParent=true] - Whether to send the message to the parent window.
- * @param {boolean} [options.toLocal=true]  - Whether to dispatch a custom event locally.
+ * @param {Object}  status         - The status details.
+ * @param {boolean} status.success - Indicates if the request succeeded.
+ * @param {string}  [status.error] - An error message if the request failed.
+ * @param {?string} source         - The source of the priming mode (i.e. admin-dashboard or priming-cli).
  */
-function notifyStatus( status, options = { toParent: true, toLocal: true } ) {
+function notifyStatus( status, source ) {
 	const message = {
 		type: 'OD_PRIME_URL_METRICS_REQUEST_STATUS',
 		success: status.success,
 		...( status.error && { error: status.error } ),
 	};
 
-	// This will be used when URL metrics are primed using a IFRAME.
-	if ( options.toParent && window.parent && window.parent !== window ) {
+	if (
+		'admin-dashboard' === source &&
+		window.parent &&
+		window.parent !== window
+	) {
 		window.parent.postMessage( message, '*' );
-	}
-
-	// This will be used when URL metrics are primed using Puppeteer script.
-	if ( options.toLocal ) {
+	} else if ( 'priming-cli' === source ) {
 		document.dispatchEvent(
 			new CustomEvent( message.type, {
 				detail: { ...status },
@@ -721,9 +727,13 @@ export default async function detect( {
 	// Presence of the token indicates that the URL Metric is being primed
 	// through the Puppeteer script or WordPress admin dashboard.
 	if ( '' !== window.location.hash ) {
-		odPrimeUrlMetricsVerificationToken = new URLSearchParams(
+		const searchParams = new URLSearchParams(
 			window.location.hash.slice( 1 )
-		).get( 'odPrimeUrlMetricsVerificationToken' );
+		);
+		primeModeVerificationToken = searchParams.get(
+			'odPrimeModeVerificationToken'
+		);
+		primeModeSource = searchParams.get( 'odPrimeModeSource' );
 	}
 
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
@@ -735,7 +745,7 @@ export default async function detect( {
 			logger
 		);
 	if (
-		! odPrimeUrlMetricsVerificationToken &&
+		! primeModeVerificationToken &&
 		null !== alreadySubmittedSessionStorageKey &&
 		alreadySubmittedSessionStorageKey in sessionStorage
 	) {
@@ -1054,7 +1064,7 @@ export default async function detect( {
 
 	// Wait for the page to be hidden.
 	await new Promise( async ( resolve ) => {
-		if ( ! odPrimeUrlMetricsVerificationToken ) {
+		if ( ! primeModeVerificationToken ) {
 			win.addEventListener( 'pagehide', resolve, { once: true } );
 			win.addEventListener( 'pageswap', resolve, { once: true } );
 			doc.addEventListener(
@@ -1230,10 +1240,10 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	if ( odPrimeUrlMetricsVerificationToken ) {
+	if ( primeModeVerificationToken ) {
 		url.searchParams.set(
 			'prime_url_metrics_verification_token',
-			odPrimeUrlMetricsVerificationToken
+			primeModeVerificationToken
 		);
 	}
 
@@ -1248,10 +1258,10 @@ export default async function detect( {
 		method: 'POST',
 		body: payloadBlob,
 		headers,
-		keepalive: odPrimeUrlMetricsVerificationToken ? false : true, // Setting keepalive to true makes fetch() behave the same as navigator.sendBeacon().
+		keepalive: primeModeVerificationToken ? false : true, // Setting keepalive to true makes fetch() behave the same as navigator.sendBeacon().
 	} );
 
-	if ( ! odPrimeUrlMetricsVerificationToken ) {
+	if ( ! primeModeVerificationToken ) {
 		await fetch( request );
 	} else {
 		try {
@@ -1261,9 +1271,12 @@ export default async function detect( {
 					`Failed to send URL Metric. Status: ${ response.status }`
 				);
 			}
-			notifyStatus( { success: true } );
+			notifyStatus( { success: true }, primeModeSource );
 		} catch ( err ) {
-			notifyStatus( { success: false, error: err.message } );
+			notifyStatus(
+				{ success: false, error: err.message },
+				primeModeSource
+			);
 		}
 	}
 }
