@@ -88,8 +88,8 @@ function checkEnvironment() {
 /**
  * Fetches the next batch of URLs.
  *
- * @param {?import("../types.ts").URLBatchCursor} lastCursor - The cursor to fetch the next batch.
- * @return {?import("../types.ts").URLBatchResponse} - The batch of URLs.
+ * @param {?import("./types.ts").URLBatchCursor} lastCursor - The cursor to fetch the next batch.
+ * @return {?import("./types.ts").URLBatchResponse} - The batch of URLs.
  */
 function getBatch( lastCursor ) {
 	try {
@@ -122,8 +122,8 @@ function getBatch( lastCursor ) {
 /**
  * Flattens the url groups to tasks.
  *
- * @param {import("../types.ts").URLGroup[]} urlGroups - The url groups to flatten.
- * @return {import("../types.ts").URLPrimingTask[]} - The flattened tasks.
+ * @param {import("./types.ts").URLGroup[]} urlGroups - The url groups to flatten.
+ * @return {import("./types.ts").URLPrimingTask[]} - The flattened tasks.
  */
 function flattenBatchToTasks( urlGroups ) {
 	return urlGroups.flatMap( ( urlGroup ) =>
@@ -138,10 +138,10 @@ function flattenBatchToTasks( urlGroups ) {
 /**
  * Processes a single task using Puppeteer.
  *
- * @param {Page}                                 page              - The Puppeteer page to use.
- * @param {import("../types.ts").URLPrimingTask} task              - The task parameters.
- * @param {string}                               verificationToken - The verification token.
- * @param {AbortSignal}                          abortSignal       - The abort signal.
+ * @param {Page}                                page              - The Puppeteer page to use.
+ * @param {import("./types.ts").URLPrimingTask} task              - The task parameters.
+ * @param {string}                              verificationToken - The verification token.
+ * @param {AbortSignal}                         abortSignal       - The abort signal.
  * @return {Promise<void>}
  */
 async function processTask( page, task, verificationToken, abortSignal ) {
@@ -273,7 +273,7 @@ async function init() {
 	/**
 	 * Cursor object to track position in pagination when fetching URL batches.
 	 *
-	 * @type {import("../types.ts").URLBatchCursor}
+	 * @type {import("./types.ts").URLBatchCursor}
 	 */
 	let cursor = null;
 
@@ -297,7 +297,7 @@ async function init() {
 			break;
 		}
 		spinner.start( 'Fetching next batch' );
-		const currentBatch = await getBatch( cursor );
+		const currentBatch = getBatch( cursor );
 
 		// If no URLs remain in the batch, finish processing.
 		if (
