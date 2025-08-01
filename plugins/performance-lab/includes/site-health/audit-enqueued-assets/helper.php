@@ -487,14 +487,20 @@ function perflab_aea_generate_blocking_assets_table(): string {
 
 				$table .= $has_error ? '<tr style="background-color: #ffecec;">' : '<tr>';
 				$table .= '<td>' . esc_html( $label ) . '</td>';
-				$table .= '<td>' . esc_url( $asset['src'] ) . '</td>';
-				$table .= '<td>' . ( $has_error ? esc_html__( 'NA', 'performance-lab' ) : str_replace( ' ', '&nbsp;', size_format( $asset['size'] ) ) ) . '</td>';
+				$table .= '<td>' . esc_url( $asset['src'] );
+				if ( $has_error ) {
+					$table .= '<p>' . wp_kses( $asset['error']->get_error_message(), array( 'code' => array() ) ) . '</p>';
+				}
+				$table .= '</td>';
+				$table .= '<td>';
+				if ( is_int( $asset['size'] ) ) {
+					$table .= str_replace( ' ', '&nbsp;', (string) size_format( $asset['size'] ) );
+				} else {
+					$table .= esc_html__( 'N/A', 'performance-lab' );
+				}
+				$table .= '</td>';
 				$table .= '<td>' . esc_html( $has_error ? __( 'Error', 'performance-lab' ) : __( 'OK', 'performance-lab' ) ) . '</td>';
 				$table .= '</tr>';
-
-				if ( $has_error ) {
-					$table .= '<tr style="background-color: #ffecec;"><td colspan="4">' . wp_kses( $asset['error']->get_error_message(), array( 'code' => array() ) ) . '</td></tr>';
-				}
 			}
 		}
 	}
