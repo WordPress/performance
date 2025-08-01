@@ -97,7 +97,7 @@ function perflab_get_standalone_plugin_data(): array {
 	return array(
 		'auto-sizes'              => array(
 			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'dominant-color-images'   => array(
 			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
