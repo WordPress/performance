@@ -58,16 +58,16 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 
 	$result['description'] .= perflab_aea_generate_blocking_assets_table();
 
-	if ( isset( $scripts_result['description'] ) ) {
+	if ( isset( $scripts_result ) ) {
 		$result['description'] .= $scripts_result['description'];
 	}
-	if ( isset( $styles_result['description'] ) ) {
+	if ( isset( $styles_result ) ) {
 		$result['description'] .= $styles_result['description'];
 	}
 
 	if (
-		( isset( $scripts_result['status'] ) && 'good' !== $scripts_result['status'] ) ||
-		( isset( $styles_result['status'] ) && 'good' !== $styles_result['status'] )
+		( isset( $scripts_result ) && 'good' !== $scripts_result['status'] ) ||
+		( isset( $styles_result ) && 'good' !== $styles_result['status'] )
 	) {
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
