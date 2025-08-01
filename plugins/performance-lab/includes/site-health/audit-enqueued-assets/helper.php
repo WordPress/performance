@@ -157,6 +157,16 @@ function perflab_aea_enqueued_blocking_scripts(): ?array {
 		);
 	}
 
+	// If one of the assets had an error, then fail the test even if under the threshold.
+	$scripts = perflab_aea_get_blocking_assets( 'scripts' );
+	if ( null !== $scripts ) {
+		foreach ( $scripts as $script ) {
+			if ( is_wp_error( $script['error'] ) ) {
+				$result['status'] = 'recommended';
+			}
+		}
+	}
+
 	return $result;
 }
 
@@ -232,6 +242,16 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
 				)
 			)
 		);
+	}
+
+	// If one of the assets had an error, then fail the test even if under the threshold.
+	$styles = perflab_aea_get_blocking_assets( 'styles' );
+	if ( null !== $styles ) {
+		foreach ( $styles as $style ) {
+			if ( is_wp_error( $style['error'] ) ) {
+				$result['status'] = 'recommended';
+			}
+		}
 	}
 
 	return $result;
@@ -414,6 +434,8 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		);
 	}
 
+	// TODO: A non-cacheable response should also be considered an error.
+	// TODO: A size of zero could be considered an error too.
 	return strlen( wp_remote_retrieve_body( $response ) );
 }
 
@@ -466,7 +488,7 @@ function perflab_aea_generate_blocking_assets_table(): string {
 				$table .= $has_error ? '<tr style="background-color: #ffecec;">' : '<tr>';
 				$table .= '<td>' . esc_html( $label ) . '</td>';
 				$table .= '<td>' . esc_url( $asset['src'] ) . '</td>';
-				$table .= '<td>' . ( $has_error ? esc_html__( 'NA', 'performance-lab' ) : size_format( $asset['size'] ) ) . '</td>';
+				$table .= '<td>' . ( $has_error ? esc_html__( 'NA', 'performance-lab' ) : str_replace( ' ', '&nbsp;', size_format( $asset['size'] ) ) ) . '</td>';
 				$table .= '<td>' . esc_html( $has_error ? __( 'Error', 'performance-lab' ) : __( 'OK', 'performance-lab' ) ) . '</td>';
 				$table .= '</tr>';
 
