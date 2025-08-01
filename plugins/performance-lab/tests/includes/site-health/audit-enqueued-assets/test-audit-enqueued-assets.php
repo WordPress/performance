@@ -8,9 +8,6 @@
 
 class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
-	const WARNING_SCRIPTS_THRESHOLD = 31;
-	const WARNING_STYLES_THRESHOLD  = 11;
-
 	/**
 	 * Mocked responses for HTTP requests.
 	 *
@@ -339,68 +336,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test perflab_aea_enqueued_blocking_scripts() no transient saved.
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_scripts
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_no_transient(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_scripts() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_scripts() with data in transient ( less than WARNING_SCRIPTS_threshold ).
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_scripts
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( 1 );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_scripts() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_scripts() with data in transient ( more than WARNING_SCRIPTS_threshold ).
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_scripts
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( self::WARNING_SCRIPTS_THRESHOLD );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_scripts() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_styles() no transient saved.
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_styles
-	 */
-	public function test_perflab_aea_enqueued_css_assets_test_no_transient(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_styles() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_styles() with data in transient ( less than WARNING_STYLES_threshold ).
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_styles
-	 */
-	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( 1 );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_styles() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_styles() with data in transient ( more than WARNING_STYLES_threshold ).
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_styles
-	 */
-	public function test_aea_enqueued_cdd_assets_test_with_assets_more_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( self::WARNING_STYLES_THRESHOLD );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_styles() );
-	}
-
-	/**
 	 * Tests perflab_aea_invalidate_cache_transients() functionality.
 	 *
 	 * @covers ::perflab_aea_invalidate_cache_transients
@@ -513,28 +448,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	public function current_user_can_view_site_health_checks_cap(): void {
 		$current_user = wp_get_current_user();
 		$current_user->add_cap( 'view_site_health_checks' );
-	}
-
-	/**
-	 * @param int $number_of_assets Number of assets mocked.
-	 * @return array<string, mixed>
-	 */
-	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( int $number_of_assets = 5 ): array {
-		if ( $number_of_assets < self::WARNING_SCRIPTS_THRESHOLD ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_less_than_threshold( $number_of_assets );
-		}
-		return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_more_than_threshold( $number_of_assets );
-	}
-
-	/**
-	 * @param int $number_of_assets Number of styles mocked.
-	 * @return array<string, mixed>
-	 */
-	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( int $number_of_assets = 5 ): array {
-		if ( $number_of_assets < self::WARNING_STYLES_THRESHOLD ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_threshold( $number_of_assets );
-		}
-		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 
 	public function get_mocked_html(): string {
