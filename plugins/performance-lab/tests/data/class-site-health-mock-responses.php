@@ -46,7 +46,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( 'scripts' ) )
 					)
 				)
 			),
@@ -74,7 +74,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( 'scripts' ) )
 					)
 				)
 			),
@@ -102,7 +102,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' ) )
 					)
 				)
 			),
@@ -130,7 +130,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' ) )
 					)
 				)
 			),
