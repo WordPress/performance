@@ -27,6 +27,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
 		/**
@@ -311,6 +313,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Make sure perflab_aea_add_enqueued_assets_test adds the right information.
+	 *
+	 * @covers ::perflab_aea_add_enqueued_assets_test
 	 */
 	public function test_perflab_aea_add_enqueued_assets_test(): void {
 		$initial_tests = array(
@@ -336,6 +340,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_scripts() no transient saved.
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_no_transient(): void {
 		$this->assertNull( perflab_aea_enqueued_blocking_scripts() );
@@ -343,6 +349,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_scripts() with data in transient ( less than WARNING_SCRIPTS_threshold ).
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
@@ -352,6 +360,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_scripts() with data in transient ( more than WARNING_SCRIPTS_threshold ).
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
@@ -361,6 +371,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_styles() no transient saved.
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_no_transient(): void {
 		$this->assertNull( perflab_aea_enqueued_blocking_styles() );
@@ -368,6 +380,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_styles() with data in transient ( less than WARNING_STYLES_threshold ).
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
@@ -377,6 +391,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Test perflab_aea_enqueued_blocking_styles() with data in transient ( more than WARNING_STYLES_threshold ).
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_aea_enqueued_cdd_assets_test_with_assets_more_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
@@ -386,6 +402,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Tests perflab_aea_invalidate_cache_transients() functionality.
+	 *
+	 * @covers ::perflab_aea_invalidate_cache_transients
 	 */
 	public function test_perflab_aea_invalidate_cache_transients(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
@@ -396,6 +414,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
 	 * Tests perflab_aea_clean_aea_audit_action() functionality.
+	 *
+	 * @covers ::perflab_aea_clean_aea_audit_action
 	 */
 	public function test_perflab_aea_clean_aea_audit_action(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();

@@ -9,61 +9,87 @@
 class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 
 	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test(): void {
+		$this->markTestIncomplete();
+	}
+
+	// Note: perflab_aea_enqueued_blocking_scripts() is tested in Test_Audit_Enqueued_Assets.
+	// Note: perflab_aea_enqueued_blocking_styles() is tested in Test_Audit_Enqueued_Assets.
+
+
+	/**
+	 * Tests perflab_aea_blocking_assets_retrieval_failure().
+	 *
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_blocking_assets_retrieval_failure(): void {
+		$this->markTestIncomplete();
+	}
+
+	/**
 	 * Tests perflab_aea_get_total_enqueued_scripts() no transient saved.
+	 *
+	 * @covers ::perflab_aea_get_total_enqueued_scripts
 	 */
 	public function test_perflab_aea_get_total_enqueued_scripts_no_transient(): void {
-		$total_enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
-		$this->assertFalse( $total_enqueued_scripts );
+		$this->assertFalse( perflab_aea_get_total_enqueued_scripts() );
 	}
 
 	/**
-	 * Tests perflab_aea_get_total_enqueued_scripts().
+	 * Tests perflab_aea_get_total_enqueued_styles() no transient saved.
+	 *
+	 * @covers ::perflab_aea_get_total_enqueued_styles
+	 */
+	public function test_perflab_aea_get_total_enqueued_styles_no_transient(): void {
+		$this->assertFalse( perflab_aea_get_total_enqueued_styles() );
+	}
+
+	/**
+	 * Tests perflab_aea_get_total_enqueued_scripts() with transient saved..
+	 *
+	 * @covers ::perflab_aea_get_total_enqueued_scripts
 	 */
 	public function test_perflab_aea_get_total_enqueued_scripts(): void {
-		$total_enqueued_styles = perflab_aea_get_total_enqueued_styles();
-		$this->assertFalse( $total_enqueued_styles );
-
+		$this->assertFalse( perflab_aea_get_total_enqueued_scripts() );
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 5 );
-		$total_enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
-		$this->assertIsInt( $total_enqueued_scripts );
-		$this->assertEquals( 5, $total_enqueued_scripts );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_size_bytes_enqueued_scripts().
-	 */
-	public function test_perflab_aea_get_total_size_bytes_enqueued_scripts(): void {
-		$size_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_scripts();
-		$this->assertFalse( $size_enqueued_scripts );
-
-		Audit_Assets_Transients_Set::set_script_transient_with_data( 5 );
-		$total_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_scripts();
-		$this->assertEquals( 5000, $total_enqueued_scripts );
+		$this->assertSame( 5, perflab_aea_get_total_enqueued_scripts() );
 	}
 
 	/**
 	 * Tests perflab_aea_get_total_enqueued_styles() with transient saved.
+	 *
+	 * @covers ::perflab_aea_get_total_enqueued_styles
 	 */
 	public function test_perflab_aea_get_total_enqueued_styles(): void {
-		$total_enqueued_styles = perflab_aea_get_total_enqueued_styles();
-		$this->assertEquals( 0, $total_enqueued_styles );
-
+		$this->assertFalse( perflab_aea_get_total_enqueued_styles() );
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 5 );
-		$total_enqueued_styles = perflab_aea_get_total_enqueued_styles();
-		$this->assertIsInt( $total_enqueued_styles );
-		$this->assertEquals( 5, $total_enqueued_styles );
+		$this->assertSame( 5, perflab_aea_get_total_enqueued_styles() );
+	}
+
+	/**
+	 * Tests perflab_aea_get_total_size_bytes_enqueued_scripts().
+	 *
+	 * @covers ::perflab_aea_get_total_size_bytes_enqueued_scripts
+	 */
+	public function test_perflab_aea_get_total_size_bytes_enqueued_scripts(): void {
+		$this->assertFalse( perflab_aea_get_total_size_bytes_enqueued_scripts() );
+
+		Audit_Assets_Transients_Set::set_script_transient_with_data( 5 );
+		$this->assertSame( 5000, perflab_aea_get_total_size_bytes_enqueued_scripts() );
 	}
 
 	/**
 	 * Tests perflab_aea_get_total_size_bytes_enqueued_styles().
 	 */
 	public function test_perflab_aea_get_total_size_bytes_enqueued_styles(): void {
-		$size_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_styles();
-		$this->assertFalse( $size_enqueued_scripts );
+		$this->assertFalse( perflab_aea_get_total_size_bytes_enqueued_styles() );
 
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 5 );
-		$total_enqueued_styles = perflab_aea_get_total_size_bytes_enqueued_styles();
-		$this->assertEquals( 5000, $total_enqueued_styles );
+		$this->assertEquals( 5000, perflab_aea_get_total_size_bytes_enqueued_styles() );
 	}
 
 	/**
@@ -130,6 +156,15 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 		$headers                  = perflab_aea_copy_basic_auth_headers( array() );
 		$this->assertArrayHasKey( 'Authorization', $headers );
 		$this->assertEquals( 'Basic ' . base64_encode( 'user:pass' ), $headers['Authorization'] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to encode the credentials for verifying forwarding of basic auth headers.
+	}
+
+	/**
+	 * Tests perflab_aea_generate_blocking_assets_table().
+	 *
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_generate_blocking_assets_table(): void {
+		$this->markTestIncomplete();
 	}
 
 	/**
