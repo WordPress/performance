@@ -319,7 +319,13 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts = false;
 	$blocking_assets  = get_transient( 'aea_blocking_assets' );
-	if ( isset( $blocking_assets['scripts'] ) && is_array( $blocking_assets['scripts'] ) ) {
+	if (
+		is_array( $blocking_assets ) // If it is a WP_Error, then "Error: Cannot use object of type WP_Error as array".
+		&&
+		isset( $blocking_assets['scripts'] )
+		&&
+		is_array( $blocking_assets['scripts'] )
+	) {
 		$enqueued_scripts = count( $blocking_assets['scripts'] );
 	}
 	return $enqueued_scripts;
@@ -335,7 +341,13 @@ function perflab_aea_get_total_enqueued_scripts() {
 function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 	$total_size      = false;
 	$blocking_assets = get_transient( 'aea_blocking_assets' );
-	if ( isset( $blocking_assets['scripts'] ) && is_array( $blocking_assets['scripts'] ) ) {
+	if (
+		is_array( $blocking_assets ) // If it is a WP_Error, then "Error: Cannot use object of type WP_Error as array".
+		&&
+		isset( $blocking_assets['scripts'] )
+		&&
+		is_array( $blocking_assets['scripts'] )
+	) {
 		$total_size = 0;
 		foreach ( $blocking_assets['scripts'] as $enqueued_script ) {
 			if ( is_array( $enqueued_script ) && array_key_exists( 'size', $enqueued_script ) && is_int( $enqueued_script['size'] ) ) {
@@ -356,7 +368,13 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 function perflab_aea_get_total_enqueued_styles() {
 	$enqueued_styles = false;
 	$blocking_assets = get_transient( 'aea_blocking_assets' );
-	if ( isset( $blocking_assets['styles'] ) && is_array( $blocking_assets['styles'] ) ) {
+	if (
+		is_array( $blocking_assets ) // If it is a WP_Error, then "Error: Cannot use object of type WP_Error as array".
+		&&
+		isset( $blocking_assets['styles'] )
+		&&
+		is_array( $blocking_assets['styles'] )
+	) {
 		$enqueued_styles = count( $blocking_assets['styles'] );
 	}
 	return $enqueued_styles;
@@ -372,7 +390,13 @@ function perflab_aea_get_total_enqueued_styles() {
 function perflab_aea_get_total_size_bytes_enqueued_styles() {
 	$total_size      = false;
 	$blocking_assets = get_transient( 'aea_blocking_assets' );
-	if ( isset( $blocking_assets['styles'] ) && is_array( $blocking_assets['styles'] ) ) {
+	if (
+		is_array( $blocking_assets ) // If it is a WP_Error, then "Error: Cannot use object of type WP_Error as array".
+		&&
+		isset( $blocking_assets['styles'] )
+		&&
+		is_array( $blocking_assets['styles'] )
+	) {
 		$total_size = 0;
 		foreach ( $blocking_assets['styles'] as $enqueued_style ) {
 			if ( is_array( $enqueued_style ) && array_key_exists( 'size', $enqueued_style ) && is_int( $enqueued_style['size'] ) ) {
