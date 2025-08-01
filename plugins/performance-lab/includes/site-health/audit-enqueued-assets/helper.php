@@ -17,7 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  *
- * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string}|array{omitted: true} Result.
+ * @return array{
+ *             label: string,
+ *             status: 'good'|'recommended',
+ *             badge: array{label: string, color: non-empty-string},
+ *             description: string,
+ *             actions: string,
+ *             test: string
+ *         }|array{omitted: true} Result.
  */
 function perflab_aea_enqueued_blocking_assets_test(): array {
 	$result = array(
@@ -33,17 +40,11 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 	);
 
 	$response = get_transient( 'aea_blocking_assets_response' );
-	if ( false !== $response ) {
+	if ( is_wp_error( $response ) || is_array( $response ) ) {
 		$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $response );
-		if ( null === $retrieval_failure_result ) {
-			// The return value is validated in JavaScript at:
-			// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
-			// If the value lacks the required keys of test, label, and description then it is omitted.
-			return array( 'omitted' => true );
+		if ( null !== $retrieval_failure_result ) {
+			return array_merge( $result, $retrieval_failure_result );
 		}
-		$result['status']      = $retrieval_failure_result['status'];
-		$result['description'] = $retrieval_failure_result['description'];
-		return $result;
 	}
 
 	$scripts_result = perflab_aea_enqueued_blocking_scripts();
@@ -245,7 +246,7 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
  * @since n.e.x.t
  *
  * @param WP_Error|array<string, mixed> $response The response from the home page retrieval.
- * @return array{status: string, description: string}|null Result.
+ * @return array{status: 'recommended', description: string}|null Result, or null if there was no failure.
  */
 function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 	$result = array(
@@ -253,17 +254,7 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 		'description' => '',
 	);
 
-	if ( is_wp_error( $response ) ) {
-		$result['description'] = '<p>' . wp_kses(
-			sprintf(
-				/* translators: %1$s is the error code */
-				__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code <code>%1$s</code> and the following message:', 'performance-lab' ),
-				esc_html( (string) $response->get_error_code() )
-			),
-			array( 'code' => array() )
-		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
-		return $result;
-	} elseif ( is_array( $response ) ) {
+	if ( is_array( $response ) ) {
 		$code    = wp_remote_retrieve_response_code( $response );
 		$message = wp_remote_retrieve_response_message( $response );
 		$body    = wp_remote_retrieve_body( $response );
@@ -272,20 +263,26 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 			$header = array_pop( $header );
 		}
 
-		if ( 200 === $code && '' === $body ) {
-			$result['description'] .= '<p>' . esc_html__( 'While retrieving the home page to analyze the blocking assets, the request was successfully but response body was empty.', 'performance-lab' ) . '</p>';
-			return $result;
+		// No error.
+		if ( 200 === $code && '' !== $body ) {
+			return null;
 		}
 
-		$result['description'] .= '<p>' . wp_kses(
-			sprintf(
-				/* translators: %d is the HTTP status code, %s is the status header description */
-				__( 'While retrieving the home page to analyze the blocking assets, the request returned with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
-				(int) $code,
-				esc_html( $message )
-			),
-			array( 'code' => array() )
-		) . '</p>';
+		if ( '' === $body ) {
+			$result['description'] .= '<p>' . esc_html__( 'While retrieving the home page to analyze the blocking assets, the request was successfully but response body was empty.', 'performance-lab' ) . '</p>';
+		}
+
+		if ( 200 !== $code ) {
+			$result['description'] .= '<p>' . wp_kses(
+				sprintf(
+					/* translators: %d is the HTTP status code, %s is the status header description */
+					__( 'While retrieving the home page to analyze the blocking assets, the request returned with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
+					(int) $code,
+					esc_html( $message )
+				),
+				array( 'code' => array() )
+			) . '</p>';
+		}
 
 		if ( '' !== $body ) {
 			$result['description'] .= '<details>';
@@ -299,10 +296,17 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 			}
 			$result['description'] .= '</details>';
 		}
-		return $result;
+	} else {
+		$result['description'] = '<p>' . wp_kses(
+			sprintf(
+				/* translators: %1$s is the error code */
+				__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code <code>%1$s</code> and the following message:', 'performance-lab' ),
+				esc_html( (string) $response->get_error_code() )
+			),
+			array( 'code' => array() )
+		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
 	}
-
-	return null;
+	return $result;
 }
 
 /**

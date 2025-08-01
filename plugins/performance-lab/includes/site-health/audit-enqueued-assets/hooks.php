@@ -39,15 +39,15 @@ function perflab_aea_audit_blocking_assets(): void {
 		)
 	);
 
-	delete_transient( 'aea_blocking_assets_response' );
+	// Always populate the response so it is available for inspection.
+	set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
+
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
 		return;
 	}
 
 	$html = wp_remote_retrieve_body( $response );
 	if ( '' === $html ) {
-		set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
 		return;
 	}
 
