@@ -17,8 +17,198 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
 	 */
-	public function test_perflab_aea_enqueued_blocking_assets_test(): void {
-		$this->markTestIncomplete();
+	public function test_perflab_aea_enqueued_blocking_assets_test_no_transient(): void {
+		$this->assertSame(
+			array( 'omitted' => true ),
+			perflab_aea_enqueued_blocking_assets_test()
+		);
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_and_css(): void {
+		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
+		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'good', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+
+		$processor = new WP_HTML_Tag_Processor( $test['actions'] );
+		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'A' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_and_css(): void {
+		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
+		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+
+		$processor = new WP_HTML_Tag_Processor( $test['actions'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'A' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_but_good_css(): void {
+		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
+		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+
+		$processor = new WP_HTML_Tag_Processor( $test['actions'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'A' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_but_bad_css(): void {
+		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
+		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+
+		$processor = new WP_HTML_Tag_Processor( $test['actions'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'A' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_wp_error(): void {
+		set_transient( 'aea_blocking_assets_response', new WP_Error( 'something_bad', 'Oh no!!!' ) );
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'BLOCKQUOTE' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_http_error(): void {
+		set_transient(
+			'aea_blocking_assets_response',
+			array(
+				'response' => array(
+					'code'    => 404,
+					'message' => 'Not Found',
+				),
+				'body'     => 'Where art thou?',
+			)
+		);
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$processor = new WP_HTML_Tag_Processor( $test['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'DETAILS' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_empty_body(): void {
+		set_transient(
+			'aea_blocking_assets_response',
+			array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => '',
+			)
+		);
+
+		$test = perflab_aea_enqueued_blocking_assets_test();
+		$this->assertArrayNotHasKey( 'omitted', $test );
+
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $test )
+		);
+		$this->assertSame( 'recommended', $test['status'] );
+
+		$this->assertStringContainsString( 'body was empty', $test['description'] );
 	}
 
 	/**
@@ -83,14 +273,49 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_styles() );
 	}
 
+	/**
+	 * Tests perflab_aea_blocking_assets_retrieval_failure().
+	 *
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_blocking_assets_retrieval_failure_not(): void {
+		$response = array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'body'     => 'HEY!!',
+		);
+		$this->assertNull( perflab_aea_blocking_assets_retrieval_failure( $response ) );
+	}
 
 	/**
 	 * Tests perflab_aea_blocking_assets_retrieval_failure().
 	 *
 	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
 	 */
-	public function test_perflab_aea_blocking_assets_retrieval_failure(): void {
-		$this->markTestIncomplete();
+	public function test_perflab_aea_blocking_assets_retrieval_failure_404(): void {
+		$response = array(
+			'response' => array(
+				'code'    => 404,
+				'message' => 'Not Found',
+			),
+			'body'     => 'You are so lost',
+		);
+		$result   = perflab_aea_blocking_assets_retrieval_failure( $response );
+		$this->assertIsArray( $result );
+		$this->assertSame( 'recommended', $result['status'] );
+	}
+
+	/**
+	 * Tests perflab_aea_blocking_assets_retrieval_failure().
+	 *
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_blocking_assets_retrieval_failure_wp_error(): void {
+		$result = perflab_aea_blocking_assets_retrieval_failure( new WP_Error( 'something_bad', 'Oh no!!!' ) );
+		$this->assertIsArray( $result );
+		$this->assertSame( 'recommended', $result['status'] );
 	}
 
 	/**
@@ -222,12 +447,37 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_generate_blocking_assets_table().
+	 * Tests perflab_aea_generate_blocking_assets_table() without anything.
 	 *
 	 * @covers ::perflab_aea_generate_blocking_assets_table
 	 */
-	public function test_perflab_aea_generate_blocking_assets_table(): void {
-		$this->markTestIncomplete();
+	public function test_perflab_aea_generate_blocking_assets_table_empty(): void {
+		delete_transient( 'aea_blocking_assets' );
+		$this->assertSame( '', perflab_aea_generate_blocking_assets_table() );
+	}
+
+	/**
+	 * Tests perflab_aea_generate_blocking_assets_table() with scripts.
+	 *
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_generate_blocking_assets_table_scripts(): void {
+		Audit_Assets_Transients_Set::set_script_transient_with_data( 5 );
+		$table     = perflab_aea_generate_blocking_assets_table();
+		$processor = new WP_HTML_Tag_Processor( $table );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_generate_blocking_assets_table() with styles.
+	 *
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 */
+	public function test_perflab_aea_generate_blocking_assets_table_css(): void {
+		Audit_Assets_Transients_Set::set_style_transient_with_data( 5 );
+		$table     = perflab_aea_generate_blocking_assets_table();
+		$processor = new WP_HTML_Tag_Processor( $table );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
 	}
 
 	/**

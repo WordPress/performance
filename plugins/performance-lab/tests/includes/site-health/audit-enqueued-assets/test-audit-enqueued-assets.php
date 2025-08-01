@@ -43,16 +43,19 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEqualSets(
 			array(
 				array(
-					'src'  => 'script.js',
-					'size' => 1000,
+					'src'   => 'script.js',
+					'size'  => 1000,
+					'error' => null,
 				),
 				array(
-					'src'  => 'script.js',
-					'size' => 1000,
+					'src'   => 'script.js',
+					'size'  => 1000,
+					'error' => null,
 				),
 				array(
-					'src'  => 'script.js',
-					'size' => 1000,
+					'src'   => 'script.js',
+					'size'  => 1000,
+					'error' => null,
 				),
 			),
 			$transient['scripts']
@@ -192,16 +195,19 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEqualSets(
 			array(
 				array(
-					'src'  => 'style.css',
-					'size' => 1000,
+					'src'   => 'style.css',
+					'size'  => 1000,
+					'error' => null,
 				),
 				array(
-					'src'  => 'style.css',
-					'size' => 1000,
+					'src'   => 'style.css',
+					'size'  => 1000,
+					'error' => null,
 				),
 				array(
-					'src'  => 'style.css',
-					'size' => 1000,
+					'src'   => 'style.css',
+					'size'  => 1000,
+					'error' => null,
 				),
 			),
 			$transient['styles']

@@ -89,7 +89,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
  *
  * @since n.e.x.t
  *
- * @return array{status: string, description: string}|null Result.
+ * @return array{status: 'good'|'recommended', description: string}|null Result.
  */
 function perflab_aea_enqueued_blocking_scripts(): ?array {
 	/**
