@@ -19,16 +19,18 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_script_transient_with_data( int $number_of_assets = 5 ): void {
-		$assets = array(
-			'scripts' => array_fill(
-				0,
-				$number_of_assets,
-				array(
-					'src'  => 'script.js',
-					'size' => 1000,
-				)
-			),
-			'styles'  => array(),
+		$assets = get_transient( self::ASSETS_TRANSIENT );
+		if ( ! is_array( $assets ) ) {
+			$assets = array();
+		}
+		$assets['scripts'] = array_fill(
+			0,
+			$number_of_assets,
+			array(
+				'src'   => 'script.js',
+				'size'  => 1000,
+				'error' => null,
+			)
 		);
 		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
@@ -39,16 +41,18 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_style_transient_with_data( int $number_of_assets = 5 ): void {
-		$assets = array(
-			'scripts' => array(),
-			'styles'  => array_fill(
-				0,
-				$number_of_assets,
-				array(
-					'src'  => 'style.css',
-					'size' => 1000,
-				)
-			),
+		$assets = get_transient( self::ASSETS_TRANSIENT );
+		if ( ! is_array( $assets ) ) {
+			$assets = array();
+		}
+		$assets['styles'] = array_fill(
+			0,
+			$number_of_assets,
+			array(
+				'src'   => 'style.css',
+				'size'  => 1000,
+				'error' => null,
+			)
 		);
 		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
