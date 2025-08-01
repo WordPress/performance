@@ -52,11 +52,4 @@ class Audit_Assets_Transients_Set {
 		);
 		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
-
-	/**
-	 * Deleting the Assets transient.
-	 */
-	public static function set_asset_transient_with_no_data(): void {
-		delete_transient( self::ASSETS_TRANSIENT );
-	}
 }

@@ -81,15 +81,15 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 		add_filter(
 			'wp_script_attributes',
-			static function ( $atts ) {
-				if ( 'script-async-js' === $atts['id'] ) {
-					$atts['async'] = true;
-				} elseif ( 'script-defer-js' === $atts['id'] ) {
-					$atts['defer'] = true;
-				} elseif ( 'type-noscript-js' === $atts['id'] ) {
-					$atts['type'] = 'noscript';
+			static function ( $attributes ) {
+				if ( 'script-async-js' === $attributes['id'] ) {
+					$attributes['async'] = true;
+				} elseif ( 'script-defer-js' === $attributes['id'] ) {
+					$attributes['defer'] = true;
+				} elseif ( 'type-noscript-js' === $attributes['id'] ) {
+					$attributes['type'] = 'noscript';
 				}
-				return $atts;
+				return $attributes;
 			}
 		);
 
@@ -449,7 +449,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_perflab_aea_audit_blocking_assets_home_request_failure.
 	 *
-	 * @return array<string, array<mixed>>
+	 * @return array<string, array{ mocked_responses: array{ url: string, response: WP_Error|array{ code: positive-int, body: string } } }>
 	 */
 	public function data_perflab_aea_audit_blocking_assets_home_request_failure(): array {
 		return array(
@@ -464,6 +464,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					'url'      => home_url( '/' ),
 					'response' => array(
 						'code' => 404,
+						'body' => '',
 					),
 				),
 			),

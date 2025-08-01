@@ -32,7 +32,7 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( int $enqueued_scripts = 1 ): array {
-		$result = array(
+		return array(
 			'status'      => 'good',
 			'description' => sprintf(
 				'<p>%s</p>',
@@ -51,7 +51,6 @@ class Site_Health_Mock_Responses {
 				)
 			),
 		);
-		return $result;
 	}
 
 	/**
@@ -61,7 +60,7 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( int $enqueued_scripts ): array {
-		$result = array(
+		return array(
 			'status'      => 'recommended',
 			'description' => sprintf(
 				'<p>%s</p>',
@@ -80,7 +79,6 @@ class Site_Health_Mock_Responses {
 				)
 			),
 		);
-		return $result;
 	}
 
 	/**
@@ -90,7 +88,7 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( int $enqueued_styles = 1 ): array {
-		$result = array(
+		return array(
 			'status'      => 'good',
 			'description' => sprintf(
 				'<p>%s</p>',
@@ -109,7 +107,6 @@ class Site_Health_Mock_Responses {
 				)
 			),
 		);
-		return $result;
 	}
 
 	/**
@@ -119,7 +116,7 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( int $enqueued_styles ): array {
-		$result = array(
+		return array(
 			'status'      => 'recommended',
 			'description' => sprintf(
 				'<p>%s</p>',
@@ -138,6 +135,5 @@ class Site_Health_Mock_Responses {
 				)
 			),
 		);
-		return $result;
 	}
 }
