@@ -13,6 +13,15 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	const WARNING_STYLES_THRESHOLD = 11;
 
 	/**
+	 * Tear down.
+	 */
+	public function tear_down(): void {
+		unset( $_SERVER['PHP_AUTH_USER'] );
+		unset( $_SERVER['PHP_AUTH_PW'] );
+		parent::tear_down();
+	}
+
+	/**
 	 * Tests perflab_aea_enqueued_blocking_assets_test
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
@@ -475,18 +484,18 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_copy_basic_auth_headers() with various scenarios.
 	 *
-	 * @covers ::perflab_aea_copy_basic_auth_headers
+	 * @covers ::perflab_get_http_basic_authorization_headers
 	 */
-	public function test_perflab_aea_copy_basic_auth_headers(): void {
+	public function test_perflab_get_http_basic_authorization_headers(): void {
 		unset( $_SERVER['PHP_AUTH_USER'] );
 		unset( $_SERVER['PHP_AUTH_PW'] );
 
-		$headers = perflab_aea_copy_basic_auth_headers( array() );
+		$headers = perflab_get_http_basic_authorization_headers();
 		$this->assertArrayNotHasKey( 'Authorization', $headers );
 
 		$_SERVER['PHP_AUTH_USER'] = 'user';
 		$_SERVER['PHP_AUTH_PW']   = 'pass';
-		$headers                  = perflab_aea_copy_basic_auth_headers( array() );
+		$headers                  = perflab_get_http_basic_authorization_headers();
 		$this->assertArrayHasKey( 'Authorization', $headers );
 		$this->assertEquals( 'Basic ' . base64_encode( 'user:pass' ), $headers['Authorization'] ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to encode the credentials for verifying forwarding of basic auth headers.
 	}

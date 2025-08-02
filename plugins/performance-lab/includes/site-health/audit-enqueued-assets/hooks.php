@@ -27,14 +27,14 @@ function perflab_aea_audit_blocking_assets(): void {
 	}
 
 	$response = wp_remote_get(
-		home_url( '/' ),
+		add_query_arg( 'cache_bust', (string) wp_rand(), home_url( '/' ) ),
 		array(
 			'timeout' => 10,
-			'headers' => perflab_aea_copy_basic_auth_headers(
+			'headers' => array_merge(
 				array(
-					'Accept'        => 'text/html',
-					'Cache-Control' => 'no-cache',
-				)
+					'Accept' => 'text/html',
+				),
+				perflab_get_http_basic_authorization_headers()
 			),
 		)
 	);

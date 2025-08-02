@@ -423,7 +423,7 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		$resource_url,
 		array(
 			'timeout' => 10,
-			'headers' => perflab_aea_copy_basic_auth_headers( array() ),
+			'headers' => perflab_get_http_basic_authorization_headers(),
 		)
 	);
 
@@ -452,14 +452,14 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 }
 
 /**
- * Copies HTTP Basic auth headers if present.
+ * Gets headers for HTTP Basic authorization headers.
  *
  * @since n.e.x.t
  *
- * @param array<string, mixed> $headers Headers to copy to.
- * @return array<string, mixed> Headers with copied Basic auth headers.
+ * @return array{ Authorization?: non-empty-string } Headers with copied Basic auth headers.
  */
-function perflab_aea_copy_basic_auth_headers( array $headers ): array {
+function perflab_get_http_basic_authorization_headers(): array {
+	$headers = array();
 	if ( isset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) ) {
 		$user                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) );
 		$pass                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
