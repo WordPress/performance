@@ -511,7 +511,13 @@ function perflab_aea_generate_blocking_assets_table(): string {
 					$table .= esc_html__( 'N/A', 'performance-lab' );
 				}
 				$table .= '</td>';
-				$table .= '<td>' . esc_html( $has_error ? __( 'Error', 'performance-lab' ) : __( 'OK', 'performance-lab' ) ) . '</td>';
+				$table .= '<td>';
+				if ( $has_error ) {
+					$table .= esc_html__( 'Error', 'performance-lab' );
+				} else {
+					$table .= esc_html__( 'OK', 'performance-lab' );
+				}
+				$table .= '</td>';
 				$table .= '</tr>';
 			}
 		}

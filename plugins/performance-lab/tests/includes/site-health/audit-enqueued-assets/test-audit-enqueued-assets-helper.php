@@ -29,6 +29,8 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
 	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_and_css(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 1 );
@@ -43,6 +45,10 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 
 		$processor = new WP_HTML_Tag_Processor( $test['description'] );
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
+		$this->assertStringContainsString( 'OK', $test['description'] );
+		$this->assertStringContainsString( '1,000&nbsp;B', $test['description'] );
+		$this->assertStringNotContainsString( 'N/A', $test['description'] );
+		$this->assertStringNotContainsString( 'Not found', $test['description'] );
 
 		$processor = new WP_HTML_Tag_Processor( $test['actions'] );
 		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'A' ) ) );
@@ -53,6 +59,8 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
 	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_and_css(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
@@ -77,6 +85,8 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
 	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_but_good_css(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
@@ -101,6 +111,8 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
 	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_but_bad_css(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 1 );
@@ -201,6 +213,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * Tests perflab_aea_enqueued_blocking_assets_test
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_one_script_is_404(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3, 1 );
@@ -212,14 +227,20 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 			array_keys( $test )
 		);
 		$this->assertSame( 'recommended', $test['status'] );
+
+		$this->assertStringContainsString( 'N/A', $test['description'] );
+		$this->assertStringContainsString( 'Not found', $test['description'] );
 	}
 
 	/**
 	 * Tests perflab_aea_enqueued_blocking_assets_test
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_assets_test
+	 * @covers ::perflab_aea_generate_blocking_assets_table
+	 * @covers ::perflab_aea_enqueued_blocking_scripts
+	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
-	public function test_perflab_aea_enqueued_blocking_assets_test_but_one_stylet_is_404(): void {
+	public function test_perflab_aea_enqueued_blocking_assets_test_but_one_style_is_404(): void {
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3 );
 		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 2, 1 );
 		$test = perflab_aea_enqueued_blocking_assets_test();
@@ -229,6 +250,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 			array_keys( $test )
 		);
 		$this->assertSame( 'recommended', $test['status'] );
+
+		$this->assertStringContainsString( 'N/A', $test['description'] );
+		$this->assertStringContainsString( 'Not found', $test['description'] );
 	}
 
 	/**

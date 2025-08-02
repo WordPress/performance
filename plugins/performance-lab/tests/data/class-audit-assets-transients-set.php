@@ -35,7 +35,7 @@ class Audit_Assets_Transients_Set {
 
 			$assets[ $type ][] = array(
 				'src'   => 'scripts' === $type ? 'script.js' : 'style.css',
-				'size'  => 1000,
+				'size'  => $error instanceof WP_Error ? null : 1000,
 				'error' => $error,
 			);
 		}
