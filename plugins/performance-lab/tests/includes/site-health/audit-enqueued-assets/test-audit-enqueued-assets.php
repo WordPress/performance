@@ -484,6 +484,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function ( $preempt, $parsed_args, $url ) {
+				$url = remove_query_arg( 'cache_bust', $url );
+
 				if ( isset( $this->mocked_responses[ $url ] ) ) {
 					if ( is_wp_error( $this->mocked_responses[ $url ] ) ) {
 						return $this->mocked_responses[ $url ];
