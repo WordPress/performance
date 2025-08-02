@@ -341,16 +341,20 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_get_total_enqueued_assets() no transient saved.
 	 *
+	 * @covers ::perflab_aea_get_blocking_assets
 	 * @covers ::perflab_aea_get_total_enqueued_assets
 	 */
 	public function test_perflab_aea_get_total_enqueued_assets_no_transient(): void {
+		$this->assertNull( perflab_aea_get_blocking_assets( 'scripts' ) );
 		$this->assertNull( perflab_aea_get_total_enqueued_assets( 'scripts' ) );
+		$this->assertNull( perflab_aea_get_blocking_assets( 'styles' ) );
 		$this->assertNull( perflab_aea_get_total_enqueued_assets( 'styles' ) );
 	}
 
 	/**
 	 * Tests perflab_aea_get_total_enqueued_assets( 'scripts' ) with transient saved..
 	 *
+	 * @covers ::perflab_aea_get_blocking_assets
 	 * @covers ::perflab_aea_get_total_enqueued_assets
 	 */
 	public function test_perflab_aea_get_total_enqueued_scripts(): void {
@@ -362,6 +366,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_get_total_enqueued_assets( 'styles' ) with transient saved.
 	 *
+	 * @covers ::perflab_aea_get_blocking_assets
 	 * @covers ::perflab_aea_get_total_enqueued_assets
 	 */
 	public function test_perflab_aea_get_total_enqueued_styles(): void {
@@ -373,6 +378,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_get_total_size_bytes_enqueued_assets( 'scripts' ).
 	 *
+	 * @covers ::perflab_aea_get_blocking_assets
 	 * @covers ::perflab_aea_get_total_size_bytes_enqueued_assets
 	 */
 	public function test_perflab_aea_get_total_size_bytes_enqueued_scripts(): void {
@@ -385,6 +391,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' ).
 	 *
+	 * @covers ::perflab_aea_get_blocking_assets
 	 * @covers ::perflab_aea_get_total_size_bytes_enqueued_assets
 	 */
 	public function test_perflab_aea_get_total_size_bytes_enqueued_styles(): void {
