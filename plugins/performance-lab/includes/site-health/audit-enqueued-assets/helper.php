@@ -346,11 +346,23 @@ function perflab_aea_get_blocking_assets( string $type ): ?array {
 		$blocking_assets = array();
 		foreach ( $transient[ $type ] as $blocking_asset ) {
 			if (
-				( array_key_exists( 'src', $blocking_asset ) && is_string( $blocking_asset['src'] ) )
+				(
+					array_key_exists( 'src', $blocking_asset )
+					&&
+					is_string( $blocking_asset['src'] )
+				)
 				&&
-				( array_key_exists( 'size', $blocking_asset ) && ( is_int( $blocking_asset['size'] ) || is_null( $blocking_asset['size'] ) ) )
+				(
+					array_key_exists( 'size', $blocking_asset )
+					&&
+					( is_int( $blocking_asset['size'] ) || is_null( $blocking_asset['size'] ) )
+				)
 				&&
-				( array_key_exists( 'error', $blocking_asset ) && ( is_wp_error( $blocking_asset['error'] ) || is_null( $blocking_asset['error'] ) ) )
+				(
+					array_key_exists( 'error', $blocking_asset )
+					&&
+					( is_wp_error( $blocking_asset['error'] ) || is_null( $blocking_asset['error'] ) )
+				)
 			) {
 				$blocking_assets[] = $blocking_asset;
 			}

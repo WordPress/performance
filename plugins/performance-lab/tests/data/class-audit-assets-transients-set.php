@@ -16,44 +16,29 @@ class Audit_Assets_Transients_Set {
 	/**
 	 * Setting up the Script transient.
 	 *
-	 * @param int $number_of_assets Number of assets to mock.
+	 * @param 'scripts'|'styles' $type             Type.
+	 * @param int                $number_of_assets Number of assets to mock.
+	 * @param int                $error_count      Error count to mock.
 	 */
-	public static function set_script_transient_with_data( int $number_of_assets = 5 ): void {
+	public static function set_assets_transient_with_data( string $type, int $number_of_assets = 5, int $error_count = 0 ): void {
 		$assets = get_transient( self::ASSETS_TRANSIENT );
 		if ( ! is_array( $assets ) ) {
 			$assets = array();
 		}
-		$assets['scripts'] = array_fill(
-			0,
-			$number_of_assets,
-			array(
-				'src'   => 'script.js',
-				'size'  => 1000,
-				'error' => null,
-			)
-		);
-		set_transient( self::ASSETS_TRANSIENT, $assets );
-	}
+		$assets[ $type ] = array();
+		for ( $i = 0; $i < $number_of_assets; $i++ ) {
+			$error = null;
+			if ( $error_count > 0 ) {
+				--$error_count;
+				$error = new WP_Error( '404', 'Not found' );
+			}
 
-	/**
-	 * Setting up the Styles transient.
-	 *
-	 * @param int $number_of_assets Number of assets to mock.
-	 */
-	public static function set_style_transient_with_data( int $number_of_assets = 5 ): void {
-		$assets = get_transient( self::ASSETS_TRANSIENT );
-		if ( ! is_array( $assets ) ) {
-			$assets = array();
-		}
-		$assets['styles'] = array_fill(
-			0,
-			$number_of_assets,
-			array(
-				'src'   => 'style.css',
+			$assets[ $type ][] = array(
+				'src'   => 'scripts' === $type ? 'script.js' : 'style.css',
 				'size'  => 1000,
-				'error' => null,
-			)
-		);
+				'error' => $error,
+			);
+		}
 		set_transient( self::ASSETS_TRANSIENT, $assets );
 	}
 }

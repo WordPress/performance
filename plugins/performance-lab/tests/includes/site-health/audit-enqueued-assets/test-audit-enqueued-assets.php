@@ -34,7 +34,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3 );
 		perflab_aea_audit_blocking_assets();
 		$transient = get_transient( 'aea_blocking_assets' );
 		$this->assertIsArray( $transient );
@@ -181,7 +181,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 3 );
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
@@ -347,8 +347,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_invalidate_cache_transients
 	 */
 	public function test_perflab_aea_invalidate_cache_transients(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data();
-		Audit_Assets_Transients_Set::set_style_transient_with_data();
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts' );
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles' );
 		perflab_aea_invalidate_cache_transients();
 		$this->assertFalse( get_transient( 'aea_blocking_assets' ) );
 	}
@@ -359,8 +359,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_clean_aea_audit_action
 	 */
 	public function test_perflab_aea_clean_aea_audit_action(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data();
-		Audit_Assets_Transients_Set::set_style_transient_with_data();
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts' );
+		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles' );
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
 		$_GET['action']       = 'clean_aea_audit';
 		$this->current_user_can_view_site_health_checks_cap();
