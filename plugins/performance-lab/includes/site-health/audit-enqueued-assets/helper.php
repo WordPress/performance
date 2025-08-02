@@ -272,12 +272,12 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 	);
 
 	if ( is_array( $response ) ) {
-		$code    = wp_remote_retrieve_response_code( $response );
-		$message = wp_remote_retrieve_response_message( $response );
-		$body    = wp_remote_retrieve_body( $response );
-		$header  = wp_remote_retrieve_header( $response, 'content-type' );
-		if ( is_array( $header ) ) {
-			$header = array_pop( $header );
+		$code         = wp_remote_retrieve_response_code( $response );
+		$message      = wp_remote_retrieve_response_message( $response );
+		$body         = wp_remote_retrieve_body( $response );
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_array( $content_type ) ) {
+			$content_type = array_pop( $content_type );
 		}
 
 		// No error.
@@ -305,7 +305,7 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 			$result['description'] .= '<details>';
 			$result['description'] .= '<summary>' . esc_html__( 'Raw response:', 'performance-lab' ) . '</summary>';
 
-			if ( is_string( $header ) && str_contains( $header, 'html' ) ) {
+			if ( is_string( $content_type ) && str_contains( $content_type, 'html' ) ) {
 				$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
 				$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe>';
 			} else {

@@ -347,17 +347,45 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 *
 	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
 	 */
-	public function test_perflab_aea_blocking_assets_retrieval_failure_404(): void {
+	public function test_perflab_aea_blocking_assets_retrieval_failure_404_plain_text(): void {
 		$response = array(
 			'response' => array(
 				'code'    => 404,
 				'message' => 'Not Found',
+			),
+			'headers'  => array(
+				'content-type' => 'text/plain',
 			),
 			'body'     => 'You are so lost',
 		);
 		$result   = perflab_aea_blocking_assets_retrieval_failure( $response );
 		$this->assertIsArray( $result );
 		$this->assertSame( 'recommended', $result['status'] );
+		$processor = new WP_HTML_Tag_Processor( $result['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'PRE' ) ) );
+	}
+
+	/**
+	 * Tests perflab_aea_blocking_assets_retrieval_failure().
+	 *
+	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
+	 */
+	public function test_perflab_aea_blocking_assets_retrieval_failure_404_html(): void {
+		$response = array(
+			'response' => array(
+				'code'    => 404,
+				'message' => 'Not Found',
+			),
+			'headers'  => array(
+				'content-type' => array( 'text/html' ),
+			),
+			'body'     => '<html>WOOPS!!</html>',
+		);
+		$result   = perflab_aea_blocking_assets_retrieval_failure( $response );
+		$this->assertIsArray( $result );
+		$this->assertSame( 'recommended', $result['status'] );
+		$processor = new WP_HTML_Tag_Processor( $result['description'] );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IFRAME' ) ) );
 	}
 
 	/**
