@@ -112,7 +112,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 
 			'non_responsive_image'              => array(
@@ -167,7 +167,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 
 			'wrongly_auto_sized_responsive_img_with_only_auto' => array(
@@ -177,7 +177,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-removed-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" >',
 			),
 		);
 	}
@@ -188,7 +188,6 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::__invoke
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::process_img
 	 * @covers Image_Prioritizer_Tag_Visitor::get_attribute_value
-	 * @covers Image_Prioritizer_Img_Tag_Visitor::compute_sizes
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::sizes_attribute_includes_valid_auto
 	 *
 	 * @dataProvider data_provider_test_auto_sizes
