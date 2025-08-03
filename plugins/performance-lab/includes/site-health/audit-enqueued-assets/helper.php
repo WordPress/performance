@@ -143,7 +143,7 @@ function perflab_aea_enqueued_blocking_scripts(): ?array {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of blocking styles. 2.Styles size. */
+					/* translators: 1: Number of blocking scripts. 2. Scripts size. */
 					_n(
 						'Your website has %1$s blocking script (size: %2$s). Try to reduce the number or to concatenate them.',
 						'Your website has %1$s blocking scripts (size: %2$s). Try to reduce the number or to concatenate them.',
@@ -163,6 +163,7 @@ function perflab_aea_enqueued_blocking_scripts(): ?array {
 		foreach ( $scripts as $script ) {
 			if ( is_wp_error( $script['error'] ) ) {
 				$result['status'] = 'recommended';
+				break;
 			}
 		}
 	}
@@ -191,7 +192,7 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of blocking styles. 2.Styles size. */
+					/* translators: 1: Number of blocking styles. 2. Styles size. */
 					_n(
 						'The amount of %1$s blocking style (size: %2$s) is acceptable.',
 						'The amount of %1$s blocking styles (size: %2$s) is acceptable.',
@@ -250,6 +251,7 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
 		foreach ( $styles as $style ) {
 			if ( is_wp_error( $style['error'] ) ) {
 				$result['status'] = 'recommended';
+				break;
 			}
 		}
 	}
@@ -317,8 +319,8 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 		$result['description'] = '<p>' . wp_kses(
 			sprintf(
 				/* translators: %1$s is the error code */
-				__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code <code>%1$s</code> and the following message:', 'performance-lab' ),
-				esc_html( (string) $response->get_error_code() )
+				esc_html__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code %1$s and the following message:', 'performance-lab' ),
+				'<code>' . esc_html( (string) $response->get_error_code() ) . '</code>'
 			),
 			array( 'code' => array() )
 		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
