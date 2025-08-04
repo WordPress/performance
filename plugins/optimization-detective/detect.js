@@ -817,12 +817,20 @@ export default async function detect( {
 	/** @type {string[]} */
 	const initializingExtensionModuleUrls = [];
 
-	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		try {
-			/** @type {Extension} */
-			const extension = await import( extensionModuleUrl );
-			extensions.set( extensionModuleUrl, extension );
+	// Load all extensions in parallel.
+	await Promise.all(
+		extensionModuleUrls.map( ( extensionModuleUrl ) => {
+			return import( extensionModuleUrl ).then(
+				( /** @type {Extension} */ extension ) => {
+					extensions.set( extensionModuleUrl, extension );
+				}
+			);
+		} )
+	);
 
+	// Initialize extensions.
+	for ( const [ extensionModuleUrl, extension ] of extensions.entries() ) {
+		try {
 			const extensionLogger = createLogger(
 				isDebug,
 				`[Optimization Detective: ${
