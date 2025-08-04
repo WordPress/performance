@@ -509,27 +509,45 @@ function debounceCompressUrlMetric() {
  */
 
 /**
+ * Args for the detect function.
+ *
+ * @since 1.0.0
+ *
+ * @typedef {Object}                  DetectFunctionArgs
+ * @property {string[]}               extensionModuleUrls        - URLs for extension script modules to import.
+ * @property {number}                 minViewportAspectRatio     - Minimum aspect ratio allowed for the viewport.
+ * @property {number}                 maxViewportAspectRatio     - Maximum aspect ratio allowed for the viewport.
+ * @property {boolean}                isDebug                    - Whether to show debug messages.
+ * @property {string}                 restApiEndpoint            - URL for where to send the detection data.
+ * @property {string}                 [restApiNonce]             - Nonce for the REST API when the user is logged-in.
+ * @property {boolean}                gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
+ * @property {number}                 maxUrlMetricSize           - Maximum size of the URL Metric to send.
+ * @property {string}                 currentETag                - Current ETag.
+ * @property {string}                 currentUrl                 - Current URL.
+ * @property {string}                 urlMetricSlug              - Slug for URL Metric.
+ * @property {number|null}            cachePurgePostId           - Cache purge post ID.
+ * @property {string}                 urlMetricHMAC              - HMAC for URL Metric storage.
+ * @property {URLMetricGroupStatus[]} urlMetricGroupStatuses     - URL Metric group statuses.
+ * @property {number}                 storageLockTTL             - The TTL (in seconds) for the URL Metric storage lock.
+ * @property {number}                 freshnessTTL               - The freshness age (TTL) for a given URL Metric.
+ * @property {string}                 webVitalsLibrarySrc        - The URL for the web-vitals library.
+ * @property {CollectionDebugData}    [urlMetricGroupCollection] - URL Metric group collection, when in debug mode.
+ */
+
+/**
+ * The detect function.
+ *
+ * @since 1.0.0
+ * @callback DetectFunction
+ * @param {DetectFunctionArgs} args - The arguments for the function.
+ * @return {Promise<void>}
+ */
+
+/**
  * Detects the LCP element, loaded images, client viewport, and store for future optimizations.
  *
- * @param {Object}                 args                            - Args.
- * @param {string[]}               args.extensionModuleUrls        - URLs for extension script modules to import.
- * @param {number}                 args.minViewportAspectRatio     - Minimum aspect ratio allowed for the viewport.
- * @param {number}                 args.maxViewportAspectRatio     - Maximum aspect ratio allowed for the viewport.
- * @param {boolean}                args.isDebug                    - Whether to show debug messages.
- * @param {string}                 args.restApiEndpoint            - URL for where to send the detection data.
- * @param {string}                 [args.restApiNonce]             - Nonce for the REST API when the user is logged-in.
- * @param {boolean}                args.gzdecodeAvailable          - Whether application/gzip can be sent to the REST API.
- * @param {number}                 args.maxUrlMetricSize           - Maximum size of the URL Metric to send.
- * @param {string}                 args.currentETag                - Current ETag.
- * @param {string}                 args.currentUrl                 - Current URL.
- * @param {string}                 args.urlMetricSlug              - Slug for URL Metric.
- * @param {number|null}            args.cachePurgePostId           - Cache purge post ID.
- * @param {string}                 args.urlMetricHMAC              - HMAC for URL Metric storage.
- * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     - URL Metric group statuses.
- * @param {number}                 args.storageLockTTL             - The TTL (in seconds) for the URL Metric storage lock.
- * @param {number}                 args.freshnessTTL               - The freshness age (TTL) for a given URL Metric.
- * @param {string}                 args.webVitalsLibrarySrc        - The URL for the web-vitals library.
- * @param {CollectionDebugData}    [args.urlMetricGroupCollection] - URL Metric group collection, when in debug mode.
+ * @type {DetectFunction}
+ * @param {DetectFunctionArgs} args - Args.
  */
 export default async function detect( {
 	minViewportAspectRatio,

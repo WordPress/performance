@@ -5,8 +5,10 @@
  * JavaScript file must contain a single top-level function which is not exported. The file is inlined as part of
  * another module which wraps the function in an IIFE.
  *
- * @param {string} detectSrc
- * @param {Object} detectArgs
+ * @since 1.0.0
+ *
+ * @param {string}                                   detectSrc  - The URL to detect.js.
+ * @param {import("./detect.js").DetectFunctionArgs} detectArgs - The arguments exported from PHP.
  */
 // eslint-disable-next-line no-unused-vars
 async function load( detectSrc, detectArgs ) {
@@ -26,6 +28,8 @@ async function load( detectSrc, detectArgs ) {
 		} );
 	}
 
-	const { default: detect } = await import( detectSrc );
+	const detect = /** @type {import("./detect.js").DetectFunction} */ (
+		( await import( detectSrc ) ).default
+	);
 	await detect( detectArgs );
 }
