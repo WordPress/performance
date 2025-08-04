@@ -13,15 +13,6 @@ async function load( detectSrc, detectArgs ) {
 	const doc = document;
 	const win = window;
 
-	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
-	await new Promise( ( resolve ) => {
-		if ( doc.readyState !== 'loading' ) {
-			resolve();
-		} else {
-			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
-		}
-	} );
-
 	// Wait until the resources on the page have fully loaded.
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState === 'complete' ) {
