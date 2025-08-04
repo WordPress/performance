@@ -819,12 +819,11 @@ export default async function detect( {
 
 	// Load all extensions in parallel.
 	await Promise.all(
-		extensionModuleUrls.map( ( extensionModuleUrl ) => {
-			return import( extensionModuleUrl ).then(
-				( /** @type {Extension} */ extension ) => {
-					extensions.set( extensionModuleUrl, extension );
-				}
+		extensionModuleUrls.map( async ( extensionModuleUrl ) => {
+			const extension = /** @type {Extension} */ await import(
+				extensionModuleUrl
 			);
+			extensions.set( extensionModuleUrl, extension );
 		} )
 	);
 
