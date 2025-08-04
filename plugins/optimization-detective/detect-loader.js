@@ -1,7 +1,9 @@
 /**
- * Loads the detect logic after the page has loaded to prevent a high-priority script module network request from competing with other critical resources.
+ * Loads the detect module after the page has loaded.
  *
- * This JavaScript file must be contain a single top-level function which is not exported. The file is inlined as part of another module which wraps the module in an IIFE.
+ * This prevents a high-priority script module network request from competing with other critical resources. This
+ * JavaScript file must contain a single top-level function which is not exported. The file is inlined as part of
+ * another module which wraps the function in an IIFE.
  *
  * @param {string} detectSrc
  * @param {Object} detectArgs
