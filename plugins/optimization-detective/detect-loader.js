@@ -10,15 +10,12 @@
  */
 // eslint-disable-next-line no-unused-vars
 async function load( detectSrc, detectArgs ) {
-	const doc = document;
-	const win = window;
-
 	// Wait until the resources on the page have fully loaded.
 	await new Promise( ( resolve ) => {
-		if ( doc.readyState === 'complete' ) {
+		if ( document.readyState === 'complete' ) {
 			resolve();
 		} else {
-			win.addEventListener( 'load', resolve, { once: true } );
+			window.addEventListener( 'load', resolve, { once: true } );
 		}
 	} );
 
