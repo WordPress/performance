@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check for the fswatch command
-if ! which fswatch >/dev/null 2>&1; then
+if ! command -v fswatch >/dev/null 2>&1; then
 	echo "Error: The fswatch command is not available."
 	echo "On macOS, you can install it with Homebrew: brew install fswatch"
 	exit 1
