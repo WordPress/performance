@@ -97,7 +97,7 @@ function perflab_get_standalone_plugin_data(): array {
 	return array(
 		'auto-sizes'              => array(
 			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'dominant-color-images'   => array(
 			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
@@ -115,6 +115,10 @@ function perflab_get_standalone_plugin_data(): array {
 		),
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
+		),
+		'view-transitions'        => array(
+			'constant'     => 'VIEW_TRANSITIONS_VERSION',
+			'experimental' => true,
 		),
 		'web-worker-offloading'   => array(
 			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',

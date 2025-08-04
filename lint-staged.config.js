@@ -18,6 +18,7 @@ const config = {
 	'/tools/**.php': 'composer lint',
 	// Note: Instead of the preceding two lines, the following line was tried but it is not working:
 	// [ `!(plugins/{${ plugins.join( '|' ) }})/**/*.php` ]: 'composer lint',
+	'composer.{json,lock}': () => 'composer validate --strict',
 };
 
 for ( const plugin of plugins ) {

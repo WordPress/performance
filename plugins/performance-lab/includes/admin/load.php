@@ -305,7 +305,7 @@ function perflab_install_activate_plugin_callback(): void {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) );
+	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- perflab_sanitize_plugin_slug() is a sanitizing function.
 	if ( null === $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
@@ -407,7 +407,7 @@ function perflab_plugin_admin_notices(): void {
 
 	$activated_plugin_slug = null;
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$activated_plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$activated_plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- perflab_sanitize_plugin_slug() is a sanitizing function.
 	}
 
 	if ( null !== $activated_plugin_slug ) {

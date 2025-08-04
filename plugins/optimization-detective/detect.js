@@ -555,7 +555,7 @@ export default async function detect( {
 	const { log, warn, error } = logger;
 	compressionEnabled = gzdecodeAvailable;
 
-	if ( isDebug ) {
+	if ( isDebug && Array.isArray( urlMetricGroupCollection?.groups ) ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
 		for ( const group of urlMetricGroupCollection.groups ) {
 			for ( const otherUrlMetric of group.url_metrics ) {
@@ -764,7 +764,7 @@ export default async function detect( {
 		elements: [],
 	};
 
-	const lcpMetric = lcpMetricCandidates.at( -1 );
+	const lcpMetric = lcpMetricCandidates[ lcpMetricCandidates.length - 1 ];
 
 	// Populate the elements in the URL Metric.
 	for ( const elementIntersection of elementIntersections ) {
