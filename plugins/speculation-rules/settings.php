@@ -50,9 +50,9 @@ function plsr_get_eagerness_labels(): array {
  */
 function plsr_get_authentication_labels(): array {
 	return array(
-		'logged_out'           => _x( 'Logged-out visitors only (default)', 'setting label', 'speculation-rules' ),
+		'logged_out'            => _x( 'Logged-out visitors only (default)', 'setting label', 'speculation-rules' ),
 		'logged_out_and_admins' => _x( 'Administrators and logged-out visitors', 'setting label', 'speculation-rules' ),
-		'any'                  => _x( 'Any user (logged-in or logged-out)', 'setting label', 'speculation-rules' ),
+		'any'                   => _x( 'Any user (logged-in or logged-out)', 'setting label', 'speculation-rules' ),
 	);
 }
 

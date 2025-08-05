@@ -59,19 +59,19 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		);
 
 		return array(
-			'invalid type null'               => array(
+			'invalid type null'                => array(
 				null,
 				$default_value,
 			),
-			'invalid type string'             => array(
+			'invalid type string'              => array(
 				'prerender',
 				$default_value,
 			),
-			'missing fields'                  => array(
+			'missing fields'                   => array(
 				array(),
 				$default_value,
 			),
-			'missing mode'                    => array(
+			'missing mode'                     => array(
 				array( 'eagerness' => 'conservative' ),
 				array_merge(
 					$default_value,
@@ -80,7 +80,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'missing eagerness'               => array(
+			'missing eagerness'                => array(
 				array( 'mode' => 'prefetch' ),
 				array_merge(
 					$default_value,
@@ -89,7 +89,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'invalid mode'                    => array(
+			'invalid mode'                     => array(
 				array(
 					'mode'      => 'something',
 					'eagerness' => 'eager',
@@ -102,7 +102,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'invalid eagerness'               => array(
+			'invalid eagerness'                => array(
 				array(
 					'mode'      => 'prefetch',
 					'eagerness' => 'something',
@@ -115,13 +115,13 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'invalid authentication'          => array(
+			'invalid authentication'           => array(
 				array(
 					'authentication' => 'bad',
 				),
 				$default_value,
 			),
-			'valid auth logged_out'           => array(
+			'valid auth logged_out'            => array(
 				array(
 					'authentication' => 'logged_out',
 				),
@@ -143,7 +143,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'valid auth any'                  => array(
+			'valid auth any'                   => array(
 				array(
 					'authentication' => 'any',
 				),
@@ -154,7 +154,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'valid fields'                    => array(
+			'valid fields'                     => array(
 				array(
 					'mode'           => 'prefetch',
 					'eagerness'      => 'conservative',
