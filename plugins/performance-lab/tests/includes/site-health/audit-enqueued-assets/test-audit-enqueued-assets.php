@@ -354,37 +354,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_clean_aea_audit_action() functionality.
-	 *
-	 * @covers ::perflab_aea_clean_aea_audit_action
-	 */
-	public function test_perflab_aea_clean_aea_audit_action(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts' );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles' );
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
-		$_GET['action']       = 'clean_aea_audit';
-		$this->current_user_can_view_site_health_checks_cap();
-		$redirected_url = null;
-		add_filter(
-			'wp_redirect',
-			static function ( $url ) use ( &$redirected_url ) {
-				$redirected_url = $url;
-				return false;
-			}
-		);
-		$_REQUEST['_wp_http_referer'] = add_query_arg(
-			array(
-				'_wpnonce' => 'foo',
-				'action'   => 'bar',
-			),
-			home_url( '/' )
-		);
-		perflab_aea_clean_aea_audit_action();
-		$this->assertSame( home_url( '/' ), $redirected_url );
-		$this->assertFalse( get_transient( 'aea_blocking_assets' ) );
-	}
-
-	/**
 	 * Tests perflab_aea_audit_blocking_assets functionality when the home request fails.
 	 *
 	 * @covers ::perflab_aea_audit_blocking_assets

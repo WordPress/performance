@@ -13,6 +13,116 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
+ * Audit blocking assets on the front page.
+ *
+ * @since n.e.x.t
+ *
+ * @return array<string,mixed> Returns an array containing response and blocking assets.
+ */
+function perflab_aea_audit_blocking_assets(): array {
+	$response = wp_remote_get(
+		add_query_arg( 'cache_bust', (string) wp_rand(), home_url( '/' ) ),
+		array(
+			'timeout' => 10,
+			'headers' => array_merge(
+				array(
+					'Accept' => 'text/html',
+				),
+				perflab_get_http_basic_authorization_headers()
+			),
+		)
+	);
+
+	$result = array(
+		'response' => $response,
+		'assets'   => array(
+			'scripts' => array(),
+			'styles'  => array(),
+		),
+	);
+
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return $result;
+	}
+
+	$html = wp_remote_retrieve_body( $response );
+	if ( '' === $html ) {
+		return $result;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $html );
+
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
+
+		if ( 'SCRIPT' === $tag ) {
+			$src = $processor->get_attribute( 'src' );
+			if ( ! is_string( $src ) ) {
+				continue;
+			}
+
+			// Note that when the "type" attribute is absent or empty, the element is treated as a classic JavaScript script.
+			$type = $processor->get_attribute( 'type' );
+
+			// Skip external script with "async" or "defer" attributes.
+			if ( null !== $processor->get_attribute( 'async' ) || null !== $processor->get_attribute( 'defer' ) ) {
+				continue;
+			}
+
+			// Skip external script with a "type" attribute set to "module" as they are deferred by default.
+			if ( 'module' === strtolower( (string) $type ) ) {
+				continue;
+			}
+
+			// Skip external script with a "type" attribute that is not JavaScript.
+			if (
+				is_string( $type ) &&
+				'' !== $type &&
+				! (
+					str_contains( $type, 'javascript' ) ||
+					str_contains( $type, 'ecmascript' ) ||
+					str_contains( $type, 'jscript' ) ||
+					str_contains( $type, 'livescript' )
+				)
+			) {
+				continue;
+			}
+
+			$size                          = perflab_aea_get_asset_size( $src );
+			$result['assets']['scripts'][] = array(
+				'src'   => $src,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
+		} elseif ( 'LINK' === $tag ) {
+			$rel = $processor->get_attribute( 'rel' );
+			if ( 'stylesheet' !== strtolower( (string) $rel ) ) {
+				continue;
+			}
+
+			$media = $processor->get_attribute( 'media' );
+			if ( is_string( $media ) && 1 !== preg_match( '/^\s*(all|screen)\b/i', $media ) ) {
+				continue;
+			}
+
+			$href = $processor->get_attribute( 'href' );
+			if ( ! is_string( $href ) ) {
+				continue;
+			}
+
+			$size                         = perflab_aea_get_asset_size( $href );
+			$result['assets']['styles'][] = array(
+				'src'   => $href,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
+		}
+	}
+
+	return $result;
+}
+
+/**
  * Callback for enqueued_blocking_assets test.
  *
  * @since n.e.x.t
@@ -39,16 +149,16 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		'test'        => 'enqueued_blocking_assets',
 	);
 
-	$response = get_transient( 'aea_blocking_assets_response' );
-	if ( is_wp_error( $response ) || is_array( $response ) ) {
-		$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $response );
+	$audit_result = perflab_aea_audit_blocking_assets();
+	if ( is_wp_error( $audit_result['response'] ) || is_array( $audit_result['response'] ) ) {
+		$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $audit_result['response'] );
 		if ( null !== $retrieval_failure_result ) {
 			return array_merge( $result, $retrieval_failure_result );
 		}
 	}
 
-	$scripts_result = perflab_aea_enqueued_blocking_scripts();
-	$styles_result  = perflab_aea_enqueued_blocking_styles();
+	$scripts_result = perflab_aea_enqueued_blocking_scripts( $audit_result['assets'] );
+	$styles_result  = perflab_aea_enqueued_blocking_styles( $audit_result['assets'] );
 
 	if ( null === $scripts_result && null === $styles_result ) {
 		// The return value is validated in JavaScript at:
@@ -57,7 +167,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		return array( 'omitted' => true );
 	}
 
-	$result['description'] .= perflab_aea_generate_blocking_assets_table();
+	$result['description'] .= perflab_aea_generate_blocking_assets_table( $audit_result['assets'] );
 
 	if ( isset( $scripts_result ) ) {
 		$result['description'] .= $scripts_result['description'];
@@ -73,11 +183,9 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
+			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			__( 'More info about performance optimization', 'performance-lab' ),
-			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			__( 'Clean Test Cache', 'performance-lab' )
+			__( 'More info about performance optimization', 'performance-lab' )
 		);
 	}
 
@@ -85,15 +193,25 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 }
 
 /**
+ * Callback for enqueued_blocking_assets test via AJAX.
+ *
+ * @since n.e.x.t
+ */
+function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
+	wp_send_json_success( perflab_aea_enqueued_blocking_assets_test() );
+}
+
+/**
  * Prepares the blocking scripts audit result.
  *
  * @since n.e.x.t
  *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return array{status: 'good'|'recommended', description: string}|null Result.
  */
-function perflab_aea_enqueued_blocking_scripts(): ?array {
-	$enqueued_scripts = perflab_aea_get_total_enqueued_assets( 'scripts' );
-	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_assets( 'scripts' );
+function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): ?array {
+	$enqueued_scripts = perflab_aea_get_total_enqueued_assets( $blocking_assets, 'scripts' );
+	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'scripts' );
 	if ( null === $enqueued_scripts || null === $bytes_enqueued ) {
 		return null;
 	}
@@ -158,7 +276,7 @@ function perflab_aea_enqueued_blocking_scripts(): ?array {
 	}
 
 	// If one of the assets had an error, then fail the test even if under the threshold.
-	$scripts = perflab_aea_get_blocking_assets( 'scripts' );
+	$scripts = perflab_aea_get_blocking_assets( $blocking_assets, 'scripts' );
 	if ( null !== $scripts ) {
 		foreach ( $scripts as $script ) {
 			if ( is_wp_error( $script['error'] ) ) {
@@ -176,12 +294,13 @@ function perflab_aea_enqueued_blocking_scripts(): ?array {
  *
  * @since n.e.x.t
  *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return array{status: string, description: string}|null Result.
  */
-function perflab_aea_enqueued_blocking_styles(): ?array {
+function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): ?array {
 	// Omit if the test didn't run yet, omit.
-	$enqueued_styles = perflab_aea_get_total_enqueued_assets( 'styles' );
-	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' );
+	$enqueued_styles = perflab_aea_get_total_enqueued_assets( $blocking_assets, 'styles' );
+	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'styles' );
 	if ( null === $enqueued_styles || null === $bytes_enqueued ) {
 		return null;
 	}
@@ -224,7 +343,7 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
 	 */
 	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
 
-	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' ) > $styles_size_threshold ) {
+	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'styles' ) > $styles_size_threshold ) {
 		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
@@ -246,7 +365,7 @@ function perflab_aea_enqueued_blocking_styles(): ?array {
 	}
 
 	// If one of the assets had an error, then fail the test even if under the threshold.
-	$styles = perflab_aea_get_blocking_assets( 'styles' );
+	$styles = perflab_aea_get_blocking_assets( $blocking_assets, 'styles' );
 	if ( null !== $styles ) {
 		foreach ( $styles as $style ) {
 			if ( is_wp_error( $style['error'] ) ) {
@@ -333,20 +452,14 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
  *
  * @since n.e.x.t
  *
- * @param 'scripts'|'styles' $type Type of assets.
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @param 'scripts'|'styles'   $type Type of assets.
  * @return array<array{ src: string, size: int|null, error: WP_Error|null }>|null Blocking assets, or null if transient not set.
  */
-function perflab_aea_get_blocking_assets( string $type ): ?array {
-	$transient = get_transient( 'aea_blocking_assets' );
-	if (
-		is_array( $transient ) // If it is a WP_Error, then "Error: Cannot use object of type WP_Error as array".
-		&&
-		isset( $transient[ $type ] )
-		&&
-		is_array( $transient[ $type ] )
-	) {
-		$blocking_assets = array();
-		foreach ( $transient[ $type ] as $blocking_asset ) {
+function perflab_aea_get_blocking_assets( array $blocking_assets, string $type ): ?array {
+	if ( isset( $blocking_assets[ $type ] ) && is_array( $blocking_assets[ $type ] ) ) {
+		$final_blocking_assets = array();
+		foreach ( $blocking_assets[ $type ] as $blocking_asset ) {
 			if (
 				(
 					array_key_exists( 'src', $blocking_asset )
@@ -366,10 +479,10 @@ function perflab_aea_get_blocking_assets( string $type ): ?array {
 					( is_wp_error( $blocking_asset['error'] ) || is_null( $blocking_asset['error'] ) )
 				)
 			) {
-				$blocking_assets[] = $blocking_asset;
+				$final_blocking_assets[] = $blocking_asset;
 			}
 		}
-		return $blocking_assets;
+		return $final_blocking_assets;
 	} else {
 		return null;
 	}
@@ -380,11 +493,12 @@ function perflab_aea_get_blocking_assets( string $type ): ?array {
  *
  * @since n.e.x.t
  *
- * @param 'scripts'|'styles' $type Type.
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @param 'scripts'|'styles'   $type Type.
  * @return int|null Number of total scripts or null if transient hasn't been set.
  */
-function perflab_aea_get_total_enqueued_assets( string $type ): ?int {
-	$scripts = perflab_aea_get_blocking_assets( $type );
+function perflab_aea_get_total_enqueued_assets( array $blocking_assets, string $type ): ?int {
+	$scripts = perflab_aea_get_blocking_assets( $blocking_assets, $type );
 	if ( is_array( $scripts ) ) {
 		return count( $scripts );
 	}
@@ -396,11 +510,12 @@ function perflab_aea_get_total_enqueued_assets( string $type ): ?int {
  *
  * @since n.e.x.t
  *
- * @param 'scripts'|'styles' $type Type.
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @param 'scripts'|'styles'   $type Type.
  * @return int|null Byte Total size or null if transient hasn't been set.
  */
-function perflab_aea_get_total_size_bytes_enqueued_assets( string $type ): ?int {
-	$assets = perflab_aea_get_blocking_assets( $type );
+function perflab_aea_get_total_size_bytes_enqueued_assets( array $blocking_assets, string $type ): ?int {
+	$assets = perflab_aea_get_blocking_assets( $blocking_assets, $type );
 	if ( null === $assets ) {
 		return null;
 	}
@@ -475,11 +590,11 @@ function perflab_get_http_basic_authorization_headers(): array {
  *
  * @since n.e.x.t
  *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return string HTML table of blocking assets.
  */
-function perflab_aea_generate_blocking_assets_table(): string {
-	$blocking_assets = get_transient( 'aea_blocking_assets' );
-	if ( ! is_array( $blocking_assets ) || 0 === count( $blocking_assets ) ) {
+function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): string {
+	if ( 0 === count( $blocking_assets ) ) {
 		return '';
 	}
 

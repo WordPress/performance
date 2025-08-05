@@ -13,123 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Audit blocking assets on the front page.
- *
- * @since n.e.x.t
- */
-function perflab_aea_audit_blocking_assets(): void {
-	if (
-		! is_admin() ||
-		! current_user_can( 'view_site_health_checks' ) ||
-		false !== get_transient( 'aea_blocking_assets' )
-	) {
-		return;
-	}
-
-	$response = wp_remote_get(
-		add_query_arg( 'cache_bust', (string) wp_rand(), home_url( '/' ) ),
-		array(
-			'timeout' => 10,
-			'headers' => array_merge(
-				array(
-					'Accept' => 'text/html',
-				),
-				perflab_get_http_basic_authorization_headers()
-			),
-		)
-	);
-
-	// Always populate the response so it is available for inspection.
-	set_transient( 'aea_blocking_assets_response', $response, 12 * HOUR_IN_SECONDS );
-
-	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		return;
-	}
-
-	$html = wp_remote_retrieve_body( $response );
-	if ( '' === $html ) {
-		return;
-	}
-
-	$assets = array(
-		'scripts' => array(),
-		'styles'  => array(),
-	);
-
-	$processor = new WP_HTML_Tag_Processor( $html );
-
-	while ( $processor->next_tag() ) {
-		$tag = $processor->get_tag();
-
-		if ( 'SCRIPT' === $tag ) {
-			$src = $processor->get_attribute( 'src' );
-			if ( ! is_string( $src ) ) {
-				continue;
-			}
-
-			// Note that when the "type" attribute is absent or empty, the element is treated as a classic JavaScript script.
-			$type = $processor->get_attribute( 'type' );
-
-			// Skip external script with "async" or "defer" attributes.
-			if ( null !== $processor->get_attribute( 'async' ) || null !== $processor->get_attribute( 'defer' ) ) {
-				continue;
-			}
-
-			// Skip external script with a "type" attribute set to "module" as they are deferred by default.
-			if ( 'module' === strtolower( (string) $type ) ) {
-				continue;
-			}
-
-			// Skip external script with a "type" attribute that is not JavaScript.
-			if (
-				is_string( $type ) &&
-				'' !== $type &&
-				! (
-					str_contains( $type, 'javascript' ) ||
-					str_contains( $type, 'ecmascript' ) ||
-					str_contains( $type, 'jscript' ) ||
-					str_contains( $type, 'livescript' )
-				)
-			) {
-				continue;
-			}
-
-			$size                = perflab_aea_get_asset_size( $src );
-			$assets['scripts'][] = array(
-				'src'   => $src,
-				'size'  => is_wp_error( $size ) ? null : $size,
-				'error' => is_wp_error( $size ) ? $size : null,
-			);
-		} elseif ( 'LINK' === $tag ) {
-			$rel = $processor->get_attribute( 'rel' );
-			if ( 'stylesheet' !== strtolower( (string) $rel ) ) {
-				continue;
-			}
-
-			$media = $processor->get_attribute( 'media' );
-			if ( is_string( $media ) && 1 !== preg_match( '/^\s*(all|screen)\b/i', $media ) ) {
-				continue;
-			}
-
-			$href = $processor->get_attribute( 'href' );
-			if ( ! is_string( $href ) ) {
-				continue;
-			}
-
-			$size               = perflab_aea_get_asset_size( $href );
-			$assets['styles'][] = array(
-				'src'   => $href,
-				'size'  => is_wp_error( $size ) ? null : $size,
-				'error' => is_wp_error( $size ) ? $size : null,
-			);
-		}
-	}
-
-	set_transient( 'aea_blocking_assets', $assets, 12 * HOUR_IN_SECONDS );
-}
-add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
-
-/**
  * Adds tests to site health.
  *
  * @since 1.0.0
@@ -138,29 +21,17 @@ add_action( 'admin_init', 'perflab_aea_audit_blocking_assets' );
  * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
 function perflab_aea_add_enqueued_assets_test( array $tests ): array {
-	$tests['direct']['enqueued_blocking_assets'] = array(
-		'label' => __( 'Blocking assets', 'performance-lab' ),
-		'test'  => 'perflab_aea_enqueued_blocking_assets_test',
+	$tests['async']['enqueued_blocking_assets'] = array(
+		'label'             => __( 'Blocking assets', 'performance-lab' ),
+		'test'              => 'enqueued-blocking-assets-test',
+		'has_rest'          => false,
+		'async_direct_test' => 'perflab_aea_enqueued_blocking_assets_test',
 	);
 
 	return $tests;
 }
 add_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' );
-
-/**
- * Invalidate both transients/cache on user clean_aea_audit action.
- * Redirects to site-health.php screen after clean up.
- *
- * @since 1.0.0
- */
-function perflab_aea_clean_aea_audit_action(): void {
-	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] && current_user_can( 'view_site_health_checks' ) ) {
-		check_admin_referer( 'clean_aea_audit' );
-		perflab_aea_invalidate_cache_transients();
-		wp_safe_redirect( remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ) );
-	}
-}
-add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
+add_action( 'wp_ajax_health-check-enqueued-blocking-assets-test', 'perflab_aea_enqueued_ajax_blocking_assets_test' );
 
 /**
  * Invalidate both transients/cache.
@@ -168,8 +39,6 @@ add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
  * @since 1.0.0
  */
 function perflab_aea_invalidate_cache_transients(): void {
-	delete_transient( 'aea_blocking_assets' );
-	delete_transient( 'aea_blocking_assets_response' );
 	// Keeping legacy transients deletion for backward compatibility.
 	delete_transient( 'aea_enqueued_front_page_scripts' );
 	delete_transient( 'aea_enqueued_front_page_styles' );
