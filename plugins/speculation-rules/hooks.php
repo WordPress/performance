@@ -27,7 +27,7 @@ function plsr_is_speculative_loading_enabled(): bool {
 			||
 			'any' === $option['authentication']
 			||
-			( current_user_can( 'manage_options' ) && 'logged_out_or_admins' === $option['authentication'] )
+			( current_user_can( 'manage_options' ) && 'logged_out_and_admins' === $option['authentication'] )
 		)
 		&&
 		(

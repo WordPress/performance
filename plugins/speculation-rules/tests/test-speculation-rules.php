@@ -60,18 +60,18 @@ class Test_Speculation_Rules extends WP_UnitTestCase {
 				'set_up'            => null,
 				'expected'          => true,
 			),
-			'authentication_logged_out_or_admins_auth_subscriber_auth_with_pretty_permalinks' => array(
+			'authentication_logged_out_and_admins_auth_subscriber_auth_with_pretty_permalinks' => array(
 				'settings'          => array(
-					'authentication' => 'logged_out_or_admins',
+					'authentication' => 'logged_out_and_admins',
 				),
 				'pretty_permalinks' => true,
 				'current_user_role' => 'subscriber',
 				'set_up'            => null,
 				'expected'          => false,
 			),
-			'authentication_logged_out_or_admins_auth_administrator_auth_with_pretty_permalinks' => array(
+			'authentication_logged_out_and_admins_auth_administrator_auth_with_pretty_permalinks' => array(
 				'settings'          => array(
-					'authentication' => 'logged_out_or_admins',
+					'authentication' => 'logged_out_and_admins',
 				),
 				'pretty_permalinks' => true,
 				'current_user_role' => 'administrator',

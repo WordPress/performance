@@ -132,14 +132,14 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
-			'valid auth logged_out_or_admins' => array(
+			'valid auth logged_out_and_admins' => array(
 				array(
-					'authentication' => 'logged_out_or_admins',
+					'authentication' => 'logged_out_and_admins',
 				),
 				array_merge(
 					$default_value,
 					array(
-						'authentication' => 'logged_out_or_admins',
+						'authentication' => 'logged_out_and_admins',
 					)
 				),
 			),
@@ -158,14 +158,14 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 				array(
 					'mode'           => 'prefetch',
 					'eagerness'      => 'conservative',
-					'authentication' => 'logged_out_or_admins',
+					'authentication' => 'logged_out_and_admins',
 				),
 				array_merge(
 					$default_value,
 					array(
 						'mode'           => 'prefetch',
 						'eagerness'      => 'conservative',
-						'authentication' => 'logged_out_or_admins',
+						'authentication' => 'logged_out_and_admins',
 					)
 				),
 			),

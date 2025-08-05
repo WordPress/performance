@@ -46,12 +46,12 @@ function plsr_get_eagerness_labels(): array {
  *
  * @since n.e.x.t
  *
- * @return array{ logged_out: string, logged_out_or_admins: string, any: string } Associative array of `$authentication => $label` pairs.
+ * @return array{ logged_out: string, logged_out_and_admins: string, any: string } Associative array of `$authentication => $label` pairs.
  */
 function plsr_get_authentication_labels(): array {
 	return array(
 		'logged_out'           => _x( 'Logged-out visitors only (default)', 'setting label', 'speculation-rules' ),
-		'logged_out_or_admins' => _x( 'Administrators or logged-out visitors', 'setting label', 'speculation-rules' ),
+		'logged_out_and_admins' => _x( 'Administrators and logged-out visitors', 'setting label', 'speculation-rules' ),
 		'any'                  => _x( 'Any user (logged-in or logged-out)', 'setting label', 'speculation-rules' ),
 	);
 }
@@ -82,7 +82,7 @@ function plsr_get_setting_default(): array {
  *
  * @since 1.4.0
  *
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
  *     Stored setting value.
  *
  *     @type string $mode           Mode.
@@ -101,7 +101,7 @@ function plsr_get_stored_setting_value(): array {
  * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_or_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
  *     Sanitized setting.
  *
  *     @type string $mode           Mode.
