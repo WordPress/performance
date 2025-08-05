@@ -210,7 +210,7 @@ function plsr_add_setting_ui(): void {
 			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 		),
 		'authentication' => array(
-			'title'       => __( 'Authentication', 'speculation-rules' ),
+			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
 			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only.', 'speculation-rules' ),
 		),
 	);
