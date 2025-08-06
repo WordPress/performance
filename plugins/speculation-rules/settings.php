@@ -163,7 +163,7 @@ function plsr_register_setting(): void {
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 						'authentication' => array(
-							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only.', 'speculation-rules' ),
+							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
@@ -211,7 +211,7 @@ function plsr_add_setting_ui(): void {
 		),
 		'authentication' => array(
 			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
-			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only.', 'speculation-rules' ),
+			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
