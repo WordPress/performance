@@ -20,6 +20,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [No-cache BFCache](https://wordpress.org/plugins/nocache-bfcache/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
