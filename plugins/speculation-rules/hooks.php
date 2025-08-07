@@ -24,7 +24,7 @@ function plsr_is_speculative_loading_enabled(): bool {
 
 	// Disabled if the user is logged in, unless the setting explicitly allows the current user's role.
 	if (
-		( is_user_logged_in() )
+		is_user_logged_in()
 		&&
 		'any' !== $option['authentication']
 		&&
