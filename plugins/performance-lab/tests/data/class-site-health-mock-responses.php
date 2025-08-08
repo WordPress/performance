@@ -17,10 +17,12 @@ class Site_Health_Mock_Responses {
 	 * @return array<string, mixed>
 	 */
 	public static function return_added_test_info_site_health(): array {
-		$added_tests                                       = array();
-		$added_tests['direct']['enqueued_blocking_assets'] = array(
-			'label' => esc_html__( 'Blocking assets', 'performance-lab' ),
-			'test'  => 'perflab_aea_enqueued_blocking_assets_test',
+		$added_tests                                      = array();
+		$added_tests['async']['enqueued_blocking_assets'] = array(
+			'label'             => esc_html__( 'Blocking assets', 'performance-lab' ),
+			'test'              => 'enqueued-blocking-assets-test',
+			'has_rest'          => false,
+			'async_direct_test' => 'perflab_aea_enqueued_blocking_assets_test',
 		);
 		return $added_tests;
 	}
@@ -46,7 +48,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'scripts' ) )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', $enqueued_scripts ), 'scripts' ) )
 					)
 				)
 			),
@@ -74,7 +76,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'scripts' ) )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', $enqueued_scripts ), 'scripts' ) )
 					)
 				)
 			),
@@ -102,7 +104,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'styles' ) )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', $enqueued_styles ), 'styles' ) )
 					)
 				)
 			),
@@ -130,7 +132,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'styles' ) )
+						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', $enqueued_styles ), 'styles' ) )
 					)
 				)
 			),

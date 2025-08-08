@@ -590,11 +590,11 @@ function perflab_get_http_basic_authorization_headers(): array {
  *
  * @since n.e.x.t
  *
- * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @param array{scripts: array<string, mixed>, styles: array<string, mixed>} $blocking_assets Array of blocking assets.
  * @return string HTML table of blocking assets.
  */
 function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): string {
-	if ( 0 === count( $blocking_assets ) ) {
+	if ( 0 === count( $blocking_assets ) || ( isset( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['styles'] ) ) ) {
 		return '';
 	}
 

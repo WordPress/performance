@@ -16,49 +16,42 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	private $mocked_responses = array();
 
 	/**
-	 * Test 'perflab_aea_audit_blocking_assets' is added to 'admin_init' action.
-	 */
-	public function test_perflab_aea_audit_blocking_assets_hook(): void {
-		$this->assertEquals( 10, has_action( 'admin_init', 'perflab_aea_audit_blocking_assets' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
+	 * Tests perflab_aea_audit_enqueued_scripts() when blocking scripts are present.
 	 *
 	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
-	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
+	public function test_perflab_aea_audit_enqueued_scripts_blocking_scripts_are_present(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3 );
-		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_blocking_assets' );
-		$this->assertIsArray( $transient );
-		$this->assertArrayHasKey( 'scripts', $transient );
-		$this->assertEquals( 3, count( $transient['scripts'] ) );
+		Audit_Assets_Mock_Requests::mock_assets( 'scripts', 3 );
+		Audit_Assets_Mock_Requests::mock_requests();
+
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertArrayHasKey( 'assets', $result );
+		$this->assertArrayHasKey( 'scripts', $result['assets'] );
+		$this->assertEquals( 3, count( $result['assets']['scripts'] ) );
 		$this->assertEqualSets(
 			array(
 				array(
-					'src'   => 'script.js',
+					'src'   => home_url( '/script.js' ),
 					'size'  => 1000,
 					'error' => null,
 				),
 				array(
-					'src'   => 'script.js',
+					'src'   => home_url( '/script.js' ),
 					'size'  => 1000,
 					'error' => null,
 				),
 				array(
-					'src'   => 'script.js',
+					'src'   => home_url( '/script.js' ),
 					'size'  => 1000,
 					'error' => null,
 				),
 			),
-			$transient['scripts']
+			$result['assets']['scripts']
 		);
 	}
 
@@ -70,7 +63,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
@@ -124,14 +116,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			)
 		);
 		$this->mock_request();
-		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_blocking_assets' );
-		$this->assertIsArray( $transient );
-		$this->assertArrayHasKey( 'scripts', $transient );
-		$this->assertNotEmpty( $transient['scripts'] );
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertIsArray( $result['assets'] );
+		$assets = $result['assets'];
+		$this->assertArrayHasKey( 'scripts', $assets );
+		$this->assertNotEmpty( $assets['scripts'] );
 
 		$external_script = array_filter(
-			$transient['scripts'],
+			$assets['scripts'],
 			static function ( $item ) {
 				return 'https://example1.com' === $item['src'];
 			}
@@ -139,7 +131,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $external_script ) );
 
 		$internal_script = array_filter(
-			$transient['scripts'],
+			$assets['scripts'],
 			static function ( $item ) {
 				return home_url( '/wp-includes/example2.js' ) === $item['src'];
 			}
@@ -147,7 +139,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $internal_script ) );
 
 		$async_script = array_filter(
-			$transient['scripts'],
+			$assets['scripts'],
 			static function ( $item ) {
 				return 'https://async-script.com' === $item['src'];
 			}
@@ -155,7 +147,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEmpty( $async_script );
 
 		$defer_script = array_filter(
-			$transient['scripts'],
+			$assets['scripts'],
 			static function ( $item ) {
 				return 'https://defer-script.com' === $item['src'];
 			}
@@ -163,55 +155,12 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEmpty( $defer_script );
 
 		$noscript_script = array_filter(
-			$transient['scripts'],
+			$assets['scripts'],
 			static function ( $item ) {
 				return 'https://non-javascript.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $noscript_script );
-	}
-
-	/**
-	 * Tests perflab_aea_audit_enqueued_styles() when transient is already set.
-	 */
-	public function test_perflab_aea_audit_enqueued_styles_transient_already_set(): void {
-		/**
-		 * Prepare scenario for test.
-		 */
-		$this->mock_is_admin();
-		$this->current_user_can_view_site_health_checks_cap();
-
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 3 );
-
-		// Avoid deprecation warning due to related change in WordPress 6.4.
-		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		get_echo( 'wp_print_styles' );
-
-		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_blocking_assets' );
-		$this->assertIsArray( $transient );
-		$this->assertArrayHasKey( 'styles', $transient );
-		$this->assertEquals( 3, count( $transient['styles'] ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'   => 'style.css',
-					'size'  => 1000,
-					'error' => null,
-				),
-				array(
-					'src'   => 'style.css',
-					'size'  => 1000,
-					'error' => null,
-				),
-				array(
-					'src'   => 'style.css',
-					'size'  => 1000,
-					'error' => null,
-				),
-			),
-			$transient['styles']
-		);
 	}
 
 	/**
@@ -222,7 +171,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_admin();
 		$this->current_user_can_view_site_health_checks_cap();
 
 		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
@@ -275,14 +223,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		);
 
 		$this->mock_request();
-		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_blocking_assets' );
-		$this->assertIsArray( $transient );
-		$this->assertArrayHasKey( 'styles', $transient );
-		$this->assertNotEmpty( $transient['styles'] );
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertIsArray( $result['assets'] );
+		$assets = $result['assets'];
+		$this->assertArrayHasKey( 'styles', $assets );
+		$this->assertNotEmpty( $assets['styles'] );
 
 		$external_style = array_filter(
-			$transient['styles'],
+			$assets['styles'],
 			static function ( $item ) {
 				return 'https://example1.com' === $item['src'];
 			}
@@ -290,7 +238,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $external_style ) );
 
 		$internal_style = array_filter(
-			$transient['styles'],
+			$assets['styles'],
 			static function ( $item ) {
 				return home_url( '/wp-includes/example2.css' ) === $item['src'];
 			}
@@ -298,7 +246,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $internal_style ) );
 
 		$print_style = array_filter(
-			$transient['styles'],
+			$assets['styles'],
 			static function ( $item ) {
 				return 'https://print-style.com' === $item['src'];
 			}
@@ -306,7 +254,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertEmpty( $print_style );
 
 		$no_href_style = array_filter(
-			$transient['styles'],
+			$assets['styles'],
 			static function ( $item ) {
 				return 'https://no-href-style.com' === $item['src'];
 			}
@@ -321,7 +269,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aea_add_enqueued_assets_test(): void {
 		$initial_tests = array(
-			'direct' => array(
+			'async' => array(
 				'initial' => array(
 					'label' => 'Label',
 					'test'  => 'test',
@@ -329,10 +277,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			),
 		);
 
-		$expected           = $initial_tests;
-		$expected['direct'] = array_merge(
-			$expected['direct'],
-			Site_Health_Mock_Responses::return_added_test_info_site_health()['direct']
+		$expected          = $initial_tests;
+		$expected['async'] = array_merge(
+			$expected['async'],
+			Site_Health_Mock_Responses::return_added_test_info_site_health()['async']
 		);
 
 		$this->assertEqualSets(
@@ -344,13 +292,17 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_invalidate_cache_transients() functionality.
 	 *
+	 * Now that usage of transients is removed this test ensures that old transients are cleared.
+	 *
 	 * @covers ::perflab_aea_invalidate_cache_transients
 	 */
 	public function test_perflab_aea_invalidate_cache_transients(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts' );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles' );
+		set_transient( 'aea_enqueued_front_page_scripts', array() );
+		set_transient( 'aea_enqueued_front_page_styles', array() );
+
 		perflab_aea_invalidate_cache_transients();
-		$this->assertFalse( get_transient( 'aea_blocking_assets' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
 	}
 
 	/**
@@ -359,10 +311,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_audit_blocking_assets
 	 * @dataProvider data_perflab_aea_audit_blocking_assets_home_request_failure
 	 *
-	 * @param array<string|mixed>|WP_Error $mocked_response The mocked response to simulate the HTTP request.
+	 * @param array<string|mixed> $mocked_response The mocked response to simulate the HTTP request.
 	 */
-	public function test_perflab_aea_audit_blocking_assets_home_request_failure( $mocked_response ): void {
-		$this->mock_is_admin();
+	public function test_perflab_aea_audit_blocking_assets_home_request_failure( array $mocked_response ): void {
 		$this->current_user_can_view_site_health_checks_cap();
 		$this->add_mock_responses( array( $mocked_response ) );
 		$this->mock_request();
@@ -370,10 +321,20 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		delete_transient( 'aea_blocking_assets' );
-		perflab_aea_audit_blocking_assets();
-		$transient = get_transient( 'aea_blocking_assets' );
-		$this->assertFalse( $transient );
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertSameSets(
+			array(
+				'response' => $mocked_response['response'],
+				'assets'   => array(
+					'scripts' => array(),
+					'styles'  => array(),
+				),
+			),
+			is_wp_error( $result['response'] ) ? $result : array(
+				'response' => $result['response']['response'],
+				'assets'   => $result['assets'],
+			)
+		);
 	}
 
 	/**
@@ -408,13 +369,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Mocks the current screen to be the dashboard.
-	 */
-	public function mock_is_admin(): void {
-		set_current_screen( 'dashboard' );
 	}
 
 	/**
