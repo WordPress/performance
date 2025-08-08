@@ -748,12 +748,83 @@ function webp_uploads_render_generator(): void {
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
 /**
+ * Process a block's content to handle background images for specific block types.
+ *
+ * This function targets blocks like Cover and Group that may use background images,
+ * converting them to modern image formats when appropriate.
+ *
+ * @since n.e.x.t
+ *
+ * @param string               $block_content The block content.
+ * @param array<string, mixed> $block         The block.
+ * @return string The filtered block content.
+ */
+function webp_uploads_filter_block_background_images( string $block_content, array $block ): string {
+	// Only run on frontend.
+	if ( ! webp_uploads_in_frontend_body() || '' === $block_content ) {
+		return $block_content;
+	}
+
+	$attachment_id = null;
+	$image_url     = '';
+
+	// Process Cover block.
+	if ( 'core/cover' === $block['blockName'] && isset( $block['attrs']['id'] ) ) {
+		$attachment_id = $block['attrs']['id'];
+		$image_url     = isset( $block['attrs']['url'] ) ? $block['attrs']['url'] : '';
+	}
+
+	// Process Group block with background image.
+	if ( 'core/group' === $block['blockName'] && isset( $block['attrs']['style']['background']['backgroundImage'] ) ) {
+		$bg_image = $block['attrs']['style']['background']['backgroundImage'];
+
+		if ( isset( $bg_image['id'] ) ) {
+			$attachment_id = $bg_image['id'];
+			$image_url     = isset( $bg_image['url'] ) ? $bg_image['url'] : '';
+		}
+	}
+
+	// If we have a valid attachment and URL, process it.
+	if ( ! is_null( $attachment_id ) && '' !== $image_url ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( is_array( $metadata ) ) {
+			$original_mime = get_post_mime_type( $attachment_id );
+
+			if ( null !== $original_mime && '' !== $original_mime ) {
+				$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'background_image' );
+
+				foreach ( $target_mimes as $target_mime ) {
+					if ( $target_mime === $original_mime ) {
+						continue;
+					}
+
+					$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
+
+					if ( null !== $new_url && '' !== $new_url ) {
+						// Replace the URL in the content.
+						$block_content = str_replace( $image_url, $new_url, $block_content );
+					}
+				}
+			}
+		}
+	}
+
+	return $block_content;
+}
+
+/**
  * Initializes custom functionality for handling image uploads and content filters.
  *
  * @since 2.1.0
  */
 function webp_uploads_init(): void {
+	// Filter regular image tags.
 	add_filter( 'wp_content_img_tag', webp_uploads_is_picture_element_enabled() ? 'webp_uploads_wrap_image_in_picture' : 'webp_uploads_filter_image_tag', 10, 3 );
+
+	// Filter blocks that may contain background images.
+	add_filter( 'render_block_core/cover', 'webp_uploads_filter_block_background_images', 10, 2 );
+	add_filter( 'render_block_core/group', 'webp_uploads_filter_block_background_images', 10, 2 );
 }
 add_action( 'init', 'webp_uploads_init' );
 
