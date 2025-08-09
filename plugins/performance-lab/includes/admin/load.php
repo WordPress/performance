@@ -91,10 +91,20 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  * @return array<non-empty-string, string> Admin pointer messages with the admin pointer IDs as the keys.
  */
 function perflab_get_admin_pointers(): array {
-	return array(
+	$pointers = array(
 		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
 		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
 	);
+
+	if (
+		defined( 'SPECULATION_RULES_VERSION' )
+		&&
+		version_compare( SPECULATION_RULES_VERSION, '1.6.0', '>=' )
+	) {
+		$pointers['perflab-feature-speculation-rules-auth'] = __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' );
+	}
+
+	return $pointers;
 }
 
 /**
@@ -185,7 +195,7 @@ function perflab_render_pointer(): void {
 
 	$args['content'] .= '<p>' . sprintf(
 		/* translators: %s: settings page link */
-		esc_html__( 'Open %s to individually toggle the performance features.', 'performance-lab' ),
+		esc_html__( 'Open %s to individually toggle the performance features and access their settings (if any).', 'performance-lab' ),
 		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
 	) . '</p>';
 
