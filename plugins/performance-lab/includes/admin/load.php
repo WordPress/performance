@@ -123,12 +123,13 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
 	}
-	$current_user = get_current_user_id();
-	$pointers     = array_keys( perflab_get_admin_pointers() );
-	$dismissed    = perflab_get_dismissed_admin_pointer_ids();
+
+	$admin_pointers        = perflab_get_admin_pointers();
+	$admin_pointer_ids     = array_keys( $admin_pointers );
+	$dismissed_pointer_ids = perflab_get_dismissed_admin_pointer_ids();
 
 	// All pointers have been dismissed already.
-	if ( count( array_diff( $pointers, $dismissed ) ) === 0 ) {
+	if ( count( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) ) === 0 ) {
 		return;
 	}
 
@@ -138,11 +139,11 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		// And if we're on the Performance screen, automatically dismiss the pointers.
 		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			update_user_meta(
-				$current_user,
+				get_current_user_id(),
 				'dismissed_wp_pointers',
 				implode(
 					',',
-					array_unique( array_merge( $dismissed, $pointers ) )
+					array_unique( array_merge( $dismissed_pointer_ids, $admin_pointer_ids ) )
 				)
 			);
 		}
@@ -153,30 +154,12 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	// Enqueue pointer CSS and JS.
 	wp_enqueue_style( 'wp-pointer' );
 	wp_enqueue_script( 'wp-pointer' );
-	add_action( 'admin_print_footer_scripts', 'perflab_render_pointer', 10, 0 );
-}
-add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
 
-/**
- * Renders the Admin Pointer.
- *
- * Handles the rendering of the admin pointer.
- *
- * @todo Eliminate this function in favor of putting it inside of perflab_admin_pointer() which attaches an inline script.
- *
- * @since 1.0.0
- * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
- * @since n.e.x.t Unused arguments removed.
- */
-function perflab_render_pointer(): void {
 	$new_install_pointer_id = 'perflab-admin-pointer';
-	$perflab_admin_pointers = perflab_get_admin_pointers();
-	$dismissed_pointer_ids  = perflab_get_dismissed_admin_pointer_ids();
-
 	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
 		$needed_pointer_ids = array( $new_install_pointer_id );
 	} else {
-		$needed_pointer_ids = array_diff( array_keys( $perflab_admin_pointers ), $dismissed_pointer_ids );
+		$needed_pointer_ids = array_diff( array_keys( $admin_pointers ), $dismissed_pointer_ids );
 	}
 
 	$args = array(
@@ -186,8 +169,8 @@ function perflab_render_pointer(): void {
 	$args['content'] = implode(
 		'',
 		array_map(
-			static function ( string $needed_pointer ) use ( $perflab_admin_pointers ): string {
-				return '<p>' . $perflab_admin_pointers[ $needed_pointer ] . '</p>';
+			static function ( string $needed_pointer ) use ( $admin_pointers ): string {
+				return '<p>' . $admin_pointers[ $needed_pointer ] . '</p>';
 			},
 			$needed_pointer_ids
 		)
@@ -207,7 +190,9 @@ function perflab_render_pointer(): void {
 		'strong' => array(),
 	);
 
-	$pointer_ids_to_dismiss = array_values( array_diff( array_keys( $perflab_admin_pointers ), $dismissed_pointer_ids ) );
+	$pointer_ids_to_dismiss = array_values( array_diff( array_keys( $admin_pointers ), $dismissed_pointer_ids ) );
+
+	ob_start();
 	?>
 	<script>
 		jQuery( function() {
@@ -246,7 +231,12 @@ function perflab_render_pointer(): void {
 		} );
 	</script>
 	<?php
+	$processor = new WP_HTML_Tag_Processor( (string) ob_get_clean() );
+	if ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+		wp_add_inline_script( 'wp-pointer', $processor->get_modifiable_text() );
+	}
 }
+add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
 
 /**
  * Adds a link to the features page to the plugin's entry in the plugins list table.

@@ -208,7 +208,17 @@ class Test_Admin_Load extends WP_UnitTestCase {
 		}
 		$this->assertFalse( is_network_admin() || is_user_admin() );
 		perflab_admin_pointer( $hook_suffix );
-		$this->assertSame( $expected ? 10 : false, has_action( 'admin_print_footer_scripts', 'perflab_render_pointer' ) );
+
+		$after_script      = '';
+		$script_dependency = wp_scripts()->query( 'wp-pointer' );
+		if ( $script_dependency instanceof _WP_Dependency ) {
+			$after_script = implode( "\n", array_filter( $script_dependency->extra['after'] ?? array() ) );
+		}
+		if ( $expected ) {
+			$this->assertStringContainsString( 'pointerIdsToDismiss', $after_script );
+		} else {
+			$this->assertStringNotContainsString( 'pointerIdsToDismiss', $after_script );
+		}
 		$this->assertSame( $expected, wp_script_is( 'wp-pointer', 'enqueued' ) );
 		$this->assertSame( $expected, wp_style_is( 'wp-pointer', 'enqueued' ) );
 		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
