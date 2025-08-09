@@ -87,6 +87,37 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::perflab_get_dismissed_admin_pointer_ids
+	 */
+	public function test_perflab_get_dismissed_admin_pointer_ids(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		// No dismissed pointers.
+		$this->assertSame( array(), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss a single pointer.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
+		$this->assertSame( array( 'perflab-admin-pointer' ), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss multiple pointers.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', 'perflab-admin-pointer,another-pointer' );
+		$this->assertSame( array( 'perflab-admin-pointer', 'another-pointer' ), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss all pointers.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', implode( ',', array_keys( perflab_get_admin_pointers() ) ) );
+		$this->assertSame( array_keys( perflab_get_admin_pointers() ), perflab_get_dismissed_admin_pointer_ids() );
+	}
+
+	/**
+	 * @covers ::perflab_get_admin_pointers
+	 */
+	public function test_perflab_get_admin_pointers(): void {
+		$pointers = perflab_get_admin_pointers();
+		$this->assertArrayHasKey( 'perflab-admin-pointer', $pointers );
+	}
+
+	/**
 	 * @return array<string, array{ hook_suffix: string|null, expected: bool }>
 	 */
 	public function data_provider_test_perflab_admin_pointer(): array {
@@ -119,14 +150,23 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'dashboard_yes_dismissed'    => array(
+			'dashboard_new_dismissed'    => array(
 				'set_up'                => static function (): void {
 					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
 				},
 				'hook_suffix'           => 'index.php',
-				'expected'              => false,
+				'expected'              => true,
 				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+			),
+			'dashboard_all_dismissed'    => array(
+				'set_up'                => static function (): void {
+					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', implode( ',', array_keys( perflab_get_admin_pointers() ) ) );
+				},
+				'hook_suffix'           => 'index.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 			'perflab_screen_first_time'  => array(
 				'set_up'                => static function (): void {
@@ -135,7 +175,7 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'hook_suffix'           => 'options-general.php',
 				'expected'              => false,
 				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 			'perflab_screen_second_time' => array(
 				'set_up'                => static function (): void {
@@ -145,7 +185,7 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'hook_suffix'           => 'options-general.php',
 				'expected'              => false,
 				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 		);
 	}

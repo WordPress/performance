@@ -68,6 +68,36 @@ function perflab_render_settings_page(): void {
 }
 
 /**
+ * Gets dismissed admin pointer IDs.
+ *
+ * @since n.e.x.t
+ *
+ * @return non-empty-string[] Dismissed admin pointer IDs.
+ */
+function perflab_get_dismissed_admin_pointer_ids(): array {
+	return array_filter(
+		explode(
+			',',
+			(string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true )
+		)
+	);
+}
+
+/**
+ * Gets the admin pointers.
+ *
+ * @since n.e.x.t
+ *
+ * @return array<non-empty-string, string> Admin pointer messages with the admin pointer IDs as the keys.
+ */
+function perflab_get_admin_pointers(): array {
+	return array(
+		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+	);
+}
+
+/**
  * Initializes admin pointer.
  *
  * Handles the bootstrapping of the admin pointer.
@@ -84,18 +114,27 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		return;
 	}
 	$current_user = get_current_user_id();
-	$dismissed    = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
+	$pointers     = array_keys( perflab_get_admin_pointers() );
+	$dismissed    = perflab_get_dismissed_admin_pointer_ids();
 
-	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
+	// All pointers have been dismissed already.
+	if ( count( array_diff( $pointers, $dismissed ) ) === 0 ) {
 		return;
 	}
 
+	// Do not show the admin pointer when not on the dashboard or plugins list table.
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 
-		// Do not show on the settings page and dismiss the pointer.
-		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] && ( ! in_array( 'perflab-admin-pointer', $dismissed, true ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$dismissed[] = 'perflab-admin-pointer';
-			update_user_meta( $current_user, 'dismissed_wp_pointers', implode( ',', $dismissed ) );
+		// And if we're on the Performance screen, automatically dismiss the pointers.
+		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			update_user_meta(
+				$current_user,
+				'dismissed_wp_pointers',
+				implode(
+					',',
+					array_unique( array_merge( $dismissed, $pointers ) )
+				)
+			);
 		}
 
 		return;
@@ -113,53 +152,84 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  *
  * Handles the rendering of the admin pointer.
  *
+ * @todo Eliminate this function in favor of putting it inside of perflab_admin_pointer() which attaches an inline script.
+ *
  * @since 1.0.0
  * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
- *
- * @param string                                    $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
- * @param array{heading?: string, content?: string} $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
- *                                                              Defaults are the heading and content for the 'perflab-admin-pointer'.
+ * @since n.e.x.t Unused arguments removed.
  */
-function perflab_render_pointer( string $pointer_id = 'perflab-admin-pointer', array $args = array() ): void {
-	if ( ! isset( $args['heading'] ) ) {
-		$args['heading'] = __( 'Performance Lab', 'performance-lab' );
-	}
-	if ( ! isset( $args['content'] ) ) {
-		$args['content'] = sprintf(
-			/* translators: %s: settings page link */
-			esc_html__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features.', 'performance-lab' ),
-			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
-		);
+function perflab_render_pointer(): void {
+	$new_install_pointer_id = 'perflab-admin-pointer';
+	$perflab_admin_pointers = perflab_get_admin_pointers();
+	$dismissed_pointer_ids  = perflab_get_dismissed_admin_pointer_ids();
+
+	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
+		$needed_pointer_ids = array( $new_install_pointer_id );
+	} else {
+		$needed_pointer_ids = array_diff( array_keys( $perflab_admin_pointers ), $dismissed_pointer_ids );
 	}
 
-	$wp_kses_options = array(
-		'a' => array(
-			'href' => array(),
-		),
+	$args = array(
+		'heading' => __( 'Performance Lab', 'performance-lab' ),
 	);
 
+	$args['content'] = implode(
+		'',
+		array_map(
+			static function ( string $needed_pointer ) use ( $perflab_admin_pointers ): string {
+				return '<p>' . $perflab_admin_pointers[ $needed_pointer ] . '</p>';
+			},
+			$needed_pointer_ids
+		)
+	);
+
+	$args['content'] .= '<p>' . sprintf(
+		/* translators: %s: settings page link */
+		esc_html__( 'Open %s to individually toggle the performance features.', 'performance-lab' ),
+		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
+	) . '</p>';
+
+	$wp_kses_options = array(
+		'a'      => array(
+			'href' => array(),
+		),
+		'p'      => array(),
+		'strong' => array(),
+	);
+
+	$pointer_ids_to_dismiss = array_values( array_diff( array_keys( $perflab_admin_pointers ), $dismissed_pointer_ids ) );
 	?>
-	<script id="<?php echo esc_attr( $pointer_id ); ?>" type="text/javascript">
+	<script>
 		jQuery( function() {
+			const pointerIdsToDismiss = <?php echo wp_json_encode( $pointer_ids_to_dismiss, JSON_OBJECT_AS_ARRAY ); ?>;
+			const nonce = <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>;
+
+			function dismissNextPointer() {
+				const pointerId = pointerIdsToDismiss.shift();
+				if ( ! pointerId ) {
+					return;
+				}
+
+				jQuery.post(
+					window.ajaxurl,
+					{
+						pointer: pointerId,
+						action:  'dismiss-wp-pointer',
+						_wpnonce: nonce,
+					}
+				).then( dismissNextPointer );
+			}
+
 			// Pointer Options.
 			const options = {
-				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3><p>' . wp_kses( $args['content'], $wp_kses_options ) . '</p>' ); ?>,
+				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3>' . wp_kses( $args['content'], $wp_kses_options ) ); ?>,
 				position: {
 					edge:  'left',
 					align: 'right',
 				},
 				pointerClass: 'wp-pointer arrow-top',
 				pointerWidth: 420,
-				close: function() {
-					jQuery.post(
-						window.ajaxurl,
-						{
-							pointer: <?php echo wp_json_encode( $pointer_id ); ?>,
-							action:  'dismiss-wp-pointer',
-							_wpnonce: <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>,
-						}
-					);
-				}
+				close: dismissNextPointer
 			};
 
 			jQuery( '#menu-settings' ).pointer( options ).pointer( 'open' );
@@ -207,7 +277,11 @@ function perflab_plugin_action_links_add_settings( $links ) {
  * @since 2.3.0
  */
 function perflab_dismiss_wp_pointer_wrapper(): void {
-	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
+	if (
+		isset( $_POST['pointer'] )
+		&&
+		! in_array( $_POST['pointer'], array_keys( perflab_get_admin_pointers() ), true )
+	) {
 		// Another plugin's pointer, do nothing.
 		return;
 	}
