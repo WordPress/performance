@@ -215,6 +215,10 @@ const optimizationDetective = ( env ) => {
 						},
 					},
 					{
+						from: `${ destination }/detect-loader.js`,
+						to: `${ destination }/detect-loader.min.js`,
+					},
+					{
 						from: `${ destination }/detect.js`,
 						to: `${ destination }/detect.min.js`,
 					},
