@@ -11,11 +11,9 @@ Enables browsers to speculatively prerender or prefetch pages to achieve near-in
 
 == Description ==
 
-This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered.
+This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered. This core Speculative Loading functionality was [merged into WordPress 6.8](https://make.wordpress.org/core/2025/03/06/speculative-loading-in-6-8/), but it only prefetches with conservative eagerness by default. In contrast, this plugin defaults to prerendering with moderate eagerness (i.e. when interacting with a link), and it provides a user interface to customize the mode and eagerness via the "Speculative Loading" section on the _Settings > Reading_ admin screen.
 
-See the [Speculation Rules WICG specification draft](https://wicg.github.io/nav-speculation/speculation-rules.html).
-
-By default, the plugin is configured to prerender WordPress frontend URLs when the user interacts with a relevant link. This can be customized via the "Speculative Loading" section in the _Settings > Reading_ admin screen.
+By default, speculative loading is only enabled for logged-out users, since unauthenticated pages are typically only eligible for caching and so more efficient to prefetch/prerender. This means that sites with frequent logged-in users on the frontend—such as e-commerce, forums, or membership sites—will not benefit from the feature. If your server can handle the additional load (for example, with persistent object caching), you can opt in to enable speculative loading for all logged-in users or for administrators only. This setting exclusively affects frontend pages; admin screens are always excluded.
 
 A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the `no-prerender` CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
 
