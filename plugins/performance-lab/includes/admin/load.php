@@ -159,7 +159,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
 		$needed_pointer_ids = array( $new_install_pointer_id );
 	} else {
-		$needed_pointer_ids = array_diff( array_keys( $admin_pointers ), $dismissed_pointer_ids );
+		$needed_pointer_ids = array_diff( $admin_pointer_ids, $dismissed_pointer_ids );
 	}
 
 	$args = array(
@@ -190,7 +190,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		'strong' => array(),
 	);
 
-	$pointer_ids_to_dismiss = array_values( array_diff( array_keys( $admin_pointers ), $dismissed_pointer_ids ) );
+	$pointer_ids_to_dismiss = array_values( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) );
 
 	ob_start();
 	?>
