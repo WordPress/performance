@@ -610,6 +610,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Upgrade Notice ==
 
+= n.e.x.t =
+
+This release introduces a new feature plugin called View Transitions which adds smooth transitions between navigations on your site.
+
 = 3.2.0 =
 
 This release introduces a new feature plugin called Image Prioritizer which optimizes the loading of images to improve LCP.
