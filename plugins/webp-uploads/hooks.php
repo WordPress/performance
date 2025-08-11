@@ -755,11 +755,29 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  *
  * @since n.e.x.t
  *
- * @param string               $block_content The block content.
+ * @phpstan-param array{
+ *                    blockName: string|null,
+ *                    attrs: array{
+ *                        id?: positive-int,
+ *                        url?: string,
+ *                        style?: array{
+ *                            background?: array{
+ *                                backgroundImage?: string
+ *                            }
+ *                        }
+ *                    }
+ *                } $block
+ *
+ * @param string|mixed         $block_content The block content.
  * @param array<string, mixed> $block         The block.
  * @return string The filtered block content.
  */
-function webp_uploads_filter_block_background_images( string $block_content, array $block ): string {
+function webp_uploads_filter_block_background_images( $block_content, array $block ): string {
+	// Because plugins can do bad things.
+	if ( ! is_string( $block_content ) ) {
+		$block_content = '';
+	}
+
 	// Only run on frontend.
 	if ( ! webp_uploads_in_frontend_body() || '' === $block_content ) {
 		return $block_content;
@@ -771,7 +789,7 @@ function webp_uploads_filter_block_background_images( string $block_content, arr
 	// Process Cover block.
 	if ( 'core/cover' === $block['blockName'] && isset( $block['attrs']['id'] ) ) {
 		$attachment_id = $block['attrs']['id'];
-		$image_url     = isset( $block['attrs']['url'] ) ? $block['attrs']['url'] : '';
+		$image_url     = $block['attrs']['url'] ?? '';
 	}
 
 	// Process Group block with background image.
@@ -780,31 +798,41 @@ function webp_uploads_filter_block_background_images( string $block_content, arr
 
 		if ( isset( $bg_image['id'] ) ) {
 			$attachment_id = $bg_image['id'];
-			$image_url     = isset( $bg_image['url'] ) ? $bg_image['url'] : '';
+			$image_url     = $bg_image['url'] ?? '';
 		}
 	}
 
-	// If we have a valid attachment and URL, process it.
-	if ( ! is_null( $attachment_id ) && '' !== $image_url ) {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+	// Abort if there is no associated background image.
+	if ( is_null( $attachment_id ) || '' === $image_url || ! is_array( wp_get_attachment_metadata( $attachment_id ) ) ) {
+		return $block_content;
+	}
 
-		if ( is_array( $metadata ) ) {
-			$original_mime = get_post_mime_type( $attachment_id );
+	$original_mime = get_post_mime_type( $attachment_id );
 
-			if ( null !== $original_mime && '' !== $original_mime ) {
-				$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'background_image' );
+	if ( ! is_string( $original_mime ) ) {
+		return $block_content;
+	}
 
-				foreach ( $target_mimes as $target_mime ) {
-					if ( $target_mime === $original_mime ) {
-						continue;
-					}
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'background_image' );
 
-					$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
+	foreach ( $target_mimes as $target_mime ) {
+		if ( $target_mime === $original_mime ) {
+			continue;
+		}
 
-					if ( null !== $new_url && '' !== $new_url ) {
-						// Replace the URL in the content.
-						$block_content = str_replace( $image_url, $new_url, $block_content );
-					}
+		$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
+
+		if ( is_string( $new_url ) ) {
+
+			$processor = new WP_HTML_Tag_Processor( $block_content );
+			while ( $processor->next_tag() ) {
+				$style = $processor->get_attribute( 'style' );
+
+				if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+					$updated_style = str_replace( $image_url, $new_url, $style );
+					$processor->set_attribute( 'style', $updated_style );
+					$block_content = $processor->get_updated_html();
+					break 2;
 				}
 			}
 		}
