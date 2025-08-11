@@ -444,11 +444,12 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 		$basename = wp_basename( $metadata['file'] );
 
 		if ( $src_basename === $basename ) {
-			return str_replace(
+			$result = str_replace(
 				$basename,
 				$metadata['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
@@ -471,11 +472,12 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 				continue;
 			}
 
-			return str_replace(
+			$result = str_replace(
 				$size_data['file'],
 				$size_data['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
