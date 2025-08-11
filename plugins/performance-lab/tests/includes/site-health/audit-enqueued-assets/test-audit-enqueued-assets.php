@@ -9,13 +9,6 @@
 class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	/**
-	 * Mocked responses for HTTP requests.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $mocked_responses = array();
-
-	/**
 	 * Tests perflab_aea_audit_enqueued_scripts() when blocking scripts are present.
 	 *
 	 * @covers ::perflab_aea_audit_blocking_assets
@@ -43,14 +36,16 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_audit_enqueued_scripts() with no transient.
-	 * Enqueued scripts ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 * Tests perflab_aea_audit_enqueued_scripts() with blocking scripts.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
 		$this->current_user_can_view_site_health_checks_cap();
+		Audit_Assets_Mock_Assets::clear_mocked();
 
 		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
 		wp_enqueue_script( 'script2', '/wp-includes/example2.js', array(), null );
@@ -59,6 +54,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
 		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
 		wp_enqueue_script( 'type-noscript', 'https://non-javascript.com', array(), null );
+		wp_enqueue_script( 'no-src', 'no-src', array(), null );
+		wp_enqueue_script_module( 'module1', 'https://module1.com', array(), null );
 
 		add_filter(
 			'wp_script_attributes',
@@ -69,6 +66,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$attributes['defer'] = true;
 				} elseif ( 'type-noscript-js' === $attributes['id'] ) {
 					$attributes['type'] = 'noscript';
+				} elseif ( 'no-src-js' === $attributes['id'] ) {
+					unset( $attributes['src'] );
 				}
 				return $attributes;
 			}
@@ -77,15 +76,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->add_mock_responses(
+		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
-				array(
-					'url'      => home_url( '/' ),
-					'response' => array(
-						'code' => 200,
-						'body' => $this->get_mocked_html(),
-					),
-				),
 				array(
 					'url'      => 'https://example1.com',
 					'response' => array(
@@ -102,7 +94,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 				),
 			)
 		);
-		$this->mock_request();
+		Audit_Assets_Mock_Assets::mock_requests();
 		$result = perflab_aea_audit_blocking_assets();
 		$this->assertIsArray( $result['assets'] );
 		$assets = $result['assets'];
@@ -148,17 +140,27 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			}
 		);
 		$this->assertEmpty( $noscript_script );
+
+		$module_script = array_filter(
+			$assets['scripts'],
+			static function ( $item ) {
+				return 'https://module1.com' === $item['src'];
+			}
+		);
+		$this->assertEmpty( $module_script );
 	}
 
 	/**
-	 * Tests perflab_aea_audit_enqueued_styles() with no transient.
-	 * Enqueued styles ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 * Tests perflab_aea_audit_enqueued_styles() with blocking styles.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
 	public function test_perflab_aea_audit_enqueued_styles(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
 		$this->current_user_can_view_site_health_checks_cap();
+		Audit_Assets_Mock_Assets::clear_mocked();
 
 		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
 		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array(), null );
@@ -183,15 +185,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 
-		$this->add_mock_responses(
+		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
-				array(
-					'url'      => home_url( '/' ),
-					'response' => array(
-						'code' => 200,
-						'body' => $this->get_mocked_html(),
-					),
-				),
 				array(
 					'url'      => 'https://example1.com',
 					'response' => array(
@@ -209,7 +204,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			)
 		);
 
-		$this->mock_request();
+		Audit_Assets_Mock_Assets::mock_requests();
 		$result = perflab_aea_audit_blocking_assets();
 		$this->assertIsArray( $result['assets'] );
 		$assets = $result['assets'];
@@ -302,8 +297,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aea_audit_blocking_assets_home_request_failure( array $mocked_response ): void {
 		$this->current_user_can_view_site_health_checks_cap();
-		$this->add_mock_responses( array( $mocked_response ) );
-		$this->mock_request();
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::add_mock_responses( array( $mocked_response ) );
+		Audit_Assets_Mock_Assets::mock_requests( array( $mocked_response ) );
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
@@ -359,57 +355,20 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that hooks are set correctly.
+	 *
+	 * @covers ::perflab_aea_add_enqueued_assets_test
+	 */
+	public function test_hooks_are_set(): void {
+		$this->assertSame( 10, has_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' ) );
+		$this->assertSame( 10, has_action( 'wp_ajax_health-check-enqueued-blocking-assets-test', 'perflab_aea_enqueued_ajax_blocking_assets_test' ) );
+	}
+
+	/**
 	 * Adds view_site_health_checks capability to current user.
 	 */
 	public function current_user_can_view_site_health_checks_cap(): void {
 		$current_user = wp_get_current_user();
 		$current_user->add_cap( 'view_site_health_checks' );
-	}
-
-	public function get_mocked_html(): string {
-		$mock_html  = '<!DOCTYPE html><head>';
-		$mock_html .= get_echo( 'wp_head' );
-		$mock_html .= '</head><body>';
-		$mock_html .= get_echo( 'wp_footer' );
-		$mock_html .= '</body></html>';
-		return $mock_html;
-	}
-
-	/**
-	 * Adds a mocked response for a specific URL.
-	 *
-	 * @param array<string|mixed> $responses An array containing the URLs and the mocked responses.
-	 */
-	public function add_mock_responses( array $responses ): void {
-		foreach ( $responses as $response ) {
-			$this->mocked_responses[ $response['url'] ] = $response['response'];
-		}
-	}
-
-	/**
-	 * Mocks HTTP requests for tests.
-	 */
-	public function mock_request(): void {
-		remove_all_filters( 'pre_http_request' );
-		add_filter(
-			'pre_http_request',
-			function ( $preempt, $parsed_args, $url ) {
-				$url = remove_query_arg( 'cache_bust', $url );
-
-				if ( isset( $this->mocked_responses[ $url ] ) ) {
-					if ( is_wp_error( $this->mocked_responses[ $url ] ) ) {
-						return $this->mocked_responses[ $url ];
-					}
-
-					return array(
-						'response' => $this->mocked_responses[ $url ],
-						'body'     => $this->mocked_responses[ $url ]['body'] ?? '',
-					);
-				}
-				return $preempt;
-			},
-			10,
-			3
-		);
 	}
 }

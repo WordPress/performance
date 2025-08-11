@@ -138,8 +138,9 @@ class Audit_Assets_Mock_Assets {
 		remove_all_filters( 'pre_http_request' );
 
 		self::$mocked_responses[ home_url( '/' ) ] = array(
-			'code' => 200,
-			'body' => self::get_mocked_html(),
+			'code'    => 200,
+			'body'    => self::get_mocked_html(),
+			'message' => 'OK',
 		);
 		self::add_mock_responses( $additional_responses );
 
@@ -153,10 +154,7 @@ class Audit_Assets_Mock_Assets {
 					}
 
 					return array(
-						'response' => array(
-							'code'    => self::$mocked_responses[ $url ]['code'] ?? 200,
-							'message' => self::$mocked_responses[ $url ]['message'] ?? 'OK',
-						),
+						'response' => self::$mocked_responses[ $url ],
 						'body'     => self::$mocked_responses[ $url ]['body'] ?? '',
 					);
 				}

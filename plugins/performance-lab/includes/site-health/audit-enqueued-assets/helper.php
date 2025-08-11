@@ -134,7 +134,7 @@ function perflab_aea_audit_blocking_assets(): array {
  *             description: string,
  *             actions: string,
  *             test: string
- *         }|array{omitted: true} Result.
+ *         } Result.
  */
 function perflab_aea_enqueued_blocking_assets_test(): array {
 	$result = array(
@@ -159,13 +159,6 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 
 	$scripts_result = perflab_aea_enqueued_blocking_scripts( $audit_result['assets'] );
 	$styles_result  = perflab_aea_enqueued_blocking_styles( $audit_result['assets'] );
-
-	if ( null === $scripts_result && null === $styles_result ) {
-		// The return value is validated in JavaScript at:
-		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
-		// If the value lacks the required keys of test, label, and description then it is omitted.
-		return array( 'omitted' => true );
-	}
 
 	$result['description'] .= perflab_aea_generate_blocking_assets_table( $audit_result['assets'] );
 

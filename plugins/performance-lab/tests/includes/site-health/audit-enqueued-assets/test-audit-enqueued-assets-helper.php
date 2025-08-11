@@ -140,7 +140,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_wp_error(): void {
-		set_transient( 'aea_blocking_assets_response', new WP_Error( 'something_bad', 'Oh no!!!' ) );
+		Audit_Assets_Mock_Assets::mock_requests(
+			array(
+				array(
+					'url'      => home_url( '/' ),
+					'response' => new WP_Error( 'something_bad', 'Oh no!!!' ),
+				),
+			)
+		);
 
 		$test = perflab_aea_enqueued_blocking_assets_test();
 		$this->assertSameSets(
@@ -456,45 +463,41 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_get_asset_size
 	 */
 	public function test_perflab_aea_get_asset_size(): void {
-		$this->mock_request(
-			'https://example.com/script.js',
-			new WP_Error(
-				'http_error',
-				'Mocked HTTP error for testing.'
-			)
-		);
-		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
-
-		$this->mock_request(
-			'https://example.com/script.js',
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::mock_requests(
 			array(
-				'response' => array(
-					'code'    => 404,
-					'message' => 'Not Found',
+				array(
+					'url'      => 'https://example.com/script1.js',
+					'response' => new WP_Error( 'http_error', 'Mocked HTTP error for testing.' ),
 				),
-				'body'     => 'Not Found',
+				array(
+					'url'      => 'https://example.com/script2.js',
+					'response' => array(
+						'code'    => 404,
+						'message' => 'Not Found',
+					),
+				),
+				array(
+					'url'      => 'https://example.com/script3.js',
+					'response' => array(
+						'code' => 200,
+						'body' => '',
+					),
+				),
+				array(
+					'url'      => 'https://example.com/script4.js',
+					'response' => array(
+						'code' => 200,
+						'body' => str_repeat( 'A', 1000 ),
+					),
+				),
 			)
 		);
-		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
 
-		$this->mock_request(
-			'https://example.com/script.js',
-			array(
-				'response' => array( 'code' => 200 ),
-				'body'     => '',
-			)
-		);
-		$this->assertEquals( 0, perflab_aea_get_asset_size( 'https://example.com/script.js' ) );
-
-		$this->mock_request(
-			'https://example.com/script.js',
-			array(
-				'response' => array( 'code' => 200 ),
-				'body'     => str_repeat( 'a', 1000 ),
-			)
-		);
-		$size = perflab_aea_get_asset_size( 'https://example.com/script.js' );
-		$this->assertEquals( 1000, $size );
+		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script1.js' ) );
+		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script2.js' ) );
+		$this->assertEquals( 0, perflab_aea_get_asset_size( 'https://example.com/script3.js' ) );
+		$this->assertEquals( 1000, perflab_aea_get_asset_size( 'https://example.com/script4.js' ) );
 	}
 
 	/**
@@ -545,34 +548,6 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 		$table     = perflab_aea_generate_blocking_assets_table( Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 ) );
 		$processor = new WP_HTML_Tag_Processor( $table );
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
-	}
-
-	/**
-	 * Mocks HTTP requests for tests.
-	 *
-	 * @param string                       $resource_url The URL to mock.
-	 * @param array<string|mixed>|WP_Error $response The response to return for the mocked request.
-	 */
-	public function mock_request( string $resource_url, $response ): void {
-		remove_all_filters( 'pre_http_request' );
-		add_filter(
-			'pre_http_request',
-			static function ( $preempt, $parsed_args, $url ) use ( $resource_url, $response ) {
-				if ( $url === $resource_url ) {
-					if ( is_wp_error( $response ) ) {
-						return $response;
-					}
-
-					return array(
-						'response' => $response['response'],
-						'body'     => $response['body'] ?? '',
-					);
-				}
-				return $preempt;
-			},
-			10,
-			3
-		);
 	}
 
 	/**
