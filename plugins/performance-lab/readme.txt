@@ -613,7 +613,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = n.e.x.t =
 
-This release introduces a new feature plugin called View Transitions which adds smooth transitions between navigations on your site.
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and No-cache BFCache which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 
