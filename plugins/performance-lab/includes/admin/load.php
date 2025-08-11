@@ -178,7 +178,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 
 	$args['content'] .= '<p>' . sprintf(
 		/* translators: %s: settings page link */
-		esc_html__( 'Open %s to individually toggle the performance features and access their settings (if any).', 'performance-lab' ),
+		esc_html__( 'Open %s to individually toggle the performance features and access any relevant settings.', 'performance-lab' ),
 		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
 	) . '</p>';
 
