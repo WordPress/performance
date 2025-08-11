@@ -822,18 +822,19 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 
 		$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
 
-		if ( is_string( $new_url ) ) {
+		if ( ! is_string( $new_url ) ) {
+			continue;
+		}
 
-			$processor = new WP_HTML_Tag_Processor( $block_content );
-			while ( $processor->next_tag() ) {
-				$style = $processor->get_attribute( 'style' );
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
 
-				if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
-					$updated_style = str_replace( $image_url, $new_url, $style );
-					$processor->set_attribute( 'style', $updated_style );
-					$block_content = $processor->get_updated_html();
-					break 2;
-				}
+			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+				$updated_style = str_replace( $image_url, $new_url, $style );
+				$processor->set_attribute( 'style', $updated_style );
+				$block_content = $processor->get_updated_html();
+				break 2;
 			}
 		}
 	}
