@@ -795,7 +795,6 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 	// Process Group block with background image.
 	if ( 'core/group' === $block['blockName'] && isset( $block['attrs']['style']['background']['backgroundImage'] ) ) {
 		$bg_image = $block['attrs']['style']['background']['backgroundImage'];
-
 		if ( isset( $bg_image['id'] ) ) {
 			$attachment_id = $bg_image['id'];
 			$image_url     = $bg_image['url'] ?? '';
@@ -808,7 +807,6 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 	}
 
 	$original_mime = get_post_mime_type( $attachment_id );
-
 	if ( ! is_string( $original_mime ) ) {
 		return $block_content;
 	}
@@ -821,7 +819,6 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 		}
 
 		$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
-
 		if ( ! is_string( $new_url ) ) {
 			continue;
 		}
@@ -829,7 +826,6 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 		$processor = new WP_HTML_Tag_Processor( $block_content );
 		while ( $processor->next_tag() ) {
 			$style = $processor->get_attribute( 'style' );
-
 			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
 				$updated_style = str_replace( $image_url, $new_url, $style );
 				$processor->set_attribute( 'style', $updated_style );
