@@ -30,9 +30,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_and_css(): void {
-		Audit_Assets_Mock_Requests::mock_assets( 'scripts', 1 );
-		Audit_Assets_Mock_Requests::mock_assets( 'styles', 1 );
-		Audit_Assets_Mock_Requests::mock_requests();
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 1 );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', 1 );
+		Audit_Assets_Mock_Assets::mock_requests();
 
 		$test = perflab_aea_enqueued_blocking_assets_test();
 		$this->assertSameSets(
@@ -61,8 +61,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_and_css(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', self::WARNING_STYLES_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', self::WARNING_STYLES_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_requests();
 
 		$test = perflab_aea_enqueued_blocking_assets_test();
 		$this->assertSameSets(
@@ -87,8 +88,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_bad_js_but_good_css(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 1 );
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', self::WARNING_SCRIPTS_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', 1 );
+		Audit_Assets_Mock_Assets::mock_requests();
 
 		$test = perflab_aea_enqueued_blocking_assets_test();
 		$this->assertSameSets(
@@ -113,8 +115,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_good_js_but_bad_css(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 1 );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', self::WARNING_STYLES_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 1 );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', self::WARNING_STYLES_THRESHOLD );
+		Audit_Assets_Mock_Assets::mock_requests();
 
 		$test = perflab_aea_enqueued_blocking_assets_test();
 		$this->assertSameSets(
@@ -157,14 +160,16 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_http_error(): void {
-		set_transient(
-			'aea_blocking_assets_response',
+		Audit_Assets_Mock_Assets::mock_requests(
 			array(
-				'response' => array(
-					'code'    => 404,
-					'message' => 'Not Found',
+				array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code'    => 404,
+						'message' => 'Not Found',
+						'body'    => 'Where art thou?',
+					),
 				),
-				'body'     => 'Where art thou?',
 			)
 		);
 
@@ -186,14 +191,16 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_blocking_assets_retrieval_failure
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_response_is_empty_body(): void {
-		set_transient(
-			'aea_blocking_assets_response',
+		Audit_Assets_Mock_Assets::mock_requests(
 			array(
-				'response' => array(
-					'code'    => 200,
-					'message' => 'OK',
+				array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+						'body'    => '',
+					),
 				),
-				'body'     => '',
 			)
 		);
 
@@ -216,8 +223,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_one_script_is_404(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3, 1 );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 2 );
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 3, 1 );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', 2 );
+		Audit_Assets_Mock_Assets::mock_requests();
 		$test = perflab_aea_enqueued_blocking_assets_test();
 
 		$this->assertSameSets(
@@ -239,8 +247,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_blocking_assets_test_but_one_style_is_404(): void {
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'scripts', 3 );
-		Audit_Assets_Transients_Set::set_assets_transient_with_data( 'styles', 2, 1 );
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 2 );
+		Audit_Assets_Mock_Assets::mock_assets( 'styles', 3, 1 );
+		Audit_Assets_Mock_Assets::mock_requests();
 		$test = perflab_aea_enqueued_blocking_assets_test();
 
 		$this->assertSameSets(
@@ -259,7 +268,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_scripts
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_no_blocking_scripts(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_scripts( array( 'scripts' => array() ) ) );
+		$this->assertNull( perflab_aea_enqueued_blocking_scripts( array() ) );
 	}
 
 	/**
@@ -288,7 +297,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_enqueued_blocking_styles
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_no_blocking_styles(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_styles( array( 'styles' => array() ) ) );
+		$this->assertNull( perflab_aea_enqueued_blocking_styles( array() ) );
 	}
 
 	/**

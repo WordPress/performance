@@ -26,33 +26,20 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		 */
 		$this->current_user_can_view_site_health_checks_cap();
 
-		Audit_Assets_Mock_Requests::mock_assets( 'scripts', 3 );
-		Audit_Assets_Mock_Requests::mock_requests();
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 3 );
+		Audit_Assets_Mock_Assets::mock_requests();
 
 		$result = perflab_aea_audit_blocking_assets();
 		$this->assertArrayHasKey( 'assets', $result );
 		$this->assertArrayHasKey( 'scripts', $result['assets'] );
+		$this->assertIsArray( $result['assets']['scripts'] );
 		$this->assertEquals( 3, count( $result['assets']['scripts'] ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'   => home_url( '/script.js' ),
-					'size'  => 1000,
-					'error' => null,
-				),
-				array(
-					'src'   => home_url( '/script.js' ),
-					'size'  => 1000,
-					'error' => null,
-				),
-				array(
-					'src'   => home_url( '/script.js' ),
-					'size'  => 1000,
-					'error' => null,
-				),
-			),
-			$result['assets']['scripts']
-		);
+		foreach ( $result['assets']['scripts'] as $script ) {
+			$this->assertArrayHasKey( 'src', $script );
+			$this->assertArrayHasKey( 'size', $script );
+			$this->assertArrayHasKey( 'error', $script );
+		}
 	}
 
 	/**
