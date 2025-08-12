@@ -61,12 +61,11 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 	 * @param string $block_name    Block name (e.g. 'core/cover' or 'core/group').
 	 * @param int    $attachment_id Attachment ID whose URL will be used as original background image.
 	 * @param string $original_url  The original full size image URL.
-	 * @param string $content       Inner content (optional).
 	 * @return array{block_content:string,block:array<string,mixed>} Array containing 'block_content' HTML and 'block' parsed block structure.
 	 */
-	private function generate_block_with_background( string $block_name, int $attachment_id, string $original_url, string $content = 'Content' ): array {
+	private function generate_block_with_background( string $block_name, int $attachment_id, string $original_url ): array {
 		if ( 'core/cover' === $block_name ) {
-			$block_content = '<div class="wp-block-cover"><div style="background-image:url(' . esc_url( $original_url ) . ')"><span class="wp-block-cover__inner-container">' . esc_html( $content ) . '</span></div></div>';
+			$block_content = '<div class="wp-block-cover"><div style="background-image:url(' . esc_url( $original_url ) . ')"><span class="wp-block-cover__inner-container">Content</span></div></div>';
 			$block         = array(
 				'blockName' => 'core/cover',
 				'attrs'     => array(
@@ -75,7 +74,7 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 				),
 			);
 		} elseif ( 'core/group' === $block_name ) {
-			$block_content = '<div class="wp-block-group" style="background-image:url(' . esc_url( $original_url ) . ')"><div class="wp-block-group__inner-container">' . esc_html( $content ) . '</div></div>';
+			$block_content = '<div class="wp-block-group" style="background-image:url(' . esc_url( $original_url ) . ')"><div class="wp-block-group__inner-container">Content</div></div>';
 			$block         = array(
 				'blockName' => 'core/group',
 				'attrs'     => array(
@@ -128,6 +127,8 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 
 	/**
 	 * It should not change background when no WebP source exists.
+	 *
+	 * @covers ::webp_uploads_filter_block_background_images
 	 */
 	public function test_cover_block_background_image_not_changed_without_webp_source(): void {
 		// Remove any transform filters added during set_up so we start clean.
@@ -155,6 +156,8 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 
 	/**
 	 * It should replace a Group block background image URL with a WebP variant when available.
+	 *
+	 * @covers ::webp_uploads_filter_block_background_images
 	 */
 	public function test_group_block_background_image_replaced_with_webp(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {

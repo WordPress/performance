@@ -784,25 +784,24 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 	}
 
 	$attachment_id = null;
-	$image_url     = '';
+	$image_url     = null;
 
-	// Process Cover block.
-	if ( 'core/cover' === $block['blockName'] && isset( $block['attrs']['id'] ) ) {
-		$attachment_id = $block['attrs']['id'];
-		$image_url     = $block['attrs']['url'] ?? '';
-	}
-
-	// Process Group block with background image.
-	if ( 'core/group' === $block['blockName'] && isset( $block['attrs']['style']['background']['backgroundImage'] ) ) {
-		$bg_image = $block['attrs']['style']['background']['backgroundImage'];
-		if ( isset( $bg_image['id'] ) ) {
-			$attachment_id = $bg_image['id'];
-			$image_url     = $bg_image['url'] ?? '';
+	if ( 'core/cover' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['id'], $block['attrs']['url'] ) ) {
+			$attachment_id = $block['attrs']['id'];
+			$image_url     = $block['attrs']['url'];
+		}
+	} elseif ( 'core/group' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['style']['background']['backgroundImage']['id'], $block['attrs']['style']['background']['backgroundImage']['url'] ) ) {
+			$attachment_id = $block['attrs']['style']['background']['backgroundImage']['id'];
+			$image_url     = $block['attrs']['style']['background']['backgroundImage']['url'];
 		}
 	}
 
 	// Abort if there is no associated background image.
-	if ( is_null( $attachment_id ) || '' === $image_url || ! is_array( wp_get_attachment_metadata( $attachment_id ) ) ) {
+	if (
+		! isset( $attachment_id, $image_url ) || $attachment_id <= 0 || '' === $image_url || ! is_array( wp_get_attachment_metadata( $attachment_id ) )
+	) {
 		return $block_content;
 	}
 
