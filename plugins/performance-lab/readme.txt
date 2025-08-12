@@ -20,6 +20,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [No-cache BFCache](https://wordpress.org/plugins/nocache-bfcache/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
@@ -612,7 +613,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = n.e.x.t =
 
-This release introduces a new feature plugin called View Transitions which adds smooth transitions between navigations on your site.
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and No-cache BFCache which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 

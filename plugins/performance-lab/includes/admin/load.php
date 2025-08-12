@@ -94,6 +94,7 @@ function perflab_get_admin_pointers(): array {
 	$pointers = array(
 		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
 		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+		'perflab-feature-nocache-bfcache'  => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
 	);
 
 	if (
