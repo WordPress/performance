@@ -104,6 +104,8 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 
 	/**
 	 * It should replace a Cover block background image URL with a WebP variant when available.
+	 *
+	 * @covers ::webp_uploads_filter_block_background_images
 	 */
 	public function test_cover_block_background_image_replaced_with_webp(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
