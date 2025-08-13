@@ -8,7 +8,7 @@
 
 // If uninstall.php is not called by WordPress, bail.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
+	exit;// @codeCoverageIgnore
 }
 
 // For a multisite, delete the option for all sites (however limited to 100 sites to avoid memory limit or timeout problems in large scale networks).

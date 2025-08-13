@@ -19,7 +19,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 // Define required constants.
 if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
@@ -36,3 +35,4 @@ require_once __DIR__ . '/settings.php';
 require_once __DIR__ . '/picture-element.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/deprecated.php';
+// @codeCoverageIgnoreEnd

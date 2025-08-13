@@ -14,6 +14,13 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		$this->set_image_output_type( 'webp' );
 	}
 
+	protected function tearDown(): void {
+
+		// Remove filter after each test.
+		remove_all_filters( 'webp_uploads_is_fallback_enabled' );
+		parent::tearDown();
+	}
+
 	/**
 	 * Return an error when creating an additional image source with invalid parameters
 	 *

@@ -66,7 +66,7 @@ function webp_uploads_register_media_settings_field(): void {
 		)
 	);
 }
-add_action( 'init', 'webp_uploads_register_media_settings_field' );
+add_action( 'init', 'webp_uploads_register_media_settings_field' );// @codeCoverageIgnore
 
 /**
  * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
@@ -130,7 +130,7 @@ function webp_uploads_add_media_settings_fields(): void {
 		array( 'class' => 'webp-uploads-use-picture-element' )
 	);
 }
-add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
+add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );// @codeCoverageIgnore
 
 /**
  * Renders the settings field for the 'perflab_modern_image_format' setting.
