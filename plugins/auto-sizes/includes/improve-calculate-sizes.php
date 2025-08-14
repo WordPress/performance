@@ -306,8 +306,8 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/image'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/post-featured-image' => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'               => array( 'max_alignment' ),
-		'core/columns'             => array( 'max_alignment', 'container_relative_width' ),
-		'core/column'              => array( 'max_alignment', 'column_count' ),
+		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
+		'core/column'              => array( 'max_alignment' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
