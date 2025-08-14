@@ -1273,6 +1273,31 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the image block in a two-column layout renders the correct sizes attribute.
+	 */
+	public function test_image_block_in_two_column_layout_renders_correct_sizes_attribute(): void {
+		// Skip test for WordPress versions below 6.8.
+		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
+			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
+		}
+
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column -->
+			<div class="wp-block-column">
+			' . $this->get_image_block_markup( self::$image_id, 'large' ) . '
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column -->
+			<div class="wp-block-column"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
