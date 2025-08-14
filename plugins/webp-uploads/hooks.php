@@ -800,7 +800,10 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 
 	// Abort if there is no associated background image.
 	if (
-		! isset( $attachment_id, $image_url ) || $attachment_id <= 0 || '' === $image_url || ! is_array( wp_get_attachment_metadata( $attachment_id ) )
+		! isset( $attachment_id, $image_url ) ||
+		$attachment_id <= 0 ||
+		'' === $image_url ||
+		! is_array( wp_get_attachment_metadata( $attachment_id ) )
 	) {
 		return $block_content;
 	}

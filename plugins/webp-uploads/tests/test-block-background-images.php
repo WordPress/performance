@@ -141,7 +141,7 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 			$transforms['image/jpeg'] = array( 'image/jpeg' );
 			return $transforms;
 		};
-		add_filter( 'webp_uploads_upload_image_mime_transforms', $filter, 10 );
+		add_filter( 'webp_uploads_upload_image_mime_transforms', $filter );
 
 		$attachment_id = $this->create_jpeg_attachment();
 		$original_url  = wp_get_attachment_image_url( $attachment_id, 'full' );
@@ -150,7 +150,7 @@ class Test_WebP_Uploads_Block_Background_Images extends TestCase {
 		$generated = $this->generate_block_with_background( 'core/cover', $attachment_id, $original_url );
 		$filtered  = webp_uploads_filter_block_background_images( $generated['block_content'], $generated['block'] );
 
-		remove_filter( 'webp_uploads_upload_image_mime_transforms', $filter, 10 );
+		remove_filter( 'webp_uploads_upload_image_mime_transforms', $filter );
 
 		$this->assertSame( $generated['block_content'], $filtered, 'Background image should remain unchanged when no WebP source exists.' );
 		$this->assertStringNotContainsString( '-jpg.webp', $filtered );
