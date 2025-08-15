@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.2.0
  * @access private
  *
- * @global string $pagenow The filename of the current screen. 
+ * @global string $pagenow The filename of the current screen.
  *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
