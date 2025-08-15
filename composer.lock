@@ -835,16 +835,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.15",
+            "version": "0.4.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "602958982c50f93114b3e0b8b9bb651c98291914"
+                "reference": "7486ec5dd955dfe67cf425fe252cce87743e4a0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/602958982c50f93114b3e0b8b9bb651c98291914",
-                "reference": "602958982c50f93114b3e0b8b9bb651c98291914",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/7486ec5dd955dfe67cf425fe252cce87743e4a0a",
+                "reference": "7486ec5dd955dfe67cf425fe252cce87743e4a0a",
                 "shasum": ""
             },
             "type": "library",
@@ -861,9 +861,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.15"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.19"
             },
-            "time": "2025-07-29T21:22:00+00:00"
+            "time": "2025-08-13T00:23:40+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -2655,7 +2655,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.8.1",
+            "version": "6.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",

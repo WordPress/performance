@@ -384,7 +384,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 /**
  * Retrieves the featured image attachment ID for a given post ID.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  *
  * @param int $post_id The post ID.
  * @return int The featured image attachment ID or 0 if not found.
