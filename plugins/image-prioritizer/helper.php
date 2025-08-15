@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.2.0
  * @access private
  *
+ * @global string $pagenow The filename of the current screen.
+ *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
