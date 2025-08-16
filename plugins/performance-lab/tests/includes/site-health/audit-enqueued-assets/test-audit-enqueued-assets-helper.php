@@ -525,7 +525,15 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_generate_blocking_assets_table
 	 */
 	public function test_perflab_aea_generate_blocking_assets_table_empty(): void {
-		$this->assertSame( '', perflab_aea_generate_blocking_assets_table( array() ) );
+		$this->assertSame(
+			'',
+			perflab_aea_generate_blocking_assets_table(
+				array(
+					'scripts' => array(),
+					'styles'  => array(),
+				)
+			)
+		);
 	}
 
 	/**
@@ -534,7 +542,12 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_generate_blocking_assets_table
 	 */
 	public function test_perflab_aea_generate_blocking_assets_table_scripts(): void {
-		$table     = perflab_aea_generate_blocking_assets_table( Audit_Assets_Mock_Assets::mock_assets( 'scripts', 5 ) );
+		$table     = perflab_aea_generate_blocking_assets_table(
+			array_merge(
+				array( 'styles' => array() ),
+				Audit_Assets_Mock_Assets::mock_assets( 'scripts', 5 )
+			)
+		);
 		$processor = new WP_HTML_Tag_Processor( $table );
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
 	}
@@ -545,7 +558,12 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	 * @covers ::perflab_aea_generate_blocking_assets_table
 	 */
 	public function test_perflab_aea_generate_blocking_assets_table_css(): void {
-		$table     = perflab_aea_generate_blocking_assets_table( Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 ) );
+		$table     = perflab_aea_generate_blocking_assets_table(
+			array_merge(
+				array( 'scripts' => array() ),
+				Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 )
+			)
+		);
 		$processor = new WP_HTML_Tag_Processor( $table );
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) );
 	}

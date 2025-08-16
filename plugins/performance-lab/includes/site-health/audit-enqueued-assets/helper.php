@@ -17,7 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  *
- * @return array<string,mixed> Returns an array containing response and blocking assets.
+ * @return array{
+ *             response: WP_Error|array{
+ *                 headers: WpOrg\Requests\Utility\CaseInsensitiveDictionary,
+ *                 body: string,
+ *                 response: array{
+ *                     code: int|false,
+ *                     message: string|false,
+ *                 },
+ *             },
+ *             assets: array{
+ *                 scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                 styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *             }
+ *         } An array containing response and blocking assets.
  */
 function perflab_aea_audit_blocking_assets(): array {
 	$response = wp_remote_get(
@@ -150,11 +163,10 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 	);
 
 	$audit_result = perflab_aea_audit_blocking_assets();
-	if ( is_wp_error( $audit_result['response'] ) || is_array( $audit_result['response'] ) ) {
-		$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $audit_result['response'] );
-		if ( null !== $retrieval_failure_result ) {
-			return array_merge( $result, $retrieval_failure_result );
-		}
+
+	$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $audit_result['response'] );
+	if ( null !== $retrieval_failure_result ) {
+		return array_merge( $result, $retrieval_failure_result );
 	}
 
 	$scripts_result = perflab_aea_enqueued_blocking_scripts( $audit_result['assets'] );
@@ -198,6 +210,11 @@ function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
  * Prepares the blocking scripts audit result.
  *
  * @since n.e.x.t
+ *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return array{status: 'good'|'recommended', description: string}|null Result.
@@ -286,6 +303,11 @@ function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): ?array
  * Prepares the blocking styles audit result.
  *
  * @since n.e.x.t
+ *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return array{status: string, description: string}|null Result.
@@ -376,6 +398,15 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): ?array 
  *
  * @since n.e.x.t
  *
+ * @phpstan-param WP_Error|array{
+ *                    headers: WpOrg\Requests\Utility\CaseInsensitiveDictionary,
+ *                    body: string,
+ *                    response: array{
+ *                        code: int|false,
+ *                        message: string|false,
+ *                    },
+ *                } $response
+ *
  * @param WP_Error|array<string, mixed> $response The response from the home page retrieval.
  * @return array{status: 'recommended', description: string}|null Result, or null if there was no failure.
  */
@@ -445,6 +476,11 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
  *
  * @since n.e.x.t
  *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @param 'scripts'|'styles'   $type Type of assets.
  * @return array<array{ src: string, size: int|null, error: WP_Error|null }>|null Blocking assets, or null if transient not set.
@@ -486,6 +522,11 @@ function perflab_aea_get_blocking_assets( array $blocking_assets, string $type )
  *
  * @since n.e.x.t
  *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @param 'scripts'|'styles'   $type Type.
  * @return int|null Number of total scripts or null if transient hasn't been set.
@@ -502,6 +543,11 @@ function perflab_aea_get_total_enqueued_assets( array $blocking_assets, string $
  * Gets total size in bytes of Enqueued Assets.
  *
  * @since n.e.x.t
+ *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @param 'scripts'|'styles'   $type Type.
@@ -583,11 +629,16 @@ function perflab_get_http_basic_authorization_headers(): array {
  *
  * @since n.e.x.t
  *
- * @param array{scripts: array<string, mixed>, styles: array<string, mixed>} $blocking_assets Array of blocking assets.
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
  * @return string HTML table of blocking assets.
  */
 function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): string {
-	if ( 0 === count( $blocking_assets ) || ( isset( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['styles'] ) ) ) {
+	if ( 0 === count( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['styles'] ) ) {
 		return '';
 	}
 
@@ -605,12 +656,10 @@ function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): s
 	foreach ( $asset_types as $type => $label ) {
 		if ( isset( $blocking_assets[ $type ] ) && is_array( $blocking_assets[ $type ] ) ) {
 			foreach ( $blocking_assets[ $type ] as $asset ) {
-				$has_error = is_wp_error( $asset['error'] );
-
-				$table .= $has_error ? '<tr style="background-color: #ffecec;">' : '<tr>';
+				$table .= is_wp_error( $asset['error'] ) ? '<tr style="background-color: #ffecec;">' : '<tr>';
 				$table .= '<td>' . esc_html( $label ) . '</td>';
 				$table .= '<td>' . esc_url( $asset['src'] );
-				if ( $has_error ) {
+				if ( is_wp_error( $asset['error'] ) ) {
 					$table .= '<p>' . wp_kses( $asset['error']->get_error_message(), array( 'code' => array() ) ) . '</p>';
 				}
 				$table .= '</td>';
@@ -622,7 +671,7 @@ function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): s
 				}
 				$table .= '</td>';
 				$table .= '<td>';
-				if ( $has_error ) {
+				if ( is_wp_error( $asset['error'] ) ) {
 					$table .= esc_html__( 'Error', 'performance-lab' );
 				} else {
 					$table .= esc_html__( 'OK', 'performance-lab' );
