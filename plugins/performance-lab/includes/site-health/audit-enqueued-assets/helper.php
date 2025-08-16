@@ -151,7 +151,7 @@ function perflab_aea_audit_blocking_assets(): array {
  */
 function perflab_aea_enqueued_blocking_assets_test(): array {
 	$result = array(
-		'label'       => __( 'Blocking assets', 'performance-lab' ),
+		'label'       => __( 'Any blocking assets do not appear to be particularly problematic', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
 			'label' => __( 'Performance', 'performance-lab' ),
@@ -181,6 +181,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		'good' !== $scripts_result['status'] ||
 		'good' !== $styles_result['status']
 	) {
+		$result['label']   = __( 'Your site has may have a problem with blocking assets', 'performance-lab' );
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
@@ -407,6 +408,7 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
  */
 function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 	$result = array(
+		'label'       => __( 'Unable to check site for blocking assets', 'performance-lab' ),
 		'status'      => 'recommended',
 		'description' => '',
 	);
