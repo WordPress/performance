@@ -48,7 +48,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', $enqueued_scripts ), 'scripts' ) )
+						size_format( $enqueued_scripts * 1000 )
 					)
 				)
 			),
@@ -76,7 +76,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_scripts,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', $enqueued_scripts ), 'scripts' ) )
+						size_format( $enqueued_scripts * 1000 )
 					)
 				)
 			),
@@ -104,7 +104,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', $enqueued_styles ), 'styles' ) )
+						size_format( $enqueued_styles * 1000 )
 					)
 				)
 			),
@@ -132,7 +132,7 @@ class Site_Health_Mock_Responses {
 							'performance-lab'
 						),
 						$enqueued_styles,
-						size_format( perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', $enqueued_styles ), 'styles' ) )
+						size_format( $enqueued_styles * 1000 )
 					)
 				)
 			),

@@ -174,16 +174,12 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 
 	$result['description'] .= perflab_aea_generate_blocking_assets_table( $audit_result['assets'] );
 
-	if ( isset( $scripts_result ) ) {
-		$result['description'] .= $scripts_result['description'];
-	}
-	if ( isset( $styles_result ) ) {
-		$result['description'] .= $styles_result['description'];
-	}
+	$result['description'] .= $scripts_result['description'];
+	$result['description'] .= $styles_result['description'];
 
 	if (
-		( isset( $scripts_result ) && 'good' !== $scripts_result['status'] ) ||
-		( isset( $styles_result ) && 'good' !== $styles_result['status'] )
+		'good' !== $scripts_result['status'] ||
+		'good' !== $styles_result['status']
 	) {
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
@@ -217,14 +213,17 @@ function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
  *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @return array{status: 'good'|'recommended', description: string}|null Result.
+ * @return array{status: 'good'|'recommended', description: string} Result.
  */
-function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): ?array {
-	$enqueued_scripts = perflab_aea_get_total_enqueued_assets( $blocking_assets, 'scripts' );
-	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'scripts' );
-	if ( null === $enqueued_scripts || null === $bytes_enqueued ) {
-		return null;
-	}
+function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): array {
+	$enqueued_scripts = count( $blocking_assets['scripts'] );
+	$bytes_enqueued   = array_reduce(
+		$blocking_assets['scripts'],
+		static function ( $carry, $asset ): int {
+			return $carry + ( $asset['size'] ?? 0 );
+		},
+		0
+	);
 
 	$result = array(
 		'status'      => 'good',
@@ -286,13 +285,10 @@ function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): ?array
 	}
 
 	// If one of the assets had an error, then fail the test even if under the threshold.
-	$scripts = perflab_aea_get_blocking_assets( $blocking_assets, 'scripts' );
-	if ( null !== $scripts ) {
-		foreach ( $scripts as $script ) {
-			if ( is_wp_error( $script['error'] ) ) {
-				$result['status'] = 'recommended';
-				break;
-			}
+	foreach ( $blocking_assets['scripts'] as $script ) {
+		if ( is_wp_error( $script['error'] ) ) {
+			$result['status'] = 'recommended';
+			break;
 		}
 	}
 
@@ -310,15 +306,17 @@ function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): ?array
  *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @return array{status: string, description: string}|null Result.
+ * @return array{status: string, description: string} Result.
  */
-function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): ?array {
-	// Omit if the test didn't run yet, omit.
-	$enqueued_styles = perflab_aea_get_total_enqueued_assets( $blocking_assets, 'styles' );
-	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'styles' );
-	if ( null === $enqueued_styles || null === $bytes_enqueued ) {
-		return null;
-	}
+function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
+	$enqueued_styles = count( $blocking_assets['styles'] );
+	$bytes_enqueued  = array_reduce(
+		$blocking_assets['styles'],
+		static function ( $carry, $asset ): int {
+			return $carry + ( $asset['size'] ?? 0 );
+		},
+		0
+	);
 
 	$result = array(
 		'status'      => 'good',
@@ -380,13 +378,10 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): ?array 
 	}
 
 	// If one of the assets had an error, then fail the test even if under the threshold.
-	$styles = perflab_aea_get_blocking_assets( $blocking_assets, 'styles' );
-	if ( null !== $styles ) {
-		foreach ( $styles as $style ) {
-			if ( is_wp_error( $style['error'] ) ) {
-				$result['status'] = 'recommended';
-				break;
-			}
+	foreach ( $blocking_assets['styles'] as $style ) {
+		if ( is_wp_error( $style['error'] ) ) {
+			$result['status'] = 'recommended';
+			break;
 		}
 	}
 
@@ -469,101 +464,6 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
 	}
 	return $result;
-}
-
-/**
- * Gets blocking assets.
- *
- * @since n.e.x.t
- *
- * @phpstan-param array{
- *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                } $blocking_assets
- *
- * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @param 'scripts'|'styles'   $type Type of assets.
- * @return array<array{ src: string, size: int|null, error: WP_Error|null }>|null Blocking assets, or null if transient not set.
- */
-function perflab_aea_get_blocking_assets( array $blocking_assets, string $type ): ?array {
-	if ( isset( $blocking_assets[ $type ] ) && is_array( $blocking_assets[ $type ] ) ) {
-		$final_blocking_assets = array();
-		foreach ( $blocking_assets[ $type ] as $blocking_asset ) {
-			if (
-				(
-					array_key_exists( 'src', $blocking_asset )
-					&&
-					is_string( $blocking_asset['src'] )
-				)
-				&&
-				(
-					array_key_exists( 'size', $blocking_asset )
-					&&
-					( is_int( $blocking_asset['size'] ) || is_null( $blocking_asset['size'] ) )
-				)
-				&&
-				(
-					array_key_exists( 'error', $blocking_asset )
-					&&
-					( is_wp_error( $blocking_asset['error'] ) || is_null( $blocking_asset['error'] ) )
-				)
-			) {
-				$final_blocking_assets[] = $blocking_asset;
-			}
-		}
-		return $final_blocking_assets;
-	} else {
-		return null;
-	}
-}
-
-/**
- * Gets total of enqueued assets.
- *
- * @since n.e.x.t
- *
- * @phpstan-param array{
- *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                } $blocking_assets
- *
- * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @param 'scripts'|'styles'   $type Type.
- * @return int|null Number of total scripts or null if transient hasn't been set.
- */
-function perflab_aea_get_total_enqueued_assets( array $blocking_assets, string $type ): ?int {
-	$scripts = perflab_aea_get_blocking_assets( $blocking_assets, $type );
-	if ( is_array( $scripts ) ) {
-		return count( $scripts );
-	}
-	return null;
-}
-
-/**
- * Gets total size in bytes of Enqueued Assets.
- *
- * @since n.e.x.t
- *
- * @phpstan-param array{
- *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
- *                } $blocking_assets
- *
- * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @param 'scripts'|'styles'   $type Type.
- * @return int|null Byte Total size or null if transient hasn't been set.
- */
-function perflab_aea_get_total_size_bytes_enqueued_assets( array $blocking_assets, string $type ): ?int {
-	$assets = perflab_aea_get_blocking_assets( $blocking_assets, $type );
-	if ( null === $assets ) {
-		return null;
-	}
-
-	$total_size = 0;
-	foreach ( $assets as $asset ) {
-		$total_size += $asset['size'] ?? 0;
-	}
-	return $total_size;
 }
 
 /**

@@ -270,15 +270,6 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test perflab_aea_enqueued_blocking_scripts() no blocking scripts.
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_scripts
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_no_blocking_scripts(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_scripts( array() ) );
-	}
-
-	/**
 	 * Test perflab_aea_enqueued_blocking_scripts() with scripts less than WARNING_SCRIPTS_threshold.
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_scripts
@@ -296,15 +287,6 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold(): void {
 		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( self::WARNING_SCRIPTS_THRESHOLD );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_blocking_scripts( Audit_Assets_Mock_Assets::mock_assets( 'scripts', self::WARNING_SCRIPTS_THRESHOLD ) ) );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_blocking_styles() no blocking styles.
-	 *
-	 * @covers ::perflab_aea_enqueued_blocking_styles
-	 */
-	public function test_perflab_aea_enqueued_css_assets_test_no_blocking_styles(): void {
-		$this->assertNull( perflab_aea_enqueued_blocking_styles( array() ) );
 	}
 
 	/**
@@ -398,63 +380,6 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 		$result = perflab_aea_blocking_assets_retrieval_failure( new WP_Error( 'something_bad', 'Oh no!!!' ) );
 		$this->assertIsArray( $result );
 		$this->assertSame( 'recommended', $result['status'] );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_enqueued_assets() with no assets.
-	 *
-	 * @covers ::perflab_aea_get_blocking_assets
-	 * @covers ::perflab_aea_get_total_enqueued_assets
-	 */
-	public function test_perflab_aea_get_total_enqueued_assets_no_assets(): void {
-		$this->assertNull( perflab_aea_get_blocking_assets( array(), 'scripts' ) );
-		$this->assertNull( perflab_aea_get_total_enqueued_assets( array(), 'scripts' ) );
-		$this->assertNull( perflab_aea_get_blocking_assets( array(), 'styles' ) );
-		$this->assertNull( perflab_aea_get_total_enqueued_assets( array(), 'styles' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_enqueued_assets( 'scripts' ).
-	 *
-	 * @covers ::perflab_aea_get_blocking_assets
-	 * @covers ::perflab_aea_get_total_enqueued_assets
-	 */
-	public function test_perflab_aea_get_total_enqueued_scripts(): void {
-		$this->assertNull( perflab_aea_get_total_enqueued_assets( array(), 'scripts' ) );
-		$this->assertSame( 5, perflab_aea_get_total_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', 5 ), 'scripts' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_enqueued_assets( 'styles' ).
-	 *
-	 * @covers ::perflab_aea_get_blocking_assets
-	 * @covers ::perflab_aea_get_total_enqueued_assets
-	 */
-	public function test_perflab_aea_get_total_enqueued_styles(): void {
-		$this->assertNull( perflab_aea_get_total_enqueued_assets( array(), 'styles' ) );
-		$this->assertSame( 5, perflab_aea_get_total_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 ), 'styles' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_size_bytes_enqueued_assets( 'scripts' ).
-	 *
-	 * @covers ::perflab_aea_get_blocking_assets
-	 * @covers ::perflab_aea_get_total_size_bytes_enqueued_assets
-	 */
-	public function test_perflab_aea_get_total_size_bytes_enqueued_scripts(): void {
-		$this->assertNull( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'scripts' ) );
-		$this->assertSame( 5000, perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'scripts', 5 ), 'scripts' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_get_total_size_bytes_enqueued_assets( 'styles' ).
-	 *
-	 * @covers ::perflab_aea_get_blocking_assets
-	 * @covers ::perflab_aea_get_total_size_bytes_enqueued_assets
-	 */
-	public function test_perflab_aea_get_total_size_bytes_enqueued_styles(): void {
-		$this->assertNull( perflab_aea_get_total_size_bytes_enqueued_assets( array(), 'styles' ) );
-		$this->assertEquals( 5000, perflab_aea_get_total_size_bytes_enqueued_assets( Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 ), 'styles' ) );
 	}
 
 	/**
