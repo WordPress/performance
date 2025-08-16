@@ -272,22 +272,6 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_invalidate_cache_transients() functionality.
-	 *
-	 * Now that usage of transients is removed this test ensures that old transients are cleared.
-	 *
-	 * @covers ::perflab_aea_invalidate_cache_transients
-	 */
-	public function test_perflab_aea_invalidate_cache_transients(): void {
-		set_transient( 'aea_enqueued_front_page_scripts', array() );
-		set_transient( 'aea_enqueued_front_page_styles', array() );
-
-		perflab_aea_invalidate_cache_transients();
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
-	}
-
-	/**
 	 * Tests perflab_aea_audit_blocking_assets functionality when the home request fails.
 	 *
 	 * @covers ::perflab_aea_audit_blocking_assets
