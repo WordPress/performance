@@ -358,7 +358,7 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): ?array 
 	 */
 	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
 
-	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_assets( $blocking_assets, 'styles' ) > $styles_size_threshold ) {
+	if ( $enqueued_styles > $styles_threshold || $bytes_enqueued > $styles_size_threshold ) {
 		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
