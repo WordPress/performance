@@ -200,6 +200,12 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
  * @since n.e.x.t
  */
 function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
+	check_ajax_referer( 'health-check-site-status' );
+
+	if ( ! current_user_can( 'view_site_health_checks' ) ) {
+		wp_send_json_error();
+	}
+
 	wp_send_json_success( perflab_aea_enqueued_blocking_assets_test() );
 }
 

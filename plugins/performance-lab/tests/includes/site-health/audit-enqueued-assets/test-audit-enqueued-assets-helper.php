@@ -6,11 +6,19 @@
  * @group audit-enqueued-assets
  */
 
-class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
+class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 	const WARNING_SCRIPTS_THRESHOLD = 31;
 
 	const WARNING_STYLES_THRESHOLD = 11;
+
+	/**
+	 * Set up.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+	}
 
 	/**
 	 * Tear down.
@@ -270,6 +278,64 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests perflab_aea_enqueued_ajax_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_ajax_blocking_assets_test
+	 */
+	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_without_nonce(): void {
+		$this->add_filter_to_mock_front_page_loopback_request();
+		$this->expectException( WPAjaxDieStopException::class );
+		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$response = json_decode( $this->_last_response, true );
+		$this->assertArrayHasKey( 'success', $response );
+		$this->assertFalse( $response['success'] );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_ajax_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_ajax_blocking_assets_test
+	 */
+	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_with_nonce(): void {
+		$this->add_filter_to_mock_front_page_loopback_request();
+		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
+		$this->expectException( WPAjaxDieContinueException::class );
+		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$response = json_decode( $this->_last_response, true );
+		$this->assertFalse( $response['success'] );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_ajax_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_ajax_blocking_assets_test
+	 */
+	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthorized(): void {
+		$this->add_filter_to_mock_front_page_loopback_request();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
+		$this->expectException( WPAjaxDieContinueException::class );
+		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$response = json_decode( $this->_last_response, true );
+		$this->assertFalse( $response['success'] );
+	}
+
+	/**
+	 * Tests perflab_aea_enqueued_ajax_blocking_assets_test
+	 *
+	 * @covers ::perflab_aea_enqueued_ajax_blocking_assets_test
+	 */
+	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_authorized(): void {
+		$this->add_filter_to_mock_front_page_loopback_request();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
+		$this->expectException( WPAjaxDieContinueException::class );
+		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$response = json_decode( $this->_last_response, true );
+		$this->assertTrue( $response['success'] );
+	}
+
+	/**
 	 * Test perflab_aea_enqueued_blocking_scripts() with scripts less than WARNING_SCRIPTS_threshold.
 	 *
 	 * @covers ::perflab_aea_enqueued_blocking_scripts
@@ -513,5 +579,42 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_threshold( $number_of_assets );
 		}
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
+	}
+
+	/**
+	 * Add filter to intercept loopback requests.
+	 */
+	public function add_filter_to_mock_front_page_loopback_request(): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $r, $args, $url ) {
+				if ( home_url( '/' ) === remove_query_arg( 'cache_bust', $url ) ) {
+					$r = array(
+						'response' => array(
+							'status'  => 200,
+							'message' => 'OK',
+						),
+						'body'     => '<html></html>',
+						'headers'  => array(
+							'Content-Type' => 'text/html',
+						),
+					);
+				} else {
+					$r = array(
+						'response' => array(
+							'status'  => 503,
+							'message' => "Oh no you didn't",
+						),
+						'body'     => 'NO WAY',
+						'headers'  => array(
+							'Content-Type' => 'text/plain',
+						),
+					);
+				}
+				return $r;
+			},
+			10,
+			3
+		);
 	}
 }
