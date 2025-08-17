@@ -181,7 +181,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		'good' !== $scripts_result['status'] ||
 		'good' !== $styles_result['status']
 	) {
-		$result['label']   = __( 'Your site has may have a problem with blocking assets', 'performance-lab' );
+		$result['label']   = __( 'Your site may have a problem with blocking assets', 'performance-lab' );
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
