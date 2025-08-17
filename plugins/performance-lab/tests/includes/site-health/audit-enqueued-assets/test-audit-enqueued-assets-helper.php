@@ -346,7 +346,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_authorized(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		grant_super_admin( $admin_id );
 		$this->assertTrue( current_user_can( 'view_site_health_checks' ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
 		$exception        = null;
