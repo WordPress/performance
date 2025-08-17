@@ -455,7 +455,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 			'headers'  => array(
 				'content-type' => array( 'text/html' ),
 			),
-			'body'     => '<html>WOOPS!!</html>',
+			'body'     => '<html lang="en">Whoops!!</html>',
 		);
 		$result   = perflab_aea_blocking_assets_retrieval_failure( $response );
 		$this->assertIsArray( $result );
@@ -563,7 +563,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$table     = perflab_aea_generate_blocking_assets_table(
 			array_merge(
 				array( 'styles' => array() ),
-				Audit_Assets_Mock_Assets::mock_assets( 'scripts', 5 )
+				Audit_Assets_Mock_Assets::mock_assets( 'scripts' )
 			)
 		);
 		$processor = new WP_HTML_Tag_Processor( $table );
@@ -579,7 +579,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$table     = perflab_aea_generate_blocking_assets_table(
 			array_merge(
 				array( 'scripts' => array() ),
-				Audit_Assets_Mock_Assets::mock_assets( 'styles', 5 )
+				Audit_Assets_Mock_Assets::mock_assets( 'styles' )
 			)
 		);
 		$processor = new WP_HTML_Tag_Processor( $table );
@@ -621,7 +621,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 							'status'  => 200,
 							'message' => 'OK',
 						),
-						'body'     => '<html></html>',
+						'body'     => '<html lang="en"></html>',
 						'headers'  => array(
 							'Content-Type' => 'text/html',
 						),
