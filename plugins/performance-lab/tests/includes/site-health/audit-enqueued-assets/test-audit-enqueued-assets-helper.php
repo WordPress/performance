@@ -284,11 +284,15 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_without_nonce(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
-		$this->expectException( WPAjaxDieStopException::class );
-		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
-		$response = json_decode( $this->_last_response, true );
-		$this->assertArrayHasKey( 'success', $response );
-		$this->assertFalse( $response['success'] );
+		$exception = null;
+		try {
+			$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( WPAjaxDieStopException::class, $exception );
+		$this->assertEquals( '-1', $exception->getMessage() );
+		$this->assertSame( '', $this->_last_response );
 	}
 
 	/**
@@ -299,8 +303,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_with_nonce(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
-		$this->expectException( WPAjaxDieContinueException::class );
-		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$exception        = null;
+		try {
+			$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( WPAjaxDieContinueException::class, $exception );
+		$this->assertEquals( '', $exception->getMessage() );
 		$response = json_decode( $this->_last_response, true );
 		$this->assertFalse( $response['success'] );
 	}
@@ -314,8 +324,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$this->add_filter_to_mock_front_page_loopback_request();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
-		$this->expectException( WPAjaxDieContinueException::class );
-		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$exception        = null;
+		try {
+			$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( WPAjaxDieContinueException::class, $exception );
+		$this->assertEquals( '', $exception->getMessage() );
 		$response = json_decode( $this->_last_response, true );
 		$this->assertFalse( $response['success'] );
 	}
@@ -329,10 +345,21 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$this->add_filter_to_mock_front_page_loopback_request();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
-		$this->expectException( WPAjaxDieContinueException::class );
-		$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		$exception        = null;
+		try {
+			$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( WPAjaxDieContinueException::class, $exception );
+		$this->assertEquals( '', $exception->getMessage() );
 		$response = json_decode( $this->_last_response, true );
 		$this->assertTrue( $response['success'] );
+		$this->assertArrayHasKey( 'data', $response );
+		$this->assertSameSets(
+			array( 'label', 'status', 'badge', 'description', 'actions', 'test' ),
+			array_keys( $response['data'] )
+		);
 	}
 
 	/**
