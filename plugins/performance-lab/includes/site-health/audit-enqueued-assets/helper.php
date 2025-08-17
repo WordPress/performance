@@ -313,7 +313,7 @@ function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): array 
  *                } $blocking_assets
  *
  * @param array<string, mixed> $blocking_assets Array of blocking assets.
- * @return array{status: string, description: string} Result.
+ * @return array{status: 'good'|'recommended', description: string} Result.
  */
 function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
 	$enqueued_styles = count( $blocking_assets['styles'] );
