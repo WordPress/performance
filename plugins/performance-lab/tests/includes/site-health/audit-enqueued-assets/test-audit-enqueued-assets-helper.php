@@ -284,6 +284,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_without_nonce(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
+		$this->assertFalse( current_user_can( 'view_site_health_checks' ) );
 		$exception = null;
 		try {
 			$this->_handleAjax( 'health-check-enqueued-blocking-assets-test' );
@@ -302,6 +303,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	 */
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthenticated_with_nonce(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
+		$this->assertFalse( current_user_can( 'view_site_health_checks' ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
 		$exception        = null;
 		try {
@@ -323,6 +325,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_unauthorized(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		$this->assertFalse( current_user_can( 'view_site_health_checks' ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
 		$exception        = null;
 		try {
@@ -344,6 +347,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	public function test_perflab_aea_enqueued_ajax_blocking_assets_test_authorized(): void {
 		$this->add_filter_to_mock_front_page_loopback_request();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertTrue( current_user_can( 'view_site_health_checks' ) );
 		$_GET['_wpnonce'] = wp_create_nonce( 'health-check-site-status' );
 		$exception        = null;
 		try {
