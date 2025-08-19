@@ -266,6 +266,15 @@ class Test_AutoSizes extends WP_UnitTestCase {
 				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes=",,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
 				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, ,,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
 			),
+			'expected_when_no_img_tag'                     => array(
+				'input'    => '<p>No image here</p>',
+				'expected' => '<p>No image here</p>',
+			),
+			'expected_when_not_responsive'                 => array(
+				'input'    => '<img src="https://example.com/foo.jpg" loading="lazy">',
+				'expected' => '<img src="https://example.com/foo.jpg" loading="lazy">',
+			),
+
 		);
 	}
 
@@ -278,5 +287,106 @@ class Test_AutoSizes extends WP_UnitTestCase {
 			$expected,
 			auto_sizes_update_content_img_tag( $input )
 		);
+	}
+
+	/**
+	 * @covers ::auto_sizes_attribute_includes_valid_auto
+	 */
+	public function test_auto_sizes_attribute_includes_valid_auto(): void {
+		// Test when 'auto' is the first item in the list.
+		$this->assertTrue( auto_sizes_attribute_includes_valid_auto( 'auto, 100vw' ) );
+
+		// Test when 'auto' is not the first item in the list.
+		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( '100vw, auto' ) );
+	}
+
+	/**
+	 * Provides data for the auto_sizes_update_image_attributes test.
+	 *
+	 * @return array<string, array<string, array<string, string>>> The data for the test cases.
+	 */
+	public function data_provider_for_auto_sizes_update_image_attributes(): array {
+		return array(
+			'does_not_modify_eager_image'          => array(
+				'attr'     => array(
+					'loading' => 'eager',
+					'sizes'   => '100vw',
+				),
+				'expected' => array(
+					'loading' => 'eager',
+					'sizes'   => '100vw',
+				),
+			),
+
+			'does_not_modify_non_responsive_image' => array(
+				'attr'     => array(
+					'loading' => 'lazy',
+				),
+				'expected' => array(
+					'loading' => 'lazy',
+				),
+			),
+
+			'does_not_duplicate_auto_in_sizes'     => array(
+				'attr'     => array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+				'expected' => array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+			),
+
+			'adds_auto_to_sizes_when_needed'       => array(
+				'attr'     => array(
+					'loading' => 'lazy',
+					'sizes'   => '100vw',
+				),
+				'expected' => array(
+					'loading' => 'lazy',
+					'sizes'   => 'auto, 100vw',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_image_attributes
+	 *
+	 * @dataProvider data_provider_for_auto_sizes_update_image_attributes
+	 *
+	 * @param array<string, mixed> $attr Attributes to be updated.
+	 * @param array<string, mixed> $expected Expected updated attributes.
+	 */
+	public function test_auto_sizes_update_image_attributes( array $attr, array $expected ): void {
+		$this->assertSame( $expected, auto_sizes_update_image_attributes( $attr ) );
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_content_img_tag
+	 */
+	public function test_auto_sizes_update_content_img_tag_non_string_input(): void {
+		/*
+		 * These tests are separate from the data provider approach because the function
+		 * auto_sizes_update_content_img_tag() expects a string as an argument. Passing a non-string
+		 * value would cause a TypeError. These tests ensure that the function behaves as expected
+		 * when it receives non-string inputs.
+		 */
+		$this->assertSame( '', auto_sizes_update_content_img_tag( array() ) );
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_image_attributes
+	 */
+	public function test_auto_sizes_update_image_attributes_with_null_input(): void {
+		/*
+		 * This test is separate because the main test method uses a data provider
+		 * that expects the $attr parameter to be an array. Passing null directly
+		 * would cause a TypeError due to the type hint. By testing null separately,
+		 * we ensure that the function can handle null inputs gracefully without
+		 * modifying the type hint in the main test method.
+		 */
+		$this->assertSame( array(), auto_sizes_update_image_attributes( null ) );
 	}
 }
