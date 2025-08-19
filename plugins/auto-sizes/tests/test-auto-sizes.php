@@ -303,7 +303,7 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	/**
 	 * Provides data for the auto_sizes_update_image_attributes test.
 	 *
-	 * @return array<int,mixed[]> The data for the test cases.
+	 * @return array<string, array<string, array<string, string>>> The data for the test cases.
 	 */
 	public function data_provider_for_auto_sizes_update_image_attributes(): array {
 		return array(
