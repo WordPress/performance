@@ -1136,6 +1136,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @param bool        $expect_changed Whether the png should be converted to truecolor.
 	 */
 	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed ): void {
+		if ( ! extension_loaded( 'gd' ) ) {
+			$this->markTestSkipped( 'GD extension is not loaded' );
+		}
+
 		add_filter(
 			'wp_image_editors',
 			static function () {
