@@ -537,7 +537,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 		}
 	}
 }
-add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+add_action( 'delete_attachment', 'webp_uploads_remove_sources_files' );
 
 /**
  * Filters `wp_content_img_tag` to update images so that they use the preferred MIME type where possible.
@@ -662,7 +662,7 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 }
 
 /**
- * Updates the references of the featured image to the a new image format if available, in the same way it
+ * Updates the references of the featured image to the new image format if available, in the same way it
  * occurs in the_content of a post.
  *
  * @since 1.0.0
@@ -901,3 +901,65 @@ function webp_uploads_enable_additional_mime_type_support_for_all_sizes( array $
 	return $allowed_sizes;
 }
 add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_uploads_enable_additional_mime_type_support_for_all_sizes' );
+
+/**
+ * Converts palette PNG images to truecolor PNG images.
+ *
+ * GD cannot convert palette-based PNG to WebP/AVIF formats, causing conversion failures.
+ * This function detects and converts palette PNG to truecolor during upload.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed>|mixed $file The uploaded file data.
+ * @return array<string, mixed> The modified file data.
+ */
+function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
+	// Because plugins do bad things.
+	if ( ! is_array( $file ) ) {
+		$file = array();
+	}
+	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
+		return $file;
+	}
+	if ( isset( $file['type'] ) && is_string( $file['type'] ) ) {
+		if ( 'image/png' !== strtolower( $file['type'] ) ) {
+			return $file;
+		}
+	} elseif ( 'image/png' !== wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] )['type'] ) {
+		return $file;
+	}
+
+	$editor = wp_get_image_editor( $file['tmp_name'] );
+
+	if ( is_wp_error( $editor ) || ! $editor instanceof WP_Image_Editor_GD ) {
+		return $file;
+	}
+
+	$image = imagecreatefrompng( $file['tmp_name'] );
+
+	// Check if the image was created successfully.
+	if ( false === $image ) {
+		return $file;
+	}
+
+	// Check if the image is already truecolor.
+	if ( imageistruecolor( $image ) ) {
+		imagedestroy( $image );
+		return $file;
+	}
+
+	// Preserve transparency.
+	imagealphablending( $image, false );
+	imagesavealpha( $image, true );
+
+	// Convert the palette to truecolor.
+	if ( imagepalettetotruecolor( $image ) ) {
+		// Overwrite the upload with the new truecolor PNG.
+		imagepng( $image, $file['tmp_name'] );
+	}
+	imagedestroy( $image );
+
+	return $file;
+}
+add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
