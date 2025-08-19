@@ -53,6 +53,34 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that AUTO_SIZES_CONSTRAINTS contains all expected keys.
+	 */
+	public function test_auto_sizes_constraints_keys_exist(): void {
+		$expected_keys = array( 'full', 'wide', 'left', 'right', 'default', 'center' );
+		$constraints   = defined( 'AUTO_SIZES_CONSTRAINTS' ) ? constant( 'AUTO_SIZES_CONSTRAINTS' ) : $GLOBALS['AUTO_SIZES_CONSTRAINTS'];
+		$this->assertIsArray( $constraints );
+		foreach ( $expected_keys as $key ) {
+			$this->assertArrayHasKey( $key, $constraints, "Key '{$key}' not found in AUTO_SIZES_CONSTRAINTS." );
+		}
+	}
+
+	/**
+	 * Test that AUTO_SIZES_CONSTRAINTS values are as expected.
+	 */
+	public function test_auto_sizes_constraints_values(): void {
+		$expected    = array(
+			'full'    => 0,
+			'wide'    => 1,
+			'left'    => 2,
+			'right'   => 2,
+			'default' => 3,
+			'center'  => 3,
+		);
+		$constraints = defined( 'AUTO_SIZES_CONSTRAINTS' ) ? constant( 'AUTO_SIZES_CONSTRAINTS' ) : $GLOBALS['AUTO_SIZES_CONSTRAINTS'];
+		$this->assertEquals( $expected, $constraints );
+	}
+
+	/**
 	 * Test that if disable responsive image then it will not add sizes attribute.
 	 */
 	public function test_that_if_disable_responsive_image_then_it_will_not_add_sizes_attribute(): void {
