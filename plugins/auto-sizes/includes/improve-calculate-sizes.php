@@ -76,7 +76,7 @@ function auto_sizes_prime_attachment_caches( $content ): string {
  */
 function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $block ): string {
 	if ( ! is_string( $content ) ) {
-		return ''; // @codeCoverageIgnore
+		return '';
 	}
 
 	$processor = new WP_HTML_Tag_Processor( $content );
