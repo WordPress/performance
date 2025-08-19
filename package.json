@@ -8,26 +8,26 @@
   },
   "dependencies": {
     "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-    "web-vitals": "5.0.3"
+    "web-vitals": "5.1.0"
   },
   "devDependencies": {
     "@octokit/rest": "^22.0.0",
-    "@playwright/test": "^1.54.1",
-    "@types/node": "^24.0.10",
-    "@wordpress/e2e-test-utils-playwright": "^1.26.0",
-    "@wordpress/env": "^10.27.0",
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^24.2.1",
+    "@wordpress/e2e-test-utils-playwright": "^1.28.0",
+    "@wordpress/env": "^10.28.0",
     "@wordpress/prettier-config": "^4.25.0",
-    "@wordpress/scripts": "^30.19.0",
+    "@wordpress/scripts": "^30.21.0",
     "commander": "14.0.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "fast-glob": "^3.3.3",
-    "fs-extra": "^11.3.0",
+    "fs-extra": "^11.3.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
+    "lint-staged": "^16.1.5",
     "lodash": "4.17.21",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "webpackbar": "^7.0.0"
   },
   "scripts": {
@@ -81,6 +81,7 @@
     "test-php-multisite:view-transitions": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:view-transitions",
     "test-php-multisite:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:web-worker-offloading",
     "test-php-multisite:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:webp-uploads",
+    "update-test-case-snapshots": "bin/update-test-case-snapshots.sh",
     "wp-env": "wp-env",
     "prepare": "husky"
   }

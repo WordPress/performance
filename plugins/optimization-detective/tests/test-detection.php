@@ -222,7 +222,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$script = od_get_detection_script( $slug, $group_collection );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
-		$this->assertStringContainsString( 'import detect from', $script );
+		$this->assertStringContainsString( 'async function load', $script );
 		foreach ( $expected_exports as $key => $value ) {
 			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
 		}

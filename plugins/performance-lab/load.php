@@ -113,6 +113,9 @@ function perflab_get_standalone_plugin_data(): array {
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
+		'nocache-bfcache'         => array(
+			'constant' => 'WestonRuter\NocacheBFCache\VERSION',
+		),
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
 		),
