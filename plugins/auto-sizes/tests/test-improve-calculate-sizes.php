@@ -1304,6 +1304,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * Test that the image block in a two-column layout renders the correct sizes attribute.
 	 *
 	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_two_column_layout_renders_correct_sizes_attribute(): void {
 		// Skip test for WordPress versions below 6.8.
@@ -1331,6 +1332,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * Test that the image block in a three-column layout renders the correct sizes attribute.
 	 *
 	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_three_column_layout_renders_correct_sizes_attribute(): void {
 		// Skip test for WordPress versions below 6.8.
