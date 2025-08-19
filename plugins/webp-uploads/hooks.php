@@ -748,12 +748,110 @@ function webp_uploads_render_generator(): void {
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
 /**
+ * Process a block's content to handle background images for specific block types.
+ *
+ * This function targets blocks like Cover and Group that may use background images,
+ * converting them to modern image formats when appropriate.
+ *
+ * @since n.e.x.t
+ *
+ * @phpstan-param array{
+ *                    blockName: string|null,
+ *                    attrs: array{
+ *                        id?: positive-int,
+ *                        url?: string,
+ *                        style?: array{
+ *                            background?: array{
+ *                                backgroundImage?: string
+ *                            }
+ *                        }
+ *                    }
+ *                } $block
+ *
+ * @param string|mixed         $block_content The block content.
+ * @param array<string, mixed> $block         The block.
+ * @return string The filtered block content.
+ */
+function webp_uploads_filter_block_background_images( $block_content, array $block ): string {
+	// Because plugins can do bad things.
+	if ( ! is_string( $block_content ) ) {
+		$block_content = '';
+	}
+
+	// Only run on frontend.
+	if ( ! webp_uploads_in_frontend_body() || '' === $block_content ) {
+		return $block_content;
+	}
+
+	$attachment_id = null;
+	$image_url     = null;
+
+	if ( 'core/cover' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['id'], $block['attrs']['url'] ) ) {
+			$attachment_id = $block['attrs']['id'];
+			$image_url     = $block['attrs']['url'];
+		}
+	} elseif ( 'core/group' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['style']['background']['backgroundImage']['id'], $block['attrs']['style']['background']['backgroundImage']['url'] ) ) {
+			$attachment_id = $block['attrs']['style']['background']['backgroundImage']['id'];
+			$image_url     = $block['attrs']['style']['background']['backgroundImage']['url'];
+		}
+	}
+
+	// Abort if there is no associated background image.
+	if (
+		! isset( $attachment_id, $image_url ) ||
+		$attachment_id <= 0 ||
+		'' === $image_url ||
+		! is_array( wp_get_attachment_metadata( $attachment_id ) )
+	) {
+		return $block_content;
+	}
+
+	$original_mime = get_post_mime_type( $attachment_id );
+	if ( ! is_string( $original_mime ) ) {
+		return $block_content;
+	}
+
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'background_image' );
+
+	foreach ( $target_mimes as $target_mime ) {
+		if ( $target_mime === $original_mime ) {
+			continue;
+		}
+
+		$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
+		if ( ! is_string( $new_url ) ) {
+			continue;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
+			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+				$updated_style = str_replace( $image_url, $new_url, $style );
+				$processor->set_attribute( 'style', $updated_style );
+				$block_content = $processor->get_updated_html();
+				break 2;
+			}
+		}
+	}
+
+	return $block_content;
+}
+
+/**
  * Initializes custom functionality for handling image uploads and content filters.
  *
  * @since 2.1.0
  */
 function webp_uploads_init(): void {
+	// Filter regular image tags.
 	add_filter( 'wp_content_img_tag', webp_uploads_is_picture_element_enabled() ? 'webp_uploads_wrap_image_in_picture' : 'webp_uploads_filter_image_tag', 10, 3 );
+
+	// Filter blocks that may contain background images.
+	add_filter( 'render_block_core/cover', 'webp_uploads_filter_block_background_images', 10, 2 );
+	add_filter( 'render_block_core/group', 'webp_uploads_filter_block_background_images', 10, 2 );
 }
 add_action( 'init', 'webp_uploads_init' );
 

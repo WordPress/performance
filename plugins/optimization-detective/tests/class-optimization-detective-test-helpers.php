@@ -290,6 +290,8 @@ trait Optimization_Detective_Test_Helpers {
 				$text = trim( $text );
 				if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
 					$text = '/* ' . $matches[0] . ' ... */';
+				} elseif ( 1 === preg_match( '/^\( async function load.+\);$/s', $text ) ) {
+					$text = '/* detect loader */';
 				}
 				return $start_tag . $text . $end_tag;
 			},
