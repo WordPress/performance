@@ -307,39 +307,43 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 */
 	public function data_provider_for_auto_sizes_update_image_attributes(): array {
 		return array(
-			array(
-				array(
+			'does_not_modify_eager_image'          => array(
+				'attr'     => array(
 					'loading' => 'eager',
 					'sizes'   => '100vw',
 				),
-				array(
+				'expected' => array(
 					'loading' => 'eager',
 					'sizes'   => '100vw',
 				),
 			),
 
-			// Test when the image is not responsive.
-			array( array( 'loading' => 'lazy' ), array( 'loading' => 'lazy' ) ),
+			'does_not_modify_non_responsive_image' => array(
+				'attr'     => array(
+					'loading' => 'lazy',
+				),
+				'expected' => array(
+					'loading' => 'lazy',
+				),
+			),
 
-			// Test when 'auto' already exists in the sizes attribute.
-			array(
-				array(
+			'does_not_duplicate_auto_in_sizes'     => array(
+				'attr'     => array(
 					'loading' => 'lazy',
 					'sizes'   => 'auto, 100vw',
 				),
-				array(
+				'expected' => array(
 					'loading' => 'lazy',
 					'sizes'   => 'auto, 100vw',
 				),
 			),
 
-			// Test when 'auto' needs to be added to the sizes attribute.
-			array(
-				array(
+			'adds_auto_to_sizes_when_needed'       => array(
+				'attr'     => array(
 					'loading' => 'lazy',
 					'sizes'   => '100vw',
 				),
-				array(
+				'expected' => array(
 					'loading' => 'lazy',
 					'sizes'   => 'auto, 100vw',
 				),
