@@ -1235,8 +1235,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
 	 */
 	public function test_webp_uploads_convert_palette_png_to_truecolor_conditions(): void {
-		$invalid_file = 'test';
-		$this->assertSame( $invalid_file, webp_uploads_convert_palette_png_to_truecolor( $invalid_file ) );
+		$this->assertSame( array(), webp_uploads_convert_palette_png_to_truecolor( 'test' ) );
 		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( array() ) );
 
 		$file = array(
