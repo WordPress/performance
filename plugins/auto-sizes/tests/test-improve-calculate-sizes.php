@@ -53,6 +53,34 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that AUTO_SIZES_CONSTRAINTS contains all expected keys.
+	 */
+	public function test_auto_sizes_constraints_keys_exist(): void {
+		$expected_keys = array( 'full', 'wide', 'left', 'right', 'default', 'center' );
+		$constraints   = defined( 'AUTO_SIZES_CONSTRAINTS' ) ? constant( 'AUTO_SIZES_CONSTRAINTS' ) : $GLOBALS['AUTO_SIZES_CONSTRAINTS'];
+		$this->assertIsArray( $constraints );
+		foreach ( $expected_keys as $key ) {
+			$this->assertArrayHasKey( $key, $constraints, "Key '{$key}' not found in AUTO_SIZES_CONSTRAINTS." );
+		}
+	}
+
+	/**
+	 * Test that AUTO_SIZES_CONSTRAINTS values are as expected.
+	 */
+	public function test_auto_sizes_constraints_values(): void {
+		$expected    = array(
+			'full'    => 0,
+			'wide'    => 1,
+			'left'    => 2,
+			'right'   => 2,
+			'default' => 3,
+			'center'  => 3,
+		);
+		$constraints = defined( 'AUTO_SIZES_CONSTRAINTS' ) ? constant( 'AUTO_SIZES_CONSTRAINTS' ) : $GLOBALS['AUTO_SIZES_CONSTRAINTS'];
+		$this->assertEquals( $expected, $constraints );
+	}
+
+	/**
 	 * Test that if disable responsive image then it will not add sizes attribute.
 	 */
 	public function test_that_if_disable_responsive_image_then_it_will_not_add_sizes_attribute(): void {
@@ -1276,6 +1304,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * Test that the image block in a two-column layout renders the correct sizes attribute.
 	 *
 	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_two_column_layout_renders_correct_sizes_attribute(): void {
 		// Skip test for WordPress versions below 6.8.
@@ -1303,6 +1332,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * Test that the image block in a three-column layout renders the correct sizes attribute.
 	 *
 	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_three_column_layout_renders_correct_sizes_attribute(): void {
 		// Skip test for WordPress versions below 6.8.
@@ -1454,6 +1484,19 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'center',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+		);
+	}
+
+	/**
+	 * Test that auto_sizes_get_featured_image_attachment_id() returns 0 when post_id is not found.
+	 *
+	 * @covers ::auto_sizes_get_featured_image_attachment_id
+	 */
+	public function test_auto_sizes_get_featured_image_attachment_id_returns_zero_for_zero_post_id(): void {
+		$this->assertSame(
+			0,
+			auto_sizes_get_featured_image_attachment_id( 0 ),
+			'Should return 0 when post_id is not found.'
 		);
 	}
 
