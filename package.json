@@ -19,7 +19,7 @@
     "@wordpress/prettier-config": "^4.25.0",
     "@wordpress/scripts": "^30.21.0",
     "commander": "14.0.0",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^13.0.1",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.3.1",
