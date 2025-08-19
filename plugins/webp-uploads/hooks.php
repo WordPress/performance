@@ -537,7 +537,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 		}
 	}
 }
-add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+add_action( 'delete_attachment', 'webp_uploads_remove_sources_files' );
 
 /**
  * Filters `wp_content_img_tag` to update images so that they use the preferred MIME type where possible.
@@ -662,7 +662,7 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 }
 
 /**
- * Updates the references of the featured image to the a new image format if available, in the same way it
+ * Updates the references of the featured image to the new image format if available, in the same way it
  * occurs in the_content of a post.
  *
  * @since 1.0.0

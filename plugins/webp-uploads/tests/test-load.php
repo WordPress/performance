@@ -720,7 +720,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support modern images needs to be first in this list.
-				array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				array_unshift( $editors, WP_Image_Doesnt_Support_Modern_Images::class );
 				return $editors;
 			}
 		);
@@ -1143,7 +1143,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		add_filter(
 			'wp_image_editors',
 			static function () {
-				return array( 'WP_Image_Editor_GD' );
+				return array( WP_Image_Editor_GD::class );
 			}
 		);
 
@@ -1168,7 +1168,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		try {
 			$this->assertIsNumeric( $attachment_id );
 
-			// For getting a original image path for computation of the file hash.
+			// For getting an original image path for computation of the file hash.
 			$meta       = wp_get_attachment_metadata( $attachment_id );
 			$upload_dir = wp_get_upload_dir();
 			$path       = null;
