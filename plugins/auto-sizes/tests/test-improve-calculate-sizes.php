@@ -1488,6 +1488,19 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that auto_sizes_get_featured_image_attachment_id() returns 0 when post_id is not found.
+	 *
+	 * @covers ::auto_sizes_get_featured_image_attachment_id
+	 */
+	public function test_auto_sizes_get_featured_image_attachment_id_returns_zero_for_zero_post_id(): void {
+		$this->assertSame(
+			0,
+			auto_sizes_get_featured_image_attachment_id( 0 ),
+			'Should return 0 when post_id is not found.'
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
