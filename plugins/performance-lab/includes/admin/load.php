@@ -92,10 +92,16 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  */
 function perflab_get_admin_pointers(): array {
 	$pointers = array(
-		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
-		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
-		'perflab-feature-nocache-bfcache'  => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+		'perflab-admin-pointer' => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
 	);
+
+	// Only show if the feature plugin is not already active.
+	if ( ! defined( 'VIEW_TRANSITIONS_VERSION' ) ) {
+		$pointers['perflab-feature-view-transitions'] = __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' );
+	}
+	if ( ! defined( 'WestonRuter\NocacheBFCache\VERSION' ) ) {
+		$pointers['perflab-feature-nocache-bfcache'] = __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' );
+	}
 
 	if (
 		defined( 'SPECULATION_RULES_VERSION' )
