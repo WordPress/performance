@@ -163,7 +163,7 @@ function plsr_register_setting(): void {
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 						'authentication' => array(
-							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
+							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance when enabling authenticated user support, ensure you have a persistent object cache configured. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
@@ -211,7 +211,11 @@ function plsr_add_setting_ui(): void {
 		),
 		'authentication' => array(
 			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
-			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
+			'description' => sprintf(
+				/* translators: %s: URL to persistent object cache documentation */
+				__( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance when enabling authenticated user support, ensure you have a <a href="%s" target="_blank">persistent object cache</a> configured. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
+				'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
+			),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
@@ -262,14 +266,38 @@ function plsr_render_settings_field( array $args ): void {
 			return; // @codeCoverageIgnore
 	}
 
-	$value = $option[ $args['field'] ];
+	$value                 = $option[ $args['field'] ];
+	$has_object_cache      = wp_using_ext_object_cache();
+	$authenticated_options = array( 'logged_out_and_admins', 'any' );
+	$show_warning          = 'authentication' === $args['field'] && ! $has_object_cache && in_array( $value, $authenticated_options, true );
 	?>
+	
+	<?php if ( 'authentication' === $args['field'] && ! $has_object_cache ) : ?>
+		<div id="plsr-auth-warning" class="notice notice-warning inline" <?php echo $show_warning ? '' : 'hidden'; ?>>
+			<p>
+				<strong><?php esc_html_e( 'Warning:', 'speculation-rules' ); ?></strong>
+				<?php
+				printf(
+					/* translators: %s: URL to persistent object cache documentation */
+					esc_html__( 'Enabling speculative loading for authenticated users without a persistent object cache may significantly increase server load. Consider setting up a %s before enabling this feature for logged-in users.', 'speculation-rules' ),
+					sprintf(
+						'<a href="%s" target="_blank">%s</a>',
+						'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching',
+						esc_html__( 'persistent object cache', 'speculation-rules' )
+					)
+				);
+				?>
+			</p>
+		</div>
+	<?php endif; ?>
+	
 	<fieldset>
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
 		<?php foreach ( $choices as $slug => $label ) : ?>
 			<p>
 				<label>
 					<input
+						class="plsr-auth-radio"
 						name="<?php echo esc_attr( "plsr_speculation_rules[{$args['field']}]" ); ?>"
 						type="radio"
 						value="<?php echo esc_attr( $slug ); ?>"
@@ -281,9 +309,39 @@ function plsr_render_settings_field( array $args ): void {
 		<?php endforeach; ?>
 
 		<p class="description" style="max-width: 800px;">
-			<?php echo esc_html( $args['description'] ); ?>
+			<?php
+			echo wp_kses(
+				$args['description'],
+				array(
+					'a' => array(
+						'href'   => array(),
+						'target' => array(),
+					),
+				)
+			);
+			?>
 		</p>
 	</fieldset>
+	
+	<?php if ( 'authentication' === $args['field'] && ! $has_object_cache ) : ?>
+		<script>
+		( function () {
+			const authRadios = document.querySelectorAll( '.plsr-auth-radio' );
+			const warningDiv = document.getElementById( 'plsr-auth-warning' );
+			const authenticatedOptions = <?php echo wp_json_encode( $authenticated_options ); ?>;
+			
+			if ( ! authRadios.length || ! warningDiv ) {
+				return;
+			}
+			
+			authRadios.forEach( function ( radio ) {
+				radio.addEventListener( 'change', function ( e ) {
+					warningDiv.hidden = ! authenticatedOptions.includes( e.target.value );
+				} );
+			} );
+		} )();
+		</script>
+	<?php endif; ?>
 	<?php
 }
 
