@@ -288,7 +288,7 @@ function plsr_render_settings_field( array $args ): void {
 	$show_notice  = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
 	$show_warning = $show_notice && 'logged_out' !== $value;
 	?>
-	<fieldset>
+	<fieldset id="<?php echo esc_attr( 'plsr-' . $args['field'] . '-setting' ); ?>">
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
 		<?php foreach ( $choices as $slug => $label ) : ?>
 			<p>
@@ -345,16 +345,18 @@ function plsr_render_settings_field( array $args ): void {
 	if ( $show_notice ) {
 		// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
 		$js = <<<'JS'
-			const authRadios = /** @type {NodeListOf<HTMLInputElement>} */ ( document.querySelectorAll( "input[name='plsr_speculation_rules[authentication]']" ) );
-			const noticeDiv = document.getElementById( "plsr-auth-notice" );
-			if ( authRadios.length && noticeDiv ) {
-				for ( const authRadio of authRadios ) {
-					authRadio.addEventListener( "change", () => {
-						const isLoggedOut = ( authRadio.value === "logged_out" );
-						noticeDiv.classList.toggle( "notice-info", isLoggedOut )
-						noticeDiv.classList.toggle( "notice-warning", ! isLoggedOut )
-					} );
-				}
+			const authOptions = document.getElementById( 'plsr-authentication-setting' );
+			const noticeDiv = document.getElementById( 'plsr-auth-notice' );
+			if ( authOptions && noticeDiv ) {
+				authOptions.addEventListener( 'change', ( /** @type {Event} */ event ) => {
+					const target = event.target;
+					if ( ! ( target instanceof HTMLInputElement && 'radio' === target.type ) ) {
+						return;
+					}
+					const isLoggedOut = ( target.value === 'logged_out' );
+					noticeDiv.classList.toggle( 'notice-info', isLoggedOut );
+					noticeDiv.classList.toggle( 'notice-warning', ! isLoggedOut );
+				} );
 			}
 JS;
 		// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
