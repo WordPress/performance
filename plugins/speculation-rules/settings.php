@@ -307,24 +307,9 @@ function plsr_render_settings_field( array $args ): void {
 			</p>
 		<?php endforeach; ?>
 
-		<p class="description" style="max-width: 800px;">
-			<?php
-			echo wp_kses(
-				$args['description'],
-				array(
-					'a' => array(
-						'href'   => array(),
-						'target' => array(),
-					),
-				)
-			);
-			?>
-		</p>
-
 		<?php if ( $show_notice ) : ?>
 			<div id="plsr-auth-notice" class="notice <?php echo $show_warning ? 'notice-warning' : 'notice-info'; ?> inline">
 				<p>
-					<strong id="plsr-notice-label" <?php echo $show_warning ? '' : 'hidden'; ?>><?php esc_html_e( 'Warning: ', 'speculation-rules' ); ?></strong>
 					<?php
 					echo wp_kses(
 						sprintf(
@@ -343,6 +328,20 @@ function plsr_render_settings_field( array $args ): void {
 				</p>
 			</div>
 		<?php endif; ?>
+
+		<p class="description" style="max-width: 800px;">
+			<?php
+			echo wp_kses(
+				$args['description'],
+				array(
+					'a' => array(
+						'href'   => array(),
+						'target' => array(),
+					),
+				)
+			);
+			?>
+		</p>
 	</fieldset>
 
 	<?php
@@ -350,9 +349,8 @@ function plsr_render_settings_field( array $args ): void {
 		wp_print_inline_script_tag(
 			'const authRadios = document.querySelectorAll( "input[name=\'plsr_speculation_rules[authentication]\']" );
 			const noticeDiv = document.getElementById( "plsr-auth-notice" );
-			const noticeLabel = document.getElementById( "plsr-notice-label" );
 			
-			if ( authRadios.length && noticeDiv && noticeLabel ) {
+			if ( authRadios.length && noticeDiv ) {
 				authRadios.forEach( function ( radio, index ) {
 					radio.addEventListener( "change", function ( e ) {
 						// Index 0 is logged_out, any other index is authenticated option.
@@ -361,11 +359,9 @@ function plsr_render_settings_field( array $args ): void {
 						if ( isAuthOption ) {
 							noticeDiv.classList.remove( "notice-info" );
 							noticeDiv.classList.add( "notice-warning" );
-							noticeLabel.hidden = false;
 						} else {
 							noticeDiv.classList.remove( "notice-warning" );
 							noticeDiv.classList.add( "notice-info" );
-							noticeLabel.hidden = true;
 						}
 					} );
 				} );
