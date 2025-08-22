@@ -60,6 +60,7 @@ function plsr_get_authentication_labels(): array {
  * Returns translated description strings for settings fields.
  *
  * @since n.e.x.t
+ * @access private
  *
  * @param string $field The field name to get description for.
  * @param bool   $strip_tags Whether to strip HTML tags from the description.
