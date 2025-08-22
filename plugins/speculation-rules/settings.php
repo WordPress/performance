@@ -287,9 +287,9 @@ function plsr_render_settings_field( array $args ): void {
 			return; // @codeCoverageIgnore
 	}
 
-	$value                 = $option[ $args['field'] ];
-	$show_notice           = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
-	$show_warning          = $show_notice && 'logged_out' !== $value;
+	$value        = $option[ $args['field'] ];
+	$show_notice  = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
+	$show_warning = $show_notice && 'logged_out' !== $value;
 	?>
 	<fieldset>
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
@@ -348,31 +348,28 @@ function plsr_render_settings_field( array $args ): void {
 	<?php
 	if ( $show_notice ) {
 		wp_print_inline_script_tag(
-			sprintf(
-				'const authRadios = document.querySelectorAll( "input[name=\'plsr_speculation_rules[authentication]\']" );
-				const noticeDiv = document.getElementById( "plsr-auth-notice" );
-				const noticeLabel = document.getElementById( "plsr-notice-label" );
-				const authenticatedOptions = %s;
-				
-				if ( authRadios.length && noticeDiv && noticeLabel ) {
-					authRadios.forEach( function ( radio ) {
-						radio.addEventListener( "change", function ( e ) {
-							const isAuthOption = authenticatedOptions.includes( e.target.value );
+			'const authRadios = document.querySelectorAll( "input[name=\'plsr_speculation_rules[authentication]\']" );
+			const noticeDiv = document.getElementById( "plsr-auth-notice" );
+			const noticeLabel = document.getElementById( "plsr-notice-label" );
+			
+			if ( authRadios.length && noticeDiv && noticeLabel ) {
+				authRadios.forEach( function ( radio, index ) {
+					radio.addEventListener( "change", function ( e ) {
+						// Index 0 is logged_out, any other index is authenticated option.
+						const isAuthOption = index > 0;
 
-							if ( isAuthOption ) {
-								noticeDiv.classList.remove( "notice-info" );
-								noticeDiv.classList.add( "notice-warning" );
-								noticeLabel.hidden = false;
-							} else {
-								noticeDiv.classList.remove( "notice-warning" );
-								noticeDiv.classList.add( "notice-info" );
-								noticeLabel.hidden = true;
-							}
-						} );
+						if ( isAuthOption ) {
+							noticeDiv.classList.remove( "notice-info" );
+							noticeDiv.classList.add( "notice-warning" );
+							noticeLabel.hidden = false;
+						} else {
+							noticeDiv.classList.remove( "notice-warning" );
+							noticeDiv.classList.add( "notice-info" );
+							noticeLabel.hidden = true;
+						}
 					} );
-				}',
-				wp_json_encode( $authenticated_options, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
-			),
+				} );
+			}',
 			array( 'type' => 'module' )
 		);
 	}
