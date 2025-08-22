@@ -284,9 +284,7 @@ function plsr_render_settings_field( array $args ): void {
 			return; // @codeCoverageIgnore
 	}
 
-	$value        = $option[ $args['field'] ];
-	$show_notice  = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
-	$show_warning = $show_notice && 'logged_out' !== $value;
+	$value = $option[ $args['field'] ];
 	?>
 	<fieldset id="<?php echo esc_attr( 'plsr-' . $args['field'] . '-setting' ); ?>">
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
@@ -304,8 +302,8 @@ function plsr_render_settings_field( array $args ): void {
 			</p>
 		<?php endforeach; ?>
 
-		<?php if ( $show_notice ) : ?>
-			<div id="plsr-auth-notice" class="notice <?php echo esc_attr( $show_warning ? 'notice-warning' : 'notice-info' ); ?> inline">
+		<?php if ( 'authentication' === $args['field'] && ! wp_using_ext_object_cache() ) : ?>
+			<div id="plsr-auth-notice" class="notice <?php echo esc_attr( 'logged_out' !== $value ? 'notice-warning' : 'notice-info' ); ?> inline">
 				<p>
 					<?php
 					echo wp_kses(
@@ -324,6 +322,26 @@ function plsr_render_settings_field( array $args ): void {
 					?>
 				</p>
 			</div>
+			<?php
+			// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
+			$js = <<<'JS'
+				const authOptions = document.getElementById( 'plsr-authentication-setting' );
+				const noticeDiv = document.getElementById( 'plsr-auth-notice' );
+				if ( authOptions && noticeDiv ) {
+					authOptions.addEventListener( 'change', ( /** @type {Event} */ event ) => {
+						const target = event.target;
+						if ( ! ( target instanceof HTMLInputElement && 'radio' === target.type ) ) {
+							return;
+						}
+						const isLoggedOut = ( target.value === 'logged_out' );
+						noticeDiv.classList.toggle( 'notice-info', isLoggedOut );
+						noticeDiv.classList.toggle( 'notice-warning', ! isLoggedOut );
+					} );
+				}
+JS;
+			// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
+			wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
+			?>
 		<?php endif; ?>
 
 		<p class="description" style="max-width: 800px;">
@@ -341,28 +359,7 @@ function plsr_render_settings_field( array $args ): void {
 			?>
 		</p>
 	</fieldset>
-
 	<?php
-	if ( $show_notice ) {
-		// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
-		$js = <<<'JS'
-			const authOptions = document.getElementById( 'plsr-authentication-setting' );
-			const noticeDiv = document.getElementById( 'plsr-auth-notice' );
-			if ( authOptions && noticeDiv ) {
-				authOptions.addEventListener( 'change', ( /** @type {Event} */ event ) => {
-					const target = event.target;
-					if ( ! ( target instanceof HTMLInputElement && 'radio' === target.type ) ) {
-						return;
-					}
-					const isLoggedOut = ( target.value === 'logged_out' );
-					noticeDiv.classList.toggle( 'notice-info', isLoggedOut );
-					noticeDiv.classList.toggle( 'notice-warning', ! isLoggedOut );
-				} );
-			}
-JS;
-		// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
-		wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
-	}
 }
 
 /**
