@@ -141,14 +141,14 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'assert'                => null,
-				'dismissed_wp_pointers' => '',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
 			'plugins_not_dismissed'      => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
 				'assert'                => null,
-				'dismissed_wp_pointers' => '',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
 			'dashboard_new_dismissed'    => array(
 				'set_up'                => static function (): void {
@@ -157,7 +157,7 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
 			),
 			'dashboard_all_dismissed'    => array(
 				'set_up'                => static function (): void {
