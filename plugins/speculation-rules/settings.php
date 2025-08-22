@@ -328,7 +328,7 @@ function plsr_render_settings_field( array $args ): void {
 		( function () {
 			const authRadios = document.querySelectorAll( '.plsr-auth-radio' );
 			const warningDiv = document.getElementById( 'plsr-auth-warning' );
-			const authenticatedOptions = <?php echo wp_json_encode( $authenticated_options ); ?>;
+			const authenticatedOptions = <?php echo wp_json_encode( $authenticated_options, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 			
 			if ( ! authRadios.length || ! warningDiv ) {
 				return;
