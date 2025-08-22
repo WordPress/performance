@@ -267,37 +267,17 @@ function plsr_render_settings_field( array $args ): void {
 	}
 
 	$value                 = $option[ $args['field'] ];
-	$has_object_cache      = wp_using_ext_object_cache();
 	$authenticated_options = array( 'logged_out_and_admins', 'any' );
-	$show_warning          = 'authentication' === $args['field'] && ! $has_object_cache && in_array( $value, $authenticated_options, true );
+	$show_notice           = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
+	$show_warning          = $show_notice && in_array( $value, $authenticated_options, true );
 	?>
-	
-	<?php if ( 'authentication' === $args['field'] && ! $has_object_cache ) : ?>
-		<div id="plsr-auth-warning" class="notice notice-warning inline" <?php echo $show_warning ? '' : 'hidden'; ?>>
-			<p>
-				<strong><?php esc_html_e( 'Warning:', 'speculation-rules' ); ?></strong>
-				<?php
-				printf(
-					/* translators: %s: URL to persistent object cache documentation */
-					esc_html__( 'Enabling speculative loading for authenticated users without a persistent object cache may significantly increase server load. Consider setting up a %s before enabling this feature for logged-in users.', 'speculation-rules' ),
-					sprintf(
-						'<a href="%s" target="_blank">%s</a>',
-						'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching',
-						esc_html__( 'persistent object cache', 'speculation-rules' )
-					)
-				);
-				?>
-			</p>
-		</div>
-	<?php endif; ?>
-	
 	<fieldset>
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
 		<?php foreach ( $choices as $slug => $label ) : ?>
 			<p>
 				<label>
 					<input
-						class="plsr-auth-radio"
+						<?php echo $show_notice ? 'class="plsr-auth-radio"' : ''; ?>
 						name="<?php echo esc_attr( "plsr_speculation_rules[{$args['field']}]" ); ?>"
 						type="radio"
 						value="<?php echo esc_attr( $slug ); ?>"
@@ -321,28 +301,62 @@ function plsr_render_settings_field( array $args ): void {
 			);
 			?>
 		</p>
+
+		<?php if ( $show_notice ) : ?>
+			<div id="plsr-auth-notice" class="notice <?php echo $show_warning ? 'notice-warning' : 'notice-info'; ?> inline">
+				<p>
+					<strong id="plsr-notice-label" <?php echo $show_warning ? '' : 'hidden'; ?>><?php esc_html_e( 'Warning: ', 'speculation-rules' ); ?></strong>
+					<?php
+					echo wp_kses(
+						sprintf(
+							/* translators: %s: URL to persistent object cache documentation */
+							__( 'Enabling speculative loading for authenticated users without a persistent object cache may significantly increase server load. Consider setting up a <a href="%s" target="_blank">persistent object cache</a> before enabling this feature for logged-in users.', 'speculation-rules' ),
+							'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
+						),
+						array(
+							'a' => array(
+								'href'   => array(),
+								'target' => array(),
+							),
+						)
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
 	</fieldset>
-	
-	<?php if ( 'authentication' === $args['field'] && ! $has_object_cache ) : ?>
-		<script>
-		( function () {
-			const authRadios = document.querySelectorAll( '.plsr-auth-radio' );
-			const warningDiv = document.getElementById( 'plsr-auth-warning' );
-			const authenticatedOptions = <?php echo wp_json_encode( $authenticated_options, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
-			
-			if ( ! authRadios.length || ! warningDiv ) {
-				return;
-			}
-			
-			authRadios.forEach( function ( radio ) {
-				radio.addEventListener( 'change', function ( e ) {
-					warningDiv.hidden = ! authenticatedOptions.includes( e.target.value );
-				} );
-			} );
-		} )();
-		</script>
-	<?php endif; ?>
+
 	<?php
+	if ( $show_notice ) {
+		wp_print_inline_script_tag(
+			sprintf(
+				'const authRadios = document.querySelectorAll( ".plsr-auth-radio" );
+				const noticeDiv = document.getElementById( "plsr-auth-notice" );
+				const noticeLabel = document.getElementById( "plsr-notice-label" );
+				const authenticatedOptions = %s;
+				
+				if ( authRadios.length && noticeDiv && noticeLabel ) {
+					authRadios.forEach( function ( radio ) {
+						radio.addEventListener( "change", function ( e ) {
+							const isAuthOption = authenticatedOptions.includes( e.target.value );
+
+							if ( isAuthOption ) {
+								noticeDiv.classList.remove( "notice-info" );
+								noticeDiv.classList.add( "notice-warning" );
+								noticeLabel.hidden = false;
+							} else {
+								noticeDiv.classList.remove( "notice-warning" );
+								noticeDiv.classList.add( "notice-info" );
+								noticeLabel.hidden = true;
+							}
+						} );
+					} );
+				}',
+				wp_json_encode( $authenticated_options, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
+			),
+			array( 'type' => 'module' )
+		);
+	}
 }
 
 /**
