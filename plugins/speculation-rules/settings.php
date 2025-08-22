@@ -349,27 +349,19 @@ function plsr_render_settings_field( array $args ): void {
 		// TODO: Unsure why this is not allowed in PHPCS since not mentioned in WP coding standards and heredocs/nowdocs are use in core: <https://github.com/search?q=repo%3AWordPress%2Fwordpress-develop+%2F%3C%3C%3C%27%3F%5BA-Z%5D%2B%2F&type=code>.
 		// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed
 		$js = <<<'JS'
-			const authRadios = document.querySelectorAll( "input[name='plsr_speculation_rules[authentication]']" );
+			const authRadios = /** @type {NodeListOf<HTMLInputElement>} */ ( document.querySelectorAll( "input[name='plsr_speculation_rules[authentication]']" ) );
 			const noticeDiv = document.getElementById( "plsr-auth-notice" );
-
 			if ( authRadios.length && noticeDiv ) {
-				authRadios.forEach( function ( radio, index ) {
-					radio.addEventListener( "change", function ( e ) {
-						// Index 0 is logged_out, any other index is authenticated option.
-						const isAuthOption = index > 0;
-
-						if ( isAuthOption ) {
-							noticeDiv.classList.remove( "notice-info" );
-							noticeDiv.classList.add( "notice-warning" );
-						} else {
-							noticeDiv.classList.remove( "notice-warning" );
-							noticeDiv.classList.add( "notice-info" );
-						}
+				for ( const authRadio of authRadios ) {
+					authRadio.addEventListener( "change", () => {
+						const isLoggedOut = ( authRadio.value === "logged_out" );
+						noticeDiv.classList.toggle( "notice-info", isLoggedOut )
+						noticeDiv.classList.toggle( "notice-warning", ! isLoggedOut )
 					} );
-				} );
+				}
 			}
 JS;
-		// 👆 This can only be indented two tabs when minimum PHP version is increased to 7.3+.
+		// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
 		wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 	}
 }
