@@ -13,6 +13,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * @covers ::plsr_get_eagerness_labels
 	 * @covers ::plsr_get_authentication_labels
 	 * @covers ::plsr_get_setting_default
+	 * @covers ::plsr_get_field_description
 	 */
 	public function test_plsr_register_setting(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
@@ -22,6 +23,13 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		plsr_register_setting();
 		$settings = get_registered_settings();
 		$this->assertArrayHasKey( 'plsr_speculation_rules', $settings );
+		foreach ( array( 'mode', 'eagerness', 'authentication' ) as $key ) {
+			$this->assertTrue( isset( $settings['plsr_speculation_rules']['show_in_rest']['schema']['properties'][ $key ]['description'] ) );
+			$description = $settings['plsr_speculation_rules']['show_in_rest']['schema']['properties'][ $key ]['description'];
+			$this->assertIsString( $description );
+			$this->assertGreaterThan( 0, strlen( $description ) );
+			$this->assertStringNotContainsString( '<', $description );
+		}
 
 		$settings = plsr_get_setting_default();
 		$this->assertArrayHasKey( 'mode', $settings );
@@ -31,6 +39,12 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		// Test default settings applied correctly.
 		$default_settings = plsr_get_setting_default();
 		$this->assertEquals( $default_settings, get_option( 'plsr_speculation_rules' ) );
+
+		foreach ( array( 'mode', 'eagerness', 'authentication' ) as $key ) {
+			$description = plsr_get_field_description( $key );
+			$this->assertGreaterThan( 0, strlen( $description ) );
+		}
+		$this->assertSame( '', plsr_get_field_description( 'bogus' ) );
 	}
 
 	/**

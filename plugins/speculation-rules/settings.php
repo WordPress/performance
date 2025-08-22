@@ -57,6 +57,28 @@ function plsr_get_authentication_labels(): array {
 }
 
 /**
+ * Returns translated description strings for settings fields.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param 'mode'|'eagerness'|'authentication' $field The field name to get description for.
+ * @return string The translated description string.
+ */
+function plsr_get_field_description( string $field ): string {
+	$descriptions = array(
+		'mode'           => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
+		'eagerness'      => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
+		'authentication' => sprintf(
+			/* translators: %s: URL to persistent object cache documentation */
+			__( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance, regardless of the user authentication status but <em>especially</em> when logged-in, ensure you have a <a href="%s" target="_blank">persistent object cache</a> configured. This only applies to pages on the frontend; admin screens remain excluded.', 'speculation-rules' ),
+			'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
+		),
+	);
+	return $descriptions[ $field ] ?? '';
+}
+
+/**
  * Returns the default setting value for Speculative Loading configuration.
  *
  * @since 1.0.0
@@ -153,17 +175,17 @@ function plsr_register_setting(): void {
 					'type'                 => 'object',
 					'properties'           => array(
 						'mode'           => array(
-							'description' => __( 'Whether to prefetch or prerender URLs.', 'speculation-rules' ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'mode' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
 						'eagerness'      => array(
-							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'eagerness' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 						'authentication' => array(
-							'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'authentication' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
@@ -203,15 +225,15 @@ function plsr_add_setting_ui(): void {
 	$fields = array(
 		'mode'           => array(
 			'title'       => __( 'Speculation Mode', 'speculation-rules' ),
-			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
+			'description' => plsr_get_field_description( 'mode' ),
 		),
 		'eagerness'      => array(
 			'title'       => __( 'Eagerness', 'speculation-rules' ),
-			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
+			'description' => plsr_get_field_description( 'eagerness' ),
 		),
 		'authentication' => array(
 			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
-			'description' => __( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. This only applies to pages on frontend; admin screens remain excluded.', 'speculation-rules' ),
+			'description' => plsr_get_field_description( 'authentication' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
@@ -264,7 +286,7 @@ function plsr_render_settings_field( array $args ): void {
 
 	$value = $option[ $args['field'] ];
 	?>
-	<fieldset>
+	<fieldset id="<?php echo esc_attr( 'plsr-' . $args['field'] . '-setting' ); ?>">
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
 		<?php foreach ( $choices as $slug => $label ) : ?>
 			<p>
@@ -280,8 +302,61 @@ function plsr_render_settings_field( array $args ): void {
 			</p>
 		<?php endforeach; ?>
 
+		<?php if ( 'authentication' === $args['field'] && ! wp_using_ext_object_cache() ) : ?>
+			<div id="plsr-auth-notice" class="notice <?php echo esc_attr( 'logged_out' !== $value ? 'notice-warning' : 'notice-info' ); ?> inline">
+				<p>
+					<?php
+					echo wp_kses(
+						sprintf(
+							/* translators: %s: URL to persistent object cache documentation */
+							__( 'Enabling speculative loading for authenticated users may significantly increase the server load. Consider setting up a <a href="%s" target="_blank">persistent object cache</a> before enabling this feature for logged-in users.', 'speculation-rules' ),
+							'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
+						),
+						array(
+							'a' => array(
+								'href'   => array(),
+								'target' => array(),
+							),
+						)
+					);
+					?>
+				</p>
+			</div>
+			<?php
+			// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
+			$js = <<<'JS'
+				const authOptions = document.getElementById( 'plsr-authentication-setting' );
+				const noticeDiv = document.getElementById( 'plsr-auth-notice' );
+				if ( authOptions && noticeDiv ) {
+					authOptions.addEventListener( 'change', ( /** @type {Event} */ event ) => {
+						const target = event.target;
+						if ( ! ( target instanceof HTMLInputElement && 'radio' === target.type ) ) {
+							return;
+						}
+						const isLoggedOut = ( target.value === 'logged_out' );
+						noticeDiv.classList.toggle( 'notice-info', isLoggedOut );
+						noticeDiv.classList.toggle( 'notice-warning', ! isLoggedOut );
+					} );
+				}
+JS;
+			// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
+			wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
+			?>
+		<?php endif; ?>
+
 		<p class="description" style="max-width: 800px;">
-			<?php echo esc_html( $args['description'] ); ?>
+			<?php
+			echo wp_kses(
+				$args['description'],
+				array(
+					'a'  => array(
+						'href'   => array(),
+						'target' => array(),
+					),
+					'em' => array(),
+				)
+			);
+			?>
 		</p>
 	</fieldset>
 	<?php
