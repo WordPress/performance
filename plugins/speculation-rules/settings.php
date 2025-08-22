@@ -288,9 +288,8 @@ function plsr_render_settings_field( array $args ): void {
 	}
 
 	$value                 = $option[ $args['field'] ];
-	$authenticated_options = array( 'logged_out_and_admins', 'any' );
 	$show_notice           = 'authentication' === $args['field'] && ! wp_using_ext_object_cache();
-	$show_warning          = $show_notice && in_array( $value, $authenticated_options, true );
+	$show_warning          = $show_notice && 'logged_out' !== $value;
 	?>
 	<fieldset>
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
@@ -298,7 +297,6 @@ function plsr_render_settings_field( array $args ): void {
 			<p>
 				<label>
 					<input
-						<?php echo $show_notice ? 'class="plsr-auth-radio"' : ''; ?>
 						name="<?php echo esc_attr( "plsr_speculation_rules[{$args['field']}]" ); ?>"
 						type="radio"
 						value="<?php echo esc_attr( $slug ); ?>"
@@ -351,7 +349,7 @@ function plsr_render_settings_field( array $args ): void {
 	if ( $show_notice ) {
 		wp_print_inline_script_tag(
 			sprintf(
-				'const authRadios = document.querySelectorAll( ".plsr-auth-radio" );
+				'const authRadios = document.querySelectorAll( "input[name=\'plsr_speculation_rules[authentication]\']" );
 				const noticeDiv = document.getElementById( "plsr-auth-notice" );
 				const noticeLabel = document.getElementById( "plsr-notice-label" );
 				const authenticatedOptions = %s;
