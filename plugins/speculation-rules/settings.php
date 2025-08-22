@@ -62,11 +62,10 @@ function plsr_get_authentication_labels(): array {
  * @since n.e.x.t
  * @access private
  *
- * @param string $field The field name to get description for.
- * @param bool   $strip_tags Whether to strip HTML tags from the description.
+ * @param 'mode'|'eagerness'|'authentication' $field The field name to get description for.
  * @return string The translated description string.
  */
-function plsr_get_field_description( string $field, bool $strip_tags = false ): string {
+function plsr_get_field_description( string $field ): string {
 	$descriptions = array(
 		'mode'           => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
 		'eagerness'      => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
@@ -76,9 +75,7 @@ function plsr_get_field_description( string $field, bool $strip_tags = false ): 
 			'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
 		),
 	);
-	$description  = $descriptions[ $field ] ?? '';
-
-	return $strip_tags ? wp_strip_all_tags( $description ) : $description;
+	return $descriptions[ $field ] ?? '';
 }
 
 /**
@@ -178,17 +175,17 @@ function plsr_register_setting(): void {
 					'type'                 => 'object',
 					'properties'           => array(
 						'mode'           => array(
-							'description' => plsr_get_field_description( 'mode', true ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'mode' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
 						'eagerness'      => array(
-							'description' => plsr_get_field_description( 'eagerness', true ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'eagerness' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 						'authentication' => array(
-							'description' => plsr_get_field_description( 'authentication', true ),
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'authentication' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
 						),
