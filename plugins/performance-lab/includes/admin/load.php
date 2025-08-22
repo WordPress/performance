@@ -92,24 +92,10 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  */
 function perflab_get_admin_pointers(): array {
 	$pointers = array(
-		'perflab-admin-pointer' => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+		'perflab-feature-nocache-bfcache'  => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
 	);
-
-	// Get installed plugins to check if these feature plugins are already installed.
-	$installed_plugin_slugs = array_map(
-		static function ( $name ) {
-			return strtok( $name, '/' );
-		},
-		array_keys( get_plugins() )
-	);
-
-	// Only show if the feature plugin is not already active and not installed.
-	if ( ! in_array( 'view-transitions', $installed_plugin_slugs, true ) ) {
-		$pointers['perflab-feature-view-transitions'] = __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' );
-	}
-	if ( ! in_array( 'nocache-bfcache', $installed_plugin_slugs, true ) ) {
-		$pointers['perflab-feature-nocache-bfcache'] = __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' );
-	}
 
 	if (
 		defined( 'SPECULATION_RULES_VERSION' )
@@ -163,6 +149,40 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 			);
 		}
 
+		return;
+	}
+
+	// Get installed plugins to check if these feature plugins are already installed.
+	$installed_plugin_slugs = array_map(
+		static function ( $name ) {
+			return strtok( $name, '/' );
+		},
+		array_keys( get_plugins() )
+	);
+
+	// List of pointer IDs that are tied to feature plugin slugs.
+	$plugin_dependent_pointers = array(
+		'perflab-feature-view-transitions' => 'view-transitions',
+		'perflab-feature-nocache-bfcache'  => 'nocache-bfcache',
+	);
+
+	$dismissed_pointers_updated = false;
+	foreach ( $plugin_dependent_pointers as $pointer_id => $slug ) {
+		if ( in_array( $slug, $installed_plugin_slugs, true ) && ! in_array( $pointer_id, $dismissed_pointer_ids, true ) ) {
+			$dismissed_pointer_ids[]    = $pointer_id;
+			$dismissed_pointers_updated = true;
+		}
+	}
+
+	if ( $dismissed_pointers_updated ) {
+		update_user_meta(
+			get_current_user_id(),
+			'dismissed_wp_pointers',
+			implode( ',', $dismissed_pointer_ids )
+		);
+	}
+
+	if ( count( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) ) === 0 ) {
 		return;
 	}
 
