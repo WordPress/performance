@@ -308,7 +308,7 @@ function plsr_render_settings_field( array $args ): void {
 		<?php endforeach; ?>
 
 		<?php if ( $show_notice ) : ?>
-			<div id="plsr-auth-notice" class="notice <?php echo $show_warning ? 'notice-warning' : 'notice-info'; ?> inline">
+			<div id="plsr-auth-notice" class="notice <?php echo esc_attr( $show_warning ? 'notice-warning' : 'notice-info' ); ?> inline">
 				<p>
 					<?php
 					echo wp_kses(
