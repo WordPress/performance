@@ -346,10 +346,12 @@ function plsr_render_settings_field( array $args ): void {
 
 	<?php
 	if ( $show_notice ) {
-		wp_print_inline_script_tag(
-			'const authRadios = document.querySelectorAll( "input[name=\'plsr_speculation_rules[authentication]\']" );
+		// TODO: Unsure why this is not allowed in PHPCS since not mentioned in WP coding standards and heredocs/nowdocs are use in core: <https://github.com/search?q=repo%3AWordPress%2Fwordpress-develop+%2F%3C%3C%3C%27%3F%5BA-Z%5D%2B%2F&type=code>.
+		// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed
+		$js = <<<'JS'
+			const authRadios = document.querySelectorAll( "input[name='plsr_speculation_rules[authentication]']" );
 			const noticeDiv = document.getElementById( "plsr-auth-notice" );
-			
+
 			if ( authRadios.length && noticeDiv ) {
 				authRadios.forEach( function ( radio, index ) {
 					radio.addEventListener( "change", function ( e ) {
@@ -365,9 +367,10 @@ function plsr_render_settings_field( array $args ): void {
 						}
 					} );
 				} );
-			}',
-			array( 'type' => 'module' )
-		);
+			}
+JS;
+		// 👆 This can only be indented two tabs when minimum PHP version is increased to 7.3+.
+		wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 	}
 }
 
