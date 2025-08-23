@@ -126,28 +126,24 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'set_up'                => null,
 				'hook_suffix'           => null,
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
 			'edit.php'                   => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'edit.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
 			'dashboard_not_dismissed'    => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
-				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
 			'plugins_not_dismissed'      => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
-				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
 			'dashboard_new_dismissed'    => array(
@@ -157,7 +153,6 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				},
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
-				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
 			),
 			'dashboard_one_dismissed'    => array(
@@ -167,7 +162,6 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				},
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-view-transitions',
 			),
 			'dashboard_all_dismissed'    => array(
@@ -176,7 +170,6 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				},
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 			'perflab_screen_first_time'  => array(
@@ -185,7 +178,6 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				},
 				'hook_suffix'           => 'options-general.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 			'perflab_screen_second_time' => array(
@@ -195,7 +187,6 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				},
 				'hook_suffix'           => 'options-general.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 		);
@@ -208,10 +199,9 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	 * @param Closure|null $set_up      Set up.
 	 * @param string|null  $hook_suffix Hook suffix.
 	 * @param bool         $expected    Expected.
-	 * @param Closure|null $assert      Assert.
 	 * @param string       $dismissed_wp_pointers Dismissed admin pointers.
 	 */
-	public function test_perflab_admin_pointer( ?Closure $set_up, ?string $hook_suffix, bool $expected, ?Closure $assert, string $dismissed_wp_pointers ): void {
+	public function test_perflab_admin_pointer( ?Closure $set_up, ?string $hook_suffix, bool $expected, string $dismissed_wp_pointers ): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 		if ( $set_up instanceof Closure ) {
