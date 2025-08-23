@@ -127,57 +127,65 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_perflab_admin_pointer(): array {
 		return array(
-			'null'                       => array(
+			'null'                             => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => null,
 				'expected'              => false,
 				'dismissed_wp_pointers' => '',
 			),
-			'edit.php'                   => array(
+			'edit.php'                         => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'edit.php',
 				'expected'              => false,
 				'dismissed_wp_pointers' => '',
 			),
-			'dashboard_not_dismissed'    => array(
+			'dashboard_not_dismissed'          => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
-			'plugins_not_dismissed'      => array(
+			'plugins_not_dismissed'            => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
 				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
-			'dashboard_new_dismissed'    => array(
+			'dashboard_new_dismissed'          => array(
 				// Note: If the No-cache BFCache plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
 				'initial_wp_pointers'   => 'perflab-admin-pointer',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
 			),
-			'dashboard_one_dismissed'    => array(
+			'dashboard_last_auto_dismissed'    => array(
 				// Note: The No-cache BFCache plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
-				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache',
+				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth',
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth,perflab-feature-view-transitions',
+			),
+			'dashboard_one_not_auto_dismissed' => array(
+				// Note: The No-cache BFCache plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+				// Note: The Speculative Loading admin pointer 'perflab-feature-speculation-rules-auth' does not get auto-dismissed because it is for a new feature of an existing feature plugin.
+				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache',
+				'hook_suffix'           => 'index.php',
+				'expected'              => true,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-view-transitions',
 			),
-			'dashboard_all_dismissed'    => array(
+			'dashboard_all_dismissed'          => array(
 				'initial_wp_pointers'   => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
 				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
-			'perflab_screen_first_time'  => array(
+			'perflab_screen_first_time'        => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'settings_page_' . PERFLAB_SCREEN,
 				'expected'              => false,
 				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
-			'perflab_screen_second_time' => array(
+			'perflab_screen_second_time'       => array(
 				'initial_wp_pointers'   => 'perflab-admin-pointer',
 				'hook_suffix'           => 'settings_page_' . PERFLAB_SCREEN,
 				'expected'              => false,
@@ -207,14 +215,14 @@ class Test_Admin_Load extends WP_UnitTestCase {
 		if ( $script_dependency instanceof _WP_Dependency ) {
 			$after_script = implode( "\n", array_filter( $script_dependency->extra['after'] ?? array() ) );
 		}
+		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
+		$this->assertSame( $expected, wp_script_is( 'wp-pointer', 'enqueued' ) );
+		$this->assertSame( $expected, wp_style_is( 'wp-pointer', 'enqueued' ) );
 		if ( $expected ) {
 			$this->assertStringContainsString( 'pointerIdsToDismiss', $after_script );
 		} else {
 			$this->assertStringNotContainsString( 'pointerIdsToDismiss', $after_script );
 		}
-		$this->assertSame( $expected, wp_script_is( 'wp-pointer', 'enqueued' ) );
-		$this->assertSame( $expected, wp_style_is( 'wp-pointer', 'enqueued' ) );
-		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
 	}
 
 	/**

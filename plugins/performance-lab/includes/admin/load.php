@@ -88,31 +88,37 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  *
  * @since n.e.x.t
  *
- * @return array<non-empty-string, array{ content: string, plugin?: non-empty-string }> Keys are the admin pointer IDs.
+ * @return array<non-empty-string, array{ content: string, plugin: non-empty-string, dismiss_if_installed: bool }> Keys are the admin pointer IDs.
  */
 function perflab_get_admin_pointers(): array {
 	$pointers = array(
 		'perflab-admin-pointer'            => array(
-			'content' => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+			'content'              => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+			'plugin'               => 'performance-lab',
+			'dismiss_if_installed' => false,
 		),
 		'perflab-feature-view-transitions' => array(
-			'content' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
-			'plugin'  => 'view-transitions',
+			'content'              => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+			'plugin'               => 'view-transitions',
+			'dismiss_if_installed' => true,
 		),
 		'perflab-feature-nocache-bfcache'  => array(
-			'content' => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
-			'plugin'  => 'nocache-bfcache',
+			'content'              => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+			'plugin'               => 'nocache-bfcache',
+			'dismiss_if_installed' => true,
 		),
 	);
 
+	$installed_plugins = get_plugins();
 	if (
-		defined( 'SPECULATION_RULES_VERSION' )
+		isset( $installed_plugins['speculation-rules/load.php']['Version'] )
 		&&
-		version_compare( SPECULATION_RULES_VERSION, '1.6.0', '>=' )
+		version_compare( $installed_plugins['speculation-rules/load.php']['Version'], '1.6.0', '>=' )
 	) {
 		$pointers['perflab-feature-speculation-rules-auth'] = array(
-			'content' => __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' ),
-			'plugin'  => 'speculation-rules',
+			'content'              => __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' ),
+			'plugin'               => 'speculative-loading',
+			'dismiss_if_installed' => false,
 		);
 	}
 
@@ -158,15 +164,15 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	}
 
 	// List of pointer IDs that are tied to feature plugin slugs.
-	$plugin_dependent_pointers = array();
+	$plugin_pointers_dismissed_if_installed = array();
 	foreach ( $admin_pointers as $pointer_id => $admin_pointer ) {
-		if ( isset( $admin_pointer['plugin'] ) ) {
-			$plugin_dependent_pointers[ $pointer_id ] = $admin_pointer['plugin'];
+		if ( $admin_pointer['dismiss_if_installed'] ) {
+			$plugin_pointers_dismissed_if_installed[ $pointer_id ] = $admin_pointer['plugin'];
 		}
 	}
 
 	// Preemptively dismiss plugin-specific pointers for plugins which are already installed.
-	$plugin_dependent_pointers_undismissed = array_diff( array_keys( $plugin_dependent_pointers ), $dismissed_pointer_ids );
+	$plugin_dependent_pointers_undismissed = array_diff( array_keys( $plugin_pointers_dismissed_if_installed ), $dismissed_pointer_ids );
 	if ( count( $plugin_dependent_pointers_undismissed ) > 0 ) {
 		/**
 		 * Installed plugin slugs.
@@ -182,7 +188,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 
 		foreach ( $plugin_dependent_pointers_undismissed as $pointer_id ) {
 			if (
-				in_array( $plugin_dependent_pointers[ $pointer_id ], $installed_plugin_slugs, true ) &&
+				in_array( $plugin_pointers_dismissed_if_installed[ $pointer_id ], $installed_plugin_slugs, true ) &&
 				! in_array( $pointer_id, $dismissed_pointer_ids, true )
 			) {
 				$auto_dismissed_pointer_ids[] = $pointer_id;
