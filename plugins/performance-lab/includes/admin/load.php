@@ -152,7 +152,11 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		return;
 	}
 
-	// Get installed plugins to check if these feature plugins are already installed.
+	/**
+	 * Installed plugin slugs.
+	 *
+	 * @var non-empty-string[] $installed_plugin_slugs
+	 */
 	$installed_plugin_slugs = array_map(
 		static function ( $name ) {
 			return strtok( $name, '/' );
@@ -166,6 +170,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		'perflab-feature-nocache-bfcache'  => 'nocache-bfcache',
 	);
 
+	// Make sure that the dismissed pointers include any plugins that are already installed.
 	$dismissed_pointers_updated = false;
 	foreach ( $plugin_dependent_pointers as $pointer_id => $slug ) {
 		if ( in_array( $slug, $installed_plugin_slugs, true ) && ! in_array( $pointer_id, $dismissed_pointer_ids, true ) ) {
@@ -173,7 +178,6 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 			$dismissed_pointers_updated = true;
 		}
 	}
-
 	if ( $dismissed_pointers_updated ) {
 		update_user_meta(
 			get_current_user_id(),
@@ -182,20 +186,21 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		);
 	}
 
-	if ( count( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) ) === 0 ) {
-		return;
-	}
-
-	// Enqueue pointer CSS and JS.
-	wp_enqueue_style( 'wp-pointer' );
-	wp_enqueue_script( 'wp-pointer' );
-
 	$new_install_pointer_id = 'perflab-admin-pointer';
 	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
 		$needed_pointer_ids = array( $new_install_pointer_id );
 	} else {
 		$needed_pointer_ids = array_diff( $admin_pointer_ids, $dismissed_pointer_ids );
 	}
+
+	// No admin pointers are needed, so abort.
+	if ( count( $needed_pointer_ids ) === 0 ) {
+		return;
+	}
+
+	// Enqueue pointer CSS and JS.
+	wp_enqueue_style( 'wp-pointer' );
+	wp_enqueue_script( 'wp-pointer' );
 
 	$args = array(
 		'heading' => __( 'Performance Lab', 'performance-lab' ),
@@ -231,8 +236,8 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	?>
 	<script>
 		jQuery( function() {
-			const pointerIdsToDismiss = <?php echo wp_json_encode( $pointer_ids_to_dismiss, JSON_OBJECT_AS_ARRAY ); ?>;
-			const nonce = <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>;
+			const pointerIdsToDismiss = <?php echo wp_json_encode( $pointer_ids_to_dismiss, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_OBJECT_AS_ARRAY ); ?>;
+			const nonce = <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
 			function dismissNextPointer() {
 				const pointerId = pointerIdsToDismiss.shift();
@@ -252,7 +257,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 
 			// Pointer Options.
 			const options = {
-				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3>' . wp_kses( $args['content'], $wp_kses_options ) ); ?>,
+				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3>' . wp_kses( $args['content'], $wp_kses_options ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>,
 				position: {
 					edge:  'left',
 					align: 'right',
