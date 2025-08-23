@@ -152,12 +152,23 @@ class Test_Admin_Load extends WP_UnitTestCase {
 			),
 			'dashboard_new_dismissed'    => array(
 				'set_up'                => static function (): void {
+					// Note: If the No-cache BFCache plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
 					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
 				},
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
+			),
+			'dashboard_one_dismissed'    => array(
+				'set_up'                => static function (): void {
+					// Note: The No-cache BFCache plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer,perflab-feature-nocache-bfcache' );
+				},
+				'hook_suffix'           => 'index.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-view-transitions',
 			),
 			'dashboard_all_dismissed'    => array(
 				'set_up'                => static function (): void {

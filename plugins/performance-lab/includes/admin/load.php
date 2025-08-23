@@ -120,8 +120,21 @@ function perflab_get_admin_pointers(): array {
  *                                 ensure that `$hook_suffix` is a string when it calls `do_action( 'admin_enqueue_scripts', $hook_suffix )`.
  */
 function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
-	// Do not show admin pointer in multisite Network admin or User admin UI.
-	if ( is_network_admin() || is_user_admin() ) {
+	$is_performance_screen = (
+		'options-general.php' === $hook_suffix &&
+		( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	);
+
+	// Do not show admin pointer in multisite Network admin, User admin UI, dashboard, or plugins list table. However,
+	// do proceed on the Performance screen so that all pointers can be auto-dismissed.
+	if (
+		is_network_admin() ||
+		is_user_admin() ||
+		(
+			! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) &&
+			! $is_performance_screen
+		)
+	) {
 		return;
 	}
 
@@ -129,56 +142,47 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	$admin_pointer_ids     = array_keys( $admin_pointers );
 	$dismissed_pointer_ids = perflab_get_dismissed_admin_pointer_ids();
 
-	// All pointers have been dismissed already.
-	if ( count( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) ) === 0 ) {
-		return;
+	// And if we're on the Performance screen, automatically dismiss all the pointers.
+	$auto_dismissed_pointer_ids = array();
+	if ( $is_performance_screen ) {
+		$auto_dismissed_pointer_ids = array_merge( $auto_dismissed_pointer_ids, $admin_pointer_ids );
 	}
-
-	// Do not show the admin pointer when not on the dashboard or plugins list table.
-	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
-
-		// And if we're on the Performance screen, automatically dismiss the pointers.
-		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			update_user_meta(
-				get_current_user_id(),
-				'dismissed_wp_pointers',
-				implode(
-					',',
-					array_unique( array_merge( $dismissed_pointer_ids, $admin_pointer_ids ) )
-				)
-			);
-		}
-
-		return;
-	}
-
-	/**
-	 * Installed plugin slugs.
-	 *
-	 * @var non-empty-string[] $installed_plugin_slugs
-	 */
-	$installed_plugin_slugs = array_map(
-		static function ( $name ) {
-			return strtok( $name, '/' );
-		},
-		array_keys( get_plugins() )
-	);
 
 	// List of pointer IDs that are tied to feature plugin slugs.
+	// TODO: Add this to perflab_get_admin_pointers().
 	$plugin_dependent_pointers = array(
 		'perflab-feature-view-transitions' => 'view-transitions',
 		'perflab-feature-nocache-bfcache'  => 'nocache-bfcache',
 	);
 
-	// Make sure that the dismissed pointers include any plugins that are already installed.
-	$dismissed_pointers_updated = false;
-	foreach ( $plugin_dependent_pointers as $pointer_id => $slug ) {
-		if ( in_array( $slug, $installed_plugin_slugs, true ) && ! in_array( $pointer_id, $dismissed_pointer_ids, true ) ) {
-			$dismissed_pointer_ids[]    = $pointer_id;
-			$dismissed_pointers_updated = true;
+	// Preemptively dismiss plugin-specific pointers for plugins which are already installed.
+	$plugin_dependent_pointers_undismissed = array_diff( array_keys( $plugin_dependent_pointers ), $dismissed_pointer_ids );
+	if ( count( $plugin_dependent_pointers_undismissed ) > 0 ) {
+		/**
+		 * Installed plugin slugs.
+		 *
+		 * @var non-empty-string[] $installed_plugin_slugs
+		 */
+		$installed_plugin_slugs = array_map(
+			static function ( $name ) {
+				return strtok( $name, '/' );
+			},
+			array_keys( get_plugins() )
+		);
+
+		foreach ( $plugin_dependent_pointers_undismissed as $pointer_id ) {
+			if (
+				in_array( $plugin_dependent_pointers[ $pointer_id ], $installed_plugin_slugs, true ) &&
+				! in_array( $pointer_id, $dismissed_pointer_ids, true )
+			) {
+				$auto_dismissed_pointer_ids[] = $pointer_id;
+			}
 		}
 	}
-	if ( $dismissed_pointers_updated ) {
+
+	// Persist the automatically-dismissed pointers.
+	if ( count( $auto_dismissed_pointer_ids ) > 0 ) {
+		$dismissed_pointer_ids = array_unique( array_merge( $dismissed_pointer_ids, $auto_dismissed_pointer_ids ) );
 		update_user_meta(
 			get_current_user_id(),
 			'dismissed_wp_pointers',
@@ -186,12 +190,14 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		);
 	}
 
+	// Determine which admin pointers we need.
 	$new_install_pointer_id = 'perflab-admin-pointer';
 	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
 		$needed_pointer_ids = array( $new_install_pointer_id );
 	} else {
-		$needed_pointer_ids = array_diff( $admin_pointer_ids, $dismissed_pointer_ids );
+		$needed_pointer_ids = $admin_pointer_ids;
 	}
+	$needed_pointer_ids = array_diff( $needed_pointer_ids, $dismissed_pointer_ids );
 
 	// No admin pointers are needed, so abort.
 	if ( count( $needed_pointer_ids ) === 0 ) {
