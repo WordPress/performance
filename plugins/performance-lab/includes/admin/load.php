@@ -88,13 +88,21 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  *
  * @since n.e.x.t
  *
- * @return array<non-empty-string, string> Admin pointer messages with the admin pointer IDs as the keys.
+ * @return array<non-empty-string, array{ content: string, plugin?: non-empty-string }> Keys are the admin pointer IDs.
  */
 function perflab_get_admin_pointers(): array {
 	$pointers = array(
-		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
-		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
-		'perflab-feature-nocache-bfcache'  => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+		'perflab-admin-pointer'            => array(
+			'content' => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+		),
+		'perflab-feature-view-transitions' => array(
+			'content' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+			'plugin'  => 'view-transitions',
+		),
+		'perflab-feature-nocache-bfcache'  => array(
+			'content' => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+			'plugin'  => 'nocache-bfcache',
+		),
 	);
 
 	if (
@@ -102,7 +110,10 @@ function perflab_get_admin_pointers(): array {
 		&&
 		version_compare( SPECULATION_RULES_VERSION, '1.6.0', '>=' )
 	) {
-		$pointers['perflab-feature-speculation-rules-auth'] = __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' );
+		$pointers['perflab-feature-speculation-rules-auth'] = array(
+			'content' => __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' ),
+			'plugin'  => 'speculation-rules',
+		);
 	}
 
 	return $pointers;
@@ -149,11 +160,12 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	}
 
 	// List of pointer IDs that are tied to feature plugin slugs.
-	// TODO: Add this to perflab_get_admin_pointers().
-	$plugin_dependent_pointers = array(
-		'perflab-feature-view-transitions' => 'view-transitions',
-		'perflab-feature-nocache-bfcache'  => 'nocache-bfcache',
-	);
+	$plugin_dependent_pointers = array();
+	foreach ( $admin_pointers as $pointer_id => $admin_pointer ) {
+		if ( isset( $admin_pointer['plugin'] ) ) {
+			$plugin_dependent_pointers[ $pointer_id ] = $admin_pointer['plugin'];
+		}
+	}
 
 	// Preemptively dismiss plugin-specific pointers for plugins which are already installed.
 	$plugin_dependent_pointers_undismissed = array_diff( array_keys( $plugin_dependent_pointers ), $dismissed_pointer_ids );
@@ -216,7 +228,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		'',
 		array_map(
 			static function ( string $needed_pointer ) use ( $admin_pointers ): string {
-				return '<p>' . $admin_pointers[ $needed_pointer ] . '</p>';
+				return '<p>' . $admin_pointers[ $needed_pointer ]['content'] . '</p>';
 			},
 			$needed_pointer_ids
 		)
