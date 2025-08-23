@@ -131,10 +131,8 @@ function perflab_get_admin_pointers(): array {
  *                                 ensure that `$hook_suffix` is a string when it calls `do_action( 'admin_enqueue_scripts', $hook_suffix )`.
  */
 function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
-	$is_performance_screen = (
-		'options-general.php' === $hook_suffix &&
-		( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	);
+	// See get_plugin_page_hookname().
+	$is_performance_screen = 'settings_page_' . PERFLAB_SCREEN === $hook_suffix;
 
 	// Do not show admin pointer in multisite Network admin, User admin UI, dashboard, or plugins list table. However,
 	// do proceed on the Performance screen so that all pointers can be auto-dismissed.
