@@ -13,10 +13,10 @@ Improvements for responsive images in WordPress.
 
 This plugin implements enhancements for the responsive images functionality in WordPress. Currently, this includes:
 
-1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme.
-2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
+1. Improvements to the accuracy of the `sizes` attribute by using layout information available in [block themes](https://wordpress.org/documentation/article/block-themes/). This enhancement is not available to classic themes.
+2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. This enhancement was [merged](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) into WordPress 6.7.
 
-This plugin integrates with the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin. When that plugin is active, it starts learning about which images are not in the initial viewport based on actual visitors to your site. When it knows which images are below the fold, it then adds `loading=lazy` to these images. This plugin then extends Image Prioritizer to also add `sizes=auto` to these lazy-loaded images.
+See also the complimentary [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which detects which images are outside the viewport, and then adds `loading=lazy` and `sizes=auto` to them.
 
 There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
