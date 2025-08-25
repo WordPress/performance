@@ -88,21 +88,38 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
  *
  * @since n.e.x.t
  *
- * @return array<non-empty-string, string> Admin pointer messages with the admin pointer IDs as the keys.
+ * @return array<non-empty-string, array{ content: string, plugin: non-empty-string, dismiss_if_installed: bool }> Keys are the admin pointer IDs.
  */
 function perflab_get_admin_pointers(): array {
 	$pointers = array(
-		'perflab-admin-pointer'            => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
-		'perflab-feature-view-transitions' => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
-		'perflab-feature-nocache-bfcache'  => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+		'perflab-admin-pointer'            => array(
+			'content'              => __( 'You can now test upcoming WordPress performance features.', 'performance-lab' ),
+			'plugin'               => 'performance-lab',
+			'dismiss_if_installed' => false,
+		),
+		'perflab-feature-view-transitions' => array(
+			'content'              => __( 'New <strong>View Transitions</strong> feature now available.', 'performance-lab' ),
+			'plugin'               => 'view-transitions',
+			'dismiss_if_installed' => true,
+		),
+		'perflab-feature-nocache-bfcache'  => array(
+			'content'              => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+			'plugin'               => 'nocache-bfcache',
+			'dismiss_if_installed' => true,
+		),
 	);
 
+	$installed_plugins = get_plugins();
 	if (
-		defined( 'SPECULATION_RULES_VERSION' )
+		isset( $installed_plugins['speculation-rules/load.php']['Version'] )
 		&&
-		version_compare( SPECULATION_RULES_VERSION, '1.6.0', '>=' )
+		version_compare( $installed_plugins['speculation-rules/load.php']['Version'], '1.6.0', '>=' )
 	) {
-		$pointers['perflab-feature-speculation-rules-auth'] = __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' );
+		$pointers['perflab-feature-speculation-rules-auth'] = array(
+			'content'              => __( '<strong>Speculative Loading</strong> now includes an opt-in setting for logged-in users.', 'performance-lab' ),
+			'plugin'               => 'speculative-loading',
+			'dismiss_if_installed' => false,
+		);
 	}
 
 	return $pointers;
@@ -120,8 +137,19 @@ function perflab_get_admin_pointers(): array {
  *                                 ensure that `$hook_suffix` is a string when it calls `do_action( 'admin_enqueue_scripts', $hook_suffix )`.
  */
 function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
-	// Do not show admin pointer in multisite Network admin or User admin UI.
-	if ( is_network_admin() || is_user_admin() ) {
+	// See get_plugin_page_hookname().
+	$is_performance_screen = 'settings_page_' . PERFLAB_SCREEN === $hook_suffix;
+
+	// Do not show admin pointer in multisite Network admin, User admin UI, dashboard, or plugins list table. However,
+	// do proceed on the Performance screen so that all pointers can be auto-dismissed.
+	if (
+		is_network_admin() ||
+		is_user_admin() ||
+		(
+			! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) &&
+			! $is_performance_screen
+		)
+	) {
 		return;
 	}
 
@@ -129,39 +157,72 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	$admin_pointer_ids     = array_keys( $admin_pointers );
 	$dismissed_pointer_ids = perflab_get_dismissed_admin_pointer_ids();
 
-	// All pointers have been dismissed already.
-	if ( count( array_diff( $admin_pointer_ids, $dismissed_pointer_ids ) ) === 0 ) {
-		return;
+	// And if we're on the Performance screen, automatically dismiss all the pointers.
+	$auto_dismissed_pointer_ids = array();
+	if ( $is_performance_screen ) {
+		$auto_dismissed_pointer_ids = array_merge( $auto_dismissed_pointer_ids, $admin_pointer_ids );
 	}
 
-	// Do not show the admin pointer when not on the dashboard or plugins list table.
-	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
-
-		// And if we're on the Performance screen, automatically dismiss the pointers.
-		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			update_user_meta(
-				get_current_user_id(),
-				'dismissed_wp_pointers',
-				implode(
-					',',
-					array_unique( array_merge( $dismissed_pointer_ids, $admin_pointer_ids ) )
-				)
-			);
+	// List of pointer IDs that are tied to feature plugin slugs.
+	$plugin_pointers_dismissed_if_installed = array();
+	foreach ( $admin_pointers as $pointer_id => $admin_pointer ) {
+		if ( $admin_pointer['dismiss_if_installed'] ) {
+			$plugin_pointers_dismissed_if_installed[ $pointer_id ] = $admin_pointer['plugin'];
 		}
+	}
 
+	// Preemptively dismiss plugin-specific pointers for plugins which are already installed.
+	$plugin_dependent_pointers_undismissed = array_diff( array_keys( $plugin_pointers_dismissed_if_installed ), $dismissed_pointer_ids );
+	if ( count( $plugin_dependent_pointers_undismissed ) > 0 ) {
+		/**
+		 * Installed plugin slugs.
+		 *
+		 * @var non-empty-string[] $installed_plugin_slugs
+		 */
+		$installed_plugin_slugs = array_map(
+			static function ( $name ) {
+				return strtok( $name, '/' );
+			},
+			array_keys( get_plugins() )
+		);
+
+		foreach ( $plugin_dependent_pointers_undismissed as $pointer_id ) {
+			if (
+				in_array( $plugin_pointers_dismissed_if_installed[ $pointer_id ], $installed_plugin_slugs, true ) &&
+				! in_array( $pointer_id, $dismissed_pointer_ids, true )
+			) {
+				$auto_dismissed_pointer_ids[] = $pointer_id;
+			}
+		}
+	}
+
+	// Persist the automatically-dismissed pointers.
+	if ( count( $auto_dismissed_pointer_ids ) > 0 ) {
+		$dismissed_pointer_ids = array_unique( array_merge( $dismissed_pointer_ids, $auto_dismissed_pointer_ids ) );
+		update_user_meta(
+			get_current_user_id(),
+			'dismissed_wp_pointers',
+			implode( ',', $dismissed_pointer_ids )
+		);
+	}
+
+	// Determine which admin pointers we need.
+	$new_install_pointer_id = 'perflab-admin-pointer';
+	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
+		$needed_pointer_ids = array( $new_install_pointer_id );
+	} else {
+		$needed_pointer_ids = $admin_pointer_ids;
+	}
+	$needed_pointer_ids = array_diff( $needed_pointer_ids, $dismissed_pointer_ids );
+
+	// No admin pointers are needed, so abort.
+	if ( count( $needed_pointer_ids ) === 0 ) {
 		return;
 	}
 
 	// Enqueue pointer CSS and JS.
 	wp_enqueue_style( 'wp-pointer' );
 	wp_enqueue_script( 'wp-pointer' );
-
-	$new_install_pointer_id = 'perflab-admin-pointer';
-	if ( ! in_array( $new_install_pointer_id, $dismissed_pointer_ids, true ) ) {
-		$needed_pointer_ids = array( $new_install_pointer_id );
-	} else {
-		$needed_pointer_ids = array_diff( $admin_pointer_ids, $dismissed_pointer_ids );
-	}
 
 	$args = array(
 		'heading' => __( 'Performance Lab', 'performance-lab' ),
@@ -171,7 +232,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 		'',
 		array_map(
 			static function ( string $needed_pointer ) use ( $admin_pointers ): string {
-				return '<p>' . $admin_pointers[ $needed_pointer ] . '</p>';
+				return '<p>' . $admin_pointers[ $needed_pointer ]['content'] . '</p>';
 			},
 			$needed_pointer_ids
 		)
@@ -197,8 +258,8 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	?>
 	<script>
 		jQuery( function() {
-			const pointerIdsToDismiss = <?php echo wp_json_encode( $pointer_ids_to_dismiss, JSON_OBJECT_AS_ARRAY ); ?>;
-			const nonce = <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>;
+			const pointerIdsToDismiss = <?php echo wp_json_encode( $pointer_ids_to_dismiss, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_OBJECT_AS_ARRAY ); ?>;
+			const nonce = <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
 			function dismissNextPointer() {
 				const pointerId = pointerIdsToDismiss.shift();
@@ -218,7 +279,7 @@ function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 
 			// Pointer Options.
 			const options = {
-				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3>' . wp_kses( $args['content'], $wp_kses_options ) ); ?>,
+				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3>' . wp_kses( $args['content'], $wp_kses_options ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>,
 				position: {
 					edge:  'left',
 					align: 'right',
