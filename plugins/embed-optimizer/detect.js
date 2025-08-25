@@ -6,44 +6,18 @@
  * when it is submitted for storage.
  */
 
-const consoleLogPrefix = '[Embed Optimizer]';
+export const name = 'Embed Optimizer';
 
 /**
  * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
  * @typedef {import("../optimization-detective/types.ts").Extension} Extension
  * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
- * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
- * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
+ * @typedef {import("../optimization-detective/types.ts").GetElementDataFunction} GetElementDataFunction
+ * @typedef {import("../optimization-detective/types.ts").ExtendElementDataFunction} ExtendElementDataFunction
  * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
  */
-
-/**
- * Logs a message.
- *
- * @param {...*} message
- */
-function log( ...message ) {
-	// eslint-disable-next-line no-console
-	console.log( consoleLogPrefix, ...message );
-}
-
-/**
- * Logs an error.
- *
- * @param {...*} message
- */
-function error( ...message ) {
-	// eslint-disable-next-line no-console
-	console.error( consoleLogPrefix, ...message );
-}
-
-/**
- * Embed element heights.
- *
- * @type {Map<string, DOMRectReadOnly>}
- */
-const loadedElementContentRects = new Map();
 
 /**
  * Initializes extension.
@@ -51,72 +25,68 @@ const loadedElementContentRects = new Map();
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { isDebug } ) {
+export async function initialize( {
+	log,
+	error,
+	getElementData,
+	extendElementData,
+} ) {
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
 
 	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
-	}
-
-	if ( isDebug ) {
-		log( 'Loaded embed content rects:', loadedElementContentRects );
-	}
-}
-
-/**
- * Finalizes extension.
- *
- * @type {FinalizeCallback}
- * @param {FinalizeArgs} args Args.
- */
-export async function finalize( {
-	isDebug,
-	getElementData,
-	extendElementData,
-} ) {
-	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
-		try {
-			extendElementData( xpath, {
-				resizedBoundingClientRect: domRect,
-			} );
-			if ( isDebug ) {
-				const elementData = getElementData( xpath );
-				log(
-					`boundingClientRect for ${ xpath } resized:`,
-					elementData.boundingClientRect,
-					'=>',
-					domRect
-				);
-			}
-		} catch ( err ) {
-			error(
-				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
-				domRect,
-				err
-			);
-		}
+		monitorEmbedWrapperForResizes(
+			embedWrapper,
+			extendElementData,
+			getElementData,
+			log,
+			error
+		);
 	}
 }
 
 /**
  * Monitors embed wrapper for resizes.
  *
- * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
- * @param {boolean}        isDebug      Whether debug.
+ * @param {HTMLDivElement}            embedWrapper      - Embed wrapper DIV.
+ * @param {ExtendElementDataFunction} extendElementData - Function to extend element data with.
+ * @param {GetElementDataFunction}    getElementData    - Function to get element data.
+ * @param {LogFunction}               log               - The function to call with log messages.
+ * @param {LogFunction}               error             - The function to call with error messages.
  */
-function monitorEmbedWrapperForResizes( embedWrapper, isDebug ) {
+function monitorEmbedWrapperForResizes(
+	embedWrapper,
+	extendElementData,
+	getElementData,
+	log,
+	error
+) {
 	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
 	const xpath = embedWrapper.dataset.odXpath;
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
-		loadedElementContentRects.set( xpath, entry.contentRect );
-		if ( isDebug ) {
-			log( `Resized element ${ xpath }:`, entry.contentRect );
+
+		try {
+			extendElementData( xpath, {
+				resizedBoundingClientRect: entry.contentRect,
+			} );
+			const elementData = getElementData( xpath );
+			log(
+				`Resized element ${ xpath }:`,
+				elementData.boundingClientRect,
+				'=>',
+				entry.contentRect
+			);
+		} catch ( err ) {
+			error(
+				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
+				entry.contentRect,
+				err
+			);
 		}
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );

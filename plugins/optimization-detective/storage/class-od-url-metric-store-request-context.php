@@ -116,7 +116,7 @@ final class OD_URL_Metric_Store_Request_Context {
 					esc_html( __CLASS__ . '::$' . $name ),
 					esc_html(
 						sprintf(
-							/* translators: %s is class member variable name */
+							/* translators: %s is the class member variable name */
 							__( 'Use %s instead.', 'optimization-detective' ),
 							__CLASS__ . '::$url_metrics_id'
 						)
@@ -128,7 +128,7 @@ final class OD_URL_Metric_Store_Request_Context {
 				throw new Error(
 					esc_html(
 						sprintf(
-							/* translators: %s is class member variable name */
+							/* translators: %s is the class member variable name */
 							__( 'Unknown property %s.', 'optimization-detective' ),
 							__CLASS__ . '::$' . $name
 						)

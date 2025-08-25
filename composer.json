@@ -17,7 +17,25 @@
   },
   "suggest": {
     "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class",
-    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class"
+    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class",
+    "ext-zlib": "Required for compression of URL Metric data submitted to the REST API for storage in Optimization Detective"
+  },
+  "repositories":[
+    {
+      "type":"composer",
+      "url":"https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
+    }
+  ],
+  "extra": {
+    "installer-paths": {
+      "vendor/{$vendor}/{$name}/": [
+        "wpackagist-plugin/plugin-check"
+      ]
+    }
   },
   "require-dev": {
     "phpcompatibility/php-compatibility": "^9.3",
@@ -32,12 +50,14 @@
     "wp-phpunit/wp-phpunit": "^6.5",
     "yoast/phpunit-polyfills": "^4.0",
     "phpstan/php-8-stubs": "^0.4.0",
-    "phpstan/phpstan-strict-rules": "^1.6"
+    "phpstan/phpstan-strict-rules": "^1.6",
+    "wpackagist-plugin/plugin-check": "^1.6"
   },
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "composer/installers": true
     },
     "platform": {
       "php": "7.2"
@@ -54,6 +74,7 @@
       "@format:optimization-detective",
       "@format:performance-lab",
       "@format:speculation-rules",
+      "@format:view-transitions",
       "@format:web-worker-offloading",
       "@format:webp-uploads"
     ],
@@ -64,6 +85,7 @@
     "format:optimization-detective": "@format -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "format:performance-lab":        "@format -- ./plugins/performance-lab --standard=./plugins/performance-lab/phpcs.xml.dist",
     "format:speculation-rules":      "@format -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "format:view-transitions":       "@format -- ./plugins/view-transitions --standard=./plugins/view-transitions/phpcs.xml.dist",
     "format:web-worker-offloading":  "@format -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
     "format:webp-uploads":           "@format -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "lint": "phpcs",
@@ -76,6 +98,7 @@
       "@lint:optimization-detective",
       "@lint:performance-lab",
       "@lint:speculation-rules",
+      "@lint:view-transitions",
       "@lint:web-worker-offloading",
       "@lint:webp-uploads"
     ],
@@ -86,6 +109,7 @@
     "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "lint:performance-lab":        "@lint -- ./plugins/performance-lab --standard=./plugins/performance-lab/phpcs.xml.dist",
     "lint:speculation-rules":      "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "lint:view-transitions":       "@lint -- ./plugins/view-transitions --standard=./plugins/view-transitions/phpcs.xml.dist",
     "lint:web-worker-offloading":  "@lint -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
     "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "phpstan": "phpstan analyse --memory-limit=2048M",
@@ -101,6 +125,7 @@
       "@test-multisite:optimization-detective",
       "@test-multisite:performance-lab",
       "@test-multisite:speculation-rules",
+      "@test-multisite:view-transitions",
       "@test-multisite:web-worker-offloading",
       "@test-multisite:webp-uploads"
     ],
@@ -111,6 +136,7 @@
     "test-multisite:optimization-detective": "@test-multisite --verbose --testsuite optimization-detective",
     "test-multisite:performance-lab":        "@test-multisite --verbose --testsuite performance-lab",
     "test-multisite:speculation-rules":      "@test-multisite --verbose --testsuite speculation-rules",
+    "test-multisite:view-transitions":       "@test-multisite --verbose --testsuite view-transitions",
     "test-multisite:web-worker-offloading":  "@test-multisite --verbose --testsuite web-worker-offloading",
     "test-multisite:webp-uploads":           "@test-multisite --verbose --testsuite webp-uploads",
     "test:plugins": [
@@ -121,6 +147,7 @@
       "@test:optimization-detective",
       "@test:performance-lab",
       "@test:speculation-rules",
+      "@test:view-transitions",
       "@test:web-worker-offloading",
       "@test:webp-uploads"
     ],
@@ -131,6 +158,7 @@
     "test:optimization-detective": "@test --verbose --testsuite optimization-detective",
     "test:performance-lab":        "@test --verbose --testsuite performance-lab",
     "test:speculation-rules":      "@test --verbose --testsuite speculation-rules",
+    "test:view-transitions":       "@test --verbose --testsuite view-transitions",
     "test:web-worker-offloading":  "@test --verbose --testsuite web-worker-offloading",
     "test:webp-uploads":           "@test --verbose --testsuite webp-uploads"
   }

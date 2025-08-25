@@ -22,23 +22,8 @@ function od_initialize_extensions(): void {
 	/**
 	 * Fires when extensions to Optimization Detective can be loaded and initialized.
 	 *
-	 * This action is useful for loading extension code that depends on Optimization Detective to be running. The version
-	 * of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
-	 *
-	 * Example:
-	 *
-	 *     add_action( 'od_init', function ( string $version ) {
-	 *         if ( version_compare( $version, '1.0', '<' ) ) {
-	 *             add_action( 'admin_notices', 'my_plugin_warn_optimization_plugin_outdated' );
-	 *             return;
-	 *         }
-	 *
-	 *         // Bootstrap the Optimization Detective extension.
-	 *         require_once __DIR__ . '/functions.php';
-	 *         // ...
-	 *     } );
-	 *
 	 * @since 0.7.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_init
 	 *
 	 * @param string $version Optimization Detective version.
 	 */
@@ -76,7 +61,122 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 }
 
 /**
- * Displays the HTML generator meta tag for the Optimization Detective plugin.
+ * Gets the reasons why Optimization Detective is disabled for the current response.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return array{
+ *     is_search?: string,
+ *     is_embed?: string,
+ *     is_preview?: string,
+ *     is_customize_preview?: string,
+ *     non_get_request?: string,
+ *     no_cache_purge_post_id?: string,
+ *     filter_disabled?: string,
+ *     rest_api_unavailable?: string,
+ *     query_param_disabled?: string
+ * } Array of disabled reason codes and their messages.
+ */
+function od_get_disabled_reasons(): array {
+	$disabled_flags = array(
+		'is_search'              => false,
+		'is_embed'               => false,
+		'is_preview'             => false,
+		'is_customize_preview'   => false,
+		'non_get_request'        => false,
+		'no_cache_purge_post_id' => false,
+	);
+
+	// Disable the search template since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
+	// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
+	if ( is_search() ) {
+		$disabled_flags['is_search'] = true;
+	}
+
+	// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
+	// "allow-scripts" but without "allow-same-origin". This can result in an error in the console:
+	// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+	// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
+	if ( is_embed() ) {
+		$disabled_flags['is_embed'] = true;
+	}
+
+	// Skip posts that aren't published yet.
+	if ( is_preview() ) {
+		$disabled_flags['is_preview'] = true;
+	}
+
+	// Disable in Customizer preview since injection of inline-editing controls can interfere with XPath. Optimization is also not necessary in this context.
+	if ( is_customize_preview() ) {
+		$disabled_flags['is_customize_preview'] = true;
+	}
+
+	// Disable for POST responses since they cannot, by definition, be cached.
+	if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
+		$disabled_flags['non_get_request'] = true;
+	}
+
+	// Disable when there is no post ID available for cache purging. Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
+	// the relevant actions on.
+	if ( null === od_get_cache_purge_post_id() ) {
+		$disabled_flags['no_cache_purge_post_id'] = true;
+	}
+
+	// Check if any flags are set to true.
+	$has_disabled_flags = count( array_filter( $disabled_flags ) ) > 0;
+
+	/**
+	 * Filters whether the current response can be optimized.
+	 *
+	 * @since 0.1.0
+	 * @since n.e.x.t Added $disabled_flags parameter
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
+	 *
+	 * @param bool $can_optimize Whether response can be optimized.
+	 * @param array{
+	 *     is_search: bool,
+	 *     is_embed: bool,
+	 *     is_preview: bool,
+	 *     is_customize_preview: bool,
+	 *     non_get_request: bool,
+	 *     no_cache_purge_post_id: bool
+	 * } $disabled_flags Flags indicating which conditions are disabling optimization.
+	 */
+	$can_optimize = (bool) apply_filters( 'od_can_optimize_response', ! $has_disabled_flags, $disabled_flags );
+
+	$reasons = array();
+	if ( ! $can_optimize ) {
+		$reason_messages = array(
+			'is_search'              => __( 'Page is not optimized because it is a search results page.', 'optimization-detective' ),
+			'is_embed'               => __( 'Page is not optimized because it is an embed.', 'optimization-detective' ),
+			'is_preview'             => __( 'Page is not optimized because it is a preview.', 'optimization-detective' ),
+			'is_customize_preview'   => __( 'Page is not optimized because it is a customize preview.', 'optimization-detective' ),
+			'non_get_request'        => __( 'Page is not optimized because it is not a GET request.', 'optimization-detective' ),
+			'no_cache_purge_post_id' => __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' ),
+		);
+
+		$reasons = wp_array_slice_assoc( $reason_messages, array_keys( array_filter( $disabled_flags ) ) );
+
+		// If no technical reasons but optimization still disabled, it's because of the filter.
+		if ( 0 === count( $reasons ) ) {
+			$reasons['filter_disabled'] = __( 'Page is not optimized because the od_can_optimize_response filter returned false.', 'optimization-detective' );
+		}
+	}
+
+	if ( od_is_rest_api_unavailable() && ! ( wp_get_environment_type() === 'local' && ! function_exists( 'tests_add_filter' ) ) ) {
+		$reasons['rest_api_unavailable'] = __( 'Page is not optimized because the REST API for storing URL Metrics is not available.', 'optimization-detective' );
+	}
+
+	if ( isset( $_GET['optimization_detective_disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$reasons['query_param_disabled'] = __( 'Page is not optimized because the URL has the optimization_detective_disabled query parameter.', 'optimization-detective' );
+	}
+
+	return $reasons;
+}
+
+/**
+ * Displays the HTML generator META tag for the Optimization Detective plugin.
  *
  * See {@see 'wp_head'}.
  *
@@ -87,9 +187,11 @@ function od_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	$content = 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION;
 
-	// Indicate that the plugin will not be doing anything because the REST API is unavailable.
-	if ( od_is_rest_api_unavailable() ) {
-		$content .= '; rest_api_unavailable';
+	// Add any reasons why Optimization Detective is disabled.
+	$disabled_reasons = od_get_disabled_reasons();
+	if ( count( $disabled_reasons ) > 0 ) {
+		$flags    = array_keys( $disabled_reasons );
+		$content .= '; ' . implode( '; ', $flags );
 	}
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
@@ -101,7 +203,7 @@ function od_render_generator_meta_tag(): void {
  * @since 0.9.0
  * @access private
  *
- * @param string      $src_path Source path, relative to plugin root.
+ * @param string      $src_path Source path, relative to the plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.
  * @return string URL to script or stylesheet.
  *

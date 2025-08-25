@@ -40,9 +40,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 
 		$tests = perflab_effective_asset_cache_headers_add_test( $tests );
 
-		$this->assertArrayHasKey( 'effective_asset_cache_headers', $tests['direct'] );
-		$this->assertEquals( 'Effective Caching Headers', $tests['direct']['effective_asset_cache_headers']['label'] );
-		$this->assertEquals( 'perflab_effective_asset_cache_headers_assets_test', $tests['direct']['effective_asset_cache_headers']['test'] );
+		$this->assertArrayNotHasKey( 'effective_asset_cache_headers', $tests['direct'] );
 	}
 
 	/**

@@ -68,19 +68,9 @@ final class OD_Storage_Lock {
 		/**
 		 * Filters how long the current IP is locked from submitting another URL metric storage REST API request.
 		 *
-		 * Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable
-		 * locking when a user is logged-in with code like the following:
-		 *
-		 *     add_filter( 'od_metrics_storage_lock_ttl', static function ( int $ttl ): int {
-		 *         return is_user_logged_in() ? 0 : $ttl;
-		 *     } );
-		 *
-		 * By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current
-		 * user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This
-		 * custom capability by default maps to the `manage_options` primitive capability via the `user_has_cap` filter.
-		 *
 		 * @since 0.1.0
 		 * @since 1.0.0 This now defaults to zero (0) for authorized users.
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_storage_lock_ttl
 		 *
 		 * @param int $ttl TTL. Defaults to 60, except zero (0) for authorized users.
 		 */
@@ -89,15 +79,21 @@ final class OD_Storage_Lock {
 	}
 
 	/**
-	 * Gets transient key for locking URL Metric storage (for the current IP).
+	 * Gets the transient key for locking URL Metric storage (for the current IP).
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return non-empty-string Transient key.
 	 */
 	public static function get_transient_key(): string {
-		$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-		return 'url_metrics_storage_lock_' . wp_hash( $ip_address );
+		if ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			$ip_address = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip_address = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		} else {
+			$ip_address = '';
+		}
+		return 'url_metrics_storage_lock_' . wp_hash( (string) rest_is_ip_address( $ip_address ) );
 	}
 
 	/**

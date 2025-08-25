@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used for Speculative Loading.
+ * Plugin API for Speculative Loading.
  *
  * @package speculation-rules
  * @since 1.0.0
@@ -120,4 +120,22 @@ function plsr_get_speculation_rules(): array {
 	}
 
 	return array( $mode => $rules );
+}
+
+/**
+ * Prints the speculation rules.
+ *
+ * For browsers that do not support speculation rules yet, the `script[type="speculationrules"]` tag will be ignored.
+ *
+ * @since 1.0.0
+ */
+function plsr_print_speculation_rules(): void {
+	if ( ! plsr_is_speculative_loading_enabled() ) {
+		return;
+	}
+
+	wp_print_inline_script_tag(
+		(string) wp_json_encode( plsr_get_speculation_rules() ),
+		array( 'type' => 'speculationrules' )
+	);
 }

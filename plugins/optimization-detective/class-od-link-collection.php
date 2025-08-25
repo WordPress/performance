@@ -323,21 +323,19 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Encodes a URL for serving in an HTTP response header.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
-	 * @param string $url URL to percent encode. Any existing percent encodings will first be decoded.
+	 * @param string $url URL to percent encode.
 	 * @return string Percent-encoded URL.
 	 */
 	private function encode_url_for_response_header( string $url ): string {
-		$decoded_url = urldecode( $url );
-
 		// Encode characters not allowed in a URL per RFC 3986 (anything that is not among the reserved and unreserved characters).
 		$encoded_url = (string) preg_replace_callback(
-			'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=]/',
+			'/[^A-Za-z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]/',
 			static function ( $matches ) {
 				return rawurlencode( $matches[0] );
 			},
-			$decoded_url
+			$url
 		);
 		return esc_url_raw( $encoded_url );
 	}

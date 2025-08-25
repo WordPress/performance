@@ -5,7 +5,7 @@
  * Description: Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 1.0.0-beta2
+ * Version: 1.0.0-beta4
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'1.0.0-beta2',
+	'1.0.0-beta4',
 	static function ( string $version ): void {
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 			return;
@@ -99,6 +99,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/helper.php';
 
+		// Deprecations.
+		require_once __DIR__ . '/deprecated.php';
+
 		// Core infrastructure classes.
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
@@ -107,20 +110,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/class-od-strict-url-metric.php';
 		require_once __DIR__ . '/class-od-url-metric-group.php';
 		require_once __DIR__ . '/class-od-url-metric-group-collection.php';
-		class_alias( OD_URL_Metric_Group::class, 'OD_URL_Metrics_Group' ); // Temporary class alias for back-compat after rename.
-		class_alias( OD_URL_Metric_Group_Collection::class, 'OD_URL_Metrics_Group_Collection' ); // Temporary class alias for back-compat after rename.
 
 		// Storage logic.
 		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
-		require_once __DIR__ . '/storage/rest-api.php';
+		require_once __DIR__ . '/storage/class-od-rest-url-metrics-store-endpoint.php';
 		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.
 		require_once __DIR__ . '/detection.php';
 
 		// Optimization logic.
+		require_once __DIR__ . '/class-od-template-optimization-context.php';
 		require_once __DIR__ . '/class-od-link-collection.php';
 		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
 		require_once __DIR__ . '/class-od-visited-tag-state.php';

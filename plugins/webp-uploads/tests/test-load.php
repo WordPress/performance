@@ -720,7 +720,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support modern images needs to be first in this list.
-				array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				array_unshift( $editors, WP_Image_Doesnt_Support_Modern_Images::class );
 				return $editors;
 			}
 		);
@@ -1115,5 +1115,157 @@ class Test_WebP_Uploads_Load extends TestCase {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/avif' );
 		}
 		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
+	 * Tests that the `webp_uploads_convert_palette_png_to_truecolor` function is hooked to the upload filters.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_hooks(): void {
+		$this->assertSame( 10, has_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+		$this->assertSame( 10, has_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+	}
+
+	/**
+	 * Tests converting a palette PNG to a truecolor PNG.
+	 *
+	 * @dataProvider data_to_test_webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @param string|null $image_path     The path to the image file to test.
+	 * @param bool        $expect_changed Whether the png should be converted to truecolor.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed ): void {
+		if ( ! extension_loaded( 'gd' ) ) {
+			$this->markTestSkipped( 'GD extension is not loaded' );
+		}
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( WP_Image_Editor_GD::class );
+			}
+		);
+
+		// Temp file will be copied and unlinked by WordPress core during sideload processing.
+		$tmp_file = wp_tempnam();
+		copy( $image_path, $tmp_file );
+		$file = array(
+			'name'     => basename( $image_path ),
+			'tmp_name' => $tmp_file,
+			'type'     => wp_check_filetype( $image_path )['type'],
+			'size'     => filesize( $tmp_file ),
+			'error'    => UPLOAD_ERR_OK,
+		);
+
+		// Store the original file hash and the original file size for later comparison.
+		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
+		$original_file_size = (int) filesize( $file['tmp_name'] );
+
+		// This will trigger the `wp_handle_sideload_prefilter` filter.
+		$attachment_id = media_handle_sideload( $file );
+
+		try {
+			$this->assertIsNumeric( $attachment_id );
+
+			// For getting an original image path for computation of the file hash.
+			$meta       = wp_get_attachment_metadata( $attachment_id );
+			$upload_dir = wp_get_upload_dir();
+			$path       = null;
+			if ( isset( $meta['original_image'], $meta['file'] ) ) {
+				$path = path_join(
+					$upload_dir['basedir'],
+					dirname( $meta['file'] ) . '/' . $meta['original_image']
+				);
+			}
+			$this->assertNotNull( $path );
+			$this->assertFileExists( $path );
+
+			// Hash will be modified if the image was converted to truecolor.
+			$modified_file_hash = md5_file( $path );
+
+			if ( ! $expect_changed ) {
+				$this->assertSame( $original_file_hash, $modified_file_hash );
+			} else {
+				$this->assertNotSame( $original_file_hash, $modified_file_hash );
+				$img = imagecreatefrompng( $path );
+				$this->assertTrue( imageistruecolor( $img ) );
+				imagedestroy( $img );
+
+				// Make sure the image converted to modern image format is not 0 bytes.
+				$modern_image_format_path = get_attached_file( $attachment_id );
+				$this->assertNotFalse( $modern_image_format_path );
+				$this->assertFileExists( $modern_image_format_path );
+				$modern_image_format_filesize = (int) filesize( $modern_image_format_path );
+				$this->assertGreaterThan( 0, $modern_image_format_filesize );
+
+				// Ensure the file size of the converted image is less than or equal to the original indexed PNG file size.
+				$this->assertLessThanOrEqual( $original_file_size, $modern_image_format_filesize );
+			}
+		} finally {
+			wp_delete_attachment( $attachment_id );
+		}
+	}
+
+	/**
+	 * Data provider for `test_webp_uploads_convert_palette_png_to_truecolor`.
+	 *
+	 * @return array<string, mixed> Returns an array of test cases.
+	 */
+	public function data_to_test_webp_uploads_convert_palette_png_to_truecolor(): array {
+		$non_palette_png = TESTS_PLUGIN_DIR . '/tests/data/images/dice.png';
+		$palette_png     = TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png';
+		$test_jpg        = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
+
+		return array(
+			'wrong_extension' => array(
+				'image_path'       => $test_jpg,
+				'expected_changed' => false,
+			),
+			'non_palette_png' => array(
+				'image_path'       => $non_palette_png,
+				'expected_changed' => false,
+			),
+			'palette_png'     => array(
+				'image_path'       => $palette_png,
+				'expected_changed' => true,
+			),
+		);
+	}
+
+	/**
+	 * Tests the webp_uploads_convert_palette_png_to_truecolor function with various conditions.
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_conditions(): void {
+		$this->assertSame( array(), webp_uploads_convert_palette_png_to_truecolor( 'test' ) );
+		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( array() ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+			'type'     => 'image/jpeg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array();
+			}
+		);
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png',
+			'name'     => 'dice-palette.png',
+			'type'     => 'image/png',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
 	}
 }

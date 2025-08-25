@@ -185,19 +185,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $bookmarked_open_stacks = array();
 
 	/**
-	 * Stored XPath for the current tag.
-	 *
-	 * This is used so that repeated calls to {@see self::get_stored_xpath()} won't needlessly reconstruct the string.
-	 * This gets cleared whenever {@see self::open_tags()} iterates to the next tag.
-	 *
-	 * @todo Remove this once the XPath transitional period is over.
-	 *
-	 * @since 0.4.0
-	 * @var string|null
-	 */
-	private $current_stored_xpath = null;
-
-	/**
 	 * (Transitional) XPath for the current tag.
 	 *
 	 * This is used to store the old XPath format in a transitional period until which new URL Metrics are expected to
@@ -246,43 +233,40 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next tag.
 	 *
-	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
-	 * It will _always_ visit tag closers.
+	 * Unlike the base class, this subclass currently visits tag closers by default.
+	 * However, for the 1.0.0 release this method will behave the same as the method in
+	 * the base class, where it skips tag closers by default.
 	 *
 	 * @inheritDoc
 	 * @since 0.4.0
+	 * @since 1.0.0 Passing a $query is now allowed. TODO: In the final non-beta 1.0.0 release, also note that this will default to skipping tag closers.
 	 *
-	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query, but only null is accepted for this subclass.
+	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query.
 	 * @return bool Whether a tag was matched.
-	 *
-	 * @throws InvalidArgumentException If attempting to pass a query.
 	 */
 	public function next_tag( $query = null ): bool {
-		if ( null !== $query ) {
-			throw new InvalidArgumentException( esc_html__( 'Processor subclass does not support queries.', 'optimization-detective' ) );
+		if ( null === $query ) {
+			$query = array( 'tag_closers' => 'visit' );
+			$this->warn(
+				__METHOD__,
+				esc_html__( 'Previously this method always visited tag closers and did not allow a query to be supplied. Now, however, a query can be supplied. To align this method with the behavior of the base class, a future version of this method will default to skipping tag closers.', 'optimization-detective' )
+			);
 		}
-
-		// Elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
-		do {
-			$matched = parent::next_tag( array( 'tag_closers' => 'visit' ) );
-		} while ( $matched && $this->is_admin_bar() );
-		return $matched;
+		return parent::next_tag( $query );
 	}
 
 	/**
 	 * Finds the next open tag.
 	 *
+	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
+	 *
 	 * @since 0.4.0
+	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
 	public function next_open_tag(): bool {
-		while ( $this->next_tag() ) {
-			if ( ! $this->is_tag_closer() ) {
-				return true;
-			}
-		}
-		return false;
+		return $this->next_tag( array( 'tag_closers' => 'skip' ) );
 	}
 
 	/**
@@ -318,8 +302,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether a token was parsed.
 	 */
 	public function next_token(): bool {
-		$this->current_stored_xpath = null; // Clear cache.
-		$this->current_xpath        = null; // Clear cache.
+		$this->current_xpath = null; // Clear cache.
 		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags       = array();
@@ -653,23 +636,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This predicate will be included once the transitional period is over.
 	 *
 	 * @since 0.4.0
-	 * @todo Replace the logic herein with what is in get_stored_xpath() once the transitional period is over.
 	 *
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		/*
-		 * This transitional format is used by default for all extensions. The non-transitional format is used only in
-		 * od_optimize_template_output_buffer() when setting the data-od-xpath attribute. This is so that the new format
-		 * will replace the old format as new URL Metrics are collected. After a month of the new format being live, the
-		 * transitional format can be eliminated. See the corresponding logic in OD_Element for normalizing both the
-		 * old and new XPath formats to use the transitional format.
-		 */
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
 			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
-				if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) ) {
+				if ( $i < 2 ) {
 					$this->current_xpath .= "/$tag_name";
+				} elseif ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) {
+					$segment = "/$tag_name";
+					foreach ( $attributes as $attribute_name => $attribute_value ) {
+						$segment .= sprintf(
+							"[@%s='%s']",
+							$attribute_name,
+							$attribute_value // Note: $attribute_value has already been validated to only contain safe characters /^[a-zA-Z0-9_.\s:-]*/ which do not need escaping.
+						);
+					}
+					$this->current_xpath .= $segment;
 				} else {
 					$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
 				}
@@ -681,49 +666,32 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets stored XPath for the current open tag.
 	 *
-	 * This method is temporary for a transition period while new URL Metrics are collected for active installs. Once
-	 * the transition period is over, the logic in this method can be moved to {@see self::get_xpath()} and this method
-	 * can simply be an alias for that one. See related logic in {@see OD_Element::get_xpath()}. This function is only
-	 * used internally by Optimization Detective in {@see od_optimize_template_output_buffer()}.
+	 * This method was temporary for a transition period while new URL Metrics are collected for active installs
 	 *
 	 * @since 1.0.0
-	 * @todo Move the logic in this method to the get_xpath() method and let this be an alias for that method once the transitional period is over.
 	 * @access private
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 *
 	 * @return string XPath.
 	 */
 	public function get_stored_xpath(): string {
-		if ( null === $this->current_stored_xpath ) {
-			$this->current_stored_xpath = '';
-			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
-				if ( $i < 2 ) {
-					$this->current_stored_xpath .= "/$tag_name";
-				} elseif ( 2 === $i && '/HTML/BODY' === $this->current_stored_xpath ) {
-					$segment = "/$tag_name";
-					foreach ( $attributes as $attribute_name => $attribute_value ) {
-						$segment .= sprintf(
-							"[@%s='%s']",
-							$attribute_name,
-							$attribute_value // Note: $attribute_value has already been validated to only contain safe characters /^[a-zA-Z0-9_.\s:-]*/ which do not need escaping.
-						);
-					}
-					$this->current_stored_xpath .= $segment;
-				} else {
-					$this->current_stored_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
-				}
-			}
-		}
-		return $this->current_stored_xpath;
+		return $this->get_xpath();
 	}
 
 	/**
 	 * Returns whether the processor is currently at or inside the admin bar.
 	 *
+	 * This is only intended to be used internally by Optimization Detective as part of the "optimization loop". Tag
+	 * visitors should not rely on this method as it may be deprecated in the future, especially with a migration to
+	 * WP_HTML_Processor after {@link https://core.trac.wordpress.org/ticket/63020} is implemented.
+	 *
 	 * @since 1.0.0
+	 * @access private
 	 *
 	 * @return bool Whether at or inside the admin bar.
 	 */
-	private function is_admin_bar(): bool {
+	public function is_admin_bar(): bool {
 		return (
 			isset( $this->open_stack_tags[2], $this->open_stack_attributes[2]['id'] )
 			&&
@@ -734,29 +702,33 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Append HTML to the HEAD.
+	 * Appends raw HTML to the HEAD.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 *  The provided HTML must be valid for insertion in the HEAD. No validation is currently performed. However, in the
+	 *  future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 *  HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $html HTML to inject.
+	 * @param string $raw_html Raw HTML to inject.
 	 */
-	public function append_head_html( string $html ): void {
-		$this->buffered_text_replacements[ self::END_OF_HEAD_BOOKMARK ][] = $html;
+	public function append_head_html( string $raw_html ): void {
+		$this->buffered_text_replacements[ self::END_OF_HEAD_BOOKMARK ][] = $raw_html;
 	}
 
 	/**
-	 * Append HTML to the BODY.
+	 * Appends raw HTML to the BODY.
 	 *
-	 * The provided HTML must be valid! No validation is performed.
+	 * The provided HTML must be valid for insertion in the BODY. No validation is currently performed. However, in the
+	 * future the HTML Processor may be used to ensure the validity of the provided HTML. At that time, when invalid
+	 * HTML is provided, this method may emit a `_doing_it_wrong()` warning.
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $html HTML to inject.
+	 * @param string $raw_html Raw HTML to inject.
 	 */
-	public function append_body_html( string $html ): void {
-		$this->buffered_text_replacements[ self::END_OF_BODY_BOOKMARK ][] = $html;
+	public function append_body_html( string $raw_html ): void {
+		$this->buffered_text_replacements[ self::END_OF_BODY_BOOKMARK ][] = $raw_html;
 	}
 
 	/**

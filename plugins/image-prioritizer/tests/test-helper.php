@@ -85,6 +85,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Tag_Visitor
 	 * @covers Image_Prioritizer_Img_Tag_Visitor
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
+	 * @covers Image_Prioritizer_Video_Tag_Visitor
 	 *
 	 * @dataProvider data_provider_test_filter_tag_visitors
 	 *
@@ -111,7 +112,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 
 			'non_responsive_image'              => array(
@@ -166,7 +167,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 
 			'wrongly_auto_sized_responsive_img_with_only_auto' => array(
@@ -176,7 +177,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto">',
-				'expected'        => '<img data-od-removed-loading="lazy" data-od-replaced-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(width &lt;= 480px) 432px, (480px &lt; width &lt;= 600px) 540px, (600px &lt; width &lt;= 782px) 703px, (782px &lt; width) 900px">',
+				'expected'        => '<img data-od-removed-loading="lazy" data-od-removed-sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" >',
 			),
 		);
 	}
@@ -187,7 +188,6 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::__invoke
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::process_img
 	 * @covers Image_Prioritizer_Tag_Visitor::get_attribute_value
-	 * @covers Image_Prioritizer_Img_Tag_Visitor::compute_sizes
 	 * @covers Image_Prioritizer_Img_Tag_Visitor::sizes_attribute_includes_valid_auto
 	 *
 	 * @dataProvider data_provider_test_auto_sizes
@@ -448,20 +448,20 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 */
 	public function data_provider_to_test_image_prioritizer_validate_background_image_url(): array {
 		return array(
-			'bad_url_parse_error'         => array(
+			'bad_url_parse_error'                    => array(
 				'set_up'       => static function (): string {
 					return 'https:///www.example.com';
 				},
 				'expect_error' => 'background_image_url_lacks_host',
 			),
-			'bad_url_no_host'             => array(
+			'bad_url_no_host'                        => array(
 				'set_up'       => static function (): string {
 					return '/foo/bar?baz=1';
 				},
 				'expect_error' => 'background_image_url_lacks_host',
 			),
 
-			'bad_url_disallowed_origin'   => array(
+			'bad_url_disallowed_origin'              => array(
 				'set_up'       => static function (): string {
 					return 'https://bad.example.com/foo.jpg';
 				},
@@ -507,7 +507,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => null,
 			),
 
-			'good_url_allowed_cdn_origin' => array(
+			'good_url_allowed_cdn_origin'            => array(
 				'set_up'       => function (): string {
 					$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 					$this->assertIsInt( $attachment_id );
@@ -551,7 +551,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => null,
 			),
 
-			'bad_not_found'               => array(
+			'bad_not_found'                          => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/bad.jpg' );
 
@@ -582,7 +582,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_response_not_ok',
 			),
 
-			'bad_content_type'            => array(
+			'bad_content_type'                       => array(
 				'set_up'       => static function (): string {
 					$video_url = home_url( '/bad.mp4' );
 
@@ -613,7 +613,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_response_not_image',
 			),
 
-			'bad_content_length'          => array(
+			'bad_content_length'                     => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/massive-image.jpg' );
 
@@ -644,7 +644,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'background_image_content_length_too_large',
 			),
 
-			'bad_redirect'                => array(
+			'bad_redirect'                           => array(
 				'set_up'       => static function (): string {
 					$redirect_url = home_url( '/redirect.jpg' );
 
@@ -665,7 +665,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expect_error' => 'http_request_failed',
 			),
 
-			'good_same_origin'            => array(
+			'good_same_origin'                       => array(
 				'set_up'       => static function (): string {
 					$image_url = home_url( '/good.jpg' );
 
@@ -694,6 +694,68 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 					return $image_url;
 				},
 				'expect_error' => null,
+			),
+
+			'good_image_with_octet_stream_mime_type' => array(
+				'set_up'       => static function (): string {
+					$image_url = home_url( '/test-image.avif' );
+
+					add_filter(
+						'pre_http_request',
+						static function ( $pre, $parsed_args, $url ) use ( $image_url ) {
+							if ( 'HEAD' !== $parsed_args['method'] || $image_url !== $url ) {
+								return $pre;
+							}
+							return array(
+								'headers'  => array(
+									'content-type'   => 'application/octet-stream',
+									'content-length' => '288449',
+								),
+								'body'     => '',
+								'response' => array(
+									'code'    => 200,
+									'message' => 'OK',
+								),
+							);
+						},
+						10,
+						3
+					);
+
+					return $image_url;
+				},
+				'expect_error' => null,
+			),
+
+			'bad_file_with_octet_stream_mime_type'   => array(
+				'set_up'       => static function (): string {
+					$image_url = home_url( '/test-document.pdf' );
+
+					add_filter(
+						'pre_http_request',
+						static function ( $pre, $parsed_args, $url ) use ( $image_url ) {
+							if ( 'HEAD' !== $parsed_args['method'] || $image_url !== $url ) {
+								return $pre;
+							}
+							return array(
+								'headers'  => array(
+									'content-type'   => 'application/octet-stream',
+									'content-length' => '288449',
+								),
+								'body'     => '',
+								'response' => array(
+									'code'    => 200,
+									'message' => 'OK',
+								),
+							);
+						},
+						10,
+						3
+					);
+
+					return $image_url;
+				},
+				'expect_error' => 'background_image_response_not_image',
 			),
 		);
 	}
@@ -727,7 +789,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		};
 
 		$create_request = static function ( array $url_metric_data ): WP_REST_Request {
-			$request = new WP_REST_Request( 'POST', '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE );
+			$request = new WP_REST_Request( 'POST', '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE );
 			$request->set_header( 'content-type', 'application/json' );
 			$request->set_body( wp_json_encode( $url_metric_data ) );
 			return $request;

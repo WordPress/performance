@@ -145,11 +145,11 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this URL Metric is a part of (which may not be any).
+	 * Gets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return OD_URL_Metric_Group|null Group.
+	 * @return OD_URL_Metric_Group|null Group. Null will never occur in the context of a tag visitor.
 	 */
 	public function get_group(): ?OD_URL_Metric_Group {
 		return $this->group;
@@ -159,6 +159,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Sets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
+	 * @access private
 	 *
 	 * @param OD_URL_Metric_Group $group Group.
 	 *
@@ -177,6 +178,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since 0.1.0
 	 * @since 0.9.0 Added the 'etag' property to the schema.
 	 * @since 1.0.0 The 'etag' property is now required.
+	 * @access private
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -206,7 +208,7 @@ class OD_URL_Metric implements JsonSerializable {
 			)
 		);
 
-		// The spec allows these to be negative but this doesn't make sense in the context of intersectionRect and boundingClientRect.
+		// The spec allows these to be negative, but this doesn't make sense in the context of intersectionRect and boundingClientRect.
 		$dom_rect_properties['width']['minimum']  = 0.0;
 		$dom_rect_properties['height']['minimum'] = 0.0;
 
@@ -310,9 +312,9 @@ class OD_URL_Metric implements JsonSerializable {
 				),
 			),
 			// Additional root properties may be added to the schema via the od_url_metric_schema_root_additional_properties filter.
-			// Therefore, additionalProperties is set to true so that additional properties defined in the extended schema may persist
+			// Therefore, `additionalProperties` is set to true so that additional properties defined in the extended schema may persist
 			// in a stored URL Metric even when the extension is deactivated. For REST API requests, the OD_Strict_URL_Metric
-			// which sets this to false so that newly-submitted URL Metrics only ever include the known properties.
+			// which sets this to false so that newly submitted URL Metrics only ever include the known properties.
 			'additionalProperties' => true,
 		);
 
@@ -320,6 +322,7 @@ class OD_URL_Metric implements JsonSerializable {
 		 * Filters additional schema properties which should be allowed at the root of a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_root_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -332,6 +335,7 @@ class OD_URL_Metric implements JsonSerializable {
 		 * Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_element_item_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -360,7 +364,7 @@ class OD_URL_Metric implements JsonSerializable {
 	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {
 		$doing_it_wrong = static function ( string $message ) use ( $filter_name ): void {
 			_doing_it_wrong(
-				esc_html( "Filter: '{$filter_name}'" ),
+				esc_html( "Filter: '$filter_name'" ),
 				esc_html( $message ),
 				'Optimization Detective 0.6.0'
 			);

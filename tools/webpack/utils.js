@@ -149,9 +149,11 @@ const createPluginZip = ( pluginPath, pluginName ) => {
 	] );
 
 	if ( 0 !== proc.status ) {
-		throw new Error(
-			proc.error || proc.stderr.toString() || proc.stdout.toString()
-		);
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
 	}
 };
 

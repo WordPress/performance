@@ -13,26 +13,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Prints the speculation rules.
+ * Determines whether Speculative Loading is enabled.
  *
- * For browsers that do not support speculation rules yet, the `script[type="speculationrules"]` tag will be ignored.
+ * @since n.e.x.t
  *
- * @since 1.0.0
+ * @return bool Whether enabled.
  */
-function plsr_print_speculation_rules(): void {
-	// Skip speculative loading for logged-in users.
-	if ( is_user_logged_in() ) {
-		return;
+function plsr_is_speculative_loading_enabled(): bool {
+	$option = plsr_get_stored_setting_value();
+
+	// Disabled if the user is logged in, unless the setting explicitly allows the current user's role.
+	if (
+		is_user_logged_in()
+		&&
+		'any' !== $option['authentication']
+		&&
+		( ! current_user_can( 'manage_options' ) || 'logged_out_and_admins' !== $option['authentication'] )
+	) {
+		return false;
 	}
 
-	// Skip speculative loading for sites without pretty permalinks, unless explicitly enabled.
-	if ( ! (bool) get_option( 'permalink_structure' ) ) {
+	// Disable if pretty permalinks are not enabled, unless explicitly overridden by the filter.
+	if (
+		! (bool) get_option( 'permalink_structure' )
+		&&
 		/**
 		 * Filters whether speculative loading should be enabled even though the site does not use pretty permalinks.
 		 *
 		 * Since query parameters are commonly used by plugins for dynamic behavior that can change state, ideally any
 		 * such URLs are excluded from speculative loading. If the site does not use pretty permalinks though, they are
-		 * impossible to recognize. Therefore speculative loading is disabled by default for those sites.
+		 * impossible to recognize. Therefore, speculative loading is disabled by default for those sites.
 		 *
 		 * For site owners of sites without pretty permalinks that are certain their site is not using such a pattern,
 		 * this filter can be used to still enable speculative loading at their own risk.
@@ -41,19 +51,26 @@ function plsr_print_speculation_rules(): void {
 		 *
 		 * @param bool $enabled Whether speculative loading is enabled even without pretty permalinks.
 		 */
-		$enabled = (bool) apply_filters( 'plsr_enabled_without_pretty_permalinks', false );
-
-		if ( ! $enabled ) {
-			return;
-		}
+		! apply_filters( 'plsr_enabled_without_pretty_permalinks', false )
+	) {
+		return false;
 	}
 
-	wp_print_inline_script_tag(
-		(string) wp_json_encode( plsr_get_speculation_rules() ),
-		array( 'type' => 'speculationrules' )
-	);
+	return true;
 }
-add_action( 'wp_footer', 'plsr_print_speculation_rules' );
+
+// Conditionally use either the WordPress Core API, or load the plugin's API implementation otherwise.
+if ( function_exists( 'wp_get_speculation_rules_configuration' ) ) {
+	require_once __DIR__ . '/wp-core-api.php';
+
+	add_filter( 'wp_speculation_rules_configuration', 'plsr_filter_speculation_rules_configuration' );
+	add_filter( 'wp_speculation_rules_href_exclude_paths', 'plsr_filter_speculation_rules_exclude_paths', 10, 2 );
+} else {
+	require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
+	require_once __DIR__ . '/plugin-api.php';
+
+	add_action( 'wp_footer', 'plsr_print_speculation_rules' );
+}
 
 /**
  * Displays the HTML generator meta tag for the Speculative Loading plugin.

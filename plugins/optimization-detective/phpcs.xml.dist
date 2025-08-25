@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-OptimizationDetective">
+<ruleset name="WPP-OptimizationDetective" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
 	<description>WordPress Coding Standards for Optimization Detective Plugin</description>
 
 	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>

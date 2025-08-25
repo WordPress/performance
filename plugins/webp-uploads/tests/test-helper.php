@@ -345,6 +345,56 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Test that image is cropped correctly when crop is an array.
+	 *
+	 * @covers ::webp_uploads_generate_additional_image_source
+	 */
+	public function test_it_should_crop_image_with_array_crop_value(): void {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$size_data     = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => array( 'left', 'top' ),
+		);
+
+		$captured_crop = null;
+		// Add filter to intercept the crop value.
+		remove_all_filters( 'image_resize_dimensions' );
+		add_filter(
+			'image_resize_dimensions',
+			static function ( $passthrough, $orig_w, $orig_h, $dest_w, $dest_h, $crop ) use ( &$captured_crop ) {
+				$captured_crop = $crop;
+				return $passthrough;
+			},
+			10,
+			6
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
+		$this->assertFileExists( '/tmp/image.webp' );
+
+		// Get image dimensions to verify crop worked.
+		$image_editor = wp_get_image_editor( '/tmp/image.webp' );
+		$size         = $image_editor->get_size();
+
+		// Verify dimensions are as expected.
+		$this->assertEquals( 300, $size['width'] );
+		$this->assertEquals( 300, $size['height'] );
+
+		// Verify crop value is as expected.
+		$this->assertEquals( array( 'left', 'top' ), $captured_crop );
+	}
+
+	/**
 	 * Returns an empty array when the overwritten with empty array by webp_uploads_upload_image_mime_transforms filter.
 	 */
 	public function test_it_should_return_empty_array_when_filter_returns_empty_array(): void {

@@ -1,8 +1,8 @@
 === Enhanced Responsive Images ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   1.4.0
+Tested up to: 6.8
+Stable tag:   1.6.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
@@ -11,12 +11,12 @@ Improvements for responsive images in WordPress.
 
 == Description ==
 
-This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes:
+This plugin implements enhancements for the responsive images functionality in WordPress. Currently, this includes:
 
-1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme.
-2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
+1. Improvements to the accuracy of the `sizes` attribute by using layout information available in [block themes](https://wordpress.org/documentation/article/block-themes/). This enhancement is not available to classic themes.
+2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. This enhancement was [merged](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) into WordPress 6.7.
 
-This plugin integrates with the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin. When that plugin is active, it starts learning about which images are not in the initial viewport based on actual visitors to your site. When it knows which images are below the fold, it then adds `loading=lazy` to these images. This plugin then extends Image Prioritizer to also add `sizes=auto` to these lazy-loaded images.
+See also the complimentary [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which detects which images are outside the viewport, and then adds `loading=lazy` and `sizes=auto` to them.
 
 There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
@@ -51,6 +51,23 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.6.0 =
+
+**Features**
+
+* Accurate sizes: Add support for `core/post-featured-image` block. ([2084](https://github.com/WordPress/performance/pull/2084))
+
+**Enhancements**
+
+* Remove experimental from Enhanced Responsive Images readme.txt. ([2077](https://github.com/WordPress/performance/pull/2077))
+
+= 1.5.0 =
+
+**Enhancements**
+
+* Accurate sizes: Add ancestor block context for image and cover block that help in sizes calculate. ([1795](https://github.com/WordPress/performance/pull/1795))
+* Accurate sizes: Calculate sizes base on ancestor block context. ([1818](https://github.com/WordPress/performance/pull/1818))
 
 = 1.4.0 =
 

@@ -29,8 +29,6 @@ class Test_Speculation_Rules_Uninstall extends WP_UnitTestCase {
 
 	/**
 	 * Test option deletion.
-	 *
-	 * @covers ::plsr_delete_plugin_option
 	 */
 	public function test_delete_plugin_option(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );

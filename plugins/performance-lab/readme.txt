@@ -1,7 +1,7 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag:   3.9.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,13 +16,15 @@ The Performance Lab plugin is a collection of features focused on enhancing perf
 The feature plugins which are currently featured by this plugin are:
 
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [No-cache BFCache](https://wordpress.org/plugins/nocache-bfcache/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
+* [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
@@ -608,6 +610,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= n.e.x.t =
+
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and No-cache BFCache which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 
