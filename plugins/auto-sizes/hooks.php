@@ -25,15 +25,6 @@ function auto_sizes_render_generator(): void {
 add_action( 'wp_head', 'auto_sizes_render_generator' );
 
 /**
- * Filters related to the auto-sizes functionality.
- */
-// Skip loading plugin filters if WordPress Core already loaded the functionality.
-if ( ! function_exists( 'wp_img_tag_add_auto_sizes' ) ) {
-	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
-	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
-}
-
-/**
  * Filters related to the improved image sizes functionality.
  */
 add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 9 ); // This must run before 'do_blocks', which runs at priority 9.
