@@ -67,6 +67,11 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 2.6.0 =
 
+**Bug Fixes**
+
+* Use modern image formats in background images for Cover blocks and Group blocks. ([2121](https://github.com/WordPress/performance/pull/2121))
+* Fixes palette-based PNG uploads failing original full-size AVIF/WebP conversion under GD. ([2024](https://github.com/WordPress/performance/pull/2024))
+
 = 2.5.1 =
 
 **Bug Fixes**

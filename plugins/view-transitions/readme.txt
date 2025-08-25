@@ -58,6 +58,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.1.1 =
 
+**Bug Fixes**
+
+* View Transitions: Fix admin opt-in checkbox appears stretched on mobile. ([2088](https://github.com/WordPress/performance/pull/2088))
+
 = 1.1.0 =
 
 **Features**

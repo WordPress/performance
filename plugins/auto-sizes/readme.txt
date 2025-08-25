@@ -54,6 +54,18 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.7.0 =
 
+**Enhancements**
+
+* Remove `sizes=auto` as the functionality is now available in WordPress core. ([2146](https://github.com/WordPress/performance/pull/2146))
+
+**Bug Fixes**
+
+* Fix: Moved `column_count` context from `column` block to `columns` block to ensure it is available to ancestor blocks. ([2138](https://github.com/WordPress/performance/pull/2138))
+
+**Documentation**
+
+* Update Enhanced Responsive Images plugin description. ([2145](https://github.com/WordPress/performance/pull/2145))
+
 = 1.6.0 =
 
 **Features**
