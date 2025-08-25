@@ -1,13 +1,13 @@
 <?php
 /**
  * @package performance-lab
- * @since n.e.x.t
+ * @since 4.0.0
  */
 
 /**
  * Class Audit_Assets_Mock_Assets mocks assets for testing.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  */
 class Audit_Assets_Mock_Assets {
 

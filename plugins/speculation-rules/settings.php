@@ -44,7 +44,7 @@ function plsr_get_eagerness_labels(): array {
 /**
  * Returns the available options for the Speculative Loading authentication and their labels.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  *
  * @return array{ logged_out: string, logged_out_and_admins: string, any: string } Associative array of `$authentication => $label` pairs.
  */
@@ -59,7 +59,7 @@ function plsr_get_authentication_labels(): array {
 /**
  * Returns translated description strings for settings fields.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  * @access private
  *
  * @param 'mode'|'eagerness'|'authentication' $field The field name to get description for.

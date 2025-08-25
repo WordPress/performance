@@ -753,7 +753,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * This function targets blocks like Cover and Group that may use background images,
  * converting them to modern image formats when appropriate.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  *
  * @phpstan-param array{
  *                    blockName: string|null,
@@ -908,7 +908,7 @@ add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_
  * GD cannot convert palette-based PNG to WebP/AVIF formats, causing conversion failures.
  * This function detects and converts palette PNG to truecolor during upload.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  *
  * @param array<string, mixed>|mixed $file The uploaded file data.
  * @return array<string, mixed> The modified file data.

@@ -124,6 +124,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.6.0 =
 
+**Enhancements**
+
+* Add Speculative Loading opt-in for authenticated requests. ([2097](https://github.com/WordPress/performance/pull/2097))
+* Add warning notice to Speculative Loading setting for authenticated users when persistent object cache is not present. ([2144](https://github.com/WordPress/performance/pull/2144))
+* Update Speculative Loading readme description to note purpose after core merge. ([2120](https://github.com/WordPress/performance/pull/2120))
+
 = 1.5.0 =
 
 **Enhancements**
