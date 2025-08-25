@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.8
-Stable tag:   1.1.0
+Stable tag:   1.1.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, view transitions, smooth transitions, animations
@@ -55,6 +55,12 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.1 =
+
+**Bug Fixes**
+
+* View Transitions: Fix admin opt-in checkbox appears stretched on mobile. ([2088](https://github.com/WordPress/performance/pull/2088))
 
 = 1.1.0 =
 

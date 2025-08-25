@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Audit blocking assets on the front page.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @return array{
  *             response: WP_Error|array{
@@ -138,7 +138,7 @@ function perflab_aea_audit_blocking_assets(): array {
 /**
  * Callback for enqueued_blocking_assets test.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @return array{
  *             label: string,
@@ -197,7 +197,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 /**
  * Callback for enqueued_blocking_assets test via AJAX.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  */
 function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
 	check_ajax_referer( 'health-check-site-status' );
@@ -212,7 +212,7 @@ function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
 /**
  * Prepares the blocking scripts audit result.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @phpstan-param array{
  *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
@@ -305,7 +305,7 @@ function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): array 
 /**
  * Prepares the blocking styles audit result.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @phpstan-param array{
  *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
@@ -398,7 +398,7 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
 /**
  * Handles the failure of retrieving the home page to analyze blocking assets.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @phpstan-param WP_Error|array{
  *                    headers: WpOrg\Requests\Utility\CaseInsensitiveDictionary,
@@ -477,7 +477,7 @@ function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 /**
  * Gets the size of the asset in bytes.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @param string $resource_url URL of the resource.
  * @return int|WP_Error Size of the asset in bytes or WP_Error if the request fails.
@@ -518,7 +518,7 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 /**
  * Gets headers for HTTP Basic authorization headers.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @return array{ Authorization?: non-empty-string } Headers with copied Basic auth headers.
  */
@@ -535,7 +535,7 @@ function perflab_get_http_basic_authorization_headers(): array {
 /**
  * Generates a table of blocking assets.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @phpstan-param array{
  *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,

@@ -70,7 +70,7 @@ function perflab_render_settings_page(): void {
 /**
  * Gets dismissed admin pointer IDs.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @return non-empty-string[] Dismissed admin pointer IDs.
  */
@@ -86,7 +86,7 @@ function perflab_get_dismissed_admin_pointer_ids(): array {
 /**
  * Gets the admin pointers.
  *
- * @since n.e.x.t
+ * @since 4.0.0
  *
  * @return array<non-empty-string, array{ content: string, plugin: non-empty-string, dismiss_if_installed: bool }> Keys are the admin pointer IDs.
  */

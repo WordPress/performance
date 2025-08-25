@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.8
-Stable tag:   3.9.0
+Stable tag:   4.0.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -73,6 +73,22 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.0.0 =
+
+**Enhancements**
+
+* Add No-cache BFCache to list of performance feature plugins. ([2119](https://github.com/WordPress/performance/pull/2119))
+* Add admin pointers to promote new Performance Lab features. ([2122](https://github.com/WordPress/performance/pull/2122))
+* Implement opt-in `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` for  Server-Timing `object-cache.php` placement. ([1996](https://github.com/WordPress/performance/pull/1996))
+* Use `wp_is_rest_endpoint()` to detect if we are handling a REST API request. ([2094](https://github.com/WordPress/performance/pull/2094))
+
+**Bug Fixes**
+
+* Fix TypeError in `perflab_aao_query_autoloaded_options()` by serializing non-scalar option values. ([1934](https://github.com/WordPress/performance/pull/1934))
+* Omit admin pointer for new plugin if plugin is already active. ([2143](https://github.com/WordPress/performance/pull/2143))
+* Prevent effective asset cache headers audit from running on local/development environments. ([2035](https://github.com/WordPress/performance/pull/2035))
+* Use HTML Tag Processor to audit blocking scripts & styles in Site Health’s enqueued-assets test. ([2059](https://github.com/WordPress/performance/pull/2059))
 
 = 3.9.0 =
 
