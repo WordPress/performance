@@ -5,7 +5,7 @@
  * Description: Converts images to more modern formats such as WebP or AVIF during upload.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 2.5.1
+ * Version: 2.6.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -26,7 +26,7 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 	return;
 }
 
-define( 'WEBP_UPLOADS_VERSION', '2.5.1' );
+define( 'WEBP_UPLOADS_VERSION', '2.6.0' );
 define( 'WEBP_UPLOADS_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 require_once __DIR__ . '/helper.php';
