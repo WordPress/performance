@@ -64,7 +64,7 @@ function checkEnvironment() {
 		},
 		{
 			name: 'Optimization Detective WP_CLI command',
-			command: 'wp help od get_priming_mode_url_batch',
+			command: 'wp help od priming-mode get-url-batch',
 			errorMessage:
 				'Optimization Detective plugin is not installed or activated. Please install and activate the plugin.',
 		},
@@ -93,7 +93,7 @@ function checkEnvironment() {
  */
 function getBatch( lastCursor ) {
 	try {
-		let command = 'wp od get_priming_mode_url_batch --format=json';
+		let command = 'wp od priming-mode get-url-batch --format=json';
 
 		if ( lastCursor ) {
 			command += ` --provider-index=${ lastCursor.provider_index || 0 }`;
@@ -114,6 +114,31 @@ function getBatch( lastCursor ) {
 		return parsedBatch[ 0 ];
 	} catch ( error ) {
 		spinner.fail( 'Error occurred while fetching batch: ' + error.message );
+		abortController.abort();
+		return null;
+	}
+}
+
+/**
+ * Fetches the verification token.
+ *
+ * @return {string|null} - The verification token or null if not available.
+ */
+function getVerificationToken() {
+	try {
+		const verificationToken = execSync(
+			'wp od priming-mode get-verification-token'
+		)
+			.toString()
+			.trim();
+		if ( '' === verificationToken ) {
+			throw new Error( 'Invalid verification token received.' );
+		}
+		return verificationToken;
+	} catch ( error ) {
+		spinner.fail(
+			'Error occurred while fetching verification token: ' + error.message
+		);
 		abortController.abort();
 		return null;
 	}
@@ -289,7 +314,7 @@ async function init() {
 	 *
 	 * @type {string}
 	 */
-	let verificationToken;
+	let verificationToken = null;
 
 	// Process batches until no more are available.
 	while ( isNextBatchAvailable ) {
@@ -339,12 +364,22 @@ async function init() {
 					signal
 				);
 			} catch ( error ) {
-				// Log the error and continue processing the next task.
-				spinner.fail(
-					`Error processing task ${ i + 1 }. Error: ${
-						error.message
-					}`
-				);
+				// Refresh verification token if expired.
+				if (
+					error.message.includes(
+						'priming_mode_verification_token_expired'
+					)
+				) {
+					verificationToken = getVerificationToken();
+					i--;
+				} else {
+					// Log the error and continue processing the next task.
+					spinner.fail(
+						`Error processing task ${ i + 1 }. Error: ${
+							error.message
+						}`
+					);
+				}
 			}
 		}
 		cursor = currentBatch.cursor;

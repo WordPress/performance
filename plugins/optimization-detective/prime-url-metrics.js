@@ -318,7 +318,13 @@
 				);
 			} catch ( error ) {
 				log( error.message );
-				if ( abortController.signal.aborted ) {
+				if (
+					error.message.includes(
+						'priming_mode_verification_token_expired'
+					)
+				) {
+					verificationToken = await getVerificationToken();
+				} else if ( abortController.signal.aborted ) {
 					throw error;
 				}
 			}
@@ -358,6 +364,18 @@
 			path: '/optimization-detective/v1/prime-urls',
 			method: 'POST',
 			data: { cursor: lastCursor },
+		} );
+	}
+
+	/**
+	 * Fetches the verification token for priming mode.
+	 *
+	 * @return {Promise<string>} - Resolves with the verification token.
+	 */
+	async function getVerificationToken() {
+		return await apiFetch( {
+			path: '/optimization-detective/v1/priming-mode-verification-token',
+			method: 'GET',
 		} );
 	}
 

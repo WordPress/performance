@@ -141,6 +141,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/settings.php';
 
 		// Load WP-CLI commands.
-		require_once __DIR__ . '/storage/class-od-wp-cli.php';
+		require_once __DIR__ . '/storage/class-od-priming-mode-wp-cli.php';
 	}
 );

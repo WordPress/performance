@@ -1,6 +1,6 @@
 <?php
 /**
- * WP-CLI commands for Optimization Detective.
+ * WP-CLI commands for Optimization Detective priming mode.
  *
  * @package optimization-detective
  * @since n.e.x.t
@@ -15,11 +15,11 @@ if ( ! defined( 'WP_CLI' ) || ! class_exists( 'WP_CLI' ) ) {
 }
 
 /**
- * OD_WP_CLI class
+ * OD_Priming_Mode_WP_CLI class
  *
  * @since n.e.x.t
  */
-class OD_WP_CLI {
+class OD_Priming_Mode_WP_CLI {
 
 	/**
 	 * Gets batch of URLs that need to be primed.
@@ -65,17 +65,19 @@ class OD_WP_CLI {
 	 * ## EXAMPLES
 	 *
 	 *     # Get a batch of URLs that need to be primed
-	 *     $ wp od get_priming_mode_url_batch --format=json
+	 *     $ wp od get-url-batch --format=json
 	 *
 	 *     # List 20 URL metrics with specific pagination parameters
-	 *     $ wp od get_priming_mode_url_batch --provider-index=0 --subtype-index=0 --page-number=1 --offset-within-page=0 --batch-size=20 --format=json
+	 *     $ wp od get-url-batch --provider-index=0 --subtype-index=0 --page-number=1 --offset-within-page=0 --batch-size=20 --format=json
+	 *
+	 * @subcommand get-url-batch
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param array<string>         $args       Command arguments.
 	 * @param array<string, string> $assoc_args Command associated arguments.
 	 */
-	public function get_priming_mode_url_batch( array $args, array $assoc_args ): void {
+	public function get_url_batch( array $args, array $assoc_args ): void {
 		$cursor = array(
 			'provider_index'     => isset( $assoc_args['provider-index'] ) ? (int) $assoc_args['provider-index'] : 0,
 			'subtype_index'      => isset( $assoc_args['subtype-index'] ) ? (int) $assoc_args['subtype-index'] : 0,
@@ -90,7 +92,24 @@ class OD_WP_CLI {
 			WP_CLI\Utils\format_items( $format, array( od_generate_priming_mode_batch( $cursor ) ), array( 'urlGroups', 'cursor', 'verificationToken', 'isDebug' ) );
 		}
 	}
+
+	/**
+	 * Gets the priming mode verification token.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *    # Get the priming mode verification token
+	 *    $ wp od get-verification-token
+	 *
+	 * @subcommand get-verification-token
+	 *
+	 * @since n.e.x.t
+	 */
+	public function get_verification_token(): void {
+		// @phpstan-ignore-next-line
+		WP_CLI::line( od_get_priming_mode_verification_token() );
+	}
 }
 
 // Register the WP-CLI command.
-WP_CLI::add_command( 'od', new OD_WP_CLI() );
+WP_CLI::add_command( 'od priming-mode', OD_Priming_Mode_WP_CLI::class );

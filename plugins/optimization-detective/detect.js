@@ -1267,9 +1267,8 @@ export default async function detect( {
 		try {
 			const response = await fetch( request );
 			if ( ! response.ok ) {
-				throw new Error(
-					`Failed to send URL Metric. Status: ${ response.status }`
-				);
+				const errorData = await response.json();
+				throw new Error( errorData.code );
 			}
 			notifyStatus( { success: true }, primeModeSource );
 		} catch ( err ) {

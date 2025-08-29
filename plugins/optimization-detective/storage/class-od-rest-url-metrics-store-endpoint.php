@@ -123,8 +123,15 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	public function store_permissions_check( WP_REST_Request $request ) {
 		// Authenticated requests when priming URL metrics through IFRAME.
 		$verification_token = $request->get_param( 'prime_url_metrics_verification_token' );
-		if ( '' !== $verification_token && get_transient( 'od_priming_mode_verification_token' ) === $verification_token ) {
-			return true;
+		if ( null !== $verification_token && '' !== $verification_token ) {
+			if ( get_transient( 'od_priming_mode_verification_token' ) === $verification_token ) {
+				return true;
+			}
+			return new WP_Error(
+				'priming_mode_verification_token_expired',
+				__( 'The priming mode verification token has expired.', 'optimization-detective' ),
+				array( 'status' => 401 )
+			);
 		}
 
 		// Needs to be available to unauthenticated visitors.
