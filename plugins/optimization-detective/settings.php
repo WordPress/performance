@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  */
 function od_add_optimization_detective_menu(): void {
-	if ( ! od_show_admin_url_priming_feature() ) {
+	if ( ! od_show_priming_mode_settings() ) {
 		return;
 	}
 
@@ -60,17 +60,17 @@ function od_render_optimization_detective_page(): void {
 					<p><?php esc_html_e( 'Note: You must keep this page open and the tab visible. If the browser window is minimized or you switch to another tab, URL priming will stop.', 'optimization-detective' ); ?></p>
 				</div>
 				<div class="od-prime-url-metrics-controls">
-					<button id="od-prime-url-metrics-control-button" class="button button-primary"><?php esc_html_e( 'Start', 'optimization-detective' ); ?></button>
+					<button id="od-priming-mode-control-button" class="button button-primary"><?php esc_html_e( 'Start', 'optimization-detective' ); ?></button>
 				</div>
-				<div id="od-prime-url-metrics-status-container" style="display: none;">
-					<progress id="od-prime-url-metrics-progress" value="0" max="0"></progress>
+				<div id="od-priming-mode-status-container" style="display: none;">
+					<progress id="od-priming-mode-progress" value="0" max="0"></progress>
 					<div class="od-prime-url-metrics-status">
-						<span id="od-prime-url-metrics-batch-status"><?php esc_html_e( 'Batch:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-batch">0</span></span>
-						<span id="od-prime-url-metrics-task-status"><?php esc_html_e( 'Task:', 'optimization-detective' ); ?> <span id="od-prime-url-metrics-current-task">0</span> / <span id="od-prime-url-metrics-total-tasks-in-batch">0</span></span>
+						<span id="od-prime-url-metrics-batch-status"><?php esc_html_e( 'Batch:', 'optimization-detective' ); ?> <span id="od-priming-mode-current-batch">0</span></span>
+						<span id="od-prime-url-metrics-task-status"><?php esc_html_e( 'Task:', 'optimization-detective' ); ?> <span id="od-priming-mode-current-task">0</span> / <span id="od-priming-mode-total-tasks-in-batch">0</span></span>
 					</div>
 				</div>
-				<div id="od-prime-url-metrics-iframe-container">
-					<iframe id="od-prime-url-metrics-iframe" src="" style="position: fixed; transform: scale(0.05); top: 0px; left: 0px; transform-origin: 0px 0px; pointer-events: none; opacity: 1e-06; z-index: -99999;"></iframe>
+				<div id="od-priming-mode-iframe-container">
+					<iframe id="od-priming-mode-iframe" src="" style="position: fixed; transform: scale(0.05); top: 0px; left: 0px; transform-origin: 0px 0px; pointer-events: none; opacity: 1e-06; z-index: -99999;"></iframe>
 				</div>
 			</div>
 		</div>
@@ -88,7 +88,7 @@ function od_render_optimization_detective_page(): void {
  * @return string[]|mixed The modified list of actions.
  */
 function od_add_settings_action_link( $links ) {
-	if ( ! is_array( $links ) || ! od_show_admin_url_priming_feature() ) {
+	if ( ! is_array( $links ) || ! od_show_priming_mode_settings() ) {
 		return $links;
 	}
 

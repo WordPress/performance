@@ -12,7 +12,7 @@
 	 * @type {HTMLButtonElement}
 	 */
 	const controlButton = document.querySelector(
-		'button#od-prime-url-metrics-control-button'
+		'button#od-priming-mode-control-button'
 	);
 
 	/**
@@ -21,7 +21,7 @@
 	 * @type {HTMLProgressElement}
 	 */
 	const progressBar = document.querySelector(
-		'progress#od-prime-url-metrics-progress'
+		'progress#od-priming-mode-progress'
 	);
 
 	/**
@@ -30,7 +30,7 @@
 	 * @type {HTMLDivElement}
 	 */
 	const statusContainer = document.querySelector(
-		'div#od-prime-url-metrics-status-container'
+		'div#od-priming-mode-status-container'
 	);
 
 	/**
@@ -38,9 +38,7 @@
 	 *
 	 * @type {HTMLIFrameElement}
 	 */
-	const iframe = document.querySelector(
-		'iframe#od-prime-url-metrics-iframe'
-	);
+	const iframe = document.querySelector( 'iframe#od-priming-mode-iframe' );
 
 	/**
 	 * Container that holds the iframe.
@@ -48,7 +46,7 @@
 	 * @type {HTMLDivElement}
 	 */
 	const iframeContainer = document.querySelector(
-		'div#od-prime-url-metrics-iframe-container'
+		'div#od-priming-mode-iframe-container'
 	);
 
 	/**
@@ -57,7 +55,7 @@
 	 * @type {HTMLSpanElement}
 	 */
 	const currentBatchElement = document.querySelector(
-		'span#od-prime-url-metrics-current-batch'
+		'span#od-priming-mode-current-batch'
 	);
 
 	/**
@@ -66,7 +64,7 @@
 	 * @type {HTMLSpanElement}
 	 */
 	const currentTaskElement = document.querySelector(
-		'span#od-prime-url-metrics-current-task'
+		'span#od-priming-mode-current-task'
 	);
 
 	/**
@@ -75,7 +73,7 @@
 	 * @type {HTMLSpanElement}
 	 */
 	const totalTasksInBatchElement = document.querySelector(
-		'span#od-prime-url-metrics-total-tasks-in-batch'
+		'span#od-priming-mode-total-tasks-in-batch'
 	);
 
 	// Ensure all required elements are present.

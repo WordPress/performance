@@ -95,7 +95,7 @@
 	 * @type {HTMLIFrameElement}
 	 */
 	const iframe = document.createElement( 'iframe' );
-	iframe.id = 'od-prime-url-metrics-iframe';
+	iframe.id = 'od-priming-mode-iframe';
 	iframe.style.position = 'fixed';
 	iframe.style.top = '0';
 	iframe.style.left = '0';
@@ -126,13 +126,13 @@
 			isProcessing = true;
 			if ( 0 === breakpoints.length ) {
 				breakpoints = await apiFetch( {
-					path: '/optimization-detective/v1/prime-urls-breakpoints',
+					path: '/optimization-detective/v1/priming-mode-breakpoints',
 					method: 'GET',
 				} );
 			}
 
 			verificationToken = await apiFetch( {
-				path: '/optimization-detective/v1/prime-urls-verification-token',
+				path: '/optimization-detective/v1/priming-mode-verification-token',
 				method: 'GET',
 			} );
 

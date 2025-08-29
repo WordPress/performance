@@ -64,7 +64,7 @@ function checkEnvironment() {
 		},
 		{
 			name: 'Optimization Detective WP_CLI command',
-			command: 'wp help od get_url_batch',
+			command: 'wp help od get_priming_mode_url_batch',
 			errorMessage:
 				'Optimization Detective plugin is not installed or activated. Please install and activate the plugin.',
 		},
@@ -93,7 +93,7 @@ function checkEnvironment() {
  */
 function getBatch( lastCursor ) {
 	try {
-		let command = 'wp od get_url_batch --format=json';
+		let command = 'wp od get_priming_mode_url_batch --format=json';
 
 		if ( lastCursor ) {
 			command += ` --provider-index=${ lastCursor.provider_index || 0 }`;

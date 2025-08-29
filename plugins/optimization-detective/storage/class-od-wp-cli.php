@@ -65,15 +65,17 @@ class OD_WP_CLI {
 	 * ## EXAMPLES
 	 *
 	 *     # Get a batch of URLs that need to be primed
-	 *     $ wp od get_url_batch --format=json
+	 *     $ wp od get_priming_mode_url_batch --format=json
 	 *
 	 *     # List 20 URL metrics with specific pagination parameters
-	 *     $ wp od get_url_batch --provider-index=0 --subtype-index=0 --page-number=1 --offset-within-page=0 --batch-size=20 --format=json
+	 *     $ wp od get_priming_mode_url_batch --provider-index=0 --subtype-index=0 --page-number=1 --offset-within-page=0 --batch-size=20 --format=json
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param array<string>         $args       Command arguments.
 	 * @param array<string, string> $assoc_args Command associated arguments.
 	 */
-	public function get_url_batch( array $args, array $assoc_args ): void {
+	public function get_priming_mode_url_batch( array $args, array $assoc_args ): void {
 		$cursor = array(
 			'provider_index'     => isset( $assoc_args['provider-index'] ) ? (int) $assoc_args['provider-index'] : 0,
 			'subtype_index'      => isset( $assoc_args['subtype-index'] ) ? (int) $assoc_args['subtype-index'] : 0,
@@ -85,7 +87,7 @@ class OD_WP_CLI {
 		$format = isset( $assoc_args['format'] ) ? $assoc_args['format'] : 'table';
 
 		if ( function_exists( '\\WP_CLI\\Utils\\format_items' ) ) {
-			WP_CLI\Utils\format_items( $format, array( od_generate_batch_for_url_metrics_priming_mode( $cursor ) ), array( 'urlGroups', 'cursor', 'verificationToken', 'isDebug' ) );
+			WP_CLI\Utils\format_items( $format, array( od_generate_priming_mode_batch( $cursor ) ), array( 'urlGroups', 'cursor', 'verificationToken', 'isDebug' ) );
 		}
 	}
 }

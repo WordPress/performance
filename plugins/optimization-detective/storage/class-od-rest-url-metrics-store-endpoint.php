@@ -123,7 +123,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	public function store_permissions_check( WP_REST_Request $request ) {
 		// Authenticated requests when priming URL metrics through IFRAME.
 		$verification_token = $request->get_param( 'prime_url_metrics_verification_token' );
-		if ( '' !== $verification_token && get_transient( 'od_prime_url_metrics_verification_token' ) === $verification_token ) {
+		if ( '' !== $verification_token && get_transient( 'od_priming_mode_verification_token' ) === $verification_token ) {
 			return true;
 		}
 

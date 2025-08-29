@@ -332,7 +332,7 @@ function od_add_data_to_post_update_redirect_url_for_classic_editor( string $loc
  * @param array<string, int> $cursor Cursor to resume from.
  * @return array<string, mixed> Batch of URLs to prime metrics for and the updated cursor.
  */
-function od_get_batch_for_url_metrics_priming_mode( array $cursor ): array {
+function od_get_priming_mode_batch( array $cursor ): array {
 	// Get the server & its registry of sitemap providers.
 	$server   = wp_sitemaps_get_server();
 	$registry = $server->registry;
@@ -578,7 +578,7 @@ function od_get_standard_breakpoints(): array {
  * @param array<string> $urls Array of URLs to filter.
  * @return array<int, array{url: string, breakpoints: array<int, array{width: int, height: int}>}> Filtered batch of URL groups.
  */
-function od_filter_batch_urls_for_url_metrics_priming_mode( array $urls ): array {
+function od_filter_priming_mode_batch_urls( array $urls ): array {
 	$filtered_url_groups  = array();
 	$standard_breakpoints = od_get_standard_breakpoints();
 	$group_collections    = od_get_metrics_by_post_title( $urls );
@@ -625,36 +625,33 @@ function od_filter_batch_urls_for_url_metrics_priming_mode( array $urls ): array
 }
 
 /**
- * Determines whether the admin-based URL priming feature should be displayed.
- *
- * Developers can force-enable the feature by filtering 'od_show_admin_url_priming_feature', or modify the
- * threshold via 'od_admin_url_priming_threshold' filter.
+ * Determine whether to show the priming mode settings page.
  *
  * @since n.e.x.t
  *
- * @return bool True if the admin URL priming feature should be displayed, false otherwise.
+ * @return bool True to display the settings page; false to hide it.
  */
-function od_show_admin_url_priming_feature(): bool {
+function od_show_priming_mode_settings(): bool {
 	/**
-	 * Filters whether the admin URL priming feature should be shown in the admin dashboard.
+	 * Filters whether the priming mode settings page should be shown in the admin dashboard.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param bool $show_feature True if the feature should be shown, false otherwise.
 	 */
-	$force_show = apply_filters( 'od_show_admin_url_priming_feature', false );
+	$force_show = apply_filters( 'od_show_priming_mode_settings', false );
 	if ( $force_show ) {
 		return true;
 	}
 
 	/**
-	 * Filters the threshold for enabling the admin URL priming feature.
+	 * Filters maximum number of URLs allowed before hiding the settings page.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param int $threshold The threshold count of frontend-visible URLs.
 	 */
-	$threshold = apply_filters( 'od_admin_url_priming_threshold', 1000 );
+	$threshold = apply_filters( 'od_show_priming_mode_settings_max_urls', 1000 );
 	$count     = 0;
 
 	// Get the sitemap server and its registry of providers.
@@ -697,7 +694,7 @@ function od_show_admin_url_priming_feature(): bool {
  * @param array<string, int>|null $cursor Cursor to resume from.
  * @return array<string, mixed> Final batch of URLs to prime metrics for and the updated cursor.
  */
-function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array {
+function od_generate_priming_mode_batch( ?array $cursor ): array {
 	$default_cursor = array(
 		'provider_index'     => 0,
 		'subtype_index'      => 0,
@@ -710,12 +707,12 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
 	$cursor = array_map( 'intval', array_intersect_key( wp_parse_args( (array) $cursor, $default_cursor ), $default_cursor ) );
 
 	if ( $default_cursor === $cursor ) {
-		$last_cursor = get_option( 'od_prime_url_metrics_batch_cursor' );
+		$last_cursor = get_option( 'od_priming_mode_batch_cursor' );
 		if ( false !== $last_cursor ) {
 			$cursor = array_map( 'intval', array_intersect_key( wp_parse_args( $cursor, $last_cursor ), $last_cursor ) );
 		}
 	} else {
-		update_option( 'od_prime_url_metrics_batch_cursor', $cursor );
+		update_option( 'od_priming_mode_batch_cursor', $cursor );
 	}
 
 	$batch                 = array();
@@ -726,11 +723,11 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
 			break;
 		}
 
-		$batch               = od_get_batch_for_url_metrics_priming_mode( $cursor );
-		$filtered_url_groups = od_filter_batch_urls_for_url_metrics_priming_mode( $batch['urls'] );
+		$batch               = od_get_priming_mode_batch( $cursor );
+		$filtered_url_groups = od_filter_priming_mode_batch_urls( $batch['urls'] );
 
 		if ( $cursor === $batch['cursor'] ) {
-			delete_option( 'od_prime_url_metrics_batch_cursor' );
+			delete_option( 'od_priming_mode_batch_cursor' );
 			break;
 		}
 		$cursor = $batch['cursor'];
@@ -741,7 +738,7 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
 	return array(
 		'urlGroups'         => $filtered_url_groups,
 		'cursor'            => $batch['cursor'],
-		'verificationToken' => od_get_verification_token_for_priming_mode(),
+		'verificationToken' => od_get_priming_mode_verification_token(),
 		'isDebug'           => defined( 'WP_DEBUG' ) && WP_DEBUG,
 	);
 }
@@ -754,11 +751,11 @@ function od_generate_batch_for_url_metrics_priming_mode( ?array $cursor ): array
  *
  * @return string Verification token.
  */
-function od_get_verification_token_for_priming_mode(): string {
-	$verification_token = get_transient( 'od_prime_url_metrics_verification_token' );
+function od_get_priming_mode_verification_token(): string {
+	$verification_token = get_transient( 'od_priming_mode_verification_token' );
 	if ( false === $verification_token ) {
 		$verification_token = wp_generate_uuid4();
-		set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
+		set_transient( 'od_priming_mode_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
 	}
 	return $verification_token;
 }

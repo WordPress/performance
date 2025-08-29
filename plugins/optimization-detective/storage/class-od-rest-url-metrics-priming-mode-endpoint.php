@@ -31,14 +31,14 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	 *
 	 * @var string
 	 */
-	const PRIME_URLS_BREAKPOINTS_ROUTE = '/prime-urls-breakpoints';
+	const PRIME_URLS_BREAKPOINTS_ROUTE = '/priming-mode-breakpoints';
 
 	/**
-	 * Route for verifying the token for auto priming URLs.
+	 * Route for verifying the token for priming mode.
 	 *
 	 * @var string
 	 */
-	const PRIME_URLS_VERIFICATION_TOKEN_ROUTE = '/prime-urls-verification-token';
+	const PRIME_URLS_VERIFICATION_TOKEN_ROUTE = '/priming-mode-verification-token';
 
 	/**
 	 * Gets the arguments for registering the endpoint responsible for getting URLs that needs to be primed.
@@ -133,7 +133,7 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	 */
 	public function handle_generate_batch_urls_request( WP_REST_Request $request ): WP_REST_Response {
 		$cursor = $request->get_param( 'cursor' );
-		return new WP_REST_Response( od_generate_batch_for_url_metrics_priming_mode( $cursor ) );
+		return new WP_REST_Response( od_generate_priming_mode_batch( $cursor ) );
 	}
 
 	/**
@@ -157,6 +157,6 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	 * @return WP_REST_Response Response.
 	 */
 	public function handle_get_verification_token_request(): WP_REST_Response {
-		return new WP_REST_Response( od_get_verification_token_for_priming_mode() );
+		return new WP_REST_Response( od_get_priming_mode_verification_token() );
 	}
 }
