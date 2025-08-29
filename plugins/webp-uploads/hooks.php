@@ -537,7 +537,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 		}
 	}
 }
-add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+add_action( 'delete_attachment', 'webp_uploads_remove_sources_files' );
 
 /**
  * Filters `wp_content_img_tag` to update images so that they use the preferred MIME type where possible.
@@ -662,7 +662,7 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 }
 
 /**
- * Updates the references of the featured image to the a new image format if available, in the same way it
+ * Updates the references of the featured image to the new image format if available, in the same way it
  * occurs in the_content of a post.
  *
  * @since 1.0.0
@@ -748,12 +748,110 @@ function webp_uploads_render_generator(): void {
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
 /**
+ * Process a block's content to handle background images for specific block types.
+ *
+ * This function targets blocks like Cover and Group that may use background images,
+ * converting them to modern image formats when appropriate.
+ *
+ * @since 2.6.0
+ *
+ * @phpstan-param array{
+ *                    blockName: string|null,
+ *                    attrs: array{
+ *                        id?: positive-int,
+ *                        url?: string,
+ *                        style?: array{
+ *                            background?: array{
+ *                                backgroundImage?: string
+ *                            }
+ *                        }
+ *                    }
+ *                } $block
+ *
+ * @param string|mixed         $block_content The block content.
+ * @param array<string, mixed> $block         The block.
+ * @return string The filtered block content.
+ */
+function webp_uploads_filter_block_background_images( $block_content, array $block ): string {
+	// Because plugins can do bad things.
+	if ( ! is_string( $block_content ) ) {
+		$block_content = '';
+	}
+
+	// Only run on frontend.
+	if ( ! webp_uploads_in_frontend_body() || '' === $block_content ) {
+		return $block_content;
+	}
+
+	$attachment_id = null;
+	$image_url     = null;
+
+	if ( 'core/cover' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['id'], $block['attrs']['url'] ) ) {
+			$attachment_id = $block['attrs']['id'];
+			$image_url     = $block['attrs']['url'];
+		}
+	} elseif ( 'core/group' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['style']['background']['backgroundImage']['id'], $block['attrs']['style']['background']['backgroundImage']['url'] ) ) {
+			$attachment_id = $block['attrs']['style']['background']['backgroundImage']['id'];
+			$image_url     = $block['attrs']['style']['background']['backgroundImage']['url'];
+		}
+	}
+
+	// Abort if there is no associated background image.
+	if (
+		! isset( $attachment_id, $image_url ) ||
+		$attachment_id <= 0 ||
+		'' === $image_url ||
+		! is_array( wp_get_attachment_metadata( $attachment_id ) )
+	) {
+		return $block_content;
+	}
+
+	$original_mime = get_post_mime_type( $attachment_id );
+	if ( ! is_string( $original_mime ) ) {
+		return $block_content;
+	}
+
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'background_image' );
+
+	foreach ( $target_mimes as $target_mime ) {
+		if ( $target_mime === $original_mime ) {
+			continue;
+		}
+
+		$new_url = webp_uploads_get_mime_type_image( $attachment_id, $image_url, $target_mime );
+		if ( ! is_string( $new_url ) ) {
+			continue;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
+			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+				$updated_style = str_replace( $image_url, $new_url, $style );
+				$processor->set_attribute( 'style', $updated_style );
+				$block_content = $processor->get_updated_html();
+				break 2;
+			}
+		}
+	}
+
+	return $block_content;
+}
+
+/**
  * Initializes custom functionality for handling image uploads and content filters.
  *
  * @since 2.1.0
  */
 function webp_uploads_init(): void {
+	// Filter regular image tags.
 	add_filter( 'wp_content_img_tag', webp_uploads_is_picture_element_enabled() ? 'webp_uploads_wrap_image_in_picture' : 'webp_uploads_filter_image_tag', 10, 3 );
+
+	// Filter blocks that may contain background images.
+	add_filter( 'render_block_core/cover', 'webp_uploads_filter_block_background_images', 10, 2 );
+	add_filter( 'render_block_core/group', 'webp_uploads_filter_block_background_images', 10, 2 );
 }
 add_action( 'init', 'webp_uploads_init' );
 
@@ -803,3 +901,65 @@ function webp_uploads_enable_additional_mime_type_support_for_all_sizes( array $
 	return $allowed_sizes;
 }
 add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_uploads_enable_additional_mime_type_support_for_all_sizes' );
+
+/**
+ * Converts palette PNG images to truecolor PNG images.
+ *
+ * GD cannot convert palette-based PNG to WebP/AVIF formats, causing conversion failures.
+ * This function detects and converts palette PNG to truecolor during upload.
+ *
+ * @since 2.6.0
+ *
+ * @param array<string, mixed>|mixed $file The uploaded file data.
+ * @return array<string, mixed> The modified file data.
+ */
+function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
+	// Because plugins do bad things.
+	if ( ! is_array( $file ) ) {
+		$file = array();
+	}
+	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
+		return $file;
+	}
+	if ( isset( $file['type'] ) && is_string( $file['type'] ) ) {
+		if ( 'image/png' !== strtolower( $file['type'] ) ) {
+			return $file;
+		}
+	} elseif ( 'image/png' !== wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] )['type'] ) {
+		return $file;
+	}
+
+	$editor = wp_get_image_editor( $file['tmp_name'] );
+
+	if ( is_wp_error( $editor ) || ! $editor instanceof WP_Image_Editor_GD ) {
+		return $file;
+	}
+
+	$image = imagecreatefrompng( $file['tmp_name'] );
+
+	// Check if the image was created successfully.
+	if ( false === $image ) {
+		return $file;
+	}
+
+	// Check if the image is already truecolor.
+	if ( imageistruecolor( $image ) ) {
+		imagedestroy( $image );
+		return $file;
+	}
+
+	// Preserve transparency.
+	imagealphablending( $image, false );
+	imagesavealpha( $image, true );
+
+	// Convert the palette to truecolor.
+	if ( imagepalettetotruecolor( $image ) ) {
+		// Overwrite the upload with the new truecolor PNG.
+		imagepng( $image, $file['tmp_name'] );
+	}
+	imagedestroy( $image );
+
+	return $file;
+}
+add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );

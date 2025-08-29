@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 3.9.0
+ * Version: 4.0.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // @codeCoverageIgnoreEnd
 
-define( 'PERFLAB_VERSION', '3.9.0' );
+define( 'PERFLAB_VERSION', '4.0.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -113,6 +113,9 @@ function perflab_get_standalone_plugin_data(): array {
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
+		'nocache-bfcache'         => array(
+			'constant' => 'WestonRuter\NocacheBFCache\VERSION',
+		),
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
 		),
@@ -155,7 +158,7 @@ function perflab_get_standalone_plugin_version_constants(): array {
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
- * @since n.e.x.t No longer places the drop-in on new sites by default, unless the `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` constant is set to true.
+ * @since 4.0.0 No longer places the drop-in on new sites by default, unless the `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` constant is set to true.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */

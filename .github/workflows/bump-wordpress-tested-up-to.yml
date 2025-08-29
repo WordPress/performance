@@ -16,7 +16,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure plugin matrix
         id: set-matrix
@@ -46,7 +46,7 @@ jobs:
         plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download WordPress.org readme
         run: |

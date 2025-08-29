@@ -13,40 +13,235 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Callback for enqueued_js_assets test.
+ * Audit blocking assets on the front page.
  *
- * @since 1.0.0
+ * @since 4.0.0
  *
- * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string}|array{omitted: true} Result.
+ * @return array{
+ *             response: WP_Error|array{
+ *                 headers: WpOrg\Requests\Utility\CaseInsensitiveDictionary,
+ *                 body: string,
+ *                 response: array{
+ *                     code: int|false,
+ *                     message: string|false,
+ *                 },
+ *             },
+ *             assets: array{
+ *                 scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                 styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *             }
+ *         } An array containing response and blocking assets.
  */
-function perflab_aea_enqueued_js_assets_test(): array {
-	/**
-	 * If the test didn't run yet, deactivate.
-	 */
-	$enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
-	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_scripts();
-	if ( false === $enqueued_scripts || false === $bytes_enqueued ) {
-		// The return value is validated in JavaScript at:
-		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
-		// If the value lacks the required keys of test, label, and description then it is omitted.
-		return array( 'omitted' => true );
-	}
+function perflab_aea_audit_blocking_assets(): array {
+	$response = wp_remote_get(
+		add_query_arg( 'cache_bust', (string) wp_rand(), home_url( '/' ) ),
+		array(
+			'timeout' => 10,
+			'headers' => array_merge(
+				array(
+					'Accept' => 'text/html',
+				),
+				perflab_get_http_basic_authorization_headers()
+			),
+		)
+	);
 
 	$result = array(
-		'label'       => __( 'Enqueued scripts', 'performance-lab' ),
+		'response' => $response,
+		'assets'   => array(
+			'scripts' => array(),
+			'styles'  => array(),
+		),
+	);
+
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return $result;
+	}
+
+	$html = wp_remote_retrieve_body( $response );
+	if ( '' === $html ) {
+		return $result;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $html );
+
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
+
+		if ( 'SCRIPT' === $tag ) {
+			$src = $processor->get_attribute( 'src' );
+			if ( ! is_string( $src ) ) {
+				continue;
+			}
+
+			// Note that when the "type" attribute is absent or empty, the element is treated as a classic JavaScript script.
+			$type = $processor->get_attribute( 'type' );
+
+			// Skip external script with "async" or "defer" attributes.
+			if ( null !== $processor->get_attribute( 'async' ) || null !== $processor->get_attribute( 'defer' ) ) {
+				continue;
+			}
+
+			// Skip external script with a "type" attribute set to "module" as they are deferred by default.
+			if ( 'module' === strtolower( (string) $type ) ) {
+				continue;
+			}
+
+			// Skip external script with a "type" attribute that is not JavaScript.
+			if (
+				is_string( $type ) &&
+				'' !== $type &&
+				! (
+					str_contains( $type, 'javascript' ) ||
+					str_contains( $type, 'ecmascript' ) ||
+					str_contains( $type, 'jscript' ) ||
+					str_contains( $type, 'livescript' )
+				)
+			) {
+				continue;
+			}
+
+			$size                          = perflab_aea_get_asset_size( $src );
+			$result['assets']['scripts'][] = array(
+				'src'   => $src,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
+		} elseif ( 'LINK' === $tag ) {
+			$rel = $processor->get_attribute( 'rel' );
+			if ( 'stylesheet' !== strtolower( (string) $rel ) ) {
+				continue;
+			}
+
+			$media = $processor->get_attribute( 'media' );
+			if ( is_string( $media ) && 1 !== preg_match( '/^\s*(all|screen)\b/i', $media ) ) {
+				continue;
+			}
+
+			$href = $processor->get_attribute( 'href' );
+			if ( ! is_string( $href ) ) {
+				continue;
+			}
+
+			$size                         = perflab_aea_get_asset_size( $href );
+			$result['assets']['styles'][] = array(
+				'src'   => $href,
+				'size'  => is_wp_error( $size ) ? null : $size,
+				'error' => is_wp_error( $size ) ? $size : null,
+			);
+		}
+	}
+
+	return $result;
+}
+
+/**
+ * Callback for enqueued_blocking_assets test.
+ *
+ * @since 4.0.0
+ *
+ * @return array{
+ *             label: string,
+ *             status: 'good'|'recommended',
+ *             badge: array{label: string, color: non-empty-string},
+ *             description: string,
+ *             actions: string,
+ *             test: string
+ *         } Result.
+ */
+function perflab_aea_enqueued_blocking_assets_test(): array {
+	$result = array(
+		'label'       => __( 'Any blocking assets do not appear to be particularly problematic', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
 			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
+		'description' => '',
+		'actions'     => '',
+		'test'        => 'enqueued_blocking_assets',
+	);
+
+	$audit_result = perflab_aea_audit_blocking_assets();
+
+	$retrieval_failure_result = perflab_aea_blocking_assets_retrieval_failure( $audit_result['response'] );
+	if ( null !== $retrieval_failure_result ) {
+		return array_merge( $result, $retrieval_failure_result );
+	}
+
+	$scripts_result = perflab_aea_enqueued_blocking_scripts( $audit_result['assets'] );
+	$styles_result  = perflab_aea_enqueued_blocking_styles( $audit_result['assets'] );
+
+	$result['description'] .= perflab_aea_generate_blocking_assets_table( $audit_result['assets'] );
+
+	$result['description'] .= $scripts_result['description'];
+	$result['description'] .= $styles_result['description'];
+
+	if (
+		'good' !== $scripts_result['status'] ||
+		'good' !== $styles_result['status']
+	) {
+		$result['label']   = __( 'Your site may have a problem with blocking assets', 'performance-lab' );
+		$result['status']  = 'recommended';
+		$result['actions'] = sprintf(
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
+			__( 'More info about performance optimization', 'performance-lab' )
+		);
+	}
+
+	return $result;
+}
+
+/**
+ * Callback for enqueued_blocking_assets test via AJAX.
+ *
+ * @since 4.0.0
+ */
+function perflab_aea_enqueued_ajax_blocking_assets_test(): void {
+	check_ajax_referer( 'health-check-site-status' );
+
+	if ( ! current_user_can( 'view_site_health_checks' ) ) {
+		wp_send_json_error();
+	}
+
+	wp_send_json_success( perflab_aea_enqueued_blocking_assets_test() );
+}
+
+/**
+ * Prepares the blocking scripts audit result.
+ *
+ * @since 4.0.0
+ *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @return array{status: 'good'|'recommended', description: string} Result.
+ */
+function perflab_aea_enqueued_blocking_scripts( array $blocking_assets ): array {
+	$enqueued_scripts = count( $blocking_assets['scripts'] );
+	$bytes_enqueued   = array_reduce(
+		$blocking_assets['scripts'],
+		static function ( $carry, $asset ): int {
+			return $carry + ( $asset['size'] ?? 0 );
+		},
+		0
+	);
+
+	$result = array(
+		'status'      => 'good',
 		'description' => sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of blocking styles. 2.Styles size. */
 					_n(
-						'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
-						'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking script (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking scripts (size: %2$s) is acceptable.',
 						$enqueued_scripts,
 						'performance-lab'
 					),
@@ -55,8 +250,6 @@ function perflab_aea_enqueued_js_assets_test(): array {
 				)
 			)
 		),
-		'actions'     => '',
-		'test'        => 'enqueued_js_assets',
 	);
 
 	/**
@@ -84,10 +277,10 @@ function perflab_aea_enqueued_js_assets_test(): array {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of blocking scripts. 2. Scripts size. */
 					_n(
-						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking script (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking scripts (size: %2$s). Try to reduce the number or to concatenate them.',
 						$enqueued_scripts,
 						'performance-lab'
 					),
@@ -96,52 +289,52 @@ function perflab_aea_enqueued_js_assets_test(): array {
 				)
 			)
 		);
+	}
 
-		$result['actions'] = sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
-			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			__( 'More info about performance optimization', 'performance-lab' ),
-			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			__( 'Clean Test Cache', 'performance-lab' )
-		);
+	// If one of the assets had an error, then fail the test even if under the threshold.
+	foreach ( $blocking_assets['scripts'] as $script ) {
+		if ( is_wp_error( $script['error'] ) ) {
+			$result['status'] = 'recommended';
+			break;
+		}
 	}
 
 	return $result;
 }
 
 /**
- * Callback for enqueued_css_assets test.
+ * Prepares the blocking styles audit result.
  *
- * @since 1.0.0
+ * @since 4.0.0
  *
- * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string}|array{omitted: true} Result.
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @return array{status: 'good'|'recommended', description: string} Result.
  */
-function perflab_aea_enqueued_css_assets_test(): array {
-	// Omit if the test didn't run yet, omit.
-	$enqueued_styles = perflab_aea_get_total_enqueued_styles();
-	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_styles();
-	if ( false === $enqueued_styles || false === $bytes_enqueued ) {
-		// The return value is validated in JavaScript at:
-		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
-		// If the value lacks the required keys of test, label, and description then it is omitted.
-		return array( 'omitted' => true );
-	}
+function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
+	$enqueued_styles = count( $blocking_assets['styles'] );
+	$bytes_enqueued  = array_reduce(
+		$blocking_assets['styles'],
+		static function ( $carry, $asset ): int {
+			return $carry + ( $asset['size'] ?? 0 );
+		},
+		0
+	);
+
 	$result = array(
-		'label'       => __( 'Enqueued styles', 'performance-lab' ),
 		'status'      => 'good',
-		'badge'       => array(
-			'label' => __( 'Performance', 'performance-lab' ),
-			'color' => 'blue',
-		),
 		'description' => sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of blocking styles. 2. Styles size. */
 					_n(
-						'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
-						'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking style (size: %2$s) is acceptable.',
+						'The amount of %1$s blocking styles (size: %2$s) is acceptable.',
 						$enqueued_styles,
 						'performance-lab'
 					),
@@ -150,8 +343,6 @@ function perflab_aea_enqueued_css_assets_test(): array {
 				)
 			)
 		),
-		'actions'     => '',
-		'test'        => 'enqueued_css_assets',
 	);
 
 	/**
@@ -171,17 +362,18 @@ function perflab_aea_enqueued_css_assets_test(): array {
 	 * @param int $styles_size_threshold Enqueued styles size (in bytes) threshold. Default 100000.
 	 */
 	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
-	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_threshold ) {
+
+	if ( $enqueued_styles > $styles_threshold || $bytes_enqueued > $styles_size_threshold ) {
 		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of blocking styles. 2.Styles size. */
 					_n(
-						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
-						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking style (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website has %1$s blocking styles (size: %2$s). Try to reduce the number or to concatenate them.',
 						$enqueued_styles,
 						'performance-lab'
 					),
@@ -190,120 +382,215 @@ function perflab_aea_enqueued_css_assets_test(): array {
 				)
 			)
 		);
+	}
 
-		$result['actions'] = sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
-			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			__( 'More info about performance optimization', 'performance-lab' ),
-			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			__( 'Clean Test Cache', 'performance-lab' )
-		);
+	// If one of the assets had an error, then fail the test even if under the threshold.
+	foreach ( $blocking_assets['styles'] as $style ) {
+		if ( is_wp_error( $style['error'] ) ) {
+			$result['status'] = 'recommended';
+			break;
+		}
 	}
 
 	return $result;
 }
 
 /**
- * Gets total of enqueued scripts.
+ * Handles the failure of retrieving the home page to analyze blocking assets.
  *
- * @since 1.0.0
+ * @since 4.0.0
  *
- * @return int|false Number of total scripts or false if transient hasn't been set.
+ * @phpstan-param WP_Error|array{
+ *                    headers: WpOrg\Requests\Utility\CaseInsensitiveDictionary,
+ *                    body: string,
+ *                    response: array{
+ *                        code: int|false,
+ *                        message: string|false,
+ *                    },
+ *                } $response
+ *
+ * @param WP_Error|array<string, mixed> $response The response from the home page retrieval.
+ * @return array{status: 'recommended', description: string}|null Result, or null if there was no failure.
  */
-function perflab_aea_get_total_enqueued_scripts() {
-	$enqueued_scripts      = false;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( is_array( $list_enqueued_scripts ) ) {
-		$enqueued_scripts = count( $list_enqueued_scripts );
-	}
-	return $enqueued_scripts;
-}
+function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
+	$result = array(
+		'label'       => __( 'Unable to check site for blocking assets', 'performance-lab' ),
+		'status'      => 'recommended',
+		'description' => '',
+	);
 
-/**
- * Gets total size in bytes of Enqueued Scripts.
- *
- * @since 1.0.0
- *
- * @return int|false Byte Total size or false if transient hasn't been set.
- */
-function perflab_aea_get_total_size_bytes_enqueued_scripts() {
-	$total_size            = false;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( is_array( $list_enqueued_scripts ) ) {
-		$total_size = 0;
-		foreach ( $list_enqueued_scripts as $enqueued_script ) {
-			if ( is_array( $enqueued_script ) && array_key_exists( 'size', $enqueued_script ) && is_int( $enqueued_script['size'] ) ) {
-				$total_size += $enqueued_script['size'];
-			}
+	if ( is_array( $response ) ) {
+		$code         = wp_remote_retrieve_response_code( $response );
+		$message      = wp_remote_retrieve_response_message( $response );
+		$body         = wp_remote_retrieve_body( $response );
+		$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+		if ( is_array( $content_type ) ) {
+			$content_type = array_pop( $content_type );
 		}
-	}
-	return $total_size;
-}
 
-/**
- * Gets total of enqueued styles.
- *
- * @since 1.0.0
- *
- * @return int|false Number of total styles or false if transient hasn't been set.
- */
-function perflab_aea_get_total_enqueued_styles() {
-	$enqueued_styles      = false;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( is_array( $list_enqueued_styles ) ) {
-		$enqueued_styles = count( $list_enqueued_styles );
-	}
-	return $enqueued_styles;
-}
-
-/**
- * Gets total size in bytes of Enqueued Styles.
- *
- * @since 1.0.0
- *
- * @return int|false Byte Total size or false if transient hasn't been set.
- */
-function perflab_aea_get_total_size_bytes_enqueued_styles() {
-	$total_size           = false;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( is_array( $list_enqueued_styles ) ) {
-		$total_size = 0;
-		foreach ( $list_enqueued_styles as $enqueued_style ) {
-			if ( is_array( $enqueued_style ) && array_key_exists( 'size', $enqueued_style ) && is_int( $enqueued_style['size'] ) ) {
-				$total_size += $enqueued_style['size'];
-			}
+		// No error.
+		if ( 200 === $code && '' !== $body ) {
+			return null;
 		}
+
+		if ( '' === $body ) {
+			$result['description'] .= '<p>' . esc_html__( 'While retrieving the home page to analyze the blocking assets, the request was successfully but response body was empty.', 'performance-lab' ) . '</p>';
+		}
+
+		if ( 200 !== $code ) {
+			$result['description'] .= '<p>' . wp_kses(
+				sprintf(
+					/* translators: %d is the HTTP status code, %s is the status header description */
+					__( 'While retrieving the home page to analyze the blocking assets, the request returned with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
+					(int) $code,
+					esc_html( $message )
+				),
+				array( 'code' => array() )
+			) . '</p>';
+		}
+
+		if ( '' !== $body ) {
+			$result['description'] .= '<details>';
+			$result['description'] .= '<summary>' . esc_html__( 'Raw response:', 'performance-lab' ) . '</summary>';
+
+			if ( is_string( $content_type ) && str_contains( $content_type, 'html' ) ) {
+				$escaped_content        = htmlspecialchars( $body, ENT_QUOTES, 'UTF-8' );
+				$result['description'] .= '<iframe srcdoc="' . $escaped_content . '" sandbox width="100%" height="300"></iframe>';
+			} else {
+				$result['description'] .= '<pre style="white-space: pre-wrap">' . esc_html( $body ) . '</pre>';
+			}
+			$result['description'] .= '</details>';
+		}
+	} else {
+		$result['description'] = '<p>' . wp_kses(
+			sprintf(
+				/* translators: %1$s is the error code */
+				esc_html__( 'There was an error while retrieving the home page to analyze the blocking assets, with the error code %1$s and the following message:', 'performance-lab' ),
+				'<code>' . esc_html( (string) $response->get_error_code() ) . '</code>'
+			),
+			array( 'code' => array() )
+		) . '</p><blockquote>' . esc_html( $response->get_error_message() ) . '</blockquote>';
 	}
-	return $total_size;
+	return $result;
 }
 
 /**
- * Convert full URL paths to absolute paths.
- * Covers Standard WP configuration, wp-content outside WP directories and subdirectories.
- * Ex: https://example.com/content/themes/, https://example.com/wp/wp-includes/
+ * Gets the size of the asset in bytes.
  *
- * @since 1.0.0
+ * @since 4.0.0
  *
- * @param string $resource_url URl resource link.
- * @return string Returns absolute path to the resource.
+ * @param string $resource_url URL of the resource.
+ * @return int|WP_Error Size of the asset in bytes or WP_Error if the request fails.
  */
-function perflab_aea_get_path_from_resource_url( string $resource_url ): string {
-	if ( '' === $resource_url ) {
+function perflab_aea_get_asset_size( string $resource_url ) {
+	$response = wp_remote_get(
+		$resource_url,
+		array(
+			'timeout' => 10,
+			'headers' => perflab_get_http_basic_authorization_headers(),
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+
+	if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		return new WP_Error(
+			'http_error',
+			wp_kses(
+				sprintf(
+					/* translators: %d is the HTTP status code, %s is the status header description */
+					__( 'Failed to retrieve the above asset with an HTTP status of <code>%1$d %2$s</code>.', 'performance-lab' ),
+					(int) wp_remote_retrieve_response_code( $response ),
+					esc_html( wp_remote_retrieve_response_message( $response ) )
+				),
+				array( 'code' => array() )
+			)
+		);
+	}
+
+	// TODO: A non-cacheable response should also be considered an error.
+	// TODO: A size of zero could be considered an error too.
+	return strlen( wp_remote_retrieve_body( $response ) );
+}
+
+/**
+ * Gets headers for HTTP Basic authorization headers.
+ *
+ * @since 4.0.0
+ *
+ * @return array{ Authorization?: non-empty-string } Headers with copied Basic auth headers.
+ */
+function perflab_get_http_basic_authorization_headers(): array {
+	$headers = array();
+	if ( isset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) ) {
+		$user                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) );
+		$pass                     = sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
+		$headers['Authorization'] = 'Basic ' . base64_encode( $user . ':' . $pass ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to encode the credentials for forwarding basic auth headers.
+	}
+	return $headers;
+}
+
+/**
+ * Generates a table of blocking assets.
+ *
+ * @since 4.0.0
+ *
+ * @phpstan-param array{
+ *                    scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                    styles: array<array{ src: string, size: int|null, error: WP_Error|null }>,
+ *                } $blocking_assets
+ *
+ * @param array<string, mixed> $blocking_assets Array of blocking assets.
+ * @return string HTML table of blocking assets.
+ */
+function perflab_aea_generate_blocking_assets_table( array $blocking_assets ): string {
+	if ( 0 === count( $blocking_assets['scripts'] ) && 0 === count( $blocking_assets['styles'] ) ) {
 		return '';
 	}
 
-	// Different content folder ex. /content/.
-	if ( 0 === strpos( $resource_url, content_url() ) ) {
-		return WP_CONTENT_DIR . substr( $resource_url, strlen( content_url() ) );
+	$table  = '<table class="wp-list-table widefat striped"><thead><tr>';
+	$table .= '<th scope="col">' . esc_html__( 'Type', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Source', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Size', 'performance-lab' ) . '</th>';
+	$table .= '<th scope="col">' . esc_html__( 'Status', 'performance-lab' ) . '</th>';
+	$table .= '</tr></thead><tbody>';
+
+	$asset_types = array(
+		'scripts' => __( 'Script', 'performance-lab' ),
+		'styles'  => __( 'Style', 'performance-lab' ),
+	);
+	foreach ( $asset_types as $type => $label ) {
+		if ( isset( $blocking_assets[ $type ] ) && is_array( $blocking_assets[ $type ] ) ) {
+			foreach ( $blocking_assets[ $type ] as $asset ) {
+				$table .= is_wp_error( $asset['error'] ) ? '<tr style="background-color: #ffecec;">' : '<tr>';
+				$table .= '<td>' . esc_html( $label ) . '</td>';
+				$table .= '<td>' . esc_url( $asset['src'] );
+				if ( is_wp_error( $asset['error'] ) ) {
+					$table .= '<p>' . wp_kses( $asset['error']->get_error_message(), array( 'code' => array() ) ) . '</p>';
+				}
+				$table .= '</td>';
+				$table .= '<td>';
+				if ( is_int( $asset['size'] ) ) {
+					$table .= str_replace( ' ', '&nbsp;', (string) size_format( $asset['size'] ) );
+				} else {
+					$table .= esc_html__( 'N/A', 'performance-lab' );
+				}
+				$table .= '</td>';
+				$table .= '<td>';
+				if ( is_wp_error( $asset['error'] ) ) {
+					$table .= esc_html__( 'Error', 'performance-lab' );
+				} else {
+					$table .= esc_html__( 'OK', 'performance-lab' );
+				}
+				$table .= '</td>';
+				$table .= '</tr>';
+			}
+		}
 	}
 
-	// wp-content in a subdirectory. ex. /blog/wp-content/.
-	$site_url = untrailingslashit( site_url() );
-	if ( 0 === strpos( $resource_url, $site_url ) ) {
-		return untrailingslashit( ABSPATH ) . substr( $resource_url, strlen( $site_url ) );
-	}
+	$table .= '</tbody></table>';
 
-	// Standard wp-content configuration.
-	return untrailingslashit( ABSPATH ) . wp_make_link_relative( $resource_url );
+	return $table;
 }
