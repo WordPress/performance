@@ -633,14 +633,14 @@ function od_filter_priming_mode_batch_urls( array $urls ): array {
  */
 function od_show_priming_mode_settings(): bool {
 	/**
-	 * Filters whether the priming mode settings page should be shown in the admin dashboard.
+	 * Filters whether the priming mode settings page should be shown in the admin dashboard, regardless of the number of URLs.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param bool $show_feature True if the feature should be shown, false otherwise.
 	 */
 	$force_show = apply_filters( 'od_show_priming_mode_settings', false );
-	if ( $force_show ) {
+	if ( true === $force_show ) {
 		return true;
 	}
 
@@ -652,12 +652,17 @@ function od_show_priming_mode_settings(): bool {
 	 * @param int $threshold The threshold count of frontend-visible URLs.
 	 */
 	$threshold = apply_filters( 'od_show_priming_mode_settings_max_urls', 1000 );
-	$count     = 0;
+
+	$count = (int) get_transient( 'od_priming_mode_frontend_visible_url_count' );
+	if ( 0 !== $count ) {
+		return $count <= $threshold;
+	}
 
 	// Get the sitemap server and its registry of providers.
 	$server    = wp_sitemaps_get_server();
 	$registry  = $server->registry;
 	$providers = array_values( $registry->get_providers() );
+	$show      = true;
 
 	foreach ( $providers as $provider ) {
 		// Each provider returns its object subtypes (e.g. 'post', 'page', etc.).
@@ -673,16 +678,17 @@ function od_show_priming_mode_settings(): bool {
 				$url_chunk = array_filter( array_column( $url_list, 'loc' ) );
 				$count    += count( $url_chunk );
 
-				// If we reach the threshold, disable the admin priming feature.
 				if ( $count >= $threshold ) {
-					return false;
+					$show = false;
+					break 3;
 				}
 			}
 		}
 	}
 
-	// If we reach here, the count is less than the threshold. Enable the admin priming feature.
-	return true;
+	set_transient( 'od_priming_mode_frontend_visible_url_count', $count, DAY_IN_SECONDS );
+
+	return $show;
 }
 
 /**
