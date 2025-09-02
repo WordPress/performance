@@ -140,10 +140,15 @@ class Perflab_Server_Timing {
 	 *
 	 * @since 1.8.0
 	 */
-	public function send_header(): bool {
+	public function send_header(): void {
 		// Return early if headers have already been sent to avoid PHP warnings/errors.
 		if ( headers_sent() ) {
-			return false;
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html__( 'Cannot send Server-Timing header: headers already sent.', 'performance-lab' ),
+				''
+			);
+			return;
 		}
 
 		/**
@@ -157,11 +162,10 @@ class Perflab_Server_Timing {
 
 		$header_value = $this->get_header();
 		if ( '' === $header_value ) {
-			return false;
+			return;
 		}
 
 		header( sprintf( 'Server-Timing: %s', $header_value ), false );
-		return true;
 	}
 
 	/**
