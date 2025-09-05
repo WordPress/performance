@@ -49,6 +49,17 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 					'measure_callback' => static function ( $metric ) use ( $current_function ): void {
 						// This should never happen, but some odd database implementations may be doing it wrong.
 						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+							wp_trigger_error(
+								$current_function,
+								esc_html(
+									sprintf(
+										/* translators: 1: before-template-db-queries, 2: $wpdb->queries */
+										__( 'Unable to compute server timing for "%1$s" because %2$s is not an array.', 'performance-lab' ),
+										'before-template-db-queries',
+										'$wpdb->queries'
+									)
+								)
+							);
 							return;
 						}
 
