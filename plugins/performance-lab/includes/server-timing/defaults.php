@@ -192,19 +192,35 @@ function perflab_register_default_server_timing_template_metrics(): void {
 					array(
 						'measure_callback' => static function ( $metric ): void {
 							// This global should typically be set when this is called, but check just in case.
-							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) ) {
+							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) || ! is_float( $GLOBALS['perflab_query_time_before_template'] ) ) {
 								return;
 							}
 
 							// This should never happen, but some odd database implementations may be doing it wrong.
 							if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+								// A notice is already emitted above, but if $perflab_query_time_before_template was not
+								// set, then this condition wouldn't be checked in the first place.
 								return;
 							}
 
+							/**
+							 * Query times.
+							 *
+							 * @var float[] $query_times
+							 */
+							$query_times = array();
+							foreach ( $GLOBALS['wpdb']->queries as $query ) {
+								if ( ! is_array( $query ) || ! isset( $query[1] ) || ! is_float( $query[1] ) ) {
+									// A notice is already emitted above.
+									return;
+								}
+								$query_times[] = $query[1];
+							}
+
 							$total_query_time = array_reduce(
-								$GLOBALS['wpdb']->queries,
-								static function ( $acc, $query ) {
-									return $acc + $query[1];
+								$query_times,
+								static function ( float $acc, float $query_time ): float {
+									return $acc + $query_time;
 								},
 								0.0
 							);
