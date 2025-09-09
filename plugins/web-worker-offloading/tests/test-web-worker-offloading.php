@@ -208,13 +208,16 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$normalize = static function ( $html ) {
 			// See <https://core.trac.wordpress.org/ticket/63887>.
-			$p = new WP_HTML_Tag_Processor( $html );
-			while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-				$text = $p->get_modifiable_text();
-				$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
-				$p->set_modifiable_text( $text );
+			if ( class_exists( 'WP_HTML_Tag_Processor' ) ) {
+				// This normalization logic is only relevant to WP>=6.9-alpha anyway.
+				$p = new WP_HTML_Tag_Processor( $html );
+				while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+					$text = $p->get_modifiable_text();
+					$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
+					$p->set_modifiable_text( $text );
+				}
+				$html = $p->get_updated_html();
 			}
-			$html = $p->get_updated_html();
 
 			$html = preg_replace( '/\r|\n/', '', $html );
 			return trim( preg_replace( '#(?=<[^/])#', "\n", $html ) );
