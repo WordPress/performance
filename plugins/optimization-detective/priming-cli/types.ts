@@ -6,14 +6,14 @@ export interface URLBatchCursor {
 	batch_size: number;
 }
 
-export interface ViewportBreakpoint {
+export interface Viewport {
 	width: number;
 	height: number;
 }
 
 export interface URLGroup {
 	url: string;
-	breakpoints: ViewportBreakpoint[];
+	viewports: Viewport[];
 }
 
 export interface URLBatchResponse {

@@ -252,8 +252,8 @@ function od_register_rest_url_metric_priming_endpoint(): void {
 	);
 	register_rest_route(
 		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,
-		$endpoint_controller::PRIME_URLS_BREAKPOINTS_ROUTE,
-		$endpoint_controller->get_registration_args_prime_urls_breakpoints()
+		$endpoint_controller::PRIME_URLS_VIEWPORTS_ROUTE,
+		$endpoint_controller->get_registration_args_prime_urls_viewports()
 	);
 	register_rest_route(
 		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,

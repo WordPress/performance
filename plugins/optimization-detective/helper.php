@@ -533,40 +533,41 @@ function od_get_metrics_by_post_title( array $urls ): array {
 }
 
 /**
- * Computes the standard array of breakpoints.
+ * Gets the standard array of viewport based on real world device.
  *
  * @since n.e.x.t
  * @access private
  *
- * @return array<int, array{width: int, height: int}> Array of breakpoints.
+ * @return array<int, array{width: int, height: int}> Array of viewports.
  */
-function od_get_standard_breakpoints(): array {
-	$widths = od_get_breakpoint_max_widths();
-	sort( $widths );
-
-	$min_width = $widths[0];
-	$max_width = (int) end( $widths ) + 300; // For large screens.
-	$widths[]  = $max_width;
-
-	// We need to ensure min is 0.56 (1080/1920) else the height becomes too small.
-	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
-	// Ensure max is 1.78 (1920/1080) else the height becomes too large.
-	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
-
-	// Compute [width => height] for each breakpoint.
-	return array_map(
-		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
-			// Linear interpolation between max_ar and min_ar based on width.
-			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
-			$ar = max( $min_ar, min( $max_ar, $ar ) );
-
-			return array(
-				'width'  => $width,
-				'height' => (int) round( $ar * $width ),
-			);
-		},
-		$widths
+function od_get_standard_viewports(): array {
+	$device_viewports = array(
+		array( // Small smartphones.
+			'width'  => 360,
+			'height' => 780,
+		),
+		array( // Large smartphones.
+			'width'  => 414,
+			'height' => 896,
+		),
+		array( // Tablets.
+			'width'  => 768,
+			'height' => 1024,
+		),
+		array( // Desktop/laptop screens.
+			'width'  => 1920,
+			'height' => 1080,
+		),
 	);
+
+	/**
+	 * Filters the standard device viewports used for priming mode.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array<int, array{width: int, height: int}> $device_viewports Array of viewport dimensions.
+	 */
+	return apply_filters( 'od_standard_viewports', $device_viewports );
 }
 
 /**
@@ -576,19 +577,19 @@ function od_get_standard_breakpoints(): array {
  * @access private
  *
  * @param array<string> $urls Array of URLs to filter.
- * @return array<int, array{url: string, breakpoints: array<int, array{width: int, height: int}>}> Filtered batch of URL groups.
+ * @return array<int, array{url: string, viewports: array<int, array{width: int, height: int}>}> Filtered batch of URL groups.
  */
 function od_filter_priming_mode_batch_urls( array $urls ): array {
-	$filtered_url_groups  = array();
-	$standard_breakpoints = od_get_standard_breakpoints();
-	$group_collections    = od_get_metrics_by_post_title( $urls );
+	$filtered_url_groups = array();
+	$standard_viewports  = od_get_standard_viewports();
+	$group_collections   = od_get_metrics_by_post_title( $urls );
 
 	foreach ( $urls as $url ) {
 		$group_collection = $group_collections[ $url ] ?? null;
 		if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
 			$filtered_url_groups[] = array(
-				'url'         => $url,
-				'breakpoints' => $standard_breakpoints,
+				'url'       => $url,
+				'viewports' => $standard_viewports,
 			);
 			continue;
 		}
@@ -606,17 +607,17 @@ function od_filter_priming_mode_batch_urls( array $urls ): array {
 			}
 		}
 
-		$missing_breakpoints = array();
-		foreach ( $standard_breakpoints as $breakpoint ) {
-			if ( ! in_array( $breakpoint['width'], $existing_widths, true ) ) {
-				$missing_breakpoints[] = $breakpoint;
+		$missing_viewports = array();
+		foreach ( $standard_viewports as $viewport ) {
+			if ( ! in_array( $viewport['width'], $existing_widths, true ) ) {
+				$missing_viewports[] = $viewport;
 			}
 		}
 
-		if ( count( $missing_breakpoints ) > 0 ) {
+		if ( count( $missing_viewports ) > 0 ) {
 			$filtered_url_groups[] = array(
-				'url'         => $url,
-				'breakpoints' => $missing_breakpoints,
+				'url'       => $url,
+				'viewports' => $missing_viewports,
 			);
 		}
 	}

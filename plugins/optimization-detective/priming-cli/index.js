@@ -152,10 +152,10 @@ function getVerificationToken() {
  */
 function flattenBatchToTasks( urlGroups ) {
 	return urlGroups.flatMap( ( urlGroup ) =>
-		urlGroup.breakpoints.map( ( breakpoint ) => ( {
+		urlGroup.viewports.map( ( viewport ) => ( {
 			url: urlGroup.url,
-			width: breakpoint.width,
-			height: breakpoint.height,
+			width: viewport.width,
+			height: viewport.height,
 		} ) )
 	);
 }

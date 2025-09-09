@@ -22,14 +22,14 @@
 	let verificationToken = '';
 
 	/**
-	 * Array of breakpoint objects defining viewport dimensions.
+	 * Array of viewport objects defining dimensions.
 	 *
-	 * @type {import("./types.ts").ViewportBreakpoint[]}
+	 * @type {import("./types.ts").Viewport[]}
 	 */
-	let breakpoints = [];
+	let viewports = [];
 
 	/**
-	 * Queue of URL priming tasks generated from breakpoints.
+	 * Queue of URL priming tasks generated from viewports.
 	 *
 	 * @type {import("./types.ts").URLPrimingTask[]}
 	 */
@@ -98,16 +98,16 @@
 	}
 
 	/**
-	 * Primes the URL metrics for all breakpoints.
+	 * Primes the URL metrics for all viewports.
 	 *
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function processTasks() {
 		try {
 			isProcessing = true;
-			if ( 0 === breakpoints.length ) {
-				breakpoints = await apiFetch( {
-					path: '/optimization-detective/v1/priming-mode-breakpoints',
+			if ( 0 === viewports.length ) {
+				viewports = await apiFetch( {
+					path: '/optimization-detective/v1/priming-mode-viewports',
 					method: 'GET',
 				} );
 			}
@@ -118,10 +118,10 @@
 				method: 'GET',
 			} );
 
-			currentTasks = breakpoints.map( ( breakpoint ) => ( {
+			currentTasks = viewports.map( ( viewport ) => ( {
 				url: permalink,
-				width: breakpoint.width,
-				height: breakpoint.height,
+				width: viewport.width,
+				height: viewport.height,
 			} ) );
 
 			while ( isProcessing && currentTaskIndex < currentTasks.length ) {
@@ -147,7 +147,7 @@
 	/**
 	 * Loads the iframe and waits for the message.
 	 *
-	 * @param {import("./types.ts").URLPrimingTask} task   - The breakpoint to set for the iframe.
+	 * @param {import("./types.ts").URLPrimingTask} task   - The viewport to set for the iframe.
 	 * @param {AbortSignal}                         signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */

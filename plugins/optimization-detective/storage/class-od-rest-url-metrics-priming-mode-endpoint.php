@@ -27,11 +27,11 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	const PRIME_URLS_ROUTE = '/prime-urls';
 
 	/**
-	 * Route for getting breakpoints for URL Metrics.
+	 * Route for getting viewports for URL Metrics.
 	 *
 	 * @var string
 	 */
-	const PRIME_URLS_BREAKPOINTS_ROUTE = '/priming-mode-breakpoints';
+	const PRIME_URLS_VIEWPORTS_ROUTE = '/priming-mode-viewports';
 
 	/**
 	 * Route for verifying the token for priming mode.
@@ -61,7 +61,7 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	}
 
 	/**
-	 * Gets the arguments for registering the endpoint responsible for getting breakpoints for priming URL Metrics.
+	 * Gets the arguments for registering the endpoint responsible for getting viewports for priming URL Metrics.
 	 *
 	 * @since n.e.x.t
 	 * @access private
@@ -72,10 +72,10 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	 *     permission_callback: callable
 	 * }
 	 */
-	public function get_registration_args_prime_urls_breakpoints(): array {
+	public function get_registration_args_prime_urls_viewports(): array {
 		return array(
 			'methods'             => 'GET',
-			'callback'            => array( $this, 'handle_generate_breakpoints_request' ),
+			'callback'            => array( $this, 'handle_generate_viewports_request' ),
 			'permission_callback' => array( $this, 'priming_permissions_check' ),
 		);
 	}
@@ -137,15 +137,15 @@ final class OD_REST_URL_Metrics_Priming_Mode_Endpoint {
 	}
 
 	/**
-	 * Handles REST API request to generate breakpoints for URL Metrics.
+	 * Handles REST API request to generate viewports for URL Metrics.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
 	 * @return WP_REST_Response Response.
 	 */
-	public function handle_generate_breakpoints_request(): WP_REST_Response {
-		return new WP_REST_Response( od_get_standard_breakpoints() );
+	public function handle_generate_viewports_request(): WP_REST_Response {
+		return new WP_REST_Response( od_get_standard_viewports() );
 	}
 
 	/**

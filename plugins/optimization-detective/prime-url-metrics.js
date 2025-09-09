@@ -344,10 +344,10 @@
 	 */
 	function flattenBatchToTasks( urlGroups ) {
 		return urlGroups.flatMap( ( urlGroup ) =>
-			urlGroup.breakpoints.map( ( breakpoint ) => ( {
+			urlGroup.viewports.map( ( viewport ) => ( {
 				url: urlGroup.url,
-				width: breakpoint.width,
-				height: breakpoint.height,
+				width: viewport.width,
+				height: viewport.height,
 			} ) )
 		);
 	}
@@ -382,7 +382,7 @@
 	/**
 	 * Loads the iframe and waits for the message.
 	 *
-	 * @param {import("./types.ts").URLPrimingTask} task   - The breakpoint to set for the iframe.
+	 * @param {import("./types.ts").URLPrimingTask} task   - The viewport to set for the iframe.
 	 * @param {AbortSignal}                         signal - The signal to abort the task.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
