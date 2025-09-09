@@ -71,6 +71,10 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
+		// See <https://core.trac.wordpress.org/ticket/63887>.
+		$before_data = preg_replace( ':\n//# sourceURL=.+$:', '', $before_data );
+		$after_data  = preg_replace( ':\n//# sourceURL=.+$:', '', $after_data );
+
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
@@ -203,6 +207,15 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$set_up();
 
 		$normalize = static function ( $html ) {
+			// See <https://core.trac.wordpress.org/ticket/63887>.
+			$p = new WP_HTML_Tag_Processor( $html );
+			while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+				$text = $p->get_modifiable_text();
+				$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
+				$p->set_modifiable_text( $text );
+			}
+			$html = $p->get_updated_html();
+
 			$html = preg_replace( '/\r|\n/', '', $html );
 			return trim( preg_replace( '#(?=<[^/])#', "\n", $html ) );
 		};
