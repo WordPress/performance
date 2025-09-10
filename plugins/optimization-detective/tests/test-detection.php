@@ -224,7 +224,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'async function load', $script );
 		foreach ( $expected_exports as $key => $value ) {
-			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
+			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), wp_json_encode( $value, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) ), $script );
 		}
 		$this->assertStringContainsString( '"urlMetricHMAC":', $script );
 		$this->assertSame( 1, preg_match( '/"webVitalsLibrarySrc":("[^"]+?")/', $script, $matches ) );

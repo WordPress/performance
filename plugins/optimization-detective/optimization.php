@@ -122,7 +122,7 @@ function od_print_disabled_reasons( array $reasons ): void {
 		wp_print_inline_script_tag(
 			sprintf(
 				"console.info( %s );\n//# sourceURL=od-print-disabled-reasons-%d",
-				wp_json_encode( '[Optimization Detective] ' . $reason ),
+				wp_json_encode( '[Optimization Detective] ' . $reason, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 				$i + 1
 			),
 			array( 'type' => 'module' )

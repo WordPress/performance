@@ -83,7 +83,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			$before_data
 		);
 		$this->assertStringContainsString(
-			wp_json_encode( $partytown_config ),
+			wp_json_encode( $partytown_config, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 			$before_data
 		);
 		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
