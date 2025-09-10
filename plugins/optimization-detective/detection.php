@@ -151,10 +151,14 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 
 	return wp_get_inline_script_tag(
 		sprintf(
-			'( %s )( %s, %s );',
+			"( %s )( %s, %s );\n//# sourceURL=%s",
 			file_get_contents( __DIR__ . '/' . od_get_asset_path( 'detect-loader.js' ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 			wp_json_encode( plugins_url( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
-			wp_json_encode( $detect_args )
+			wp_json_encode( $detect_args ),
+			add_query_arg(
+				array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+				plugins_url( od_get_asset_path( 'detect-loader.js' ), __FILE__ )
+			)
 		),
 		array( 'type' => 'module' )
 	);

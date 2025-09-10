@@ -118,11 +118,12 @@ function od_maybe_add_template_output_buffer_filter(): void {
  * @param string[] $reasons Reason messages.
  */
 function od_print_disabled_reasons( array $reasons ): void {
-	foreach ( $reasons as $reason ) {
+	foreach ( $reasons as $i => $reason ) {
 		wp_print_inline_script_tag(
 			sprintf(
-				'console.info( %s );',
-				wp_json_encode( '[Optimization Detective] ' . $reason )
+				"console.info( %s );\n//# sourceURL=od-print-disabled-reasons-%d",
+				wp_json_encode( '[Optimization Detective] ' . $reason ),
+				$i + 1
 			),
 			array( 'type' => 'module' )
 		);

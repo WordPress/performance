@@ -279,6 +279,7 @@ trait Optimization_Detective_Test_Helpers {
 		$buffer = od_optimize_template_output_buffer( $buffer );
 
 		// Normalize script module content so changes do not impact snapshots.
+		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
 		$buffer = preg_replace_callback(
 			'#(<script type="module">)(.+?)(</script>)#s',
 			static function ( $matches ) {
@@ -290,9 +291,42 @@ trait Optimization_Detective_Test_Helpers {
 				$text = trim( $text );
 				if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
 					$text = '/* ' . $matches[0] . ' ... */';
-				} elseif ( 1 === preg_match( '/^\( async function load.+\);$/s', $text ) ) {
+				} elseif ( 1 === preg_match( ':^\( async function load.+\);(\n//# sourceURL=.*)?$:s', $text ) ) {
 					$text = '/* detect loader */';
 				}
+
+				// Normalize versions which occur in sourceURL.
+				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+
+				// Ensure any home URLs are normalized to account for variations in the testing environment.
+				$text = str_replace(
+					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
+					'https://example.com/',
+					$text
+				);
+
+				return $start_tag . $text . $end_tag;
+			},
+			$buffer
+		);
+
+		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
+		$buffer = preg_replace_callback(
+			'#(<style[^>]*?>)(.+?)(</style>)#s',
+			static function ( $matches ) {
+				array_shift( $matches );
+				list( $start_tag, $text, $end_tag ) = $matches;
+
+				// Normalize versions which occur in sourceURL.
+				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+
+				// Ensure any home URLs are normalized to account for variations in the testing environment.
+				$text = str_replace(
+					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
+					'https://example.com/',
+					$text
+				);
+
 				return $start_tag . $text . $end_tag;
 			},
 			$buffer
