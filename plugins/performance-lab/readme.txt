@@ -627,7 +627,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Upgrade Notice ==
 
-= n.e.x.t =
+= 4.0.0 =
 
 This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and Instant Back/Forward which enables back/forward cache (bfcache) for instant history navigations.
 
