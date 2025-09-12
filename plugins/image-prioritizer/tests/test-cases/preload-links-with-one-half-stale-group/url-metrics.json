@@ -194,6 +194,198 @@
   {
     "url": "https://example.net/",
     "viewport": {
+      "width": 414,
+      "height": 896 
+    },
+    "elements": [
+      {
+        "isLCP": true,
+        "isLCPCandidate": true,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[1][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 1,
+        "intersectionRect": {
+          "x": 30,
+          "y": 182.5,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 182.5,
+          "right": 330.83331298828125,
+          "bottom": 383.046875,
+          "left": 30
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 182.5,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 182.5,
+          "right": 330.83331298828125,
+          "bottom": 383.046875,
+          "left": 30
+        }
+      },
+      {
+        "isLCP": false,
+        "isLCPCandidate": false,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[2][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 0,
+        "intersectionRect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 899.5572509765625,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 899.5572509765625,
+          "right": 330.83331298828125,
+          "bottom": 1100.1041259765625,
+          "left": 30
+        }
+      }
+    ],
+    "timestamp": 1740979411.720624,
+    "uuid": "913270c1-7903-4fa5-8020-537a88b099ce",
+    "etag": "f8527651f96776745f88cc49df70b62d"
+  },
+  {
+    "url": "https://example.net/",
+    "viewport": {
+      "width": 414,
+      "height": 896
+    },
+    "elements": [
+      {
+        "isLCP": true,
+        "isLCPCandidate": true,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[1][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 1,
+        "intersectionRect": {
+          "x": 30,
+          "y": 228.4895782470703,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 228.4895782470703,
+          "right": 330.83331298828125,
+          "bottom": 429.0364532470703,
+          "left": 30
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 228.4895782470703,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 228.4895782470703,
+          "right": 330.83331298828125,
+          "bottom": 429.0364532470703,
+          "left": 30
+        }
+      },
+      {
+        "isLCP": false,
+        "isLCPCandidate": false,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[2][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 0,
+        "intersectionRect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 945.546875,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 945.546875,
+          "right": 330.83331298828125,
+          "bottom": 1146.09375,
+          "left": 30
+        }
+      }
+    ],
+    "timestamp": 1740979341.748015,
+    "uuid": "1ea8ffa1-0af2-4af1-8a01-0728af72a12f",
+    "etag": "f8527651f96776745f88cc49df70b62d"
+  },
+  {
+    "url": "https://example.net/",
+    "viewport": {
+      "width": 414,
+      "height": 896
+    },
+    "elements": [
+      {
+        "isLCP": true,
+        "isLCPCandidate": true,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[1][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 1,
+        "intersectionRect": {
+          "x": 30,
+          "y": 228.4895782470703,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 228.4895782470703,
+          "right": 330.83331298828125,
+          "bottom": 429.0364532470703,
+          "left": 30
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 228.4895782470703,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 228.4895782470703,
+          "right": 330.83331298828125,
+          "bottom": 429.0364532470703,
+          "left": 30
+        }
+      },
+      {
+        "isLCP": false,
+        "isLCPCandidate": false,
+        "xpath": "/HTML/BODY/DIV[@class='wp-site-blocks']/*[2][self::MAIN]/*[2][self::DIV]/*[1][self::UL]/*[2][self::LI]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::A]/*[1][self::IMG]",
+        "intersectionRatio": 0,
+        "intersectionRect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "boundingClientRect": {
+          "x": 30,
+          "y": 945.546875,
+          "width": 300.83331298828125,
+          "height": 200.546875,
+          "top": 945.546875,
+          "right": 330.83331298828125,
+          "bottom": 1146.09375,
+          "left": 30
+        }
+      }
+    ],
+    "timestamp": 1740979334.440874,
+    "uuid": "7e13830d-48d5-4f1b-81e2-53f6c1f2f50b",
+    "etag": "f8527651f96776745f88cc49df70b62d"
+  },
+  {
+    "url": "https://example.net/",
+    "viewport": {
       "width": 515,
       "height": 989
     },
