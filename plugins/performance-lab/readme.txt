@@ -19,8 +19,8 @@ The feature plugins which are currently featured by this plugin are:
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
+* [Instant Back/Forward](https://wordpress.org/plugins/nocache-bfcache/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
-* [No-cache BFCache](https://wordpress.org/plugins/nocache-bfcache/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
@@ -78,7 +78,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Enhancements**
 
-* Add No-cache BFCache to list of performance feature plugins. ([2119](https://github.com/WordPress/performance/pull/2119))
+* Add Instant Back/Forward to list of performance feature plugins. ([2119](https://github.com/WordPress/performance/pull/2119))
 * Add admin pointers to promote new Performance Lab features. ([2122](https://github.com/WordPress/performance/pull/2122))
 * Implement opt-in `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` for  Server-Timing `object-cache.php` placement. ([1996](https://github.com/WordPress/performance/pull/1996))
 * Use `wp_is_rest_endpoint()` to detect if we are handling a REST API request. ([2094](https://github.com/WordPress/performance/pull/2094))
@@ -627,9 +627,9 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Upgrade Notice ==
 
-= n.e.x.t =
+= 4.0.0 =
 
-This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and No-cache BFCache which enables back/forward cache (bfcache) for instant history navigations.
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and Instant Back/Forward which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 
