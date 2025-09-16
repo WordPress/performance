@@ -127,7 +127,7 @@ jobs:
 
       - name: Start deployment
         if: steps.check-deployment.outputs.deploy == 'true'
-        uses: bobheadxi/deployments@18dcfe705d6892121d665b21ef9ff448791807f3 # v1
+        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1
         id: wporg-deployment
         with:
           step: start
@@ -149,7 +149,7 @@ jobs:
 
       - name: Finish deployment
         if: ${{ steps.wporg-deployment.outputs.deployment_id && always() }}
-        uses: bobheadxi/deployments@18dcfe705d6892121d665b21ef9ff448791807f3 # v1
+        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
