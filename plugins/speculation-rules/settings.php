@@ -340,6 +340,7 @@ function plsr_render_settings_field( array $args ): void {
 				}
 JS;
 			// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
+			$js .= "\n//# sourceURL=speculation-rules-auth-admin-notice";
 			wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 			?>
 		<?php endif; ?>
