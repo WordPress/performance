@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-      - uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 # v2
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2
         with:
           php-version: latest
       - name: Get Composer Cache Directory
