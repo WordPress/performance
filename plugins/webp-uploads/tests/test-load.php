@@ -1268,4 +1268,44 @@ class Test_WebP_Uploads_Load extends TestCase {
 		);
 		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
 	}
+
+	/**
+	 * Test that the webp_uploads_update_featured_image function is hooked to the post_thumbnail_html filter.
+	 */
+	public function test_webp_uploads_update_featured_image_hooked_into_post_thumbnail_html(): void {
+		$this->assertSame( 10, has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+	}
+
+	/**
+	 * Test that the featured image is not wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_disabled(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<img ', $featured_image );
+	}
+
+	/**
+	 * Test that the featured image is wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_enabled(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->opt_in_to_picture_element();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
 }
