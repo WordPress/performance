@@ -202,7 +202,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				$style_rules[] = $style_rule;
 			}
 
-			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
+			$processor->append_head_html( sprintf( "<style>\n%s\n/*# sourceURL=embed-optimizer-reduce-layout-shifts */\n</style>\n", join( "\n", $style_rules ) ) );
 		}
 	}
 

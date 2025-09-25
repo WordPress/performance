@@ -351,6 +351,14 @@ function embed_optimizer_get_lazy_load_script(): string {
 		return '';
 	}
 
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => EMBED_OPTIMIZER_VERSION ),
+			plugins_url( embed_optimizer_get_asset_path( 'lazy-load.js' ), __FILE__ )
+		)
+	);
+
 	return $script;
 }
 

@@ -152,21 +152,21 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
 			),
 			'dashboard_new_dismissed'          => array(
-				// Note: If the No-cache BFCache plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
+				// Note: If the Instant Back/Forward plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
 				'initial_wp_pointers'   => 'perflab-admin-pointer',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
 			),
 			'dashboard_last_auto_dismissed'    => array(
-				// Note: The No-cache BFCache plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+				// Note: The Instant Back/Forward plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
 				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth',
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth,perflab-feature-view-transitions',
 			),
 			'dashboard_one_not_auto_dismissed' => array(
-				// Note: The No-cache BFCache plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+				// Note: The Instant Back/Forward plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
 				// Note: The Speculative Loading admin pointer 'perflab-feature-speculation-rules-auth' does not get auto-dismissed because it is for a new feature of an existing feature plugin.
 				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache',
 				'hook_suffix'           => 'index.php',
