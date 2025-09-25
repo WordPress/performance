@@ -103,7 +103,7 @@ function perflab_get_admin_pointers(): array {
 			'dismiss_if_installed' => true,
 		),
 		'perflab-feature-nocache-bfcache'  => array(
-			'content'              => __( 'New <strong>No-cache BFCache</strong> feature now available.', 'performance-lab' ),
+			'content'              => __( 'New <strong>Instant Back/Forward</strong> feature now available.', 'performance-lab' ),
 			'plugin'               => 'nocache-bfcache',
 			'dismiss_if_installed' => true,
 		),

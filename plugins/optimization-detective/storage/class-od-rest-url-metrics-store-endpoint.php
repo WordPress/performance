@@ -232,7 +232,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 
 		// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
 		$max_size       = od_get_maximum_url_metric_size();
-		$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+		$content_length = strlen( (string) wp_json_encode( $url_metric, JSON_UNESCAPED_SLASHES ) ); // Flags match with \OD_URL_Metrics_Post_Type::update_post().
 		if ( $content_length > $max_size ) {
 			return new WP_Error(
 				'rest_content_too_large',
