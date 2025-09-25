@@ -534,6 +534,8 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 *
 	 * @param string $context  The context to test.
 	 * @param bool   $expected Whether the image should be wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
 	 */
 	public function test_webp_uploads_wrap_image_in_picture_with_different_context( string $context, bool $expected ): void {
 		$image = wp_get_attachment_image(
@@ -549,7 +551,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$this->opt_in_to_picture_element();
 		$filtered_image = apply_filters( 'wp_content_img_tag', $image, $context, self::$image_id );
 		if ( $expected ) {
-			$this->assertStringStartsWith( '<picture', $filtered_image );
+			$processor = new WP_HTML_Tag_Processor( $filtered_image );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'PICTURE', $processor->get_tag() );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'SOURCE', $processor->get_tag() );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'IMG', $processor->get_tag() );
 		} else {
 			$this->assertSame( $image, $filtered_image );
 		}
