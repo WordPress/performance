@@ -15,7 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets plugin info for the given plugin slug from WordPress.org.
  *
+ * Falls back to local plugin data when external requests are disabled or fail.
+ *
  * @since 2.8.0
+ * @since 4.0.1 Added fallback to local plugin data when external requests fail.
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
  * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string}|WP_Error Array of plugin data or WP_Error if failed.
@@ -33,6 +36,21 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 			);
 		}
 		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
+	}
+
+	// Check if external requests are blocked and if we should use local fallback.
+	$should_use_fallback = perflab_are_external_requests_blocked();
+
+	if ( $should_use_fallback ) {
+		// Try to get local plugin data instead.
+		$local_data = perflab_get_local_plugin_fallback_data( array( $plugin_slug ) );
+		if ( isset( $local_data[ $plugin_slug ] ) ) {
+			// Cache the local data with a shorter expiration.
+			$cached_plugins                 = is_array( $plugins ) ? $plugins : array();
+			$cached_plugins[ $plugin_slug ] = $local_data[ $plugin_slug ];
+			set_transient( $transient_key, $cached_plugins, 5 * MINUTE_IN_SECONDS );
+			return $local_data[ $plugin_slug ];
+		}
 	}
 
 	$fields = array(
@@ -60,6 +78,19 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugins    = array();
 
 	if ( is_wp_error( $response ) ) {
+		// Try local fallback first before giving up.
+		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
+
+		if ( ! empty( $local_fallback_data ) ) {
+			// We have some local plugins to show, cache them.
+			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
+
+			if ( isset( $local_fallback_data[ $plugin_slug ] ) ) {
+				return $local_fallback_data[ $plugin_slug ];
+			}
+		}
+
+		// No local fallback available, store error.
 		$plugins[ $plugin_slug ] = array(
 			'error' => array(
 				'code'    => 'api_error',
@@ -77,6 +108,19 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 		$has_errors = true;
 	} elseif ( ! is_object( $response ) || ! property_exists( $response, 'plugins' ) ) {
+		// Try local fallback first before giving up.
+		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
+
+		if ( ! empty( $local_fallback_data ) ) {
+			// We have some local plugins to show, cache them.
+			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
+
+			if ( isset( $local_fallback_data[ $plugin_slug ] ) ) {
+				return $local_fallback_data[ $plugin_slug ];
+			}
+		}
+
+		// No local fallback available, store error.
 		$plugins[ $plugin_slug ] = array(
 			'error' => array(
 				'code'    => 'no_plugins',
@@ -593,6 +637,13 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		if ( null !== $settings_url ) {
 			/* translators: %s is the settings URL */
 			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
+		} elseif ( ! empty( $plugin_data['fallback_local'] ) ) {
+			// Try local fallback settings URL for locally installed plugins.
+			$local_settings_url = perflab_get_local_plugin_settings_url( $plugin_data['slug'] );
+			if ( null !== $local_settings_url ) {
+				/* translators: %s is the settings URL */
+				$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $local_settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
+			}
 		}
 	}
 	?>
@@ -666,6 +717,11 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 					<?php if ( $plugin_data['experimental'] ) : ?>
 						<em class="perflab-plugin-experimental">
 							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
+						</em>
+					<?php endif; ?>
+					<?php if ( ! empty( $plugin_data['fallback_local'] ) ) : ?>
+						<em class="perflab-plugin-local-fallback" title="<?php esc_attr_e( 'Plugin information loaded from local installation (external requests disabled)', 'performance-lab' ); ?>">
+							<?php echo esc_html( _x( '(local)', 'plugin suffix indicating local fallback data', 'performance-lab' ) ); ?>
 						</em>
 					<?php endif; ?>
 				</h3>

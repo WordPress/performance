@@ -356,6 +356,7 @@ if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/load.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/server-timing.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/plugins.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/local-plugin-fallback.php';
 }
 
 // Load REST API.
