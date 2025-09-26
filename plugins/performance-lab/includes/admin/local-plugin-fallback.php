@@ -114,7 +114,7 @@ if ( ! function_exists( 'perflab_get_local_plugin_fallback_data' ) ) {
 				$readme_content = file_get_contents( $readme_path );
 				if ( false !== $readme_content ) {
 					// Parse description from readme - look for description after "== Description ==".
-					if ( preg_match( '/==\s*Description\s*==(.*?)(?==|\z)/is', $readme_content, $matches ) ) {
+					if ( 1 === preg_match( '/==\s*Description\s*==(.*?)(?==|\z)/is', $readme_content, $matches ) ) {
 						$description = trim( $matches[1] );
 						// Remove markdown formatting and clean up.
 						$description = preg_replace( '/\*\*(.*?)\*\*/', '$1', $description ) ?? $description;
