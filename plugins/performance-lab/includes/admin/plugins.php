@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Falls back to local plugin data when external requests are disabled or fail.
  *
  * @since 2.8.0
- * @since 4.0.1 Added fallback to local plugin data when external requests fail.
+ * @since n.e.x.t Added fallback to local plugin data when external requests fail.
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
  * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string}|WP_Error Array of plugin data or WP_Error if failed.
@@ -637,13 +637,6 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		if ( null !== $settings_url ) {
 			/* translators: %s is the settings URL */
 			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
-		} elseif ( ! empty( $plugin_data['fallback_local'] ) ) {
-			// Try local fallback settings URL for locally installed plugins.
-			$local_settings_url = perflab_get_local_plugin_settings_url( $plugin_data['slug'] );
-			if ( null !== $local_settings_url ) {
-				/* translators: %s is the settings URL */
-				$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $local_settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
-			}
 		}
 	}
 	?>
@@ -717,11 +710,6 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 					<?php if ( $plugin_data['experimental'] ) : ?>
 						<em class="perflab-plugin-experimental">
 							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
-						</em>
-					<?php endif; ?>
-					<?php if ( ! empty( $plugin_data['fallback_local'] ) ) : ?>
-						<em class="perflab-plugin-local-fallback" title="<?php esc_attr_e( 'Plugin information loaded from local installation (external requests disabled)', 'performance-lab' ); ?>">
-							<?php echo esc_html( _x( '(local)', 'plugin suffix indicating local fallback data', 'performance-lab' ) ); ?>
 						</em>
 					<?php endif; ?>
 				</h3>

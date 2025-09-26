@@ -6,7 +6,7 @@
  * performance-related plugins when external API requests are disabled or fail.
  *
  * @package performance-lab
- * @since 4.0.1
+ * @since n.e.x.t
  */
 
 // @codeCoverageIgnoreStart
@@ -22,10 +22,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * are disabled or fail, allowing the Performance Lab interface to still show
  * cards for locally installed performance plugins.
  *
- * @since 4.0.1
+ * @since n.e.x.t
  *
  * @param string[] $plugin_slugs Array of plugin slugs to get local info for.
- * @return array<string, array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string, fallback_local: bool, is_installed: bool, is_active: bool}> Local plugin data keyed by slug.
+ * @return array<string, array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string, is_installed: bool, is_active: bool}> Local plugin data keyed by slug.
  */
 function perflab_get_local_plugin_fallback_data( array $plugin_slugs ): array {
 	// Ensure we have access to plugin functions.
@@ -48,15 +48,17 @@ function perflab_get_local_plugin_fallback_data( array $plugin_slugs ): array {
 		$is_active      = is_plugin_active( $plugin_file );
 
 		// Build normalized plugin data similar to WordPress.org API response.
+		$readme_description = perflab_get_plugin_readme_description( $plugin_file );
+		$description        = $readme_description ? $readme_description : ( $plugin_headers['Description'] ?? '' );
+
 		$fallback_data[ $plugin_slug ] = array(
 			'name'              => $plugin_headers['Name'] ?? $plugin_slug,
 			'slug'              => $plugin_slug,
-			'short_description' => perflab_sanitize_plugin_description( $plugin_headers['Description'] ?? '' ),
+			'short_description' => $description,
 			'requires'          => $plugin_headers['RequiresWP'] ?? false,
 			'requires_php'      => $plugin_headers['RequiresPHP'] ?? false,
-			'requires_plugins'  => perflab_parse_requires_plugins( $plugin_headers ),
+			'requires_plugins'  => perflab_parse_requires_plugins( $plugin_headers, $plugin_slug ),
 			'version'           => $plugin_headers['Version'] ?? '0.0.0',
-			'fallback_local'    => true, // Flag to identify this as local fallback data.
 			'is_installed'      => true,
 			'is_active'         => $is_active,
 		);
@@ -68,7 +70,7 @@ function perflab_get_local_plugin_fallback_data( array $plugin_slugs ): array {
 /**
  * Finds the plugin file for a given slug among installed plugins.
  *
- * @since 4.0.1
+ * @since n.e.x.t
  *
  * @param array<string, array<string, string>> $local_plugins Array from get_plugins().
  * @param string                               $plugin_slug   Plugin slug to find.
@@ -88,12 +90,49 @@ function perflab_find_local_plugin_file( array $local_plugins, string $plugin_sl
 }
 
 /**
- * Sanitizes and truncates plugin description for display.
+ * Gets plugin description from readme file.
  *
- * @since 4.0.1
+ * @since n.e.x.t
+ *
+ * @param string $plugin_file Plugin file path.
+ * @return string Plugin description from readme or empty string.
+ */
+function perflab_get_plugin_readme_description( string $plugin_file ): string {
+	if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+		return '';
+	}
+
+	$plugin_dir   = dirname( WP_PLUGIN_DIR . '/' . $plugin_file );
+	$readme_files = array( 'readme.txt', 'README.txt', 'readme.md', 'README.md' );
+
+	foreach ( $readme_files as $readme_file ) {
+		$readme_path = $plugin_dir . '/' . $readme_file;
+		if ( file_exists( $readme_path ) ) {
+			$readme_content = file_get_contents( $readme_path );
+			if ( $readme_content ) {
+				// Parse description from readme - look for description after "== Description ==".
+				if ( preg_match( '/==\s*Description\s*==(.*?)(?==|\z)/is', $readme_content, $matches ) ) {
+					$description = trim( $matches[1] );
+					// Remove markdown formatting and clean up.
+					$description = preg_replace( '/\*\*(.*?)\*\*/', '$1', $description );
+					$description = preg_replace( '/\*(.*?)\*/', '$1', $description );
+					$description = preg_replace( '/\[([^\]]+)\]\([^\)]+\)/', '$1', $description );
+					return trim( $description );
+				}
+			}
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Sanitizes plugin description for display.
+ *
+ * @since n.e.x.t
  *
  * @param string $description Raw plugin description.
- * @return string Sanitized and truncated description.
+ * @return string Sanitized description.
  */
 function perflab_sanitize_plugin_description( string $description ): string {
 	if ( empty( $description ) ) {
@@ -104,11 +143,6 @@ function perflab_sanitize_plugin_description( string $description ): string {
 	$description = wp_strip_all_tags( $description );
 	$description = html_entity_decode( $description, ENT_QUOTES, 'UTF-8' );
 
-	// Truncate to reasonable length for short description.
-	if ( mb_strlen( $description ) > 200 ) {
-		$description = mb_substr( $description, 0, 200 ) . '...';
-	}
-
 	return trim( $description );
 }
 
@@ -117,12 +151,13 @@ function perflab_sanitize_plugin_description( string $description ): string {
  *
  * This attempts to extract required plugins from various possible header formats.
  *
- * @since 4.0.1
+ * @since n.e.x.t
  *
  * @param array<string, string> $plugin_headers Plugin headers array.
+ * @param string                $plugin_slug    Plugin slug to determine dependencies.
  * @return string[] Array of required plugin slugs.
  */
-function perflab_parse_requires_plugins( array $plugin_headers ): array {
+function perflab_parse_requires_plugins( array $plugin_headers, string $plugin_slug ): array {
 	$requires_plugins = array();
 
 	// Check for RequiresPlugins header (WordPress 6.5+).
@@ -132,15 +167,13 @@ function perflab_parse_requires_plugins( array $plugin_headers ): array {
 	}
 
 	// For known Performance Lab plugins, add their specific dependencies.
-	$plugin_name = $plugin_headers['Name'] ?? '';
-
-	// Embed Optimizer has a soft dependency on Optimization Detective.
-	if ( false !== strpos( $plugin_name, 'Embed Optimizer' ) ) {
+	// Embed Optimizer has a hard dependency on Optimization Detective.
+	if ( 'embed-optimizer' === $plugin_slug ) {
 		$requires_plugins[] = 'optimization-detective';
 	}
 
-	// Image Prioritizer has a soft dependency on Optimization Detective.
-	if ( false !== strpos( $plugin_name, 'Image Prioritizer' ) ) {
+	// Image Prioritizer has a hard dependency on Optimization Detective.
+	if ( 'image-prioritizer' === $plugin_slug ) {
 		$requires_plugins[] = 'optimization-detective';
 	}
 
@@ -150,7 +183,7 @@ function perflab_parse_requires_plugins( array $plugin_headers ): array {
 /**
  * Checks if external requests are blocked or likely to fail.
  *
- * @since 4.0.1
+ * @since n.e.x.t
  *
  * @return bool True if external requests are blocked or should be avoided.
  */
@@ -159,7 +192,12 @@ function perflab_are_external_requests_blocked(): bool {
 	if ( defined( 'WP_HTTP_BLOCK_EXTERNAL' ) && WP_HTTP_BLOCK_EXTERNAL ) {
 		// Check if wordpress.org is in the allowed hosts.
 		$allowed_hosts = defined( 'WP_ACCESSIBLE_HOSTS' ) ? WP_ACCESSIBLE_HOSTS : '';
-		if ( empty( $allowed_hosts ) || false === strpos( $allowed_hosts, 'wordpress.org' ) ) {
+		if ( empty( $allowed_hosts ) ) {
+			return true;
+		}
+
+		$allowed_hosts_array = array_map( 'trim', explode( ',', $allowed_hosts ) );
+		if ( ! in_array( 'wordpress.org', $allowed_hosts_array, true ) ) {
 			return true;
 		}
 	}
@@ -172,24 +210,11 @@ function perflab_are_external_requests_blocked(): bool {
  *
  * This attempts to determine the settings URL for locally installed performance plugins.
  *
- * @since 4.0.1
+ * @since n.e.x.t
  *
  * @param string $plugin_slug Plugin slug.
  * @return string|null Settings URL or null if not available.
  */
 function perflab_get_local_plugin_settings_url( string $plugin_slug ): ?string {
-	// Use existing function if available (it should be).
-	if ( function_exists( 'perflab_get_plugin_settings_url' ) ) {
-		return perflab_get_plugin_settings_url( $plugin_slug );
-	}
-
-	// Fallback for common patterns.
-	$settings_patterns = array(
-		'webp-uploads'            => admin_url( 'options-media.php' ),
-		'dominant-color-images'   => admin_url( 'options-media.php' ),
-		'speculation-rules'       => admin_url( 'options-general.php?page=speculation-rules' ),
-		'performant-translations' => admin_url( 'options-general.php?page=performant-translations' ),
-	);
-
-	return $settings_patterns[ $plugin_slug ] ?? null;
+	return perflab_get_plugin_settings_url( $plugin_slug );
 }

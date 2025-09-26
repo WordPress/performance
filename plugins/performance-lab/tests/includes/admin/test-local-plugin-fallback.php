@@ -78,7 +78,6 @@ class Test_Local_Plugin_Fallback extends WP_UnitTestCase {
 			'Simple text'                          => 'Simple text',
 			'Text with <strong>HTML</strong> tags' => 'Text with HTML tags',
 			'Text with &amp; entities'             => 'Text with & entities',
-			str_repeat( 'A', 250 )                 => str_repeat( 'A', 200 ) . '...',
 			''                                     => '',
 		);
 
@@ -94,24 +93,19 @@ class Test_Local_Plugin_Fallback extends WP_UnitTestCase {
 		// Test RequiresPlugins header.
 		$headers = array(
 			'RequiresPlugins' => 'optimization-detective, auto-sizes',
-			'Name'            => 'Test Plugin',
 		);
-		$result  = perflab_parse_requires_plugins( $headers );
+		$result  = perflab_parse_requires_plugins( $headers, 'test-plugin' );
 		$this->assertContains( 'optimization-detective', $result );
 		$this->assertContains( 'auto-sizes', $result );
 
 		// Test known dependency: Embed Optimizer.
-		$headers = array(
-			'Name' => 'Embed Optimizer',
-		);
-		$result  = perflab_parse_requires_plugins( $headers );
+		$headers = array();
+		$result  = perflab_parse_requires_plugins( $headers, 'embed-optimizer' );
 		$this->assertContains( 'optimization-detective', $result );
 
 		// Test known dependency: Image Prioritizer.
-		$headers = array(
-			'Name' => 'Image Prioritizer',
-		);
-		$result  = perflab_parse_requires_plugins( $headers );
+		$headers = array();
+		$result  = perflab_parse_requires_plugins( $headers, 'image-prioritizer' );
 		$this->assertContains( 'optimization-detective', $result );
 	}
 }
