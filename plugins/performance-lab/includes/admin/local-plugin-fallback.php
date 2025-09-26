@@ -43,7 +43,7 @@ if ( ! function_exists( 'perflab_get_local_plugin_fallback_data' ) ) {
 			// Look for plugin files that match this slug.
 			$plugin_file = perflab_find_local_plugin_file( $local_plugins, $plugin_slug );
 
-			if ( ! $plugin_file ) {
+			if ( false === $plugin_file ) {
 				continue; // Plugin not installed locally.
 			}
 
@@ -115,7 +115,7 @@ if ( ! function_exists( 'perflab_get_local_plugin_fallback_data' ) ) {
 				if ( false !== $readme_content ) {
 					// Parse description from readme - look for description after "== Description ==".
 					if ( preg_match( '/==\s*Description\s*==(.*?)(?==|\z)/is', $readme_content, $matches ) ) {
-						$description = trim( $matches[1] ?? '' );
+						$description = trim( $matches[1] );
 						// Remove markdown formatting and clean up.
 						$description = preg_replace( '/\*\*(.*?)\*\*/', '$1', $description ) ?? $description;
 						$description = preg_replace( '/\*(.*?)\*/', '$1', $description ) ?? $description;

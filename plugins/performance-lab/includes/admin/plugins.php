@@ -81,7 +81,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		// Try local fallback first before giving up.
 		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
 
-		if ( ! empty( $local_fallback_data ) ) {
+		if ( null !== $local_fallback_data && is_array( $local_fallback_data ) && count( $local_fallback_data ) > 0 ) {
 			// We have some local plugins to show, cache them.
 			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
 
@@ -111,7 +111,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		// Try local fallback first before giving up.
 		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
 
-		if ( ! empty( $local_fallback_data ) ) {
+		if ( null !== $local_fallback_data && is_array( $local_fallback_data ) && count( $local_fallback_data ) > 0 ) {
 			// We have some local plugins to show, cache them.
 			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
 
