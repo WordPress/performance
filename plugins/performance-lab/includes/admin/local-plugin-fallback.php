@@ -15,6 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // @codeCoverageIgnoreEnd
 
+// Ensure this file is loaded when Performance Lab plugin is active
+if ( ! function_exists( 'perflab_get_local_plugin_fallback_data' ) ) {
+
 /**
  * Gets local plugin information for Performance Lab standalone plugins.
  *
@@ -49,7 +52,7 @@ function perflab_get_local_plugin_fallback_data( array $plugin_slugs ): array {
 
 		// Build normalized plugin data similar to WordPress.org API response.
 		$readme_description = perflab_get_plugin_readme_description( $plugin_file );
-		$description        = $readme_description ? $readme_description : ( $plugin_headers['Description'] ?? '' );
+		$description        = $readme_description !== '' ? $readme_description : ( $plugin_headers['Description'] ?? '' );
 
 		$fallback_data[ $plugin_slug ] = array(
 			'name'              => $plugin_headers['Name'] ?? $plugin_slug,
@@ -109,14 +112,14 @@ function perflab_get_plugin_readme_description( string $plugin_file ): string {
 		$readme_path = $plugin_dir . '/' . $readme_file;
 		if ( file_exists( $readme_path ) ) {
 			$readme_content = file_get_contents( $readme_path );
-			if ( $readme_content ) {
+			if ( $readme_content !== false ) {
 				// Parse description from readme - look for description after "== Description ==".
 				if ( preg_match( '/==\s*Description\s*==(.*?)(?==|\z)/is', $readme_content, $matches ) ) {
-					$description = trim( $matches[1] );
+					$description = trim( $matches[1] ?? '' );
 					// Remove markdown formatting and clean up.
-					$description = preg_replace( '/\*\*(.*?)\*\*/', '$1', $description );
-					$description = preg_replace( '/\*(.*?)\*/', '$1', $description );
-					$description = preg_replace( '/\[([^\]]+)\]\([^\)]+\)/', '$1', $description );
+					$description = preg_replace( '/\*\*(.*?)\*\*/', '$1', $description ) ?? $description;
+					$description = preg_replace( '/\*(.*?)\*/', '$1', $description ) ?? $description;
+					$description = preg_replace( '/\[([^\]]+)\]\([^\)]+\)/', '$1', $description ) ?? $description;
 					return trim( $description );
 				}
 			}
@@ -135,7 +138,7 @@ function perflab_get_plugin_readme_description( string $plugin_file ): string {
  * @return string Sanitized description.
  */
 function perflab_sanitize_plugin_description( string $description ): string {
-	if ( empty( $description ) ) {
+	if ( $description === '' ) {
 		return '';
 	}
 
@@ -161,7 +164,7 @@ function perflab_parse_requires_plugins( array $plugin_headers, string $plugin_s
 	$requires_plugins = array();
 
 	// Check for RequiresPlugins header (WordPress 6.5+).
-	if ( ! empty( $plugin_headers['RequiresPlugins'] ) ) {
+	if ( isset( $plugin_headers['RequiresPlugins'] ) && $plugin_headers['RequiresPlugins'] !== '' ) {
 		$plugins          = array_map( 'trim', explode( ',', $plugin_headers['RequiresPlugins'] ) );
 		$requires_plugins = array_merge( $requires_plugins, $plugins );
 	}
@@ -192,7 +195,7 @@ function perflab_are_external_requests_blocked(): bool {
 	if ( defined( 'WP_HTTP_BLOCK_EXTERNAL' ) && WP_HTTP_BLOCK_EXTERNAL ) {
 		// Check if wordpress.org is in the allowed hosts.
 		$allowed_hosts = defined( 'WP_ACCESSIBLE_HOSTS' ) ? WP_ACCESSIBLE_HOSTS : '';
-		if ( empty( $allowed_hosts ) ) {
+		if ( $allowed_hosts === '' ) {
 			return true;
 		}
 
@@ -218,3 +221,5 @@ function perflab_are_external_requests_blocked(): bool {
 function perflab_get_local_plugin_settings_url( string $plugin_slug ): ?string {
 	return perflab_get_plugin_settings_url( $plugin_slug );
 }
+
+} // Close the function_exists check

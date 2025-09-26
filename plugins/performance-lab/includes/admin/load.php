@@ -11,6 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // @codeCoverageIgnoreEnd
 
+// Load local plugin fallback functionality.
+require_once __DIR__ . '/local-plugin-fallback.php';
+
 /**
  * Adds the features page to the Settings menu.
  *
