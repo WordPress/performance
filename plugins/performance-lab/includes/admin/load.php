@@ -11,9 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // @codeCoverageIgnoreEnd
 
-// Load local plugin fallback functionality.
-require_once __DIR__ . '/local-plugin-fallback.php';
-
 /**
  * Adds the features page to the Settings menu.
  *
@@ -639,4 +636,6 @@ function perflab_print_row_meta_install_notice( string $plugin_file ): void {
 		wp_kses( $message, array( 'a' => array( 'href' => array() ) ) )
 	);
 }
+
 add_action( 'after_plugin_row_meta', 'perflab_print_row_meta_install_notice' );
+

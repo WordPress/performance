@@ -103,8 +103,10 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
 		),
 		'embed-optimizer'         => array(
-			'constant'     => 'EMBED_OPTIMIZER_VERSION',
-			'experimental' => false,
+			'constant'         => 'EMBED_OPTIMIZER_VERSION',
+			'experimental'     => false,
+			// Soft dependency: Optimization Detective enhances functionality.
+			'suggests_plugins' => array( 'optimization-detective' ),
 		),
 		'image-prioritizer'       => array(
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
@@ -356,7 +358,6 @@ if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/load.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/server-timing.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/plugins.php';
-	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/local-plugin-fallback.php';
 }
 
 // Load REST API.
