@@ -154,11 +154,15 @@ function perflab_get_plugin_dependencies( string $plugin_slug, array $plugin_hea
 		$requires_plugins = array_merge( $requires_plugins, $standalone_data[ $plugin_slug ]['suggests_plugins'] );
 	}
 
-	/** @var array<int, non-falsy-string> $filtered */
+	/* @var array<int, non-falsy-string> $filtered */
 	$filtered = array_filter( $requires_plugins );
 	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
 	/** @var list<non-falsy-string> $result */
-	$result = array_values( $unique );
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
 	return $result;
 }
 
@@ -177,16 +181,20 @@ function perflab_add_suggested_plugins( string $plugin_slug, array $requires_plu
 		$requires_plugins = array_merge( $requires_plugins, $standalone_data[ $plugin_slug ]['suggests_plugins'] );
 	}
 
-	/** @var array<int, non-falsy-string> $filtered */
+	/* @var array<int, non-falsy-string> $filtered */
 	$filtered = array_filter( $requires_plugins );
 	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
 	/** @var list<non-falsy-string> $result */
-	$result = array_values( $unique );
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
 	return $result;
 }
 
 /**
- * Parses the requires_plugins from plugin headers.
+ * Parse requires_plugins from plugin headers.
  *
  * Back-compat wrapper retained for tests; delegates to perflab_get_plugin_dependencies()
  * and applies minimal historical behavior.
@@ -206,16 +214,20 @@ function perflab_parse_requires_plugins( array $plugin_headers, string $plugin_s
 		$deps[] = 'optimization-detective';
 	}
 
-	/** @var array<int, non-falsy-string> $filtered */
+	/* @var array<int, non-falsy-string> $filtered */
 	$filtered = array_filter( $deps );
 	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
 	/** @var list<non-falsy-string> $result */
-	$result = array_values( $unique );
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
 	return $result;
 }
 
 /**
- * Sanitizes plugin description for display.
+ * Sanitize plugin description for display.
  *
  * Back-compat wrapper retained for tests.
  *
@@ -237,7 +249,7 @@ function perflab_sanitize_plugin_description( string $description ): string {
 }
 
 /**
- * Checks if external requests are blocked or likely to fail.
+ * Check if external requests are blocked or likely to fail.
  *
  * @since n.e.x.t
  *
@@ -262,7 +274,7 @@ function perflab_are_external_requests_blocked(): bool {
 }
 
 /**
- * Gets plugin info for the given plugin slug from WordPress.org.
+ * Get plugin info for the given plugin slug from WordPress.org.
  *
  * Falls back to local plugin data when external requests are disabled or fail.
  *
@@ -449,7 +461,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 }
 
 /**
- * Returns an array of WPP standalone plugins.
+ * Return an array of WPP standalone plugins.
  *
  * @since 2.8.0
  *
@@ -462,7 +474,7 @@ function perflab_get_standalone_plugins(): array {
 }
 
 /**
- * Renders plugin UI for managing standalone plugins within PL Settings screen.
+ * Render plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since 2.8.0
  */
