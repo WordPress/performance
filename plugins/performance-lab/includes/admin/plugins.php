@@ -158,7 +158,7 @@ function perflab_get_plugin_dependencies( string $plugin_slug, array $plugin_hea
 	$filtered = array_filter( $requires_plugins );
 	$unique   = array_unique( $filtered );
 	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
-	/** @var list<non-falsy-string> $result */
+	/* @var list<non-falsy-string> $result */
 	$result = array();
 	foreach ( $unique as $dep ) {
 		$result[] = $dep;
@@ -185,7 +185,7 @@ function perflab_add_suggested_plugins( string $plugin_slug, array $requires_plu
 	$filtered = array_filter( $requires_plugins );
 	$unique   = array_unique( $filtered );
 	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
-	/** @var list<non-falsy-string> $result */
+	/* @var list<non-falsy-string> $result */
 	$result = array();
 	foreach ( $unique as $dep ) {
 		$result[] = $dep;
@@ -218,7 +218,7 @@ function perflab_parse_requires_plugins( array $plugin_headers, string $plugin_s
 	$filtered = array_filter( $deps );
 	$unique   = array_unique( $filtered );
 	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
-	/** @var list<non-falsy-string> $result */
+	/* @var list<non-falsy-string> $result */
 	$result = array();
 	foreach ( $unique as $dep ) {
 		$result[] = $dep;
