@@ -14,14 +14,13 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 * [Node.js and npm](https://nodejs.org/en/)
 * [Docker](https://www.docker.com/)
-* [Git](https://git-scm.com/)
 * [Composer](https://getcomposer.org/)
 
 ### Installation
 
-1. Clone the repository, e.g. `git clone https://github.com/WordPress/performance.git`.
-2. Run `npm install` to install the Node.js dependencies.
-3. Run `composer install` to install the PHP dependencies.
+1. Run `npm install` to install the Node.js dependencies.
+2. Run `composer install` to install the PHP dependencies.
+3. Run `npm run build` to do an initial build of the assets.
 
 ### Building
 
