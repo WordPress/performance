@@ -25,7 +25,7 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 ### Building
 
-* To build the JavaScript and CSS assets: `npm run build``
+* To build the JavaScript and CSS assets: `npm run build`
 * To build all plugins and place into the `build` directory: `npm run build-plugins`
 * To build a specific plugin: `npm run build:plugin:<plugin-slug>` (e.g., `npm run build:plugin:performance-lab`)
 * To build ZIP files for distribution: `npm run build-plugins:zip`
