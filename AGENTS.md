@@ -4,7 +4,7 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 ## Project Overview
 
-* **Purpose:** To develop and maintain a suite of plugins that improve the performance of WordPress sites. All should be considered 
+* **Purpose:** To develop and maintain a suite of plugins that improve the performance of WordPress sites. All should be considered potential for future candidates for merging into WordPress core.
 * **Technologies:** PHP, JavaScript, CSS, a variety of testing and linting tools.
 * **Architecture:** This is a monorepo containing multiple WordPress plugins. The main plugin is `performance-lab`, which acts as a hub for the other feature plugins, most of which are standalone plugins located in the `plugins` directory (although some come from other repos). Each plugin has its own tests located in its respective `tests` subdirectory.
 
