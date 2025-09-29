@@ -66,7 +66,7 @@ In general, indentation should use tabs. Refer to `.editorconfig` in the project
 
 ### Inline Documentation
 
-It is expected for code introduced in pull requests to have `@since` tags with the `n.e.x.t` placeholder version. It will get replaced with the actual version at the time of release. Do not add any code review comments such code.
+It is expected for new code introduced to have `@since` tags with the `n.e.x.t` placeholder version. It will get replaced with the actual version at the time of release. Do not add any code review comments such to code.
 
 Every file, function, class, method constant, and global variable must have an associated docblock with a `@since` tag.
 
