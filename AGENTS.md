@@ -71,45 +71,89 @@ Every file, function, class, method constant, and global variable must have an a
 
 ### PHP
 
-Whenever possible, the most specific PHP type hints should be used, when compatible with the minimum version of PHP supported by WordPress, unless the `testVersion` config in `phpcs.xml.dist` is higher.
+Follow coding conventions in WordPress core. Namespaces are generally not used, as they are not normally used in WordPress core code. Procedural programming patterns are favored where classes play a supporting role, rather than everything being written in OOP.
 
-When native PHP type cannot be used, PHPStan's [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) should be used, including not only the basic types but also subtypes like `non-empty-string`, [integer ranges](https://phpstan.org/writing-php-code/phpdoc-types#integer-ranges), [general arrays](https://phpstan.org/writing-php-code/phpdoc-types#general-arrays), and especially [array shapes](https://phpstan.org/writing-php-code/phpdoc-types#array-shapes). The types should comply with PHPStan's level 10.
+Whenever possible, the most specific PHP type hints should be used, when compatible with the minimum version of PHP supported by WordPress, unless the `testVersion` config in `phpcs.xml.dist` is higher. When native PHP type cannot be used, PHPStan's [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) should be used, including not only the basic types but also subtypes like `non-empty-string`, [integer ranges](https://phpstan.org/writing-php-code/phpdoc-types#integer-ranges), [general arrays](https://phpstan.org/writing-php-code/phpdoc-types#general-arrays), and especially [array shapes](https://phpstan.org/writing-php-code/phpdoc-types#array-shapes). The types should comply with PHPStan's level 10. The one exception for using PHP types is whenever a function is used as a filter. Since plugins can supply any value at all when filtering, use the expected type with a union to `mixed`. The first statement in the function in this case must always check the type, and if it is not the expected type, override it to be so.
 
-The one exception for using PHP types is whenever a function is used as a filter. Since plugins can supply any value at all when filtering, it is important for the filtered value to always be `mixed`. The first statement in the function in this case must always check the type, and if it is not the expected type, override it to be so. For example:
+Never render HTML `SCRIPT` tags directly in HTML. Always use the relevant APIs in WordPress for adding scripts, including `wp_enqueue_script()`, `wp_add_inline_script()`, `wp_localize_script()`, `wp_print_script_tag()`, `wp_print_inline_script_tag()`, `wp_enqueue_script_module()` among others. Favor modules over classic scripts.
+
+Here is an example PHP file with various conventions demonstrated.
 
 ```php
 /**
- * Filters foo.
+ * Filtering functions for the Bar plugin.
  *
- * @param string|mixed $foo Foo.
- * @return string Foo.
+ * @since n.e.x.t
+ * @package Bar
  */
-function filter_foo( $foo, int $post_id ): string {
-	if ( ! is_string( $foo ) ) {
-		$foo = '';
+
+/**
+ * Filters post title to be upper case.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|mixed $title   Title.
+ * @param positive-int $post_id Post ID.
+ * @return string Upper-cased title.
+ */
+function bar_filter_title_uppercase( $title, int $post_id ): string {
+	if ( ! is_string( $title ) ) {
+		$title = '';
 	}
 	/**
 	 * Because plugins do bad things.
 	 *
-	 * @var string $foo
+	 * @var string $title
 	 */
 
-	 // Filtering logic goes here.
-
-	 return $foo;
+	return strtoupper( $title );
 }
-add_filter( 'foo', 'filter_foo', 10, 2 );
+add_filter( 'the_title', 'bar_filter_title_uppercase', 10, 2 );
 ```
-
-All PHP files should have a namespace which coincides with the `@package` tag in the file's PHPDoc header.
 
 ### JavaScript
 
 All JavaScript code should be written with JSDoc comments. All function parameters, return values, and other types should use [TypeScript in JSDoc](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html).
 
-JavaScript code is written using ES modules. This JS code must be runnable as-is without having to go through a build step, so it must be plain JavaScript and not TypeScript. The project _may_ also distribute minified versions of these JS files.
+JavaScript code should be written using ES modules. This JS code must be runnable as-is without having to go through a build step, so it must be plain JavaScript and not TypeScript. The project _may_ also distribute minified versions of these JS files.
 
-Never render HTML `script` markup directly. Always use the relevant APIs in WordPress for adding scripts, including `wp_enqueue_script()`, `wp_add_inline_script()`, `wp_localize_script()`, `wp_print_script_tag()`, `wp_print_inline_script_tag()`, `wp_enqueue_script_module()` among others. Since script modules are used, new scripts should normally have a `type="module"` when printing via `wp_print_inline_script_tag()` and when an external script is used, then `wp_enqueue_script_module()` is preferred.
+Here's an example JS file:
+
+```js
+/**
+ * Foo module for Optimization Detective
+ *
+ * This extension optimizes the foo performance feature.
+ *
+ * @since n.e.x.t
+ */
+
+export const name = 'Foo';
+
+/**
+ * @typedef {import("web-vitals").LCPMetric} LCPMetric
+ * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
+ * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
+ */
+
+/**
+ * Initializes extension.
+ *
+ * @since n.e.x.t
+ *
+ * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
+ */
+export async function initialize( { log, onLCP, extendRootData } ) {
+  onLCP(
+    ( metric ) => {
+      handleLCPMetric( metric, extendRootData, log );
+    }
+  );
+}
+
+// ... function definition for handleLCPMetric omitted ...
+```
 
 ### Static Analysis Commands
 
