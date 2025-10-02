@@ -9,8 +9,11 @@ Fixes #
 
 ## Use of AI Tools
 
-<!-- Please disclose whether AI tooling was used to author the code in the pull request. To what extent was AI used? Was it used as a code reviewer, or was it used to "vibe code" everything? It is your responsibility to review and take responsibility for what AI generates. For more, see CONTRIBUTING.md which includes instructions for how to provide instructions to AI agents. -->
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but we ask that you disclose what tooling you are using and to what extent a pull request has been authored by AI. Are you using AI just as a code reviewer? Or, for the other extreme, are you using AI to write everything (e.g. "vibe coding")? It is your responsibility to review and take responsibility for what AI generates.
 
+For more, see CONTRIBUTING.md which includes instructions for how to provide instructions to AI agents.
+-->
 
 <!--
 For maintainers only, please make sure:
