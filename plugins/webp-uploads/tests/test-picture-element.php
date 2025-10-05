@@ -436,10 +436,15 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ), 'Make sure the fallback IMG should return JPEG src.' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$source_count      = 0;
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			++$source_count;
 			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
 			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
 		}
+
+		// Ensure at least one source element was created (addresses GitHub issue with wp_calculate_image_srcset disabled).
+		$this->assertGreaterThan( 0, $source_count, 'At least one source element should be created even when responsive images are disabled.' );
 	}
 
 	/**

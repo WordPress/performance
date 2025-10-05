@@ -148,6 +148,16 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 					esc_attr( $image_srcset ),
 					is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
 				);
+			} else {
+				// Fallback when wp_calculate_image_srcset returns false - generate simple source without srcset.
+				$image_url = webp_uploads_get_mime_type_image( $attachment_id, $src, $image_mime_type );
+				if ( is_string( $image_url ) ) {
+					$picture_sources .= sprintf(
+						'<source type="%s" srcset="%s">',
+						esc_attr( $image_mime_type ),
+						esc_attr( $image_url )
+					);
+				}
 			}
 		}
 	} else {
