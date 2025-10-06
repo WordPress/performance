@@ -9,6 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Search for misspellings
-        uses: crate-ci/typos@0c17dabcee8b8f1957fa917d17393a23e02e1583 # master
+        uses: crate-ci/typos@83157de2df0fa7c7ae20f73f9dbed44c41f2bb64 # master
         with:
           config: ./.github/typos.toml
