@@ -278,6 +278,11 @@ trait Optimization_Detective_Test_Helpers {
 
 		$buffer = od_optimize_template_output_buffer( $buffer );
 
+		// When testing WP versions prior to 6.9, ensure the output buffer accounts for the change to entity encoding in <https://core.trac.wordpress.org/changeset/60919>.
+		if ( ! is_wp_version_compatible( '6.9' ) ) {
+			$buffer = str_replace( '&#039;', '&apos;', $buffer );
+		}
+
 		// Normalize script module content so changes do not impact snapshots.
 		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
 		$buffer = preg_replace_callback(
