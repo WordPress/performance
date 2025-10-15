@@ -279,7 +279,7 @@ trait Optimization_Detective_Test_Helpers {
 		$buffer = od_optimize_template_output_buffer( $buffer );
 
 		// When testing WP versions prior to 6.9, ensure the output buffer accounts for the change to entity encoding in <https://core.trac.wordpress.org/changeset/60919>.
-		if ( version_compare( wp_get_wp_version(), '6.9-alpha', '<' ) ) {
+		if ( ! is_wp_version_compatible( '6.9' ) ) {
 			$buffer = str_replace( '&#039;', '&apos;', $buffer );
 		}
 
