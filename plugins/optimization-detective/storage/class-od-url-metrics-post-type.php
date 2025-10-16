@@ -241,7 +241,7 @@ class OD_URL_Metrics_Post_Type {
 
 		$post_data['post_content'] = wp_json_encode(
 			$url_metric_group_collection->get_flattened_url_metrics(),
-			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes or hex tags since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {
 			return new WP_Error( 'json_encode_error', json_last_error_msg() );

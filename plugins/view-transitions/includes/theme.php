@@ -352,7 +352,7 @@ function plvt_load_view_transitions(): void {
 
 	$init_script = sprintf(
 		'plvtInitViewTransitions( %s )',
-		wp_json_encode( $config, JSON_FORCE_OBJECT )
+		wp_json_encode( $config, JSON_FORCE_OBJECT | JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 	);
 
 	/*

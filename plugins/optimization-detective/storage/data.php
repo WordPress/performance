@@ -117,6 +117,7 @@ function od_get_current_url(): string {
  * @return non-empty-string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here, but beware this could invalidate URL Metrics. See <https://github.com/WordPress/performance/pull/1949>.
 	return md5( (string) wp_json_encode( $query_vars ) );
 }
 
@@ -238,6 +239,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 	 */
 	$data = (array) apply_filters( 'od_current_url_metrics_etag_data', $data );
 
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here.
 	return md5( (string) wp_json_encode( $data ) );
 }
 

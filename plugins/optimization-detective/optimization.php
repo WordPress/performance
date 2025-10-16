@@ -118,11 +118,12 @@ function od_maybe_add_template_output_buffer_filter(): void {
  * @param string[] $reasons Reason messages.
  */
 function od_print_disabled_reasons( array $reasons ): void {
-	foreach ( $reasons as $reason ) {
+	foreach ( $reasons as $i => $reason ) {
 		wp_print_inline_script_tag(
 			sprintf(
-				'console.info( %s );',
-				wp_json_encode( '[Optimization Detective] ' . $reason )
+				"console.info( %s );\n//# sourceURL=od-print-disabled-reasons-%d",
+				wp_json_encode( '[Optimization Detective] ' . $reason, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+				$i + 1
 			),
 			array( 'type' => 'module' )
 		);
@@ -336,7 +337,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+		$processor->append_body_html( od_get_detection_scripts( $slug, $group_collection ) );
 	}
 
 	/**
