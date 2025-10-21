@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@octokit/rest": "^22.0.0",
-    "@playwright/test": "^1.56.0",
+    "@playwright/test": "^1.56.1",
     "@types/node": "^24.7.2",
     "@wordpress/e2e-test-utils-playwright": "^1.32.0",
     "@wordpress/env": "^10.33.0",
