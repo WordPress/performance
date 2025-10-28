@@ -412,10 +412,15 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		// Create sample posts of all post types other than URL Metrics.
 		$other_post_ids = array();
 		foreach ( array_diff( get_post_types(), array( OD_URL_Metrics_Post_Type::SLUG ) ) as $post_type ) {
-			$other_post_ids = array_merge(
-				$other_post_ids,
-				self::factory()->post->create_many( 10, compact( 'post_type' ) )
-			);
+			for ( $i = 0; $i < 10; $i++ ) {
+				$other_post = self::factory()->post->create_and_get( compact( 'post_type' ) );
+				$this->assertInstanceOf(
+					WP_Post::class,
+					$other_post,
+					"Failed to create post of $post_type post type: " . ( $other_post instanceof WP_Error ? $other_post->get_error_message() : 'Unknown' )
+				);
+				$other_post_ids[] = $other_post->ID;
+			}
 		}
 		foreach ( $other_post_ids as $post_id ) {
 			update_post_meta( $post_id, $other_post_meta_key, $other_post_meta_value );
