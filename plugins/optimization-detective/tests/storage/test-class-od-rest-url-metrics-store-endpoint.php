@@ -17,11 +17,20 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
 	/**
+	 * @var array<string, WP_Post_Type>|null
+	 */
+	protected $original_post_types = null;
+
+	/**
 	 * Sets up.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 		unset( $GLOBALS['wp_rest_server'] );
+
+		// This is needed due to how create_initial_rest_routes() was modified in <https://core.trac.wordpress.org/changeset/61029>. See <https://core.trac.wordpress.org/ticket/62755#comment:21>.
+		global $wp_post_types;
+		$this->original_post_types = $wp_post_types;
 	}
 
 	/**
@@ -30,6 +39,9 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 	public function tear_down(): void {
 		parent::tear_down();
 		unset( $GLOBALS['wp_rest_server'] );
+
+		global $wp_post_types;
+		$wp_post_types = $this->original_post_types;
 	}
 
 	/**
