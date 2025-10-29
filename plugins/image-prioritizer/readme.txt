@@ -5,7 +5,7 @@ Tested up to: 6.8
 Stable tag:   1.0.0-beta2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
-Tags:         performance, optimization, image, lcp, lazy-load
+Tags:         performance, optimization, image, lcp, lazy-load, optimization-detective
 
 Prioritizes the loading of images and videos based on how they appear to actual visitors: adds fetchpriority, preloads, lazy-loads, and sets sizes.
 
