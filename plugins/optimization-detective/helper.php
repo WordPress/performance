@@ -198,6 +198,34 @@ function od_render_generator_meta_tag(): void {
 }
 
 /**
+ * Adds an Extensions link to the plugin action links for Optimization Detective.
+ *
+ * This link directs users to the plugin directory to discover extensions that
+ * provide optimization functionality using the Optimization Detective plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $links List of plugin action links HTML.
+ * @return string[]|mixed Modified list of plugin action links HTML.
+ */
+function od_render_extensions_action_link( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
+	$extensions_link = sprintf(
+		'<a href="%1$s">%2$s</a>',
+		esc_url( admin_url( 'plugin-install.php?s=optimization-detective&tab=search&type=tag' ) ),
+		esc_html__( 'Extensions', 'optimization-detective' )
+	);
+
+	return array_merge(
+		array( 'extensions' => $extensions_link ),
+		$links
+	);
+}
+
+/**
  * Gets the path to a script or stylesheet.
  *
  * @since 0.9.0
