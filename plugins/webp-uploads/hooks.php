@@ -966,3 +966,53 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 }
 add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
 add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+
+/**
+ * Checks if an image has transparency when uploading AVIF images with Imagick.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed>|mixed $file The uploaded file data.
+ * @return array<string, mixed> The modified file data.
+ */
+function webp_uploads_check_image_transparency( $file ): array {
+	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() ) {
+		return $file;
+	}
+
+	// Because plugins do bad things.
+	if ( ! is_array( $file ) ) {
+		$file = array();
+	}
+	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
+		return $file;
+	}
+	if ( isset( $file['type'] ) && is_string( $file['type'] ) ) {
+		if ( ! str_starts_with( strtolower( $file['type'] ), 'image/' ) ) {
+			return $file;
+		}
+	} elseif ( ! str_starts_with( strtolower( (string) wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] )['type'] ), 'image/' ) ) {
+		return $file;
+	}
+
+	$editor = wp_get_image_editor( $file['tmp_name'] );
+
+	if ( is_wp_error( $editor ) || ! $editor instanceof WP_Image_Editor_Imagick ) {
+		return $file;
+	}
+
+	$reflection     = new ReflectionClass( $editor );
+	$image_property = $reflection->getProperty( 'image' );
+	if ( PHP_VERSION_ID < 80100 ) {
+		$image_property->setAccessible( true );
+	}
+	$imagick = $image_property->getValue( $editor );
+
+	if ( $imagick instanceof Imagick ) {
+		wp_cache_set( 'webp_uploads_image_has_transparency', (bool) $imagick->getImageAlphaChannel(), 'webp-uploads' );
+	}
+
+	return $file;
+}
+add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_check_image_transparency' );
+add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_check_image_transparency' );

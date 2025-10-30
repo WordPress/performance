@@ -374,6 +374,11 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
  * @return string The image output format. One of 'webp' or 'avif'.
  */
 function webp_uploads_get_image_output_format(): string {
+	if ( ! webp_uploads_imagick_avif_transparency_supported() && (bool) wp_cache_get( 'webp_uploads_image_has_transparency', 'webp-uploads' ) ) {
+		wp_cache_delete( 'webp_uploads_image_has_transparency', 'webp-uploads' );
+		return 'webp';
+	}
+
 	$image_format = get_option( 'perflab_modern_image_format' );
 	return webp_uploads_sanitize_image_format( $image_format );
 }
@@ -511,4 +516,25 @@ function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string 
 	$filetype  = wp_check_filetype( $file );
 	$mime_type = $filetype['type'] ?? get_post_mime_type( $attachment_id );
 	return is_string( $mime_type ) ? $mime_type : '';
+}
+
+/**
+ * Checks if Imagick has AVIF transparency support.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if Imagick has AVIF transparency support, false otherwise.
+ */
+function webp_uploads_imagick_avif_transparency_supported(): bool {
+	if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) ) {
+		$imagick_version = Imagick::getVersion();
+		if ( (bool) preg_match( '/((?:[0-9]+\\.?)+)/', $imagick_version['versionString'], $matches ) ) {
+			$imagick_version = $matches[0];
+		} else {
+			$imagick_version = $imagick_version['versionString'];
+		}
+		return version_compare( $imagick_version, '7.0.25', '>=' );
+	}
+
+	return false;
 }
