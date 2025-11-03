@@ -11,7 +11,7 @@
     "web-vitals": "5.1.0"
   },
   "devDependencies": {
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.9.1",
     "@wordpress/e2e-test-utils-playwright": "^1.33.0",
