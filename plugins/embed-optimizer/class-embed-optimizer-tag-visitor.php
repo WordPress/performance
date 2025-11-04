@@ -288,6 +288,27 @@ final class Embed_Optimizer_Tag_Visitor {
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
 		foreach ( $this->get_preconnect_urls( $processor ) as $preconnect_url ) {
+			$host = wp_parse_url( $preconnect_url, PHP_URL_HOST );
+
+			// Skip if malformed URL.
+			if ( empty( $host ) ) {
+				continue;
+			}
+
+			// Determine if same-origin.
+			$is_same_origin = wp_parse_url( home_url(), PHP_URL_HOST ) === $host;
+
+			/**
+			 * Filter whether preconnect should be used for a given embed host.
+			 *
+			 * Allows developers to override behavior.
+			 *
+			 * @param bool   $use_preconnect Whether to use preconnect (default true for same-origin).
+			 * @param string $preconnect_url The URL being hinted.
+			 * @param string $host           The parsed host.
+			 */
+			$use_preconnect = apply_filters( 'embed_optimizer_use_preconnect', $is_same_origin, $preconnect_url, $host );
+
 			foreach ( $context->url_metric_group_collection as $group ) {
 				if ( $group->get_element_max_intersection_ratio( $embed_wrapper_xpath ) < PHP_FLOAT_EPSILON ) {
 					continue;
@@ -295,7 +316,7 @@ final class Embed_Optimizer_Tag_Visitor {
 
 				$context->link_collection->add_link(
 					array(
-						'rel'  => 'preconnect',
+						'rel'  => $use_preconnect ? 'preconnect' : 'dns-prefetch',
 						'href' => $preconnect_url,
 					),
 					$group->get_minimum_viewport_width(),
