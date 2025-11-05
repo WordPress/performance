@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *               }
  *
  * @phpstan-type LinkAttributes array{
- *                   rel: 'preload'|'modulepreload'|'preconnect',
+ *                   rel: 'preload'|'modulepreload'|'preconnect'|'dns-prefetch',
  *                   href?: non-empty-string,
  *                   imagesrcset?: non-empty-string,
  *                   imagesizes?: non-empty-string,

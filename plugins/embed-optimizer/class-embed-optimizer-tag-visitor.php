@@ -224,7 +224,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
 	 * @return array<non-empty-string> Array of URLs to preconnect to.
 	 */
-	private function get_preconnect_urls( OD_HTML_Tag_Processor $processor ): array {
+	private function get_dns_prefetch_urls( OD_HTML_Tag_Processor $processor ): array {
 		$urls      = array();
 		$has_class = static function ( string $wanted_class ) use ( $processor ): bool {
 			return true === $processor->has_class( $wanted_class );
