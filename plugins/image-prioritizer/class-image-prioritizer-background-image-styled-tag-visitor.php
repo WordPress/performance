@@ -92,6 +92,9 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			$this->add_image_preload_link( $context->link_collection, $group, $background_image_url );
 		}
 
+		// Reduce the background image size if URL Metrics are available.
+		$this->reduce_background_image_size( $background_image_url, $context );
+
 		$this->lazy_load_bg_images( $context );
 
 		return true;
@@ -236,6 +239,54 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", image_prioritizer_get_lazy_load_bg_image_stylesheet() ) );
 			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_lazy_load_bg_image_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_assets = true;
+		}
+	}
+
+	/**
+	 * Reduces background image size by choosing one that fits the element dimensions more closely.
+	 *
+	 * This is similar to how VIDEO poster images are optimized in the Video Tag Visitor.
+	 *
+	 * @param non-empty-string       $background_image_url Background image URL.
+	 * @param OD_Tag_Visitor_Context $context              Tag visitor context, with the cursor currently at an element with a background image.
+	 */
+	private function reduce_background_image_size( string $background_image_url, OD_Tag_Visitor_Context $context ): void {
+		$processor = $context->processor;
+		$xpath     = $processor->get_xpath();
+
+		/*
+		* Obtain maximum width of the element exclusively from the URL Metrics group with the widest viewport width,
+		* which would be desktop. This prevents the situation where if URL Metrics have only so far been gathered for
+		* mobile viewports that an excessively-small background image would end up getting served to the first desktop visitor.
+		*/
+		$max_element_width = 0;
+		foreach ( $context->url_metric_group_collection->get_last_group() as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( $element->get_xpath() === $xpath ) {
+					$max_element_width = max( $max_element_width, $element->get_bounding_client_rect()['width'] );
+					break;
+				}
+			}
+		}
+
+		// If the element wasn't present in any URL Metrics gathered for desktop, then abort downsizing the background image.
+		if ( 0 === $max_element_width ) {
+			return;
+		}
+
+		// Try to get the attachment ID from the data attribute (populated via filter from block attributes).
+		$attachment_id = $processor->get_attribute( 'data-bg-attachment-id' );
+
+		if ( is_numeric( $attachment_id ) && $attachment_id > 0 ) {
+			$smaller_image_url = wp_get_attachment_image_url( (int) $attachment_id, array( (int) $max_element_width, 0 ) );
+			if ( is_string( $smaller_image_url ) && $smaller_image_url !== $background_image_url ) {
+				// Replace the background image URL in the style attribute.
+				$style = $processor->get_attribute( 'style' );
+				if ( is_string( $style ) ) {
+					$updated_style = str_replace( $background_image_url, $smaller_image_url, $style );
+					$processor->set_attribute( 'style', $updated_style );
+				}
+			}
 		}
 	}
 }
