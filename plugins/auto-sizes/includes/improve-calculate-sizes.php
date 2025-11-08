@@ -396,3 +396,59 @@ function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
 
 	return (int) get_post_thumbnail_id( $post_id );
 }
+/**
+ * Adds data attributes for background image attachment ID to Group and Cover blocks.
+ *
+ * This exposes the attachment ID from block attributes as data attributes on the HTML element,
+ * allowing Image Prioritizer to access this information without using attachment_url_to_postid().
+ * This is particularly important for Cover blocks that may use sizes other than "full".
+ *
+ * @param string|mixed                                              $content      The block content about to be rendered.
+ * @param array{ attrs?: array<string, mixed>, blockName?: string } $parsed_block The parsed block.
+ * @return string The updated block content.
+ */
+function auto_sizes_add_background_image_data_attributes( $content, array $parsed_block ): string {
+	if ( ! is_string( $content ) || '' === $content ) {
+		return '';
+	}
+
+	$block_name = $parsed_block['blockName'] ?? '';
+	$attrs      = $parsed_block['attrs'] ?? array();
+
+	// Extract background image data based on block type.
+	$attachment_id = null;
+	$image_url     = null;
+
+	if ( 'core/cover' === $block_name ) {
+		$attachment_id = $attrs['id'] ?? null;
+		$image_url     = $attrs['url'] ?? null;
+	} elseif ( 'core/group' === $block_name ) {
+		$attachment_id = $attrs['style']['background']['backgroundImage']['id'] ?? null;
+		$image_url     = $attrs['style']['background']['backgroundImage']['url'] ?? null;
+	} else {
+		return $content;
+	}
+
+	// Validate extracted data.
+	if (
+		! isset( $attachment_id, $image_url ) ||
+		$attachment_id <= 0 ||
+		'' === $image_url ||
+		! is_array( wp_get_attachment_metadata( $attachment_id ) )
+	) {
+		return $content;
+	}
+
+	// Find and update the element with background image.
+	$processor = new WP_HTML_Tag_Processor( $content );
+	while ( $processor->next_tag() ) {
+		$style = $processor->get_attribute( 'style' );
+		if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+			$processor->set_attribute( 'data-bg-attachment-id', (string) $attachment_id );
+			$processor->set_attribute( 'data-bg-original-url', $image_url );
+			return $processor->get_updated_html();
+		}
+	}
+
+	return $content;
+}
