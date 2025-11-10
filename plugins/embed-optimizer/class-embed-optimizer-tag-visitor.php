@@ -104,7 +104,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		$this->reduce_layout_shifts( $context );
-		$this->add_preconnect_links( $context );
+		$this->add_dns_prefetch_links( $context );
 		$this->lazy_load_embeds( $context );
 
 		/*
@@ -207,22 +207,22 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Gets preconnect URLs based on embed type.
+	 * Gets dns-prefech URLs based on embed type.
 	 *
 	 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
-	 * The list of hosts being preconnected to was obtained by inserting an embed into a post and then looking
+	 * The list of hosts being dns-prefetched to was obtained by inserting an embed into a post and then looking
 	 * at the network log on the frontend as the embed renders. Each should include the host of the iframe src
 	 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
 	 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
 	 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
-	 * it is a likely case of a load balancing domain name which cannot be safely preconnected since it could
+	 * it is a likely case of a load balancing domain name which cannot be safely dns-prefetched since it could
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
 	 * @since 0.4.1
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
-	 * @return array<non-empty-string> Array of URLs to preconnect to.
+	 * @return array<non-empty-string> Array of URLs to dns-prefetch.
 	 */
 	private function get_dns_prefetch_urls( OD_HTML_Tag_Processor $processor ): array {
 		$urls      = array();
@@ -277,13 +277,13 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Adds preconnect links for embed resources.
+	 * Adds dns-prefetch links for embed resources.
 	 *
 	 * @since 0.4.1
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
-	private function add_preconnect_links( OD_Tag_Visitor_Context $context ): void {
+	private function add_dns_prefetch_links( OD_Tag_Visitor_Context $context ): void {
 		$processor           = $context->processor;
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
