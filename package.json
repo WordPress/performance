@@ -11,13 +11,13 @@
     "web-vitals": "5.1.0"
   },
   "devDependencies": {
-    "@octokit/rest": "^22.0.0",
+    "@octokit/rest": "^22.0.1",
     "@playwright/test": "^1.56.1",
-    "@types/node": "^24.9.1",
-    "@wordpress/e2e-test-utils-playwright": "^1.33.0",
-    "@wordpress/env": "^10.33.0",
+    "@types/node": "^24.10.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.34.0",
+    "@wordpress/env": "^10.34.0",
     "@wordpress/prettier-config": "^4.33.0",
-    "@wordpress/scripts": "^30.26.0",
+    "@wordpress/scripts": "^30.27.0",
     "commander": "14.0.2",
     "copy-webpack-plugin": "^13.0.1",
     "css-minimizer-webpack-plugin": "^7.0.2",
