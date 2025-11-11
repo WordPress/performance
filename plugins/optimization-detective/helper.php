@@ -297,6 +297,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	add_thickbox();
 	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
 }
+
 /**
  * Checks for installed extensions and displays an admin notice once if none are found.
  *
