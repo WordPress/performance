@@ -298,17 +298,18 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
 }
 /**
- * Checks for installed extensions and displays an admin notice if none are found.
+ * Checks for installed extensions and displays an admin notice once if none are found.
  *
  * @since n.e.x.t
  * @access private
  */
 function od_maybe_check_installed_extensions(): void {
-	$installed_extensions = get_transient( 'od_installed_extensions' );
-	if ( ! is_array( $installed_extensions ) ) {
-		$installed_extensions = od_check_installed_extensions();
-		set_transient( 'od_installed_extensions', $installed_extensions, WEEK_IN_SECONDS );
+	if ( 1 === (int) get_option( 'od_installed_extensions_admin_notice', '0' ) ) {
+		return;
 	}
+	update_option( 'od_installed_extensions_admin_notice', '1' );
+
+	$installed_extensions = od_check_installed_extensions();
 	if ( count( $installed_extensions ) > 0 ) {
 		return;
 	}
