@@ -204,6 +204,7 @@ function od_render_generator_meta_tag(): void {
  * provide optimization functionality using the Optimization Detective plugin.
  *
  * @since n.e.x.t
+ * @access private
  *
  * @param string[]|mixed $links List of plugin action links HTML.
  * @return string[]|mixed Modified list of plugin action links HTML.
@@ -223,6 +224,96 @@ function od_render_extensions_action_link( $links ) {
 		array( 'extensions' => $extensions_link ),
 		$links
 	);
+}
+
+/**
+ * Checks for installed extensions of Optimization Detective.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return string[] List of installed extension plugin slugs.
+ */
+function od_check_installed_extensions(): array {
+	$installed_plugins    = get_plugins();
+	$extensions           = array(
+		'image-prioritizer/load.php',
+		'embed-optimizer/load.php',
+	);
+	$installed_extensions = array_intersect( $extensions, array_keys( $installed_plugins ) );
+
+	return $installed_extensions;
+}
+
+/**
+ * Renders an admin notice prompting the user to install extensions for Optimization Detective.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function od_maybe_render_installed_extensions_admin_notice(): void {
+	$message = sprintf(
+		'<p><strong>%s</strong></p>',
+		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
+	);
+
+	$message .= '<p>' . esc_html__( 'This plugin is a framework that requires extension plugins to provide optimization features. To benefit from Optimization Detective, please install one or more of the following extensions:', 'optimization-detective' ) . '</p>';
+
+	$extensions = array(
+		'image-prioritizer' => array(
+			'name'        => __( 'Image Prioritizer', 'optimization-detective' ),
+			'description' => __( 'Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy-loading.', 'optimization-detective' ),
+			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=image-prioritizer&TB_iframe=true&width=772' ),
+		),
+		'embed-optimizer'   => array(
+			'name'        => __( 'Embed Optimizer', 'optimization-detective' ),
+			'description' => __( 'Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.', 'optimization-detective' ),
+			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=embed-optimizer&TB_iframe=true&width=772' ),
+		),
+	);
+
+	$message .= '<table class="widefat" style="margin-bottom: 11px;"><tbody>';
+	foreach ( $extensions as $extension ) {
+		$message .= sprintf(
+			'<tr>
+				<td><strong><a href="%s" class="thickbox open-plugin-details-modal">%s</a></strong></td>
+				<td>%s</td>
+			</tr>',
+			esc_url( $extension['url'] ),
+			esc_html( $extension['name'] ),
+			esc_html( $extension['description'] )
+		);
+	}
+	$message .= '</tbody></table>';
+
+	$notice = wp_get_admin_notice(
+		$message,
+		array(
+			'type'           => 'warning',
+			'paragraph_wrap' => false,
+		)
+	);
+
+	add_thickbox();
+	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
+}
+/**
+ * Checks for installed extensions and displays an admin notice if none are found.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function od_maybe_check_installed_extensions(): void {
+	$installed_extensions = get_transient( 'od_installed_extensions' );
+	if ( ! is_array( $installed_extensions ) ) {
+		$installed_extensions = od_check_installed_extensions();
+		set_transient( 'od_installed_extensions', $installed_extensions, WEEK_IN_SECONDS );
+	}
+	if ( count( $installed_extensions ) > 0 ) {
+		return;
+	}
+
+	add_action( 'admin_notices', 'od_maybe_render_installed_extensions_admin_notice' );
 }
 
 /**
