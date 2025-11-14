@@ -528,7 +528,7 @@ function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string 
 function webp_uploads_imagick_avif_transparency_supported(): bool {
 	if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) ) {
 		$imagick_version = Imagick::getVersion();
-		if ( (bool) preg_match( '/^\d+(?:\.\d+)+$/', $imagick_version['versionString'], $matches ) ) {
+		if ( (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version['versionString'], $matches ) ) {
 			$imagick_version = $matches[0];
 		} else {
 			$imagick_version = $imagick_version['versionString'];
