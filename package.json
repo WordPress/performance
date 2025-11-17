@@ -14,7 +14,7 @@
     "@octokit/rest": "^22.0.1",
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.10.0",
-    "@wordpress/e2e-test-utils-playwright": "^1.34.0",
+    "@wordpress/e2e-test-utils-playwright": "^1.35.0",
     "@wordpress/env": "^10.34.0",
     "@wordpress/prettier-config": "^4.33.0",
     "@wordpress/scripts": "^30.27.0",
