@@ -236,11 +236,19 @@ function od_render_extensions_action_link( $links ) {
  */
 function od_check_installed_extensions(): array {
 	$installed_plugins    = get_plugins();
+	$installed_extensions = array();
+
+	foreach ( $installed_plugins as $plugin_slug => $plugin_data ) {
+		if ( isset( $plugin_data['RequiresPlugins'] ) && 'optimization-detective' === $plugin_data['RequiresPlugins'] ) {
+			$installed_extensions[] = $plugin_slug;
+		}
+	}
+
+	// Check for plugins without Requires Plugins header but known to be extensions.
 	$extensions           = array(
-		'image-prioritizer/load.php',
 		'embed-optimizer/load.php',
 	);
-	$installed_extensions = array_intersect( $extensions, array_keys( $installed_plugins ) );
+	$installed_extensions = array_merge( $installed_extensions, array_intersect( $extensions, array_keys( $installed_plugins ) ) );
 
 	return $installed_extensions;
 }
