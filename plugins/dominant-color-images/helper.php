@@ -49,10 +49,31 @@ function dominant_color_set_image_editors( array $editors ): array {
  * @return array{ has_transparency?: bool, dominant_color?: string }|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
 function dominant_color_get_dominant_color_data( int $attachment_id ) {
-	$mime_type = get_post_mime_type( $attachment_id );
-	if ( 'application/pdf' === $mime_type ) {
-		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
+	$mime_type            = get_post_mime_type( $attachment_id );
+	$supported_mime_types = array(
+		'image/jpeg',
+		'image/png',
+		'image/gif',
+		'image/webp',
+		'image/avif',
+	);
+
+	/**
+	 * Filter supported mime types for dominant color extraction.
+	 *
+	 * Filter the array of supported mime types for dominant color extraction, by default the plugin
+	 * supports image types supported by WordPress Core.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string[] $supported_mime_types Array of supported mime types. Defaults are 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'.
+	 */
+	$supported_mime_types = apply_filters( 'dominant_color_supported_mime_types', $supported_mime_types );
+
+	if ( ! in_array( $mime_type, $supported_mime_types, true ) ) {
+		return new WP_Error( 'unsupported_attachment_type', __( 'Unsupported attachment type.', 'dominant-color-images' ) );
 	}
+
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( false === $file ) {
 		$file = get_attached_file( $attachment_id );
