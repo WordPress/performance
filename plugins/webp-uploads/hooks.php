@@ -947,7 +947,7 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 
 	// Check if the image is already truecolor.
 	if ( imageistruecolor( $image ) ) {
-		imagedestroy( $image );
+		imagedestroy( $image ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated
 		return $file;
 	}
 
@@ -960,7 +960,7 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 		// Overwrite the upload with the new truecolor PNG.
 		imagepng( $image, $file['tmp_name'] );
 	}
-	imagedestroy( $image );
+	imagedestroy( $image ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated
 
 	return $file;
 }
