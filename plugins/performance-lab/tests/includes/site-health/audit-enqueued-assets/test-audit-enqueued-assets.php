@@ -170,6 +170,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_style( 'style-no-href', 'https://no-href-style.com', array(), null );
 		/**
 		 * Enqueue style with empty href
+		 *
 		 * @see https://github.com/WordPress/performance/issues/2278
 		 */
 		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.com', array(), null );
@@ -181,7 +182,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 				if ( 'style-no-href' === $handle ) {
 					$tag = str_replace( 'href=\'https://no-href-style.com\'', ' ', $tag );
 				}
-				
+
 				if ( 'style-empty-href' === $handle ) {
 					$tag = str_replace(
 						'href=\'https://empty-href-style.com\'',
