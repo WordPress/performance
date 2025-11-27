@@ -119,7 +119,7 @@ function perflab_aea_audit_blocking_assets(): array {
 			}
 
 			$href = $processor->get_attribute( 'href' );
-			if ( ! is_string( $href ) ) {
+			if ( ! is_string( $href ) || '' === $href ) {
 				continue;
 			}
 
