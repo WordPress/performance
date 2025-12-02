@@ -9,6 +9,8 @@ updates:
       - "no milestone"
       - "[Type] Enhancement"
       - "github_actions"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: '/'
@@ -19,6 +21,8 @@ updates:
       - "no milestone"
       - "[Type] Enhancement"
       - "javascript"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: composer
     directory: '/'
@@ -29,3 +33,5 @@ updates:
       - "no milestone"
       - "[Type] Enhancement"
       - "php"
+    cooldown:
+      default-days: 7
