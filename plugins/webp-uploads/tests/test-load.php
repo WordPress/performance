@@ -1190,7 +1190,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 				$this->assertNotSame( $original_file_hash, $modified_file_hash );
 				$img = imagecreatefrompng( $path );
 				$this->assertTrue( imageistruecolor( $img ) );
-				imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated
+				if ( PHP_VERSION_ID < 80000 ) {
+					imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated
+				}
 
 				// Make sure the image converted to modern image format is not 0 bytes.
 				$modern_image_format_path = get_attached_file( $attachment_id );
