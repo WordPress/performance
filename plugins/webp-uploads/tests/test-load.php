@@ -1191,7 +1191,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 				$img = imagecreatefrompng( $path );
 				$this->assertTrue( imageistruecolor( $img ) );
 				if ( PHP_VERSION_ID < 80000 ) {
-					imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated
+					imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- imagedestroy() has no effect as of PHP 8.0.
 				}
 
 				// Make sure the image converted to modern image format is not 0 bytes.
