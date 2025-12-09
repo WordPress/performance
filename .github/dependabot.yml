@@ -23,6 +23,10 @@ updates:
       - "javascript"
     cooldown:
       default-days: 7
+    groups:
+      wordpress-packages:
+        patterns:
+          - '@wordpress/*'
 
   - package-ecosystem: composer
     directory: '/'
@@ -35,3 +39,7 @@ updates:
       - "php"
     cooldown:
       default-days: 7
+    groups:
+      phpstan-packages:
+        patterns:
+          - 'phpstan/*'
