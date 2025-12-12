@@ -49,6 +49,8 @@ jobs:
             wp: 'trunk'
           - php: '8.4'
             wp: 'trunk'
+          - php: '8.5'
+            wp: 'trunk'
           - php: '8.2'
             phpunit: '9.6'
             wp: 'latest'
@@ -58,7 +60,7 @@ jobs:
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
     steps:
       - uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6
         with:
