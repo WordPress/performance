@@ -21,12 +21,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.0.0 Added support for AVIF.
  * @since 2.2.0 Added support for PNG.
  *
+ * @param string|null $filename Optional. The filename. Default empty string.
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
-function webp_uploads_get_upload_image_mime_transforms(): array {
+function webp_uploads_get_upload_image_mime_transforms( ?string $filename ): array {
+	$avif_support = webp_uploads_mime_type_supported( 'image/avif' );
+
+	if ( $avif_support && webp_uploads_check_image_transparency( $filename ) ) {
+		$avif_support = false;
+	}
 
 	// Check the selected output format.
-	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
+	$output_format = $avif_support ? webp_uploads_get_image_output_format() : 'webp';
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
@@ -374,11 +380,6 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
  * @return string The image output format. One of 'webp' or 'avif'.
  */
 function webp_uploads_get_image_output_format(): string {
-	if ( ! webp_uploads_imagick_avif_transparency_supported() && (bool) wp_cache_get( 'webp_uploads_image_has_transparency', 'webp-uploads' ) ) {
-		wp_cache_delete( 'webp_uploads_image_has_transparency', 'webp-uploads' );
-		return 'webp';
-	}
-
 	$image_format = get_option( 'perflab_modern_image_format' );
 	return webp_uploads_sanitize_image_format( $image_format );
 }
@@ -537,4 +538,49 @@ function webp_uploads_imagick_avif_transparency_supported(): bool {
 	}
 
 	return false;
+}
+
+/**
+ * Checks if an AVIF image has transparency
+ *
+ * @since n.e.x.t
+ *
+ * @param string|null $filename The uploaded file name.
+ * @return bool Whether the image has transparency.
+ */
+function webp_uploads_check_image_transparency( ?string $filename ): bool {
+	static $processed_images = array();
+
+	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() || ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
+		return false;
+	}
+
+	if ( null === $filename ) {
+		$file = WebP_Uploads_Image_Editor_Imagick::$current_instance->get_file();
+		if ( '' === $file ) {
+			return false;
+		}
+		$filename = $file;
+	}
+
+	if ( ! is_string( $filename ) || ! file_exists( $filename ) ) {
+		return false;
+	}
+
+	$file_hash = md5_file( $filename );
+	if ( isset( $processed_images[ $file_hash ] ) ) {
+		return $processed_images[ $file_hash ];
+	}
+	$processed_images[ $file_hash ] = false;
+
+	$editor = wp_get_image_editor( $filename );
+
+	if ( is_wp_error( $editor ) || ! $editor instanceof WebP_Uploads_Image_Editor_Imagick ) {
+		return false;
+	}
+
+	$has_transparency               = $editor->has_transparency();
+	$processed_images[ $file_hash ] = is_wp_error( $has_transparency ) ? false : $has_transparency;
+
+	return $processed_images[ $file_hash ];
 }

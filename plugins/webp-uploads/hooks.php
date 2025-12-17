@@ -65,8 +65,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 		return $metadata;
 	}
 
-	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
-
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms( $file );
 	// Not a supported mime type to create the sources property.
 	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
@@ -334,7 +333,7 @@ function webp_uploads_filter_image_editor_output_format( $output_format, ?string
 	}
 
 	// Use the original mime type if this type is allowed.
-	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms( $filename );
 	if (
 		! isset( $valid_mime_transforms[ $mime_type ] ) ||
 		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
@@ -968,51 +967,27 @@ add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_t
 add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
 
 /**
- * Checks if an image has transparency when uploading AVIF images with Imagick.
+ * Overloads wp_image_editors() to load the extended class.
  *
  * @since n.e.x.t
  *
- * @param array<string, mixed>|mixed $file The uploaded file data.
- * @return array<string, mixed> The modified file data.
+ * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
+ * @return string[] Registered image editors class names.
  */
-function webp_uploads_check_image_transparency( $file ): array {
+function webp_uploads_set_image_editors( array $editors ): array {
 	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() ) {
-		return $file;
+		return $editors;
 	}
 
-	// Because plugins do bad things.
-	if ( ! is_array( $file ) ) {
-		$file = array();
-	}
-	if ( ! isset( $file['tmp_name'], $file['name'] ) ) {
-		return $file;
-	}
-	if ( isset( $file['type'] ) && is_string( $file['type'] ) ) {
-		if ( ! str_starts_with( strtolower( $file['type'] ), 'image/' ) ) {
-			return $file;
-		}
-	} elseif ( ! str_starts_with( strtolower( (string) wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] )['type'] ), 'image/' ) ) {
-		return $file;
+	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
+		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php';// @codeCoverageIgnore
 	}
 
-	$editor = wp_get_image_editor( $file['tmp_name'] );
-
-	if ( is_wp_error( $editor ) || ! $editor instanceof WP_Image_Editor_Imagick ) {
-		return $file;
+	$key = array_search( WP_Image_Editor_Imagick::class, $editors, true );
+	if ( false !== $key ) {
+		$editors[ $key ] = WebP_Uploads_Image_Editor_Imagick::class;
 	}
 
-	$reflection     = new ReflectionClass( $editor );
-	$image_property = $reflection->getProperty( 'image' );
-	if ( PHP_VERSION_ID < 80100 ) {
-		$image_property->setAccessible( true );
-	}
-	$imagick = $image_property->getValue( $editor );
-
-	if ( $imagick instanceof Imagick ) {
-		wp_cache_set( 'webp_uploads_image_has_transparency', (bool) $imagick->getImageAlphaChannel(), 'webp-uploads' );
-	}
-
-	return $file;
+	return $editors;
 }
-add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_check_image_transparency' );
-add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_check_image_transparency' );
+add_filter( 'wp_image_editors', 'webp_uploads_set_image_editors' );

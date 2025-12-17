@@ -127,7 +127,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 		return (bool) $override;
 	}
 
-	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	$transforms = webp_uploads_get_upload_image_mime_transforms( $file_path );
 	if ( ! isset( $transforms[ $mime_type ] ) || ! is_array( $transforms[ $mime_type ] ) || 0 === count( $transforms[ $mime_type ] ) ) {
 		return null;
 	}
