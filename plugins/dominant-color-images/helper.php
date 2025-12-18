@@ -59,16 +59,16 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	);
 
 	/**
-	 * Filter supported mime types for dominant color extraction.
+	 * Filters supported mime types for dominant color extraction.
 	 *
 	 * Filter the array of supported mime types for dominant color extraction, by default the plugin
 	 * supports image types supported by WordPress Core.
 	 *
-	 * @since x.x.x
+	 * @since n.e.x.t
 	 *
 	 * @param string[] $supported_mime_types Array of supported mime types. Defaults are 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'.
 	 */
-	$supported_mime_types = apply_filters( 'dominant_color_supported_mime_types', $supported_mime_types );
+	$supported_mime_types = (array) apply_filters( 'dominant_color_supported_mime_types', $supported_mime_types );
 
 	if ( ! in_array( $mime_type, $supported_mime_types, true ) ) {
 		return new WP_Error( 'unsupported_attachment_type', __( 'Unsupported attachment type.', 'dominant-color-images' ) );
