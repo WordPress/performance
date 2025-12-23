@@ -123,7 +123,7 @@ jobs:
           fi
       - name: Upload single site coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./single-site-reports
@@ -132,7 +132,7 @@ jobs:
           fail_ci_if_error: true
       - name: Upload multisite coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./multisite-reports
