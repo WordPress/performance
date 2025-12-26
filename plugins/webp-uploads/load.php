@@ -36,3 +36,4 @@ require_once __DIR__ . '/settings.php';
 require_once __DIR__ . '/picture-element.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/deprecated.php';
+require_once __DIR__ . '/site-health/load.php';

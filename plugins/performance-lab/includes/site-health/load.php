@@ -39,7 +39,3 @@ require_once __DIR__ . '/effective-asset-cache-headers/hooks.php';
 // Cache-Control headers site health check.
 require_once __DIR__ . '/bfcache-compatibility-headers/helper.php';
 require_once __DIR__ . '/bfcache-compatibility-headers/hooks.php';
-
-// Imagick AVIF transparency support site health check.
-require_once __DIR__ . '/imagick-avif-transparency-support/helper.php';
-require_once __DIR__ . '/imagick-avif-transparency-support/hooks.php';
