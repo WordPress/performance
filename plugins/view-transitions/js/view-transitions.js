@@ -155,6 +155,7 @@ window.plvtInitViewTransitions = ( config ) => {
 					);
 				} else if (
 					document.body.classList.contains( 'home' ) ||
+					document.body.classList.contains( 'blog' ) ||
 					document.body.classList.contains( 'archive' )
 				) {
 					viewTransitionEntries = getViewTransitionEntries(
