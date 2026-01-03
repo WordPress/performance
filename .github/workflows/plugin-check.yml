@@ -24,15 +24,29 @@ concurrency:
 permissions: {}
 
 jobs:
+    prepare-matrix:
+        runs-on: ubuntu-latest
+        outputs:
+            plugins: ${{ steps.set-matrix.outputs.plugins }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Generate matrix
+              id: set-matrix
+              run: |
+                  PLUGINS=$(jq -c '.plugins' plugins.json)
+                  echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
+
     plugin-check:
-        name: PHP ${{ matrix.php }} - WP ${{ matrix.wordpress }}
-        runs-on: 'ubuntu-24.04'
+        needs: prepare-matrix
+        name: Check ${{ matrix.plugin }} (PHP ${{ matrix.php }} - WP ${{ matrix.wordpress }})
+        runs-on: ubuntu-24.04
         permissions:
             contents: read
         timeout-minutes: 20
         strategy:
-            fail-fast: true
+            fail-fast: false
             matrix:
+                plugin: ${{ fromJson(needs.prepare-matrix.outputs.plugins) }}
                 php:
                     - '8.3' # Currently the wordpress/plugin-check-action always uses the latest PHP version anyway.
                 wordpress: ['latest'] # Currently the wordpress/plugin-check-action only supports 'latest' or 'trunk'.
@@ -55,12 +69,13 @@ jobs:
             - name: npm install
               run: npm ci
 
-            - name: Build plugins
-              run: npm run build-plugins
+            - name: Build plugin
+              run: npm run build:plugin:${{ matrix.plugin }}
 
             - name: Run plugin check
               uses: wordpress/plugin-check-action@v1
               with:
+                  build-dir: ./build/${{ matrix.plugin }}
                   wp-version: ${{ matrix.wordpress }}
                   # Exclude file_type because of the dev files present in the repository.
                   exclude-checks: |
