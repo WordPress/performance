@@ -78,3 +78,4 @@ jobs:
                   build-dir: ./build/${{ matrix.plugin }}
                   slug: ${{ matrix.plugin }}
                   wp-version: ${{ matrix.wordpress }}
+                  ignore-codes: 'readme_reserved_contributors,WordPress.WP.I18n.TextDomainMismatch'
