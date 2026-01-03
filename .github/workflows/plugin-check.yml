@@ -29,7 +29,7 @@ jobs:
         outputs:
             plugins: ${{ steps.set-matrix.outputs.plugins }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
             - name: Generate matrix
               id: set-matrix
               run: |
@@ -51,9 +51,9 @@ jobs:
                     - '8.3' # Currently the wordpress/plugin-check-action always uses the latest PHP version anyway.
                 wordpress: ['latest'] # Currently the wordpress/plugin-check-action only supports 'latest' or 'trunk'.
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
 
-            - uses: shivammathur/setup-php@v2
+            - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
               with:
                   php-version: ${{ matrix.php }}
 
@@ -61,7 +61,7 @@ jobs:
               run: composer install
 
             - name: Setup Node.js (.nvmrc)
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -73,7 +73,7 @@ jobs:
               run: npm run build:plugin:${{ matrix.plugin }}
 
             - name: Run plugin check
-              uses: wordpress/plugin-check-action@v1
+              uses: wordpress/plugin-check-action@ec9b3fe9beaa76bcc4510b7ba2cb5855a5f80f3f # v1.1.4
               with:
                   build-dir: ./build/${{ matrix.plugin }}
                   slug: ${{ matrix.plugin }}
