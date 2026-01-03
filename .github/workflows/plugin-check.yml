@@ -45,6 +45,7 @@ jobs:
         timeout-minutes: 20
         strategy:
             fail-fast: false
+            max-parallel: 1 # Needed to avoid error: Failed to CreateArtifact: Received non-retryable error: Failed request: (409) Conflict: an artifact with this name already exists on the workflow run
             matrix:
                 plugin: ${{ fromJson(needs.prepare-matrix.outputs.plugins) }}
                 php:
@@ -76,4 +77,5 @@ jobs:
               uses: wordpress/plugin-check-action@v1
               with:
                   build-dir: ./build/${{ matrix.plugin }}
+                  slug: ${{ matrix.plugin }}
                   wp-version: ${{ matrix.wordpress }}
