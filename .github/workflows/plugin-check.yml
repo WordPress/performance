@@ -26,10 +26,36 @@ permissions: {}
 jobs:
     prepare-matrix:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
         outputs:
             plugins: ${{ steps.set-matrix.outputs.plugins }}
         steps:
             - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+
+            - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+              with:
+                  php-version: '8.3'
+
+            - name: Setup Node.js (.nvmrc)
+              uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: npm
+
+            - name: npm install
+              run: npm ci
+
+            - name: Build plugins
+              run: npm run build-plugins
+
+            - name: Upload built plugins
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: built-plugins
+                  path: build/
+                  retention-days: 1
+
             - name: Generate matrix
               id: set-matrix
               run: |
@@ -53,24 +79,11 @@ jobs:
         steps:
             - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
 
-            - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
+            - name: Download built plugins
+              uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
               with:
-                  php-version: ${{ matrix.php }}
-
-            - name: Install Composer dependencies
-              run: composer install
-
-            - name: Setup Node.js (.nvmrc)
-              uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: npm
-
-            - name: npm install
-              run: npm ci
-
-            - name: Build plugin
-              run: npm run build:plugin:${{ matrix.plugin }}
+                  name: built-plugins
+                  path: build
 
             - name: Run plugin check
               uses: wordpress/plugin-check-action@ec9b3fe9beaa76bcc4510b7ba2cb5855a5f80f3f # v1.1.4
