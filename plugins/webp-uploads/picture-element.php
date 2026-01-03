@@ -7,6 +7,12 @@
  * @since 2.0.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Potentially wrap an image tag in a picture element.
  *
