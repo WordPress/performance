@@ -55,8 +55,8 @@ jobs:
             - name: npm install
               run: npm ci
 
-            - name: Build assets
-              run: npm run build
+            - name: Build plugins
+              run: npm run build-plugins
 
             - name: Run plugin check
               uses: wordpress/plugin-check-action@v1
