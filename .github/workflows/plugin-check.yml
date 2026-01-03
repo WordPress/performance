@@ -77,10 +77,3 @@ jobs:
               with:
                   build-dir: ./build/${{ matrix.plugin }}
                   wp-version: ${{ matrix.wordpress }}
-                  # Exclude file_type because of the dev files present in the repository.
-                  exclude-checks: |
-                      file_type
-                  exclude-directories: |
-                      .github
-                      docs
-                      tests
