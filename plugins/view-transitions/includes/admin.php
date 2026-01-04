@@ -27,9 +27,12 @@ function plvt_print_view_transitions_admin_style(): void {
 	if ( ! isset( $options['enable_admin_transitions'] ) || true !== $options['enable_admin_transitions'] ) {
 		return;
 	}
+
+	$duration_seconds = absint( $options['default_transition_animation_duration'] ) / 1000;
 	?>
 <style>
 	@view-transition { navigation: auto; }
+	::view-transition-group(*) { animation-duration: <?php echo esc_html( (string) $duration_seconds ); ?>s; }
 	#adminmenu > .menu-top { view-transition-name: attr(id type(<custom-ident>), none); }
 </style>
 	<?php
