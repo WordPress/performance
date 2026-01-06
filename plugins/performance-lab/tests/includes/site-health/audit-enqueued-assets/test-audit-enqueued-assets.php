@@ -47,15 +47,15 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
+		wp_enqueue_script( 'script1', 'https://first.example.com', array(), null );
 		wp_enqueue_script( 'script2', '/wp-includes/example2.js', array(), null );
-		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
+		wp_enqueue_script( 'script3', 'https://third.example.com', array(), null );
 		wp_dequeue_script( 'script3' );
-		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
-		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
-		wp_enqueue_script( 'type-noscript', 'https://non-javascript.com', array(), null );
+		wp_enqueue_script( 'script-async', 'https://async-script.example.com', array(), null, true );
+		wp_enqueue_script( 'script-defer', 'https://defer-script.example.com', array(), null, true );
+		wp_enqueue_script( 'type-noscript', 'https://non-javascript.example.com', array(), null );
 		wp_enqueue_script( 'no-src', 'no-src', array(), null );
-		wp_enqueue_script_module( 'module1', 'https://module1.com', array(), null );
+		wp_enqueue_script_module( 'module1', 'https://module1.example.com', array(), null );
 
 		add_filter(
 			'wp_script_attributes',
@@ -79,7 +79,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'url'      => 'https://example1.com',
+					'url'      => 'https://first.example.com',
 					'response' => array(
 						'code' => 200,
 						'body' => 'console.log("Example 1");',
@@ -104,7 +104,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$external_script = array_filter(
 			$assets['scripts'],
 			static function ( $item ) {
-				return 'https://example1.com' === $item['src'];
+				return 'https://first.example.com' === $item['src'];
 			}
 		);
 		$this->assertEquals( 1, count( $external_script ) );
@@ -120,7 +120,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$async_script = array_filter(
 			$assets['scripts'],
 			static function ( $item ) {
-				return 'https://async-script.com' === $item['src'];
+				return 'https://async-script.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $async_script );
@@ -128,7 +128,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$defer_script = array_filter(
 			$assets['scripts'],
 			static function ( $item ) {
-				return 'https://defer-script.com' === $item['src'];
+				return 'https://defer-script.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $defer_script );
@@ -136,7 +136,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$noscript_script = array_filter(
 			$assets['scripts'],
 			static function ( $item ) {
-				return 'https://non-javascript.com' === $item['src'];
+				return 'https://non-javascript.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $noscript_script );
@@ -144,7 +144,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$module_script = array_filter(
 			$assets['scripts'],
 			static function ( $item ) {
-				return 'https://module1.com' === $item['src'];
+				return 'https://module1.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $module_script );
@@ -162,15 +162,15 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
+		wp_enqueue_style( 'style1', 'https://first.example.com', array(), null );
 		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array(), null );
-		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
+		wp_enqueue_style( 'style3', 'https://third.example.com', array(), null );
 		wp_dequeue_style( 'style3' );
-		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
+		wp_enqueue_style( 'style-print', 'https://print-style.example.com', array(), null, 'print' );
 
 		// The href for the following two styles is mutated via the style_loader_tag filter below.
-		wp_enqueue_style( 'style-no-href', 'https://no-href-style.com', array(), null );
-		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.com', array(), null );
+		wp_enqueue_style( 'style-no-href', 'https://print-style.example.com', array(), null );
+		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.example.com', array(), null );
 
 		// Filter to remove href attribute from a specific style handle.
 		add_filter(
@@ -201,7 +201,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'url'      => 'https://example1.com',
+					'url'      => 'https://first.example.com',
 					'response' => array(
 						'code' => 200,
 						'body' => 'body { background-color: red; }',
@@ -227,7 +227,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$external_style = array_filter(
 			$assets['styles'],
 			static function ( $item ) {
-				return 'https://example1.com' === $item['src'];
+				return 'https://first.example.com' === $item['src'];
 			}
 		);
 		$this->assertEquals( 1, count( $external_style ) );
@@ -243,7 +243,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$print_style = array_filter(
 			$assets['styles'],
 			static function ( $item ) {
-				return 'https://print-style.com' === $item['src'];
+				return 'https://print-style.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $print_style );
@@ -251,7 +251,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$no_href_style = array_filter(
 			$assets['styles'],
 			static function ( $item ) {
-				return 'https://no-href-style.com' === $item['src'];
+				return 'https://print-style.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $no_href_style );
@@ -259,7 +259,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$empty_href_style = array_filter(
 			$assets['styles'],
 			static function ( $item ) {
-				return 'https://empty-href-style.com' === $item['src'];
+				return 'https://empty-href-style.example.com' === $item['src'];
 			}
 		);
 		$this->assertEmpty( $empty_href_style );
