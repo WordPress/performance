@@ -101,53 +101,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'scripts', $assets );
 		$this->assertNotEmpty( $assets['scripts'] );
 
-		$external_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://first.example.com' === $item['src'];
-			}
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'http://localhost:8990/wp-includes/example2.js',
+			),
+			wp_list_pluck( $assets['scripts'], 'src' )
 		);
-		$this->assertEquals( 1, count( $external_script ) );
-
-		$internal_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return home_url( '/wp-includes/example2.js' ) === $item['src'];
-			}
-		);
-		$this->assertEquals( 1, count( $internal_script ) );
-
-		$async_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://async-script.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $async_script );
-
-		$defer_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://defer-script.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $defer_script );
-
-		$noscript_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://non-javascript.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $noscript_script );
-
-		$module_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://module1.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $module_script );
 	}
 
 	/**
@@ -224,45 +184,13 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'styles', $assets );
 		$this->assertNotEmpty( $assets['styles'] );
 
-		$external_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://first.example.com' === $item['src'];
-			}
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'http://localhost:8990/wp-includes/example2.css',
+			),
+			wp_list_pluck( $assets['styles'], 'src' )
 		);
-		$this->assertEquals( 1, count( $external_style ) );
-
-		$internal_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return home_url( '/wp-includes/example2.css' ) === $item['src'];
-			}
-		);
-		$this->assertEquals( 1, count( $internal_style ) );
-
-		$print_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://print-style.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $print_style );
-
-		$no_href_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://print-style.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $no_href_style );
-
-		$empty_href_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://empty-href-style.example.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $empty_href_style );
 	}
 
 	/**
