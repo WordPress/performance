@@ -33,7 +33,7 @@ addFormats( ajv );
 ajv.removeKeyword( 'deprecated' );
 ajv.addKeyword( {
 	keyword: 'deprecated',
-	validate: ( schema ) => ! schema,
+	validate: ( /** @type {string|boolean} */ deprecation ) => ! deprecation,
 	error: {
 		message: ( cxt ) => {
 			return cxt.schema && typeof cxt.schema === 'string'
