@@ -84,7 +84,7 @@ jobs:
       - name: Install PHPUnit
         run: |
           if [ "${{ matrix.php }}" == "8.2" ]; then
-            composer require phpunit/phpunit:${{ matrix.phpunit }} --with-all-dependencies --ignore-platform-reqs
+            composer require phpunit/phpunit:${{ matrix.phpunit }} "doctrine/instantiator:<2.0" --with-all-dependencies --ignore-platform-reqs
           else
             composer require --dev phpunit/phpunit:${{ matrix.phpunit }}
           fi
