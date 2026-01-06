@@ -30,6 +30,19 @@ const ajv = new Ajv( {
 } );
 addFormats( ajv );
 
+ajv.removeKeyword( 'deprecated' );
+ajv.addKeyword( {
+	keyword: 'deprecated',
+	validate: ( schema ) => ! schema,
+	error: {
+		message: ( cxt ) => {
+			return cxt.schema && typeof cxt.schema === 'string'
+				? `is deprecated: ${ cxt.schema }`
+				: 'is deprecated';
+		},
+	},
+} );
+
 /**
  * Validates a JSON file against its schema.
  *
