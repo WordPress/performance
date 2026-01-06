@@ -1,6 +1,6 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "\/wp-admin\/admin.php?page=perflab-modules",
+  "landingPage": "/wp-admin/admin.php?page=perflab-modules",
   "phpExtensionBundles": [
     "kitchen-sink"
   ],
@@ -12,8 +12,8 @@
     },
     {
       "step": "installPlugin",
-      "pluginZipFile": {
-        "resource": "wordpress.org\/plugins",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
         "slug": "performance-lab"
       },
       "options": {
