@@ -126,6 +126,8 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	 * }>
 	 */
 	public function data_provider_test_perflab_admin_pointer(): array {
+		$has_instant_back_forward = array_key_exists( 'nocache-bfcache/nocache-bfcache.php', get_plugins() );
+
 		return array(
 			'null'                             => array(
 				'initial_wp_pointers'   => '',
@@ -143,20 +145,20 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
-				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
 			),
 			'plugins_not_dismissed'            => array(
 				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
-				'dismissed_wp_pointers' => 'perflab-feature-view-transitions',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
 			),
 			'dashboard_new_dismissed'          => array(
 				// Note: If the Instant Back/Forward plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
 				'initial_wp_pointers'   => 'perflab-admin-pointer',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions',
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
 			),
 			'dashboard_last_auto_dismissed'    => array(
 				// Note: The Instant Back/Forward plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
