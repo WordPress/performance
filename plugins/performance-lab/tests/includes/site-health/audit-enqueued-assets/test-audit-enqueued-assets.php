@@ -178,17 +178,19 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// Filter to remove href attribute from a specific style handle.
 		add_filter(
 			'style_loader_tag',
-			static function ( $tag, $handle ) {
+			function ( $tag, $handle ) {
 				if ( 'style-no-href' === $handle ) {
-					$tag = str_replace( 'href=\'https://no-href-style.com\'', ' ', $tag );
-				}
-
-				if ( 'style-empty-href' === $handle ) {
-					$tag = str_replace(
-						'href=\'https://empty-href-style.com\'',
-						"href=''",
-						$tag
-					);
+					$processor = new WP_HTML_Tag_Processor( $tag );
+					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
+					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
+					$processor->remove_attribute( 'href' );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-empty-href' === $handle ) {
+					$processor = new WP_HTML_Tag_Processor( $tag );
+					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
+					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
+					$processor->set_attribute( 'href', '' );
+					$tag = $processor->get_updated_html();
 				}
 				return $tag;
 			},
