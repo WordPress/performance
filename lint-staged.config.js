@@ -13,7 +13,7 @@ const { plugins } = require( './plugins.json' );
  */
 const config = {
 	'**/*.{js,ts,mjs}': [ 'npm run lint-js', () => 'npm run tsc' ],
-	'**/*.json': [ 'node bin/validate-json-schema.js' ],
+	'**/*.json': [ 'npm run lint-json' ],
 	'**/*.php': () => 'composer phpstan',
 	'*.php': 'composer lint',
 	'/tools/**.php': 'composer lint',
