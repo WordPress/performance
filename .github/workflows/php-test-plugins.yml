@@ -84,7 +84,8 @@ jobs:
       - name: Install PHPUnit
         run: |
           if [ "${{ matrix.php }}" == "8.2" ]; then
-            composer require phpunit/phpunit:${{ matrix.phpunit }} "doctrine/instantiator:<2.0" --with-all-dependencies --ignore-platform-reqs
+            # Version 2.1.0 of doctrine/instantiator started requiring PHP 8.4: <https://github.com/doctrine/instantiator/pull/148>.
+            composer require phpunit/phpunit:${{ matrix.phpunit }} "doctrine/instantiator:<2.1" --with-all-dependencies --ignore-platform-reqs
           else
             composer require --dev phpunit/phpunit:${{ matrix.phpunit }}
           fi
