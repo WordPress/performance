@@ -167,12 +167,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
 		wp_dequeue_style( 'style3' );
 		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
+
+		// The href for the following two styles is mutated via the style_loader_tag filter below.
 		wp_enqueue_style( 'style-no-href', 'https://no-href-style.com', array(), null );
-		/**
-		 * Enqueue style with empty href
-		 *
-		 * @see https://github.com/WordPress/performance/issues/2278
-		 */
 		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.com', array(), null );
 
 		// Filter to remove href attribute from a specific style handle.
