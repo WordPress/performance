@@ -232,7 +232,7 @@ function od_render_extensions_action_link( $links ): array {
  * @since n.e.x.t
  * @access private
  *
- * @return string[] List of installed extension plugin slugs.
+ * @return string[] List of installed extension plugin files.
  */
 function od_check_installed_extensions(): array {
 	$installed_plugins    = get_plugins();
