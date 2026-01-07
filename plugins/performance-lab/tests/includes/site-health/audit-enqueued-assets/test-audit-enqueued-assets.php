@@ -136,23 +136,35 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		// The href for the following two styles is mutated via the style_loader_tag filter below.
 		wp_enqueue_style( 'style-no-href', 'https://print-style.example.com', array(), null );
 		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.example.com', array(), null );
+		wp_enqueue_style( 'style-whitespace-href', 'https://whitespace-href-style.example.com', array(), null );
 
 		// Filter to remove href attribute from a specific style handle.
 		add_filter(
 			'style_loader_tag',
 			function ( $tag, $handle ) {
-				if ( 'style-no-href' === $handle ) {
-					$processor = new WP_HTML_Tag_Processor( $tag );
+				$create_processor_state = function ( string $html ): WP_HTML_Tag_Processor {
+					$processor = new WP_HTML_Tag_Processor( $html );
 					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
 					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
-					$processor->remove_attribute( 'href' );
+					return $processor;
+				};
+				if ( 'style-no-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->remove_attribute( 'href' ) );
 					$tag = $processor->get_updated_html();
 				} elseif ( 'style-empty-href' === $handle ) {
-					$processor = new WP_HTML_Tag_Processor( $tag );
-					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
-					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
-					$processor->set_attribute( 'href', '' );
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->set_attribute( 'href', '' ) );
 					$tag = $processor->get_updated_html();
+				} elseif ( 'style-whitespace-href' === $handle ) {
+					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalud URL to the href will be rejected.
+					$tag = str_replace(
+						'https://whitespace-href-style.example.com',
+						'   ',
+						$tag,
+						$count
+					);
+					$this->assertSame( 1, $count, 'Expected string to be replaced.' );
 				}
 				return $tag;
 			},
