@@ -16,6 +16,8 @@ const Ajv4 = require( 'ajv-draft-04' );
 const addFormats = require( 'ajv-formats' ).default;
 const fg = require( 'fast-glob' );
 
+const schemaCache = new Map();
+
 function createAjv( AjvConstructor ) {
 	const ajv = new AjvConstructor( {
 		allErrors: true,
@@ -52,13 +54,20 @@ const ajv4 = createAjv( Ajv4 );
  * @return {Promise<Object>} The JSON schema object.
  */
 async function fetchSchema( schemaUrl ) {
+	if ( schemaCache.has( schemaUrl ) ) {
+		return schemaCache.get( schemaUrl );
+	}
+
 	const response = await fetch( schemaUrl );
 	if ( ! response.ok ) {
 		throw new Error(
 			`Failed to fetch schema from ${ schemaUrl }: ${ response.statusText }`
 		);
 	}
-	return await response.json();
+	const schema = await response.json();
+	schemaCache.set( schemaUrl, schema );
+
+	return schema;
 }
 
 /**
