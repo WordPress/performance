@@ -12,7 +12,7 @@
   "include": [
     "**/*.js",
     "**/*.mjs",
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "plugins/*/build/*",
