@@ -132,6 +132,16 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 * @covers ::od_render_extensions_meta_link
 	 */
 	public function test_od_render_extensions_meta_link(): void {
+		// With capability and no active extensions, notice is shown.
+		$user = self::factory()->user->create();
+		wp_set_current_user( $user );
+		if ( is_multisite() ) {
+			grant_super_admin( $user );
+		} else {
+			$current_user = wp_get_current_user();
+			$current_user->add_cap( 'activate_plugins' );
+		}
+
 		$input  = array(
 			'Version 1.0',
 		);

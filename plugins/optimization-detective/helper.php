@@ -198,7 +198,7 @@ function od_render_generator_meta_tag(): void {
 }
 
 /**
- * Adds an Extensions link to the plugin action links for Optimization Detective.
+ * Adds an Extensions link to the plugin row meta for Optimization Detective.
  *
  * This link directs users to the plugin directory to discover extensions that
  * provide optimization functionality using the Optimization Detective plugin.
@@ -214,11 +214,10 @@ function od_render_extensions_meta_link( $plugin_meta, string $plugin_file ): ar
 	if ( ! is_array( $plugin_meta ) ) {
 		$plugin_meta = array();
 	}
-	if ( 'optimization-detective/load.php' !== $plugin_file ) {
+	if ( 'optimization-detective/load.php' !== $plugin_file || ! current_user_can( 'install_plugins' ) ) {
 		return $plugin_meta;
 	}
 
-	// TODO: What if user can't install plugins?
 	/* @noinspection HtmlUnknownTarget */
 	$extensions_link = sprintf(
 		'<a href="%s">%s</a>',
