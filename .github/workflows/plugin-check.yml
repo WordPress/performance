@@ -119,7 +119,7 @@ jobs:
                   CHANGED_PLUGINS="[]"
                   for plugin in $(echo "$ALL_PLUGINS" | jq -r '.[]'); do
                       # Convert plugin name with hyphens to underscores for output key
-                      OUTPUT_KEY=$(echo "$plugin" | tr '-' '_' | tr -d '\n')
+                      OUTPUT_KEY=$(echo "$plugin" | tr '-' '_')
                       CHANGED="${{ toJson(needs.detect-changes.outputs) }}"
 
                       # Check if this plugin has changes
