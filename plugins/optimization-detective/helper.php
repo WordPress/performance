@@ -339,7 +339,7 @@ function od_render_documentation_links(): void {
 	/* @noinspection HtmlUnknownTarget */
 	echo wp_kses_post(
 		sprintf(
-			/* translators: %s is the URL for the list of extension plugins. */
+			/* translators: 1: project documentation URL, 2: introduction URL, 3: code reference URL, 4: extensions list URL. */
 			__( 'The <a href="%1$s" target="_blank">project documentation</a> is available on GitHub, including an <a href="%2$s" target="_blank">introduction</a>, <a href="%3$s" target="_blank">code reference</a>, and a list of <a href="%4$s" target="_blank">extensions</a>.', 'optimization-detective' ),
 			esc_url( 'https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs' ),
 			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md' ),
