@@ -264,7 +264,7 @@ function od_check_installed_extensions(): array {
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
 	$installed_extensions = od_check_installed_extensions();
-	if ( count( $installed_extensions ) === 0 ) {
+	if ( count( $installed_extensions ) > 0 ) {
 		return;
 	}
 
