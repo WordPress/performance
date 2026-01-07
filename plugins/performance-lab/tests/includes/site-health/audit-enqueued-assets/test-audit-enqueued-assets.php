@@ -171,7 +171,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$this->assertTrue( $processor->set_attribute( 'href', '' ) );
 					$tag = $processor->get_updated_html();
 				} elseif ( 'style-whitespace-href' === $handle ) {
-					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalud URL to the href will be rejected.
+					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalid URL to the href will be rejected.
 					$tag = str_replace(
 						'https://style-whitespace-href.example.com',
 						'   ',
