@@ -269,8 +269,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	}
 
 	$message = sprintf(
-		'<summary style="margin: 0.5em 0">%s %s</summary>',
-		esc_html__( 'Info:', 'optimization-detective' ),
+		'<summary style="margin: 0.5em 0">%s</summary>',
 		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
 	);
 
