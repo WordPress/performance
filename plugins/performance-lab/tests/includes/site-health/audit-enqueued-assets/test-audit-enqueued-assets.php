@@ -104,9 +104,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'https://first.example.com',
-				'http://localhost:8990/wp-includes/example2.js',
+				'/wp-includes/example2.js',
 			),
-			wp_list_pluck( $assets['scripts'], 'src' )
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['scripts'], 'src' )
+			)
 		);
 	}
 
@@ -187,9 +192,14 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'https://first.example.com',
-				'http://localhost:8990/wp-includes/example2.css',
+				'/wp-includes/example2.css',
 			),
-			wp_list_pluck( $assets['styles'], 'src' )
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['styles'], 'src' )
+			)
 		);
 	}
 
