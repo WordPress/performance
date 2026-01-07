@@ -301,11 +301,12 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		/* @noinspection HtmlUnknownTarget */
 		$message .= sprintf(
 			'<tr>
-				<td><strong><a href="%s" class="thickbox open-plugin-details-modal">%s</a></strong></td>
+				<td><strong>%s</a></strong></td>
 				<td>%s</td>
 			</tr>',
-			esc_url( $featured_extension['url'] ),
-			esc_html( $featured_extension['name'] ),
+			current_user_can( 'install_plugins' ) ?
+				sprintf( '<a href="%s" class="thickbox open-plugin-details-modal">%s</a>', esc_url( $featured_extension['url'] ), esc_html( $featured_extension['name'] ) ) :
+				esc_html( $featured_extension['name'] ),
 			esc_html( $featured_extension['description'] )
 		);
 	}
@@ -321,7 +322,9 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		)
 	);
 
-	add_thickbox();
+	if ( current_user_can( 'install_plugins' ) ) {
+		add_thickbox();
+	}
 	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
 }
 
