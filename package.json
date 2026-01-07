@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.schemastore.org/package.json",
   "name": "performance",
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
