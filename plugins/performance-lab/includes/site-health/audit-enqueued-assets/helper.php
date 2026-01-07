@@ -70,6 +70,8 @@ function perflab_aea_audit_blocking_assets(): array {
 
 		if ( 'SCRIPT' === $tag ) {
 			$src = $processor->get_attribute( 'src' );
+
+			// Skip scripts with empty or whitespace-only src attributes as they never load external scripts which block rendering.
 			if ( ! is_string( $src ) ) {
 				continue;
 			}
@@ -123,6 +125,8 @@ function perflab_aea_audit_blocking_assets(): array {
 			}
 
 			$href = $processor->get_attribute( 'href' );
+
+			// Skip stylesheets with empty or whitespace-only href attributes since they may be using a deferred loading technique.
 			if ( ! is_string( $href ) ) {
 				continue;
 			}

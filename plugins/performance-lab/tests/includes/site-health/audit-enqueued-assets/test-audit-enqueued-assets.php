@@ -149,7 +149,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_style( 'style-empty-href', 'https://style-empty-href.example.com', array(), null );
 		wp_enqueue_style( 'style-whitespace-href', 'https://style-whitespace-href.example.com', array(), null );
 
-		// Filter to remove href attribute from a specific style handle.
+		// Filter to manipulate style href attributes for testing various edge cases.
 		add_filter(
 			'style_loader_tag',
 			function ( $tag, $handle ) {
@@ -165,7 +165,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$tag = $processor->get_updated_html();
 				} elseif ( 'style-boolean-href' === $handle ) {
 					$processor = $create_processor_state( $tag );
-					$processor->set_attribute( 'href', true );
+					$this->assertTrue( $processor->set_attribute( 'href', true ) );
 					$tag = $processor->get_updated_html();
 				} elseif ( 'style-empty-href' === $handle ) {
 					$processor = $create_processor_state( $tag );
