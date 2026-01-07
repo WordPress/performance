@@ -142,7 +142,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_dequeue_style( 'style3' );
 		wp_enqueue_style( 'style-print', 'https://print-style.example.com', array(), null, 'print' );
 
-		// The href for the following two styles is mutated via the style_loader_tag filter below.
+		// The href for the following styles is mutated via the style_loader_tag filter below.
 		wp_enqueue_style( 'style-no-href', 'https://style-no-href.example.com', array(), null );
 		wp_enqueue_style( 'style-boolean-href', 'https://style-boolean-href.example.com', array(), null );
 		wp_enqueue_style( 'style-empty-href', 'https://style-empty-href.example.com', array(), null );
