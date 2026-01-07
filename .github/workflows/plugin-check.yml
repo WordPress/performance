@@ -64,7 +64,7 @@ jobs:
 
     plugin-check:
         needs: prepare-matrix
-        name: Check ${{ matrix.plugin }} (PHP ${{ matrix.php }} - WP ${{ matrix.wordpress }})
+        name: Check ${{ matrix.plugin }}
         runs-on: ubuntu-24.04
         permissions:
             contents: read
@@ -88,5 +88,4 @@ jobs:
               with:
                   build-dir: ./build/${{ matrix.plugin }}
                   slug: ${{ matrix.plugin }}
-                  wp-version: ${{ matrix.wordpress }}
                   ignore-codes: 'readme_reserved_contributors,WordPress.WP.I18n.TextDomainMismatch'
