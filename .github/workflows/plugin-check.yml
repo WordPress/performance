@@ -31,43 +31,37 @@ jobs:
             contents: read
             pull-requests: read
         outputs:
-            auto-sizes: ${{ steps.filter.outputs.auto-sizes }}
-            dominant-color-images: ${{ steps.filter.outputs.dominant-color-images }}
-            embed-optimizer: ${{ steps.filter.outputs.embed-optimizer }}
-            image-prioritizer: ${{ steps.filter.outputs.image-prioritizer }}
-            optimization-detective: ${{ steps.filter.outputs.optimization-detective }}
-            performance-lab: ${{ steps.filter.outputs.performance-lab }}
-            speculation-rules: ${{ steps.filter.outputs.speculation-rules }}
-            view-transitions: ${{ steps.filter.outputs.view-transitions }}
-            web-worker-offloading: ${{ steps.filter.outputs.web-worker-offloading }}
-            webp-uploads: ${{ steps.filter.outputs.webp-uploads }}
+            changed-plugins: ${{ steps.filter-plugins.outputs.changed-plugins }}
         steps:
             - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+            - name: Generate filters from plugins.json
+              id: generate-filters
+              run: |
+                  FILTERS=""
+                  for plugin in $(jq -r '.plugins[]' plugins.json); do
+                      FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
+                  done
+                  echo "$FILTERS" > /tmp/filters.yml
+                  cat /tmp/filters.yml
 
             - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
               id: filter
               with:
-                  filters: |
-                      auto-sizes:
-                        - 'plugins/auto-sizes/**'
-                      dominant-color-images:
-                        - 'plugins/dominant-color-images/**'
-                      embed-optimizer:
-                        - 'plugins/embed-optimizer/**'
-                      image-prioritizer:
-                        - 'plugins/image-prioritizer/**'
-                      optimization-detective:
-                        - 'plugins/optimization-detective/**'
-                      performance-lab:
-                        - 'plugins/performance-lab/**'
-                      speculation-rules:
-                        - 'plugins/speculation-rules/**'
-                      view-transitions:
-                        - 'plugins/view-transitions/**'
-                      web-worker-offloading:
-                        - 'plugins/web-worker-offloading/**'
-                      webp-uploads:
-                        - 'plugins/webp-uploads/**'
+                  filters: /tmp/filters.yml
+
+            - name: Collect changed plugins
+              id: filter-plugins
+              run: |
+                  CHANGED_PLUGINS="[]"
+                  for plugin in $(jq -r '.plugins[]' plugins.json); do
+                      OUTPUT_KEY=$(echo "$plugin" | tr '-' '_')
+                      FILTER_OUTPUT="${{ toJson(steps.filter.outputs) }}"
+                      if echo "$FILTER_OUTPUT" | jq -e ".[\"$OUTPUT_KEY\"] == \"true\"" > /dev/null; then
+                          CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | jq -c --arg p "$plugin" '. + [$p]')
+                      fi
+                  done
+                  echo "changed-plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
 
     prepare-matrix:
         needs: [detect-changes]
@@ -115,20 +109,8 @@ jobs:
                       exit 0
                   fi
 
-                  # For PRs, filter to only changed plugins
-                  CHANGED_PLUGINS="[]"
-                  for plugin in $(echo "$ALL_PLUGINS" | jq -r '.[]'); do
-                      # Convert plugin name with hyphens to underscores for output key
-                      OUTPUT_KEY=$(echo "$plugin" | tr '-' '_')
-                      CHANGED="${{ toJson(needs.detect-changes.outputs) }}"
-
-                      # Check if this plugin has changes
-                      if echo "$CHANGED" | jq -e ".[\"$OUTPUT_KEY\"] == \"true\"" > /dev/null; then
-                          CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | jq -c --arg p "$plugin" '. + [$p]')
-                      fi
-                  done
-
-                  # If no plugins changed, output empty array
+                  # For PRs, use the changed plugins from detect-changes
+                  CHANGED_PLUGINS="${{ needs.detect-changes.outputs.changed-plugins }}"
                   echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
 
     plugin-check:
