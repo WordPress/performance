@@ -214,8 +214,9 @@ function od_render_extensions_action_link( $links ): array {
 		$links = array();
 	}
 
+	/* @noinspection HtmlUnknownTarget */
 	$extensions_link = sprintf(
-		'<a href="%1$s">%2$s</a>',
+		'<a href="%s">%s</a>',
 		esc_url( admin_url( 'plugin-install.php?s=optimization-detective&tab=search&type=tag' ) ),
 		esc_html__( 'Extensions', 'optimization-detective' )
 	);
@@ -297,6 +298,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 
 	$message .= '<table class="widefat" style="margin-bottom: 11px;"><tbody>';
 	foreach ( $extensions as $extension ) {
+		/* @noinspection HtmlUnknownTarget */
 		$message .= sprintf(
 			'<tr>
 				<td><strong><a href="%s" class="thickbox open-plugin-details-modal">%s</a></strong></td>
