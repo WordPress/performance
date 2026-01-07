@@ -228,37 +228,37 @@ function od_render_extensions_action_link( $links ): array {
 }
 
 /**
- * Checks for installed and active extensions of Optimization Detective.
+ * Checks for active extension plugins for Optimization Detective.
  *
  * @since n.e.x.t
  * @access private
  *
- * @return string[] List of installed and active extension plugin files.
+ * @return string[] List of active extension plugin files.
  */
-function od_check_installed_extensions(): array {
-	$installed_plugins    = get_plugins();
-	$installed_extensions = array();
+function od_get_active_extensions(): array {
+	$installed_plugins = get_plugins();
+	$active_extensions = array();
 
 	foreach ( $installed_plugins as $plugin_slug => $plugin_data ) {
 		if ( isset( $plugin_data['RequiresPlugins'] ) && is_string( $plugin_data['RequiresPlugins'] ) ) {
 			$required_plugins = array_map( 'trim', explode( ',', $plugin_data['RequiresPlugins'] ) );
 			if ( in_array( 'optimization-detective', $required_plugins, true ) && is_plugin_active( $plugin_slug ) ) {
-				$installed_extensions[] = $plugin_slug;
+				$active_extensions[] = $plugin_slug;
 			}
 		}
 	}
 
 	// Check for plugins without Requires Plugins header but known to be extensions.
-	$known_extensions = array(
+	$suggesting_extensions = array(
 		'embed-optimizer/load.php',
 	);
-	foreach ( $known_extensions as $extension ) {
+	foreach ( $suggesting_extensions as $extension ) {
 		if ( isset( $installed_plugins[ $extension ] ) && is_plugin_active( $extension ) ) {
-			$installed_extensions[] = $extension;
+			$active_extensions[] = $extension;
 		}
 	}
 
-	return $installed_extensions;
+	return $active_extensions;
 }
 
 /**
@@ -271,8 +271,8 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	if ( ! current_user_can( 'activate_plugins' ) ) {
 		return;
 	}
-	$installed_extensions = od_check_installed_extensions();
-	if ( count( $installed_extensions ) > 0 ) {
+	$active_extensions = od_get_active_extensions();
+	if ( count( $active_extensions ) > 0 ) {
 		return;
 	}
 
@@ -283,7 +283,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 
 	$message .= '<p>' . esc_html__( 'This plugin is a framework that requires extension plugins to provide optimization features. To benefit from Optimization Detective, please install and activate one or more of the following extensions:', 'optimization-detective' ) . '</p>';
 
-	$extensions = array(
+	$featured_extensions = array(
 		'image-prioritizer' => array(
 			'name'        => __( 'Image Prioritizer', 'optimization-detective' ),
 			'description' => __( 'Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy-loading.', 'optimization-detective' ),
@@ -297,16 +297,16 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	);
 
 	$message .= '<table class="widefat" style="margin-bottom: 11px;"><tbody>';
-	foreach ( $extensions as $extension ) {
+	foreach ( $featured_extensions as $featured_extension ) {
 		/* @noinspection HtmlUnknownTarget */
 		$message .= sprintf(
 			'<tr>
 				<td><strong><a href="%s" class="thickbox open-plugin-details-modal">%s</a></strong></td>
 				<td>%s</td>
 			</tr>',
-			esc_url( $extension['url'] ),
-			esc_html( $extension['name'] ),
-			esc_html( $extension['description'] )
+			esc_url( $featured_extension['url'] ),
+			esc_html( $featured_extension['name'] ),
+			esc_html( $featured_extension['description'] )
 		);
 	}
 	$message .= '</tbody></table>';

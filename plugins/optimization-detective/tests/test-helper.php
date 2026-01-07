@@ -166,15 +166,15 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	/**
 	 * Test checking installed and active extensions.
 	 *
-	 * @covers ::od_check_installed_extensions
+	 * @covers ::od_get_active_extensions
 	 */
-	public function test_od_check_installed_extensions(): void {
-		$installed_extensions = od_check_installed_extensions();
+	public function test_od_get_active_extensions(): void {
+		$installed_extensions = od_get_active_extensions();
 		// Extensions are installed but not active in the test environment.
 		$this->assertSame( array(), $installed_extensions );
 
 		activate_plugins( array( 'optimization-detective/load.php', 'image-prioritizer/load.php', 'embed-optimizer/load.php' ) );
-		$installed_extensions = od_check_installed_extensions();
+		$installed_extensions = od_get_active_extensions();
 		$this->assertSame(
 			array(
 				'image-prioritizer/load.php',
@@ -188,7 +188,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 * Test rendering installed extensions admin notice with various scenarios.
 	 *
 	 * @covers ::od_maybe_render_installed_extensions_admin_notice
-	 * @covers ::od_check_installed_extensions
+	 * @covers ::od_get_active_extensions
 	 */
 	public function test_od_maybe_render_installed_extensions_admin_notice(): void {
 		// Without capability, no output.
