@@ -73,8 +73,6 @@ jobs:
             fail-fast: false
             matrix:
                 plugin: ${{ fromJson(needs.prepare-matrix.outputs.plugins) }}
-                php:
-                    - '8.3' # Currently the wordpress/plugin-check-action always uses the latest PHP version anyway.
                 wordpress: ['latest'] # Currently the wordpress/plugin-check-action only supports 'latest' or 'trunk'.
         steps:
             - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
