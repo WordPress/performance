@@ -307,7 +307,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		$message,
 		array(
 			'type'               => 'info',
-			'additional_classes' => array( 'inline', 'notice-alt' ),
+			'additional_classes' => array( 'inline' ),
 			'paragraph_wrap'     => false,
 		)
 	);
