@@ -224,17 +224,17 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 */
 	public function test_od_render_documentation_links(): void {
 		$processor = new WP_HTML_Tag_Processor( get_echo( 'od_render_documentation_links' ) );
-		$this->assertTrue( $processor->next_tag( 'P' ), 'Expected P to be the first tag..' );
+		$this->assertTrue( $processor->next_tag( 'P' ), 'Expected P to be the first tag.' );
 		$found_links = 0;
 		while ( $processor->next_tag() ) {
-			$this->assertSame( 'A', $processor->get_tag(), 'Expected tag in pararaph to be a link.' );
+			$this->assertSame( 'A', $processor->get_tag(), 'Expected tag in paragraph to be a link.' );
 			$href = $processor->get_attribute( 'href' );
 			$this->assertIsString( $href, 'Expected A to be the second tag.' );
 			$this->assertSame( 'github.com', wp_parse_url( $href, PHP_URL_HOST ) );
 			$this->assertSame( '_blank', $processor->get_attribute( 'target' ) );
 			++$found_links;
 		}
-		$this->assertSame( 4, $found_links, 'Expected there to be 3 links.' );
+		$this->assertSame( 4, $found_links, 'Expected there to be 4 links.' );
 	}
 
 	/**
