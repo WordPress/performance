@@ -132,7 +132,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 * @covers ::od_render_extensions_meta_link
 	 */
 	public function test_od_render_extensions_meta_link(): void {
-		// With capability and no active extensions, notice is shown.
+		// With capability, the Extensions link is added to plugin meta.
 		$this->set_admin_user();
 
 		$input  = array(
