@@ -125,4 +125,121 @@ class Test_OD_Helper extends WP_UnitTestCase {
 		$this->assertTrue( od_is_rest_api_unavailable() );
 		$this->assertStringContainsString( '; rest_api_unavailable', $tag );
 	}
+
+	/**
+	 * Test rendering extensions action link.
+	 *
+	 * @covers ::od_render_extensions_action_link
+	 */
+	public function test_od_render_extensions_action_link(): void {
+		$input  = array(
+			'deactivate' => '<a href="#">Deactivate</a>',
+			'edit'       => '<a href="#">Edit</a>',
+		);
+		$result = od_render_extensions_action_link( $input );
+
+		$this->assertArrayHasKey( 'extensions', $result );
+		$this->assertArrayHasKey( 'deactivate', $result );
+		$this->assertArrayHasKey( 'edit', $result );
+		$this->assertStringContainsString( 'plugin-install.php?s=optimization-detective', $result['extensions'] );
+		$this->assertStringContainsString( 'Extensions', $result['extensions'] );
+		$this->assertSame( '<a href="#">Deactivate</a>', $result['deactivate'] );
+		$this->assertSame( '<a href="#">Edit</a>', $result['edit'] );
+
+		// Check that it's first in the array.
+		$keys = array_keys( $result );
+		$this->assertSame( 'extensions', $keys[0] );
+	}
+
+	/**
+	 * Test rendering extensions action link with non-array input.
+	 *
+	 * @covers ::od_render_extensions_action_link
+	 */
+	public function test_od_render_extensions_action_link_non_array(): void {
+		$result = od_render_extensions_action_link( 'not an array' );
+
+		$this->assertArrayHasKey( 'extensions', $result );
+		$this->assertStringContainsString( 'Extensions', $result['extensions'] );
+	}
+
+	/**
+	 * Test checking installed and active extensions.
+	 *
+	 * @covers ::od_check_installed_extensions
+	 */
+	public function test_od_check_installed_extensions(): void {
+		$installed_extensions = od_check_installed_extensions();
+		// Extensions are installed but not active in the test environment.
+		$this->assertSame( array(), $installed_extensions );
+
+		activate_plugins( array( 'optimization-detective/load.php', 'image-prioritizer/load.php', 'embed-optimizer/load.php' ) );
+		$installed_extensions = od_check_installed_extensions();
+		$this->assertSame(
+			array(
+				'image-prioritizer/load.php',
+				'embed-optimizer/load.php',
+			),
+			$installed_extensions
+		);
+	}
+
+	/**
+	 * Test rendering installed extensions admin notice with various scenarios.
+	 *
+	 * @covers ::od_maybe_render_installed_extensions_admin_notice
+	 * @covers ::od_check_installed_extensions
+	 */
+	public function test_od_maybe_render_installed_extensions_admin_notice(): void {
+		// Without capability, no output.
+		$output = get_echo( 'od_maybe_render_installed_extensions_admin_notice' );
+		$this->assertSame( '', $output );
+
+		// With capability and no active extensions, notice is shown.
+		$user = self::factory()->user->create();
+		wp_set_current_user( $user );
+		if ( is_multisite() ) {
+			grant_super_admin( $user );
+		} else {
+			$current_user = wp_get_current_user();
+			$current_user->add_cap( 'activate_plugins' );
+		}
+
+		$output = get_echo( 'od_maybe_render_installed_extensions_admin_notice' );
+		$this->assertStringContainsString( '<div class="notice notice-info', $output );
+		$this->assertStringContainsString( '<details>', $output );
+		$this->assertStringContainsString( '</summary>', $output );
+
+		// With capability and active extensions, no notice.
+		activate_plugins( array( 'optimization-detective/load.php', 'image-prioritizer/load.php', 'embed-optimizer/load.php' ) );
+
+		$output = get_echo( 'od_maybe_render_installed_extensions_admin_notice' );
+		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * Test od_render_installed_extensions_admin_notice_in_plugin_row with various scenarios.
+	 *
+	 * @covers ::od_render_installed_extensions_admin_notice_in_plugin_row
+	 * @covers ::od_maybe_render_installed_extensions_admin_notice
+	 */
+	public function test_od_render_installed_extensions_admin_notice_in_plugin_row(): void {
+		$user = self::factory()->user->create();
+		wp_set_current_user( $user );
+		if ( is_multisite() ) {
+			grant_super_admin( $user );
+		} else {
+			$current_user = wp_get_current_user();
+			$current_user->add_cap( 'activate_plugins' );
+		}
+
+		// When called for a different plugin, no output.
+		$this->assertSame( '', get_echo( 'od_render_installed_extensions_admin_notice_in_plugin_row', array( 'foo.php' ) ) );
+
+		// With no active extensions, notice is shown.
+		$notice = get_echo( 'od_render_installed_extensions_admin_notice_in_plugin_row', array( 'optimization-detective/load.php' ) );
+		$this->assertStringContainsString( '<div class="notice notice-info', $notice );
+		$this->assertStringContainsString( '<details>', $notice );
+		$this->assertStringContainsString( '</summary>', $notice );
+	}
 }
