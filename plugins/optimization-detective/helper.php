@@ -254,14 +254,25 @@ function od_check_installed_extensions(): array {
 }
 
 /**
- * Renders an admin notice prompting the user to install extensions for Optimization Detective.
+ * Renders an inline admin notice prompting the user to install extensions for Optimization Detective.
  *
  * @since n.e.x.t
  * @access private
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
+	if ( 1 === (int) get_option( 'od_installed_extensions_admin_notice', '0' ) ) {
+		return;
+	}
+	update_option( 'od_installed_extensions_admin_notice', '1' );
+
+	$installed_extensions = od_check_installed_extensions();
+	if ( count( $installed_extensions ) > 0 ) {
+		return;
+	}
+
 	$message = sprintf(
-		'<p><strong>%s</strong></p>',
+		'<summary style="margin: 0.5em 0">%s %s</summary>',
+		esc_html__( 'Warning:', 'optimization-detective' ),
 		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
 	);
 
@@ -293,12 +304,14 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		);
 	}
 	$message .= '</tbody></table>';
+	$message  = "<details>$message</details>";
 
 	$notice = wp_get_admin_notice(
 		$message,
 		array(
-			'type'           => 'warning',
-			'paragraph_wrap' => false,
+			'type'               => 'warning',
+			'additional_classes' => array( 'inline', 'notice-alt' ),
+			'paragraph_wrap'     => false,
 		)
 	);
 
@@ -307,23 +320,18 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 }
 
 /**
- * Checks for installed extensions and displays an admin notice once if none are found.
+ * Displays an inline admin notice on the plugin row if no extensions are installed.
  *
  * @since n.e.x.t
  * @access private
+ *
+ * @param non-empty-string $plugin_file Plugin file.
  */
-function od_maybe_check_installed_extensions(): void {
-	if ( 1 === (int) get_option( 'od_installed_extensions_admin_notice', '0' ) ) {
+function od_render_installed_extensions_admin_notice_in_plugin_row( string $plugin_file ): void {
+	if ( 'optimization-detective/load.php' !== $plugin_file ) {
 		return;
 	}
-	update_option( 'od_installed_extensions_admin_notice', '1' );
-
-	$installed_extensions = od_check_installed_extensions();
-	if ( count( $installed_extensions ) > 0 ) {
-		return;
-	}
-
-	add_action( 'admin_notices', 'od_maybe_render_installed_extensions_admin_notice' );
+	od_maybe_render_installed_extensions_admin_notice();
 }
 
 /**
