@@ -13,21 +13,20 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 // For a multisite, delete the option for all sites (however limited to 100 sites to avoid memory limit or timeout problems in large scale networks).
 if ( is_multisite() ) {
-	array_map(
-		static function ( $site_id ): void {
-			switch_to_blog( $site_id );
-			plsr_delete_plugin_option();
-			restore_current_blog();
-		},
-		get_sites(
-			array(
-				'fields'                 => 'ids',
-				'number'                 => 100,
-				'update_site_cache'      => false,
-				'update_site_meta_cache' => false,
-			)
+	$plsr_site_ids = get_sites(
+		array(
+			'fields'                 => 'ids',
+			'number'                 => 100,
+			'update_site_cache'      => false,
+			'update_site_meta_cache' => false,
 		)
 	);
+
+	foreach ( $plsr_site_ids as $plsr_site_id ) {
+		switch_to_blog( $plsr_site_id );
+		plsr_delete_plugin_option();
+		restore_current_blog();
+	}
 }
 
 plsr_delete_plugin_option();
