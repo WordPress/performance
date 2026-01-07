@@ -301,7 +301,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		/* @noinspection HtmlUnknownTarget */
 		$message .= sprintf(
 			'<tr>
-				<td><strong>%s</a></strong></td>
+				<td><strong>%s</strong></td>
 				<td>%s</td>
 			</tr>',
 			current_user_can( 'install_plugins' ) ?
