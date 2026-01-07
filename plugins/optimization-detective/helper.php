@@ -323,13 +323,25 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 
 	add_thickbox();
 	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
+}
 
+/**
+ * Renders a paragraph of links to the plugin's documentation on GitHub.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function od_render_documentation_links(): void {
 	echo '<p>';
+	/* @noinspection HtmlUnknownTarget */
 	echo wp_kses_post(
 		sprintf(
 			/* translators: %s is the URL for the list of extension plugins. */
-			__( 'See also the <a href="%s" target="_blank">list of extension plugins</a> in the project documentation on GitHub.', 'optimization-detective' ),
-			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#extension-plugins' )
+			__( 'The <a href="%1$s" target="_blank">project documentation</a> is available on GitHub, including an <a href="%2$s" target="_blank">introduction</a>, <a href="%3$s" target="_blank">code reference</a>, and a list of <a href="%4$s" target="_blank">extensions</a>.', 'optimization-detective' ),
+			esc_url( 'https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md' )
 		)
 	);
 	echo '</p>';
@@ -348,6 +360,7 @@ function od_render_installed_extensions_admin_notice_in_plugin_row( string $plug
 		return;
 	}
 	od_maybe_render_installed_extensions_admin_notice();
+	od_render_documentation_links();
 }
 
 /**

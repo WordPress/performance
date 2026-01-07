@@ -71,7 +71,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test generating media query.
+	 * Tests generating media query.
 	 *
 	 * @dataProvider data_to_test_od_generate_media_query
 	 * @covers ::od_generate_media_query
@@ -84,7 +84,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the META generator tag.
+	 * Tests printing the META generator tag.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 */
@@ -98,7 +98,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test META generator tag when query parameter is present.
+	 * Tests META generator tag when query parameter is present.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 * @covers ::od_get_disabled_reasons
@@ -111,7 +111,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test printing the META generator tag when the REST API is not available.
+	 * Tests printing the META generator tag when the REST API is not available.
 	 *
 	 * @covers ::od_render_generator_meta_tag
 	 * @covers ::od_get_disabled_reasons
@@ -127,7 +127,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test rendering extensions action link.
+	 * Tests rendering extensions action link.
 	 *
 	 * @covers ::od_render_extensions_action_link
 	 */
@@ -152,7 +152,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test rendering extensions action link with non-array input.
+	 * Tests rendering extensions action link with non-array input.
 	 *
 	 * @covers ::od_render_extensions_action_link
 	 */
@@ -164,7 +164,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test checking installed and active extensions.
+	 * Tests checking installed and active extensions.
 	 *
 	 * @covers ::od_get_active_extensions
 	 */
@@ -185,7 +185,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test rendering installed extensions admin notice with various scenarios.
+	 * Tests rendering installed extensions admin notice with various scenarios.
 	 *
 	 * @covers ::od_maybe_render_installed_extensions_admin_notice
 	 * @covers ::od_get_active_extensions
@@ -218,10 +218,31 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_render_installed_extensions_admin_notice_in_plugin_row with various scenarios.
+	 * Tests od_render_documentation_links().
+	 *
+	 * @covers ::od_render_documentation_links
+	 */
+	public function test_od_render_documentation_links(): void {
+		$processor = new WP_HTML_Tag_Processor( get_echo( 'od_render_documentation_links' ) );
+		$this->assertTrue( $processor->next_tag( 'P' ), 'Expected P to be the first tag..' );
+		$found_links = 0;
+		while ( $processor->next_tag() ) {
+			$this->assertSame( 'A', $processor->get_tag(), 'Expected tag in pararaph to be a link.' );
+			$href = $processor->get_attribute( 'href' );
+			$this->assertIsString( $href, 'Expected A to be the second tag.' );
+			$this->assertSame( 'github.com', wp_parse_url( $href, PHP_URL_HOST ) );
+			$this->assertSame( '_blank', $processor->get_attribute( 'target' ) );
+			++$found_links;
+		}
+		$this->assertSame( 4, $found_links, 'Expected there to be 3 links.' );
+	}
+
+	/**
+	 * Tests od_render_installed_extensions_admin_notice_in_plugin_row with various scenarios.
 	 *
 	 * @covers ::od_render_installed_extensions_admin_notice_in_plugin_row
 	 * @covers ::od_maybe_render_installed_extensions_admin_notice
+	 * @covers ::od_render_documentation_links
 	 */
 	public function test_od_render_installed_extensions_admin_notice_in_plugin_row(): void {
 		$user = self::factory()->user->create();
@@ -238,8 +259,22 @@ class Test_OD_Helper extends WP_UnitTestCase {
 
 		// With no active extensions, notice is shown.
 		$notice = get_echo( 'od_render_installed_extensions_admin_notice_in_plugin_row', array( 'optimization-detective/load.php' ) );
-		$this->assertStringContainsString( '<div class="notice notice-info', $notice );
-		$this->assertStringContainsString( '<details>', $notice );
-		$this->assertStringContainsString( '</summary>', $notice );
+
+		$processor = new WP_HTML_Tag_Processor( $notice );
+		$this->assertTrue( $processor->next_tag( 'DIV' ), 'Expected DIV to be present.' );
+		$this->assertTrue( $processor->has_class( 'notice' ), 'Expected DIV to have a "notice" class.' );
+		$this->assertTrue( $processor->has_class( 'notice-info' ), 'Expected DIV to have a "notice-info" class.' );
+		$this->assertTrue( $processor->next_tag( 'DETAILS' ), 'Expected DETAILS to be present.' );
+		$this->assertTrue( $processor->next_tag( 'SUMMARY' ), 'Expected SUMMARY to be present.' );
+
+		$found_github_link = false;
+		while ( $processor->next_tag( 'A' ) ) {
+			$href = $processor->get_attribute( 'href' );
+			if ( is_string( $href ) && 'github.com' === wp_parse_url( $href, PHP_URL_HOST ) ) {
+				$found_github_link = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_github_link, 'Expected there to be a link to GitHub.' );
 	}
 }
