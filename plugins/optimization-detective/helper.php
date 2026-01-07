@@ -263,11 +263,6 @@ function od_check_installed_extensions(): array {
  * @access private
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
-	if ( 1 === (int) get_option( 'od_installed_extensions_admin_notice', '0' ) ) {
-		return;
-	}
-	update_option( 'od_installed_extensions_admin_notice', '1', false );
-
 	$installed_extensions = od_check_installed_extensions();
 	if ( count( $installed_extensions ) > 0 ) {
 		return;
