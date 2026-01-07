@@ -47,16 +47,20 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_script( 'script1', 'https://example1.com', array(), null );
+		wp_enqueue_script( 'script1', 'https://first.example.com', array(), null );
 		wp_enqueue_script( 'script2', '/wp-includes/example2.js', array(), null );
-		wp_enqueue_script( 'script3', 'https://example3.com', array(), null );
+		wp_enqueue_script( 'script3', 'https://third.example.com', array(), null );
 		wp_dequeue_script( 'script3' );
-		wp_enqueue_script( 'script-async', 'https://async-script.com', array(), null, true );
-		wp_enqueue_script( 'script-defer', 'https://defer-script.com', array(), null, true );
-		wp_enqueue_script( 'type-noscript', 'https://non-javascript.com', array(), null );
-		wp_enqueue_script( 'no-src', 'no-src', array(), null );
-		wp_enqueue_script_module( 'module1', 'https://module1.com', array(), null );
+		wp_enqueue_script( 'script-async', 'https://async-script.example.com', array(), null, true );
+		wp_enqueue_script( 'script-defer', 'https://defer-script.example.com', array(), null, true );
+		wp_enqueue_script( 'type-noscript', 'https://non-javascript.example.com', array(), null );
+		wp_enqueue_script( 'no-src', 'https://no-src.example.com', array(), null );
+		wp_enqueue_script( 'boolean-src', 'https://boolean-src.example.com', array(), null );
+		wp_enqueue_script( 'empty-src', 'https://empty-src.example.com', array(), null );
+		wp_enqueue_script( 'whitespace-src', 'https://whitespace-src.example.com', array(), null );
+		wp_enqueue_script_module( 'module1', 'https://module1.example.com', array(), null );
 
+		add_theme_support( 'html5', array( 'script' ) );
 		add_filter(
 			'wp_script_attributes',
 			static function ( $attributes ) {
@@ -68,6 +72,12 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$attributes['type'] = 'noscript';
 				} elseif ( 'no-src-js' === $attributes['id'] ) {
 					unset( $attributes['src'] );
+				} elseif ( 'boolean-src-js' === $attributes['id'] ) {
+					$attributes['src'] = true;
+				} elseif ( 'empty-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '';
+				} elseif ( 'whitespace-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '   ';
 				}
 				return $attributes;
 			}
@@ -79,7 +89,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'url'      => 'https://example1.com',
+					'url'      => 'https://first.example.com',
 					'response' => array(
 						'code' => 200,
 						'body' => 'console.log("Example 1");',
@@ -101,53 +111,18 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'scripts', $assets );
 		$this->assertNotEmpty( $assets['scripts'] );
 
-		$external_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://example1.com' === $item['src'];
-			}
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'/wp-includes/example2.js',
+			),
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['scripts'], 'src' )
+			)
 		);
-		$this->assertEquals( 1, count( $external_script ) );
-
-		$internal_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return home_url( '/wp-includes/example2.js' ) === $item['src'];
-			}
-		);
-		$this->assertEquals( 1, count( $internal_script ) );
-
-		$async_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://async-script.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $async_script );
-
-		$defer_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://defer-script.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $defer_script );
-
-		$noscript_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://non-javascript.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $noscript_script );
-
-		$module_script = array_filter(
-			$assets['scripts'],
-			static function ( $item ) {
-				return 'https://module1.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $module_script );
 	}
 
 	/**
@@ -162,19 +137,49 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_style( 'style1', 'https://example1.com', array(), null );
+		wp_enqueue_style( 'style1', 'https://first.example.com', array(), null );
 		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array(), null );
-		wp_enqueue_style( 'style3', 'https://example3.com', array(), null );
+		wp_enqueue_style( 'style3', 'https://third.example.com', array(), null );
 		wp_dequeue_style( 'style3' );
-		wp_enqueue_style( 'style-print', 'https://print-style.com', array(), null, 'print' );
-		wp_enqueue_style( 'style-no-href', 'https://no-href-style.com', array(), null );
+		wp_enqueue_style( 'style-print', 'https://print-style.example.com', array(), null, 'print' );
 
-		// Filter to remove href attribute from a specific style handle.
+		// The href for the following styles is mutated via the style_loader_tag filter below.
+		wp_enqueue_style( 'style-no-href', 'https://style-no-href.example.com', array(), null );
+		wp_enqueue_style( 'style-boolean-href', 'https://style-boolean-href.example.com', array(), null );
+		wp_enqueue_style( 'style-empty-href', 'https://style-empty-href.example.com', array(), null );
+		wp_enqueue_style( 'style-whitespace-href', 'https://style-whitespace-href.example.com', array(), null );
+
+		// Filter to manipulate style href attributes for testing various edge cases.
 		add_filter(
 			'style_loader_tag',
-			static function ( $tag, $handle ) {
+			function ( $tag, $handle ) {
+				$create_processor_state = function ( string $html ): WP_HTML_Tag_Processor {
+					$processor = new WP_HTML_Tag_Processor( $html );
+					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
+					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
+					return $processor;
+				};
 				if ( 'style-no-href' === $handle ) {
-					$tag = str_replace( 'href=\'https://no-href-style.com\'', ' ', $tag );
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->remove_attribute( 'href' ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-boolean-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->set_attribute( 'href', true ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-empty-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->set_attribute( 'href', '' ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-whitespace-href' === $handle ) {
+					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalid URL to the href will be rejected.
+					$tag = str_replace(
+						'https://style-whitespace-href.example.com',
+						'   ',
+						$tag,
+						$count
+					);
+					$this->assertSame( 1, $count, 'Expected string to be replaced.' );
 				}
 				return $tag;
 			},
@@ -188,7 +193,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'url'      => 'https://example1.com',
+					'url'      => 'https://first.example.com',
 					'response' => array(
 						'code' => 200,
 						'body' => 'body { background-color: red; }',
@@ -211,37 +216,18 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'styles', $assets );
 		$this->assertNotEmpty( $assets['styles'] );
 
-		$external_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://example1.com' === $item['src'];
-			}
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'/wp-includes/example2.css',
+			),
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['styles'], 'src' )
+			)
 		);
-		$this->assertEquals( 1, count( $external_style ) );
-
-		$internal_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return home_url( '/wp-includes/example2.css' ) === $item['src'];
-			}
-		);
-		$this->assertEquals( 1, count( $internal_style ) );
-
-		$print_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://print-style.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $print_style );
-
-		$no_href_style = array_filter(
-			$assets['styles'],
-			static function ( $item ) {
-				return 'https://no-href-style.com' === $item['src'];
-			}
-		);
-		$this->assertEmpty( $no_href_style );
 	}
 
 	/**
