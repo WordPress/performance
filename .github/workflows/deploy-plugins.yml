@@ -127,7 +127,7 @@ jobs:
 
       - name: Start deployment
         if: steps.check-deployment.outputs.deploy == 'true'
-        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1
+        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1.5.0
         id: wporg-deployment
         with:
           step: start
@@ -136,7 +136,7 @@ jobs:
 
       - name: Deploy Plugin - ${{ matrix.plugin }}
         if: steps.check-deployment.outputs.deploy == 'true'
-        uses: 10up/action-wordpress-plugin-deploy@2480306f6f693672726d08b5917ea114cb2825f7 # stable
+        uses: 10up/action-wordpress-plugin-deploy@54bd289b8525fd23a5c365ec369185f2966529c2 # stable
         with:
           dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
         env:
@@ -149,7 +149,7 @@ jobs:
 
       - name: Finish deployment
         if: ${{ steps.wporg-deployment.outputs.deployment_id && always() }}
-        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1
+        uses: bobheadxi/deployments@648679e8e4915b27893bd7dbc35cb504dc915bc8 # v1.5.0
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +172,7 @@ jobs:
     steps:
       - name: Check artifact existence
         id: artifact-existence
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const getArtifact = await github.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts{?name}', {
@@ -198,7 +198,7 @@ jobs:
 
       - name: Upload release assets
         if: steps.artifact-existence.outputs.exists == 'true'
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           files: |
             ./build/dist/${{ matrix.plugin }}.zip
