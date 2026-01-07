@@ -42,7 +42,7 @@ jobs:
                   for plugin in $(jq -r '.plugins[]' plugins.json); do
                       FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
                   done
-                  echo "$FILTERS" > /tmp/filters.yml
+                  echo -e "$FILTERS" > /tmp/filters.yml
                   cat /tmp/filters.yml
 
             - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
@@ -54,9 +54,9 @@ jobs:
               id: filter-plugins
               run: |
                   CHANGED_PLUGINS="[]"
+                  FILTER_OUTPUT="${{ toJson(steps.filter.outputs) }}"
                   for plugin in $(jq -r '.plugins[]' plugins.json); do
                       OUTPUT_KEY=$(echo "$plugin" | tr '-' '_')
-                      FILTER_OUTPUT="${{ toJson(steps.filter.outputs) }}"
                       if echo "$FILTER_OUTPUT" | jq -e ".[\"$OUTPUT_KEY\"] == \"true\"" > /dev/null; then
                           CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | jq -c --arg p "$plugin" '. + [$p]')
                       fi
