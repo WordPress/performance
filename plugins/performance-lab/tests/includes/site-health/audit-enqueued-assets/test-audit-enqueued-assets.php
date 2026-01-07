@@ -54,7 +54,9 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_script( 'script-async', 'https://async-script.example.com', array(), null, true );
 		wp_enqueue_script( 'script-defer', 'https://defer-script.example.com', array(), null, true );
 		wp_enqueue_script( 'type-noscript', 'https://non-javascript.example.com', array(), null );
-		wp_enqueue_script( 'no-src', 'no-src', array(), null );
+		wp_enqueue_script( 'no-src', 'https://no-src.example.com', array(), null );
+		wp_enqueue_script( 'empty-src', 'https://empty-src.example.com', array(), null );
+		wp_enqueue_script( 'whitespace-src', 'https://whitespace-src.example.com', array(), null );
 		wp_enqueue_script_module( 'module1', 'https://module1.example.com', array(), null );
 
 		add_filter(
@@ -68,6 +70,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$attributes['type'] = 'noscript';
 				} elseif ( 'no-src-js' === $attributes['id'] ) {
 					unset( $attributes['src'] );
+				} elseif ( 'empty-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '';
+				} elseif ( 'whitespace-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '   ';
 				}
 				return $attributes;
 			}

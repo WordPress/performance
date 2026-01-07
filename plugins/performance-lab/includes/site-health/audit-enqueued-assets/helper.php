@@ -73,6 +73,10 @@ function perflab_aea_audit_blocking_assets(): array {
 			if ( ! is_string( $src ) ) {
 				continue;
 			}
+			$src = trim( $src );
+			if ( '' === $src ) {
+				continue;
+			}
 
 			// Note that when the "type" attribute is absent or empty, the element is treated as a classic JavaScript script.
 			$type = $processor->get_attribute( 'type' );
