@@ -239,8 +239,11 @@ function od_check_installed_extensions(): array {
 	$installed_extensions = array();
 
 	foreach ( $installed_plugins as $plugin_slug => $plugin_data ) {
-		if ( isset( $plugin_data['RequiresPlugins'] ) && 'optimization-detective' === $plugin_data['RequiresPlugins'] ) {
-			$installed_extensions[] = $plugin_slug;
+		if ( isset( $plugin_data['RequiresPlugins'] ) && is_string( $plugin_data['RequiresPlugins'] ) ) {
+			$required_plugins = array_map( 'trim', explode( ',', $plugin_data['RequiresPlugins'] ) );
+			if ( in_array( 'optimization-detective', $required_plugins, true ) ) {
+				$installed_extensions[] = $plugin_slug;
+			}
 		}
 	}
 
