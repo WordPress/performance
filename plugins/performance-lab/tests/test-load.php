@@ -28,7 +28,17 @@ class Test_Load extends WP_UnitTestCase {
 		$this->assertSame( $expected, $content );
 	}
 
+	/**
+	 * @covers ::perflab_render_generator
+	 */
 	public function test_perflab_render_generator(): void {
+		/*
+		 * Removed in order to avoid this error since minified files aren't always built during tests:
+		 * > Unexpected incorrect usage notice for wp_maybe_inline_styles.
+		 * > Unable to read the "path" key with value "/var/www/html//wp-includes/css/dist/block-library/style.min.css" for stylesheet "wp-block-library". (This message was added in version 7.0.0.)
+		 */
+		remove_action( 'wp_head', 'wp_maybe_inline_styles', 1 );
+
 		$expected = '<meta name="generator" content="performance-lab ' . PERFLAB_VERSION . '; plugins: ">' . "\n";
 		$output   = get_echo( 'perflab_render_generator' );
 		$this->assertSame( $expected, $output );
