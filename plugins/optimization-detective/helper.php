@@ -278,10 +278,10 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 
 	$message = sprintf(
 		'<summary style="margin: 0.5em 0">%s</summary>',
-		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
+		esc_html__( 'Optimization Detective is a framework plugin which requires extensions.', 'optimization-detective' )
 	);
 
-	$message .= '<p>' . esc_html__( 'This plugin is a framework that requires extension plugins to provide optimization features. To benefit from Optimization Detective, please install and activate one or more of the following extensions:', 'optimization-detective' ) . '</p>';
+	$message .= '<p>' . esc_html__( 'This plugin doesn&#8217;t provide standalone functionality; it is a framework that requires extension plugins to implement optimizations. Please install and activate one or more of the following extensions:', 'optimization-detective' ) . '</p>';
 
 	$featured_extensions = array(
 		'image-prioritizer' => array(
@@ -323,6 +323,16 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 
 	add_thickbox();
 	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
+
+	echo '<p>';
+	echo wp_kses_post(
+		sprintf(
+			/* translators: %s is the URL for the list of extension plugins. */
+			__( 'See also the <a href="%s" target="_blank">list of extension plugins</a> in the project documentation on GitHub.', 'optimization-detective' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#extension-plugins' )
+		)
+	);
+	echo '</p>';
 }
 
 /**
