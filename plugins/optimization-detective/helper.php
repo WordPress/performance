@@ -263,6 +263,9 @@ function od_check_installed_extensions(): array {
  * @access private
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
+	if ( ! current_user_can( 'install_plugins' ) ) {
+		return;
+	}
 	$installed_extensions = od_check_installed_extensions();
 	if ( count( $installed_extensions ) > 0 ) {
 		return;
