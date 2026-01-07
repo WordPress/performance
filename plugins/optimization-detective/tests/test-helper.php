@@ -133,14 +133,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 */
 	public function test_od_render_extensions_meta_link(): void {
 		// With capability and no active extensions, notice is shown.
-		$user = self::factory()->user->create();
-		wp_set_current_user( $user );
-		if ( is_multisite() ) {
-			grant_super_admin( $user );
-		} else {
-			$current_user = wp_get_current_user();
-			$current_user->add_cap( 'activate_plugins' );
-		}
+		$this->set_admin_user();
 
 		$input  = array(
 			'Version 1.0',
@@ -159,6 +152,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 * @covers ::od_render_extensions_meta_link
 	 */
 	public function test_od_render_extensions_meta_link_non_array(): void {
+		$this->set_admin_user();
 		$result = od_render_extensions_meta_link( 'not an array', 'optimization-detective/load.php' );
 		$this->assertCount( 1, $result );
 		$this->assertStringContainsString( 'Extensions', $result[0] );
@@ -197,14 +191,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 		$this->assertSame( '', $output );
 
 		// With capability and no active extensions, notice is shown.
-		$user = self::factory()->user->create();
-		wp_set_current_user( $user );
-		if ( is_multisite() ) {
-			grant_super_admin( $user );
-		} else {
-			$current_user = wp_get_current_user();
-			$current_user->add_cap( 'activate_plugins' );
-		}
+		$this->set_admin_user();
 
 		$output = get_echo( 'od_maybe_render_installed_extensions_admin_notice' );
 		$this->assertStringContainsString( '<div class="notice notice-info', $output );
@@ -246,14 +233,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	 * @covers ::od_render_documentation_links
 	 */
 	public function test_od_render_installed_extensions_admin_notice_in_plugin_row(): void {
-		$user = self::factory()->user->create();
-		wp_set_current_user( $user );
-		if ( is_multisite() ) {
-			grant_super_admin( $user );
-		} else {
-			$current_user = wp_get_current_user();
-			$current_user->add_cap( 'activate_plugins' );
-		}
+		$this->set_admin_user();
 
 		// When called for a different plugin, no output.
 		$this->assertSame( '', get_echo( 'od_render_installed_extensions_admin_notice_in_plugin_row', array( 'foo.php' ) ) );
@@ -277,5 +257,16 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			}
 		}
 		$this->assertTrue( $found_github_link, 'Expected there to be a link to GitHub.' );
+	}
+
+	/**
+	 * Set the current user to be an admin.
+	 */
+	private function set_admin_user(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id );
+		}
 	}
 }
