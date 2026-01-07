@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
  * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function avif_uploads_add_is_avif_supported_test( array $tests ): array {
+function perflab_avif_uploads_add_is_avif_supported_test( array $tests ): array {
 	$tests['direct']['avif_supported'] = array(
 		'label' => __( 'AVIF Support', 'performance-lab' ),
-		'test'  => 'avif_uploads_check_avif_supported_test',
+		'test'  => 'perflab_avif_uploads_check_avif_supported_test',
 	);
 	return $tests;
 }
-add_filter( 'site_status_tests', 'avif_uploads_add_is_avif_supported_test' );
+add_filter( 'site_status_tests', 'perflab_avif_uploads_add_is_avif_supported_test' );

@@ -30,7 +30,7 @@ $od_delete_site_data();
  * and timeout problems in large scale networks).
  */
 if ( is_multisite() ) {
-	$site_ids = get_sites(
+	$od_site_ids = get_sites(
 		array(
 			'fields'                 => 'ids',
 			'number'                 => 100,
@@ -40,14 +40,14 @@ if ( is_multisite() ) {
 	);
 
 	// Skip iterating over self.
-	$site_ids = array_diff(
-		$site_ids,
+	$od_site_ids = array_diff(
+		$od_site_ids,
 		array( get_current_blog_id() )
 	);
 
 	// Delete all other blogs' URL Metrics posts.
-	foreach ( $site_ids as $site_id ) {
-		switch_to_blog( $site_id );
+	foreach ( $od_site_ids as $od_site_id ) {
+		switch_to_blog( $od_site_id );
 		$od_delete_site_data();
 		restore_current_blog();
 	}

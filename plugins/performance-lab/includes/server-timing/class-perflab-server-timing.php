@@ -6,6 +6,12 @@
  * @since 1.8.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Class controlling the Server-Timing header.
  *

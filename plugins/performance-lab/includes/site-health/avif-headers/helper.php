@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
  */
-function avif_headers_check_avif_headers_test(): array {
+function perflab_avif_headers_check_avif_headers_test(): array {
 	$result = array(
 		'label'       => __( 'Your site sends AVIF image headers', 'performance-lab' ),
 		'status'      => 'good',
@@ -42,7 +42,7 @@ function avif_headers_check_avif_headers_test(): array {
 		'test'        => 'is_avif_headers_enabled',
 	);
 
-	$avif_headers_enabled = avif_headers_is_enabled();
+	$avif_headers_enabled = perflab_avif_headers_is_enabled();
 
 	if ( ! $avif_headers_enabled ) {
 		$result['status']  = 'recommended';
@@ -63,7 +63,7 @@ function avif_headers_check_avif_headers_test(): array {
  *
  * @return bool True if AVIF headers are enabled, false otherwise.
  */
-function avif_headers_is_enabled(): bool {
+function perflab_avif_headers_is_enabled(): bool {
 	// Request an AVIF image at a known URL bundled with the plugin.
 	$url = plugins_url( 'avif-headers/images/lossy.avif', __DIR__ );
 
