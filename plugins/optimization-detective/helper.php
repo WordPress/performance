@@ -258,7 +258,7 @@ function od_get_active_extensions(): array {
 		}
 	}
 
-	return $active_extensions;
+	return array_values( array_unique( $active_extensions ) );
 }
 
 /**
