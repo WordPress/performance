@@ -127,40 +127,31 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests rendering extensions action link.
+	 * Tests rendering extensions meta link.
 	 *
-	 * @covers ::od_render_extensions_action_link
+	 * @covers ::od_render_extensions_meta_link
 	 */
-	public function test_od_render_extensions_action_link(): void {
+	public function test_od_render_extensions_meta_link(): void {
 		$input  = array(
-			'deactivate' => '<a href="#">Deactivate</a>',
-			'edit'       => '<a href="#">Edit</a>',
+			'Version 1.0',
 		);
-		$result = od_render_extensions_action_link( $input );
+		$result = od_render_extensions_meta_link( $input, 'optimization-detective/load.php' );
 
-		$this->assertArrayHasKey( 'extensions', $result );
-		$this->assertArrayHasKey( 'deactivate', $result );
-		$this->assertArrayHasKey( 'edit', $result );
-		$this->assertStringContainsString( 'plugin-install.php?s=optimization-detective', $result['extensions'] );
-		$this->assertStringContainsString( 'Extensions', $result['extensions'] );
-		$this->assertSame( '<a href="#">Deactivate</a>', $result['deactivate'] );
-		$this->assertSame( '<a href="#">Edit</a>', $result['edit'] );
-
-		// Check that it's first in the array.
-		$keys = array_keys( $result );
-		$this->assertSame( 'extensions', $keys[0] );
+		$this->assertCount( 2, $result );
+		$this->assertSame( $input[0], $result[0] );
+		$this->assertStringContainsString( 'plugin-install.php?s=optimization-detective', $result[1] );
+		$this->assertStringContainsString( 'Extensions', $result[1] );
 	}
 
 	/**
-	 * Tests rendering extensions action link with non-array input.
+	 * Tests rendering extensions meta link with non-array input.
 	 *
-	 * @covers ::od_render_extensions_action_link
+	 * @covers ::od_render_extensions_meta_link
 	 */
-	public function test_od_render_extensions_action_link_non_array(): void {
-		$result = od_render_extensions_action_link( 'not an array' );
-
-		$this->assertArrayHasKey( 'extensions', $result );
-		$this->assertStringContainsString( 'Extensions', $result['extensions'] );
+	public function test_od_render_extensions_meta_link_non_array(): void {
+		$result = od_render_extensions_meta_link( 'not an array', 'optimization-detective/load.php' );
+		$this->assertCount( 1, $result );
+		$this->assertStringContainsString( 'Extensions', $result[0] );
 	}
 
 	/**

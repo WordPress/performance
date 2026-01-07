@@ -206,14 +206,19 @@ function od_render_generator_meta_tag(): void {
  * @since n.e.x.t
  * @access private
  *
- * @param array<string, string>|mixed $links List of plugin action links HTML.
- * @return array<string, string> Modified list of plugin action links HTML.
+ * @param string[]|mixed $plugin_meta The plugin's metadata.
+ * @param string         $plugin_file Plugin file.
+ * @return string[] Updated plugin metadata.
  */
-function od_render_extensions_action_link( $links ): array {
-	if ( ! is_array( $links ) ) {
-		$links = array();
+function od_render_extensions_meta_link( $plugin_meta, string $plugin_file ): array {
+	if ( ! is_array( $plugin_meta ) ) {
+		$plugin_meta = array();
+	}
+	if ( 'optimization-detective/load.php' !== $plugin_file ) {
+		return $plugin_meta;
 	}
 
+	// TODO: What if user can't install plugins?
 	/* @noinspection HtmlUnknownTarget */
 	$extensions_link = sprintf(
 		'<a href="%s">%s</a>',
@@ -221,10 +226,8 @@ function od_render_extensions_action_link( $links ): array {
 		esc_html__( 'Extensions', 'optimization-detective' )
 	);
 
-	return array_merge(
-		array( 'extensions' => $extensions_link ),
-		$links
-	);
+	$plugin_meta[] = $extensions_link;
+	return $plugin_meta;
 }
 
 /**
