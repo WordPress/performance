@@ -227,12 +227,12 @@ function od_render_extensions_action_link( $links ): array {
 }
 
 /**
- * Checks for installed extensions of Optimization Detective.
+ * Checks for installed and active extensions of Optimization Detective.
  *
  * @since n.e.x.t
  * @access private
  *
- * @return string[] List of installed extension plugin files.
+ * @return string[] List of installed and active extension plugin files.
  */
 function od_check_installed_extensions(): array {
 	$installed_plugins    = get_plugins();
@@ -241,29 +241,33 @@ function od_check_installed_extensions(): array {
 	foreach ( $installed_plugins as $plugin_slug => $plugin_data ) {
 		if ( isset( $plugin_data['RequiresPlugins'] ) && is_string( $plugin_data['RequiresPlugins'] ) ) {
 			$required_plugins = array_map( 'trim', explode( ',', $plugin_data['RequiresPlugins'] ) );
-			if ( in_array( 'optimization-detective', $required_plugins, true ) ) {
+			if ( in_array( 'optimization-detective', $required_plugins, true ) && is_plugin_active( $plugin_slug ) ) {
 				$installed_extensions[] = $plugin_slug;
 			}
 		}
 	}
 
 	// Check for plugins without Requires Plugins header but known to be extensions.
-	$extensions           = array(
+	$known_extensions = array(
 		'embed-optimizer/load.php',
 	);
-	$installed_extensions = array_merge( $installed_extensions, array_intersect( $extensions, array_keys( $installed_plugins ) ) );
+	foreach ( $known_extensions as $extension ) {
+		if ( isset( $installed_plugins[ $extension ] ) && is_plugin_active( $extension ) ) {
+			$installed_extensions[] = $extension;
+		}
+	}
 
 	return $installed_extensions;
 }
 
 /**
- * Renders an inline admin notice prompting the user to install extensions for Optimization Detective.
+ * Renders an inline admin notice prompting the user to install or activate extensions for Optimization Detective.
  *
  * @since n.e.x.t
  * @access private
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
-	if ( ! current_user_can( 'install_plugins' ) ) {
+	if ( ! current_user_can( 'activate_plugins' ) ) {
 		return;
 	}
 	$installed_extensions = od_check_installed_extensions();
@@ -276,7 +280,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
 	);
 
-	$message .= '<p>' . esc_html__( 'This plugin is a framework that requires extension plugins to provide optimization features. To benefit from Optimization Detective, please install one or more of the following extensions:', 'optimization-detective' ) . '</p>';
+	$message .= '<p>' . esc_html__( 'This plugin is a framework that requires extension plugins to provide optimization features. To benefit from Optimization Detective, please install and activate one or more of the following extensions:', 'optimization-detective' ) . '</p>';
 
 	$extensions = array(
 		'image-prioritizer' => array(
@@ -320,7 +324,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 }
 
 /**
- * Displays an inline admin notice on the plugin row if no extensions are installed.
+ * Displays an inline admin notice on the plugin row if no extensions are installed and active.
  *
  * @since n.e.x.t
  * @access private
