@@ -55,6 +55,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_script( 'script-defer', 'https://defer-script.example.com', array(), null, true );
 		wp_enqueue_script( 'type-noscript', 'https://non-javascript.example.com', array(), null );
 		wp_enqueue_script( 'no-src', 'https://no-src.example.com', array(), null );
+		wp_enqueue_script( 'boolean-src', 'https://boolean-src.example.com', array(), null );
 		wp_enqueue_script( 'empty-src', 'https://empty-src.example.com', array(), null );
 		wp_enqueue_script( 'whitespace-src', 'https://whitespace-src.example.com', array(), null );
 		wp_enqueue_script_module( 'module1', 'https://module1.example.com', array(), null );
@@ -70,6 +71,8 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$attributes['type'] = 'noscript';
 				} elseif ( 'no-src-js' === $attributes['id'] ) {
 					unset( $attributes['src'] );
+				} elseif ( 'boolean-src-js' === $attributes['id'] ) {
+					$attributes['src'] = true;
 				} elseif ( 'empty-src-js' === $attributes['id'] ) {
 					$attributes['src'] = '';
 				} elseif ( 'whitespace-src-js' === $attributes['id'] ) {
@@ -140,9 +143,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_style( 'style-print', 'https://print-style.example.com', array(), null, 'print' );
 
 		// The href for the following two styles is mutated via the style_loader_tag filter below.
-		wp_enqueue_style( 'style-no-href', 'https://print-style.example.com', array(), null );
-		wp_enqueue_style( 'style-empty-href', 'https://empty-href-style.example.com', array(), null );
-		wp_enqueue_style( 'style-whitespace-href', 'https://whitespace-href-style.example.com', array(), null );
+		wp_enqueue_style( 'style-no-href', 'https://style-no-href.example.com', array(), null );
+		wp_enqueue_style( 'style-boolean-href', 'https://style-boolean-href.example.com', array(), null );
+		wp_enqueue_style( 'style-empty-href', 'https://style-empty-href.example.com', array(), null );
+		wp_enqueue_style( 'style-whitespace-href', 'https://style-whitespace-href.example.com', array(), null );
 
 		// Filter to remove href attribute from a specific style handle.
 		add_filter(
@@ -158,6 +162,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 					$processor = $create_processor_state( $tag );
 					$this->assertTrue( $processor->remove_attribute( 'href' ) );
 					$tag = $processor->get_updated_html();
+				} elseif ( 'style-boolean-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$processor->set_attribute( 'href', true );
+					$tag = $processor->get_updated_html();
 				} elseif ( 'style-empty-href' === $handle ) {
 					$processor = $create_processor_state( $tag );
 					$this->assertTrue( $processor->set_attribute( 'href', '' ) );
@@ -165,7 +173,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 				} elseif ( 'style-whitespace-href' === $handle ) {
 					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalud URL to the href will be rejected.
 					$tag = str_replace(
-						'https://whitespace-href-style.example.com',
+						'https://style-whitespace-href.example.com',
 						'   ',
 						$tag,
 						$count
