@@ -43,6 +43,8 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
  * @since 0.3.0
  * @access private
  *
+ * @global string $pagenow The filename of the current screen.
+ *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
@@ -348,6 +350,14 @@ function embed_optimizer_get_lazy_load_script(): string {
 	if ( false === $script ) {
 		return '';
 	}
+
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => EMBED_OPTIMIZER_VERSION ),
+			plugins_url( embed_optimizer_get_asset_path( 'lazy-load.js' ), __FILE__ )
+		)
+	);
 
 	return $script;
 }

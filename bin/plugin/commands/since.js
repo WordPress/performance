@@ -101,6 +101,18 @@ exports.handler = async ( opt ) => {
 			}
 		}
 
+		// Update versions in Changelog and Upgrade Notices.
+		const readmeContentUpdated = readmeContent.replace(
+			/(^= )(n\.e\.x\.t)( =$)/gm,
+			function ( matches, before, next, after ) {
+				replacementCount++;
+				return before + version + after;
+			}
+		);
+		if ( readmeContent !== readmeContentUpdated ) {
+			fs.writeFileSync( readmeFile, readmeContentUpdated );
+		}
+
 		const commonMessage = `Using version ${ version } for ${ pluginSlug }: `;
 		if ( replacementCount > 0 ) {
 			log(

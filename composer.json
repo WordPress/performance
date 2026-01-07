@@ -20,6 +20,23 @@
 		"ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class",
 		"ext-zlib": "Required for compression of URL Metric data submitted to the REST API for storage in Optimization Detective"
 	},
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "https://wpackagist.org",
+			"only": [
+				"wpackagist-plugin/*",
+				"wpackagist-theme/*"
+			]
+		}
+	],
+	"extra": {
+		"installer-paths": {
+			"vendor/{$vendor}/{$name}/": [
+				"wpackagist-plugin/plugin-check"
+			]
+		}
+	},
 	"require-dev": {
 		"phpcompatibility/php-compatibility": "^9.3",
 		"phpstan/extension-installer": "^1.3",
@@ -33,12 +50,14 @@
 		"wp-phpunit/wp-phpunit": "^6.5",
 		"yoast/phpunit-polyfills": "^4.0",
 		"phpstan/php-8-stubs": "^0.4.0",
-		"phpstan/phpstan-strict-rules": "^1.6"
+		"phpstan/phpstan-strict-rules": "^1.6",
+		"wpackagist-plugin/plugin-check": "^1.6"
 	},
 	"config": {
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true,
-			"phpstan/extension-installer": true
+			"phpstan/extension-installer": true,
+			"composer/installers": true
 		},
 		"platform": {
 			"php": "7.2"

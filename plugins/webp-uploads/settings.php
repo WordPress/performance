@@ -285,7 +285,7 @@ function webp_uploads_generate_all_fallback_sizes_callback(): void {
 		}
 
 		fallbackCheckbox.addEventListener( 'change', toggleAllFallbackSizes );
-	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id ); ?> );
+	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
 	</script>
 	<?php
 }
@@ -377,7 +377,7 @@ function webp_uploads_use_picture_element_callback(): void {
 				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
 			}
 		} );
-	} )( <?php echo wp_json_encode( $picture_element_hidden_id ); ?> );
+	} )( <?php echo wp_json_encode( $picture_element_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
 	</script>
 	<?php
 }

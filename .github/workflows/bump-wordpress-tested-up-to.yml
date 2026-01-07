@@ -16,7 +16,7 @@ jobs:
             matrix: ${{ steps.set-matrix.outputs.plugins }}
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
 
             - name: Configure plugin matrix
               id: set-matrix
@@ -46,7 +46,7 @@ jobs:
                 plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
 
             - name: Download WordPress.org readme
               run: |
@@ -84,7 +84,7 @@ jobs:
               run: cp "./plugins/$PLUGIN_SLUG/readme.txt" "$GITHUB_WORKSPACE/readme.txt"
 
             - name: Push to WordPress.org
-              uses: 10up/action-wordpress-plugin-asset-update@stable
+              uses: 10up/action-wordpress-plugin-asset-update@2480306f6f693672726d08b5917ea114cb2825f7 # stable
               env:
                   SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
                   SVN_USERNAME: ${{ secrets.SVN_USERNAME }}

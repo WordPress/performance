@@ -1,6 +1,6 @@
 <?php
 /**
- * Test Bootstrap for Optimiztaion Detective.
+ * Test Bootstrap for Optimization Detective.
  *
  * @package optimization-detective
  */

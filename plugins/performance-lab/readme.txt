@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.8
-Stable tag:   3.9.0
+Tested up to: 6.9
+Stable tag:   4.0.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -16,13 +16,14 @@ The Performance Lab plugin is a collection of features focused on enhancing perf
 The feature plugins which are currently featured by this plugin are:
 
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
+* [Instant Back/Forward](https://wordpress.org/plugins/nocache-bfcache/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
 * [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
 * [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 * [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
@@ -72,6 +73,22 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.0.0 =
+
+**Enhancements**
+
+* Add Instant Back/Forward to list of performance feature plugins. ([2119](https://github.com/WordPress/performance/pull/2119))
+* Add admin pointers to promote new Performance Lab features. ([2122](https://github.com/WordPress/performance/pull/2122))
+* Implement opt-in `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` for  Server-Timing `object-cache.php` placement. ([1996](https://github.com/WordPress/performance/pull/1996))
+* Use `wp_is_rest_endpoint()` to detect if we are handling a REST API request. ([2094](https://github.com/WordPress/performance/pull/2094))
+
+**Bug Fixes**
+
+* Fix TypeError in `perflab_aao_query_autoloaded_options()` by serializing non-scalar option values. ([1934](https://github.com/WordPress/performance/pull/1934))
+* Omit admin pointer for new plugin if plugin is already active. ([2143](https://github.com/WordPress/performance/pull/2143))
+* Prevent effective asset cache headers audit from running on local/development environments. ([2035](https://github.com/WordPress/performance/pull/2035))
+* Use HTML Tag Processor to audit blocking scripts & styles in Site Health’s enqueued-assets test. ([2059](https://github.com/WordPress/performance/pull/2059))
 
 = 3.9.0 =
 
@@ -609,6 +626,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 4.0.0 =
+
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and Instant Back/Forward which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 

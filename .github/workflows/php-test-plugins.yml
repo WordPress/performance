@@ -47,6 +47,10 @@ jobs:
                       wp: '6.6'
                     - php: '8.3'
                       wp: 'trunk'
+                    - php: '8.4'
+                      wp: 'trunk'
+                    - php: '8.5'
+                      wp: 'trunk'
                     - php: '8.2'
                       phpunit: '9.6'
                       wp: 'latest'
@@ -55,10 +59,10 @@ jobs:
             WP_ENV_PHP_VERSION: ${{ matrix.php }}
             WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
         steps:
-            - uses: styfle/cancel-workflow-action@0.12.1
-            - uses: actions/checkout@v4
+            - uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
+            - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
             - name: Setup Node.js (.nvmrc)
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
@@ -80,7 +84,8 @@ jobs:
             - name: Install PHPUnit
               run: |
                   if [ "${{ matrix.php }}" == "8.2" ]; then
-                    composer require phpunit/phpunit:${{ matrix.phpunit }} --with-all-dependencies --ignore-platform-reqs
+                    # Version 2.1.0 of doctrine/instantiator started requiring PHP 8.4: <https://github.com/doctrine/instantiator/pull/148>.
+                    composer require phpunit/phpunit:${{ matrix.phpunit }} "doctrine/instantiator:<2.1" --with-all-dependencies --ignore-platform-reqs
                   else
                     composer require --dev phpunit/phpunit:${{ matrix.phpunit }}
                   fi
@@ -119,7 +124,7 @@ jobs:
                   fi
             - name: Upload single site coverage reports to Codecov
               if: ${{ matrix.coverage == true }}
-              uses: codecov/codecov-action@v5
+              uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   directory: ./single-site-reports
@@ -128,7 +133,7 @@ jobs:
                   fail_ci_if_error: true
             - name: Upload multisite coverage reports to Codecov
               if: ${{ matrix.coverage == true }}
-              uses: codecov/codecov-action@v5
+              uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   directory: ./multisite-reports

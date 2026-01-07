@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.2.0
  * @access private
  *
+ * @global string $pagenow The filename of the current screen.
+ *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
@@ -398,8 +400,16 @@ function image_prioritizer_get_asset_path( string $src_path, ?string $min_path =
  * @return string Lazy load script.
  */
 function image_prioritizer_get_video_lazy_load_script(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-video.js' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path    = image_prioritizer_get_asset_path( 'lazy-load-video.js' );
+	$script  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $script;
 }
 
 /**
@@ -413,8 +423,16 @@ function image_prioritizer_get_video_lazy_load_script(): string {
  * @return string Lazy load script.
  */
 function image_prioritizer_get_lazy_load_bg_image_script(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-bg-image.js' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path    = image_prioritizer_get_asset_path( 'lazy-load-bg-image.js' );
+	$script  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $script;
 }
 
 /**
@@ -426,6 +444,14 @@ function image_prioritizer_get_lazy_load_bg_image_script(): string {
  * @return string Lazy load stylesheet.
  */
 function image_prioritizer_get_lazy_load_bg_image_stylesheet(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-bg-image.css' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path   = image_prioritizer_get_asset_path( 'lazy-load-bg-image.css' );
+	$style  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$style .= sprintf(
+		"\n/*# sourceURL=%s */",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $style;
 }

@@ -65,15 +65,16 @@ function od_get_cache_purge_post_id(): ?int {
 }
 
 /**
- * Prints the script for detecting loaded images and the LCP element.
+ * Prints the scripts for the detect loader.
  *
  * @since 0.1.0
+ * @since 1.0.0 Renamed from od_get_detection_script().
  * @access private
  *
  * @param non-empty-string               $slug             URL Metrics slug.
  * @param OD_URL_Metric_Group_Collection $group_collection URL Metric group collection.
  */
-function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
+function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
 
 	/**
 	 * Filters whether to use the web-vitals.js build with attribution.
@@ -115,6 +116,11 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	 */
 	$gzdecode_available = function_exists( 'gzdecode' ) && apply_filters( 'od_gzip_url_metric_store_request_payloads', true );
 
+	$detect_src = add_query_arg(
+		array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+		plugins_url( od_get_asset_path( 'detect.js' ), __FILE__ )
+	);
+
 	$detect_args = array(
 		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
@@ -149,14 +155,36 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}
 
-	return wp_get_inline_script_tag(
-		sprintf(
-			'import detect from %s; detect( %s );',
-			wp_json_encode( plugins_url( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
-			wp_json_encode( $detect_args )
+	$json_flags = JSON_HEX_TAG | JSON_UNESCAPED_SLASHES;
+	if ( SCRIPT_DEBUG ) {
+		$json_flags |= JSON_PRETTY_PRINT;
+	}
+	$json_script = wp_get_inline_script_tag(
+		(string) wp_json_encode(
+			array( $detect_src, $detect_args ),
+			$json_flags
 		),
+		array(
+			'type' => 'application/json',
+			'id'   => 'optimization-detective-detect-args',
+		)
+	);
+
+	$module_js  = file_get_contents( __DIR__ . '/' . od_get_asset_path( 'detect-loader.js' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$module_js .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+			plugins_url( od_get_asset_path( 'detect-loader.js' ), __FILE__ )
+		)
+	);
+
+	$module_script = wp_get_inline_script_tag(
+		$module_js,
 		array( 'type' => 'module' )
 	);
+
+	return $json_script . $module_script;
 }
 
 /**

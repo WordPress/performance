@@ -9,6 +9,6 @@
 		"skipLibCheck": true,
 		"resolveJsonModule": true
 	},
-	"include": [ "*.js", "*.mjs", "*.ts" ],
-	"exclude": [ "plugins/*/build/*" ]
+	"include": [ "**/*.js", "**/*.mjs", "**/*.ts" ],
+	"exclude": [ "plugins/*/build/*", "build/*", "vendor/*", "node_modules/*" ]
 }

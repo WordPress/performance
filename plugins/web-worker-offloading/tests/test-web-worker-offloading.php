@@ -71,6 +71,10 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
+		// See <https://core.trac.wordpress.org/ticket/63887>.
+		$before_data = preg_replace( ':\n//# sourceURL=.+$:', '', $before_data );
+		$after_data  = preg_replace( ':\n//# sourceURL=.+$:', '', $after_data );
+
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
@@ -79,7 +83,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			$before_data
 		);
 		$this->assertStringContainsString(
-			wp_json_encode( $partytown_config ),
+			wp_json_encode( $partytown_config, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 			$before_data
 		);
 		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
@@ -203,6 +207,18 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$set_up();
 
 		$normalize = static function ( $html ) {
+			// See <https://core.trac.wordpress.org/ticket/63887>.
+			if ( method_exists( 'WP_HTML_Tag_Processor', 'set_modifiable_text' ) ) { // @phpstan-ignore function.alreadyNarrowedType
+				// This normalization logic is only relevant to WP>=6.9-alpha anyway.
+				$p = new WP_HTML_Tag_Processor( $html );
+				while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+					$text = $p->get_modifiable_text();
+					$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
+					$p->set_modifiable_text( $text );
+				}
+				$html = $p->get_updated_html();
+			}
+
 			$html = preg_replace( '/\r|\n/', '', $html );
 			return trim( preg_replace( '#(?=<[^/])#', "\n", $html ) );
 		};

@@ -13,11 +13,13 @@ const { plugins } = require( './plugins.json' );
  */
 const config = {
 	'**/*.{js,ts,mjs}': [ 'npm run lint-js', () => 'npm run tsc' ],
+	'**/*.json': [ 'npm run lint-json' ],
 	'**/*.php': () => 'composer phpstan',
 	'*.php': 'composer lint',
 	'/tools/**.php': 'composer lint',
 	// Note: Instead of the preceding two lines, the following line was tried but it is not working:
 	// [ `!(plugins/{${ plugins.join( '|' ) }})/**/*.php` ]: 'composer lint',
+	'composer.{json,lock}': () => 'composer validate --strict',
 };
 
 for ( const plugin of plugins ) {

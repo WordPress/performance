@@ -23,24 +23,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<string, string>|null Filtered $config.
  */
 function plsr_filter_speculation_rules_configuration( $config ): ?array {
-	/*
-	 * If speculative loading should be disable per the WordPress Core configuration, respect that value, unless pretty
-	 * permalinks are disabled and the plugin-specific filter to opt in to the feature despite that is set to true.
-	 * This is present for backward compatibility so that usage of the plugin-specific filter does not break.
-	 */
-	if (
-		null === $config &&
-		/** This filter is documented in plugin-api.php */
-		( (bool) get_option( 'permalink_structure' ) || ! (bool) apply_filters( 'plsr_enabled_without_pretty_permalinks', false ) )
-	) {
-		return null;
+	if ( ! is_array( $config ) ) {
+		// Because plugins do bad things.
+		$config = null;
 	}
 
-	$option = plsr_get_stored_setting_value();
-	return array(
-		'mode'      => $option['mode'],
-		'eagerness' => $option['eagerness'],
-	);
+	if ( plsr_is_speculative_loading_enabled() ) {
+		$option = plsr_get_stored_setting_value();
+		$config = array(
+			'mode'      => $option['mode'],
+			'eagerness' => $option['eagerness'],
+		);
+	}
+
+	return $config;
 }
 
 /**

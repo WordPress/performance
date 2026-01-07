@@ -432,10 +432,10 @@ function webp_uploads_should_generate_all_fallback_sizes(): bool {
  *
  * @since 2.2.0
  *
- * @param int    $attachment_id The ID of the attachment.
- * @param string $src           The original image src url.
- * @param string $mime          A mime type we are looking to get image url.
- * @return string|null Returns mime type image if available.
+ * @param int    $attachment_id  The ID of the attachment.
+ * @param string $src            The original image src url.
+ * @param string $mime           A mime type we are looking to get image url.
+ * @return non-empty-string|null Returns mime type image if available.
  */
 function webp_uploads_get_mime_type_image( int $attachment_id, string $src, string $mime ): ?string {
 	$metadata     = wp_get_attachment_metadata( $attachment_id );
@@ -444,11 +444,12 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 		$basename = wp_basename( $metadata['file'] );
 
 		if ( $src_basename === $basename ) {
-			return str_replace(
+			$result = str_replace(
 				$basename,
 				$metadata['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
@@ -471,11 +472,12 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 				continue;
 			}
 
-			return str_replace(
+			$result = str_replace(
 				$size_data['file'],
 				$size_data['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
