@@ -206,12 +206,12 @@ function od_render_generator_meta_tag(): void {
  * @since n.e.x.t
  * @access private
  *
- * @param string[]|mixed $links List of plugin action links HTML.
- * @return string[]|mixed Modified list of plugin action links HTML.
+ * @param array<string, string>|mixed $links List of plugin action links HTML.
+ * @return array<string, string> Modified list of plugin action links HTML.
  */
-function od_render_extensions_action_link( $links ) {
+function od_render_extensions_action_link( $links ): array {
 	if ( ! is_array( $links ) ) {
-		return $links;
+		$links = array();
 	}
 
 	$extensions_link = sprintf(
