@@ -264,13 +264,13 @@ function od_check_installed_extensions(): array {
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
 	$installed_extensions = od_check_installed_extensions();
-	if ( count( $installed_extensions ) > 0 ) {
+	if ( count( $installed_extensions ) === 0 ) {
 		return;
 	}
 
 	$message = sprintf(
 		'<summary style="margin: 0.5em 0">%s %s</summary>',
-		esc_html__( 'Warning:', 'optimization-detective' ),
+		esc_html__( 'Info:', 'optimization-detective' ),
 		esc_html__( 'Optimization Detective does not provide any functionality on its own.', 'optimization-detective' )
 	);
 
@@ -307,7 +307,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 	$notice = wp_get_admin_notice(
 		$message,
 		array(
-			'type'               => 'warning',
+			'type'               => 'info',
 			'additional_classes' => array( 'inline', 'notice-alt' ),
 			'paragraph_wrap'     => false,
 		)
