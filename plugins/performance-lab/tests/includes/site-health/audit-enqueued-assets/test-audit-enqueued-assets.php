@@ -60,6 +60,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		wp_enqueue_script( 'whitespace-src', 'https://whitespace-src.example.com', array(), null );
 		wp_enqueue_script_module( 'module1', 'https://module1.example.com', array(), null );
 
+		add_theme_support( 'html5', array( 'script' ) );
 		add_filter(
 			'wp_script_attributes',
 			static function ( $attributes ) {
