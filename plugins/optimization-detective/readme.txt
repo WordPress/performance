@@ -65,7 +65,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 * Bump web-vitals from 5.0.3 to 5.1.0. ([2116](https://github.com/WordPress/performance/pull/2116))
 * Change default garbage collection TTL of `od_url_metrics` posts from 1 month to 3 months and add the filter to customize expiration. ([1950](https://github.com/WordPress/performance/pull/1950))
 * Enhance Optimization Detective meta generator tag with all disabled reasons. ([1979](https://github.com/WordPress/performance/pull/1979))
-* Enhancement: Amend URL metrics to the generator meta tag content. ([1954](https://github.com/WordPress/performance/pull/1954))
+* Amend URL metrics to the generator meta tag content. ([1954](https://github.com/WordPress/performance/pull/1954))
 * Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
 * Improve discoverability and user guidance for Optimization Detective extensions. ([2261](https://github.com/WordPress/performance/pull/2261))
 * Remove deprecated `url_metrics_group_collection` and class aliases and bump required OD version in Image Prioritizer. ([1943](https://github.com/WordPress/performance/pull/1943))

@@ -69,8 +69,8 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 **Bug Fixes**
 
-* Add a simple php version check around a deprecated function. ([2285](https://github.com/WordPress/performance/pull/2285))
-* Fix missing `PICTURE` element support for post thumbnail and add missing Modern Image Formats support for Widget Block. ([2179](https://github.com/WordPress/performance/pull/2179))
+* Add a simple PHP version check around a deprecated function. ([2285](https://github.com/WordPress/performance/pull/2285))
+* Fix missing `PICTURE` element support for post thumbnail and add missing Modern Image Formats support for Widget block. ([2179](https://github.com/WordPress/performance/pull/2179))
 
 = 2.6.0 =
 
