@@ -1,24 +1,15 @@
 {
-  "$schema": "https://www.schemastore.org/tsconfig.json",
-  "compilerOptions": {
-    "checkJs": true,
-    "noEmit": true,
-    "allowJs": true,
-    "target": "es2020",
-    "moduleResolution": "nodenext",
-    "module": "nodenext",
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  },
-  "include": [
-    "**/*.js",
-    "**/*.mjs",
-    "**/*.ts"
-  ],
-  "exclude": [
-    "plugins/*/build/*",
-    "build/*",
-    "vendor/*",
-    "node_modules/*"
-  ]
+	"$schema": "https://www.schemastore.org/tsconfig.json",
+	"compilerOptions": {
+		"checkJs": true,
+		"noEmit": true,
+		"allowJs": true,
+		"target": "es2020",
+		"moduleResolution": "nodenext",
+		"module": "nodenext",
+		"skipLibCheck": true,
+		"resolveJsonModule": true
+	},
+	"include": [ "**/*.js", "**/*.mjs", "**/*.ts" ],
+	"exclude": [ "plugins/*/build/*", "build/*", "vendor/*", "node_modules/*" ]
 }
