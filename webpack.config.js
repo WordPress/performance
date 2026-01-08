@@ -22,13 +22,6 @@ const {
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
-/*
- * Temporary workaround because 'view-transitions' should not be added to `plugins.json` just yet, since it is not
- * ready to be released.
- * TODO: Remove this workaround once the plugin is added to `plugins.json`.
- */
-standalonePlugins.push( 'view-transitions' );
-
 const defaultBuildConfig = {
 	entry: {},
 	output: {
