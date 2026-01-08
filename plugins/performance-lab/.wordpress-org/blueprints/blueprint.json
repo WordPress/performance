@@ -1,20 +1,20 @@
 {
-  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/wp-admin/admin.php?page=perflab-modules",
-  "steps": [
-    {
-      "step": "login",
-      "username": "admin"
-    },
-    {
-      "step": "installPlugin",
-      "pluginData": {
-        "resource": "wordpress.org/plugins",
-        "slug": "performance-lab"
-      },
-      "options": {
-        "activate": true
-      }
-    }
-  ]
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/wp-admin/admin.php?page=perflab-modules",
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "performance-lab"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	]
 }
