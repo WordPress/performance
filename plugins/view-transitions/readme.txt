@@ -58,6 +58,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.1.2 =
 
+**Bug Fixes**
+
+* Include static page for posts for article transitions. ([2306](https://github.com/WordPress/performance/pull/2306))
+
 = 1.1.1 =
 
 **Bug Fixes**

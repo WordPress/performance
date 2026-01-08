@@ -74,6 +74,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta3 =
 
+**Bug Fixes**
+
+* Allow background image URLs for file types the web server doesn't know about, e.g. when AVIF is sent as `application/octet-stream`. ([1956](https://github.com/WordPress/performance/pull/1956))
+* Remove responsive image sizes computation. ([2109](https://github.com/WordPress/performance/pull/2109))
+
 = 1.0.0-beta2 =
 
 **Enhancements**

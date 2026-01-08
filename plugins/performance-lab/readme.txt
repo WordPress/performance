@@ -76,6 +76,17 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 4.1.0 =
 
+**Enhancements**
+
+* Add JSON Schema validation for JSON files with a $schema property. ([2325](https://github.com/WordPress/performance/pull/2325))
+
+**Bug Fixes**
+
+* Add notices and improved type checking for `$wpdb->queries` when attempting to compute server-timing for database queries. ([2159](https://github.com/WordPress/performance/pull/2159))
+* Fix: Use proper escape function. ([2246](https://github.com/WordPress/performance/pull/2246))
+* Follow-up: Skip stylesheets with empty href attributes in Site Health audit. ([2328](https://github.com/WordPress/performance/pull/2328))
+* Skip stylesheets with empty href attributes in Site Health audit. ([2281](https://github.com/WordPress/performance/pull/2281))
+
 = 4.0.0 =
 
 **Enhancements**
