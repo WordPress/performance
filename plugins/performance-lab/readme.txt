@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.9
-Stable tag:   4.1.0
+Stable tag:   4.0.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -74,18 +74,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
-= 4.1.0 =
-
-**Enhancements**
-
-* Add JSON Schema validation for JSON files with a $schema property. ([2325](https://github.com/WordPress/performance/pull/2325))
+= 4.0.1 =
 
 **Bug Fixes**
 
 * Add notices and improved type checking for `$wpdb->queries` when attempting to compute server-timing for database queries. ([2159](https://github.com/WordPress/performance/pull/2159))
-* Fix: Use proper escape function. ([2246](https://github.com/WordPress/performance/pull/2246))
-* Follow-up: Skip stylesheets with empty href attributes in Site Health audit. ([2328](https://github.com/WordPress/performance/pull/2328))
-* Skip stylesheets with empty href attributes in Site Health audit. ([2281](https://github.com/WordPress/performance/pull/2281))
+* Skip stylesheets with empty `href` attributes in Site Health audit. ([2281](https://github.com/WordPress/performance/pull/2281), [2328](https://github.com/WordPress/performance/pull/2328))
+* Use proper escape function. ([2246](https://github.com/WordPress/performance/pull/2246))
 
 = 4.0.0 =
 
