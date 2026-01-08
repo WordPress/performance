@@ -56,8 +56,7 @@ jobs:
                   CHANGED_PLUGINS="[]"
                   FILTER_OUTPUT="${{ toJson(steps.filter.outputs) }}"
                   for plugin in $(jq -r '.plugins[]' plugins.json); do
-                      OUTPUT_KEY=$(echo "$plugin" | tr '-' '_')
-                      if echo "$FILTER_OUTPUT" | jq -e ".[\"$OUTPUT_KEY\"] == \"true\"" > /dev/null; then
+                      if echo "$FILTER_OUTPUT" | jq -e ".[\"$plugin\"] == \"true\"" > /dev/null; then
                           CHANGED_PLUGINS=$(echo "$CHANGED_PLUGINS" | jq -c --arg p "$plugin" '. + [$p]')
                       fi
                   done
