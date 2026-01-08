@@ -94,13 +94,13 @@ async function fetchSchema( schemaUrl ) {
  * Fetches a JSON schema and determines its draft version.
  *
  * @param {string} schemaUrl URL of the JSON schema.
- * @return {Promise<string>} The draft version (e.g., 'draft-04' or 'draft-07').
+ * @return {Promise<string>} The draft version ('draft-04' or 'default').
  */
 async function getSchemaDraft( schemaUrl ) {
 	const schema = await fetchSchema( schemaUrl );
 	const draft = typeof schema.$schema === 'string' ? schema.$schema : '';
-	// Default to draft-07 for other cases.
-	return draft.includes( 'draft-04' ) ? 'draft-04' : 'draft-07';
+	// Default to 'default' (modern Ajv) for other cases.
+	return draft.includes( 'draft-04' ) ? 'draft-04' : 'default';
 }
 
 /**
