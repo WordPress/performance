@@ -35,7 +35,6 @@ const schemaCache = new Map();
  * @return {T} Ajv instance.
  */
 function createAjv( AjvConstructor ) {
-	/** @type {T & { removeKeyword: function(string): void; addKeyword: function(Object): void }} */
 	const ajv = new AjvConstructor( {
 		allErrors: true,
 		strict: false,
