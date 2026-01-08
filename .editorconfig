@@ -4,7 +4,7 @@
 # WordPress Coding Standards
 # https://developer.wordpress.org/coding-standards/wordpress-coding-standards/
 
-# This is largely aligned with the .editorconfig in wordpress-develop and Gutenbeg.
+# This is largely aligned with the .editorconfig in wordpress-develop and Gutenberg.
 # Matches: https://github.com/WordPress/wordpress-develop/blob/bff31ca3a823e89127a7d3c2d953eda3d9b2193e/.editorconfig#L7-L21
 # See also: https://github.com/WordPress/gutenberg/blob/trunk/.editorconfig
 
