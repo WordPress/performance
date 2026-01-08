@@ -21,19 +21,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function plvt_get_view_transition_animation_labels(): array {
 	return array(
-		'fade'              => _x( 'Fade (default)', 'animation label', 'view-transitions' ),
-		'slide-from-right'  => _x( 'Slide (from right)', 'animation label', 'view-transitions' ),
-		'slide-from-left'   => _x( 'Slide (from left)', 'animation label', 'view-transitions' ),
-		'slide-from-bottom' => _x( 'Slide (from bottom)', 'animation label', 'view-transitions' ),
-		'slide-from-top'    => _x( 'Slide (from top)', 'animation label', 'view-transitions' ),
-		'swipe-from-right'  => _x( 'Swipe (from right)', 'animation label', 'view-transitions' ),
-		'swipe-from-left'   => _x( 'Swipe (from left)', 'animation label', 'view-transitions' ),
-		'swipe-from-bottom' => _x( 'Swipe (from bottom)', 'animation label', 'view-transitions' ),
-		'swipe-from-top'    => _x( 'Swipe (from top)', 'animation label', 'view-transitions' ),
-		'wipe-from-right'   => _x( 'Wipe (from right)', 'animation label', 'view-transitions' ),
-		'wipe-from-left'    => _x( 'Wipe (from left)', 'animation label', 'view-transitions' ),
-		'wipe-from-bottom'  => _x( 'Wipe (from bottom)', 'animation label', 'view-transitions' ),
-		'wipe-from-top'     => _x( 'Wipe (from top)', 'animation label', 'view-transitions' ),
+		'fade'                           => _x( 'Fade (default)', 'animation label', 'view-transitions' ),
+		'slide-from-right'               => _x( 'Slide (from right)', 'animation label', 'view-transitions' ),
+		'slide-from-left'                => _x( 'Slide (from left)', 'animation label', 'view-transitions' ),
+		'slide-from-bottom'              => _x( 'Slide (from bottom)', 'animation label', 'view-transitions' ),
+		'slide-from-top'                 => _x( 'Slide (from top)', 'animation label', 'view-transitions' ),
+		'slide-chronological-pagination' => _x( 'Slide (Chronological and Pagination)', 'animation label', 'view-transitions' ),
+		'swipe-from-right'               => _x( 'Swipe (from right)', 'animation label', 'view-transitions' ),
+		'swipe-from-left'                => _x( 'Swipe (from left)', 'animation label', 'view-transitions' ),
+		'swipe-from-bottom'              => _x( 'Swipe (from bottom)', 'animation label', 'view-transitions' ),
+		'swipe-from-top'                 => _x( 'Swipe (from top)', 'animation label', 'view-transitions' ),
+		'swipe-chronological-pagination' => _x( 'Swipe (Chronological and Pagination)', 'animation label', 'view-transitions' ),
+		'wipe-from-right'                => _x( 'Wipe (from right)', 'animation label', 'view-transitions' ),
+		'wipe-from-left'                 => _x( 'Wipe (from left)', 'animation label', 'view-transitions' ),
+		'wipe-from-bottom'               => _x( 'Wipe (from bottom)', 'animation label', 'view-transitions' ),
+		'wipe-from-top'                  => _x( 'Wipe (from top)', 'animation label', 'view-transitions' ),
+		'wipe-chronological-pagination'  => _x( 'Wipe (Chronological and Pagination)', 'animation label', 'view-transitions' ),
 	);
 }
 
@@ -231,7 +234,22 @@ function plvt_apply_settings_to_theme_support(): void {
 	// Apply the settings.
 	$args['default-animation']          = $options['default_transition_animation'];
 	$args['default-animation-duration'] = absint( $options['default_transition_animation_duration'] );
-	$selector_options                   = array(
+
+	// Automatically enable chronological and pagination animations for special animation options.
+	$chronological_pagination_animations = array(
+		'slide-chronological-pagination' => 'slide',
+		'swipe-chronological-pagination' => 'swipe',
+		'wipe-chronological-pagination'  => 'wipe',
+	);
+	if ( isset( $chronological_pagination_animations[ $args['default-animation'] ] ) ) {
+		$base_animation                            = $chronological_pagination_animations[ $args['default-animation'] ];
+		$args['chronological-forwards-animation']  = $base_animation . '-from-right';
+		$args['chronological-backwards-animation'] = $base_animation . '-from-left';
+		$args['pagination-forwards-animation']     = $base_animation . '-from-right';
+		$args['pagination-backwards-animation']    = $base_animation . '-from-left';
+	}
+
+	$selector_options = array(
 		'global' => array(
 			'header_selector' => 'header',
 			'main_selector'   => 'main',
