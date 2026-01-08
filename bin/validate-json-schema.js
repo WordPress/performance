@@ -16,9 +16,26 @@ const Ajv4 = require( 'ajv-draft-04' ).default;
 const addFormats = require( 'ajv-formats' ).default;
 const fg = require( 'fast-glob' );
 
+/**
+ * @typedef {import('ajv').default} Ajv
+ */
+
 const schemaCache = new Map();
 
+/**
+ * @template {Ajv} T
+ * @typedef {{ new (options: Object): T }} AjvConstructorType
+ */
+
+/**
+ * Creates an Ajv instance.
+ *
+ * @template {Ajv} T
+ * @param {AjvConstructorType<T>} AjvConstructor Ajv constructor.
+ * @return {T} Ajv instance.
+ */
 function createAjv( AjvConstructor ) {
+	/** @type {T & { removeKeyword: function(string): void; addKeyword: function(Object): void }} */
 	const ajv = new AjvConstructor( {
 		allErrors: true,
 		strict: false,
@@ -33,6 +50,10 @@ function createAjv( AjvConstructor ) {
 		validate: ( /** @type {string|boolean} */ deprecation ) =>
 			! deprecation,
 		error: {
+			/**
+			 * @param {Object}        cxt
+			 * @param {string|Object} [cxt.schema]
+			 */
 			message: ( cxt ) => {
 				return cxt.schema && typeof cxt.schema === 'string'
 					? `is deprecated: ${ cxt.schema }`
@@ -51,7 +72,7 @@ const ajv4 = createAjv( Ajv4 );
  * Fetches a JSON schema from a URL.
  *
  * @param {string} schemaUrl URL of the JSON schema.
- * @return {Promise<Object>} The JSON schema object.
+ * @return {Promise<any>} The JSON schema object.
  */
 async function fetchSchema( schemaUrl ) {
 	if ( schemaCache.has( schemaUrl ) ) {
