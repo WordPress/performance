@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
  */
-function avif_uploads_check_avif_supported_test(): array {
+function perflab_avif_uploads_check_avif_supported_test(): array {
 	$result = array(
 		'label'       => __( 'Your site supports AVIF', 'performance-lab' ),
 		'status'      => 'good',
