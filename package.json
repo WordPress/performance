@@ -1,4 +1,5 @@
 {
+	"$schema": "https://www.schemastore.org/package.json",
 	"name": "performance",
 	"license": "GPL-2.0-or-later",
 	"repository": "git+https://github.com/WordPress/performance.git",
@@ -19,6 +20,7 @@
 		"@wordpress/prettier-config": "^4.37.0",
 		"@wordpress/scripts": "^31.2.0",
 		"ajv": "8.17.1",
+		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
 		"commander": "14.0.2",
 		"copy-webpack-plugin": "^13.0.1",
