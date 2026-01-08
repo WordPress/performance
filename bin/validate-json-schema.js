@@ -12,7 +12,7 @@ const path = require( 'path' );
  * External dependencies
  */
 const Ajv7 = require( 'ajv' ).default;
-const Ajv4 = require( 'ajv-draft-04' );
+const Ajv4 = require( 'ajv-draft-04' ).default;
 const addFormats = require( 'ajv-formats' ).default;
 const fg = require( 'fast-glob' );
 
