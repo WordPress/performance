@@ -66,18 +66,22 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 	$args = $_wp_theme_features['view-transitions'];
 
 	$defaults = array(
-		'post-selector'              => '.wp-block-post.post, article.post, body.single main',
-		'global-transition-names'    => array(
+		'post-selector'                     => '.wp-block-post.post, article.post, body.single main',
+		'global-transition-names'           => array(
 			'header' => 'header',
 			'main'   => 'main',
 		),
-		'post-transition-names'      => array(
+		'post-transition-names'             => array(
 			'.wp-block-post-title, .entry-title'     => 'post-title',
 			'.wp-post-image'                         => 'post-thumbnail',
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
-		'default-animation'          => 'fade',
-		'default-animation-duration' => 400,
+		'default-animation'                 => 'fade',
+		'default-animation-duration'        => 400,
+		'chronological-forwards-animation'  => false,
+		'chronological-backwards-animation' => false,
+		'pagination-forwards-animation'     => false,
+		'pagination-backwards-animation'    => false,
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.
@@ -102,8 +106,21 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 		if ( ! is_array( $args['post-transition-names'] ) ) {
 			$args['post-transition-names'] = array();
 		}
-	}
 
+		// If specific transition animations match the default animations, they are irrelevant.
+		if ( $args['chronological-forwards-animation'] === $args['default-animation'] ) {
+			$args['chronological-forwards-animation'] = false;
+		}
+		if ( $args['chronological-backwards-animation'] === $args['default-animation'] ) {
+			$args['chronological-backwards-animation'] = false;
+		}
+		if ( $args['pagination-forwards-animation'] === $args['default-animation'] ) {
+			$args['pagination-forwards-animation'] = false;
+		}
+		if ( $args['pagination-backwards-animation'] === $args['default-animation'] ) {
+			$args['pagination-backwards-animation'] = false;
+		}
+	}
 	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	$_wp_theme_features['view-transitions'] = $args;
 }
@@ -324,7 +341,11 @@ function plvt_load_view_transitions(): void {
 	 */
 	if (
 		( ! is_array( $theme_support['global-transition-names'] ) || count( $theme_support['global-transition-names'] ) === 0 ) &&
-		( ! is_array( $theme_support['post-transition-names'] ) || count( $theme_support['post-transition-names'] ) === 0 )
+		( ! is_array( $theme_support['post-transition-names'] ) || count( $theme_support['post-transition-names'] ) === 0 ) &&
+		! (bool) $theme_support['chronological-forwards-animation'] &&
+		! (bool) $theme_support['chronological-backwards-animation'] &&
+		! (bool) $theme_support['pagination-forwards-animation'] &&
+		! (bool) $theme_support['pagination-backwards-animation']
 	) {
 		return;
 	}
@@ -335,6 +356,34 @@ function plvt_load_view_transitions(): void {
 			'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $theme_support['default-animation'], $default_animation_args ),
 		),
 	);
+
+	$additional_transition_types = array(
+		'chronological-forwards',
+		'chronological-backwards',
+		'pagination-forwards',
+		'pagination-backwards',
+	);
+
+	foreach ( $additional_transition_types as $transition_type ) {
+		if ( isset( $theme_support[ $transition_type . '-animation' ] ) ) {
+			$additional_animation_args       = isset( $theme_support[ $transition_type . '-animation-args' ] ) ? (array) $theme_support[ $transition_type . '-animation-args' ] : array();
+			$additional_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support[ $transition_type . '-animation' ], $additional_animation_args );
+			if ( '' !== $additional_animation_stylesheet ) {
+				wp_add_inline_style(
+					'plvt-view-transitions',
+					plvt_scope_animation_stylesheet_to_transition_type( $additional_animation_stylesheet, $transition_type )
+				);
+			}
+
+			$animations_js_config[ $transition_type ] = array(
+				'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
+				'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
+				'targetName'               => isset( $additional_animation_args['target-name'] ) ? $additional_animation_args['target-name'] : '*', // Special argument.
+			);
+		} else {
+			$animations_js_config[ $transition_type ] = false;
+		}
+	}
 
 	$config = array(
 		'postSelector'          => $theme_support['post-selector'],
@@ -387,5 +436,65 @@ function plvt_inject_animation_duration( string $css, int $animation_duration ):
 		$seconds
 	);
 
+	return $css;
+}
+
+/**
+ * Scopes the given view transition animation CSS to apply only to a specific transition type.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $css             Animation stylesheet as inline CSS.
+ * @param string $transition_type Transition type to scope the CSS to.
+ * @return string Scoped animation stylesheet.
+ */
+function plvt_scope_animation_stylesheet_to_transition_type( string $css, string $transition_type ): string {
+	$indent = static function ( string $input, $indent_tabs = 1 ): string {
+		return implode(
+			"\n",
+			array_map(
+				static function ( string $line ) use ( $indent_tabs ): string {
+					return str_repeat( "\t", $indent_tabs ) . $line;
+				},
+				explode( "\n", $input )
+			)
+		);
+	};
+
+	// This is very fragile, but it works well enough for now. TODO: Find a better solution to scope the CSS selectors.
+	if ( (bool) preg_match_all( '/(\s*)([^{}]+)\{[^{}]*?\}/m', $css, $matches ) ) {
+		// Wrap all `::view-transition-*` selectors to scope them to the transition type.
+		$view_transition_rule_pattern = '/::view-transition-/';
+
+		foreach ( $matches[0] as $index => $match ) {
+			$rule      = $match;
+			$rule_name = $matches[2][ $index ];
+			if ( (bool) preg_match( $view_transition_rule_pattern, $rule_name ) ) {
+				$rule_whitespace    = $matches[1][ $index ];
+				$prefixed_rule_name = preg_replace( $view_transition_rule_pattern, '&\0', $rule_name );
+				if ( null === $prefixed_rule_name ) {
+					continue;
+				}
+
+				$rule = str_replace( $rule_name, $prefixed_rule_name, $rule );
+
+				if ( str_contains( $rule, "\n" ) ) { // Non-minified.
+					$rule = $rule_whitespace .
+						"html:active-view-transition-type({$transition_type}) {\n" .
+						$indent( substr( $rule, strlen( $rule_whitespace ) ), 1 ) .
+						"\n}";
+				} else { // Minified.
+					$rule = $rule_whitespace .
+					"html:active-view-transition-type({$transition_type}){" .
+					substr( $rule, strlen( $rule_whitespace ) ) .
+					'}';
+				}
+
+				// Replace the original rule with the wrapped/scoped one.
+				$css = str_replace( $match, $rule, $css );
+			}
+		}
+	}
 	return $css;
 }

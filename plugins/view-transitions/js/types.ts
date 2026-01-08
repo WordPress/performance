@@ -14,6 +14,10 @@ export type InitViewTransitionsFunction = (
 	config: ViewTransitionsConfig
 ) => void;
 
+export type NavigationHistoryEntry = {
+	url: string;
+};
+
 declare global {
 	interface Window {
 		plvtInitViewTransitions?: InitViewTransitionsFunction;
