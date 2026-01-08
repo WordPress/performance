@@ -74,6 +74,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta3 =
 
+**Enhancements**
+
+* Add URL Metric mutation helpers to extension initialization API. ([1951](https://github.com/WordPress/performance/pull/1951))
+* Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
+
 **Bug Fixes**
 
 * Allow background image URLs for file types the web server doesn't know about, e.g. when AVIF is sent as `application/octet-stream`. ([1956](https://github.com/WordPress/performance/pull/1956))
