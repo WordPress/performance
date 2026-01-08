@@ -94,7 +94,7 @@ async function fetchSchema( schemaUrl ) {
  * Fetches a JSON schema and determines its draft version.
  *
  * @param {string} schemaUrl URL of the JSON schema.
- * @return {Promise<string>} The draft version ('draft-04' or 'default').
+ * @return {Promise<'draft-04'|'default'>} The draft version ('draft-04' or 'default').
  */
 async function getSchemaDraft( schemaUrl ) {
 	const schema = await fetchSchema( schemaUrl );
