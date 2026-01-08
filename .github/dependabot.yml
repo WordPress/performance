@@ -1,45 +1,45 @@
 version: 2
 updates:
-    - package-ecosystem: github-actions
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'github_actions'
-      cooldown:
-          default-days: 7
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'github_actions'
+    cooldown:
+      default-days: 7
 
-    - package-ecosystem: npm
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'javascript'
-      cooldown:
-          default-days: 7
-      groups:
-          wordpress-packages:
-              patterns:
-                  - '@wordpress/*'
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'javascript'
+    cooldown:
+      default-days: 7
+    groups:
+      wordpress-packages:
+        patterns:
+          - '@wordpress/*'
 
-    - package-ecosystem: composer
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'php'
-      cooldown:
-          default-days: 7
-      groups:
-          phpstan-packages:
-              patterns:
-                  - 'phpstan/*'
+  - package-ecosystem: composer
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'php'
+    cooldown:
+      default-days: 7
+    groups:
+      phpstan-packages:
+        patterns:
+          - 'phpstan/*'

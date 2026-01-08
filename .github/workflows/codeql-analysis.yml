@@ -3,42 +3,42 @@ name: CodeQL
 
 # Cancel previous workflow run groups that have not completed.
 concurrency:
-    # Group workflow runs by workflow name, along with the head branch ref of the pull request
-    # or otherwise the branch or tag ref.
-    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-    cancel-in-progress: true
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 # Disable permissions for all available scopes.
 # Enable permissions for specific scopes as needed on job level.
 permissions: {}
 
 on:
-    push:
-        # Only run if JS files changed.
-        paths:
-            - '**.js'
-        branches:
-            - trunk
-            - 'release/**'
-    pull_request:
-        # Only run if JS files changed.
-        paths:
-            - '**.js'
+  push:
+    # Only run if JS files changed.
+    paths:
+      - '**.js'
+    branches:
+      - trunk
+      - 'release/**'
+  pull_request:
+    # Only run if JS files changed.
+    paths:
+      - '**.js'
 
 jobs:
-    analyze:
-        name: Analyze
-        runs-on: ubuntu-latest
-        permissions:
-            security-events: write
-        steps:
-            - name: Checkout
-              uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
 
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
-              with:
-                  languages: javascript
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        with:
+          languages: javascript
 
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
