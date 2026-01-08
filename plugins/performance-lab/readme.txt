@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.9
-Stable tag:   4.0.0
+Stable tag:   4.1.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -11,7 +11,7 @@ Performance plugin from the WordPress Performance Team, which is a collection of
 
 == Description ==
 
-The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions. 
+The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions.
 
 The feature plugins which are currently featured by this plugin are:
 
@@ -73,6 +73,8 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.1.0 =
 
 = 4.0.0 =
 

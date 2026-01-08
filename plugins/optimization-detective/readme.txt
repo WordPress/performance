@@ -55,6 +55,8 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 == Changelog ==
 
+= 1.0.0-beta4 =
+
 = 1.0.0-beta3 =
 
 **Enhancements**
