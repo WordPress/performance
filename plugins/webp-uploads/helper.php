@@ -156,7 +156,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
-	$crop   = isset( $size_data['crop'] ) ? $size_data['crop'] : false;
+	$crop   = $size_data['crop'] ?? false;
 	if ( $width <= 0 && $height <= 0 ) {
 		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'webp-uploads' ) );
 	}
