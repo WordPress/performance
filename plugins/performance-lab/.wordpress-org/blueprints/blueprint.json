@@ -1,19 +1,20 @@
 {
 	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
 	"landingPage": "/wp-admin/admin.php?page=perflab-modules",
+	"plugins": [ "performance-lab" ],
+	"login": true,
+	"features": {
+		"networking": true
+	},
+	"preferredVersions": {
+		"php": "latest",
+		"wp": "latest"
+	},
 	"steps": [
 		{
-			"step": "login",
-			"username": "admin"
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "performance-lab"
-			},
+			"step": "setSiteOptions",
 			"options": {
-				"activate": true
+				"blogname": "Testing Performance Lab"
 			}
 		}
 	]
