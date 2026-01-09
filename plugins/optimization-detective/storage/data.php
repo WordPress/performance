@@ -27,7 +27,7 @@ function od_get_url_metric_freshness_ttl(): int {
 	 * Filters age (TTL) for which a URL Metric can be considered fresh.
 	 *
 	 * @since 0.1.0
-	 * @since n.e.x.t Negative values disable timestamp-based freshness checks.
+	 * @since 1.0.0 Negative values disable timestamp-based freshness checks.
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_freshness_ttl
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
@@ -443,7 +443,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 /**
  * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return positive-int Maximum allowed byte size.
@@ -452,7 +452,7 @@ function od_get_maximum_url_metric_size(): int {
 	/**
 	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_url_metric_size
 	 *
 	 * @param int $max_size Maximum allowed byte size.

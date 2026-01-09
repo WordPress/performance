@@ -63,7 +63,7 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 /**
  * Gets the reasons why Optimization Detective is disabled for the current response.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return array{
@@ -130,7 +130,7 @@ function od_get_disabled_reasons(): array {
 	 * Filters whether the current response can be optimized.
 	 *
 	 * @since 0.1.0
-	 * @since n.e.x.t Added $disabled_flags parameter
+	 * @since 1.0.0 Added $disabled_flags parameter
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
 	 * @param bool $can_optimize Whether response can be optimized.
@@ -203,7 +203,7 @@ function od_render_generator_meta_tag(): void {
  * This link directs users to the plugin directory to discover extensions that
  * provide optimization functionality using the Optimization Detective plugin.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param string[]|mixed $plugin_meta The plugin's metadata.
@@ -232,7 +232,7 @@ function od_render_extensions_meta_link( $plugin_meta, string $plugin_file ): ar
 /**
  * Checks for active extension plugins for Optimization Detective.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return string[] List of active extension plugin files.
@@ -266,7 +266,7 @@ function od_get_active_extensions(): array {
 /**
  * Renders an inline admin notice prompting the user to install or activate extensions for Optimization Detective.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  */
 function od_maybe_render_installed_extensions_admin_notice(): void {
@@ -333,7 +333,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 /**
  * Renders a paragraph of links to the plugin's documentation on GitHub.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  */
 function od_render_documentation_links(): void {
@@ -355,7 +355,7 @@ function od_render_documentation_links(): void {
 /**
  * Displays an inline admin notice on the plugin row if no extensions are installed and active.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param non-empty-string $plugin_file Plugin file.
