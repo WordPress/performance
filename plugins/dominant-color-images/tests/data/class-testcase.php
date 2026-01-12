@@ -222,7 +222,7 @@ abstract class TestCase extends WP_UnitTestCase {
 	 *
 	 * @covers dominant_color_get_dominant_color_data
 	 */
-	public function test_get_dominant_color_data_unsupported_mime_type() : void {
+	public function test_get_dominant_color_data_unsupported_mime_type(): void {
 		add_filter( 'dominant_color_supported_mime_types', '__return_empty_array' );
 		$image_path = TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg';
 
