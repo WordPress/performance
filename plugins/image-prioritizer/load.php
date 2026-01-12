@@ -6,7 +6,7 @@
  * Requires at least: 6.6
  * Requires PHP: 7.2
  * Requires Plugins: optimization-detective
- * Version: 1.0.0-beta2
+ * Version: 1.0.0-beta3
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -66,13 +66,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// Otherwise, register this copy if it is actually the one installed in the directory for plugins.
 			rtrim( WP_PLUGIN_DIR, '/' ) === dirname( __DIR__ )
 		) {
-			$GLOBALS[ $global_var_name ]['version'] = $version;
-			$GLOBALS[ $global_var_name ]['load']    = $load;
+			$GLOBALS[ $global_var_name ]['version'] = $version; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
+			$GLOBALS[ $global_var_name ]['load']    = $load; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
 		}
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'1.0.0-beta2',
+	'1.0.0-beta3',
 	static function ( string $version ): void {
 		if ( defined( 'IMAGE_PRIORITIZER_VERSION' ) ) {
 			return;

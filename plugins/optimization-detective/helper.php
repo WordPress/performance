@@ -63,7 +63,7 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 /**
  * Gets the reasons why Optimization Detective is disabled for the current response.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return array{
@@ -130,7 +130,7 @@ function od_get_disabled_reasons(): array {
 	 * Filters whether the current response can be optimized.
 	 *
 	 * @since 0.1.0
-	 * @since n.e.x.t Added $disabled_flags parameter
+	 * @since 1.0.0 Added $disabled_flags parameter
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_can_optimize_response
 	 *
 	 * @param bool $can_optimize Whether response can be optimized.
@@ -195,6 +195,177 @@ function od_render_generator_meta_tag(): void {
 	}
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
+}
+
+/**
+ * Adds an Extensions link to the plugin row meta for Optimization Detective.
+ *
+ * This link directs users to the plugin directory to discover extensions that
+ * provide optimization functionality using the Optimization Detective plugin.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @param string[]|mixed $plugin_meta The plugin's metadata.
+ * @param string         $plugin_file Plugin file.
+ * @return string[] Updated plugin metadata.
+ */
+function od_render_extensions_meta_link( $plugin_meta, string $plugin_file ): array {
+	if ( ! is_array( $plugin_meta ) ) {
+		$plugin_meta = array();
+	}
+	if ( 'optimization-detective/load.php' !== $plugin_file || ! current_user_can( 'install_plugins' ) ) {
+		return $plugin_meta;
+	}
+
+	/* @noinspection HtmlUnknownTarget */
+	$extensions_link = sprintf(
+		'<a href="%s">%s</a>',
+		esc_url( admin_url( 'plugin-install.php?s=optimization-detective&tab=search&type=tag' ) ),
+		esc_html__( 'Extensions', 'optimization-detective' )
+	);
+
+	$plugin_meta[] = $extensions_link;
+	return $plugin_meta;
+}
+
+/**
+ * Checks for active extension plugins for Optimization Detective.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @return string[] List of active extension plugin files.
+ */
+function od_get_active_extensions(): array {
+	$installed_plugins = get_plugins();
+	$active_extensions = array();
+
+	foreach ( $installed_plugins as $plugin_slug => $plugin_data ) {
+		if ( isset( $plugin_data['RequiresPlugins'] ) && is_string( $plugin_data['RequiresPlugins'] ) ) {
+			$required_plugins = array_map( 'trim', explode( ',', $plugin_data['RequiresPlugins'] ) );
+			if ( in_array( 'optimization-detective', $required_plugins, true ) && is_plugin_active( $plugin_slug ) ) {
+				$active_extensions[] = $plugin_slug;
+			}
+		}
+	}
+
+	// Check for plugins without Requires Plugins header but known to be extensions.
+	$suggesting_extensions = array(
+		'embed-optimizer/load.php',
+	);
+	foreach ( $suggesting_extensions as $extension ) {
+		if ( isset( $installed_plugins[ $extension ] ) && is_plugin_active( $extension ) ) {
+			$active_extensions[] = $extension;
+		}
+	}
+
+	return array_values( array_unique( $active_extensions ) );
+}
+
+/**
+ * Renders an inline admin notice prompting the user to install or activate extensions for Optimization Detective.
+ *
+ * @since 1.0.0
+ * @access private
+ */
+function od_maybe_render_installed_extensions_admin_notice(): void {
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+	$active_extensions = od_get_active_extensions();
+	if ( count( $active_extensions ) > 0 ) {
+		return;
+	}
+
+	$message = sprintf(
+		'<summary style="margin: 0.5em 0">%s</summary>',
+		esc_html__( 'Optimization Detective is a framework plugin which requires extensions.', 'optimization-detective' )
+	);
+
+	$message .= '<p>' . esc_html__( 'This plugin doesn&#8217;t provide standalone functionality; it is a framework that requires extension plugins to implement optimizations. Please install and activate one or more of the following extensions:', 'optimization-detective' ) . '</p>';
+
+	$featured_extensions = array(
+		'image-prioritizer' => array(
+			'name'        => __( 'Image Prioritizer', 'optimization-detective' ),
+			'description' => __( 'Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy-loading.', 'optimization-detective' ),
+			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=image-prioritizer&TB_iframe=true&width=772' ),
+		),
+		'embed-optimizer'   => array(
+			'name'        => __( 'Embed Optimizer', 'optimization-detective' ),
+			'description' => __( 'Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.', 'optimization-detective' ),
+			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=embed-optimizer&TB_iframe=true&width=772' ),
+		),
+	);
+
+	$message .= '<table class="widefat" style="margin-bottom: 11px;"><tbody>';
+	foreach ( $featured_extensions as $featured_extension ) {
+		/* @noinspection HtmlUnknownTarget */
+		$message .= sprintf(
+			'<tr>
+				<td><strong>%s</strong></td>
+				<td>%s</td>
+			</tr>',
+			current_user_can( 'install_plugins' ) ?
+				sprintf( '<a href="%s" class="thickbox open-plugin-details-modal">%s</a>', esc_url( $featured_extension['url'] ), esc_html( $featured_extension['name'] ) ) :
+				esc_html( $featured_extension['name'] ),
+			esc_html( $featured_extension['description'] )
+		);
+	}
+	$message .= '</tbody></table>';
+	$message  = "<details>$message</details>";
+
+	$notice = wp_get_admin_notice(
+		$message,
+		array(
+			'type'               => 'info',
+			'additional_classes' => array( 'inline' ),
+			'paragraph_wrap'     => false,
+		)
+	);
+
+	if ( current_user_can( 'install_plugins' ) ) {
+		add_thickbox();
+	}
+	echo wp_kses( $notice, wp_kses_allowed_html( 'post' ) );
+}
+
+/**
+ * Renders a paragraph of links to the plugin's documentation on GitHub.
+ *
+ * @since 1.0.0
+ * @access private
+ */
+function od_render_documentation_links(): void {
+	echo '<p>';
+	/* @noinspection HtmlUnknownTarget */
+	echo wp_kses_post(
+		sprintf(
+			/* translators: 1: project documentation URL, 2: introduction URL, 3: code reference URL, 4: extensions list URL. */
+			__( 'The <a href="%1$s" target="_blank">project documentation</a> is available on GitHub, including an <a href="%2$s" target="_blank">introduction</a>, <a href="%3$s" target="_blank">code reference</a>, and a list of <a href="%4$s" target="_blank">extensions</a>.', 'optimization-detective' ),
+			esc_url( 'https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md' ),
+			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md' )
+		)
+	);
+	echo '</p>';
+}
+
+/**
+ * Displays an inline admin notice on the plugin row if no extensions are installed and active.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @param non-empty-string $plugin_file Plugin file.
+ */
+function od_render_installed_extensions_admin_notice_in_plugin_row( string $plugin_file ): void {
+	if ( 'optimization-detective/load.php' !== $plugin_file ) {
+		return;
+	}
+	od_maybe_render_installed_extensions_admin_notice();
+	od_render_documentation_links();
 }
 
 /**

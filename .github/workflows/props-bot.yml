@@ -71,10 +71,10 @@ jobs:
 
     steps:
       - name: Gather a list of contributors
-        uses: WordPress/props-bot-action@e04f1e3b9824144892bfe3d278865f4b7c3e25a1 # trunk
+        uses: WordPress/props-bot-action@ed3fe51af489b1eab1c00d275ca317e0c8e75cb2 # trunk
 
       - name: Remove the props-bot label
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         if: ${{ github.event.action == 'labeled' && 'props-bot' == github.event.label.name }}
         with:
           retries: 2
