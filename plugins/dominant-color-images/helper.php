@@ -47,6 +47,13 @@ function dominant_color_set_image_editors( array $editors ): array {
 /**
  * Computes the dominant color of the given attachment image and whether it has transparency.
  *
+ * The image types jpeg, png, gif, webp, and avif are supported for determining the dominant color.
+ *
+ * Animated GIFs are supported, but when the GD-based editor is used only the first frame is
+ * processed to determine the dominant color. This may not represent the dominant color of the
+ * entire animation. This behavior is intentional and can be customized via the
+ * {@see 'dominant_color_supported_mime_types'} filter if needed.
+ *
  * @since 1.0.0
  *
  * @access private
