@@ -3,13 +3,13 @@
 
 [![codecov](https://codecov.io/gh/WordPress/performance/graph/badge.svg?token=zQv52K2LWz)](https://codecov.io/gh/WordPress/performance)
 
-Monorepo for the [WordPress Performance Team](https://make.wordpress.org/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance features.
+Monorepo for the [WordPress Performance Team](https://make.wordpress.org/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance-related features.
 
-Details about the Performance Lab plugin, including instructions for getting started and contributing, are available in the [Performance Team Handbook here](https://make.wordpress.org/performance/handbook/performance-lab/).
+Details about the Performance Lab plugin, including instructions for getting started and contributing, are available in the [Performance Team Handbook](https://make.wordpress.org/performance/handbook/performance-lab/).
 
-For WordPress and PHP version requirements, please see the [CONTRIBUTING.md file here](https://github.com/WordPress/performance/blob/trunk/CONTRIBUTING.md).
+For WordPress and PHP version requirements, please refer to the [CONTRIBUTING.md file](https://github.com/WordPress/performance/blob/trunk/CONTRIBUTING.md).
 
-The feature plugins which are currently featured by this plugin are:
+The feature plugins that are currently included in this plugin are:
 
 Plugin                          | Slug                      | Experimental | Links
 --------------------------------|---------------------------|--------------|-------------
@@ -73,4 +73,4 @@ Plugin                          | Slug                      | Experimental | Lin
 [40]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+View%20Transitions%22
 [44]: https://github.com/westonruter/nocache-bfcache/pulls
 
-Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin's purpose may change as some of its features are merged into WordPress core.
+Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin’s purpose may change as some of its features are merged into WordPress core.
