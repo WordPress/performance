@@ -15,42 +15,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets the freshness age (TTL) for a given URL Metric.
  *
- * When a URL Metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
+ * When a URL Metric expires, it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
  * @since 0.1.0
  * @access private
  *
- * @return int<0, max> Expiration TTL in seconds.
+ * @return int<-1, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given URL Metric.
-	 *
-	 * The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale.
-	 * In practice, the value should be at least an hour.
+	 * Filters age (TTL) for which a URL Metric can be considered fresh.
 	 *
 	 * @since 0.1.0
+	 * @since 1.0.0 Negative values disable timestamp-based freshness checks.
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_freshness_ttl
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
-
-	if ( $freshness_ttl < 0 ) {
-		_doing_it_wrong(
-			esc_html( "Filter: 'od_url_metric_freshness_ttl'" ),
-			esc_html(
-				sprintf(
-					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'optimization-detective' ),
-					$freshness_ttl
-				)
-			),
-			''
-		);
-		$freshness_ttl = 0;
-	}
-
-	return $freshness_ttl;
+	$ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
+	return max( -1, $ttl );
 }
 
 /**
@@ -84,7 +67,7 @@ function od_get_normalized_query_vars(): array {
  * Get the URL for the current request.
  *
  * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
- * This is needed in particular due to subdirectory installs.
+ * This is needed in particular due to subdirectory installations.
  *
  * @since 0.1.1
  * @access private
@@ -134,6 +117,7 @@ function od_get_current_url(): string {
  * @return non-empty-string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here, but beware this could invalidate URL Metrics. See <https://github.com/WordPress/performance/pull/1949>.
 	return md5( (string) wp_json_encode( $query_vars ) );
 }
 
@@ -152,7 +136,7 @@ function od_get_current_theme_template() {
 	global $template, $_wp_current_template_id;
 
 	if ( wp_is_block_theme() && isset( $_wp_current_template_id ) ) {
-		$block_template = get_block_template( $_wp_current_template_id, 'wp_template' );
+		$block_template = get_block_template( $_wp_current_template_id );
 		if ( $block_template instanceof WP_Block_Template ) {
 			return $block_template;
 		}
@@ -249,11 +233,13 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 	 * Filters the data that goes into computing the current ETag for URL Metrics.
 	 *
 	 * @since 0.9.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_current_url_metrics_etag_data
 	 *
 	 * @param array<string, mixed> $data Data.
 	 */
 	$data = (array) apply_filters( 'od_current_url_metrics_etag_data', $data );
 
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here.
 	return md5( (string) wp_json_encode( $data ) );
 }
 
@@ -320,10 +306,8 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the minimum allowed viewport aspect ratio for URL Metrics.
 	 *
-	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
-	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_minimum_viewport_aspect_ratio
 	 *
 	 * @param float $minimum_viewport_aspect_ratio Minimum viewport aspect ratio.
 	 */
@@ -342,10 +326,8 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the maximum allowed viewport aspect ratio for URL Metrics.
 	 *
-	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 (2.333).
-	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_viewport_aspect_ratio
 	 *
 	 * @param float $maximum_viewport_aspect_ratio Maximum viewport aspect ratio.
 	 */
@@ -357,7 +339,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
- * provided breakpoints (320, 480, 576) then this means there will be four groups:
+ * provided breakpoints (320, 480, 576), then this means there will be four groups:
  *
  *  1. 0-320 (small smartphone)
  *  2. 321-480 (normal smartphone)
@@ -372,7 +354,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
  *
- * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * This array may be empty, in which case there are no responsive breakpoints, and all URL Metrics are collected in a
  * single group.
  *
  * @since 0.1.0
@@ -404,10 +386,8 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero. This array may be empty in which case there
-		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
-		 *
 		 * @since 0.1.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_breakpoint_max_widths
 		 *
 		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
@@ -435,9 +415,8 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL Metrics on a given URL.
 	 *
-	 * The sample size must be greater than zero.
-	 *
 	 * @since 0.1.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metrics_breakpoint_sample_size
 	 *
 	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
@@ -459,4 +438,40 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	}
 
 	return $sample_size;
+}
+
+/**
+ * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @return positive-int Maximum allowed byte size.
+ */
+function od_get_maximum_url_metric_size(): int {
+	/**
+	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+	 *
+	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_url_metric_size
+	 *
+	 * @param int $max_size Maximum allowed byte size.
+	 * @return int Filtered maximum allowed byte size.
+	 */
+	$size = (int) apply_filters( 'od_maximum_url_metric_size', MB_IN_BYTES );
+	if ( $size <= 0 ) {
+		_doing_it_wrong(
+			esc_html( "Filter: 'od_maximum_url_metric_size'" ),
+			esc_html(
+				sprintf(
+					/* translators: %s: size */
+					__( 'Invalid size "%s". Must be greater than zero.', 'optimization-detective' ),
+					$size
+				)
+			),
+			'Optimization Detective 1.0.0'
+		);
+		$size = MB_IN_BYTES;
+	}
+	return $size;
 }

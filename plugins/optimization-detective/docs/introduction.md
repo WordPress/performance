@@ -33,11 +33,11 @@ Consider the case where you may have three images laid out horizontally in a Col
 
 ![Limitations in Applying Lazy-Loading: On-screen image lazy-loaded](images/limitations-in-applying-lazy-loading-2.png)
 
-It’s even worse in this specific scenario because the fourth image is the LCP element on desktop , and as mentioned above, lazy loading the LCP image element causes the browser to delay loading this most important resource.
+It’s even worse in this specific scenario because the fourth image is the LCP element on desktop, and as mentioned above, lazy loading the LCP image element causes the browser to delay loading this most important resource.
 
 ## Limitations in Applying High Fetch Priority
 
-As somewhat the inverse of lazy loading is the Fetch Priority API, namely adding `fetchpriority=high` to an `IMG`. This tells the browser it should prioritize loading the resource over other resources on the page. In 2023, enhancing LCP image performance with Fetch Priority was [proposed](https://make.wordpress.org/core/2023/05/02/proposal-for-enhancing-lcp-image-performance-with-fetchpriority/) for WordPress core, and later that year it [landed](https://make.wordpress.org/core/2023/07/13/image-performance-enhancements-in-wordpress-6-3/) and was [improved](https://make.wordpress.org/core/2023/10/18/image-loading-optimization-enhancements-in-6-4/). The performance enhancement added `fetchpriority=high` to the `IMG` which was determined to be the best candidate for being the LCP element. In many cases, the heuristics WordPress uses are correct, but unfortunately the problem remains that PHP on the server is unaware of how the page is actually laid out. It is easy to find scenarios where the LCP `IMG` element is not properly identified. For example, going back to the initial image lazy loading example:
+As somewhat the inverse of lazy loading is the Fetch Priority API, namely adding `fetchpriority=high` to an `IMG`. This tells the browser it should prioritize loading the resource over other resources on the page. In 2023, enhancing LCP image performance with Fetch Priority was [proposed](https://make.wordpress.org/core/2023/05/02/proposal-for-enhancing-lcp-image-performance-with-fetchpriority/) for WordPress core, and later that year it [landed](https://make.wordpress.org/core/2023/07/13/image-performance-enhancements-in-wordpress-6-3/) and was [improved](https://make.wordpress.org/core/2023/10/18/image-loading-optimization-enhancements-in-6-4/). The performance enhancement added `fetchpriority=high` to the `IMG` which was determined to be the best candidate for being the LCP element. In many cases, the heuristics WordPress uses are correct, but unfortunately, the problem remains that PHP on the server is unaware of how the page is actually laid out. It is easy to find scenarios where the LCP `IMG` element is not properly identified. For example, going back to the initial image lazy loading example:
 
 ![Limitations in Applying Fetch Priority: Image outside viewport has fetchpriority=high but the LCP element is a header image with a CSS background-image](images/limitations-in-applying-fetchpriority-high-1.png)
 
@@ -47,7 +47,7 @@ Another more fundamental problem with adding `fetchpriority=high` to an image is
 
 ![Limitations in Applying Fetch Priority: Actual LCP image element not given fetchpriority=high since it varies between viewports and core only adds it to the first image even though a subsequent image may be larger](images/limitations-in-applying-fetchpriority-high-2.png)
 
-WordPress core adds `fetchpriority=high` to the first sufficiently-large image, which by default is 50,000 pixels (e.g. for a 200x250 image). In the example above, on desktop the image in the first column is only 136x91 because CSS is used to reduce its rendered size inside the column. So even though its dimensions in HTML indicate it is above the threshold, in how the page is actually rendered on desktop it should have been passed over. On mobile, however, the rendered size of the initial image is 300x200 so it is above the threshold and gets `fetchpriority=high`. Nevertheless, the second image on mobile is actually a little bit taller at 300x225, so on a mobile viewport the *second* image is actually the LCP element. And on desktop, as mentioned above, it’s the fourth image not inside the Columns block which is actually the LCP element. So in adding `fetchpriority=high` to an `IMG` tag, not only can WordPress’s existing heuristics do so for the wrong image on both desktop and mobile, but even if it does so correctly for either mobile or desktop, this can result in being incorrect for the other device form factor since LCP elements vary by viewport size. Adding `fetchpriority=high` to an `IMG` is only correct when it is the LCP element for all device form factors, e.g. mobile, tablet, and desktop. On the server-side in WordPress, you cannot reliably provide different HTML attributes for different viewports, so that makes it impossible to apply `fetchpriority=high` with 100% accuracy—even if WordPress Core's server-side guesstimate was perfect.
+WordPress core adds `fetchpriority=high` to the first sufficiently large image, which by default is 50,000 pixels (e.g. for a 200x250 image). In the example above, on desktop the image in the first column is only 136x91 because CSS is used to reduce its rendered size inside the column. So even though its dimensions in HTML indicate it is above the threshold, in how the page is actually rendered on desktop, it should have been passed over. On mobile, however, the rendered size of the initial image is 300x200, so it is above the threshold and gets `fetchpriority=high`. Nevertheless, the second image on mobile is actually a little bit taller at 300x225, so on a mobile viewport the *second* image is actually the LCP element. And on desktop, as mentioned above, it’s the fourth image not inside the Columns block which is actually the LCP element. So in adding `fetchpriority=high` to an `IMG` tag, not only can WordPress’s existing heuristics do so for the wrong image on both desktop and mobile, but even if it does so correctly for either mobile or desktop, this can result in being incorrect for the other device form factor since LCP elements vary by viewport size. Adding `fetchpriority=high` to an `IMG` is only correct when it is the LCP element for all device form factors, e.g. mobile, tablet, and desktop. On the server-side in WordPress, you cannot reliably provide different HTML attributes for different viewports, so that makes it impossible to apply `fetchpriority=high` with 100% accuracy—even if WordPress Core's server-side guesstimate was perfect.
 
 # The Solution
 
@@ -86,16 +86,16 @@ The detection phase involves collecting metrics about the viewport and the eleme
 
 The optimization phase involves applying performance fixes to the page based on the collected data during detection:
 
-1. Extensions register tag visitors which apply optimizations to the tags which were opted-in for measurement during detection. (In practice, this same tag visitor is used for both detection and optimization.)
+1. Extensions register tag visitors which apply optimizations to the tags which were opted in for measurement during detection. (In practice, this same tag visitor is used for both detection and optimization.)
 2. The previously collected URL Metrics for the current request are loaded from the associated `od_url_metrics` post.
 3. The rendered page is captured in the same output buffer as during the detection phase.
 4. The rendered page is loaded into an HTML Tag Processor instance, again the same as during the detection phase.
-5. Also as in the detection phase, all open tags are iterated over and all registered tag visitors are invoked for each.
+5. Also, as in the detection phase, all open tags are iterated over and all registered tag visitors are invoked for each.
 6. When a tag visitor is invoked on a relevant tag, it applies optimizations to the tag based on the measurements stored in URL Metrics (during detection).
 
 # Collecting URL Metrics
 
-WordPress is not designed to do something like collect URL Metrics from every page visit. Therefore, only a sampling of visits have URL Metrics collected. First of all, the responsive breakpoints 480px, 600px, and 782px are used to group URL Metrics by viewport width into the following buckets: 
+WordPress is not designed to do something like collect URL Metrics from every page visit. Therefore, only a sampling of visits has URL Metrics collected. First of all, the responsive breakpoints 480px, 600px, and 782px are used to group URL Metrics by viewport width into the following buckets: 
 
 | Name    | Media Query          |
 |:--------|:---------------------|
@@ -111,9 +111,9 @@ Once the full sample has been collected for a viewport group, the detection logi
 1. Detection is needed when a collected URL Metric for the current viewport group has become stale. By default, a URL Metric is considered fresh for one week. This can be customized with the `od_url_metric_freshness_ttl` filter.
 2. Detection is also initiated when the page state has changed since the point at which a URL Metric was collected. The page state is captured in a URL Metric's “ETag”, which is a hash computed from an array including the last modified times of the posts in the loop, the active theme, and the active plugins. The data that goes into computing such an ETag can be customized with the `od_current_url_metrics_etag_data` filter.
 
-When either of these conditions are true, the detection logic will attempt to collect URL Metrics for visitors with the needed viewport dimensions. Note that the REST API endpoint for submitting URL Metrics (`optimization-detective/v1/url-metrics:store`) does not require authentication since in order to optimize a page effectively for real visitors it is important to collect measurements from real user visits. In order to guard against abuse, unauthenticated URL Metric storage requests are restricted to being made once per minute. This is called the “storage lock” and the duration can be customized via the `od_url_metric_storage_lock_ttl` filter. The storage lock time is stored in a transient keyed by a hash of the user’s IP address to protect privacy. An attempted REST API request to store a URL Metric while there is an active storage lock will result in a `423 Locked` error response from the REST API endpoint. Not only this but there is also a client-side storage lock in `sessionStorage` which prevents a user from attempting to submit a URL Metric when the server would reject the request due to there being a storage lock in place. This client-side storage lock also prevents the same client from submitting a second URL Metric from the same viewport group for the same URL after the lock has transpired. This is done to increase the diversity of the clients submitting URL Metrics.
+When either of these conditions are true, the detection logic will attempt to collect URL Metrics for visitors with the needed viewport dimensions. Note that the REST API endpoint for submitting URL Metrics (`optimization-detective/v1/url-metrics:store`) does not require authentication since, to optimize a page effectively for real visitors, it is important to collect measurements from real user visits. In order to guard against abuse, unauthenticated URL Metric storage requests are restricted to being made once per minute. This is called the “storage lock” and the duration can be customized via the `od_url_metric_storage_lock_ttl` filter. The storage lock time is stored in a transient keyed by a hash of the user’s IP address to protect privacy. An attempted REST API request to store a URL Metric while there is an active storage lock will result in a `423 Locked` error response from the REST API endpoint. Not only this but there is also a client-side storage lock in `sessionStorage` which prevents a user from attempting to submit a URL Metric when the server would reject the request due to there being a storage lock in place. This client-side storage lock also prevents the same client from submitting a second URL Metric from the same viewport group for the same URL after the lock has transpired. This is done to increase the diversity of the clients submitting URL Metrics.
 
-While unauthenticated users are restricted to submitting URL Metrics once a minute by default, this restriction is lifted for users who are logged-in as administrators. This allows an administrator to quickly populate initial URL Metrics by browsing a site. The ability to bypass the storage lock TTL is granted by the `od_store_url_metric_now` user capability, which by default maps to whether the user can `manage_options`.
+While unauthenticated users are restricted to submitting URL Metrics once a minute by default, this restriction is lifted for users who are logged in as administrators. This allows an administrator to quickly populate initial URL Metrics by browsing a site. The ability to bypass the storage lock TTL is granted by the `od_store_url_metric_now` user capability, which by default maps to whether the user can `manage_options`.
 
 The URL Metric is submitted when the user leaves the page. The `navigator.sendBeacon()` API is used to submit the URL Metric so it can be sent even after the page has gone away.
 
@@ -151,9 +151,9 @@ The format of the XPath expression warrants further discussion. A typical XPath 
 
 The `HTML` and `BODY` tags lack any XPath predicates because there is no possible ambiguity. Children of the `BODY` include a predicate which references the `id`, `role`, or `class` attribute to disambiguate it from other siblings (e.g. those rendered at `wp_body_open`). Below this level, all elements are referenced like `*[1][self::IMG]` in order to avoid ambiguity between siblings. For example, if an `IMG` is the first child node then it has the aforementioned XPath, but if a paragraph were added before it then it would become `*[2][self::IMG]`. This is in contrast with `IMG[1]` which would continue to match the first `IMG` whether it was the first child or not. The predicates were chosen to ensure that the XPath continues to reference elements in the same page structure as when the detection logic obtained its measurements and constructed the URL Metric.
 
-Note that the XPath is not actually used for querying the DOM. It is just used as a stable string to uniquely identify the same element across the captured URL Metrics, for example to determine whether it is the LCP element for all viewport groups (mobile through desktop).
+Note that the XPath is not actually used for querying the DOM. It is just used as a stable string to uniquely identify the same element across the captured URL Metrics, for example, to determine whether it is the LCP element for all viewport groups (mobile through desktop).
 
-The maximum size a URL Metric is permitted to be is 64 kibibyte (65,536 bytes) which is the maximum size allowed when sending data via `navigator.sendBeacon()`. 
+The maximum size a URL Metric is permitted to be is 64 kibibytes (65,536 bytes) which is the maximum size allowed when sending data via `navigator.sendBeacon()`. 
 
 # The `od_url_metrics` Post Type
 
@@ -186,7 +186,7 @@ add_filter( 'query_vars', function ( $query_vars ) {
 
 Then in your template code you may continue to use `isset( $_GET['thank_you'] )` but you might as well use `get_query_var( 'thank_you' )` instead.
 
-When an `od_url_metrics` post has not been updated in a month then it is garbage-collected, since it is likely the original URL has gone away.
+When an `od_url_metrics` post has not been modified for three (3) months, it will then be garbage collected since it is likely the original URL for the metrics has gone away. If you have a site that gets very little traffic, and you want to increase the TTL to prevent premature garbage collection, you can use the [`od_url_metric_garbage_collection_ttl`](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl) filter to increase this.
 
 Extensions to Optimization Detective rarely need to directly interface with the custom post type, so far. See the experimental [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility/) plugin which interfaces with the `od_url_metrics` post at submission time to add post meta via the `od_url_metric_stored` action, and then retrieves post meta in the tag visitor via the context object’s `url_metrics_id` property.
 
@@ -226,7 +226,7 @@ As noted above, the HTML Tag Processor is instantiated after the output bufferin
 In the future, it is intended for Optimization Detective to replace the use of `WP_HTML_Tag_Processor` with `WP_HTML_Processor` which will allow for additional mutation possibilities. In the meantime, the Optimization Detective subclass does provide two additional methods for injecting arbitrary HTML at the end of the `HEAD` and `BODY`: `$processor->append_head_html()` and `$processor->append_body_html()`. These are useful, for example, to inject additional styles and scripts into the page. The Optimization Detective subclass does implement some methods which are otherwise only available on `WP_HTML_Processor`:
 
 * `expects_closer()`: Whether the tag expects a closing tag.
-* `get_breadcrumbs()`: Computes the HTML breadcrumbs for the currently-matched node.
+* `get_breadcrumbs()`: Computes the HTML breadcrumbs for the currently matched node.
 * `get_current_depth()`: Returns the nesting depth of the current location in the document.
 
 In addition to these, the following methods are also implemented which are useful for tag visitors:
@@ -382,22 +382,18 @@ add_filter(
 );
 ```
 
-The `detect.js` file is a script module which exports two async functions: `initialize` and `finalize`. The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission. The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/optimization-detective/types.ts#L52-L79). Here is an example `detect.js` module script which amends the URL Metric with these exported functions:
+The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`; extensions should use `initialize` instead and call the supplied `extendRootData` and `extendElementData` whenever a relevant mutation occurs rather than waiting until the page is left). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). An extension may also export a `name` which is used as a prefix when logging out messages. Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
 
 ```js
-/**
- * Embed element heights.
- *
- * @type {Map<string, DOMRectReadOnly>}
- */
-const loadedElementContentRects = new Map();
+export name = 'My Resized Embed Optimizer';
 
 /**
  * Initializes extension.
  *
  * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
  */
-export async function initialize() {
+export async function initialize( { extendElementData } ) {
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
@@ -406,49 +402,37 @@ export async function initialize() {
 		const xpath = embedWrapper.dataset.odXpath;
 		const observer = new ResizeObserver( ( entries ) => {
 			const [ entry ] = entries;
-			loadedElementContentRects.set( xpath, entry.contentRect );
+			extendElementData( xpath, {
+				resizedBoundingClientRect: entry.contentRect,
+			} );
 		} );
 		observer.observe( embedWrapper, { box: 'content-box' } );
-	}
-}
-
-/**
- * Finalizes extension.
- *
- * @type {FinalizeCallback}
- * @param {FinalizeArgs} args Args.
- */
-export async function finalize( { extendElementData } ) {
-	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
-		extendElementData( xpath, {
-			resizedBoundingClientRect: domRect,
-		} );
 	}
 }
 ```
 
 Note that this depends on a tag visitor to have been registered which opts in the `.wp-block-embed__wrapper` elements for tracking. With the resized data captured in URL Metrics, the tag visitor can use this data to construct responsive `min-height` styles that target the parent `.wp-block-embed` elements. A full implementation of this tag visitor and detection extension can be found in the [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) plugin: [`Embed_Optimizer_Tag_Visitor::reduce_layout_shifts()`](https://github.com/WordPress/performance/blob/42bd7a88da1df3195f9f076331d9dd157e3b2a86/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L131-L207) and [`detect.js`](https://github.com/WordPress/performance/blob/trunk/plugins/embed-optimizer/detect.js).
 
-## Properties Passed to `initialize` and `finalize`
+## Properties Passed to `initialize` ~and `finalize`~
 
 The following are the properties passed to the `initialize` async function:
 
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `onTTFB`: Function from web-vitals.js which registers a callback to obtain the TTFB metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onttfb).
 * `onFCP`: Function from web-vitals.js which registers a callback to obtain the FCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onfcp).
 * `onLCP`: Function from web-vitals.js which registers a callback to obtain the LCP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#onlcp).
 * `onINP`: Function from web-vitals.js which registers a callback to obtain the INP metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oninp).
 * `onCLS`: Function from web-vitals.js which registers a callback to obtain the CLS metric. See [docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#oncls).
-
-The following are the properties passed to the `finalize` async function:
-
-* `isDebug`: Whether `WP_DEBUG` is enabled.
 * `getRootData`: Function which returns an immutable copy of the current URL Metric data pending submission.
 * `getElementData`: Function which returns an immutable copy of the element data for a given XPath.
 * `extendRootData`: Function which merges additional properties onto the root of the URL Metric (which may not override core properties).
 * `extendElementData`: Function which merges additional properties onto the root of the element for the supplied XPath (which may not override core properties).
+* `isDebug`: Whether `WP_DEBUG` is enabled.
+* `log`: Logs a message to the console via `console.log()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `info`: Logs a message to the console via `console.info()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `warn`: Logs a message to the console via `console.warn()` if `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
+* `error`: Logs a message to the console via `console.error()` _regardless_ of whether `isDebug` is enabled. Message is prefixed with the extension `name` automatically.
 
-The `initialize` and `finalize` functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
+The `initialize` ~and `finalize`~ functions are async so that Optimization Detective can await for them to complete prior to submitting the URL Metric.
 
 Note that by default the [“standard” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=1.%20The%20%22standard%22%20build) of web-vitals.js is loaded during detection. Extensions can opt in to serving the [“attribution” build](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution-build:~:text=2.%20The%20%22attribution%22%20build) via the `od_use_web_vitals_attribution_build` filter. The attribution build is slightly larger and includes additional data which can be useful to store in a URL Metric, such as LoAF data with the INP metric. See [attribution docs](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#attribution) for what additional properties are made available.
 
@@ -456,13 +440,13 @@ Note that by default the [“standard” build](https://github.com/GoogleChrome/
 
 When the `WP_DEBUG` constant is enabled, additional logging for Optimization Detective is added to the browser console.
 
-During the development of Optimization Detective extensions it’s recommended that you install the [Development Mode](https://github.com/westonruter/od-dev-mode) plugin which will:
+During the development of Optimization Detective extensions, it’s recommended that you install the [Development Mode](https://github.com/westonruter/od-dev-mode) plugin which will:
 
 * Zero out the storage lock and freshness TTLs to allow new URL Metrics to be collected with each page load.
 * Reduce the sample size from 3 to 1.
 * Disable aspect ratio constraints to allow URL Metrics to be collected when DevTools is open, for example.
 
-Then to actually inspect the contents of the URL Metrics which are collected, it’s recommended you install the [Admin UI](https://github.com/westonruter/od-admin-ui) plugin.
+Then, to actually inspect the contents of the URL Metrics which are collected, it’s recommended you install the [Admin UI](https://github.com/westonruter/od-admin-ui) plugin.
 
 # Highlighted Extensions
 
@@ -535,7 +519,7 @@ After:
 
 > Optimizes the performance of embeds through lazy loading, preconnecting, and reserving space to reduce layout shifts.
 
-Embeds are very resource intensive components on a page, both in terms of their network usage and in their CPU load. The page load time suffers when out-of-viewport embeds compete to load alongside assets displayed in the initial viewport. This can be seen here in this profile of a page in which embeds from YouTube, Twitter, and TikTok are on the page but aren’t in the initial viewport:
+Embeds are very resource-intensive components on a page, both in terms of their network usage and in their CPU load. The page load time suffers when out-of-viewport embeds compete to load alongside assets displayed in the initial viewport. This can be seen here in this profile of a page in which embeds from YouTube, Twitter, and TikTok are on the page but aren’t in the initial viewport:
 
 ![Lazy-loading embeds: before. Profile of a page with embeds from YouTube, Twitter, and TikTok which are all outside the viewport, showing significant main thread activity and 26 megabytes downloaded over the network.](images/lazy-loading-embeds-before.png)
 
@@ -556,11 +540,11 @@ The reduction in main thread work is dramatic:
 
 Additionally, there is a 99% reduction in the number of bytes downloaded over the network, from 26.3 MB to 152 kB. The `load` event also goes from firing at 1.15 seconds down to 245 ms.
 
-The other major performance optimization implemented by Embed Optimizer is the reduction in CLS by reserving space for embeds that resize when loading. This was discussed above as part of Client-side Extensions but here is the impact on CLS for loading a tweet: 
+The other major performance optimization implemented by Embed Optimizer is the reduction in CLS by reserving space for embeds that resize when loading. This was discussed above as part of Client-side Extensions, but here is the impact on CLS for loading a tweet: 
 
 | Before                                                                                       | After                                                                                                               |
 |:---------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------|
 | ![Tweet embed showing significant layout shift once it loads](images/tweet-embed-before.gif) | ![Tweet embed showing now layout shift once it loads due to the space being reserved](images/tweet-embed-after.gif) |
 | CLS 0.15 ⚠️                                                                                  | CLS 0.00 ✅                                                                                                          |
 
-To see how these optimizations were implemented in Image Prioritizer and Embed Optimizer, refer to the previously-mentioned [reference](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#use-cases-and-examples). The same docs page also includes a [list of extension plugins](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#extension-plugins), some of which are experimental and others which are helpful for development and debugging.  
+To see how these optimizations were implemented in Image Prioritizer and Embed Optimizer, refer to the previously mentioned [reference](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#use-cases-and-examples). The same docs page also includes a [list of extension plugins](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#extension-plugins), some of which are experimental and others which are helpful for development and debugging.  

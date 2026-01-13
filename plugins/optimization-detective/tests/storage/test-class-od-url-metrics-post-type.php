@@ -288,7 +288,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_delete_stale_posts(): void {
 		global $wpdb;
 
-		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) - HOUR_IN_SECONDS );
+		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 3 * MONTH_IN_SECONDS + 1 ) );
 
 		$new_generic_post = self::factory()->post->create();
 		$old_generic_post = self::factory()->post->create();
@@ -323,6 +323,78 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, get_post( $old_generic_post ), 'Expected old generic post to not have been deleted.' );
 		$this->assertInstanceOf( WP_Post::class, get_post( $new_url_metrics_post ), 'Expected new URL Metrics post to not have been deleted.' );
 		$this->assertNull( get_post( $old_url_metrics_post ), 'Expected old URL Metrics post to have been deleted.' );
+
+		// Remove the URL Metrics post older than 6 months.
+		add_filter(
+			'od_url_metric_garbage_collection_ttl',
+			static function (): int {
+				return 6 * MONTH_IN_SECONDS;
+			}
+		);
+
+		// Update timestamp to 6 months older.
+		$new_stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 6 * MONTH_IN_SECONDS + 1 ) );
+
+		$older_generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_generic_post )
+		);
+		clean_post_cache( $older_generic_post );
+
+		$older_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $older_generic_post ) );
+		$older_url_metrics_post = $this->store_url_metric( $older_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $older_generic_post ) ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $older_url_metrics_post )
+		);
+		clean_post_cache( $older_url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $older_generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertNull( get_post( $older_url_metrics_post ), 'Expected old URL Metrics post to not have been deleted.' );
+
+		// Prevent garbage collection to happen.
+		add_filter( 'od_url_metric_garbage_collection_ttl', '__return_zero' );
+
+		$generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $generic_post )
+		);
+		clean_post_cache( $generic_post );
+
+		$url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $generic_post ) );
+		$url_metrics_post = $this->store_url_metric( $url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $generic_post ) ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $new_stale_timestamp_gmt ),
+				'post_modified_gmt' => $new_stale_timestamp_gmt,
+			),
+			array( 'ID' => $url_metrics_post )
+		);
+		clean_post_cache( $url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertNotNull( get_post( $url_metrics_post ), 'Expected old URL Metrics post to not have been deleted.' );
 	}
 
 	/**
@@ -340,10 +412,15 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		// Create sample posts of all post types other than URL Metrics.
 		$other_post_ids = array();
 		foreach ( array_diff( get_post_types(), array( OD_URL_Metrics_Post_Type::SLUG ) ) as $post_type ) {
-			$other_post_ids = array_merge(
-				$other_post_ids,
-				self::factory()->post->create_many( 10, compact( 'post_type' ) )
-			);
+			for ( $i = 0; $i < 10; $i++ ) {
+				$other_post = self::factory()->post->create_and_get( compact( 'post_type' ) );
+				$this->assertInstanceOf(
+					WP_Post::class,
+					$other_post,
+					"Failed to create post of $post_type post type: " . ( $other_post instanceof WP_Error ? $other_post->get_error_message() : 'Unknown' )
+				);
+				$other_post_ids[] = $other_post->ID;
+			}
 		}
 		foreach ( $other_post_ids as $post_id ) {
 			update_post_meta( $post_id, $other_post_meta_key, $other_post_meta_value );

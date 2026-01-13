@@ -120,25 +120,11 @@ final class OD_Tag_Visitor_Context {
 				return $this->url_metrics_id;
 			case 'url_metric_group_collection':
 				return $this->url_metric_group_collection;
-			case 'url_metrics_group_collection':
-				// TODO: Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
-				_doing_it_wrong(
-					esc_html( __CLASS__ . '::$' . $name ),
-					esc_html(
-						sprintf(
-							/* translators: %s is class member variable name */
-							__( 'Use %s instead.', 'optimization-detective' ),
-							__CLASS__ . '::$url_metric_group_collection'
-						)
-					),
-					'optimization-detective 0.7.0'
-				);
-				return $this->url_metric_group_collection;
 			default:
 				throw new Error(
 					esc_html(
 						sprintf(
-							/* translators: %s is class member variable name */
+							/* translators: %s is the class member variable name */
 							__( 'Unknown property %s.', 'optimization-detective' ),
 							__CLASS__ . '::$' . $name
 						)

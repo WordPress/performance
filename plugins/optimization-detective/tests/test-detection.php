@@ -98,7 +98,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array{set_up: Closure, expected_exports: array<string, mixed>, expected_standard_build: bool}>
 	 */
-	public function data_provider_od_get_detection_script(): array {
+	public function data_provider_od_get_detection_scripts(): array {
 		return array(
 			'unfiltered'       => array(
 				'set_up'                  => static function (): void {},
@@ -107,6 +107,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'extensionModuleUrls' => array(),
 					'cachePurgePostId'    => null,
 					'freshnessTTL'        => WEEK_IN_SECONDS,
+					'gzdecodeAvailable'   => function_exists( 'gzencode' ),
 				),
 				'expected_standard_build' => true,
 			),
@@ -161,6 +162,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return WEEK_IN_SECONDS;
 						}
 					);
+					add_filter( 'od_gzip_url_metric_store_request_payloads', '__return_false' );
 				},
 				'expected_exports'        => array(
 					'storageLockTTL'         => DAY_IN_SECONDS,
@@ -168,6 +170,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					'extensionModuleUrls'    => array( home_url( '/my-extension.js', 'https' ) ),
 					'minViewportAspectRatio' => 0,
 					'maxViewportAspectRatio' => 2,
+					'gzdecodeAvailable'      => false,
 				),
 				'expected_standard_build' => false,
 			),
@@ -177,7 +180,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	/**
 	 * Make sure the expected script is printed.
 	 *
-	 * @covers ::od_get_detection_script
+	 * @covers ::od_get_detection_scripts
 	 * @covers ::od_get_asset_path
 	 * @covers OD_Storage_Lock::get_ttl
 	 * @covers ::od_get_cache_purge_post_id
@@ -189,13 +192,13 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 * @covers OD_URL_Metric_Group::is_complete
 	 * @covers OD_URL_Metric_Group_Collection::get_current_etag
 	 *
-	 * @dataProvider data_provider_od_get_detection_script
+	 * @dataProvider data_provider_od_get_detection_scripts
 	 *
 	 * @param Closure               $set_up                  Set up callback.
 	 * @param array<string, string> $expected_exports        Expected exports.
 	 * @param bool                  $expected_standard_build Expected standard build.
 	 */
-	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports, bool $expected_standard_build ): void {
+	public function test_od_get_detection_scripts_returns_script( Closure $set_up, array $expected_exports, bool $expected_standard_build ): void {
 		$set_up();
 		$slug         = od_get_url_metrics_slug( array() );
 		$current_etag = md5( '' );
@@ -216,12 +219,12 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$breakpoints      = array( 480, 600, 782 );
 		$group_collection = new OD_URL_Metric_Group_Collection( array(), $current_etag, $breakpoints, 3, HOUR_IN_SECONDS );
 
-		$script = od_get_detection_script( $slug, $group_collection );
+		$script = od_get_detection_scripts( $slug, $group_collection );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
-		$this->assertStringContainsString( 'import detect from', $script );
+		$this->assertStringContainsString( 'async function load', $script );
 		foreach ( $expected_exports as $key => $value ) {
-			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
+			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), wp_json_encode( $value, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) ), $script );
 		}
 		$this->assertStringContainsString( '"urlMetricHMAC":', $script );
 		$this->assertSame( 1, preg_match( '/"webVitalsLibrarySrc":("[^"]+?")/', $script, $matches ) );

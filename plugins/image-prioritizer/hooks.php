@@ -10,6 +10,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 add_action( 'od_init', 'image_prioritizer_init' );
+// @codeCoverageIgnoreEnd

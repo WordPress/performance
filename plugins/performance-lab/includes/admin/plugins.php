@@ -505,7 +505,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
 
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
-	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
+	$description = apply_filters( 'plugin_install_description', $description, $plugin_data ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentionally applying core filter.
 
 	$availability   = perflab_get_plugin_availability( $plugin_data );
 	$compatible_php = $availability['compatible_php'];
@@ -601,7 +601,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt">';
 			if ( ! $compatible_php && ! $compatible_wp ) {
-				echo '<p>' . esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
+				echo '<p>' . esc_html__( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
 						sprintf(

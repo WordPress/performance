@@ -1,8 +1,8 @@
 === Optimization Detective ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   1.0.0-beta3
+Tested up to: 6.9
+Stable tag:   1.0.0-beta4
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -54,6 +54,28 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta4 =
+
+**Enhancements**
+
+* Add URL Metric mutation helpers to extension initialization API. ([1951](https://github.com/WordPress/performance/pull/1951))
+* Add gzip compression for URL metrics using Compression Streams API. ([1959](https://github.com/WordPress/performance/pull/1959))
+* Allow disabling timestamp-based freshness checks by using negative TTL values. ([1940](https://github.com/WordPress/performance/pull/1940))
+* Bump web-vitals from 5.0.3 to 5.1.0. ([2116](https://github.com/WordPress/performance/pull/2116))
+* Change default garbage collection TTL of `od_url_metrics` posts from 1 month to 3 months and add the filter to customize expiration. ([1950](https://github.com/WordPress/performance/pull/1950))
+* Enhance Optimization Detective meta generator tag with all disabled reasons. ([1979](https://github.com/WordPress/performance/pull/1979))
+* Amend URL metrics to the generator meta tag content. ([1954](https://github.com/WordPress/performance/pull/1954))
+* Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
+* Improve discoverability and user guidance for Optimization Detective extensions. ([2261](https://github.com/WordPress/performance/pull/2261))
+* Remove deprecated `url_metrics_group_collection` and class aliases and bump required OD version in Image Prioritizer. ([1943](https://github.com/WordPress/performance/pull/1943))
+
+**Bug Fixes**
+
+* Avoid possible error when reading groups in debug mode. ([2108](https://github.com/WordPress/performance/pull/2108))
+* Delay loading detect module until page is loaded and idle. ([2017](https://github.com/WordPress/performance/pull/2017))
+* Ensure URL Metric is initially constructed with all elements prior to initializing extensions. ([1968](https://github.com/WordPress/performance/pull/1968))
+* Short-circuit detection when page is opened in background tab since web-vitals.js will not report LCP. ([1927](https://github.com/WordPress/performance/pull/1927))
 
 = 1.0.0-beta3 =
 

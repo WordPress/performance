@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Obtains the ID for a post related to this response so that page caches can be told to invalidate their cache.
+ * Gets the ID for a post related to this response so that page caches can be told to invalidate their cache.
  *
  * If the queried object for the response is a post, then that post's ID is used. Otherwise, it uses the ID of the first
  * post in The Loop.
@@ -23,15 +23,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * this ID if the relevant actions are triggered for the post (e.g. clean_post_cache, save_post, transition_post_status).
  *
  * Otherwise, if the response is an archive page or the front page where show_on_front=posts (i.e. is_home), then
- * there is no singular post object that represents the URL. In this case, we obtain the first post in the main
- * loop. By triggering the relevant actions for this post ID, page caches will have their best shot at invalidating
+ * there is no singular post object that represents the URL. In this case, we get the first post in the main
+ * loop. By triggering the relevant actions for this post ID, page caches will be more likely able to invalidate
  * the related URLs. Page caching plugins which leverage surrogate keys will be the most reliable here. Otherwise,
  * caching plugins may just resort to automatically purging the cache for the homepage whenever any post is edited,
  * which is better than nothing.
  *
  * There should not be any situation by default in which a page optimized with Optimization Detective does not have such
  * a post available for cache purging. As seen in {@see od_can_optimize_response()}, when such a post ID is not
- * available for cache purging then it returns false, as it also does in another case like if is_404().
+ * available for cache purging, then it returns false, as it also does in another case like if is_404().
  *
  * @since 0.8.0
  * @access private
@@ -65,31 +65,22 @@ function od_get_cache_purge_post_id(): ?int {
 }
 
 /**
- * Prints the script for detecting loaded images and the LCP element.
+ * Prints the scripts for the detect loader.
  *
  * @since 0.1.0
+ * @since 1.0.0 Renamed from od_get_detection_script().
  * @access private
  *
  * @param non-empty-string               $slug             URL Metrics slug.
  * @param OD_URL_Metric_Group_Collection $group_collection URL Metric group collection.
  */
-function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
+function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
 
 	/**
 	 * Filters whether to use the web-vitals.js build with attribution.
 	 *
-	 * When using the attribution build of web-vitals, the metric object passed to report callbacks registered via
-	 * `onTTFB`, `onFCP`, `onLCP`, `onCLS`, and `onINP` will include an additional {@link https://github.com/GoogleChrome/web-vitals#attribution attribution property}.
-	 * For details, please refer to the {@link https://github.com/GoogleChrome/web-vitals web-vitals documentation}.
-	 *
-	 * For example, to opt in to using the attribution build:
-	 *
-	 *     add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
-	 *
-	 * Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
-	 * The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
-	 *
 	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_use_web_vitals_attribution_build
 	 *
 	 * @param bool $use_attribution_build Whether to use the attribution build.
 	 */
@@ -105,16 +96,30 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	 * Filters the list of extension script module URLs to import when performing detection.
 	 *
 	 * @since 0.7.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_extension_module_urls
 	 *
 	 * @param string[] $extension_module_urls Extension module URLs.
 	 */
 	$extension_module_urls = (array) apply_filters( 'od_extension_module_urls', array() );
 
 	$cache_purge_post_id = od_get_cache_purge_post_id();
+	$current_url         = od_get_current_url();
+	$current_etag        = $group_collection->get_current_etag();
 
-	$current_url = od_get_current_url();
+	/**
+	 * Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
+	 *
+	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_gzip_url_metric_store_request_payloads
+	 *
+	 * @param bool $gzip_url_metric_store_request_payloads Whether to use gzip to compress URL Metric JSON.
+	 */
+	$gzdecode_available = function_exists( 'gzdecode' ) && apply_filters( 'od_gzip_url_metric_store_request_payloads', true );
 
-	$current_etag = $group_collection->get_current_etag();
+	$detect_src = add_query_arg(
+		array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+		plugins_url( od_get_asset_path( 'detect.js' ), __FILE__ )
+	);
 
 	$detect_args = array(
 		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
@@ -140,6 +145,8 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
 		'freshnessTTL'           => od_get_url_metric_freshness_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
+		'gzdecodeAvailable'      => $gzdecode_available,
+		'maxUrlMetricSize'       => od_get_maximum_url_metric_size(),
 	);
 	if ( is_user_logged_in() ) {
 		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );
@@ -148,14 +155,36 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}
 
-	return wp_get_inline_script_tag(
-		sprintf(
-			'import detect from %s; detect( %s );',
-			wp_json_encode( plugins_url( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
-			wp_json_encode( $detect_args )
+	$json_flags = JSON_HEX_TAG | JSON_UNESCAPED_SLASHES;
+	if ( SCRIPT_DEBUG ) {
+		$json_flags |= JSON_PRETTY_PRINT;
+	}
+	$json_script = wp_get_inline_script_tag(
+		(string) wp_json_encode(
+			array( $detect_src, $detect_args ),
+			$json_flags
 		),
+		array(
+			'type' => 'application/json',
+			'id'   => 'optimization-detective-detect-args',
+		)
+	);
+
+	$module_js  = file_get_contents( __DIR__ . '/' . od_get_asset_path( 'detect-loader.js' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$module_js .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+			plugins_url( od_get_asset_path( 'detect-loader.js' ), __FILE__ )
+		)
+	);
+
+	$module_script = wp_get_inline_script_tag(
+		$module_js,
 		array( 'type' => 'module' )
 	);
+
+	return $json_script . $module_script;
 }
 
 /**
@@ -172,6 +201,67 @@ function od_register_rest_url_metric_store_endpoint(): void {
 		$endpoint_controller::ROUTE_BASE,
 		$endpoint_controller->get_registration_args()
 	);
+}
+
+/**
+ * Decompresses the REST API request body for the URL Metrics endpoint.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
+ * @param mixed           $result  Response to replace the requested version with. Can be anything a normal endpoint can return, or null to not hijack the request.
+ * @param WP_REST_Server  $server  Server instance.
+ * @param WP_REST_Request $request Request used to generate the response.
+ * @return mixed Passed through $result if successful, or otherwise a WP_Error.
+ */
+function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_REST_Request $request ) {
+	unset( $server ); // Unused.
+
+	if (
+		function_exists( 'gzdecode' ) &&
+		$request->get_route() === '/' . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE &&
+		'gzip' === $request->get_header( 'Content-Encoding' )
+	) {
+		$compressed_body = $request->get_body();
+
+		/*
+		 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
+		 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
+		 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
+		 * getting sent.
+		 */
+		$max_size       = 64 * 1024; // 64 KB
+		$content_length = strlen( $compressed_body );
+		if ( $content_length > $max_size ) {
+			return new WP_Error(
+				'rest_content_too_large',
+				sprintf(
+					/* translators: 1: the size of the payload, 2: the maximum allowed payload size */
+					__( 'Compressed JSON payload size is %1$s bytes which is larger than the maximum allowed size of %2$s bytes.', 'optimization-detective' ),
+					number_format_i18n( $content_length ),
+					number_format_i18n( $max_size )
+				),
+				array( 'status' => 413 )
+			);
+		}
+
+		$decompressed_body = @gzdecode( $compressed_body ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- We need to suppress errors here.
+
+		if ( false === $decompressed_body ) {
+			return new WP_Error(
+				'rest_invalid_payload',
+				__( 'Unable to decompress the gzip payload.', 'optimization-detective' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Update the request so later handlers see the decompressed JSON.
+		$request->set_body( $decompressed_body );
+		$request->remove_header( 'Content-Encoding' );
+	}
+	return $result;
 }
 
 /**

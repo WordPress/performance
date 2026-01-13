@@ -126,7 +126,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	}
 
 	/**
-	 * Determines if the HTTP origin is an authorized one.
+	 * Determines if the HTTP origin is authorized.
 	 *
 	 * Note that `is_allowed_http_origin()` is not used directly because the underlying `get_allowed_http_origins()` does
 	 * not account for the URL port (although there is a to-do comment committed in core to address this). Additionally,
@@ -157,7 +157,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * @return WP_REST_Response|WP_Error Response.
 	 */
 	public function handle_rest_request( WP_REST_Request $request ) {
-		// Block cross-origin storage requests since by definition URL Metrics data can only be sourced from the frontend of the site.
+		// Block cross-origin storage requests since, by definition, URL Metrics data can only be sourced from the frontend of the site.
 		$origin = $request->get_header( 'origin' );
 		if ( null === $origin || ! self::is_allowed_http_origin( $origin ) ) {
 			return new WP_Error(
@@ -222,7 +222,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			return new WP_Error(
 				'rest_invalid_param',
 				sprintf(
-					/* translators: %s is exception message */
+					/* translators: %s is the exception message */
 					__( 'Failed to validate URL Metric: %s', 'optimization-detective' ),
 					$e->getMessage()
 				),
@@ -230,14 +230,9 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			);
 		}
 
-		/*
-		 * The limit for data sent via navigator.sendBeacon() is 64 KiB. This limit is checked in detect.js so that the
-		 * request will not even be attempted if the payload is too large. This server-side restriction is added as a
-		 * safeguard against clients sending possibly malicious payloads much larger than 64 KiB which should never be
-		 * getting sent.
-		 */
-		$max_size       = 64 * 1024; // 64 KB
-		$content_length = strlen( (string) wp_json_encode( $url_metric ) );
+		// Limit JSON payload size to safeguard against clients sending possibly malicious payloads much larger than allowed.
+		$max_size       = od_get_maximum_url_metric_size();
+		$content_length = strlen( (string) wp_json_encode( $url_metric, JSON_UNESCAPED_SLASHES ) ); // Flags match with \OD_URL_Metrics_Post_Type::update_post().
 		if ( $content_length > $max_size ) {
 			return new WP_Error(
 				'rest_content_too_large',
@@ -292,6 +287,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 		 * Fires whenever a URL Metric was successfully stored.
 		 *
 		 * @since 0.7.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Action%3A%20od_url_metric_stored
 		 *
 		 * @param OD_URL_Metric_Store_Request_Context $context Context about the successful URL Metric collection.
 		 */

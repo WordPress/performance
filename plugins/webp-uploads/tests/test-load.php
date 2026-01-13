@@ -720,7 +720,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support modern images needs to be first in this list.
-				array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				array_unshift( $editors, WP_Image_Doesnt_Support_Modern_Images::class );
 				return $editors;
 			}
 		);
@@ -1115,5 +1115,199 @@ class Test_WebP_Uploads_Load extends TestCase {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/avif' );
 		}
 		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
+	 * Tests that the `webp_uploads_convert_palette_png_to_truecolor` function is hooked to the upload filters.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_hooks(): void {
+		$this->assertSame( 10, has_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+		$this->assertSame( 10, has_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+	}
+
+	/**
+	 * Tests converting a palette PNG to a truecolor PNG.
+	 *
+	 * @dataProvider data_to_test_webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @param string|null $image_path     The path to the image file to test.
+	 * @param bool        $expect_changed Whether the png should be converted to truecolor.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed ): void {
+		if ( ! extension_loaded( 'gd' ) ) {
+			$this->markTestSkipped( 'GD extension is not loaded' );
+		}
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( WP_Image_Editor_GD::class );
+			}
+		);
+
+		// Temp file will be copied and unlinked by WordPress core during sideload processing.
+		$tmp_file = wp_tempnam();
+		copy( $image_path, $tmp_file );
+		$file = array(
+			'name'     => basename( $image_path ),
+			'tmp_name' => $tmp_file,
+			'type'     => wp_check_filetype( $image_path )['type'],
+			'size'     => filesize( $tmp_file ),
+			'error'    => UPLOAD_ERR_OK,
+		);
+
+		// Store the original file hash and the original file size for later comparison.
+		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
+		$original_file_size = (int) filesize( $file['tmp_name'] );
+
+		// This will trigger the `wp_handle_sideload_prefilter` filter.
+		$attachment_id = media_handle_sideload( $file );
+
+		try {
+			$this->assertIsNumeric( $attachment_id );
+
+			// For getting an original image path for computation of the file hash.
+			$meta       = wp_get_attachment_metadata( $attachment_id );
+			$upload_dir = wp_get_upload_dir();
+			$path       = null;
+			if ( isset( $meta['original_image'], $meta['file'] ) ) {
+				$path = path_join(
+					$upload_dir['basedir'],
+					dirname( $meta['file'] ) . '/' . $meta['original_image']
+				);
+			}
+			$this->assertNotNull( $path );
+			$this->assertFileExists( $path );
+
+			// Hash will be modified if the image was converted to truecolor.
+			$modified_file_hash = md5_file( $path );
+
+			if ( ! $expect_changed ) {
+				$this->assertSame( $original_file_hash, $modified_file_hash );
+			} else {
+				$this->assertNotSame( $original_file_hash, $modified_file_hash );
+				$img = imagecreatefrompng( $path );
+				$this->assertTrue( imageistruecolor( $img ) );
+				if ( PHP_VERSION_ID < 80000 ) {
+					imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- imagedestroy() has no effect as of PHP 8.0.
+				}
+
+				// Make sure the image converted to modern image format is not 0 bytes.
+				$modern_image_format_path = get_attached_file( $attachment_id );
+				$this->assertNotFalse( $modern_image_format_path );
+				$this->assertFileExists( $modern_image_format_path );
+				$modern_image_format_filesize = (int) filesize( $modern_image_format_path );
+				$this->assertGreaterThan( 0, $modern_image_format_filesize );
+
+				// Ensure the file size of the converted image is less than or equal to the original indexed PNG file size.
+				$this->assertLessThanOrEqual( $original_file_size, $modern_image_format_filesize );
+			}
+		} finally {
+			wp_delete_attachment( $attachment_id );
+		}
+	}
+
+	/**
+	 * Data provider for `test_webp_uploads_convert_palette_png_to_truecolor`.
+	 *
+	 * @return array<string, mixed> Returns an array of test cases.
+	 */
+	public function data_to_test_webp_uploads_convert_palette_png_to_truecolor(): array {
+		$non_palette_png = TESTS_PLUGIN_DIR . '/tests/data/images/dice.png';
+		$palette_png     = TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png';
+		$test_jpg        = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
+
+		return array(
+			'wrong_extension' => array(
+				'image_path'       => $test_jpg,
+				'expected_changed' => false,
+			),
+			'non_palette_png' => array(
+				'image_path'       => $non_palette_png,
+				'expected_changed' => false,
+			),
+			'palette_png'     => array(
+				'image_path'       => $palette_png,
+				'expected_changed' => true,
+			),
+		);
+	}
+
+	/**
+	 * Tests the webp_uploads_convert_palette_png_to_truecolor function with various conditions.
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_conditions(): void {
+		$this->assertSame( array(), webp_uploads_convert_palette_png_to_truecolor( 'test' ) );
+		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( array() ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+			'type'     => 'image/jpeg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array();
+			}
+		);
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png',
+			'name'     => 'dice-palette.png',
+			'type'     => 'image/png',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+	}
+
+	/**
+	 * Test that the webp_uploads_update_featured_image function is hooked to the post_thumbnail_html filter.
+	 */
+	public function test_webp_uploads_update_featured_image_hooked_into_post_thumbnail_html(): void {
+		$this->assertSame( 10, has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+	}
+
+	/**
+	 * Test that the featured image is not wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_disabled(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<img ', $featured_image );
+	}
+
+	/**
+	 * Test that the featured image is wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_enabled(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->opt_in_to_picture_element();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<picture ', $featured_image );
 	}
 }

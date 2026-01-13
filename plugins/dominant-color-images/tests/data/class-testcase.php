@@ -218,6 +218,24 @@ abstract class TestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test the function returns a WP_Error object for unsupported mime types.
+	 *
+	 * @covers dominant_color_get_dominant_color_data
+	 */
+	public function test_get_dominant_color_data_unsupported_mime_type(): void {
+		add_filter( 'dominant_color_supported_mime_types', '__return_empty_array' );
+		$image_path = TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg';
+
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
+
+		$this->assertWPError( $dominant_color_data );
+		$this->assertStringContainsString( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
+	}
+
+	/**
 	 * Test if the function returns the correct color.
 	 *
 	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color

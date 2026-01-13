@@ -58,7 +58,7 @@ class OD_URL_Metrics_Post_Type {
 	/**
 	 * Registers post type for URL Metrics storage.
 	 *
-	 * This the configuration for this post type is similar to the oembed_cache in core.
+	 * The configuration for this post type is similar to the oembed_cache in core.
 	 *
 	 * @since 0.1.0
 	 */
@@ -108,9 +108,8 @@ class OD_URL_Metrics_Post_Type {
 		$post = current( $post_query->posts );
 		if ( $post instanceof WP_Post ) {
 			return $post;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -153,7 +152,7 @@ class OD_URL_Metrics_Post_Type {
 		} elseif ( ! is_array( $url_metrics_data ) ) {
 			$trigger_error(
 				sprintf(
-					/* translators: %s is post type slug */
+					/* translators: %s is the post type slug */
 					__( 'Contents of %s post type was not a JSON array.', 'optimization-detective' ),
 					self::SLUG
 				),
@@ -242,7 +241,7 @@ class OD_URL_Metrics_Post_Type {
 
 		$post_data['post_content'] = wp_json_encode(
 			$url_metric_group_collection->get_flattened_url_metrics(),
-			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes or hex tags since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {
 			return new WP_Error( 'json_encode_error', json_last_error_msg() );
@@ -298,7 +297,21 @@ class OD_URL_Metrics_Post_Type {
 	 * @since 0.1.0
 	 */
 	public static function delete_stale_posts(): void {
-		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
+		/**
+		 * Filters the expiration time (TTL) after which a since-unmodified od_url_metrics post will be garbage collected.
+		 *
+		 * @since 1.0.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl
+		 *
+		 * @return int TTL for garbage collection in seconds. Defaults to 3 months.
+		 */
+		$ttl = (int) apply_filters( 'od_url_metric_garbage_collection_ttl', 3 * MONTH_IN_SECONDS );
+
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
+		$before_time = gmdate( 'Y-m-d H:i:s', time() - $ttl );
 
 		$query = new WP_Query(
 			array(
@@ -306,7 +319,7 @@ class OD_URL_Metrics_Post_Type {
 				'posts_per_page' => 100,
 				'date_query'     => array(
 					'column' => 'post_modified_gmt',
-					'before' => $one_month_ago,
+					'before' => $before_time,
 				),
 			)
 		);

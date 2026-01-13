@@ -18,11 +18,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.2.0
  * @access private
  *
+ * @global string $pagenow The filename of the current screen.
+ *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
 function image_prioritizer_init( string $optimization_detective_version ): void {
-	$required_od_version = '0.9.0';
-	if ( ! version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '>=' ) ) {
+	$required_od_version = '1.0.0-beta4';
+	if ( ! version_compare( $optimization_detective_version, $required_od_version, '>=' ) ) {
 		add_action(
 			'admin_notices',
 			static function (): void {
@@ -234,7 +236,15 @@ function image_prioritizer_validate_background_image_url( string $url ) {
 
 	// Validate that the Content-Type is an image.
 	$content_type = (array) wp_remote_retrieve_header( $r, 'content-type' );
-	if ( ! is_string( $content_type[0] ) || ! str_starts_with( $content_type[0], 'image/' ) ) {
+	if ( 'application/octet-stream' === $content_type[0] ) {
+		// This is a special case for images that are not served with the correct Content-Type.
+		$file_extension              = pathinfo( (string) wp_parse_url( $url, PHP_URL_PATH ), PATHINFO_EXTENSION );
+		$valid_image_file_extensions = array( 'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic', 'heif', 'svg' );
+		$is_valid_content_type       = in_array( strtolower( $file_extension ), $valid_image_file_extensions, true );
+	} else {
+		$is_valid_content_type = is_string( $content_type[0] ) && str_starts_with( $content_type[0], 'image/' );
+	}
+	if ( ! $is_valid_content_type ) {
 		return new WP_Error(
 			'background_image_response_not_image',
 			sprintf(
@@ -292,21 +302,19 @@ function image_prioritizer_validate_background_image_url( string $url ) {
  *
  * @return WP_REST_Response|WP_HTTP_Response|WP_Error|mixed Result to send to the client.
  * @noinspection PhpDocMissingThrowsInspection
- * @noinspection PhpDeprecationInspection
  */
 function image_prioritizer_filter_rest_request_before_callbacks( $response, array $handler, WP_REST_Request $request ) {
 	unset( $handler ); // Unused.
-
-	// Check for class existence and use constant or class method calls accordingly.
-	$route_endpoint = class_exists( 'OD_REST_URL_Metrics_Store_Endpoint' )
-						? OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE
-						: OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE; // @phpstan-ignore constant.deprecated, constant.deprecated (To be replaced with class method calls in subsequent release.)
 
 	if (
 		$request->get_method() !== 'POST'
 		||
 		// The strtolower() and outer trim are due to \WP_REST_Server::match_request_to_handler() using case-insensitive pattern match and using '$' instead of '\z'.
-		( rtrim( strtolower( ltrim( $request->get_route(), '/' ) ) ) !== $route_endpoint )
+		(
+			OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE . OD_REST_URL_Metrics_Store_Endpoint::ROUTE_BASE
+			!==
+			rtrim( strtolower( ltrim( $request->get_route(), '/' ) ) )
+		)
 	) {
 		return $response;
 	}
@@ -392,8 +400,16 @@ function image_prioritizer_get_asset_path( string $src_path, ?string $min_path =
  * @return string Lazy load script.
  */
 function image_prioritizer_get_video_lazy_load_script(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-video.js' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path    = image_prioritizer_get_asset_path( 'lazy-load-video.js' );
+	$script  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $script;
 }
 
 /**
@@ -407,8 +423,16 @@ function image_prioritizer_get_video_lazy_load_script(): string {
  * @return string Lazy load script.
  */
 function image_prioritizer_get_lazy_load_bg_image_script(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-bg-image.js' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path    = image_prioritizer_get_asset_path( 'lazy-load-bg-image.js' );
+	$script  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script .= sprintf(
+		"\n//# sourceURL=%s",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $script;
 }
 
 /**
@@ -420,6 +444,14 @@ function image_prioritizer_get_lazy_load_bg_image_script(): string {
  * @return string Lazy load stylesheet.
  */
 function image_prioritizer_get_lazy_load_bg_image_stylesheet(): string {
-	$path = image_prioritizer_get_asset_path( 'lazy-load-bg-image.css' );
-	return (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$path   = image_prioritizer_get_asset_path( 'lazy-load-bg-image.css' );
+	$style  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$style .= sprintf(
+		"\n/*# sourceURL=%s */",
+		add_query_arg(
+			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
+			plugins_url( $path, __FILE__ )
+		)
+	);
+	return $style;
 }

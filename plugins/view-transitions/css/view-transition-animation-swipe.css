@@ -1,0 +1,43 @@
+@property --plvt-view-transition-animation-swipe-horizontal-offset {
+	syntax: "<number>";
+	initial-value: 1;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-swipe-vertical-offset {
+	syntax: "<number>";
+	initial-value: 0;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-duration {
+	syntax: "<time>";
+	initial-value: 1s;
+	inherits: false;
+}
+
+@keyframes plvt-view-transition-animation-swipe-old {
+	to {
+		opacity: 0;
+		translate: calc(100vw * var(--plvt-view-transition-animation-swipe-horizontal-offset) * -1) calc(100vw * var(--plvt-view-transition-animation-swipe-vertical-offset) * -1);
+	}
+}
+
+@keyframes plvt-view-transition-animation-swipe-new {
+	from {
+		opacity: 0;
+		translate: calc(100vw * var(--plvt-view-transition-animation-swipe-horizontal-offset)) calc(100vw * var(--plvt-view-transition-animation-swipe-vertical-offset));
+	}
+}
+
+::view-transition-group(*) {
+	animation-duration: var(--plvt-view-transition-animation-duration);
+}
+
+::view-transition-old(*) {
+	animation-name: plvt-view-transition-animation-swipe-old;
+}
+
+::view-transition-new(*) {
+	animation-name: plvt-view-transition-animation-swipe-new;
+}

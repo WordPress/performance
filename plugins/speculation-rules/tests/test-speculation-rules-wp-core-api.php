@@ -9,8 +9,11 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::plsr_filter_speculation_rules_configuration
+	 * @covers ::plsr_is_speculative_loading_enabled
 	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_regular(): void {
+		add_filter( 'plsr_enabled_without_pretty_permalinks', '__return_true' );
+		$this->assertTrue( plsr_is_speculative_loading_enabled() );
 		$this->assertSame(
 			array(
 				'mode'      => 'prerender',
@@ -27,8 +30,11 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::plsr_filter_speculation_rules_configuration
+	 * @covers ::plsr_is_speculative_loading_enabled
 	 */
 	public function test_plsr_filter_speculation_rules_configuration_with_invalid(): void {
+		add_filter( 'plsr_enabled_without_pretty_permalinks', '__return_true' );
+		$this->assertTrue( plsr_is_speculative_loading_enabled() );
 		$this->assertSame(
 			array(
 				'mode'      => 'prerender',

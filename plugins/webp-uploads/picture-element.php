@@ -7,6 +7,12 @@
  * @since 2.0.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Potentially wrap an image tag in a picture element.
  *
@@ -19,7 +25,7 @@
  * @return string The new image tag.
  */
 function webp_uploads_wrap_image_in_picture( string $image, string $context, int $attachment_id ): string {
-	if ( 'the_content' !== $context ) {
+	if ( ! in_array( $context, array( 'the_content', 'post_thumbnail_html', 'widget_block_content' ), true ) ) {
 		return $image;
 	}
 

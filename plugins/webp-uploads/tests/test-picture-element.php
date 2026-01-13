@@ -526,4 +526,70 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$this->assertSame( $image, $filtered_image );
 	}
+
+	/**
+	 * Test that images are not wrapped in picture element for unsupported contexts.
+	 *
+	 * @dataProvider data_provider_webp_uploads_wrap_image_in_picture_with_different_context
+	 *
+	 * @param string $context  The context to test.
+	 * @param bool   $expected Whether the image should be wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_webp_uploads_wrap_image_in_picture_with_different_context( string $context, bool $expected ): void {
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$this->opt_in_to_picture_element();
+		$filtered_image = apply_filters( 'wp_content_img_tag', $image, $context, self::$image_id );
+		if ( $expected ) {
+			$processor = new WP_HTML_Tag_Processor( $filtered_image );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'PICTURE', $processor->get_tag() );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'SOURCE', $processor->get_tag() );
+			$this->assertTrue( $processor->next_tag() );
+			$this->assertSame( 'IMG', $processor->get_tag() );
+		} else {
+			$this->assertSame( $image, $filtered_image );
+		}
+	}
+
+	/**
+	 * Data provider for test_webp_uploads_wrap_image_in_picture_with_different_context.
+	 *
+	 * @return array<string, array{ context: string, expected: bool }>
+	 */
+	public function data_provider_webp_uploads_wrap_image_in_picture_with_different_context(): array {
+		return array(
+			'the_content'          =>
+				array(
+					'context'  => 'the_content',
+					'expected' => true,
+				),
+			'post_thumbnail_html'  =>
+				array(
+					'context'  => 'post_thumbnail_html',
+					'expected' => true,
+				),
+			'widget_block_content' =>
+				array(
+					'context'  => 'widget_block_content',
+					'expected' => true,
+				),
+			'invalid_context'      =>
+				array(
+					'context'  => 'invalid_context',
+					'expected' => false,
+				),
+		);
+	}
 }
