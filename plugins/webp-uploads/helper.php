@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.0.0 Added support for AVIF.
  * @since 2.2.0 Added support for PNG.
  *
- * @param string|null $filename Optional. The filename. Default empty string.
+ * @param string|null $filename Optional. The filename. Default null.
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
-function webp_uploads_get_upload_image_mime_transforms( ?string $filename ): array {
+function webp_uploads_get_upload_image_mime_transforms( ?string $filename = null ): array {
 	$avif_support = webp_uploads_mime_type_supported( 'image/avif' );
 
 	if ( $avif_support && webp_uploads_check_image_transparency( $filename ) ) {
