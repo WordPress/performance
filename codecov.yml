@@ -25,7 +25,7 @@ flag_management:
   individual_flags:
     - name: auto-sizes
       paths:
-      - plugins/auto-sizes/
+        - plugins/auto-sizes/
     - name: dominant-color-images
       paths:
         - plugins/dominant-color-images/
