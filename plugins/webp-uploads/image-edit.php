@@ -523,5 +523,5 @@ function webp_uploads_restore_image( int $attachment_id, array $data ): array {
  */
 function webp_uploads_image_edit_thumbnails_separately(): bool {
 	/** This filter is documented in wp-admin/includes/image-edit.php */
-	return (bool) apply_filters( 'image_edit_thumbnails_separately', false );
+	return (bool) apply_filters( 'image_edit_thumbnails_separately', false ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentionally applying core filter.
 }
