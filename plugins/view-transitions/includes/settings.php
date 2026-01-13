@@ -296,7 +296,7 @@ function plvt_add_setting_ui(): void {
 		)
 	);
 
-	// Only show setting if feature is not present in core. See <https://core.trac.wordpress.org/ticket/64470>.
+	// Only show the setting if the feature is not already present in core. See <https://core.trac.wordpress.org/ticket/64470>.
 	if ( ! function_exists( 'wp_enqueue_view_transitions_admin_css' ) ) {
 		add_settings_section(
 			'plvt_admin_view_transitions',
