@@ -47,8 +47,14 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 				'before-template-db-queries',
 				array(
 					'measure_callback' => static function ( $metric ) use ( $current_function ): void {
+						// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
+						if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
+							$metric->set_value( 0.0 );
+							return;
+						}
+
 						// This should never happen, but some odd database implementations may be doing it wrong.
-						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+						if ( ! is_array( $GLOBALS['wpdb']->queries ) ) {
 							wp_trigger_error(
 								$current_function,
 								esc_html(
@@ -196,8 +202,15 @@ function perflab_register_default_server_timing_template_metrics(): void {
 								return;
 							}
 
+							// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
+							// In this case, template query time is just negative of before-template time.
+							if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
+								$metric->set_value( ( 0.0 - $GLOBALS['perflab_query_time_before_template'] ) * 1000.0 );
+								return;
+							}
+
 							// This should never happen, but some odd database implementations may be doing it wrong.
-							if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+							if ( ! is_array( $GLOBALS['wpdb']->queries ) ) {
 								// A notice is already emitted above, but if $perflab_query_time_before_template was not
 								// set, then this condition wouldn't be checked in the first place.
 								return;
