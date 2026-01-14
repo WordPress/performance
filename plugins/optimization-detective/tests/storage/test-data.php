@@ -506,6 +506,16 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 					};
 				},
 			),
+
+			'null_wp_query_posts'         => array(
+				'set_up' => function (): void {
+					$post = self::factory()->post->create_and_get();
+					$this->assertInstanceOf( WP_Post::class, $post );
+					$this->go_to( '/' );
+					global $wp_query;
+					unset( $wp_query->posts );
+				},
+			),
 		);
 	}
 
