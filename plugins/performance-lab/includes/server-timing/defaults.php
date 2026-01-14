@@ -48,14 +48,10 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 				array(
 					'measure_callback' => static function ( $metric ) use ( $current_function ): void {
 						// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
-						if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
-							$GLOBALS['perflab_query_time_before_template'] = 0.0;
-							$metric->set_value( 0.0 );
-							return;
-						}
+						$queries = $GLOBALS['wpdb']->queries ?? array();
 
 						// This should never happen, but some odd database implementations may be doing it wrong.
-						if ( ! is_array( $GLOBALS['wpdb']->queries ) ) {
+						if ( ! is_array( $queries ) ) {
 							wp_trigger_error(
 								$current_function,
 								esc_html(
@@ -76,7 +72,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 						 * @var float[] $query_times
 						 */
 						$query_times = array();
-						foreach ( $GLOBALS['wpdb']->queries as $query ) {
+						foreach ( $queries as $query ) {
 							if ( ! is_array( $query ) || ! isset( $query[1] ) || ! is_float( $query[1] ) ) {
 								wp_trigger_error(
 									$current_function,
@@ -204,14 +200,10 @@ function perflab_register_default_server_timing_template_metrics(): void {
 							}
 
 							// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
-							// In this case, template query time is 0 since no queries ran during template either.
-							if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
-								$metric->set_value( 0.0 );
-								return;
-							}
+							$queries = $GLOBALS['wpdb']->queries ?? array();
 
 							// This should never happen, but some odd database implementations may be doing it wrong.
-							if ( ! is_array( $GLOBALS['wpdb']->queries ) ) {
+							if ( ! is_array( $queries ) ) {
 								// A notice is already emitted above, but if $perflab_query_time_before_template was not
 								// set, then this condition wouldn't be checked in the first place.
 								return;
@@ -223,7 +215,7 @@ function perflab_register_default_server_timing_template_metrics(): void {
 							 * @var float[] $query_times
 							 */
 							$query_times = array();
-							foreach ( $GLOBALS['wpdb']->queries as $query ) {
+							foreach ( $queries as $query ) {
 								if ( ! is_array( $query ) || ! isset( $query[1] ) || ! is_float( $query[1] ) ) {
 									// A notice is already emitted above.
 									return;
