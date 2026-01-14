@@ -49,6 +49,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 					'measure_callback' => static function ( $metric ) use ( $current_function ): void {
 						// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
 						if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
+							$GLOBALS['perflab_query_time_before_template'] = 0.0;
 							$metric->set_value( 0.0 );
 							return;
 						}
