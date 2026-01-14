@@ -204,9 +204,9 @@ function perflab_register_default_server_timing_template_metrics(): void {
 							}
 
 							// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
-							// In this case, template query time is just negative of before-template time.
+							// In this case, template query time is 0 since no queries ran during template either.
 							if ( ! isset( $GLOBALS['wpdb']->queries ) ) {
-								$metric->set_value( ( 0.0 - $GLOBALS['perflab_query_time_before_template'] ) * 1000.0 );
+								$metric->set_value( 0.0 );
 								return;
 							}
 
