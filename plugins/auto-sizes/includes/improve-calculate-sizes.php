@@ -405,6 +405,8 @@ function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
 /**
  * Adds data attributes for background image attachment ID to Group and Cover blocks.
  *
+ * @since n.e.x.t
+ *
  * This exposes the attachment ID from block attributes as data attributes on the HTML element,
  * allowing Image Prioritizer to access this information without using attachment_url_to_postid().
  * This is particularly important for Cover blocks that may use sizes other than "full".
