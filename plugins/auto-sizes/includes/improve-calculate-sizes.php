@@ -402,6 +402,7 @@ function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
 
 	return (int) get_post_thumbnail_id( $post_id );
 }
+
 /**
  * Adds data attributes for background image attachment ID to Group and Cover blocks.
  *
