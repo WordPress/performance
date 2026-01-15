@@ -247,6 +247,8 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 *
 	 * This is similar to how VIDEO poster images are optimized in the Video Tag Visitor.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param non-empty-string       $background_image_url Background image URL.
 	 * @param OD_Tag_Visitor_Context $context              Tag visitor context, with the cursor currently at an element with a background image.
 	 */
@@ -255,10 +257,10 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		$xpath     = $processor->get_xpath();
 
 		/*
-		* Obtain maximum width of the element exclusively from the URL Metrics group with the widest viewport width,
-		* which would be desktop. This prevents the situation where if URL Metrics have only so far been gathered for
-		* mobile viewports that an excessively-small background image would end up getting served to the first desktop visitor.
-		*/
+		 * Obtain maximum width of the element exclusively from the URL Metrics group with the widest viewport width,
+		 * which would be desktop. This prevents the situation where if URL Metrics have only so far been gathered for
+		 * mobile viewports that an excessively-small background image would end up getting served to the first desktop visitor.
+		 */
 		$max_element_width = 0;
 		foreach ( $context->url_metric_group_collection->get_last_group() as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
