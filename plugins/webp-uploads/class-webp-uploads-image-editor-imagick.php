@@ -74,7 +74,7 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			 * has been compiled against ImageMagick version 6.4.0 or newer.
 			 */
 			if ( is_callable( array( $this->image, 'getImageAlphaChannel' ) ) ) {
-				if ( ! $this->image->getImageAlphaChannel() ) {
+				if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
 					return false;
 				}
 			}

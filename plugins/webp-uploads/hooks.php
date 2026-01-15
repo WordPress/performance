@@ -984,7 +984,7 @@ function webp_uploads_set_image_editors( array $editors ): array {
 	}
 
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
-		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php';// @codeCoverageIgnore
+		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php'; // @codeCoverageIgnore
 	}
 
 	$key = array_search( WP_Image_Editor_Imagick::class, $editors, true );
