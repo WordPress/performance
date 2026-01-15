@@ -11,37 +11,97 @@ const path = require( 'path' );
 /**
  * External dependencies
  */
-const Ajv = require( 'ajv' ).default;
+const Ajv7 = require( 'ajv' ).default;
+const Ajv4 = require( 'ajv-draft-04' ).default;
 const addFormats = require( 'ajv-formats' ).default;
 const fg = require( 'fast-glob' );
 
-const ajv = new Ajv( {
-	allErrors: true,
-	strict: false,
-	loadSchema: async ( uri ) => {
-		const response = await fetch( uri );
-		if ( ! response.ok ) {
-			throw new Error(
-				`Failed to fetch schema from ${ uri }: ${ response.statusText }`
-			);
-		}
-		return await response.json();
-	},
-} );
-addFormats( ajv );
+/**
+ * @typedef {import('ajv').default} Ajv
+ */
 
-ajv.removeKeyword( 'deprecated' );
-ajv.addKeyword( {
-	keyword: 'deprecated',
-	validate: ( /** @type {string|boolean} */ deprecation ) => ! deprecation,
-	error: {
-		message: ( cxt ) => {
-			return cxt.schema && typeof cxt.schema === 'string'
-				? `is deprecated: ${ cxt.schema }`
-				: 'is deprecated';
+const schemaCache = new Map();
+
+/**
+ * @template {Ajv} T
+ * @typedef {{ new (options: Object): T }} AjvConstructorType
+ */
+
+/**
+ * Creates an Ajv instance.
+ *
+ * @template {Ajv} T
+ * @param {AjvConstructorType<T>} AjvConstructor Ajv constructor.
+ * @return {T} Ajv instance.
+ */
+function createAjv( AjvConstructor ) {
+	const ajv = new AjvConstructor( {
+		allErrors: true,
+		strict: false,
+		loadSchema: fetchSchema,
+	} );
+
+	addFormats( ajv );
+
+	ajv.removeKeyword( 'deprecated' );
+	ajv.addKeyword( {
+		keyword: 'deprecated',
+		validate: ( /** @type {string|boolean} */ deprecation ) =>
+			! deprecation,
+		error: {
+			/**
+			 * @param {Object}        cxt
+			 * @param {string|Object} [cxt.schema]
+			 */
+			message: ( cxt ) => {
+				return cxt.schema && typeof cxt.schema === 'string'
+					? `is deprecated: ${ cxt.schema }`
+					: 'is deprecated';
+			},
 		},
-	},
-} );
+	} );
+
+	return ajv;
+}
+
+const ajv7 = createAjv( Ajv7 );
+const ajv4 = createAjv( Ajv4 );
+
+/**
+ * Fetches a JSON schema from a URL.
+ *
+ * @param {string} schemaUrl URL of the JSON schema.
+ * @return {Promise<any>} The JSON schema object.
+ */
+async function fetchSchema( schemaUrl ) {
+	if ( schemaCache.has( schemaUrl ) ) {
+		return schemaCache.get( schemaUrl );
+	}
+
+	const response = await fetch( schemaUrl );
+	if ( ! response.ok ) {
+		throw new Error(
+			`Failed to fetch schema from ${ schemaUrl }: ${ response.statusText }`
+		);
+	}
+	const schema = await response.json();
+	schemaCache.set( schemaUrl, schema );
+
+	return schema;
+}
+
+/**
+ * Fetches a JSON schema and determines its draft version.
+ *
+ * @param {string} schemaUrl URL of the JSON schema.
+ * @return {Promise<'draft-04'|'default'>} The draft version ('draft-04' or 'default').
+ */
+async function getSchemaDraft( schemaUrl ) {
+	const schema = await fetchSchema( schemaUrl );
+	const draft = typeof schema.$schema === 'string' ? schema.$schema : '';
+	// Default to 'default' (modern Ajv) for other cases.
+	return draft.includes( 'draft-04' ) ? 'draft-04' : 'default';
+}
 
 /**
  * Validates a JSON file against its schema.
@@ -74,7 +134,11 @@ async function validateFile( filePath ) {
 	console.log( `Validating ${ filePath } against schema: ${ data.$schema }` );
 
 	try {
-		const validate = await ajv.compileAsync( { $ref: data.$schema } );
+		const draft = await getSchemaDraft( data.$schema );
+		const ajvInstance = draft === 'draft-04' ? ajv4 : ajv7;
+		const validate = await ajvInstance.compileAsync( {
+			$ref: data.$schema,
+		} );
 		const valid = validate( data );
 
 		if ( ! valid ) {
