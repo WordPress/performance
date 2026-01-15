@@ -1,11 +1,11 @@
 === Embed Optimizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.8
-Stable tag:   1.0.0-beta2
+Tested up to: 6.9
+Stable tag:   1.0.0-beta3
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
-Tags:         performance, embeds
+Tags:         performance, embeds, optimization-detective
 
 Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
 
@@ -66,6 +66,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta3 =
+
+**Enhancements**
+
+* Add URL Metric mutation helpers to extension initialization API. ([1951](https://github.com/WordPress/performance/pull/1951))
+* Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
 
 = 1.0.0-beta2 =
 

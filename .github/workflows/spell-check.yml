@@ -7,8 +7,8 @@ jobs:
     name: Spell Check with Typos
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Search for misspellings
-        uses: crate-ci/typos@07d900b8fa1097806b8adb6391b0d3e0ac2fdea7 # master
+        uses: crate-ci/typos@bb4666ad77b539a6b4ce4eda7ebb6de553704021 # v1.42.0
         with:
           config: ./.github/typos.toml

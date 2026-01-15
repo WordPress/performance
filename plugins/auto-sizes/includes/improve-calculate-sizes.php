@@ -6,6 +6,12 @@
  * @since 1.4.0
  */
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /*
  * Map alignment values to a weighting value so they can be compared.
  * Note that 'left' and 'right' alignments are only constrained by max alignment.

@@ -13,7 +13,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 // For a multisite, delete the option for all sites (however limited to 100 sites to avoid memory limit or timeout problems in large scale networks).
 if ( is_multisite() ) {
-	$site_ids = get_sites(
+	$plsr_site_ids = get_sites(
 		array(
 			'fields'                 => 'ids',
 			'number'                 => 100,
@@ -22,8 +22,8 @@ if ( is_multisite() ) {
 		)
 	);
 
-	foreach ( $site_ids as $site_id ) {
-		switch_to_blog( $site_id );
+	foreach ( $plsr_site_ids as $plsr_site_id ) {
+		switch_to_blog( $plsr_site_id );
 		plsr_delete_plugin_option();
 		restore_current_blog();
 	}
