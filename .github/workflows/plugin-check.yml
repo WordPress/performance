@@ -44,7 +44,7 @@ jobs:
               FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
           done
           # Add filter for global files that affect all plugins
-          FILTERS="${FILTERS}global:\n  - 'plugins.json'\n  - 'package.json'\n  - 'package-lock.json'\n  - 'webpack.config.js'\n  - '.github/workflows/plugin-check.yml'\n"
+          FILTERS="${FILTERS}global:\n  - 'plugins.json'\n  - 'package.json'\n  - 'package-lock.json'\n  - 'composer.json'\n  - 'composer.lock'\n  - 'webpack.config.js'\n  - '.github/workflows/plugin-check.yml'\n"
           printf "%b" "$FILTERS" > /tmp/filters.yml
           cat /tmp/filters.yml
 
