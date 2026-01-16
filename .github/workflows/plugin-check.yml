@@ -108,7 +108,7 @@ jobs:
   plugin-check:
     needs: prepare-matrix
     # Skip if no plugins to check (empty array)
-    if: needs.prepare-matrix.outputs.plugins != '[]'
+    if: always() && needs.prepare-matrix.outputs.plugins != '[]'
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
     permissions:
