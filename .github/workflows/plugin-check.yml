@@ -64,8 +64,9 @@ jobs:
               ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
               echo "changed-plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
           else
-              # Otherwise, return only the changed plugins
-              echo "changed-plugins=$CHANGES" >> $GITHUB_OUTPUT
+              # Filter out 'global' from changes and return only plugin names
+              PLUGIN_CHANGES=$(echo "$CHANGES" | jq -c '[.[] | select(. != "global")]')
+              echo "changed-plugins=$PLUGIN_CHANGES" >> $GITHUB_OUTPUT
           fi
 
   prepare-matrix:
@@ -128,9 +129,11 @@ jobs:
 
       - name: Set matrix output
         id: set-matrix
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
         run: |
           # Output the plugins list for the matrix
-          echo "plugins=${{ steps.determine-plugins.outputs.plugins }}" >> $GITHUB_OUTPUT
+          echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
 
   plugin-check:
     needs: prepare-matrix
