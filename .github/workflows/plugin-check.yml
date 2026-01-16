@@ -102,7 +102,7 @@ jobs:
           fi
 
           # For PRs, use the changed plugins from detect-changes
-          CHANGED_PLUGINS="${{ needs.detect-changes.outputs.changed-plugins }}"
+          CHANGED_PLUGINS='${{ needs.detect-changes.outputs.changed-plugins }}'
           echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
 
   plugin-check:
