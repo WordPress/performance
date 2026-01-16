@@ -243,7 +243,7 @@ function dominant_color_admin_script(): void {
 	</script>
 	<?php
 }
-add_action( 'admin_print_footer_scripts', 'dominant_color_admin_script', 10 );
+add_action( 'admin_print_footer_scripts', 'dominant_color_admin_script' );
 
 /**
  * Prepares attachment data for JavaScript, adding dominant color and transparency information.

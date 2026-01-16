@@ -22,7 +22,7 @@ function auto_sizes_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="auto-sizes ' . esc_attr( IMAGE_AUTO_SIZES_VERSION ) . '">' . "\n";
 }
-add_action( 'wp_head', 'auto_sizes_render_generator', 10 );
+add_action( 'wp_head', 'auto_sizes_render_generator' );
 
 /**
  * Filters related to the improved image sizes functionality.
