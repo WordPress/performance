@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - release/**
+      - 'release/**'
       - trunk
   pull_request:
     types:
@@ -39,9 +39,12 @@ jobs:
         id: generate-filters
         run: |
           FILTERS=""
+          # Add filters for each plugin
           for plugin in $(jq -r '.plugins[]' plugins.json); do
               FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
           done
+          # Add filter for global files that affect all plugins
+          FILTERS="${FILTERS}global:\n  - 'plugins.json'\n  - 'package.json'\n  - 'package-lock.json'\n  - 'webpack.config.js'\n  - '.github/workflows/plugin-check.yml'\n"
           printf "%b" "$FILTERS" > /tmp/filters.yml
           cat /tmp/filters.yml
 
@@ -52,8 +55,18 @@ jobs:
 
       - name: Collect changed plugins
         id: filter-plugins
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+          GLOBAL_CHANGED: ${{ steps.filter.outputs.global }}
         run: |
-          echo 'changed-plugins=${{ steps.filter.outputs.changes }}' >> $GITHUB_OUTPUT
+          # If global files changed, return all plugins
+          if [ "$GLOBAL_CHANGED" = "true" ]; then
+              ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+              echo "changed-plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+          else
+              # Otherwise, return only the changed plugins
+              echo "changed-plugins=$CHANGES" >> $GITHUB_OUTPUT
+          fi
 
   prepare-matrix:
     needs: [detect-changes]
@@ -82,6 +95,8 @@ jobs:
 
       - name: Determine plugins to build
         id: determine-plugins
+        env:
+          CHANGED_PLUGINS: ${{ needs.detect-changes.outputs.changed-plugins }}
         run: |
           ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
 
@@ -92,14 +107,13 @@ jobs:
           fi
 
           # For PRs, use the changed plugins from detect-changes
-          CHANGED_PLUGINS='${{ needs.detect-changes.outputs.changed-plugins }}'
           echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
 
       - name: Build plugins
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
         run: |
-          PLUGINS='${{ steps.determine-plugins.outputs.plugins }}'
-
-          # Convert JSON array to space-separated list and build each plugin
+          # Build each plugin from the JSON array
           for plugin in $(echo "$PLUGINS" | jq -r '.[]'); do
               echo "Building plugin: $plugin"
               npm run "build:plugin:$plugin"
@@ -112,17 +126,16 @@ jobs:
           path: build/
           retention-days: 1
 
-      - name: Generate matrix
+      - name: Set matrix output
         id: set-matrix
         run: |
-          # Use the same plugin list that was determined for building
-          PLUGINS='${{ steps.determine-plugins.outputs.plugins }}'
-          echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
+          # Output the plugins list for the matrix
+          echo "plugins=${{ steps.determine-plugins.outputs.plugins }}" >> $GITHUB_OUTPUT
 
   plugin-check:
     needs: prepare-matrix
-    # Skip if no plugins to check (empty array)
-    if: always() && needs.prepare-matrix.outputs.plugins != '[]'
+    # Only run if prepare-matrix succeeded and has plugins to check
+    if: needs.prepare-matrix.result == 'success' && needs.prepare-matrix.outputs.plugins != '[]'
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
     permissions:
