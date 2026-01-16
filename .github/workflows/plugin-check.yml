@@ -53,7 +53,7 @@ jobs:
       - name: Collect changed plugins
         id: filter-plugins
         run: |
-          echo "changed-plugins=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+          echo 'changed-plugins=${{ steps.filter.outputs.changes }}' >> $GITHUB_OUTPUT
 
   prepare-matrix:
     needs: [detect-changes]
