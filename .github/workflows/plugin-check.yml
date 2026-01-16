@@ -84,13 +84,13 @@ jobs:
         id: determine-plugins
         run: |
           ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
-          
+
           # For non-PR events (push to trunk/release branches), build all plugins
           if [ "${{ github.event_name }}" != "pull_request" ]; then
               echo "plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
               exit 0
           fi
-          
+
           # For PRs, use the changed plugins from detect-changes
           CHANGED_PLUGINS='${{ needs.detect-changes.outputs.changed-plugins }}'
           echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
@@ -98,7 +98,7 @@ jobs:
       - name: Build plugins
         run: |
           PLUGINS='${{ steps.determine-plugins.outputs.plugins }}'
-          
+
           # Convert JSON array to space-separated list and build each plugin
           for plugin in $(echo "$PLUGINS" | jq -r '.[]'); do
               echo "Building plugin: $plugin"
