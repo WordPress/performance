@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - release/**
       - trunk
   pull_request:
     types:
