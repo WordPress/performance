@@ -80,8 +80,30 @@ jobs:
       - name: npm install
         run: npm ci
 
+      - name: Determine plugins to build
+        id: determine-plugins
+        run: |
+          ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+          
+          # For non-PR events (push to trunk/release branches), build all plugins
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+              echo "plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+              exit 0
+          fi
+          
+          # For PRs, use the changed plugins from detect-changes
+          CHANGED_PLUGINS='${{ needs.detect-changes.outputs.changed-plugins }}'
+          echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
+
       - name: Build plugins
-        run: npm run build-plugins
+        run: |
+          PLUGINS='${{ steps.determine-plugins.outputs.plugins }}'
+          
+          # Convert JSON array to space-separated list and build each plugin
+          for plugin in $(echo "$PLUGINS" | jq -r '.[]'); do
+              echo "Building plugin: $plugin"
+              npm run "build:plugin:$plugin"
+          done
 
       - name: Upload built plugins
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -93,17 +115,9 @@ jobs:
       - name: Generate matrix
         id: set-matrix
         run: |
-          ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
-
-          # For non-PR events (push to trunk/develop), run all plugins
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
-              echo "plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
-              exit 0
-          fi
-
-          # For PRs, use the changed plugins from detect-changes
-          CHANGED_PLUGINS='${{ needs.detect-changes.outputs.changed-plugins }}'
-          echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
+          # Use the same plugin list that was determined for building
+          PLUGINS='${{ steps.determine-plugins.outputs.plugins }}'
+          echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
 
   plugin-check:
     needs: prepare-matrix
