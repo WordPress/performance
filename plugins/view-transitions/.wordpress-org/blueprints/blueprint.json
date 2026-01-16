@@ -11,7 +11,10 @@
 		{
 			"step": "setSiteOptions",
 			"options": {
-				"blogname": "Testing View Transitions"
+				"blogname": "Testing View Transitions",
+				"plvt_view_transitions": {
+					"enable_admin_transitions": true
+				}
 			}
 		}
 	]
