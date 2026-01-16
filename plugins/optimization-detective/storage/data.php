@@ -212,7 +212,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 						'post_modified_gmt' => $post->post_modified_gmt,
 					);
 				},
-				( $wp_query instanceof WP_Query && $wp_query->post_count > 0 ) ? $wp_query->posts : array()
+				( $wp_query instanceof WP_Query && is_array( $wp_query->posts ) ) ? $wp_query->posts : array()
 			)
 		),
 		'active_theme'     => array(

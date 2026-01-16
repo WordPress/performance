@@ -1,0 +1,21 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/",
+	"plugins": [ "view-transitions" ],
+	"login": true,
+	"preferredVersions": {
+		"php": "latest",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"blogname": "Testing View Transitions",
+				"plvt_view_transitions": {
+					"enable_admin_transitions": true
+				}
+			}
+		}
+	]
+}
