@@ -44,12 +44,12 @@ flag_management:
     - name: speculation-rules
       paths:
         - plugins/speculation-rules/
-    - name: web-worker-offloading
-      paths:
         - plugins/web-worker-offloading/
     - name: view-transitions
       paths:
         - plugins/view-transitions/
+    - name: web-worker-offloading
+      paths:
     - name: webp-uploads
       paths:
         - plugins/webp-uploads/
