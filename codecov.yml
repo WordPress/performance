@@ -47,6 +47,9 @@ flag_management:
     - name: web-worker-offloading
       paths:
         - plugins/web-worker-offloading/
+    - name: view-transitions
+      paths:
+        - plugins/view-transitions/
     - name: webp-uploads
       paths:
         - plugins/webp-uploads/
