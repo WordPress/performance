@@ -535,11 +535,11 @@ function plvt_render_settings_field( array $args ): void {
 			?>
 		>
 		<?php
-		if ( ! empty( $args['unit'] ) ) {
+		if ( isset( $args['unit'] ) && '' !== $args['unit'] ) {
 			?>
 			<span class="description">
 				<?php
-				if ( ! empty( $args['show_seconds'] ) ) {
+				if ( isset( $args['show_seconds'] ) && true === $args['show_seconds'] ) {
 					$seconds  = (int) $value / 1000;
 					$field_id = esc_attr( $args['label_for'] );
 					printf(

@@ -32,7 +32,7 @@ function plvt_print_view_transitions_admin_style(): void {
 	?>
 <style>
 	@view-transition { navigation: auto; }
-	::view-transition-group(*) { animation-duration: <?php echo esc_html( (string) $duration_seconds ); ?>s; }
+	::view-transition-group(*) { animation-duration: <?php echo (int) $duration_seconds ; ?>s; }
 	#adminmenu > .menu-top { view-transition-name: attr(id type(<custom-ident>), none); }
 </style>
 	<?php
