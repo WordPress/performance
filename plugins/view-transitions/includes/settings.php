@@ -350,9 +350,14 @@ function plvt_add_setting_ui(): void {
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
 		'default_transition_animation_duration' => array(
-			'section'     => 'plvt_view_transitions',
-			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
-			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
+			'section'      => 'plvt_view_transitions',
+			'title'        => __( 'Transition Animation Duration', 'view-transitions' ),
+			'description'  => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
+			'min'          => PLVT_MIN_ANIMATION_DURATION,
+			'max'          => PLVT_MAX_ANIMATION_DURATION,
+			'step'         => 50,
+			'unit'         => 'ms',
+			'show_seconds' => true,
 		),
 		'header_selector'                       => array(
 			'section'     => 'plvt_view_transitions',
@@ -499,19 +504,29 @@ function plvt_render_settings_field( array $args ): void {
 		</label>
 		<?php
 	} elseif ( 'number' === $type ) {
-		$seconds  = (int) $value / 1000;
-		$field_id = esc_attr( $args['label_for'] );
 		?>
 		<input
 			type="number"
-			id="<?php echo $field_id; ?>"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="small-text"
-			min="<?php echo esc_attr( (string) PLVT_MIN_ANIMATION_DURATION ); ?>"
-			max="<?php echo esc_attr( (string) PLVT_MAX_ANIMATION_DURATION ); ?>"
-			step="50"
 			<?php
+			if ( isset( $args['min'] ) ) {
+				?>
+				min="<?php echo esc_attr( (string) $args['min'] ); ?>"
+				<?php
+			}
+			if ( isset( $args['max'] ) ) {
+				?>
+				max="<?php echo esc_attr( (string) $args['max'] ); ?>"
+				<?php
+			}
+			if ( isset( $args['step'] ) ) {
+				?>
+				step="<?php echo esc_attr( (string) $args['step'] ); ?>"
+				<?php
+			}
 			if ( '' !== $args['description'] ) {
 				?>
 				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
@@ -519,23 +534,34 @@ function plvt_render_settings_field( array $args ): void {
 			}
 			?>
 		>
-		<span class="description">
-			<?php
-			printf(
-				/* translators: %s: duration in seconds wrapped in a span for dynamic update */
-				esc_html__( 'ms (%s)', 'view-transitions' ),
-				'<span id="' . $field_id . '-seconds">' . esc_html( (string) $seconds ) . 's</span>'
-			);
-			?>
-		</span>
 		<?php
-		wp_print_inline_script_tag(
-			sprintf(
-				'document.getElementById( %s ).addEventListener( "input", function( e ) { document.getElementById( %s ).textContent = ( parseInt( e.target.value, 10 ) / 1000 ) + "s"; } );',
-				wp_json_encode( $field_id ),
-				wp_json_encode( $field_id . '-seconds' )
-			)
-		);
+		if ( ! empty( $args['unit'] ) ) {
+			?>
+			<span class="description">
+				<?php
+				if ( ! empty( $args['show_seconds'] ) ) {
+					$seconds  = (int) $value / 1000;
+					$field_id = esc_attr( $args['label_for'] );
+					printf(
+						/* translators: 1: unit, 2: duration in seconds wrapped in a span for dynamic update */
+						esc_html__( '%1$s (%2$s)', 'view-transitions' ),
+						esc_html( $args['unit'] ),
+						'<span id="' . esc_attr( $args['label_for'] ) . '-seconds">' . esc_html( (string) $seconds ) . 's</span>'
+					);
+					wp_print_inline_script_tag(
+						sprintf(
+							'document.getElementById( %s ).addEventListener( "input", function( e ) { document.getElementById( %s ).textContent = ( parseInt( e.target.value, 10 ) / 1000 ) + "s"; } );',
+							wp_json_encode( $field_id ),
+							wp_json_encode( $field_id . '-seconds' )
+						)
+					);
+				} else {
+					echo esc_html( $args['unit'] );
+				}
+				?>
+			</span>
+			<?php
+		}
 	} else {
 		?>
 		<input
