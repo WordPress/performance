@@ -27,6 +27,15 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	public static $current_instance;
 
 	/**
+	 * Stores already checked images for transparency.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @var array<string, bool> Associative array with file paths as keys and transparency detection results as values.
+	 */
+	private static $checked_images = array();
+
+	/**
 	 * Load the image and set the current instance.
 	 *
 	 * @since n.e.x.t
@@ -66,6 +75,11 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'webp-uploads' ) );
 		}
 
+		$file_path = $this->get_file();
+		if ( isset( self::$checked_images[ $file_path ] ) ) {
+			return self::$checked_images[ $file_path ];
+		}
+
 		try {
 			/*
 			 * Check if the image has an alpha channel if false, then it can't have transparency so return early.
@@ -75,6 +89,7 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			 */
 			if ( is_callable( array( $this->image, 'getImageAlphaChannel' ) ) ) {
 				if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
+					self::$checked_images[ $file_path ] = false;
 					return false;
 				}
 			}
@@ -87,10 +102,12 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 					$pixel = $this->image->getImagePixelColor( $x, $y );
 					$color = $pixel->getColor( 2 );
 					if ( $color['a'] > 0 ) {
+						self::$checked_images[ $file_path ] = true;
 						return true;
 					}
 				}
 			}
+			self::$checked_images[ $file_path ] = false;
 			return false;
 
 		} catch ( Exception $e ) {
