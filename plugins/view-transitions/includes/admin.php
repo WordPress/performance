@@ -23,6 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.1.0
  */
 function plvt_print_view_transitions_admin_style(): void {
+	// Short circuit if the feature is already present in core. See <https://core.trac.wordpress.org/ticket/64470>.
+	if ( function_exists( 'wp_enqueue_view_transitions_admin_css' ) ) {
+		return;
+	}
+
 	$options = plvt_get_stored_setting_value();
 	if ( ! isset( $options['enable_admin_transitions'] ) || true !== $options['enable_admin_transitions'] ) {
 		return;

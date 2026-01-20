@@ -316,8 +316,9 @@ trait Optimization_Detective_Test_Helpers {
 		);
 
 		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
+		// TODO: This should use assertEqualHTML() once 6.9 is the minimum supported version.
 		$buffer = preg_replace_callback(
-			'#(<script type="application/json" id="optimization-detective-detect-args">)(.+?)(</script>)#s',
+			'#(<script (?:type="application/json" id="optimization-detective-detect-args"|id="optimization-detective-detect-args" type="application/json")>)(.+?)(</script>)#s',
 			static function ( $matches ) {
 				array_shift( $matches );
 				list( $start_tag, $text, $end_tag ) = $matches;
@@ -327,7 +328,7 @@ trait Optimization_Detective_Test_Helpers {
 					$text = '[]';
 				}
 
-				return $start_tag . $text . $end_tag;
+				return '<script type="application/json" id="optimization-detective-detect-args">' . $text . $end_tag;
 			},
 			$buffer
 		);
