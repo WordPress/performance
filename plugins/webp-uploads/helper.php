@@ -567,11 +567,10 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 		return false;
 	}
 
-	$file_hash = md5_file( $filename );
-	if ( isset( $processed_images[ $file_hash ] ) ) {
-		return $processed_images[ $file_hash ];
+	if ( isset( $processed_images[ $filename ] ) ) {
+		return $processed_images[ $filename ];
 	}
-	$processed_images[ $file_hash ] = false;
+	$processed_images[ $filename ] = false;
 
 	$editor = wp_get_image_editor( $filename );
 
@@ -579,8 +578,8 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 		return false;
 	}
 
-	$has_transparency               = $editor->has_transparency();
-	$processed_images[ $file_hash ] = is_wp_error( $has_transparency ) ? false : $has_transparency;
+	$has_transparency              = $editor->has_transparency();
+	$processed_images[ $filename ] = is_wp_error( $has_transparency ) ? false : $has_transparency;
 
-	return $processed_images[ $file_hash ];
+	return $processed_images[ $filename ];
 }
