@@ -101,7 +101,7 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 				for ( $y = 0; $y < $h; $y++ ) {
 					$pixel = $this->image->getImagePixelColor( $x, $y );
 					$color = $pixel->getColor( 2 );
-					if ( $color['a'] > 0 ) {
+					if ( $color['a'] > 0 && $color['a'] < 255 ) {
 						self::$checked_images[ $file_path ] = true;
 						return true;
 					}
