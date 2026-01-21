@@ -22,9 +22,9 @@ class WebP_Uploads_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @var WebP_Uploads_Image_Editor_Imagick
+	 * @var WebP_Uploads_Image_Editor_Imagick|null $current_instance The current instance.
 	 */
-	public static $current_instance;
+	public static $current_instance = null;
 
 	/**
 	 * Stores already checked images for transparency.
