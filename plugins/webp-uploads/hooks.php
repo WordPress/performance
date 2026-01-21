@@ -983,13 +983,35 @@ function webp_uploads_set_image_editors( array $editors ): array {
 		return $editors;
 	}
 
+	if ( 0 === count( $editors ) || false === array_search( WP_Image_Editor_Imagick::class, $editors, true ) ) {
+		return $editors;
+	}
+
+	if ( ! class_exists( $editors[0] ) ) {
+		return $editors;
+	}
+
+	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
+		if ( WP_Image_Editor_Imagick::class !== $editors[0] ) {
+			if ( ! is_subclass_of( WP_Image_Editor_Imagick::class, $editors[0] ) ) {
+				return $editors;
+			} else {
+				$reflection = new ReflectionClass( $editors[0] );
+				if ( $reflection->isFinal() ) {
+					return $editors;
+				}
+				class_alias( $editors[0], 'WebP_Uploads_Image_Editor_Imagick_Base' );
+			}
+		} else {
+			class_alias( WP_Image_Editor_Imagick::class, 'WebP_Uploads_Image_Editor_Imagick_Base' );
+		}
+	}
+
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
 		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php'; // @codeCoverageIgnore
 	}
 
-	if ( false !== array_search( WP_Image_Editor_Imagick::class, $editors, true ) ) {
-		array_unshift( $editors, WebP_Uploads_Image_Editor_Imagick::class );
-	}
+	array_unshift( $editors, WebP_Uploads_Image_Editor_Imagick::class );
 
 	return $editors;
 }
