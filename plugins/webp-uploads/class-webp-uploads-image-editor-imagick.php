@@ -112,7 +112,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 					for ( $y = 0; $y < $h; $y++ ) {
 						$pixel = $this->image->getImagePixelColor( $x, $y );
 						$color = $pixel->getColor( 2 );
-						if ( $color['a'] > 0 && $color['a'] < 255 ) {
+						if ( $color['a'] < 255 ) {
 							self::$checked_images[ $file_path ] = true;
 							return true;
 						}
