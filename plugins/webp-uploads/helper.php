@@ -541,7 +541,7 @@ function webp_uploads_imagick_avif_transparency_supported(): bool {
 }
 
 /**
- * Checks if an AVIF image has transparency
+ * Checks if an image has transparency when AVIF output is configured and AVIF transparency support is missing.
  *
  * @since n.e.x.t
  *

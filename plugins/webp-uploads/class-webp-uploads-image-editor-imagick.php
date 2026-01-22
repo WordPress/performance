@@ -93,11 +93,11 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 
 			try {
 				/*
-				* Check if the image has an alpha channel if false, then it can't have transparency so return early.
-				*
-				* Note that Imagick::getImageAlphaChannel() is only available if Imagick
-				* has been compiled against ImageMagick version 6.4.0 or newer.
-				*/
+				 * Check if the image has an alpha channel if false, then it can't have transparency so return early.
+				 *
+				 * Note that Imagick::getImageAlphaChannel() is only available if Imagick
+				 * has been compiled against ImageMagick version 6.4.0 or newer.
+				 */
 				if ( is_callable( array( $this->image, 'getImageAlphaChannel' ) ) ) {
 					if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
 						self::$checked_images[ $file_path ] = false;
@@ -105,7 +105,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 					}
 				}
 
-				// Walk through the pixels and look transparent pixels.
+				// Walk through the pixels and look for transparent pixels.
 				$w = $this->image->getImageWidth();
 				$h = $this->image->getImageHeight();
 				for ( $x = 0; $x < $w; $x++ ) {

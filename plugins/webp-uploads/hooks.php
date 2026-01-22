@@ -971,7 +971,7 @@ add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_t
 add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
 
 /**
- * Overloads wp_image_editors() to load the extended class when AVIF transparency is not supported.
+ * Filters the list of image editors to load the extended class when AVIF transparency is not supported.
  *
  * @since n.e.x.t
  *
