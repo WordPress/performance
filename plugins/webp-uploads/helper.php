@@ -25,14 +25,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
 function webp_uploads_get_upload_image_mime_transforms( ?string $filename = null ): array {
-	$avif_support = webp_uploads_mime_type_supported( 'image/avif' );
-
-	if ( $avif_support && webp_uploads_check_image_transparency( $filename ) ) {
-		$avif_support = false;
-	}
-
 	// Check the selected output format.
-	$output_format = $avif_support ? webp_uploads_get_image_output_format() : 'webp';
+	$output_format = webp_uploads_get_image_output_format();
+
+	if ( 'avif' === $output_format && ( ! webp_uploads_mime_type_supported( 'image/avif' ) || webp_uploads_check_image_transparency( $filename ) ) ) {
+		$output_format = 'webp';
+	}
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
