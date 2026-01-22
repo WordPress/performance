@@ -993,7 +993,7 @@ function webp_uploads_set_image_editors( array $editors ): array {
 
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		if ( WP_Image_Editor_Imagick::class !== $editors[0] ) {
-			if ( ! is_subclass_of( WP_Image_Editor_Imagick::class, $editors[0] ) ) {
+			if ( ! is_subclass_of( $editors[0], WP_Image_Editor_Imagick::class ) ) {
 				return $editors;
 			} else {
 				$reflection = new ReflectionClass( $editors[0] );
