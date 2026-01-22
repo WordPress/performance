@@ -553,6 +553,12 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 		return false;
 	}
 
+	/*
+	 * When WordPress generates subsizes (thumbnail, medium, large, etc.), the 'image_editor_output_format'
+	 * filter is triggered without a filename parameter. In these cases, we need to retrieve the filename
+	 * from the current editor instance that was used to load the original image. This allows us to perform
+	 * the transparency check on the source file even when generating derivative sizes.
+	 */
 	if ( null === $filename ) {
 		if ( null === WebP_Uploads_Image_Editor_Imagick::$current_instance ) {
 			return false;
