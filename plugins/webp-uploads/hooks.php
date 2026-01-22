@@ -979,39 +979,35 @@ add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to
  * @return string[] Registered image editors class names.
  */
 function webp_uploads_set_image_editors( array $editors ): array {
-	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() ) {
-		return $editors;
-	}
-
-	if ( 0 === count( $editors ) || false === array_search( WP_Image_Editor_Imagick::class, $editors, true ) ) {
-		return $editors;
-	}
-
-	if ( ! class_exists( $editors[0] ) ) {
+	if (
+		'avif' !== webp_uploads_get_image_output_format() ||
+		webp_uploads_imagick_avif_transparency_supported() ||
+		0 === count( $editors ) ||
+		! class_exists( $editors[0] ) ||
+		! ( WP_Image_Editor_Imagick::class === $editors[0] || is_subclass_of( $editors[0], WP_Image_Editor_Imagick::class ) )
+	) {
 		return $editors;
 	}
 
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		if ( WP_Image_Editor_Imagick::class !== $editors[0] ) {
-			if ( ! is_subclass_of( $editors[0], WP_Image_Editor_Imagick::class ) ) {
+			$reflection = new ReflectionClass( $editors[0] );
+			if ( $reflection->isFinal() ) {
 				return $editors;
-			} else {
-				$reflection = new ReflectionClass( $editors[0] );
-				if ( $reflection->isFinal() ) {
-					return $editors;
-				}
-				class_alias( $editors[0], 'WebP_Uploads_Image_Editor_Imagick_Base' );
 			}
+			class_alias( $editors[0], 'WebP_Uploads_Image_Editor_Imagick_Base' );
 		} else {
 			class_alias( WP_Image_Editor_Imagick::class, 'WebP_Uploads_Image_Editor_Imagick_Base' );
 		}
 	}
 
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
-		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php'; // @codeCoverageIgnore
+		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php';
 	}
 
-	array_unshift( $editors, WebP_Uploads_Image_Editor_Imagick::class );
+	if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
+		array_unshift( $editors, WebP_Uploads_Image_Editor_Imagick::class );
+	}
 
 	return $editors;
 }

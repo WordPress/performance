@@ -82,21 +82,13 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		 * @return bool|WP_Error True or false based on whether there are transparent pixels, or an error on failure.
 		 */
 		public function has_transparency() {
-			if ( ! property_exists( $this, 'image' ) ) {
-				return false;
-			}
-
-			if ( ! (bool) $this->image ) {
+			if ( ! property_exists( $this, 'image' ) || ! $this->image instanceof Imagick ) {
 				return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'webp-uploads' ) );
 			}
 
 			$file_path = $this->get_file();
 			if ( isset( self::$checked_images[ $file_path ] ) ) {
 				return self::$checked_images[ $file_path ];
-			}
-
-			if ( ! $this->image instanceof Imagick ) {
-				return false;
 			}
 
 			try {
