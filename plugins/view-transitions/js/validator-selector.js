@@ -81,7 +81,9 @@
 			'input[data-plvt-validate-selector]'
 		);
 
-		selectorInputs.forEach( ( input ) => {
+		selectorInputs.forEach( ( element ) => {
+			const input = /** @type {HTMLInputElement} */ ( element );
+
 			// Validate on blur
 			input.addEventListener( 'blur', () => {
 				updateValidation( input );
