@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-
 /**
  * Minimum allowed transition animation duration in milliseconds.
  *
@@ -350,14 +349,13 @@ function plvt_add_setting_ui(): void {
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
 		'default_transition_animation_duration' => array(
-			'section'      => 'plvt_view_transitions',
-			'title'        => __( 'Transition Animation Duration', 'view-transitions' ),
-			'description'  => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
-			'min'          => PLVT_MIN_ANIMATION_DURATION,
-			'max'          => PLVT_MAX_ANIMATION_DURATION,
-			'step'         => 50,
-			'unit'         => 'ms',
-			'show_seconds' => true,
+			'section'     => 'plvt_view_transitions',
+			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
+			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
+			'min'         => PLVT_MIN_ANIMATION_DURATION,
+			'max'         => PLVT_MAX_ANIMATION_DURATION,
+			'step'        => 50,
+			'unit'        => 'ms',
 		),
 		'header_selector'                       => array(
 			'section'     => 'plvt_view_transitions',
@@ -537,29 +535,7 @@ function plvt_render_settings_field( array $args ): void {
 		<?php
 		if ( isset( $args['unit'] ) && '' !== $args['unit'] ) {
 			?>
-			<span class="description">
-				<?php
-				if ( isset( $args['show_seconds'] ) && true === $args['show_seconds'] ) {
-					$seconds  = (int) $value / 1000;
-					$field_id = esc_attr( $args['label_for'] );
-					printf(
-						/* translators: 1: unit, 2: duration in seconds wrapped in a span for dynamic update */
-						esc_html__( '%1$s (%2$s)', 'view-transitions' ),
-						esc_html( $args['unit'] ),
-						'<span id="' . esc_attr( $args['label_for'] ) . '-seconds">' . esc_html( (string) $seconds ) . 's</span>'
-					);
-					wp_print_inline_script_tag(
-						sprintf(
-							'document.getElementById( %s ).addEventListener( "input", function( e ) { document.getElementById( %s ).textContent = ( parseInt( e.target.value, 10 ) / 1000 ) + "s"; } );',
-							wp_json_encode( $field_id ),
-							wp_json_encode( $field_id . '-seconds' )
-						)
-					);
-				} else {
-					echo esc_html( $args['unit'] );
-				}
-				?>
-			</span>
+			<span class="description"><?php echo esc_html( $args['unit'] ); ?></span>
 			<?php
 		}
 	} else {

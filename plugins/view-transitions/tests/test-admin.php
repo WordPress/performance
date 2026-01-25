@@ -38,7 +38,7 @@ class Test_ViewTransitions_Admin extends WP_UnitTestCase {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( '@view-transition { navigation: auto; }', $output );
-		$this->assertStringContainsString( 'animation-duration: 0.5s', $output );
+		$this->assertStringContainsString( '--plvt-view-transition-animation-duration: 500ms', $output );
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Test_ViewTransitions_Admin extends WP_UnitTestCase {
 		plvt_print_view_transitions_admin_style();
 		$output = ob_get_clean();
 
-		// Default duration is 400ms = 0.4s.
-		$this->assertStringContainsString( 'animation-duration: 0.4s', $output );
+		// Default duration is 400ms.
+		$this->assertStringContainsString( '--plvt-view-transition-animation-duration: 400ms', $output );
 	}
 }
