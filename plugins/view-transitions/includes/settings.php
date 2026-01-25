@@ -539,6 +539,18 @@ function plvt_render_settings_field( array $args ): void {
 			<?php
 		}
 	} else {
+		// Determine if this is a CSS selector field that needs validation.
+		$is_selector_field = in_array(
+			$args['field'],
+			array(
+				'header_selector',
+				'main_selector',
+				'post_title_selector',
+				'post_thumbnail_selector',
+				'post_content_selector',
+			),
+			true
+		);
 		?>
 		<input
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
@@ -546,6 +558,11 @@ function plvt_render_settings_field( array $args ): void {
 			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
 			<?php
+			if ( $is_selector_field ) {
+				?>
+				data-plvt-validate-selector
+				<?php
+			}
 			if ( '' !== $args['description'] ) {
 				?>
 				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"

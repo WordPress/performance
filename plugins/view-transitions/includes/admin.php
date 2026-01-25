@@ -37,3 +37,38 @@ function plvt_print_view_transitions_admin_style(): void {
 </style>
 	<?php
 }
+
+/**
+ * Enqueues the CSS selector validation scripts and styles on the settings page.
+ *
+ * This function loads the JavaScript and CSS needed for real-time CSS selector
+ * validation in the View Transitions settings panel.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function plvt_enqueue_selector_validation(): void {
+	$current_screen = get_current_screen();
+
+	// Only enqueue on the reading settings page.
+	if ( null === $current_screen || 'options-reading' !== $current_screen->id ) {
+		return;
+	}
+
+	// Enqueue validation CSS.
+	wp_enqueue_style(
+		'plvt-selector-validator',
+		plugin_dir_url( VIEW_TRANSITIONS_MAIN_FILE ) . 'css/validator-selector.css',
+		array(),
+		VIEW_TRANSITIONS_VERSION
+	);
+
+	// Enqueue validation JS.
+	wp_enqueue_script(
+		'plvt-selector-validator',
+		plugin_dir_url( VIEW_TRANSITIONS_MAIN_FILE ) . 'js/validator-selector.js',
+		array(),
+		VIEW_TRANSITIONS_VERSION,
+		array( 'in_footer' => false )
+	);
+}
