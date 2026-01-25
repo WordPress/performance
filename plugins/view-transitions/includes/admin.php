@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function plvt_print_view_transitions_admin_style(): void {
 	$options = plvt_get_stored_setting_value();
-	if ( ! isset( $options['enable_admin_transitions'] ) || true !== $options['enable_admin_transitions'] ) {
+	if ( ! isset( $options['enable_admin_transitions'] ) || ! (bool) $options['enable_admin_transitions'] ) {
 		return;
 	}
 
