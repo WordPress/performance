@@ -1,31 +1,31 @@
 {
-  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
-  "core": null,
-  "plugins": [
-    "./plugins/optimization-detective",
-    "./plugins/auto-sizes",
-    "./plugins/dominant-color-images",
-    "./plugins/embed-optimizer",
-    "./plugins/image-prioritizer",
-    "./plugins/performance-lab",
-    "./plugins/speculation-rules",
-    "./plugins/view-transitions",
-    "./plugins/web-worker-offloading",
-    "./plugins/webp-uploads"
-  ],
-  "env": {
-    "development": {
-      "config": {
-        "WP_DEVELOPMENT_MODE": "plugin"
-      }
-    },
-    "tests": {
-      "config": {
-        "FS_METHOD": "direct"
-      },
-      "mappings": {
-        "/wp-content/plugins/performance": "."
-      }
-    }
-  }
+	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"core": null,
+	"plugins": [
+		"./plugins/optimization-detective",
+		"./plugins/auto-sizes",
+		"./plugins/dominant-color-images",
+		"./plugins/embed-optimizer",
+		"./plugins/image-prioritizer",
+		"./plugins/performance-lab",
+		"./plugins/speculation-rules",
+		"./plugins/view-transitions",
+		"./plugins/web-worker-offloading",
+		"./plugins/webp-uploads"
+	],
+	"env": {
+		"development": {
+			"config": {
+				"WP_DEVELOPMENT_MODE": "plugin"
+			}
+		},
+		"tests": {
+			"config": {
+				"FS_METHOD": "direct"
+			},
+			"mappings": {
+				"/wp-content/plugins/performance": "."
+			}
+		}
+	}
 }

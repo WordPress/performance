@@ -1,11 +1,8 @@
 {
 	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
-	"landingPage": "/wp-admin/admin.php?page=perflab-modules",
-	"plugins": [ "performance-lab" ],
+	"landingPage": "/",
+	"plugins": [ "view-transitions" ],
 	"login": true,
-	"features": {
-		"networking": true
-	},
 	"preferredVersions": {
 		"php": "latest",
 		"wp": "latest"
@@ -14,7 +11,10 @@
 		{
 			"step": "setSiteOptions",
 			"options": {
-				"blogname": "Testing Performance Lab"
+				"blogname": "Testing View Transitions",
+				"plvt_view_transitions": {
+					"enable_admin_transitions": true
+				}
 			}
 		}
 	]
