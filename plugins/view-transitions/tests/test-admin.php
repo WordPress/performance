@@ -25,6 +25,10 @@ class Test_ViewTransitions_Admin extends WP_UnitTestCase {
 	 * @covers ::plvt_print_view_transitions_admin_style
 	 */
 	public function test_plvt_print_view_transitions_admin_style_enabled(): void {
+		if ( function_exists( 'wp_enqueue_view_transitions_admin_css' ) ) {
+			$this->markTestSkipped();
+		}
+
 		update_option(
 			'plvt_view_transitions',
 			array(
@@ -45,6 +49,10 @@ class Test_ViewTransitions_Admin extends WP_UnitTestCase {
 	 * @covers ::plvt_print_view_transitions_admin_style
 	 */
 	public function test_plvt_print_view_transitions_admin_style_uses_default_duration(): void {
+		if ( function_exists( 'wp_enqueue_view_transitions_admin_css' ) ) {
+			$this->markTestSkipped();
+		}
+
 		update_option(
 			'plvt_view_transitions',
 			array( 'enable_admin_transitions' => true )
