@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+      - 'release/**'
       - trunk
   pull_request:
     types:
@@ -24,8 +24,56 @@ concurrency:
 permissions: {}
 
 jobs:
-  prepare-matrix:
+  detect-changes:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      changed-plugins: ${{ steps.filter-plugins.outputs.changed-plugins }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Generate filters from plugins.json
+        id: generate-filters
+        run: |
+          FILTERS=""
+          # Add filters for each plugin
+          for plugin in $(jq -r '.plugins[]' plugins.json); do
+              FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
+          done
+          # Add filter for global files that affect all plugins
+          FILTERS="${FILTERS}global:\n  - 'plugins.json'\n  - 'package.json'\n  - 'package-lock.json'\n  - 'composer.json'\n  - 'composer.lock'\n  - 'webpack.config.js'\n  - '.github/workflows/plugin-check.yml'\n"
+          printf "%b" "$FILTERS" > /tmp/filters.yml
+          cat /tmp/filters.yml
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: /tmp/filters.yml
+
+      - name: Collect changed plugins
+        id: filter-plugins
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+          GLOBAL_CHANGED: ${{ steps.filter.outputs.global }}
+        run: |
+          # If global files changed, return all plugins
+          if [ "$GLOBAL_CHANGED" = "true" ]; then
+              ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+              echo "changed-plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+          else
+              # Filter out 'global' from changes and return only plugin names
+              PLUGIN_CHANGES=$(echo "$CHANGES" | jq -c '[.[] | select(. != "global")]')
+              echo "changed-plugins=$PLUGIN_CHANGES" >> $GITHUB_OUTPUT
+          fi
+
+  prepare-matrix:
+    needs: [detect-changes]
+    runs-on: ubuntu-latest
+    # Always run this job, even if detect-changes was skipped
+    if: always() && (needs.detect-changes.result == 'success' || needs.detect-changes.result == 'skipped')
     permissions:
       contents: read
     outputs:
@@ -46,8 +94,31 @@ jobs:
       - name: npm install
         run: npm ci
 
+      - name: Determine plugins to build
+        id: determine-plugins
+        env:
+          CHANGED_PLUGINS: ${{ needs.detect-changes.outputs.changed-plugins }}
+        run: |
+          ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+
+          # For non-PR events (push to trunk/release branches), build all plugins
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+              echo "plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+              exit 0
+          fi
+
+          # For PRs, use the changed plugins from detect-changes
+          echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
+
       - name: Build plugins
-        run: npm run build-plugins
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
+        run: |
+          # Build each plugin from the JSON array
+          for plugin in $(echo "$PLUGINS" | jq -r '.[]'); do
+              echo "Building plugin: $plugin"
+              npm run "build:plugin:$plugin"
+          done
 
       - name: Upload built plugins
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -56,14 +127,18 @@ jobs:
           path: build/
           retention-days: 1
 
-      - name: Generate matrix
+      - name: Set matrix output
         id: set-matrix
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
         run: |
-          PLUGINS=$(jq -c '.plugins' plugins.json)
+          # Output the plugins list for the matrix
           echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
 
   plugin-check:
     needs: prepare-matrix
+    # Only run if prepare-matrix succeeded and has plugins to check
+    if: needs.prepare-matrix.result == 'success' && needs.prepare-matrix.outputs.plugins != '[]'
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
     permissions:
@@ -74,8 +149,6 @@ jobs:
       matrix:
         plugin: ${{ fromJson(needs.prepare-matrix.outputs.plugins) }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
       - name: Download built plugins
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -83,7 +156,7 @@ jobs:
           path: build
 
       - name: Run plugin check
-        uses: wordpress/plugin-check-action@27b60e89aad9f3006d5c800a8fa9bbaa87c36421 # main
+        uses: wordpress/plugin-check-action@6f5a57e173c065a394b78688f75df543e4011902 # main
         with:
           build-dir: ./build/${{ matrix.plugin }}
           slug: ${{ matrix.plugin }}
