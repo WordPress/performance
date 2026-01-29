@@ -44,11 +44,6 @@
 		},
 		"platform": {
 			"php": "7.2"
-		},
-		"audit": {
-			"ignore": [
-				"PKSA-z3gr-8qht-p93v"
-			]
 		}
 	},
 	"scripts": {
