@@ -52,7 +52,7 @@ jobs:
           - php: '8.5'
             wp: 'trunk'
           - php: '8.2'
-            phpunit: '9.6'
+            phpunit: '^9.6'
             wp: 'latest'
             coverage: ${{ !startsWith(github.actor, 'dependabot') }}
     env:
