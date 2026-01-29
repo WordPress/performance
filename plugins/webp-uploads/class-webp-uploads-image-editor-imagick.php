@@ -90,6 +90,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 			if ( isset( self::$checked_images[ $file_path ] ) ) {
 				return self::$checked_images[ $file_path ];
 			}
+			$transparency = false;
 
 			try {
 				/*
@@ -105,22 +106,47 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 					}
 				}
 
-				// Walk through the pixels and look for transparent pixels.
-				$w = $this->image->getImageWidth();
-				$h = $this->image->getImageHeight();
-				for ( $x = 0; $x < $w; $x++ ) {
-					for ( $y = 0; $y < $h; $y++ ) {
-						$pixel = $this->image->getImagePixelColor( $x, $y );
-						$color = $pixel->getColor( 2 );
-						if ( $color['a'] < 255 ) {
-							self::$checked_images[ $file_path ] = true;
-							return true;
+				// Use mean and range to determine if there is any transparency more efficiently.
+				if ( is_callable( array( $this->image, 'getImageChannelMean' ) ) && is_callable( array( $this->image, 'getImageChannelRange' ) ) ) {
+					$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_ALL );
+					$alpha_range = $this->image->getImageChannelRange( Imagick::CHANNEL_ALPHA );
+
+					if ( isset( $rgb_mean['mean'], $alpha_range['maxima'] ) ) {
+						$maxima = (int) $alpha_range['maxima'];
+						$mean   = (int) $rgb_mean['mean'];
+
+						if ( 0 > $maxima || 0 > $mean ) {
+							// For invalid values assume no transparency.
+							$transparency = false;
+						} elseif ( 0 === $maxima && 0 === $mean ) {
+							// Alpha channel is all zeros AND no RGB content indicates fully transparent image.
+							$transparency = true;
+						} elseif ( 0 === $maxima && $mean > 0 ) {
+							// Alpha maxima of 0 with RGB content present indicates no real alpha channel exists (hence fully opaque).
+							$transparency = false;
+						} elseif ( 0 < $maxima && 0 < $mean ) {
+							// Non-zero alpha values with RGB content present indicates some transparency.
+							$transparency = true;
+						}
+					}
+				} else {
+					// Fallback to walk through the pixels and look for transparent pixels.
+					$w = $this->image->getImageWidth();
+					$h = $this->image->getImageHeight();
+					for ( $x = 0; $x < $w; $x++ ) {
+						for ( $y = 0; $y < $h; $y++ ) {
+							$pixel = $this->image->getImagePixelColor( $x, $y );
+							$color = $pixel->getColor( 2 );
+							if ( $color['a'] < 255 ) {
+								$transparency = true;
+								break 2;
+							}
 						}
 					}
 				}
-				self::$checked_images[ $file_path ] = false;
-				return false;
 
+				self::$checked_images[ $file_path ] = $transparency;
+				return $transparency;
 			} catch ( Exception $e ) {
 				/* translators: %s is the error message */
 				return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'webp-uploads' ), $e->getMessage() ) );
