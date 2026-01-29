@@ -27,6 +27,9 @@ updates:
       wordpress-packages:
         patterns:
           - '@wordpress/*'
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [">= 21"]
 
   - package-ecosystem: composer
     directory: '/'
