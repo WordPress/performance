@@ -9,7 +9,7 @@ Details about the Performance Lab plugin, including instructions for getting sta
 
 For WordPress and PHP version requirements, please refer to the [CONTRIBUTING.md file](https://github.com/WordPress/performance/blob/trunk/CONTRIBUTING.md).
 
-The feature plugins that are currently included in this plugin are:
+The feature plugins which are currently featured by this plugin are:
 
 Plugin                          | Slug                      | Experimental | Links
 --------------------------------|---------------------------|--------------|-------------
