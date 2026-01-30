@@ -579,7 +579,15 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 	}
 	$processed_images[ $filename ] = false;
 
-	$editor = wp_get_image_editor( $filename );
+	$editor = wp_get_image_editor(
+		$filename,
+		array(
+			'methods' => array(
+				'get_file',
+				'has_transparency',
+			),
+		)
+	);
 
 	if ( is_wp_error( $editor ) || ! $editor instanceof WebP_Uploads_Image_Editor_Imagick ) {
 		return false;
