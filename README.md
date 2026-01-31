@@ -73,4 +73,4 @@ Plugin                          | Slug                      | Experimental | Lin
 [40]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+View%20Transitions%22
 [44]: https://github.com/westonruter/nocache-bfcache/pulls
 
-Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin’s purpose may change as some of its features are merged into WordPress core.
+Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin's purpose may change as some of its features are merged into WordPress core.
