@@ -9,10 +9,12 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 ### Project Structure
 
+In this documentation, `<plugin-slug>` is a placeholder for one of the subdirectories under `/plugins`.
+
 * `/bin`: Custom CLI commands and scripts for certain development workflows.
 * `/plugins`: The actual WordPress plugins that are developed in this monorepo.
-* `/plugins/*`: An individual WordPress plugin folder.
-* `/plugins/*/tests`: PHPUnit tests for the specific WordPress plugin.
+* `/plugins/<plugin-slug>`: An individual WordPress plugin folder.
+* `/plugins/<plugin-slug>/tests`: PHPUnit tests for the specific WordPress plugin.
 * `/tools`: Setup and configuration files for various tools, such as linting and testing.
 
 ## Building and Running
@@ -26,25 +28,58 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 ### Installation
 
 1. Run `npm install` to install the Node.js dependencies.
-2. Run `composer install` to install the PHP dependencies.
-3. Run `npm run build` to do an initial build of the assets.
+2. Run `npx husky` to ensure pre-commit hook (using `lint-staged`) is installed.
+3. Run `composer install` to install the PHP dependencies.
+4. Run `npm run build` to do an initial build of the JS and CSS assets.
 
-### Building
+### Production Builds
 
-* To build the JavaScript and CSS assets: `npm run build`
-* To build all plugins and place into the `build` directory: `npm run build-plugins`
-* To build a specific plugin: `npm run build:plugin:<plugin-slug>` (e.g., `npm run build:plugin:performance-lab`)
+* To build all plugins and place into the `build` directory: `npm run build-plugins`.
+* To build a specific plugin: `npm run build:plugin:<plugin-slug>`.
 * To build ZIP files for distribution: `npm run build-plugins:zip`
 
-### Running a Local Environment
+### Running Local Environment
 
 This project uses `@wordpress/env` to create a local development environment.
 
-* Check if the environment is already running: `npm run wp-env status`
-* Start the environment: `npm run wp-env start`
-* Stop the environment: `npm run wp-env stop`
+* Start: `npx wp-env start` (with Xdebug: `npx wp-env start --xdebug`)
+* Stop: `npx wp-env stop`
+* Running a WP-CLI command: `npx wp-env run cli -- <command>` (e.g. `npx wp-env run cli -- wp post list`)
 
-The environment will by default be located at `http://localhost:8888` but this can be overridden by `.wp-env.override.json`.
+Web environment URLs:
+
+* Development: `http://localhost:8888` (overridden by `port` in `.wp-env.override.json`)
+* Test: `http://localhost:8889` (overridden by `testsPort` in `.wp-env.override.json`)
+
+### Testing
+
+* PHPUnit:
+  * Run tests for all plugins: `npm run test-php` (and in multisite: `npm run test-php-multisite`)
+  * Run tests for one plugin: `npm run test-php:<plugin-slug>` (and in multisite: `npm run test-php-multisite:<plugin-slug>`)
+* End-to-end (E2E) tests:
+  * Run tests for all plugins: `npm run test-e2e`
+  * Run tests for one plugin: `npm run test-e2e:<plugin-slug>` (currently only `auto-sizes`)
+
+### Formatting
+
+* Format all files in the plugin: `npm run format`
+* Format all PHP files: `composer format:all`
+* Format all JavaScript, JSON, TypeScript, YAML files: `npm run format-js`
+
+When possible, scope formatting to just the file/plugin being modified:
+
+* Format JS files for a plugin: `npm run format-js plugins/<plugin-slug>` (or supply specific paths)
+* Format all PHP files for a plugin: `composer format:<plugin-slug>`
+* Format specific PHP files for a plugin: `composer format -- plugins/<plugin-slug>/phpcs.xml.dist plugins/<plugin-slug>/*.php`
+* Format JavaScript, JSON, TypeScript, YAML files for a plugin: `npm run format-js plugins/<plugin-slug>` (or supply specific paths)
+
+### Static Analysis
+
+Static analysis involves linting (ESLint, PHPCS), PHPStan (`composer phpstan`), and TypeScript (`npx tsc`). These are run automatically via a pre-commit hook, but they can be run manually. See the [lint-staged configuration](./lint-staged.config.js) for how to invoke.
+
+## Contributing a Change
+
+Ensure all changed code passes static analysis checks and unit tests. When possible, include unit tests with each change. A bug fix should include a test that reproduces the original issue before following up with a commit to fix the issue.
 
 ## Code Style
 
@@ -68,7 +103,7 @@ Note that `lint-staged` will be used to automatically run code quality checks wi
 
 ### Indentation
 
-In general, indentation should use tabs. Refer to `.editorconfig` in the project root for specifics.
+In general, indentation should use tabs. Refer to [`.editorconfig`](./.editorconfig) in the project root for specifics.
 
 ### Inline Documentation
 
@@ -161,24 +196,3 @@ export async function initialize( { log, onLCP, extendRootData } ) {
 
 // ... function definition for handleLCPMetric omitted ...
 ```
-
-### Static Analysis Commands
-
-* **PHPStan**: `npm run phpstan`
-* **TypeScript**: `npm run tsc`
-
-### Linting Commands
-
-* **JavaScript:** `npm run lint-js`
-* **PHP:** `npm run lint-php`
-
-### Formatting Commands
-
-* **JavaScript:** `npm run format-js`
-* **PHP:** `npm run format-php`
-
-### Testing Commands
-
-* **End-to-end (E2E) tests:** `npm run test-e2e`
-* **PHP tests:** `npm run test-php`
-* **PHP tests (multisite):** `npm run test-php-multisite`
