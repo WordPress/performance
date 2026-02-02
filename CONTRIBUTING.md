@@ -20,6 +20,8 @@ You are free to use artificial intelligence (AI) tooling to contribute, but we a
 
 This repo includes an [`AGENTS.md`](./AGENTS.md) file which is a [README for agents](https://agents.md/). This can be used by tools like Cursor, Gemini CLI, GitHub Copilot coding agent, OpenAI Codex, and others. If your AI tool doesn't support `AGENTS.md` directly, you can simply create a symlink to it using the file name your tool is looking for.
 
+For more, please see see the [WordPress AI Guidelines](https://make.wordpress.org/ai/handbook/ai-guidelines/).
+
 ## Reporting Security Issues
 
 Please see [SECURITY.md](/SECURITY.md).
