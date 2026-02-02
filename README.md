@@ -3,13 +3,13 @@
 
 [![codecov](https://codecov.io/gh/WordPress/performance/graph/badge.svg?token=zQv52K2LWz)](https://codecov.io/gh/WordPress/performance)
 
-Monorepo for the [WordPress Performance Team](https://make.wordpress.org/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance features.
+Monorepo for the [WordPress Performance Team](https://make.wordpress.org/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance-related features.
 
-Details about the Performance Lab plugin, including instructions for getting started and contributing, are available in the [Performance Team Handbook here](https://make.wordpress.org/performance/handbook/performance-lab/).
+Details about the Performance Lab plugin, including instructions for getting started and contributing, are available in the [Performance Team Handbook](https://make.wordpress.org/performance/handbook/performance-lab/).
 
-For WordPress and PHP version requirements, please see the [CONTRIBUTING.md file here](https://github.com/WordPress/performance/blob/trunk/CONTRIBUTING.md).
+For WordPress and PHP version requirements, please refer to the [CONTRIBUTING.md file](https://github.com/WordPress/performance/blob/trunk/CONTRIBUTING.md).
 
-The feature plugins which are currently featured by this plugin are:
+The feature plugins which are currently highlighted by this plugin are:
 
 Plugin                          | Slug                      | Experimental | Links
 --------------------------------|---------------------------|--------------|-------------
