@@ -1,6 +1,6 @@
 # Performance Lab
 
-This is a monorepo for the WordPress Performance Team, containing a collection of standalone performance feature plugins. Refer to the [Performance Lab handbook](https://make.wordpress.org/performance/handbook/performance-lab/) for more details. 
+This is a monorepo for the WordPress Performance Team, containing a collection of standalone performance feature plugins. Refer to the [Performance Lab handbook](https://make.wordpress.org/performance/handbook/performance-lab/) for more details, as well as [README.md](../README.md) and [CONTRIBUTING.md](../CONTRIBUTING.md). See also the [WordPress AI Guidelines](https://make.wordpress.org/ai/handbook/ai-guidelines/).
 
 ## Project Overview
 
@@ -80,6 +80,16 @@ Static analysis involves linting (ESLint, PHPCS), PHPStan (`composer phpstan`), 
 ## Contributing a Change
 
 Ensure all changed code passes static analysis checks and unit tests. When possible, include unit tests with each change. A bug fix should include a test that reproduces the original issue before following up with a commit to fix the issue.
+
+Disclose AI tool usage in pull requests. Add a `Co-authored-by` Git commit message trailier indicating the agent when possible, for example one of:
+
+```
+Co-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>
+Co-authored-by: gemini-code-assist[bot] <176961590+gemini-code-assist[bot]@users.noreply.github.com>
+Co-authored-by: Claude Opus 4.5 <noreply@anthropic.com>
+```
+
+All contributions released under GPLv2+ license, so generated code must be compatible.
 
 ## Code Style
 
