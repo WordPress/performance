@@ -549,7 +549,16 @@ function webp_uploads_imagick_avif_transparency_supported(): bool {
 function webp_uploads_check_image_transparency( ?string $filename ): bool {
 	static $processed_images = array();
 
-	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() || ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
+	if ( 'avif' !== webp_uploads_get_image_output_format() || webp_uploads_imagick_avif_transparency_supported() ) {
+		return false;
+	}
+
+	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
+		// Calls filter `wp_image_editors` internally which makes sure `webp_uploads_set_image_editors` is called.
+		wp_image_editor_supports();
+	}
+
+	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
 		return false;
 	}
 
