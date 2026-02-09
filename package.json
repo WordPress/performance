@@ -75,7 +75,7 @@
 		"test-php:speculation-rules": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:speculation-rules",
 		"test-php:view-transitions": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:view-transitions",
 		"test-php:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:web-worker-offloading",
-		"test-php:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:webp-uploads",
+		"test-php:webp-uploads": "wp-env run tests-wordpress --env-cwd=/var/www/html/wp-content/plugins/performance composer test:webp-uploads",
 		"test-php-multisite:performance-lab": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:performance-lab",
 		"test-php-multisite:auto-sizes": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:auto-sizes",
 		"test-php-multisite:dominant-color-images": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:dominant-color-images",
@@ -85,7 +85,7 @@
 		"test-php-multisite:speculation-rules": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:speculation-rules",
 		"test-php-multisite:view-transitions": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:view-transitions",
 		"test-php-multisite:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:web-worker-offloading",
-		"test-php-multisite:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:webp-uploads",
+		"test-php-multisite:webp-uploads": "wp-env run tests-wordpress --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:webp-uploads",
 		"update-test-case-snapshots": "bin/update-test-case-snapshots.sh",
 		"wp-env": "wp-env",
 		"prepare": "husky"
