@@ -989,12 +989,15 @@ function webp_uploads_set_image_editors( array $editors ): array {
 		return $editors;
 	}
 
+	if ( WP_Image_Editor_Imagick::class !== $editors[0] ) {
+		$reflection = new ReflectionClass( $editors[0] );
+		if ( $reflection->isFinal() ) {
+			return $editors;
+		}
+	}
+
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		if ( WP_Image_Editor_Imagick::class !== $editors[0] ) {
-			$reflection = new ReflectionClass( $editors[0] );
-			if ( $reflection->isFinal() ) {
-				return $editors;
-			}
 			class_alias( $editors[0], 'WebP_Uploads_Image_Editor_Imagick_Base' );
 		} else {
 			class_alias( WP_Image_Editor_Imagick::class, 'WebP_Uploads_Image_Editor_Imagick_Base' );
