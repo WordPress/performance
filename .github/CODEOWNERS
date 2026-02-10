@@ -6,9 +6,12 @@
 /plugins/performance-lab                    @mukeshpanchal27 @westonruter
 
 # Performance Lab Plugin: Individual Site Health checks
-/plugins/performance-lab/includes/site-health/avif-support    @adamsilverstein
-/plugins/performance-lab/includes/site-health/avif-headers    @adamsilverstein
-/plugins/performance-lab/includes/site-health/webp-support    @adamsilverstein
+/plugins/performance-lab/includes/site-health/avif-support                  @adamsilverstein
+/plugins/performance-lab/includes/site-health/avif-headers                  @adamsilverstein
+/plugins/performance-lab/includes/site-health/webp-support                  @adamsilverstein
+/plugins/performance-lab/includes/site-health/audit-enqueued-assets         @b1ink0
+/plugins/performance-lab/includes/site-health/bfcache-compatibility-headers @b1ink0
+/plugins/performance-lab/includes/site-health/effective-asset-cache-headers @b1ink0
 
 # Plugin: Enhanced Responsive Images
 /plugins/auto-sizes                         @mukeshpanchal27
@@ -20,7 +23,7 @@
 /plugins/image-prioritizer                  @westonruter
 
 # Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein
+/plugins/webp-uploads                       @adamsilverstein @b1ink0
 
 # Plugin: Optimization Detective
 /plugins/optimization-detective             @westonruter
