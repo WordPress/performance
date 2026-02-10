@@ -9,6 +9,7 @@
 /plugins/performance-lab/includes/site-health/avif-support                  @adamsilverstein
 /plugins/performance-lab/includes/site-health/avif-headers                  @adamsilverstein
 /plugins/performance-lab/includes/site-health/webp-support                  @adamsilverstein
+/plugins/performance-lab/includes/site-health/audit-autoloaded-options      @mukeshpanchal27
 /plugins/performance-lab/includes/site-health/audit-enqueued-assets         @b1ink0
 /plugins/performance-lab/includes/site-health/bfcache-compatibility-headers @b1ink0
 /plugins/performance-lab/includes/site-health/effective-asset-cache-headers @b1ink0
