@@ -1,9 +1,9 @@
 # Documentation/Infrastructure
-/.github                                    @mukeshpanchal27 @thelovekesh
-/bin                                        @mukeshpanchal27 @thelovekesh
+/.github                                    @mukeshpanchal27 @thelovekesh @westonruter
+/bin                                        @mukeshpanchal27 @thelovekesh @westonruter
 
 # Performance Lab Plugin
-/plugins/performance-lab                    @mukeshpanchal27
+/plugins/performance-lab                    @mukeshpanchal27 @westonruter
 
 # Performance Lab Plugin: Individual Site Health checks
 /plugins/performance-lab/includes/site-health/avif-support    @adamsilverstein
