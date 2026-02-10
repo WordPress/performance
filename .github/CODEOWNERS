@@ -1,37 +1,32 @@
 # Documentation/Infrastructure
-/.github                                    @mukeshpanchal27 @felixarntz @thelovekesh
-/bin                                        @mukeshpanchal27 @felixarntz @thelovekesh
+/.github                                    @mukeshpanchal27 @thelovekesh
+/bin                                        @mukeshpanchal27 @thelovekesh
 
 # Performance Lab Plugin
-/plugins/performance-lab                    @mukeshpanchal27 @felixarntz
+/plugins/performance-lab                    @mukeshpanchal27
 
 # Performance Lab Plugin: Individual Site Health checks
-/plugins/performance-lab/includes/site-health/avif-support              @adamsilverstein
-/plugins/performance-lab/includes/site-health/avif-headers              @adamsilverstein
-/plugins/performance-lab/includes/site-health/webp-support              @adamsilverstein
-/plugins/performance-lab/includes/site-health/audit-autoloaded-options  @manuelRod @felixarntz @mukeshpanchal27
-/plugins/performance-lab/includes/site-health/audit-enqueued-assets     @manuelRod
+/plugins/performance-lab/includes/site-health/avif-support    @adamsilverstein
+/plugins/performance-lab/includes/site-health/avif-headers    @adamsilverstein
+/plugins/performance-lab/includes/site-health/webp-support    @adamsilverstein
 
 # Plugin: Enhanced Responsive Images
-/plugins/auto-sizes                         @joemcgill @mukeshpanchal27
+/plugins/auto-sizes                         @mukeshpanchal27
 
 # Plugin: Embed Optimizer
 /plugins/embed-optimizer                    @adamsilverstein @westonruter
 
-# Plugin: Image Placeholders
-/plugins/dominant-color-images              @pbearne
-
 # Plugin: Image Prioritizer
-/plugins/image-prioritizer                  @westonruter @felixarntz
+/plugins/image-prioritizer                  @westonruter
 
 # Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein @felixarntz @westonruter
+/plugins/webp-uploads                       @adamsilverstein
 
 # Plugin: Optimization Detective
-/plugins/optimization-detective             @westonruter @felixarntz
+/plugins/optimization-detective             @westonruter
 
 # Plugin: Speculative Loading
-/plugins/speculation-rules                  @felixarntz
+/plugins/speculation-rules                  @westonruter
 
 # Plugin: View Transitions
-/plugins/view-transitions                   @felixarntz
+/plugins/view-transitions                   @westonruter
