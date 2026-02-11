@@ -38,6 +38,14 @@ class Perflab_Server_Timing_Metric {
 	private $before_value;
 
 	/**
+	 * The metric description.
+	 *
+	 * @since n.e.x.t
+	 * @var string|null
+	 */
+	private $description;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.8.0
@@ -141,5 +149,47 @@ class Perflab_Server_Timing_Metric {
 		}
 
 		$this->set_value( ( microtime( true ) - $this->before_value ) * 1000.0 );
+	}
+
+	/**
+	 * Sets the metric description.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string|mixed $description The metric description.
+	 */
+	public function set_description( $description ): void {
+		if ( ! is_string( $description ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: PHP parameter name */
+				sprintf( esc_html__( 'The %s parameter must be a string.', 'performance-lab' ), '$description' ),
+				''
+			);
+			return;
+		}
+
+		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: WordPress action name */
+				sprintf( esc_html__( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				''
+			);
+			return;
+		}
+
+		$this->description = $description;
+	}
+
+	/**
+	 * Gets the metric description.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string|null The metric description, or null if none set.
+	 */
+	public function get_description(): ?string {
+		return $this->description;
 	}
 }

@@ -281,4 +281,79 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 		$set_up();
 		$this->assertSame( $expected, $this->server_timing->use_output_buffer() );
 	}
+
+	/**
+	 * @dataProvider data_get_header_with_description
+	 *
+	 * @phpstan-param array<string, mixed> $metrics
+	 */
+	public function test_get_header_with_description( string $expected, array $metrics ): void {
+		foreach ( $metrics as $metric_slug => $args ) {
+			$this->server_timing->register_metric( $metric_slug, $args );
+		}
+		$this->assertSame( $expected, $this->server_timing->get_header() );
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_get_header_with_description(): array {
+		$measure_with_description = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			$metric->set_value( 100 );
+			$metric->set_description( 'Database queries' );
+		};
+		$measure_description_only = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			$metric->set_description( 'Cache operations' );
+		};
+		$measure_duration_only    = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			$metric->set_value( 50 );
+		};
+
+		return array(
+			'metric with duration and description' => array(
+				'wp-db-query;dur=100;desc="Database queries"',
+				array(
+					'db-query' => array(
+						'measure_callback' => $measure_with_description,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'metric with description only'         => array(
+				'wp-cache-ops;desc="Cache operations"',
+				array(
+					'cache-ops' => array(
+						'measure_callback' => $measure_description_only,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'metric with duration only'            => array(
+				'wp-duration-only;dur=50',
+				array(
+					'duration-only' => array(
+						'measure_callback' => $measure_duration_only,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'mixed metrics'                        => array(
+				'wp-with-both;dur=100;desc="Database queries", wp-desc-only;desc="Cache operations", wp-dur-only;dur=50',
+				array(
+					'with-both' => array(
+						'measure_callback' => $measure_with_description,
+						'access_cap'       => 'exist',
+					),
+					'desc-only' => array(
+						'measure_callback' => $measure_description_only,
+						'access_cap'       => 'exist',
+					),
+					'dur-only'  => array(
+						'measure_callback' => $measure_duration_only,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+		);
+	}
 }

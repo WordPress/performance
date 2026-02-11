@@ -290,23 +290,33 @@ class Perflab_Server_Timing {
 	 * @since 1.8.0
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
-	 * @return string|null Segment for the Server-Timing header, or null if no value set.
+	 * @return string|null Segment for the Server-Timing header, or null if neither value nor description is set.
 	 */
 	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): ?string {
-		$value = $metric->get_value();
+		$value       = $metric->get_value();
+		$description = $metric->get_description();
 
-		// If no value is set, make sure it's just passed through.
-		if ( null === $value ) {
+		// If neither value nor description is set, skip this metric.
+		if ( null === $value && null === $description ) {
 			return null;
-		}
-
-		if ( is_float( $value ) ) {
-			$value = round( $value, 2 );
 		}
 
 		// See https://github.com/WordPress/performance/issues/955.
 		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );
 
-		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
+		$parts = array( sprintf( 'wp-%s', $name ) );
+
+		if ( null !== $value ) {
+			if ( is_float( $value ) ) {
+				$value = round( $value, 2 );
+			}
+			$parts[] = sprintf( 'dur=%s', $value );
+		}
+
+		if ( null !== $description ) {
+			$parts[] = sprintf( 'desc="%s"', $description );
+		}
+
+		return implode( ';', $parts );
 	}
 }
