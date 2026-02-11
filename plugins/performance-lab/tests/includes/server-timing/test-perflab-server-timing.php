@@ -356,4 +356,68 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 			),
 		);
 	}
+
+	/**
+	 * @dataProvider data_get_header_with_description_edge_cases
+	 *
+	 * @phpstan-param array<string, mixed> $metrics
+	 */
+	public function test_get_header_with_description_edge_cases( string $expected, array $metrics ): void {
+		foreach ( $metrics as $metric_slug => $args ) {
+			$this->server_timing->register_metric( $metric_slug, $args );
+		}
+		$this->assertSame( $expected, $this->server_timing->get_header() );
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_get_header_with_description_edge_cases(): array {
+		return array(
+			'description with double quote'    => array(
+				'wp-quoted;desc="Say \\"hello\\""',
+				array(
+					'quoted' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_description( 'Say "hello"' );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'description with backslash'       => array(
+				'wp-backslash;desc="path\\\\to\\\\file"',
+				array(
+					'backslash' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_description( 'path\\to\\file' );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'description with newline'         => array(
+				'wp-newline;desc="Line 1Line 2"',
+				array(
+					'newline' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_description( "Line 1\nLine 2" );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'description with carriage return' => array(
+				'wp-cr;desc="BeforeAfter"',
+				array(
+					'cr' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_description( "Before\rAfter" );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+		);
+	}
 }
