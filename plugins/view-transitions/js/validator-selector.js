@@ -12,7 +12,7 @@
 	 * Validates a CSS selector by attempting to use it with document.querySelector.
 	 *
 	 * @param {string} selector The CSS selector to validate.
-	 * @return {Object} Object with 'valid' boolean and optional 'message' string.
+	 * @return {boolean} Whether the selector is valid.
 	 */
 	function validateSelector( selector ) {
 		// Empty selectors are allowed (they reset to default)
@@ -20,15 +20,7 @@
 			return { valid: true };
 		}
 
-		try {
-			document.querySelector( selector );
-			return { valid: true };
-		} catch ( error ) {
-			return {
-				valid: false,
-				message: 'Invalid CSS selector: ' + error.message,
-			};
-		}
+		return CSS.supports( `selector(${ selector })` );
 	}
 
 	/**
@@ -52,7 +44,9 @@
 				existingError.remove();
 			}
 		} else {
-			input.setCustomValidity( result.message );
+			input.setCustomValidity(
+				wp.i18n.__( 'Invalid CSS selector', 'view-transitions' )
+			);
 			input.classList.remove( 'plvt-selector-valid' );
 			input.classList.add( 'plvt-selector-invalid' );
 

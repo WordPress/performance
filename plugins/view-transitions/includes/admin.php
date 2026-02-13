@@ -33,11 +33,10 @@ function plvt_print_view_transitions_admin_style(): void {
 		return;
 	}
 
-	$duration = absint( $options['default_transition_animation_duration'] );
 	?>
 <style>
 	@view-transition { navigation: auto; }
-	::view-transition-group(*) { --plvt-view-transition-animation-duration: <?php echo (int) $duration; ?>ms; }
+	::view-transition-group(*) { --plvt-view-transition-animation-duration: <?php echo absint( $options['default_transition_animation_duration'] ); ?>ms; }
 	#adminmenu > .menu-top { view-transition-name: attr(id type(<custom-ident>), none); }
 </style>
 	<?php
@@ -72,8 +71,14 @@ function plvt_enqueue_selector_validation(): void {
 	wp_enqueue_script(
 		'plvt-selector-validator',
 		plugin_dir_url( VIEW_TRANSITIONS_MAIN_FILE ) . 'js/validator-selector.js',
-		array(),
+		array( 'wp-i18n' ),
 		VIEW_TRANSITIONS_VERSION,
 		array( 'in_footer' => false )
+	);
+
+	// Set up translations for the script.
+	wp_set_script_translations(
+		'plvt-selector-validator',
+		'view-transitions'
 	);
 }
