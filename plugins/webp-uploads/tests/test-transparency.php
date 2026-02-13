@@ -12,8 +12,18 @@ class Test_WebP_Uploads_Transparency extends TestCase {
 	public static function set_up_before_class(): void {
 		parent::set_up_before_class();
 
-		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick' ) ) {
+		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick' ) || ! class_exists( 'ImagickException' ) ) {
 			self::markTestSkipped( 'Imagick extension is not available.' );
+		}
+
+		// Check if Imagick supports AVIF encoding.
+		try {
+			$i = new Imagick();
+			$i->newImage( 10, 10, 'white' );
+			$i->setImageFormat( 'avif' );
+			$i->getImageBlob();
+		} catch ( ImagickException $e ) {
+			self::markTestSkipped( 'Imagick does not support AVIF encoding.' );
 		}
 	}
 
