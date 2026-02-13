@@ -1147,6 +1147,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 			}
 		);
 
+		if ( ! webp_uploads_mime_type_supported( 'image/webp' ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		// Temp file will be copied and unlinked by WordPress core during sideload processing.
 		$tmp_file = wp_tempnam();
 		copy( $image_path, $tmp_file );
