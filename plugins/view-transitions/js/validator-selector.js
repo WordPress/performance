@@ -14,11 +14,10 @@
  */
 
 /**
- * Declare the global `wp` object.
+ * Global `wp` object.
  *
  * @type {WP}
  */
-declare const wp: WP;
 
 (
 	() => {
