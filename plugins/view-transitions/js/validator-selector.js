@@ -56,6 +56,7 @@
 					existingError.remove();
 				}
 			} else {
+				// @ts-ignore
 				const errorMessage = wp.i18n.__(
 					'Invalid CSS selector',
 					'view-transitions'
