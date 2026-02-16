@@ -978,11 +978,15 @@ add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to
  * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
  * @return string[] Registered image editors class names.
  */
-function webp_uploads_set_image_editors( array $editors ): array {
+function webp_uploads_set_image_editors( $editors ): array {
+	if ( ! is_array( $editors ) ) {
+		return array();
+	}
+
 	if (
 		'avif' !== webp_uploads_get_image_output_format() ||
 		webp_uploads_imagick_avif_transparency_supported() ||
-		0 === count( $editors ) ||
+		! isset( $editors[0] ) ||
 		! class_exists( $editors[0] ) ||
 		! ( WP_Image_Editor_Imagick::class === $editors[0] || is_subclass_of( $editors[0], WP_Image_Editor_Imagick::class ) )
 	) {
