@@ -589,7 +589,7 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 			return false;
 		}
 		$file = WebP_Uploads_Image_Editor_Imagick::$current_instance->get_file();
-		if ( '' === $file ) {
+		if ( null === $file ) {
 			return false;
 		}
 		$filename = $file;

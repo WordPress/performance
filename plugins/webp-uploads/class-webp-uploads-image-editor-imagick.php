@@ -64,13 +64,13 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @return string The file path of the image.
+		 * @return string|null The file path of the image, or null if not available.
 		 */
-		public function get_file(): string {
+		public function get_file(): ?string {
 			if ( property_exists( $this, 'file' ) && is_string( $this->file ) ) {
 				return $this->file;
 			}
-			return '';
+			return null;
 		}
 
 		/**
@@ -87,7 +87,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 			}
 
 			$file_path = $this->get_file();
-			if ( isset( self::$checked_images[ $file_path ] ) ) {
+			if ( isset( $file_path, self::$checked_images[ $file_path ] ) ) {
 				return self::$checked_images[ $file_path ];
 			}
 			$transparency = false;
