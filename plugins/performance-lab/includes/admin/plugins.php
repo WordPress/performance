@@ -218,7 +218,7 @@ function perflab_render_plugins_ui(): void {
 
 			$plugin_list     .= sprintf(
 				'<li><a target="_blank" href="%s"><code>%s</code></a> %s</li>',
-				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
+				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'performance-lab' ) . $plugin_slug ) ),
 				esc_html( $plugin_slug ),
 				esc_html( $status )
 			);
@@ -280,7 +280,7 @@ function perflab_render_plugins_ui(): void {
 		<div class="wrap">
 			<form id="plugin-filter" method="post">
 				<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
-					<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'default' ); ?></h2>
+					<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'performance-lab' ); ?></h2>
 					<div id="the-list">
 						<?php
 						foreach ( $plugins as $plugin_data ) {
@@ -444,7 +444,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	$plugin_file   = $plugin_status['file'];
 	if ( 'install' === $plugin_status['status'] ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new WP_Error( 'cannot_install_plugin', __( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
+			return new WP_Error( 'cannot_install_plugin', __( 'Sorry, you are not allowed to install plugins on this site.', 'performance-lab' ) );
 		}
 
 		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
@@ -475,7 +475,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	// Activate the plugin.
 	if ( ! is_plugin_active( $plugin_file ) ) {
 		if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
-			return new WP_Error( 'cannot_activate_plugin', __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+			return new WP_Error( 'cannot_activate_plugin', __( 'Sorry, you are not allowed to activate this plugin.', 'performance-lab' ) );
 		}
 
 		$result = activate_plugin( $plugin_file );
@@ -516,7 +516,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	if ( $availability['activated'] ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-			esc_html( _x( 'Active', 'plugin', 'default' ) )
+			esc_html( _x( 'Active', 'plugin', 'performance-lab' ) )
 		);
 	} elseif (
 		$availability['compatible_php'] &&
@@ -539,10 +539,10 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			'<a class="button perflab-install-active-plugin" href="%s" data-plugin-slug="%s">%s</a>',
 			esc_url( $url ),
 			esc_attr( $plugin_data['slug'] ),
-			esc_html__( 'Activate', 'default' )
+			esc_html__( 'Activate', 'performance-lab' )
 		);
 	} else {
-		$explanation    = $availability['can_install'] ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
+		$explanation    = $availability['can_install'] ? _x( 'Cannot Activate', 'plugin', 'performance-lab' ) : _x( 'Cannot Install', 'plugin', 'performance-lab' );
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( $explanation )
@@ -568,7 +568,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
 			esc_url( $details_link ),
 			/* translators: %s: Plugin name and version. */
-			esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
+			esc_attr( sprintf( __( 'More information about %s', 'performance-lab' ), $name ) ),
 			esc_attr( $name ),
 			esc_html__( 'Learn more', 'performance-lab' )
 		);
@@ -576,15 +576,15 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		$title_link_attr = ' target="_blank"';
 
 		/* translators: %s: Plugin name. */
-		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
+		$aria_label = sprintf( __( 'Visit plugin site for %s', 'performance-lab' ), $name );
 
-		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'] . '/';
+		$details_link = __( 'https://wordpress.org/plugins/', 'performance-lab' ) . $plugin_data['slug'] . '/';
 
 		$action_links[] = sprintf(
 			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
 			esc_url( $details_link ),
 			esc_attr( $aria_label ),
-			esc_html__( 'Visit plugin site', 'default' )
+			esc_html__( 'Visit plugin site', 'performance-lab' )
 		);
 	}
 
@@ -601,12 +601,12 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt">';
 			if ( ! $compatible_php && ! $compatible_wp ) {
-				echo '<p>' . esc_html__( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
+				echo '<p>' . esc_html__( 'This plugin does not work with your versions of WordPress and PHP.', 'performance-lab' ) . '</p>';
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
-							' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
+							' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'performance-lab' ),
 							esc_url( self_admin_url( 'update-core.php' ) ),
 							esc_url( wp_get_update_php_url() )
 						)
@@ -616,7 +616,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: URL to WordPress Updates screen. */
-							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ),
 							esc_url( self_admin_url( 'update-core.php' ) )
 						)
 					);
@@ -624,30 +624,30 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: URL to Update PHP page. */
-							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'performance-lab' ),
 							esc_url( wp_get_update_php_url() )
 						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
 			} elseif ( ! $compatible_wp ) {
-				esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
+				esc_html_e( 'This plugin does not work with your version of WordPress.', 'performance-lab' );
 				if ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: URL to WordPress Updates screen. */
-							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ),
 							esc_url( self_admin_url( 'update-core.php' ) )
 						)
 					);
 				}
 			} elseif ( ! $compatible_php ) {
-				esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
+				esc_html_e( 'This plugin does not work with your version of PHP.', 'performance-lab' );
 				if ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: URL to Update PHP page. */
-							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'performance-lab' ),
 							esc_url( wp_get_update_php_url() )
 						)
 					);
