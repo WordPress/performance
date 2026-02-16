@@ -99,7 +99,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 				 * Note that Imagick::getImageAlphaChannel() is only available if Imagick
 				 * has been compiled against ImageMagick version 6.4.0 or newer.
 				 */
-				if ( is_callable( array( $this->image, 'getImageAlphaChannel' ) ) ) {
+				if ( method_exists( $this->image, 'getImageAlphaChannel' ) ) {
 					if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
 						self::$checked_images[ $file_path ] = false;
 						return false;
@@ -107,7 +107,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 				}
 
 				// Use mean and range to determine if there is any transparency more efficiently.
-				if ( is_callable( array( $this->image, 'getImageChannelMean' ) ) && is_callable( array( $this->image, 'getImageChannelRange' ) ) ) {
+				if ( method_exists( $this->image, 'getImageChannelMean' ) && method_exists( $this->image, 'getImageChannelRange' ) ) {
 					$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_ALL );
 					$alpha_range = $this->image->getImageChannelRange( Imagick::CHANNEL_ALPHA );
 
