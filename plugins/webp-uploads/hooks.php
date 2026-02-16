@@ -975,8 +975,8 @@ add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to
  *
  * @since n.e.x.t
  *
- * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
- * @return string[] Registered image editors class names.
+ * @param class-string[]|mixed $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
+ * @return class-string[] Registered image editors class names.
  */
 function webp_uploads_set_image_editors( $editors ): array {
 	if ( ! is_array( $editors ) ) {
