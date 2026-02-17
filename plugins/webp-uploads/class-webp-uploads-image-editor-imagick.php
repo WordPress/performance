@@ -91,6 +91,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 				return self::$checked_images[ $file_path ];
 			}
 			$transparency = false;
+			$use_fallback = false;
 
 			try {
 				/*
@@ -99,37 +100,40 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 				 * Note that Imagick::getImageAlphaChannel() is only available if Imagick
 				 * has been compiled against ImageMagick version 6.4.0 or newer.
 				 */
-				if ( method_exists( $this->image, 'getImageAlphaChannel' ) ) {
-					if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
-						self::$checked_images[ $file_path ] = false;
-						return false;
-					}
+				if ( Imagick::ALPHACHANNEL_UNDEFINED === $this->image->getImageAlphaChannel() ) {
+					self::$checked_images[ $file_path ] = false;
+					return false;
 				}
 
 				// Use mean and range to determine if there is any transparency more efficiently.
-				if ( method_exists( $this->image, 'getImageChannelMean' ) && method_exists( $this->image, 'getImageChannelRange' ) ) {
-					$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_ALL );
-					$alpha_range = $this->image->getImageChannelRange( Imagick::CHANNEL_ALPHA );
+				$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_ALL );
+				$alpha_range = $this->image->getImageChannelRange( Imagick::CHANNEL_ALPHA );
 
-					if ( isset( $rgb_mean['mean'], $alpha_range['maxima'] ) ) {
-						$maxima = (int) $alpha_range['maxima'];
-						$mean   = (int) $rgb_mean['mean'];
+				if ( isset( $rgb_mean['mean'], $alpha_range['maxima'] ) ) {
+					$maxima = (int) $alpha_range['maxima'];
+					$mean   = (int) $rgb_mean['mean'];
 
-						if ( 0 > $maxima || 0 > $mean ) {
-							// For invalid values assume no transparency.
-							$transparency = false;
-						} elseif ( 0 === $maxima && 0 === $mean ) {
-							// Alpha channel is all zeros AND no RGB content indicates fully transparent image.
-							$transparency = true;
-						} elseif ( 0 === $maxima && $mean > 0 ) {
-							// Alpha maxima of 0 with RGB content present indicates no real alpha channel exists (hence fully opaque).
-							$transparency = false;
-						} elseif ( 0 < $maxima && 0 < $mean ) {
-							// Non-zero alpha values with RGB content present indicates some transparency.
-							$transparency = true;
-						}
+					if ( 0 > $maxima || 0 > $mean ) {
+						// For invalid values use fallback.
+						$use_fallback = true;
+					} elseif ( 0 === $maxima && 0 === $mean ) {
+						// Alpha channel is all zeros AND no RGB content indicates fully transparent image.
+						$transparency = true;
+					} elseif ( 0 === $maxima && $mean > 0 ) {
+						// Alpha maxima of 0 with RGB content present indicates no real alpha channel exists (hence fully opaque).
+						$transparency = false;
+					} elseif ( 0 < $maxima && 0 < $mean ) {
+						// Non-zero alpha values with RGB content present indicates some transparency.
+						$transparency = true;
+					} else {
+						// For any other case use fallback.
+						$use_fallback = true;
 					}
 				} else {
+					$use_fallback = true;
+				}
+
+				if ( $use_fallback ) {
 					// Fallback to walk through the pixels and look for transparent pixels.
 					$w = $this->image->getImageWidth();
 					$h = $this->image->getImageHeight();
@@ -147,7 +151,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 
 				self::$checked_images[ $file_path ] = $transparency;
 				return $transparency;
-			} catch ( Exception $e ) {
+			} catch ( Throwable $e ) {
 				/* translators: %s is the error message */
 				return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'webp-uploads' ), $e->getMessage() ) );
 			}
