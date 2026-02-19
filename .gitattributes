@@ -1,7 +1,8 @@
-# See <https://github.com/github-linguist/linguist/blob/master/docs/overrides.md>.
+# Force LF for all text files
+* text=auto eol=lf
 
-# Improve highlighting for PHPStan stub files.
+# Improve highlighting for PHPStan stub files
 *.stub linguist-language=PHP
 
-# Hide diffs for Optimization Detective snapshots.
-plugins/*/tests/test-cases/*/expected.html linguist-generated=true
+# Hide diffs for Optimization Detective snapshots
+plugins/*/tests/test-cases/*/expected.html linguist-generated=trues
