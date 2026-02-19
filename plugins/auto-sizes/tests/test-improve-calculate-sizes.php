@@ -423,12 +423,12 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 */
 	public function test_no_image(): void {
 		$block_content = '<!-- wp:paragraph -->
-		<p>No image here</p>
+		<p class="wp-block-paragraph">No image here</p>
 		<!-- /wp:paragraph -->';
 
 		$result = apply_filters( 'the_content', $block_content );
 
-		$this->assertStringContainsString( '<p>No image here</p>', $result );
+		$this->assertStringContainsString( '<p class="wp-block-paragraph">No image here</p>', $result );
 	}
 
 	/**
