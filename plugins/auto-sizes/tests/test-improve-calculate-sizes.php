@@ -11,16 +11,16 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	/**
 	 * Attachment ID.
 	 *
-	 * @var int
+	 * @var int Attachment ID of the test image.
 	 */
-	public static $image_id;
+	public static int $image_id;
 
 	/**
 	 * Post ID.
 	 *
-	 * @var int
+	 * @var int ID of the test post.
 	 */
-	public static $post_id;
+	public static int $post_id;
 	/**
 	 * Set up the environment for the tests.
 	 */

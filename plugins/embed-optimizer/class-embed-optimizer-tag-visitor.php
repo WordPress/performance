@@ -25,9 +25,9 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Whether the lazy-loading script was added to the body.
 	 *
-	 * @var bool
+	 * @var bool True when the script has already been injected.
 	 */
-	private $added_lazy_script = false;
+	private bool $added_lazy_script = false;
 
 	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
