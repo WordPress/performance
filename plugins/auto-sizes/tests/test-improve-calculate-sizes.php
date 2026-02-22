@@ -8,10 +8,18 @@
 
 class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
-	/** @var int */
+	/**
+	 * Attachment ID.
+	 *
+	 * @var int
+	 */
 	public static $image_id;
 
-	/** @var int */
+	/**
+	 * Post ID.
+	 *
+	 * @var int
+	 */
 	public static $post_id;
 	/**
 	 * Set up the environment for the tests.
