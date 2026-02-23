@@ -7,6 +7,7 @@
 
 /**
  * @group server-timing
+ * @phpstan-import-type MetricArguments from Perflab_Server_Timing
  */
 class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 
@@ -154,7 +155,8 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_get_header
 	 *
-	 * @phpstan-param array<string, mixed> $metrics
+	 * @param string                         $expected The expected header value.
+	 * @param array<string, MetricArguments> $metrics  The metric configurations.
 	 */
 	public function test_get_header( string $expected, array $metrics ): void {
 		foreach ( $metrics as $metric_slug => $args ) {
@@ -285,7 +287,8 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_get_header_with_description
 	 *
-	 * @phpstan-param array<string, mixed> $metrics
+	 * @param string                         $expected The expected header value.
+	 * @param array<string, MetricArguments> $metrics  The metric configurations.
 	 */
 	public function test_get_header_with_description( string $expected, array $metrics ): void {
 		foreach ( $metrics as $metric_slug => $args ) {
@@ -360,7 +363,8 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_get_header_with_description_edge_cases
 	 *
-	 * @phpstan-param array<string, mixed> $metrics
+	 * @param string                         $expected The expected header value.
+	 * @param array<string, MetricArguments> $metrics  The metric configurations.
 	 */
 	public function test_get_header_with_description_edge_cases( string $expected, array $metrics ): void {
 		foreach ( $metrics as $metric_slug => $args ) {

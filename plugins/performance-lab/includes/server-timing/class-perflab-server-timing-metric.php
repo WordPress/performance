@@ -43,7 +43,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since n.e.x.t
 	 * @var string|null
 	 */
-	private $description;
+	private $description = null;
 
 	/**
 	 * Constructor.
@@ -156,18 +156,9 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param string|mixed $description The metric description.
+	 * @param non-empty-string $description The metric description.
 	 */
-	public function set_description( $description ): void {
-		if ( ! is_string( $description ) ) {
-			_doing_it_wrong(
-				__METHOD__,
-				/* translators: %s: PHP parameter name */
-				sprintf( esc_html__( 'The %s parameter must be a string.', 'performance-lab' ), '$description' ),
-				''
-			);
-			return;
-		}
+	public function set_description( string $description ): void {
 
 		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(

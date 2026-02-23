@@ -320,8 +320,7 @@ class Perflab_Server_Timing {
 			if ( null === $sanitized_description ) {
 				$sanitized_description = '';
 			}
-			$sanitized_description = addcslashes( $sanitized_description, '\\' );
-			$sanitized_description = addcslashes( $sanitized_description, '"' );
+			$sanitized_description = addcslashes( $sanitized_description, '\\"' );
 			$parts[]               = sprintf( 'desc="%s"', $sanitized_description );
 		}
 
