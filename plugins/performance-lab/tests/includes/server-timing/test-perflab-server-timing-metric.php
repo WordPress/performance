@@ -86,16 +86,6 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers Perflab_Server_Timing_Metric::set_description
-	 */
-	public function test_set_description_requires_string(): void {
-		$this->setExpectedIncorrectUsage( Perflab_Server_Timing_Metric::class . '::set_description' );
-
-		$this->metric->set_description( 123 );
-		$this->assertNull( $this->metric->get_description() );
-	}
-
-	/**
 	 * @covers Perflab_Server_Timing_Metric::get_description
 	 */
 	public function test_get_description_returns_null_by_default(): void {

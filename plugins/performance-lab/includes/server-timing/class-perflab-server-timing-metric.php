@@ -159,7 +159,6 @@ class Perflab_Server_Timing_Metric {
 	 * @param non-empty-string $description The metric description.
 	 */
 	public function set_description( string $description ): void {
-
 		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(
 				__METHOD__,
