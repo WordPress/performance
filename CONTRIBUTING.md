@@ -12,13 +12,15 @@ In general, all code must follow the [WordPress Coding Standards and best practi
 ## Guidelines
 
 - As with all WordPress projects, we want to ensure a welcoming environment for everyone. With that in mind, all contributors are expected to follow our [Code of Conduct](https://make.wordpress.org/handbook/community-code-of-conduct/).
-- All WordPress projects are [licensed under the GPLv2+](/LICENSE), and all contributions to Gutenberg will be released under the GPLv2+ license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv2+ license.
+- All WordPress projects are [licensed under the GPLv2+](/LICENSE), and all contributions to the [Performance Lab](https://wordpress.org/plugins/performance-lab/) plugin will be released under the GPLv2+ license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv2+ license.
 
 ## Use of AI Tools
 
 You are free to use artificial intelligence (AI) tooling to contribute, but we ask that you disclose what tooling you are using and to what extent a pull request has been authored by AI. Are you using AI just as a code reviewer? Or, for the other extreme, are you using AI to write everything (e.g. "vibe coding")? It is your responsibility to review and take responsibility for what AI generates.
 
 This repo includes an [`AGENTS.md`](./AGENTS.md) file which is a [README for agents](https://agents.md/). This can be used by tools like Cursor, Gemini CLI, GitHub Copilot coding agent, OpenAI Codex, and others. If your AI tool doesn't support `AGENTS.md` directly, you can simply create a symlink to it using the file name your tool is looking for.
+
+For more, please see the [WordPress AI Guidelines](https://make.wordpress.org/ai/handbook/ai-guidelines/).
 
 ## Reporting Security Issues
 
