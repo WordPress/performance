@@ -371,7 +371,7 @@ function plvt_load_view_transitions(): void {
 			if ( '' !== $additional_animation_stylesheet ) {
 				wp_add_inline_style(
 					'plvt-view-transitions',
-					plvt_scope_animation_stylesheet_to_transition_type( $additional_animation_stylesheet, $transition_type )
+					'@media (prefers-reduced-motion: no-preference) {' . plvt_scope_animation_stylesheet_to_transition_type( $additional_animation_stylesheet, $transition_type ) . '}'
 				);
 			}
 
