@@ -967,8 +967,8 @@ function webp_uploads_convert_palette_png_to_truecolor( $file ): array {
 
 	return $file;
 }
-add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
-add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' );
+add_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ); // @codeCoverageIgnore
+add_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ); // @codeCoverageIgnore
 
 /**
  * Filters the list of image editors to load the extended class when AVIF transparency is not supported.
@@ -1009,7 +1009,7 @@ function webp_uploads_set_image_editors( $editors ): array {
 	}
 
 	if ( ! class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
-		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php';
+		require_once __DIR__ . '/class-webp-uploads-image-editor-imagick.php'; // @codeCoverageIgnore
 	}
 
 	if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick' ) ) {
@@ -1018,4 +1018,4 @@ function webp_uploads_set_image_editors( $editors ): array {
 
 	return $editors;
 }
-add_filter( 'wp_image_editors', 'webp_uploads_set_image_editors' );
+add_filter( 'wp_image_editors', 'webp_uploads_set_image_editors' ); // @codeCoverageIgnore

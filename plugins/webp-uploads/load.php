@@ -29,6 +29,7 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 define( 'WEBP_UPLOADS_VERSION', '2.6.1' );
 define( 'WEBP_UPLOADS_MAIN_FILE', plugin_basename( __FILE__ ) );
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';
@@ -37,3 +38,4 @@ require_once __DIR__ . '/picture-element.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/deprecated.php';
 require_once __DIR__ . '/site-health/load.php';
+// @codeCoverageIgnoreEnd

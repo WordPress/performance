@@ -10,8 +10,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-// @codeCoverageIgnoreEnd
 
 // Imagick AVIF transparency support site health check.
 require_once __DIR__ . '/imagick-avif-transparency-support/helper.php';
 require_once __DIR__ . '/imagick-avif-transparency-support/hooks.php';
+// @codeCoverageIgnoreEnd

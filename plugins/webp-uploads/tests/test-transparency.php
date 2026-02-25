@@ -33,6 +33,14 @@ class Test_WebP_Uploads_Transparency extends TestCase {
 	}
 
 	/**
+	 * Tests that AVIF transparency-related hooks are added.
+	 */
+	public function test_webp_uploads_avif_transparency_related_hooks(): void {
+		$this->assertSame( 10, has_filter( 'wp_image_editors', 'webp_uploads_set_image_editors' ) );
+		$this->assertSame( 10, has_filter( 'site_status_tests', 'webp_uploads_add_imagick_avif_transparency_supported_test' ) );
+	}
+
+	/**
 	 * Data provider for ImageMagick version strings.
 	 *
 	 * @return array<string, array{string, bool}> Test data with version strings and expected support.
@@ -182,6 +190,17 @@ class Test_WebP_Uploads_Transparency extends TestCase {
 		$editors          = webp_uploads_set_image_editors( $original_editors );
 
 		$this->assertSame( $original_editors, $editors );
+	}
+
+	/**
+	 * Tests webp_uploads_set_image_editors returns empty array for invalid input.
+	 *
+	 * @covers ::webp_uploads_set_image_editors
+	 */
+	public function test_webp_uploads_set_image_editors_returns_empty_array_for_invalid_input(): void {
+		$editors = webp_uploads_set_image_editors( 'not an array' );
+
+		$this->assertSame( array(), $editors );
 	}
 
 	/**
@@ -563,6 +582,7 @@ class Test_WebP_Uploads_Transparency extends TestCase {
 		return array(
 			'transparent PNG'         => array( 'dice.png', true ),
 			'transparent palette PNG' => array( 'dice-palette.png', true ),
+			'fully transparent PNG'   => array( 'transparent.png', true ),
 			'non-transparent JPEG'    => array( 'car.jpeg', false ),
 			'non-transparent WebP'    => array( 'balloons.webp', false ),
 		);

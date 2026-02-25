@@ -27,4 +27,4 @@ function webp_uploads_add_imagick_avif_transparency_supported_test( array $tests
 	);
 	return $tests;
 }
-add_filter( 'site_status_tests', 'webp_uploads_add_imagick_avif_transparency_supported_test' );
+add_filter( 'site_status_tests', 'webp_uploads_add_imagick_avif_transparency_supported_test' ); // @codeCoverageIgnore
