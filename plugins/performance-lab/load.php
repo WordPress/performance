@@ -123,10 +123,6 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant'     => 'VIEW_TRANSITIONS_VERSION',
 			'experimental' => true,
 		),
-		'web-worker-offloading'   => array(
-			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',
-			'experimental' => true,
-		),
 		'webp-uploads'            => array(
 			'constant' => 'WEBP_UPLOADS_VERSION',
 		),
