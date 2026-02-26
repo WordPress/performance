@@ -457,7 +457,6 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 		$style = $processor->get_attribute( 'style' );
 		if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
 			$processor->set_attribute( 'data-bg-attachment-id', (string) $attachment_id );
-			$processor->set_attribute( 'data-bg-original-url', $image_url );
 			return $processor->get_updated_html();
 		}
 	}
