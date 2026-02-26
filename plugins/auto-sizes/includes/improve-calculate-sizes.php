@@ -438,9 +438,15 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 		return $content;
 	}
 
+	// Normalize attachment ID type if possible.
+	if ( isset( $attachment_id ) && is_numeric( $attachment_id ) ) {
+		$attachment_id = (int) $attachment_id;
+	}
+
 	// Validate extracted data.
 	if (
 		! isset( $attachment_id, $image_url ) ||
+		! is_int( $attachment_id ) ||
 		$attachment_id <= 0 ||
 		'' === $image_url ||
 		! is_array( wp_get_attachment_metadata( $attachment_id ) )
