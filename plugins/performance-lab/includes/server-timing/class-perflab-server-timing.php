@@ -316,10 +316,7 @@ class Perflab_Server_Timing {
 		if ( null !== $description ) {
 			// Sanitize description for HTTP header quoted-string format.
 			// Remove control characters (CR/LF) and escape backslashes and quotes.
-			$sanitized_description = preg_replace( '/[\r\n]/', '', $description );
-			if ( null === $sanitized_description ) {
-				$sanitized_description = '';
-			}
+			$sanitized_description = str_replace( array( "\r", "\n" ), '', $description );
 			$sanitized_description = addcslashes( $sanitized_description, '\\"' );
 			$parts[]               = sprintf( 'desc="%s"', $sanitized_description );
 		}
