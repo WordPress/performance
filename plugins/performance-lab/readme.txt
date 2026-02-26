@@ -25,7 +25,6 @@ The feature plugins which are currently featured by this plugin are:
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
 * [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
-* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 

@@ -316,20 +316,19 @@ trait Optimization_Detective_Test_Helpers {
 		);
 
 		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
+		// TODO: This should use assertEqualHTML() once 6.9 is the minimum supported version.
 		$buffer = preg_replace_callback(
-			'#<script (?:type="application/json" id="optimization-detective-detect-args"|id="optimization-detective-detect-args" type="application/json")>(.+?)(</script>)#s',
+			'#(<script (?:type="application/json" id="optimization-detective-detect-args"|id="optimization-detective-detect-args" type="application/json")>)(.+?)(</script>)#s',
 			static function ( $matches ) {
 				array_shift( $matches );
-				list( $text, $end_tag ) = $matches;
-
-				$start_tag = '<script type="application/json" id="optimization-detective-detect-args">';
+				list( $start_tag, $text, $end_tag ) = $matches;
 
 				$data = json_decode( $text, true );
 				if ( is_array( $data ) && 2 === count( $data ) && is_string( $data[0] ) && is_array( $data[1] ) ) {
 					$text = '[]';
 				}
 
-				return $start_tag . $text . $end_tag;
+				return '<script type="application/json" id="optimization-detective-detect-args">' . $text . $end_tag;
 			},
 			$buffer
 		);

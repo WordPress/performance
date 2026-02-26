@@ -296,22 +296,25 @@ function plvt_add_setting_ui(): void {
 		)
 	);
 
-	add_settings_section(
-		'plvt_admin_view_transitions',
-		_x( 'Admin View Transitions', 'Settings section', 'view-transitions' ),
-		static function (): void {
-			?>
-			<p class="description">
-				<?php esc_html_e( 'This section allows you to control view transitions usage in the WordPress admin area.', 'view-transitions' ); ?>
-			</p>
-			<?php
-		},
-		'reading',
-		array(
-			'before_section' => '<div id="admin-view-transitions">',
-			'after_section'  => '</div>',
-		)
-	);
+	// Only show the setting if the feature is not already present in core. See <https://core.trac.wordpress.org/ticket/64470>.
+	if ( ! function_exists( 'wp_enqueue_view_transitions_admin_css' ) ) {
+		add_settings_section(
+			'plvt_admin_view_transitions',
+			_x( 'Admin View Transitions', 'Settings section', 'view-transitions' ),
+			static function (): void {
+				?>
+				<p class="description">
+					<?php esc_html_e( 'This section allows you to control view transitions usage in the WordPress admin area.', 'view-transitions' ); ?>
+				</p>
+				<?php
+			},
+			'reading',
+			array(
+				'before_section' => '<div id="admin-view-transitions">',
+				'after_section'  => '</div>',
+			)
+		);
+	}
 
 	$fields = array(
 		'override_theme_config'                 => array(
