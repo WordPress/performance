@@ -421,8 +421,10 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 		return '';
 	}
 
-	$block_name = $parsed_block['blockName'] ?? '';
-	$attrs      = $parsed_block['attrs'] ?? array();
+	$block_name    = $parsed_block['blockName'] ?? '';
+	$attrs         = $parsed_block['attrs'] ?? array();
+	$attachment_id = null;
+	$image_url     = null;
 
 	// Extract background image data based on block type.
 	if ( 'core/cover' === $block_name ) {
@@ -431,8 +433,6 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 	} elseif ( 'core/group' === $block_name ) {
 		$attachment_id = $attrs['style']['background']['backgroundImage']['id'] ?? null;
 		$image_url     = $attrs['style']['background']['backgroundImage']['url'] ?? null;
-	} else {
-		return $content;
 	}
 
 	// Normalize attachment ID type if possible.
@@ -440,24 +440,22 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 		$attachment_id = (int) $attachment_id;
 	}
 
-	// Validate extracted data.
+	// Validate extracted data and update the element with background image.
 	if (
-		! isset( $attachment_id, $image_url ) ||
-		! is_int( $attachment_id ) ||
-		$attachment_id <= 0 ||
-		'' === $image_url ||
-		! is_array( wp_get_attachment_metadata( $attachment_id ) )
+		isset( $attachment_id, $image_url ) &&
+		is_int( $attachment_id ) &&
+		$attachment_id > 0 &&
+		'' !== $image_url &&
+		is_array( wp_get_attachment_metadata( $attachment_id ) )
 	) {
-		return $content;
-	}
-
-	// Find and update the element with background image.
-	$processor = new WP_HTML_Tag_Processor( $content );
-	while ( $processor->next_tag() ) {
-		$style = $processor->get_attribute( 'style' );
-		if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
-			$processor->set_attribute( 'data-bg-attachment-id', (string) $attachment_id );
-			return $processor->get_updated_html();
+		$processor = new WP_HTML_Tag_Processor( $content );
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
+			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
+				$processor->set_attribute( 'data-bg-attachment-id', (string) $attachment_id );
+				$content = $processor->get_updated_html();
+				break;
+			}
 		}
 	}
 
