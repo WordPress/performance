@@ -187,7 +187,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			foreach ( $minimums as $minimum ) {
 				$style_rule = sprintf(
 					'#%s { min-height: %dpx; }',
-					$element_id,
+					$this->escape_css( $element_id ),
 					$minimum['height']
 				);
 
@@ -204,6 +204,79 @@ final class Embed_Optimizer_Tag_Visitor {
 
 			$processor->append_head_html( sprintf( "<style>\n%s\n/*# sourceURL=embed-optimizer-reduce-layout-shifts */\n</style>\n", join( "\n", $style_rules ) ) );
 		}
+	}
+
+	/**
+	 * Escapes a CSS identifier.
+	 *
+	 * This is a PHP implementation of the CSS.escape() method in CSSOM, based on the
+	 * JavaScript polyfill by Mathias Bynens.
+	 *
+	 * @since 1.0.0
+	 * @link https://drafts.csswg.org/cssom/#the-css.escape()-method
+	 * @link https://github.com/mathiasbynens/CSS.escape
+	 * @link https://mathiasbynens.be/notes/css-escapes
+	 * @license MIT
+	 *
+	 * @param string $ident Identifier to escape.
+	 * @return string Escaped identifier.
+	 */
+	private function escape_css( string $ident ): string {
+		$length          = strlen( $ident );
+		$result          = '';
+		$first_code_unit = $length > 0 ? ord( $ident[0] ) : 0;
+
+		for ( $i = 0; $i < $length; $i++ ) {
+			$code_unit = ord( $ident[ $i ] );
+
+			// If the character is NULL (U+0000), then the REPLACEMENT CHARACTER (U+FFFD).
+			if ( 0x0000 === $code_unit ) {
+				$result .= "\u{FFFD}";
+				continue;
+			}
+
+			if (
+				// If the character is in the range [\1-\1f] (U+0001 to U+001F) or is U+007F...
+				$code_unit <= 0x001F || 0x007F === $code_unit ||
+				// If the character is the first character and is in the range [0-9] (U+0030 to U+0039)...
+				( 0 === $i && $code_unit >= 0x0030 && $code_unit <= 0x0039 ) ||
+				// If the character is the second character and is in the range [0-9] (U+0030 to U+0039) and the first character is a `-` (U+002D)...
+				( 1 === $i && $code_unit >= 0x0030 && $code_unit <= 0x0039 && 0x002D === $first_code_unit )
+			) {
+				$result .= '\\' . dechex( $code_unit ) . ' ';
+				continue;
+			}
+
+			// If the character is the first character and is a `-` (U+002D), and there is no second character...
+			if (
+				0 === $i &&
+				1 === $length &&
+				0x002D === $code_unit
+			) {
+				$result .= '\\' . $ident[ $i ];
+				continue;
+			}
+
+			// If the character is not handled by one of the above rules and is
+			// greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
+			// is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
+			// U+005A), or [a-z] (U+0061 to U+007A)...
+			if (
+				$code_unit >= 0x0080 ||
+				0x002D === $code_unit ||
+				0x005F === $code_unit ||
+				( $code_unit >= 0x0030 && $code_unit <= 0x0039 ) ||
+				( $code_unit >= 0x0041 && $code_unit <= 0x005A ) ||
+				( $code_unit >= 0x0061 && $code_unit <= 0x007A )
+			) {
+				$result .= $ident[ $i ];
+				continue;
+			}
+
+			// Otherwise, the escaped character.
+			$result .= '\\' . $ident[ $i ];
+		}
+		return $result;
 	}
 
 	/**

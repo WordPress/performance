@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.9
-Stable tag:   4.0.0
+Stable tag:   4.0.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -11,7 +11,7 @@ Performance plugin from the WordPress Performance Team, which is a collection of
 
 == Description ==
 
-The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions. 
+The Performance Lab plugin is a collection of features focused on enhancing the performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions.
 
 The feature plugins which are currently featured by this plugin are:
 
@@ -25,7 +25,6 @@ The feature plugins which are currently featured by this plugin are:
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
 * [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
-* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
@@ -73,6 +72,14 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.0.1 =
+
+**Bug Fixes**
+
+* Add notices and improved type checking for `$wpdb->queries` when attempting to compute server-timing for database queries. ([2159](https://github.com/WordPress/performance/pull/2159))
+* Skip stylesheets with empty `href` attributes in Site Health audit. ([2281](https://github.com/WordPress/performance/pull/2281), [2328](https://github.com/WordPress/performance/pull/2328))
+* Use proper escape function. ([2246](https://github.com/WordPress/performance/pull/2246))
 
 = 4.0.0 =
 

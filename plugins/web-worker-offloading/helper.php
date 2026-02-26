@@ -198,3 +198,33 @@ function plwwo_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="web-worker-offloading ' . esc_attr( WEB_WORKER_OFFLOADING_VERSION ) . '">' . "\n";
 }
+
+/**
+ * Displays a sunset warning notice for the plugin in the plugin row meta.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+ */
+function plwwo_render_sunset_notice( string $plugin_file ): void {
+	if ( 'web-worker-offloading/load.php' !== $plugin_file ) {
+		return;
+	}
+
+	$message = sprintf(
+		/* translators: 1: GitHub issue URL. 2: Support forum URL. */
+		__( 'The Web Worker Offloading plugin is proposed for being sunset. Please refer to the <a href="%1$s" target="_blank" rel="noopener">GitHub issue</a> for more information. If you have metrics showing how this plugin specifically improved your Interaction to Next Paint (INP), please share them in the <a href="%2$s" target="_blank" rel="noopener">support forum</a> as this could provide a reason to keep the plugin.', 'web-worker-offloading' ),
+		esc_url( 'https://github.com/WordPress/performance/issues/2284' ),
+		esc_url( 'https://wordpress.org/support/plugin/web-worker-offloading/' )
+	);
+	?>
+	<div class="notice inline notice-warning notice-alt">
+		<p>
+			<?php
+			echo wp_kses_post( $message );
+			?>
+		</p>
+	</div>
+	<?php
+}

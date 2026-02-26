@@ -300,7 +300,7 @@ class OD_URL_Metrics_Post_Type {
 		/**
 		 * Filters the expiration time (TTL) after which a since-unmodified od_url_metrics post will be garbage collected.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.0.0
 		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_garbage_collection_ttl
 		 *
 		 * @return int TTL for garbage collection in seconds. Defaults to 3 months.

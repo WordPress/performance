@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 4.0.0
+ * Version: 4.0.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // @codeCoverageIgnoreEnd
 
-define( 'PERFLAB_VERSION', '4.0.0' );
+define( 'PERFLAB_VERSION', '4.0.1' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -121,10 +121,6 @@ function perflab_get_standalone_plugin_data(): array {
 		),
 		'view-transitions'        => array(
 			'constant'     => 'VIEW_TRANSITIONS_VERSION',
-			'experimental' => true,
-		),
-		'web-worker-offloading'   => array(
-			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',
 			'experimental' => true,
 		),
 		'webp-uploads'            => array(

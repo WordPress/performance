@@ -226,10 +226,12 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_lazy_load_scripts
 	 */
 	public function test_embed_optimizer_lazy_load_scripts(): void {
-		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
-		$this->assertStringStartsWith( '<script type="module">', $script );
-		$this->assertStringContainsString( 'IntersectionObserver', $script );
-		$this->assertStringEndsWith( '</script>', $script );
+		$processor = new WP_HTML_Tag_Processor( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertTrue( $processor->next_tag(), 'Expected there to be a tag.' );
+		$this->assertSame( 'SCRIPT', $processor->get_tag(), 'Expected first tag to match name.' );
+		$this->assertSame( 'module', $processor->get_attribute( 'type' ), 'Expected type attribute.' );
+		$this->assertNull( $processor->get_attribute( 'nonce' ), 'Expected nonce to be null.' );
+		$this->assertStringContainsString( 'IntersectionObserver', $processor->get_modifiable_text(), 'Expected string to include IntersectionObserver.' );
 
 		add_filter(
 			'wp_inline_script_attributes',
@@ -242,9 +244,12 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 			10,
 			2
 		);
-		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
-		$this->assertStringStartsWith( '<script type="module" nonce="abc123">', $script );
-		$this->assertStringEndsWith( '</script>', $script );
+		$processor = new WP_HTML_Tag_Processor( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertTrue( $processor->next_tag(), 'Expected there to be a tag.' );
+		$this->assertSame( 'SCRIPT', $processor->get_tag(), 'Expected first tag to match name.' );
+		$this->assertSame( 'module', $processor->get_attribute( 'type' ), 'Expected type attribute.' );
+		$this->assertSame( 'abc123', $processor->get_attribute( 'nonce' ), 'Expected nonce attribute to match.' );
+		$this->assertStringContainsString( 'IntersectionObserver', $processor->get_modifiable_text(), 'Expected string to include IntersectionObserver.' );
 	}
 
 	/**

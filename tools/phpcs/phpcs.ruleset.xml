@@ -2,9 +2,6 @@
 <ruleset name="WPP-Base" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
 	<description>Sniffs for WordPress plugins</description>
 
-	<rule ref="../../vendor/wpackagist-plugin/plugin-check/vendor/plugin-check/phpcs-sniffs/PluginCheck/ruleset.xml" />
-	<rule ref="../../vendor/wpackagist-plugin/plugin-check/phpcs-rulesets/plugin-check.ruleset.xml"/>
-
 	<rule ref="PHPCompatibility"/>
 	<config name="testVersion" value="7.2-"/>
 
@@ -73,6 +70,10 @@
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>plugins/performance-lab/includes/server-timing/object-cache.copy.php</exclude-pattern>
+	</rule>
+
 	<!-- Exceptions for variable name casing. -->
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
@@ -122,9 +123,6 @@
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
 	</rule>
 
-	<rule ref="PluginCheck.CodeAnalysis.Offloading.OffloadedContent">
-		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
-	</rule>
 	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
