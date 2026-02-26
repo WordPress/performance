@@ -425,9 +425,6 @@ function auto_sizes_add_background_image_data_attributes( $content, array $parse
 	$attrs      = $parsed_block['attrs'] ?? array();
 
 	// Extract background image data based on block type.
-	$attachment_id = null;
-	$image_url     = null;
-
 	if ( 'core/cover' === $block_name ) {
 		$attachment_id = $attrs['id'] ?? null;
 		$image_url     = $attrs['url'] ?? null;
