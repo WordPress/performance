@@ -77,7 +77,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Bug Fixes**
 
-* Fix invalid Server-Timing logic for database query timing whe `$wpdb->queries` is `null` due to no query having been done yet. ([2346](https://github.com/WordPress/performance/pull/2346))
+* Fix invalid Server-Timing logic for database query timing when `$wpdb->queries` is `null` due to no query having been done yet. ([2346](https://github.com/WordPress/performance/pull/2346))
 
 **Documentation**
 
