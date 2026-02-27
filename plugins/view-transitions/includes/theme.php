@@ -141,7 +141,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 	 * animation.
 	 */
 	$is_specific_target_name = static function ( string $alias, array $args ): bool {
-		return '*' === $args['target-name'] ? false : true;
+		return ! ( '*' === $args['target-name'] );
 	};
 
 	/*
@@ -342,10 +342,10 @@ function plvt_load_view_transitions(): void {
 	if (
 		( ! is_array( $theme_support['global-transition-names'] ) || count( $theme_support['global-transition-names'] ) === 0 ) &&
 		( ! is_array( $theme_support['post-transition-names'] ) || count( $theme_support['post-transition-names'] ) === 0 ) &&
-		! (bool) $theme_support['chronological-forwards-animation'] &&
-		! (bool) $theme_support['chronological-backwards-animation'] &&
-		! (bool) $theme_support['pagination-forwards-animation'] &&
-		! (bool) $theme_support['pagination-backwards-animation']
+		false === $theme_support['chronological-forwards-animation'] &&
+		false === $theme_support['chronological-backwards-animation'] &&
+		false === $theme_support['pagination-forwards-animation'] &&
+		false === $theme_support['pagination-backwards-animation']
 	) {
 		return;
 	}
@@ -378,7 +378,7 @@ function plvt_load_view_transitions(): void {
 			$animations_js_config[ $transition_type ] = array(
 				'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
 				'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
-				'targetName'               => isset( $additional_animation_args['target-name'] ) ? $additional_animation_args['target-name'] : '*', // Special argument.
+				'targetName'               => $additional_animation_args['target-name'] ?? '*', // Special argument.
 			);
 		} else {
 			$animations_js_config[ $transition_type ] = false;
@@ -481,12 +481,12 @@ function plvt_scope_animation_stylesheet_to_transition_type( string $css, string
 
 				if ( str_contains( $rule, "\n" ) ) { // Non-minified.
 					$rule = $rule_whitespace .
-						"html:active-view-transition-type({$transition_type}) {\n" .
+						"html:active-view-transition-type($transition_type) {\n" .
 						$indent( substr( $rule, strlen( $rule_whitespace ) ), 1 ) .
 						"\n}";
 				} else { // Minified.
 					$rule = $rule_whitespace .
-					"html:active-view-transition-type({$transition_type}){" .
+					"html:active-view-transition-type($transition_type){" .
 					substr( $rule, strlen( $rule_whitespace ) ) .
 					'}';
 				}

@@ -180,7 +180,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			prefix = 'chronological-';
 		}
 
-		// If not, check if the URLs are for a multi-page post.
+		// If not, check if the URLs are for a multipage post.
 		if (
 			! oldPageMatches &&
 			! newPageMatches &&
@@ -235,7 +235,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			}
 		}
 
-		// If enabled, check if the URLs are for content labelled by date (e.g. navigation to previous/next post).
+		// If enabled, check if the URLs are for content labeled by date (e.g. navigation to previous/next post).
 		if (
 			config.animations[ 'chronological-forwards' ] ||
 			config.animations[ 'chronological-backwards' ]
