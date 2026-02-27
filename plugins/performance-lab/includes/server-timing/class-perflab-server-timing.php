@@ -290,16 +290,11 @@ class Perflab_Server_Timing {
 	 * @since 1.8.0
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
-	 * @return string|null Segment for the Server-Timing header, or null if neither value nor description is set.
+	 * @return string Segment for the Server-Timing header.
 	 */
-	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): ?string {
+	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): string {
 		$value       = $metric->get_value();
 		$description = $metric->get_description();
-
-		// If neither value nor description is set, skip this metric.
-		if ( null === $value && null === $description ) {
-			return null;
-		}
 
 		// See https://github.com/WordPress/performance/issues/955.
 		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );

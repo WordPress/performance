@@ -311,6 +311,9 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 		$measure_duration_only    = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 50 );
 		};
+		$measure_name_only        = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			unset( $metric );
+		};
 
 		return array(
 			'metric with duration and description' => array(
@@ -340,8 +343,17 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 				),
 			),
+			'metric with name only'                => array(
+				'wp-missed-cache',
+				array(
+					'missed-cache' => array(
+						'measure_callback' => $measure_name_only,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
 			'mixed metrics'                        => array(
-				'wp-with-both;dur=100;desc="Database queries", wp-desc-only;desc="Cache operations", wp-dur-only;dur=50',
+				'wp-with-both;dur=100;desc="Database queries", wp-desc-only;desc="Cache operations", wp-dur-only;dur=50, wp-name-only',
 				array(
 					'with-both' => array(
 						'measure_callback' => $measure_with_description,
@@ -353,6 +365,10 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 					'dur-only'  => array(
 						'measure_callback' => $measure_duration_only,
+						'access_cap'       => 'exist',
+					),
+					'name-only' => array(
+						'measure_callback' => $measure_name_only,
 						'access_cap'       => 'exist',
 					),
 				),
