@@ -78,11 +78,12 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * Metrics (by returning true). When visiting the parent `figure.wp-block-embed` tag, it does all the actual
 	 * processing. In particular, it will use the element metrics gathered for the child `div.wp-block-embed__wrapper`
 	 * element to set the min-height style on the `figure.wp-block-embed` to avoid layout shifts. Additionally, when
-	 * the embed is in the initial viewport for any breakpoint, it will add preconnect links for key resources.
+	 * the embed is in the initial viewport for any breakpoint, it will add dns-prefetch links for key resources.
 	 * Otherwise, if the embed is not in any initial viewport, it will add lazy-loading logic.
 	 *
 	 * @since 0.2.0
 	 * @since 0.4.0 Adds preconnect links for each viewport group and skips if the element is not in the viewport for that group.
+	 * @since n.e.x.t Switches from preconnect links to dns-prefetch links.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL Metrics.
@@ -104,7 +105,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		$this->reduce_layout_shifts( $context );
-		$this->add_preconnect_links( $context );
+		$this->add_dns_prefetch_links( $context );
 		$this->lazy_load_embeds( $context );
 
 		/*
@@ -187,7 +188,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			foreach ( $minimums as $minimum ) {
 				$style_rule = sprintf(
 					'#%s { min-height: %dpx; }',
-					$element_id,
+					$this->escape_css( $element_id ),
 					$minimum['height']
 				);
 
@@ -207,24 +208,98 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Gets preconnect URLs based on embed type.
+	 * Escapes a CSS identifier.
+	 *
+	 * This is a PHP implementation of the CSS.escape() method in CSSOM, based on the
+	 * JavaScript polyfill by Mathias Bynens.
+	 *
+	 * @since 1.0.0
+	 * @link https://drafts.csswg.org/cssom/#the-css.escape()-method
+	 * @link https://github.com/mathiasbynens/CSS.escape
+	 * @link https://mathiasbynens.be/notes/css-escapes
+	 * @license MIT
+	 *
+	 * @param string $ident Identifier to escape.
+	 * @return string Escaped identifier.
+	 */
+	private function escape_css( string $ident ): string {
+		$length          = strlen( $ident );
+		$result          = '';
+		$first_code_unit = $length > 0 ? ord( $ident[0] ) : 0;
+
+		for ( $i = 0; $i < $length; $i++ ) {
+			$code_unit = ord( $ident[ $i ] );
+
+			// If the character is NULL (U+0000), then the REPLACEMENT CHARACTER (U+FFFD).
+			if ( 0x0000 === $code_unit ) {
+				$result .= "\u{FFFD}";
+				continue;
+			}
+
+			if (
+				// If the character is in the range [\1-\1f] (U+0001 to U+001F) or is U+007F...
+				$code_unit <= 0x001F || 0x007F === $code_unit ||
+				// If the character is the first character and is in the range [0-9] (U+0030 to U+0039)...
+				( 0 === $i && $code_unit >= 0x0030 && $code_unit <= 0x0039 ) ||
+				// If the character is the second character and is in the range [0-9] (U+0030 to U+0039) and the first character is a `-` (U+002D)...
+				( 1 === $i && $code_unit >= 0x0030 && $code_unit <= 0x0039 && 0x002D === $first_code_unit )
+			) {
+				$result .= '\\' . dechex( $code_unit ) . ' ';
+				continue;
+			}
+
+			// If the character is the first character and is a `-` (U+002D), and there is no second character...
+			if (
+				0 === $i &&
+				1 === $length &&
+				0x002D === $code_unit
+			) {
+				$result .= '\\' . $ident[ $i ];
+				continue;
+			}
+
+			// If the character is not handled by one of the above rules and is
+			// greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
+			// is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
+			// U+005A), or [a-z] (U+0061 to U+007A)...
+			if (
+				$code_unit >= 0x0080 ||
+				0x002D === $code_unit ||
+				0x005F === $code_unit ||
+				( $code_unit >= 0x0030 && $code_unit <= 0x0039 ) ||
+				( $code_unit >= 0x0041 && $code_unit <= 0x005A ) ||
+				( $code_unit >= 0x0061 && $code_unit <= 0x007A )
+			) {
+				$result .= $ident[ $i ];
+				continue;
+			}
+
+			// Otherwise, the escaped character.
+			$result .= '\\' . $ident[ $i ];
+		}
+		return $result;
+	}
+
+	/**
+	 * Gets dns-prefetch URLs based on embed type.
 	 *
 	 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
-	 * The list of hosts being preconnected to was obtained by inserting an embed into a post and then looking
+	 * The list of hosts being dns-prefetched to was obtained by inserting an embed into a post and then looking
 	 * at the network log on the frontend as the embed renders. Each should include the host of the iframe src
 	 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
 	 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
 	 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
-	 * it is a likely case of a load balancing domain name which cannot be safely preconnected since it could
+	 * it is a likely case of a load balancing domain name which cannot be effectively dns-prefetched since it could
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
 	 * @since 0.4.1
+	 * @since n.e.x.t This was originally the ::get_preconnect_urls() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
-	 * @return array<non-empty-string> Array of URLs to preconnect to.
+	 * @return array<non-empty-string> Array of URLs to dns-prefetch.
 	 */
-	private function get_preconnect_urls( OD_HTML_Tag_Processor $processor ): array {
+	private function get_dns_prefetch_urls( OD_HTML_Tag_Processor $processor ): array {
 		$urls      = array();
 		$has_class = static function ( string $wanted_class ) use ( $processor ): bool {
 			return true === $processor->has_class( $wanted_class );
@@ -259,7 +334,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			// Note: The other domains used for TikTok embeds include https://lf16-tiktok-web.tiktokcdn-us.com,
 			// https://lf16-cdn-tos.tiktokcdn-us.com, and https://lf16-tiktok-common.tiktokcdn-us.com among others
 			// which either appear to be geo-targeted ('-us') _or_ load-balanced ('lf16'). So these are not added
-			// to the preconnected hosts.
+			// to the dns-prefetched hosts.
 		} elseif ( $has_class( 'wp-block-embed-amazon' ) ) {
 			$urls[] = 'https://read.amazon.com';
 			$urls[] = 'https://m.media-amazon.com';
@@ -277,17 +352,18 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Adds preconnect links for embed resources.
+	 * Adds dns-prefetch links for embed resources.
 	 *
 	 * @since 0.4.1
+	 * @since n.e.x.t This was originally the ::add_preconnect_links() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
-	private function add_preconnect_links( OD_Tag_Visitor_Context $context ): void {
+	private function add_dns_prefetch_links( OD_Tag_Visitor_Context $context ): void {
 		$processor           = $context->processor;
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
-		foreach ( $this->get_preconnect_urls( $processor ) as $preconnect_url ) {
+		foreach ( $this->get_dns_prefetch_urls( $processor ) as $dns_prefetch_url ) {
 			foreach ( $context->url_metric_group_collection as $group ) {
 				if ( $group->get_element_max_intersection_ratio( $embed_wrapper_xpath ) < PHP_FLOAT_EPSILON ) {
 					continue;
@@ -295,8 +371,8 @@ final class Embed_Optimizer_Tag_Visitor {
 
 				$context->link_collection->add_link(
 					array(
-						'rel'  => 'preconnect',
-						'href' => $preconnect_url,
+						'rel'  => 'dns-prefetch',
+						'href' => $dns_prefetch_url,
 					),
 					$group->get_minimum_viewport_width(),
 					$group->get_maximum_viewport_width()
