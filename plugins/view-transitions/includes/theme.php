@@ -310,8 +310,12 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
  * Loads view transitions based on the current configuration.
  *
  * @since 1.0.0
+ *
+ * @global WP_Rewrite $wp_rewrite
  */
 function plvt_load_view_transitions(): void {
+	global $wp_rewrite;
+
 	if ( ! current_theme_supports( 'view-transitions' ) ) {
 		return;
 	}
@@ -390,6 +394,7 @@ function plvt_load_view_transitions(): void {
 		'globalTransitionNames' => $theme_support['global-transition-names'],
 		'postTransitionNames'   => $theme_support['post-transition-names'],
 		'animations'            => $animations_js_config,
+		'paginationBase'        => $wp_rewrite->pagination_base,
 	);
 
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents

@@ -159,6 +159,7 @@ window.plvtInitViewTransitions = ( config ) => {
 		const oldURL = new URL( oldEntry.url );
 		const newURL = new URL( newEntry.url );
 
+		// TODO: Handle non-pretty permalinks.
 		const oldPathname = oldURL.pathname;
 		const newPathname = newURL.pathname;
 
@@ -175,8 +176,12 @@ window.plvtInitViewTransitions = ( config ) => {
 			config.animations[ 'chronological-forwards' ] ||
 			config.animations[ 'chronological-backwards' ]
 		) {
-			oldPageMatches = oldPathname.match( /\/page\/(\d+)\/?$/ );
-			newPageMatches = newPathname.match( /\/page\/(\d+)\/?$/ );
+			const pagedRegEx = new RegExp(
+				'/' + config.paginationBase + '/(\\d+)/?$' // TODO: Escape.
+			);
+			// TODO: Handle non-pretty permalinks.
+			oldPageMatches = oldPathname.match( pagedRegEx );
+			newPageMatches = newPathname.match( pagedRegEx );
 			prefix = 'chronological-';
 		}
 
@@ -187,6 +192,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			( config.animations[ 'pagination-forwards' ] ||
 				config.animations[ 'pagination-backwards' ] )
 		) {
+			// TODO: Handle non-pretty permalinks.
 			oldPageMatches = oldPathname.match( /\/(\d+)\/?$/ );
 			newPageMatches = newPathname.match( /\/(\d+)\/?$/ );
 			prefix = 'pagination-';
@@ -240,6 +246,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			config.animations[ 'chronological-forwards' ] ||
 			config.animations[ 'chronological-backwards' ]
 		) {
+			// TODO: Handle non-pretty permalinks.
 			const oldDateMatches = oldPathname.match(
 				/\/(\d{4})\/(\d{2})\/(\d{2})\/[^\/]+\/?$/
 			);

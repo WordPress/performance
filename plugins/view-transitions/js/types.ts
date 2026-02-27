@@ -8,6 +8,7 @@ export type ViewTransitionsConfig = {
 	globalTransitionNames?: Record< string, string >;
 	postTransitionNames?: Record< string, string >;
 	animations?: Record< string, ViewTransitionAnimationConfig >;
+	paginationBase: string;
 };
 
 export type InitViewTransitionsFunction = (
