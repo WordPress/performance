@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *               }
  *
  * @phpstan-type LinkAttributes array{
- *                   rel: 'preload'|'modulepreload'|'preconnect',
+ *                   rel: 'preload'|'modulepreload'|'preconnect'|'dns-prefetch',
  *                   href?: non-empty-string,
  *                   imagesrcset?: non-empty-string,
  *                   imagesizes?: non-empty-string,
@@ -37,6 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.3.0
  * @since 0.4.0 Renamed from OD_Preload_Link_Collection.
+ * @since n.e.x.t Added support for dns-prefetch.
  */
 final class OD_Link_Collection implements Countable {
 
@@ -53,6 +54,7 @@ final class OD_Link_Collection implements Countable {
 	 * Adds link.
 	 *
 	 * @since 0.3.0
+	 * @since n.e.x.t Added support for dns-prefetch.
 	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *
@@ -81,6 +83,11 @@ final class OD_Link_Collection implements Countable {
 			$throw_invalid_argument_exception(
 				/* translators: 1: link, 2: rel=preconnect, 3: 'href' attribute name */
 				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=preconnect', 'href' )
+			);
+		} elseif ( 'dns-prefetch' === $attributes['rel'] && ! array_key_exists( 'href', $attributes ) ) {
+			$throw_invalid_argument_exception(
+				/* translators: 1: link, 2: rel=dns-prefetch, 3: 'href' attribute name */
+				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=dns-prefetch', 'href' )
 			);
 		}
 		if ( ! array_key_exists( 'href', $attributes ) && ! array_key_exists( 'imagesrcset', $attributes ) ) {
