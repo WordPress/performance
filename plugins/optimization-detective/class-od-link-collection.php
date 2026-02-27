@@ -37,6 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.3.0
  * @since 0.4.0 Renamed from OD_Preload_Link_Collection.
+ * @since n.e.x.t Added support for dns-prefetch.
  */
 final class OD_Link_Collection implements Countable {
 
@@ -53,6 +54,7 @@ final class OD_Link_Collection implements Countable {
 	 * Adds link.
 	 *
 	 * @since 0.3.0
+	 * @since n.e.x.t Added support for dns-prefetch.
 	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *

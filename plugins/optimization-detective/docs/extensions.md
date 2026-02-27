@@ -30,7 +30,7 @@ As mentioned above, this plugin is a dependency that doesn't provide features on
 **[Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) ([GitHub](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer)):**
 
 1. Lazy loading embeds just before they come into view. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L298-L324), [2](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L168-L336))
-2. Adding preconnect links for embeds in the initial viewport. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L199-L296))
+2. Adding `dns-prefetch` links for embeds in the initial viewport. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L199-L296))
 3. Reserving space for embeds that resize to reduce layout shifting. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L64-L65), [2](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L81-L144), [3](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/detect.js), [4](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L130-L197))
 
 ## Extension Plugins
@@ -38,7 +38,7 @@ As mentioned above, this plugin is a dependency that doesn't provide features on
 Stable plugins for use in production from the WordPress.org Plugin Directory:
 
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/): Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy loading.
-* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/): Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
+* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/): Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
 
 Experimental plugins being explored exploration, from repositories on GitHub:
 

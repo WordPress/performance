@@ -78,11 +78,12 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * Metrics (by returning true). When visiting the parent `figure.wp-block-embed` tag, it does all the actual
 	 * processing. In particular, it will use the element metrics gathered for the child `div.wp-block-embed__wrapper`
 	 * element to set the min-height style on the `figure.wp-block-embed` to avoid layout shifts. Additionally, when
-	 * the embed is in the initial viewport for any breakpoint, it will add preconnect links for key resources.
+	 * the embed is in the initial viewport for any breakpoint, it will add dns-prefetch links for key resources.
 	 * Otherwise, if the embed is not in any initial viewport, it will add lazy-loading logic.
 	 *
 	 * @since 0.2.0
 	 * @since 0.4.0 Adds preconnect links for each viewport group and skips if the element is not in the viewport for that group.
+	 * @since n.e.x.t Switches from preconnect links to dns-prefetch links.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL Metrics.
@@ -280,7 +281,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Gets dns-prefech URLs based on embed type.
+	 * Gets dns-prefetch URLs based on embed type.
 	 *
 	 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
 	 * The list of hosts being dns-prefetched to was obtained by inserting an embed into a post and then looking
@@ -288,11 +289,12 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
 	 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
 	 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
-	 * it is a likely case of a load balancing domain name which cannot be safely dns-prefetched since it could
+	 * it is a likely case of a load balancing domain name which cannot be effectively dns-prefetched since it could
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
 	 * @since 0.4.1
+	 * @since n.e.x.t This was originally the ::get_preconnect_urls() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
 	 * @return array<non-empty-string> Array of URLs to dns-prefetch.
@@ -332,7 +334,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			// Note: The other domains used for TikTok embeds include https://lf16-tiktok-web.tiktokcdn-us.com,
 			// https://lf16-cdn-tos.tiktokcdn-us.com, and https://lf16-tiktok-common.tiktokcdn-us.com among others
 			// which either appear to be geo-targeted ('-us') _or_ load-balanced ('lf16'). So these are not added
-			// to the preconnected hosts.
+			// to the dns-prefetched hosts.
 		} elseif ( $has_class( 'wp-block-embed-amazon' ) ) {
 			$urls[] = 'https://read.amazon.com';
 			$urls[] = 'https://m.media-amazon.com';
@@ -353,6 +355,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * Adds dns-prefetch links for embed resources.
 	 *
 	 * @since 0.4.1
+	 * @since n.e.x.t This was originally the ::add_preconnect_links() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
