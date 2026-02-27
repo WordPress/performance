@@ -396,4 +396,33 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$this->assertFalse( function_exists( 'plwwo_rank_math_configure' ) );
 		$this->assertFalse( function_exists( 'plwwo_woocommerce_configure' ) );
 	}
+
+	/**
+	 * Test the sunset notice hook.
+	 *
+	 * @covers ::plwwo_render_sunset_notice
+	 */
+	public function test_plwwo_render_sunset_notice_hook(): void {
+		$this->assertEquals( 10, has_action( 'after_plugin_row_meta', 'plwwo_render_sunset_notice' ) );
+	}
+
+	/**
+	 * Test rendering the sunset notice.
+	 *
+	 * @covers ::plwwo_render_sunset_notice
+	 */
+	public function test_plwwo_render_sunset_notice_rendering(): void {
+		$plugin_file = 'web-worker-offloading/load.php';
+
+		$output = get_echo( 'plwwo_render_sunset_notice', array( $plugin_file ) );
+
+		$this->assertStringContainsString( 'notice-warning', $output );
+		$this->assertStringContainsString( 'The Web Worker Offloading plugin is proposed for being sunset.', $output );
+		$this->assertStringContainsString( 'Interaction to Next Paint (INP)', $output );
+		$this->assertStringContainsString( 'https://wordpress.org/support/plugin/web-worker-offloading/', $output );
+
+		// Test with different plugin file.
+		$output = get_echo( 'plwwo_render_sunset_notice', array( 'other-plugin/load.php' ) );
+		$this->assertEmpty( $output );
+	}
 }
