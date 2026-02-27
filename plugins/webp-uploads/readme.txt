@@ -67,6 +67,10 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 2.6.2 =
 
+**Bug Fixes**
+
+* Only attempt to get dominant colour for image mime types. ([2264](https://github.com/WordPress/performance/pull/2264))
+
 = 2.6.1 =
 
 **Bug Fixes**

@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 7.0
-Stable tag:   1.2.0
+Stable tag:   1.2.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, dominant color
@@ -46,6 +46,12 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.2.1 =
+
+**Bug Fixes**
+
+* Only attempt to get dominant colour for image mime types. ([2264](https://github.com/WordPress/performance/pull/2264))
 
 = 1.2.0 =
 

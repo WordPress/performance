@@ -57,6 +57,10 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta5 =
 
+**Bug Fixes**
+
+* Prevent fatal error in `od_get_current_url_metrics_etag()` when `$wp_query->posts` is `null`. ([2347](https://github.com/WordPress/performance/pull/2347))
+
 = 1.0.0-beta4 =
 
 **Enhancements**

@@ -75,6 +75,14 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 4.1.0 =
 
+**Bug Fixes**
+
+* Fix invalid Server-Timing logic for database query timing whe `$wpdb->queries` is `null` due to no query having been done yet. ([2346](https://github.com/WordPress/performance/pull/2346))
+
+**Documentation**
+
+* Remove Web Worker Offloading from being featured by Performance Lab. ([2404](https://github.com/WordPress/performance/pull/2404))
+
 = 4.0.1 =
 
 **Bug Fixes**

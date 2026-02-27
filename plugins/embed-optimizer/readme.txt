@@ -69,6 +69,10 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 1.0.0-beta5 =
 
+**Bug Fixes**
+
+* Switch initial viewport embeds from preconnect to dns-prefetch links. ([2256](https://github.com/WordPress/performance/pull/2256))
+
 = 1.0.0-beta4 =
 
 **Security**

@@ -58,6 +58,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.2.0 =
 
+**Enhancements**
+
+* Omit admin View Transitions functionality when present in core. ([2344](https://github.com/WordPress/performance/pull/2344))
+
 = 1.1.2 =
 
 **Bug Fixes**
