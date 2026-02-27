@@ -82,6 +82,11 @@ final class OD_Link_Collection implements Countable {
 				/* translators: 1: link, 2: rel=preconnect, 3: 'href' attribute name */
 				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=preconnect', 'href' )
 			);
+		} elseif ( 'dns-prefetch' === $attributes['rel'] && ! array_key_exists( 'href', $attributes ) ) {
+			$throw_invalid_argument_exception(
+				/* translators: 1: link, 2: rel=dns-prefetch, 3: 'href' attribute name */
+				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=dns-prefetch', 'href' )
+			);
 		}
 		if ( ! array_key_exists( 'href', $attributes ) && ! array_key_exists( 'imagesrcset', $attributes ) ) {
 			$throw_invalid_argument_exception(
