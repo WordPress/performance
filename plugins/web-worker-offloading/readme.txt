@@ -1,7 +1,7 @@
 === Web Worker Offloading ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag:   0.2.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
