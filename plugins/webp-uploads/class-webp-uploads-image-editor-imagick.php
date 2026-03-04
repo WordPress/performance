@@ -106,7 +106,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 				}
 
 				// Use mean and range to determine if there is any transparency more efficiently.
-				$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_ALL );
+				$rgb_mean    = $this->image->getImageChannelMean( Imagick::CHANNEL_DEFAULT );
 				$alpha_range = $this->image->getImageChannelRange( Imagick::CHANNEL_ALPHA );
 
 				if ( isset( $rgb_mean['mean'], $alpha_range['maxima'] ) ) {
