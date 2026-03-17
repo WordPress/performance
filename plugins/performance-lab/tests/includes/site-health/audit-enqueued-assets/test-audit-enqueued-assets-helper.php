@@ -520,8 +520,43 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script1.js' ) );
 		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script2.js' ) );
-		$this->assertEquals( 0, perflab_aea_get_asset_size( 'https://example.com/script3.js' ) );
+
+		$zero_size_result = perflab_aea_get_asset_size( 'https://example.com/script3.js' );
+		$this->assertWPError( $zero_size_result );
+		$this->assertSame( 'zero_size', $zero_size_result->get_error_code() );
+
 		$this->assertEquals( 1000, perflab_aea_get_asset_size( 'https://example.com/script4.js' ) );
+	}
+
+	/**
+	 * Tests perflab_aea_get_asset_size() returns error for non-cacheable Cache-Control header.
+	 *
+	 * @covers ::perflab_aea_get_asset_size
+	 */
+	public function test_perflab_aea_get_asset_size_non_cacheable(): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $parsed_args, $url ) {
+				if ( 'https://example.com/nocache.js' !== $url ) {
+					return $preempt;
+				}
+				return array(
+					'headers'  => new WpOrg\Requests\Utility\CaseInsensitiveDictionary( array( 'Cache-Control' => 'no-store' ) ),
+					'body'     => 'var x = 1;',
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+				);
+			},
+			10,
+			3
+		);
+
+		$result = perflab_aea_get_asset_size( 'https://example.com/nocache.js' );
+		$this->assertWPError( $result );
+		$this->assertSame( 'non_cacheable', $result->get_error_code() );
+		$this->assertStringContainsString( 'no-store', $result->get_error_message() );
 	}
 
 	/**

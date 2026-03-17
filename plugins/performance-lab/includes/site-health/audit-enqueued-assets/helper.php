@@ -522,9 +522,30 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		);
 	}
 
-	// TODO: A non-cacheable response should also be considered an error.
-	// TODO: A size of zero could be considered an error too.
-	return strlen( wp_remote_retrieve_body( $response ) );
+	$body = wp_remote_retrieve_body( $response );
+	if ( 0 === strlen( $body ) ) {
+		return new WP_Error(
+			'zero_size',
+			__( 'The asset returned an empty response (0 bytes).', 'performance-lab' )
+		);
+	}
+
+	$cache_control = wp_remote_retrieve_header( $response, 'Cache-Control' );
+	if ( is_string( $cache_control ) && ( false !== stripos( $cache_control, 'no-store' ) || false !== stripos( $cache_control, 'no-cache' ) ) ) {
+		return new WP_Error(
+			'non_cacheable',
+			wp_kses(
+				sprintf(
+					/* translators: %s is the Cache-Control header value */
+					__( 'The asset is not cacheable (<code>Cache-Control: %s</code>), which can harm performance.', 'performance-lab' ),
+					esc_html( $cache_control )
+				),
+				array( 'code' => array() )
+			)
+		);
+	}
+
+	return strlen( $body );
 }
 
 /**
