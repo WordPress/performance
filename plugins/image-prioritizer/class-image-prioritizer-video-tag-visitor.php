@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Tag visitor that optimizes VIDEO tags:
  * - Adds preload links for poster images if in a breakpoint group's LCP.

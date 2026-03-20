@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Helper function to detect if static assets have effective caching headers.
  *

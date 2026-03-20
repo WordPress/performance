@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Plugin Name: Modern Image Formats
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/webp-uploads

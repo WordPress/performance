@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective

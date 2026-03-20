@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Optimization Detective: OD_Tag_Visitor_Context class
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Admin related functions for View Transitions.
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Tag visitor for Embed Optimizer.
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * REST API integration for the plugin: OD_REST_URL_Metrics_Store_Endpoint.
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Web Worker Offloading integration with Site Kit by Google.
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Server-Timing API: Perflab_Server_Timing_Metric class
  *

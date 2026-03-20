@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Class 'PLVT_View_Transition_Animation_Registry'.
  *

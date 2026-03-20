@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Support for WordPress Core API for Speculative Loading.
  *

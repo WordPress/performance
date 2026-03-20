@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance

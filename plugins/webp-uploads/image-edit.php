@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Edit images integration for the plugin, including backup and restore support.
  *

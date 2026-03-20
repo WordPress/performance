@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Theme related functions for View Transitions.
  *

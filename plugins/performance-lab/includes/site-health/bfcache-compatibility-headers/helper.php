@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Helper functions used for Cache-Control headers for bfcache compatibility site health check.
  *

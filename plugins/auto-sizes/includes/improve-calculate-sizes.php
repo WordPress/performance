@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Functionality to improve the calculation of image `sizes` attributes.
  *

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Class 'PLSR_URL_Pattern_Prefixer'.
  *

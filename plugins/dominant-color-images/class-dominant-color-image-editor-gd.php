@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * WordPress Image Editor Class for Image Manipulation through GD
  * with dominant color detection

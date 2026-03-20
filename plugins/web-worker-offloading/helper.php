@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Helpers for Web Worker Offloading.
  *

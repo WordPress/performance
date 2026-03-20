@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Image Prioritizer: IP_Background_Image_Styled_Tag_Visitor class
  *
