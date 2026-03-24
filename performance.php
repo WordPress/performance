@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Performance monorepo (not a real plugin)
  * Plugin URI: https://github.com/WordPress/performance
@@ -10,6 +9,8 @@ declare( strict_types = 1 );
  *
  * @package performance
  */
+
+ declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
