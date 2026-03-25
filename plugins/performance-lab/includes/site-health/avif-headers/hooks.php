@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Hook callbacks used for AVIF Headers.
  *
  * @package performance-lab
  * @since 3.6.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

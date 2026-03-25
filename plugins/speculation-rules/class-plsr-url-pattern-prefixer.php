@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Class 'PLSR_URL_Pattern_Prefixer'.
  *
  * @package speculation-rules
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Web Worker Offloading integration with WooCommerce.
  *
  * @since 0.1.0
  * @package web-worker-offloading
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Admin settings helper functions.
  *
  * @package performance-lab
  * @noinspection PhpRedundantOptionalArgumentInspection
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

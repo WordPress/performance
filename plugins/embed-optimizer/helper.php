@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Helper functions for Embed Optimizer.
  *
  * @since 1.0.0
  * @package embed-optimizer
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

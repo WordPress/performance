@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Optimization Detective: OD_Strict_URL_Metric class
  *
  * @package optimization-detective
  * @since 0.6.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

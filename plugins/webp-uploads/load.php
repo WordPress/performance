@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Modern Image Formats
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/webp-uploads
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package webp-uploads
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

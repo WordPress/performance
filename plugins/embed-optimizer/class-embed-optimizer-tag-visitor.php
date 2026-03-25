@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Tag visitor for Embed Optimizer.
  *
  * @package embed-optimizer
  * @since 0.2.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

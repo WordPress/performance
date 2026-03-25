@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Helper functions used for Enqueued Assets Health Check.
  *
  * @package performance-lab
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

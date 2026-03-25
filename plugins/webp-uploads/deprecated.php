@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Deprecated functions.
  *
@@ -7,6 +6,8 @@ declare( strict_types = 1 );
  *
  * @since 1.1.1
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

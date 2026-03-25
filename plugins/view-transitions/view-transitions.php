@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: View Transitions
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/view-transitions
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package view-transitions
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

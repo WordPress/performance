@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Third-party integration loader for Web Worker Offloading.
  *
  * @since 0.1.0
  * @package web-worker-offloading
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

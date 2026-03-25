@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Embed Optimizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package embed-optimizer
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

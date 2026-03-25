@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Web Worker Offloading integration with Rank Math SEO.
  *
  * @since 0.2.0
  * @package web-worker-offloading
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

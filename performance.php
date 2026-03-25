@@ -10,7 +10,7 @@
  * @package performance
  */
 
- declare( strict_types = 1 );
+declare( strict_types = 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.

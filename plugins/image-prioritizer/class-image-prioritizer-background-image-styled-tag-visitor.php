@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Image Prioritizer: IP_Background_Image_Styled_Tag_Visitor class
  *
  * @package image-prioritizer
  * @since 0.1.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

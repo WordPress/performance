@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Web Worker Offloading
  * Plugin URI: https://github.com/WordPress/performance/issues/176
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package web-worker-offloading
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Optimization Detective: OD_HTML_Tag_Processor class
  *
  * @package optimization-detective
  * @since 0.1.1
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

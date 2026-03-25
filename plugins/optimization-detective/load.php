@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package optimization-detective
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

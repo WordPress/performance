@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Edit images integration for the plugin, including backup and restore support.
  *
@@ -7,6 +6,8 @@ declare( strict_types = 1 );
  *
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

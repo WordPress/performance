@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin uninstaller logic.
  *
  * @package speculation-rules
  * @since 1.2.0
  */
+
+declare( strict_types = 1 );
 
 // If uninstall.php is not called by WordPress, bail.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {

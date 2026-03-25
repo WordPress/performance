@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * WordPress Image Editor Class for Image Manipulation through Imagick
  * with dominant color detection
@@ -8,6 +7,8 @@ declare( strict_types = 1 );
  *
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 /**
  * WordPress Image Editor Class for Image Manipulation through Imagick

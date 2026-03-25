@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Deprecated functions and constants.
  *
@@ -9,6 +8,8 @@ declare( strict_types = 1 );
  *
  * @noinspection PhpUnused
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

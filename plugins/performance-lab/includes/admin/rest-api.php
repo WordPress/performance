@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * REST API integration for the plugin.
  *
  * @package performance-lab
  * @since 3.6.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Hook callbacks used for Server Timing.
  *
@@ -7,6 +6,8 @@ declare( strict_types = 1 );
  *
  * @since 3.1.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

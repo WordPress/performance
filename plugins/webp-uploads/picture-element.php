@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Add `picture` element support
  *
@@ -7,6 +6,8 @@ declare( strict_types = 1 );
  *
  * @since 2.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

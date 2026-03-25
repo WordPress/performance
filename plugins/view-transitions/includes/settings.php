@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Settings functions used for View Transitions.
  *
  * @package view-transitions
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

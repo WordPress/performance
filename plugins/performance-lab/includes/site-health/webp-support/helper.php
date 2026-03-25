@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Helper functions used for WebP Support.
  *
  * @package performance-lab
  * @since 2.1.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Hook callbacks used for Enhanced Responsive Images.
  *
  * @package auto-sizes
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package performance-lab
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

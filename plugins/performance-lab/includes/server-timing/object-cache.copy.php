@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Performance Lab Server Timing Object Cache Drop-In
  * Plugin URI: https://github.com/WordPress/performance
@@ -28,6 +27,8 @@ declare( strict_types = 1 );
  * @package performance-lab
  * @since 1.8.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

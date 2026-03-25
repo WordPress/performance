@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Hook callbacks used for Embed Optimizer.
  *
  * @since 0.1.0
  * @package embed-optimizer
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

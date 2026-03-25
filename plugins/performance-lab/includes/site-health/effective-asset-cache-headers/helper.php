@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Helper function to detect if static assets have effective caching headers.
  *
  * @package performance-lab
  * @since 3.8.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

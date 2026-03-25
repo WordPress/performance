@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Site Health checks.
  *
  * @package optimization-detective
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

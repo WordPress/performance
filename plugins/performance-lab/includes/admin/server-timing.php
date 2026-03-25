@@ -1,10 +1,11 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Server-Timing API admin integration file.
  *
  * @package performance-lab
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

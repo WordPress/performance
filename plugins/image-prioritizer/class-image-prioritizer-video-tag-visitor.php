@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Tag visitor that optimizes VIDEO tags:
  * - Adds preload links for poster images if in a breakpoint group's LCP.
@@ -8,6 +7,8 @@ declare( strict_types = 1 );
  *
  * @since 0.2.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

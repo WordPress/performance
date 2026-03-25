@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Server-Timing API: Perflab_Server_Timing_Metric class
  *
  * @package performance-lab
  * @since 1.8.0
  */
+
+declare( strict_types = 1 );
 
 /**
  * Class representing a single Server-Timing metric.

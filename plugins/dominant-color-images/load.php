@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Image Placeholders
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/dominant-color-images
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package dominant-color-images
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

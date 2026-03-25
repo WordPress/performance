@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Support for WordPress Core API for Speculative Loading.
  *
  * @package speculation-rules
  * @since 1.5.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

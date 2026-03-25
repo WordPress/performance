@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Class 'PLVT_View_Transition_Animation_Registry'.
  *
  * @package view-transitions
  * @since 1.0.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Enhanced Responsive Images
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
@@ -15,6 +14,8 @@ declare( strict_types = 1 );
  *
  * @package auto-sizes
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,12 @@
 <?php
-declare( strict_types = 1 );
 /**
  * REST API integration for the plugin: OD_REST_URL_Metrics_Store_Endpoint.
  *
  * @package optimization-detective
  * @since 0.1.0
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
