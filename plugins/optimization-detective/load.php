@@ -15,8 +15,6 @@
  * @package optimization-detective
  */
 
-declare( strict_types = 1 );
-
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
