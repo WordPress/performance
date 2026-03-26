@@ -157,10 +157,6 @@ function perflab_aao_query_autoloaded_options(): array {
 			$option_value = serialize( $option_value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
-		if ( ! is_string( $option_value ) ) {
-			$option_value = (string) $option_value;
-		}
-
 		if ( strlen( $option_value ) > $option_threshold ) {
 			$large_options[] = (object) array(
 				'option_name'         => $option_name,
