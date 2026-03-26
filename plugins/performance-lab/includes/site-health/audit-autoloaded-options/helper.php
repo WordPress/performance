@@ -153,7 +153,7 @@ function perflab_aao_query_autoloaded_options(): array {
 			continue;
 		}
 
-		if ( is_array( $option_value ) || is_object( $option_value ) ) {
+		if ( ! is_string( $option_value ) ) {
 			$option_value = serialize( $option_value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
