@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.9
-Stable tag:   4.0.1
+Tested up to: 7.0
+Stable tag:   4.1.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -72,6 +72,16 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.1.0 =
+
+**Bug Fixes**
+
+* Fix invalid Server-Timing logic for database query timing when `$wpdb->queries` is `null` due to no query having been done yet. ([2346](https://github.com/WordPress/performance/pull/2346))
+
+**Documentation**
+
+* Remove Web Worker Offloading from being featured by Performance Lab. ([2404](https://github.com/WordPress/performance/pull/2404))
 
 = 4.0.1 =
 

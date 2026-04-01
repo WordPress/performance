@@ -77,7 +77,7 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	 * Filter the array of supported mime types for dominant color extraction, by default the plugin
 	 * supports image types supported by WordPress Core.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.2.1
 	 *
 	 * @param string[] $supported_mime_types Array of supported mime types. Defaults are 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'.
 	 */

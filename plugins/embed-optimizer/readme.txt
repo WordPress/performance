@@ -1,8 +1,8 @@
 === Embed Optimizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.9
-Stable tag:   1.0.0-beta4
+Tested up to: 7.0
+Stable tag:   1.0.0-beta5
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, embeds, optimization-detective
@@ -66,6 +66,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta5 =
+
+**Bug Fixes**
+
+* Switch initial viewport embeds from preconnect to dns-prefetch links. ([2256](https://github.com/WordPress/performance/pull/2256))
 
 = 1.0.0-beta4 =
 

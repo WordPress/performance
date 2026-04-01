@@ -83,7 +83,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @since 0.2.0
 	 * @since 0.4.0 Adds preconnect links for each viewport group and skips if the element is not in the viewport for that group.
-	 * @since n.e.x.t Switches from preconnect links to dns-prefetch links.
+	 * @since 1.0.0 Switches from preconnect links to dns-prefetch links.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL Metrics.
@@ -294,7 +294,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
 	 * @since 0.4.1
-	 * @since n.e.x.t This was originally the ::get_preconnect_urls() method, renamed to use dns-prefetch.
+	 * @since 1.0.0 This was originally the ::get_preconnect_urls() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
 	 * @return array<non-empty-string> Array of URLs to dns-prefetch.
@@ -355,7 +355,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * Adds dns-prefetch links for embed resources.
 	 *
 	 * @since 0.4.1
-	 * @since n.e.x.t This was originally the ::add_preconnect_links() method, renamed to use dns-prefetch.
+	 * @since 1.0.0 This was originally the ::add_preconnect_links() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
