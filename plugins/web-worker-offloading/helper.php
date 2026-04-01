@@ -202,7 +202,7 @@ function plwwo_render_generator_meta_tag(): void {
 /**
  * Displays a sunset warning notice for the plugin in the plugin row meta.
  *
- * @since n.e.x.t
+ * @since 0.2.1
  * @access private
  *
  * @param string $plugin_file Path to the plugin file relative to the plugins directory.

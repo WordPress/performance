@@ -59,10 +59,10 @@ jobs:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
     steps:
-      - uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
+      - uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -124,7 +124,7 @@ jobs:
           fi
       - name: Upload single site coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./single-site-reports
@@ -133,7 +133,7 @@ jobs:
           fail_ci_if_error: true
       - name: Upload multisite coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./multisite-reports
