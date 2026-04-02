@@ -15,6 +15,7 @@ const config = require( '../config' );
 
 const MISSING_TYPE = 'MISSING_TYPE';
 const TYPE_PREFIX = '[Type] ';
+/** @type {Record<string, string>} */
 const PRIMARY_TYPE_LABELS = {
 	'[Type] Feature': 'Features',
 	'[Type] Enhancement': 'Enhancements',
@@ -116,17 +117,24 @@ async function fetchAllPullRequests( octokit, settings ) {
 function getIssueType( issue ) {
 	const typeLabels = issue.labels
 		.map( ( label ) => ( typeof label === 'string' ? label : label.name ) )
-		.filter( ( label ) => label.startsWith( TYPE_PREFIX ) );
+		.filter(
+			/**
+			 * @param {string|undefined} label - Label.
+			 * @return {label is string} Whether label starts with type prefix.
+			 */ ( label ) =>
+				typeof label === 'string' && label.startsWith( TYPE_PREFIX )
+		);
 
 	if ( ! typeLabels.length ) {
 		return MISSING_TYPE;
 	}
 
-	if ( PRIMARY_TYPE_LABELS[ typeLabels[ 0 ] ] ) {
-		return PRIMARY_TYPE_LABELS[ typeLabels[ 0 ] ];
+	const firstLabel = typeLabels[ 0 ];
+	if ( PRIMARY_TYPE_LABELS[ firstLabel ] ) {
+		return PRIMARY_TYPE_LABELS[ firstLabel ];
 	}
 
-	return typeLabels[ 0 ].replace( TYPE_PREFIX, '' );
+	return firstLabel.replace( TYPE_PREFIX, '' );
 }
 
 /**
@@ -263,7 +271,7 @@ async function createChangelog( settings ) {
 		changelog = await getChangelog( settings );
 	} catch ( error ) {
 		if ( error instanceof Error ) {
-			changelog = formats.error( error.stack );
+			changelog = formats.error( error.stack ?? error.message );
 		}
 	}
 
