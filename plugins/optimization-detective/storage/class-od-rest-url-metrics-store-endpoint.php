@@ -89,12 +89,15 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'required'          => true,
 				'pattern'           => '^[0-9a-f]+\z',
 				'validate_callback' => static function ( string $hmac, WP_REST_Request $request ) use ( $cache_purge_post_id_schema ) {
-					// Obtain the validated and sanitized cache_purge_post_id.
-					$cache_purge_post_id_validity = rest_validate_value_from_schema( $request['cache_purge_post_id'], $cache_purge_post_id_schema, 'cache_purge_post_id' );
-					if ( is_wp_error( $cache_purge_post_id_validity ) ) {
-						return $cache_purge_post_id_validity;
+					// Obtain the validated and sanitized cache_purge_post_id since the param is not yet sanitized at this point.
+					$cache_purge_post_id = $request['cache_purge_post_id'];
+					if ( null !== $cache_purge_post_id ) {
+						$cache_purge_post_id_validity = rest_validate_value_from_schema( $cache_purge_post_id, $cache_purge_post_id_schema, 'cache_purge_post_id' );
+						if ( is_wp_error( $cache_purge_post_id_validity ) ) {
+							return $cache_purge_post_id_validity;
+						}
+						$cache_purge_post_id = rest_sanitize_value_from_schema( $cache_purge_post_id, $cache_purge_post_id_schema, 'cache_purge_post_id' );
 					}
-					$cache_purge_post_id = rest_sanitize_value_from_schema( $request['cache_purge_post_id'], $cache_purge_post_id_schema, 'cache_purge_post_id' );
 
 					if ( '' === $hmac || ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $cache_purge_post_id ) ) {
 						return new WP_Error( 'invalid_hmac', __( 'URL Metrics HMAC verification failure.', 'optimization-detective' ) );
