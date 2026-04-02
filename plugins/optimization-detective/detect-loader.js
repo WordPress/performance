@@ -26,13 +26,25 @@ async function load() {
 		} );
 	}
 
-	const data = JSON.parse(
-		/** @type {HTMLElement} */ (
-			document.getElementById( 'optimization-detective-detect-args' )
-		).textContent ?? ''
+	const argsScript = document.getElementById(
+		'optimization-detective-detect-args'
 	);
+	if ( ! ( argsScript instanceof HTMLScriptElement ) ) {
+		throw new Error( 'Missing: SCRIPT#optimization-detective-detect-args' );
+	}
+	const data = JSON.parse( argsScript.textContent );
+	if (
+		! Array.isArray( data ) ||
+		data.length !== 2 ||
+		'string' !== typeof data[ 0 ] ||
+		'object' !== typeof data[ 1 ]
+	) {
+		throw new Error(
+			'SCRIPT#optimization-detective-detect-args is not [ string, object ]'
+		);
+	}
 
-	const detectSrc = /** @type {string} */ data[ 0 ];
+	const detectSrc = data[ 0 ];
 	const detectArgs =
 		/** @type {import("./detect.js").DetectFunctionArgs} */ data[ 1 ];
 	const detect = /** @type {import("./detect.js").DetectFunction} */ (
