@@ -121,7 +121,8 @@ function getIssueType( issue ) {
 			/**
 			 * @param {string|undefined} label - Label.
 			 * @return {label is string} Whether label starts with type prefix.
-			 */ ( label ) =>
+			 */
+			( label ) =>
 				typeof label === 'string' && label.startsWith( TYPE_PREFIX )
 		);
 
