@@ -163,7 +163,7 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 			);
 		}
 
-		// This validation is done here as opposed to the a validate_callback for the arg since here the params have all been validated and sanitized.
+		// This validation is done here as opposed to a validate_callback for the arg since here the params have all been validated and sanitized.
 		if ( ! od_verify_url_metrics_storage_hmac( $request['hmac'], $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
