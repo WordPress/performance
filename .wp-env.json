@@ -24,7 +24,7 @@
 				"FS_METHOD": "direct"
 			},
 			"mappings": {
-				"/wp-content/plugins/performance": "."
+				"wp-content/plugins/performance": "."
 			}
 		}
 	}
