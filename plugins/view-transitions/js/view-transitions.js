@@ -144,6 +144,11 @@ window.plvtInitViewTransitions = ( config ) => {
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				// Prevent unhandled promise rejections when the transition is already aborted (e.g. bfcache restoration).
+				const noop = () => {};
+				event.viewTransition.ready.catch( noop );
+				event.viewTransition.finished.catch( noop );
+
 				event.viewTransition.types.add( transitionType );
 
 				let viewTransitionEntries;
@@ -185,6 +190,11 @@ window.plvtInitViewTransitions = ( config ) => {
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				// Prevent unhandled promise rejections when the transition is already aborted (e.g. bfcache restoration).
+				const noop = () => {};
+				event.viewTransition.ready.catch( noop );
+				event.viewTransition.finished.catch( noop );
+
 				event.viewTransition.types.add( transitionType );
 
 				let viewTransitionEntries;
