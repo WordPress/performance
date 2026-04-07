@@ -60,6 +60,23 @@ window.plvtInitViewTransitions = ( config ) => {
 	};
 
 	/**
+	 * Suppresses unhandled promise rejections on a ViewTransition.
+	 *
+	 * When a transition is already aborted (e.g. bfcache restoration), its ready
+	 * and finished promises reject. Without a rejection handler, these surface as
+	 * "Uncaught (in promise) InvalidStateError" errors.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param {ViewTransition} viewTransition The view transition to suppress rejections for.
+	 */
+	const suppressViewTransitionRejections = ( viewTransition ) => {
+		const noop = () => {};
+		viewTransition.ready.catch( noop );
+		viewTransition.finished.catch( noop );
+	};
+
+	/**
 	 * Temporarily sets view transition names for the given entries until the view transition has been completed.
 	 *
 	 * @param {Array[]}       entries   View transition entries as received from `getViewTransitionEntries()`.
@@ -144,11 +161,7 @@ window.plvtInitViewTransitions = ( config ) => {
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
-				// Prevent unhandled promise rejections when the transition is already aborted (e.g. bfcache restoration).
-				const noop = () => {};
-				event.viewTransition.ready.catch( noop );
-				event.viewTransition.finished.catch( noop );
-
+				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
 
 				let viewTransitionEntries;
@@ -190,11 +203,7 @@ window.plvtInitViewTransitions = ( config ) => {
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
-				// Prevent unhandled promise rejections when the transition is already aborted (e.g. bfcache restoration).
-				const noop = () => {};
-				event.viewTransition.ready.catch( noop );
-				event.viewTransition.finished.catch( noop );
-
+				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
 
 				let viewTransitionEntries;
