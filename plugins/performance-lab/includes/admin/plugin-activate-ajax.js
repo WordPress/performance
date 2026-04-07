@@ -33,11 +33,7 @@
 		target.classList.add( 'updating-message' );
 		target.textContent = __( 'Waiting…', 'performance-lab' );
 
-		const pluginSlug = target.dataset.pluginSlug;
-		if ( ! pluginSlug ) {
-			return;
-		}
-
+		const pluginSlug = /** @type {string} */ ( target.dataset.pluginSlug );
 		activationQueue.push( { target, pluginSlug } );
 
 		// Start processing the queue if not already doing so.
@@ -112,7 +108,7 @@
 
 	// Attach the event listeners.
 	document
-		.querySelectorAll( '.perflab-install-active-plugin' )
+		.querySelectorAll( '.perflab-install-active-plugin[data-plugin-slug]' )
 		.forEach( ( item ) => {
 			item.addEventListener( 'click', ( event ) =>
 				enqueuePluginActivation( /** @type {MouseEvent} */ ( event ) )
