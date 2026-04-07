@@ -96,9 +96,9 @@
 		"lint:web-worker-offloading": "@lint -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
 		"lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
 		"phpstan": "phpstan analyse --memory-limit=2048M",
-		"test": "phpunit --strict-coverage",
+		"test": "php vendor/bin/phpunit --strict-coverage",
 		"test-multisite": [
-			"WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
+			"WP_MULTISITE=1 php vendor/bin/phpunit --exclude-group=ms-excluded"
 		],
 		"test-multisite:plugins": [
 			"@test-multisite:auto-sizes",
