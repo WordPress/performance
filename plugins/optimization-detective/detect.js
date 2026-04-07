@@ -79,7 +79,8 @@ function isStorageLocked( currentTime, storageLockTTL ) {
 
 	try {
 		const storageLockTime = parseInt(
-			sessionStorage.getItem( storageLockTimeSessionKey ) || ''
+			sessionStorage.getItem( storageLockTimeSessionKey ) || '',
+			10
 		);
 		return (
 			! isNaN( storageLockTime ) &&
