@@ -151,7 +151,9 @@ exports.handler = async ( opt ) => {
 			}
 		} catch ( error ) {
 			errorCount++;
-			log( formats.error( `❌ ${ slug }: ${ error.message }` ) );
+			const message =
+				error instanceof Error ? error.message : 'Unknown error';
+			log( formats.error( `❌ ${ slug }: ${ message }` ) );
 		}
 	}
 
