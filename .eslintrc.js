@@ -32,7 +32,13 @@ const config = {
 			rules: {
 				'jsdoc/no-undefined-types': [
 					'error',
-					{ definedTypes: [ 'PageSwapEvent', 'PageRevealEvent', 'ViewTransition' ] },
+					{
+						definedTypes: [
+							'PageSwapEvent',
+							'PageRevealEvent',
+							'ViewTransition',
+						],
+					},
 				],
 			},
 		},
