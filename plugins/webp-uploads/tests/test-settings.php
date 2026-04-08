@@ -8,6 +8,18 @@
 class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 
 	/**
+	 * @covers ::webp_uploads_render_settings_section_info
+	 */
+	public function test_webp_uploads_render_settings_section_info_contains_notice(): void {
+		$output = get_echo( 'webp_uploads_render_settings_section_info' );
+
+		$this->assertStringContainsString( 'notice notice-info inline', $output );
+		$this->assertStringContainsString( 'Modern image formats', $output );
+		$this->assertStringContainsString( 'https://wordpress.org/plugins/webp-uploads/#faq', $output );
+		$this->assertStringContainsString( 'smaller file than the original', $output );
+	}
+
+	/**
 	 * @covers ::webp_uploads_add_settings_action_link
 	 */
 	public function test_webp_uploads_add_settings_action_link(): void {
