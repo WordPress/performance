@@ -79,7 +79,7 @@ function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
 		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
-		'__return_empty_string',
+		'webp_uploads_render_settings_section_info',
 		'media',
 		array(
 			'before_section' => '<div id="modern-image-formats">',
@@ -138,6 +138,33 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
  * Renders the settings field for the 'perflab_modern_image_format' setting.
  *
  * @since 2.0.0
+ */
+/**
+ * Render informational notice for the Modern Image Formats settings section.
+ *
+ * Explains why modern format images may not always be generated after upload.
+ */
+function webp_uploads_render_settings_section_info(): void {
+	?>
+	<div class="notice notice-info inline" style="margin:0;padding:10px 14px;">
+		<p>
+			<?php
+			echo wp_kses(
+				__( 'Modern image formats (e.g. WebP, AVIF) are only generated when they result in a smaller file than the original. If a converted image would be larger, the original is kept instead. For more details, see the <a href="https://wordpress.org/plugins/webp-uploads/#faq">FAQ</a>.', 'webp-uploads' ),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Callback for rendering the AVIF/WebP output format setting.
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
