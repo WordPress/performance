@@ -180,6 +180,35 @@ function dominant_color_add_inline_style(): void {
 add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 /**
+ * Add inline script to cleanup dominant color CSS variable on image load.
+ *
+ * This script removes the --dominant-color CSS variable from images after they load,
+ * preventing issues with dynamically loaded or lazily-loaded images.
+ *
+ * @since 1.2.1
+ */
+function dominant_color_add_cleanup_script(): void {
+	$script = <<<'JS'
+document.addEventListener(
+  "load",
+  (event) => {
+    if (
+      event.target instanceof HTMLImageElement &&
+      event.target.hasAttribute("data-dominant-color")
+    ) {
+      event.target.style.removeProperty("--dominant-color");
+    }
+  },
+  { capture: true },
+);
+JS;
+	wp_register_script( 'dominant-color-cleanup', false );
+	wp_enqueue_script( 'dominant-color-cleanup' );
+	wp_add_inline_script( 'dominant-color-cleanup', $script );
+}
+add_action( 'wp_enqueue_scripts', 'dominant_color_add_cleanup_script' );
+
+/**
  * Displays the HTML generator tag for the Image Placeholders plugin.
  *
  * See {@see 'wp_head'}.
