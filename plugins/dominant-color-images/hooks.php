@@ -185,7 +185,7 @@ add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * This script removes the --dominant-color CSS variable from images after they load,
  * preventing issues with dynamically loaded or lazily-loaded images.
  *
- * @since 1.2.1
+ * @since n.e.x.t
  */
 function dominant_color_add_cleanup_script(): void {
 	$script = <<<'JS'
