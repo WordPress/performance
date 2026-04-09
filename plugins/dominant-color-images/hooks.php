@@ -202,7 +202,7 @@ document.addEventListener(
   { capture: true },
 );
 JS;
-	wp_register_script( 'dominant-color-cleanup', false );
+	wp_register_script( 'dominant-color-cleanup', false, array(), DOMINANT_COLOR_IMAGES_VERSION, true );
 	wp_enqueue_script( 'dominant-color-cleanup' );
 	wp_add_inline_script( 'dominant-color-cleanup', $script );
 }
