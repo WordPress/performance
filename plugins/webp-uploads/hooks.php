@@ -717,29 +717,6 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 }
 
 /**
- * Updates the references of the featured image to the new image format if available, in the same way it
- * occurs in the_content of a post.
- *
- * @since 1.0.0
- * @deprecated 2.7.0 Featured images are now rewritten through the
- *             `wp_get_attachment_image` filter, since `the_post_thumbnail()`
- *             routes through `wp_get_attachment_image()`. This function is
- *             retained for third-party callers only and is no longer
- *             registered on `post_thumbnail_html`.
- *
- * @param string $html          The current HTML markup of the featured image.
- * @param int    $post_id       The current post ID where the featured image is requested.
- * @param int    $attachment_id The ID of the attachment image.
- * @return string The updated HTML markup.
- */
-function webp_uploads_update_featured_image( string $html, int $post_id, int $attachment_id ): string {
-	if ( webp_uploads_is_picture_element_enabled() ) {
-		return webp_uploads_wrap_image_in_picture( $html, 'post_thumbnail_html', $attachment_id );
-	}
-	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
-}
-
-/**
  * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
  * core theme sizes are enabled by default.
  *

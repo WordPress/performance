@@ -1279,7 +1279,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @covers ::webp_uploads_init
 	 */
 	public function test_post_thumbnail_html_filter_is_not_registered_directly(): void {
-		$this->assertFalse( has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+		$this->assertFalse( has_filter( 'post_thumbnail_html' ) );
 		$this->assertSame( 10, has_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image' ) );
 	}
 

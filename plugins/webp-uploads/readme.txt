@@ -71,6 +71,10 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 * Serve modern image formats (WebP / AVIF) from `wp_get_attachment_image()` so that `<img>` tags produced by template tags, page builders, and custom loops use the preferred format — not only images inside `the_content`. Featured images continue to be rewritten through the same pipeline (via `the_post_thumbnail()` routing through `wp_get_attachment_image()`), so the dedicated `post_thumbnail_html` filter registration has been retired. ([523](https://github.com/WordPress/performance/issues/523))
 
+**Breaking Changes**
+
+* The `webp_uploads_update_featured_image()` function has been removed. It was previously hooked on `post_thumbnail_html` to rewrite featured images; that responsibility now lives in the `wp_get_attachment_image` filter via `webp_uploads_filter_wp_get_attachment_image()`. Third-party code that called `webp_uploads_update_featured_image()` directly should switch to `webp_uploads_img_tag_update_mime_type()` or `webp_uploads_wrap_image_in_picture()`, or rely on the new `wp_get_attachment_image` filter.
+
 = 2.6.1 =
 
 **Bug Fixes**
