@@ -27,7 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string The new image tag.
  */
 function webp_uploads_wrap_image_in_picture( string $image, string $context, int $attachment_id ): string {
-	if ( ! in_array( $context, array( 'the_content', 'post_thumbnail_html', 'widget_block_content' ), true ) ) {
+	if ( ! in_array( $context, array( 'the_content', 'post_thumbnail_html', 'widget_block_content', 'wp_get_attachment_image' ), true ) ) {
+		return $image;
+	}
+
+	// Idempotency: bail if the input is already wrapped in a picture element, to
+	// avoid double-wrapping when multiple rewrite paths fire on the same markup
+	// (e.g. wp_get_attachment_image -> the_content -> wp_content_img_tag).
+	if ( false !== stripos( $image, '<picture' ) ) {
 		return $image;
 	}
 

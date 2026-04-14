@@ -48,6 +48,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
+
+		// Many tests in this class rely on `wp_get_attachment_image()` returning
+		// unfiltered markup so they can exercise the `wp_content_img_tag` path
+		// manually. Remove the new auto-rewriter by default; tests that want to
+		// exercise it explicitly can re-register via `opt_in_to_picture_element()`
+		// (which re-runs `webp_uploads_init()`).
+		remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
 	}
 
 	public function tear_down(): void {
@@ -102,6 +109,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Apply picture element support.
 		if ( $picture_element ) {
 			$this->opt_in_to_picture_element();
+			// `opt_in_to_picture_element()` re-runs webp_uploads_init(), which
+			// re-registers the new wp_get_attachment_image rewriter. Remove it
+			// again so this test exercises the wp_content_img_tag path only.
+			remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
 		}
 
 		// Create some content with the image.
@@ -570,26 +581,83 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 */
 	public function data_provider_webp_uploads_wrap_image_in_picture_with_different_context(): array {
 		return array(
-			'the_content'          =>
+			'the_content'             =>
 				array(
 					'context'  => 'the_content',
 					'expected' => true,
 				),
-			'post_thumbnail_html'  =>
+			'post_thumbnail_html'     =>
 				array(
 					'context'  => 'post_thumbnail_html',
 					'expected' => true,
 				),
-			'widget_block_content' =>
+			'widget_block_content'    =>
 				array(
 					'context'  => 'widget_block_content',
 					'expected' => true,
 				),
-			'invalid_context'      =>
+			'wp_get_attachment_image' =>
+				array(
+					'context'  => 'wp_get_attachment_image',
+					'expected' => true,
+				),
+			'invalid_context'         =>
 				array(
 					'context'  => 'invalid_context',
 					'expected' => false,
 				),
 		);
+	}
+
+	/**
+	 * `wp_get_attachment_image()` should return a <picture>-wrapped image when
+	 * picture-element output is enabled, because the new filter dispatches to
+	 * `webp_uploads_wrap_image_in_picture()`.
+	 *
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wp_get_attachment_image_is_wrapped_in_picture_when_picture_element_enabled(): void {
+		$this->opt_in_to_picture_element();
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$this->assertStringStartsWith( '<picture ', $image );
+		$this->assertStringContainsString( '<source type="image/webp"', $image );
+	}
+
+	/**
+	 * `webp_uploads_wrap_image_in_picture()` must be idempotent: wrapping an
+	 * already-wrapped string should be a no-op. Otherwise the same markup
+	 * passing through both `wp_get_attachment_image` and `wp_content_img_tag`
+	 * would end up double-wrapped.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wrap_image_in_picture_is_idempotent(): void {
+		$this->opt_in_to_picture_element();
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$twice = webp_uploads_wrap_image_in_picture( $image, 'wp_get_attachment_image', self::$image_id );
+
+		$this->assertSame( $image, $twice, 'Re-wrapping an already-wrapped picture should return the input unchanged.' );
+		$this->assertSame( 1, substr_count( $twice, '<picture ' ) );
 	}
 }

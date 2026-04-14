@@ -1272,19 +1272,26 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Test that the webp_uploads_update_featured_image function is hooked to the post_thumbnail_html filter.
+	 * Featured images are now rewritten through the `wp_get_attachment_image`
+	 * filter (since `the_post_thumbnail()` routes through `wp_get_attachment_image()`),
+	 * so the direct `post_thumbnail_html` registration should no longer exist.
+	 *
+	 * @covers ::webp_uploads_init
 	 */
-	public function test_webp_uploads_update_featured_image_hooked_into_post_thumbnail_html(): void {
-		$this->assertSame( 10, has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+	public function test_post_thumbnail_html_filter_is_not_registered_directly(): void {
+		$this->assertFalse( has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+		$this->assertSame( 10, has_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image' ) );
 	}
 
 	/**
 	 * Test that the featured image is not wrapped in a picture element.
 	 *
-	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 * @covers ::webp_uploads_img_tag_update_mime_type
 	 */
 	public function test_webp_uploads_update_featured_image_picture_element_disabled(): void {
+		$this->mock_frontend_body_hooks();
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 		$post_id       = self::factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
@@ -1296,12 +1303,13 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Test that the featured image is wrapped in a picture element.
 	 *
-	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 * @covers ::webp_uploads_wrap_image_in_picture
 	 */
 	public function test_webp_uploads_update_featured_image_picture_element_enabled(): void {
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 		$this->opt_in_to_picture_element();
+		$this->mock_frontend_body_hooks();
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 		$post_id       = self::factory()->post->create();
@@ -1309,5 +1317,85 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$featured_image = get_the_post_thumbnail( $post_id );
 		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_is_rewritten_to_webp(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.webp', $html );
+		$this->assertStringNotContainsString( 'leaves.jpg', $html );
+
+		$processor = new WP_HTML_Tag_Processor( $html );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Only one IMG tag should be present.' );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_opt_out_filter_returns_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		add_filter( 'webp_uploads_filter_wp_get_attachment_image', '__return_false' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_unhook_restores_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_outside_frontend_body(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		// Intentionally do NOT call mock_frontend_body_hooks().
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_icon_placeholder_requested(): void {
+		$this->mock_frontend_body_hooks();
+
+		// Directly exercise the filter callback with $icon = true; expect unchanged HTML.
+		$html = '<img src="https://example.test/wp-content/uploads/2024/01/something.jpg">';
+		$this->assertSame(
+			$html,
+			webp_uploads_filter_wp_get_attachment_image( $html, 0, 'medium', true, array() )
+		);
 	}
 }
