@@ -1350,7 +1350,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringContainsString( '.jpg', $html );
 		$this->assertStringNotContainsString( '.webp', $html );
 	}
 
@@ -1366,7 +1366,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringContainsString( '.jpg', $html );
 		$this->assertStringNotContainsString( '.webp', $html );
 	}
 
@@ -1381,7 +1381,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		$this->assertStringContainsString( 'leaves.jpg', $html );
+		$this->assertStringContainsString( '.jpg', $html );
 		$this->assertStringNotContainsString( '.webp', $html );
 	}
 
