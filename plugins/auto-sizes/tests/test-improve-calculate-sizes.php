@@ -1360,6 +1360,52 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the image block in a gallery layout renders the correct sizes attribute.
+	 *
+	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
+	 * @cover ::auto_sizes_get_layout_block_column_count
+	 * @cover ::auto_sizes_inherit_parent_layout_width
+	 */
+	public function test_image_block_in_gallery_layout_renders_correct_sizes_attribute(): void {
+		$block_content = $this->get_gallery_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large' ) .
+			$this->get_image_block_markup( self::$image_id, 'large' ) .
+			$this->get_image_block_markup( self::$image_id, 'large' )
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 206px) 100vw, 206px" ', $result );
+	}
+
+	/**
+	 * Test that the image block in a grid group layout renders the correct sizes attribute.
+	 *
+	 * @cover ::auto_sizes_filter_image_tag
+	 * @cover ::auto_sizes_filter_render_block_context
+	 * @cover ::auto_sizes_get_layout_block_column_count
+	 * @cover ::auto_sizes_inherit_parent_layout_width
+	 */
+	public function test_image_block_in_group_grid_layout_renders_correct_sizes_attribute(): void {
+		$block_content = $this->get_group_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large' ) .
+			$this->get_image_block_markup( self::$image_id, 'large' ) .
+			$this->get_image_block_markup( self::$image_id, 'large' ),
+			array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 3,
+				),
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 206px) 100vw, 206px" ', $result );
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
@@ -1562,7 +1608,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			)
 		);
 
-		$align_class = (bool) $atts['align'] ? ' align' . $atts['align'] : '';
+		$align_class = isset( $atts['align'] ) && '' !== $atts['align'] ? ' align' . $atts['align'] : '';
 
 		return '<!-- wp:group ' . wp_json_encode( $atts ) . ' -->
 		<div class="wp-block-group' . $align_class . '">' . $content . '</div>
@@ -1622,5 +1668,22 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			esc_attr( $align_class ),
 			$column_block
 		);
+	}
+
+	/**
+	 * Helper to generate gallery block markup.
+	 *
+	 * @param string       $content Block content.
+	 * @param array<mixed> $atts    Optional. Block attributes. Default empty array.
+	 * @return string Gallery block markup.
+	 */
+	public function get_gallery_block_markup( string $content, array $atts = array() ): string {
+		$column_count = isset( $atts['columns'] ) ? (int) $atts['columns'] : 0;
+		$columns      = $column_count > 0 ? ' columns-' . $column_count : ' columns-default';
+		$attrs        = array() !== $atts ? ' ' . wp_json_encode( $atts ) : '';
+
+		return '<!-- wp:gallery' . $attrs . ' -->
+		<figure class="wp-block-gallery has-nested-images' . $columns . ' is-layout-flex wp-block-gallery-is-layout-flex">' . $content . '</figure>
+		<!-- /wp:gallery -->';
 	}
 }
