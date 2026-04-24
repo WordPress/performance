@@ -156,7 +156,7 @@ function formatChangelog( milestone, pullRequests ) {
 		);
 	if ( typeGroups[ MISSING_TYPE ] ) {
 		const prURLs = typeGroups[ MISSING_TYPE ].map(
-			( { html_url } ) => html_url // eslint-disable-line camelcase
+			( { html_url } ) => html_url
 		);
 		throw new Error(
 			`The following pull-requests are missing a "${ TYPE_PREFIX }xyz" label: ${ prURLs.join(
@@ -195,7 +195,7 @@ function formatChangelog( milestone, pullRequests ) {
 					// Add trailing period.
 					.replace( /\s*\.?$/, '' )
 					.concat( '.' );
-				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`; // eslint-disable-line camelcase
+				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`;
 			} )
 			.filter( Boolean )
 			.sort()

@@ -141,7 +141,6 @@ function createLogger(
 		 */
 		log( ...message ) {
 			if ( debugMode ) {
-				// eslint-disable-next-line no-console
 				console.log( ...constructLogArgs( message, false ) );
 			}
 		},
@@ -153,7 +152,6 @@ function createLogger(
 		 */
 		info( ...message ) {
 			if ( debugMode ) {
-				// eslint-disable-next-line no-console
 				console.info( ...constructLogArgs( message, false ) );
 			}
 		},
@@ -165,7 +163,6 @@ function createLogger(
 		 */
 		warn( ...message ) {
 			if ( debugMode ) {
-				// eslint-disable-next-line no-console
 				console.warn( ...constructLogArgs( message, true ) );
 			}
 		},
@@ -176,7 +173,6 @@ function createLogger(
 		 * @param {...*} message - The message(s) to log as an error.
 		 */
 		error( ...message ) {
-			// eslint-disable-next-line no-console
 			console.error( ...constructLogArgs( message, true ) );
 		},
 	};

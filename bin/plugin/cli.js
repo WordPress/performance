@@ -27,7 +27,7 @@ const catchException = ( /** @type {Function} */ handler ) => {
 		} catch ( error ) {
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
-			console.error( formats.error( message ) ); // eslint-disable-line no-console
+			console.error( formats.error( message ) );
 			process.exitCode = 1;
 		}
 	};

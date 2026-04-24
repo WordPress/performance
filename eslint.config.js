@@ -13,6 +13,7 @@ module.exports = [
 			'vendor/',
 			'node_modules/',
 			'build/',
+			'**/build/**',
 			'dist/',
 			'**/*.min.js',
 			'**/*.min.css',
@@ -58,6 +59,7 @@ module.exports = [
 				'error',
 				{
 					definedTypes: [
+						'Element',
 						'PageSwapEvent',
 						'PageRevealEvent',
 						'ViewTransition',
