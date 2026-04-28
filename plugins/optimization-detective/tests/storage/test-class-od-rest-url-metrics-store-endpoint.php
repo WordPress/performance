@@ -308,6 +308,36 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 				'expected_status' => 400,
 				'expected_code'   => 'rest_invalid_param',
 			),
+			'negative_cache_purge_post_id'             => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'cache_purge_post_id' => -1,
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'zero_cache_purge_post_id'                 => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'cache_purge_post_id' => 0,
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
+			'non_numeric_cache_purge_post_id'          => array(
+				'params'          => array_merge(
+					$valid_params,
+					array(
+						'cache_purge_post_id' => 'evil',
+					)
+				),
+				'expected_status' => 400,
+				'expected_code'   => 'rest_invalid_param',
+			),
 			'invalid_viewport_type'                    => array(
 				'params'          => array_merge(
 					$valid_params,
@@ -1117,7 +1147,10 @@ class Test_OD_REST_URL_Metrics_Store_Endpoint extends WP_UnitTestCase {
 		 */
 		$request = new WP_REST_Request( 'POST', $this->get_route() );
 		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) ) );
+		// Cast all query params to strings to simulate real HTTP requests where all parameter values are strings.
+		$query_params = wp_array_slice_assoc( $params, array( 'hmac', 'current_etag', 'slug', 'cache_purge_post_id' ) );
+		$query_params = array_map( 'strval', $query_params );
+		$request->set_query_params( $query_params );
 		$request->set_header( 'Origin', home_url() );
 		unset( $params['hmac'], $params['slug'], $params['current_etag'], $params['cache_purge_post_id'] );
 

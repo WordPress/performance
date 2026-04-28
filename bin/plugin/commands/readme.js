@@ -166,9 +166,11 @@ async function updateReadme( settings ) {
 				)
 			);
 		} catch ( error ) {
+			const message =
+				error instanceof Error ? error.message : 'Unknown error';
 			log(
 				formats.error(
-					`${ pluginSlug } failed to update: ${ error.message }`
+					`${ pluginSlug } failed to update: ${ message }`
 				)
 			);
 		}

@@ -4,21 +4,17 @@ const lazyVideoObserver = new IntersectionObserver(
 			if ( entry.isIntersecting ) {
 				const video = /** @type {HTMLVideoElement} */ entry.target;
 
-				if ( video.hasAttribute( 'data-original-poster' ) ) {
-					video.setAttribute(
-						'poster',
-						video.getAttribute( 'data-original-poster' )
-					);
+				const poster = video.getAttribute( 'data-original-poster' );
+				if ( poster ) {
+					video.setAttribute( 'poster', poster );
 				}
 
 				if ( video.hasAttribute( 'data-original-autoplay' ) ) {
 					video.setAttribute( 'autoplay', 'autoplay' );
 				}
 
-				if ( video.hasAttribute( 'data-original-preload' ) ) {
-					const preload = video.getAttribute(
-						'data-original-preload'
-					);
+				const preload = video.getAttribute( 'data-original-preload' );
+				if ( preload ) {
 					if ( 'default' === preload ) {
 						video.removeAttribute( 'preload' );
 					} else {

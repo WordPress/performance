@@ -26,7 +26,7 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @param {string}       transitionType View transition type. Only 'default' is supported so far, but more to be added.
 	 * @param {Element}      bodyElement    The body element.
 	 * @param {Element|null} articleElement The post element relevant for the view transition, if any.
-	 * @return {Array[]} View transition entries with each one containing the element and its view transition name.
+	 * @return {Array<Array<any>>} View transition entries with each one containing the element and its view transition name.
 	 */
 	const getViewTransitionEntries = (
 		transitionType,
@@ -61,10 +61,27 @@ window.plvtInitViewTransitions = ( config ) => {
 	};
 
 	/**
+	 * Suppresses unhandled promise rejections on a ViewTransition.
+	 *
+	 * When a transition is already aborted (e.g. bfcache restoration), its ready
+	 * and finished promises reject. Without a rejection handler, these surface as
+	 * "Uncaught (in promise) InvalidStateError" errors.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param {ViewTransition} viewTransition The view transition to suppress rejections for.
+	 */
+	const suppressViewTransitionRejections = ( viewTransition ) => {
+		const noop = () => {};
+		viewTransition.ready.catch( noop );
+		viewTransition.finished.catch( noop );
+	};
+
+	/**
 	 * Temporarily sets view transition names for the given entries until the view transition has been completed.
 	 *
-	 * @param {Array[]}       entries   View transition entries as received from `getViewTransitionEntries()`.
-	 * @param {Promise<void>} vtPromise Promise that resolves after the view transition has been completed.
+	 * @param {Array<Array<any>>} entries   View transition entries as received from `getViewTransitionEntries()`.
+	 * @param {Promise<void>}     vtPromise Promise that resolves after the view transition has been completed.
 	 * @return {Promise<void>} Promise that resolves after the view transition names were reset.
 	 */
 	const setTemporaryViewTransitionNames = async ( entries, vtPromise ) => {
@@ -142,7 +159,13 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @return {string} View transition type (e.g. 'default', 'chronological-forwards', 'chronological-backwards').
 	 */
 	const determineTransitionType = ( oldEntry, newEntry ) => {
-		if ( ! oldEntry || ! newEntry ) {
+		if (
+			! oldEntry ||
+			! newEntry ||
+			! config.animations ||
+			! oldEntry.url ||
+			! newEntry.url
+		) {
 			return 'default';
 		}
 
@@ -301,10 +324,14 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pageswap',
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
+				if ( ! event.activation?.entry || ! event.activation?.from ) {
+					return;
+				}
 				const transitionType = determineTransitionType(
 					event.activation.from,
 					event.activation.entry
 				);
+				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
 				let viewTransitionEntries;
 				if ( document.body.classList.contains( 'single' ) ) {
@@ -318,11 +345,13 @@ window.plvtInitViewTransitions = ( config ) => {
 					document.body.classList.contains( 'blog' ) ||
 					document.body.classList.contains( 'archive' )
 				) {
-					viewTransitionEntries = getViewTransitionEntries(
-						transitionType,
-						document.body,
-						getArticleForUrl( event.activation.entry.url )
-					);
+					if ( event.activation?.entry.url ) {
+						viewTransitionEntries = getViewTransitionEntries(
+							transitionType,
+							document.body,
+							getArticleForUrl( event.activation.entry.url )
+						);
+					}
 				}
 				if ( viewTransitionEntries ) {
 					setTemporaryViewTransitionNames(
@@ -344,10 +373,17 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pagereveal',
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
+				if (
+					! window.navigation.activation?.from ||
+					! window.navigation.activation.entry
+				) {
+					return;
+				}
 				const transitionType = determineTransitionType(
 					window.navigation.activation.from,
 					window.navigation.activation.entry
 				);
+				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
 
 				let viewTransitionEntries;
@@ -364,7 +400,7 @@ window.plvtInitViewTransitions = ( config ) => {
 					viewTransitionEntries = getViewTransitionEntries(
 						transitionType,
 						document.body,
-						window.navigation.activation.from
+						window.navigation?.activation?.from?.url
 							? getArticleForUrl(
 									window.navigation.activation.from.url
 							  )

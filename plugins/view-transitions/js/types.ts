@@ -16,15 +16,12 @@ export type InitViewTransitionsFunction = (
 ) => void;
 
 export type NavigationHistoryEntry = {
-	url: string;
+	url: string | null;
 };
 
 declare global {
 	interface Window {
 		plvtInitViewTransitions?: InitViewTransitionsFunction;
-		navigation?: {
-			activation: NavigationActivation;
-		};
 	}
 }
 

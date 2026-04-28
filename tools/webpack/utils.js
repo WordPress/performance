@@ -68,6 +68,7 @@ const generateBuildManifest = ( slug, from ) => {
 		fs.mkdirSync( buildDir );
 	}
 
+	/** @type {Record<string, string>} */
 	let manifest = {};
 	const manifestPath = path.resolve( buildDir, 'manifest.json' );
 

@@ -6,6 +6,8 @@
  * @since 2.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -147,9 +149,10 @@ function perflab_aao_query_autoloaded_options(): array {
 	$large_options = array();
 
 	foreach ( $all_options as $option_name => $option_value ) {
-		if ( is_array( $option_value ) || is_object( $option_value ) ) {
+		if ( ! is_string( $option_value ) ) {
 			$option_value = serialize( $option_value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
+
 		if ( strlen( $option_value ) > $option_threshold ) {
 			$large_options[] = (object) array(
 				'option_name'         => $option_name,

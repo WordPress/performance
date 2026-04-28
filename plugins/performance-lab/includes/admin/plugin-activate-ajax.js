@@ -8,6 +8,7 @@
 	const { __ } = i18n;
 
 	// Queue to hold pending activation requests.
+	/** @type {{target: HTMLElement, pluginSlug: string}[]} */
 	const activationQueue = [];
 	let isProcessingActivation = false;
 
@@ -32,8 +33,7 @@
 		target.classList.add( 'updating-message' );
 		target.textContent = __( 'Waiting…', 'performance-lab' );
 
-		const pluginSlug = target.dataset.pluginSlug;
-
+		const pluginSlug = /** @type {string} */ ( target.dataset.pluginSlug );
 		activationQueue.push( { target, pluginSlug } );
 
 		// Start processing the queue if not already doing so.
@@ -48,14 +48,15 @@
 	 * @return {Promise<void>} The asynchronous function returns a promise that resolves to void.
 	 */
 	async function handlePluginActivation() {
-		if ( 0 === activationQueue.length ) {
+		const activationItem = activationQueue.shift();
+		if ( ! activationItem ) {
 			isProcessingActivation = false;
 			return;
 		}
 
 		isProcessingActivation = true;
 
-		const { target, pluginSlug } = activationQueue.shift();
+		const { target, pluginSlug } = activationItem;
 
 		target.textContent = __( 'Activating…', 'performance-lab' );
 
@@ -87,7 +88,7 @@
 				anchor.textContent = __( 'Settings', 'performance-lab' );
 
 				listItem.appendChild( anchor );
-				actionButtonList.appendChild( listItem );
+				actionButtonList?.appendChild( listItem );
 			}
 
 			a11y.speak( __( 'Plugin activated.', 'performance-lab' ) );
@@ -107,8 +108,10 @@
 
 	// Attach the event listeners.
 	document
-		.querySelectorAll( '.perflab-install-active-plugin' )
+		.querySelectorAll( '.perflab-install-active-plugin[data-plugin-slug]' )
 		.forEach( ( item ) => {
-			item.addEventListener( 'click', enqueuePluginActivation );
+			item.addEventListener( 'click', ( event ) =>
+				enqueuePluginActivation( /** @type {MouseEvent} */ ( event ) )
+			);
 		} );
 } )();
