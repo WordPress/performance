@@ -100,13 +100,28 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 		}
 
 		$args = wp_parse_args( $args, $defaults );
-
 		// Enforce correct types.
 		if ( ! is_array( $args['global-transition-names'] ) ) {
 			$args['global-transition-names'] = array();
 		}
 		if ( ! is_array( $args['post-transition-names'] ) ) {
 			$args['post-transition-names'] = array();
+		}
+		if ( ! is_string( $args['default-animation'] ) ) {
+			$args['default-animation'] = 'fade';
+		}
+
+		$transition_animation_keys = array(
+			'chronological-forwards-animation',
+			'chronological-backwards-animation',
+			'pagination-forwards-animation',
+			'pagination-backwards-animation',
+		);
+
+		foreach ( $transition_animation_keys as $transition_animation_key ) {
+			if ( ! is_string( $args[ $transition_animation_key ] ) || '' === $args[ $transition_animation_key ] ) {
+				$args[ $transition_animation_key ] = false;
+			}
 		}
 
 		// If specific transition animations match the default animations, they are irrelevant.
@@ -355,7 +370,6 @@ function plvt_load_view_transitions(): void {
 	) {
 		return;
 	}
-
 	$animations_js_config = array(
 		'default' => array(
 			'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $theme_support['default-animation'], $default_animation_args ),
@@ -371,24 +385,32 @@ function plvt_load_view_transitions(): void {
 	);
 
 	foreach ( $additional_transition_types as $transition_type ) {
-		if ( isset( $theme_support[ $transition_type . '-animation' ] ) ) {
-			$additional_animation_args       = isset( $theme_support[ $transition_type . '-animation-args' ] ) ? (array) $theme_support[ $transition_type . '-animation-args' ] : array();
-			$additional_animation_stylesheet = $animation_registry->get_animation_stylesheet( $theme_support[ $transition_type . '-animation' ], $additional_animation_args );
-			if ( '' !== $additional_animation_stylesheet ) {
-				wp_add_inline_style(
-					'plvt-view-transitions',
-					'@media (prefers-reduced-motion: no-preference) {' . plvt_scope_animation_stylesheet_to_transition_type( $additional_animation_stylesheet, $transition_type ) . '}'
-				);
-			}
-
-			$animations_js_config[ $transition_type ] = array(
-				'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
-				'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $theme_support[ $transition_type . '-animation' ], $additional_animation_args ),
-				'targetName'               => $additional_animation_args['target-name'] ?? '*', // Special argument.
-			);
-		} else {
+		$transition_animation_key = $transition_type . '-animation';
+		if ( ! isset( $theme_support[ $transition_animation_key ] ) ) {
 			$animations_js_config[ $transition_type ] = false;
+			continue;
 		}
+
+		$transition_animation_alias = $theme_support[ $transition_animation_key ];
+		if ( ! is_string( $transition_animation_alias ) || '' === $transition_animation_alias ) {
+			$animations_js_config[ $transition_type ] = false;
+			continue;
+		}
+
+		$additional_animation_args       = isset( $theme_support[ $transition_type . '-animation-args' ] ) ? (array) $theme_support[ $transition_type . '-animation-args' ] : array();
+		$additional_animation_stylesheet = $animation_registry->get_animation_stylesheet( $transition_animation_alias, $additional_animation_args );
+		if ( '' !== $additional_animation_stylesheet ) {
+			wp_add_inline_style(
+				'plvt-view-transitions',
+				'@media (prefers-reduced-motion: no-preference) {' . plvt_scope_animation_stylesheet_to_transition_type( $additional_animation_stylesheet, $transition_type ) . '}'
+			);
+		}
+
+		$animations_js_config[ $transition_type ] = array(
+			'useGlobalTransitionNames' => $animation_registry->use_animation_global_transition_names( $transition_animation_alias, $additional_animation_args ),
+			'usePostTransitionNames'   => $animation_registry->use_animation_post_transition_names( $transition_animation_alias, $additional_animation_args ),
+			'targetName'               => $additional_animation_args['target-name'] ?? '*', // Special argument.
+		);
 	}
 
 	$config = array(
