@@ -9,16 +9,17 @@
 	},
 	"dependencies": {
 		"@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-		"web-vitals": "5.1.0"
+		"web-vitals": "5.2.0"
 	},
 	"devDependencies": {
 		"@octokit/rest": "^22.0.1",
-		"@playwright/test": "^1.58.2",
-		"@types/node": "^20.19.37",
-		"@wordpress/e2e-test-utils-playwright": "^1.42.0",
-		"@wordpress/env": "^11.2.0",
-		"@wordpress/prettier-config": "^4.42.0",
-		"@wordpress/scripts": "^31.7.0",
+		"@playwright/test": "^1.59.1",
+		"@types/lodash": "4.17.24",
+		"@types/node": "^20.19.39",
+		"@wordpress/e2e-test-utils-playwright": "^1.43.0",
+		"@wordpress/env": "^11.3.0",
+		"@wordpress/prettier-config": "^4.43.0",
+		"@wordpress/scripts": "^31.8.0",
 		"ajv": "8.18.0",
 		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
@@ -29,9 +30,9 @@
 		"fs-extra": "^11.3.4",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.4.0",
-		"lodash": "4.17.23",
+		"lodash": "4.18.1",
 		"npm-run-all": "^4.1.5",
-		"typescript": "^5.9.3",
+		"typescript": "^6.0.2",
 		"webpackbar": "^7.0.0"
 	},
 	"scripts": {

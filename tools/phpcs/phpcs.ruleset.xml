@@ -8,6 +8,7 @@
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
+	<rule ref="Generic.PHP.RequireStrictTypes"/>
 
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
@@ -137,6 +138,10 @@
 	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotSanitized">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.PHP.RequireStrictTypes.MissingDeclaration">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/**</exclude-pattern>
 	</rule>
 
 	<!-- Exclude built plugins and built assets in plugins. -->

@@ -6,6 +6,8 @@
  * @since 1.8.0
  */
 
+declare( strict_types = 1 );
+
 /**
  * Class representing a single Server-Timing metric.
  *

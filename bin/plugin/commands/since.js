@@ -30,9 +30,7 @@ exports.options = [
  * @param {WPSinceCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
-	const isAllPlugins = ! opt.plugin;
-
-	if ( ! isAllPlugins && ! plugins.includes( opt.plugin ) ) {
+	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
 		throw new Error(
 			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 		);
@@ -41,16 +39,16 @@ exports.handler = async ( opt ) => {
 	const pluginDirectories = [];
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 
-	if ( isAllPlugins ) {
+	if ( opt.plugin ) {
+		pluginDirectories.push(
+			path.resolve( pluginRoot, 'plugins', opt.plugin )
+		);
+	} else {
 		for ( const pluginSlug of plugins ) {
 			pluginDirectories.push(
 				path.resolve( pluginRoot, 'plugins', pluginSlug )
 			);
 		}
-	} else {
-		pluginDirectories.push(
-			path.resolve( pluginRoot, 'plugins', opt.plugin )
-		);
 	}
 
 	for ( const pluginDirectory of pluginDirectories ) {
