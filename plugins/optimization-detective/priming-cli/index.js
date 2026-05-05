@@ -37,6 +37,16 @@ const abortController = new AbortController();
  */
 const signal = abortController.signal;
 
+/**
+ * Gets an error message from an unknown error value.
+ *
+ * @param {unknown} error Error value.
+ * @return {string} Error message.
+ */
+function getErrorMessage( error ) {
+	return error instanceof Error ? error.message : String( error );
+}
+
 // Listen for the SIGINT signal (Ctrl+C) to abort the process.
 process.on( 'SIGINT', () => {
 	spinner.start( 'Aborting...' );
@@ -113,7 +123,9 @@ function getBatch( lastCursor ) {
 		}
 		return parsedBatch[ 0 ];
 	} catch ( error ) {
-		spinner.fail( 'Error occurred while fetching batch: ' + error.message );
+		spinner.fail(
+			'Error occurred while fetching batch: ' + getErrorMessage( error )
+		);
 		abortController.abort();
 		return null;
 	}
@@ -122,7 +134,7 @@ function getBatch( lastCursor ) {
 /**
  * Fetches the verification token.
  *
- * @return {string|null} - The verification token or null if not available.
+ * @return {?string} - The verification token or null if not available.
  */
 function getVerificationToken() {
 	try {
@@ -137,7 +149,8 @@ function getVerificationToken() {
 		return verificationToken;
 	} catch ( error ) {
 		spinner.fail(
-			'Error occurred while fetching verification token: ' + error.message
+			'Error occurred while fetching verification token: ' +
+				getErrorMessage( error )
 		);
 		abortController.abort();
 		return null;
@@ -220,43 +233,54 @@ async function processTask( page, task, verificationToken, abortSignal ) {
 			} );
 
 			await page.evaluate( () => {
-				return new Promise(
-					( requestSuccessResolve, requestSuccessReject ) => {
-						// Set timeout for 30 seconds.
-						const timeoutId = setTimeout( () => {
-							requestSuccessReject(
-								new Error(
-									'Timed out waiting for event "OD_PRIME_URL_METRICS_REQUEST_SUCCESS".'
-								)
-							);
-						}, 30000 );
-
-						/**
-						 * Handles the message from the page.
-						 *
-						 * @param {CustomEvent} event - The message event.
-						 */
-						function handleMessage( event ) {
-							if ( event.detail && event.detail.success ) {
-								clearTimeout( timeoutId );
-								requestSuccessResolve();
-							} else {
-								clearTimeout( timeoutId );
+				return /** @type {Promise<void>} */ (
+					new Promise(
+						( requestSuccessResolve, requestSuccessReject ) => {
+							// Set timeout for 30 seconds.
+							const timeoutId = setTimeout( () => {
 								requestSuccessReject(
 									new Error(
-										event.detail.error ||
-											'URL Metric request failed'
+										'Timed out waiting for event "OD_PRIME_URL_METRICS_REQUEST_SUCCESS".'
 									)
 								);
-							}
-						}
+							}, 30000 );
 
-						document.addEventListener(
-							'OD_PRIME_URL_METRICS_REQUEST_STATUS',
-							handleMessage,
-							{ once: true }
-						);
-					}
+							/**
+							 * Handles the message from the page.
+							 *
+							 * @param {Event} event - The message event.
+							 */
+							function handleMessage( event ) {
+								const customEvent =
+									/** @type {CustomEvent<{success?: boolean, error?: string}>} */ (
+										event
+									);
+								if (
+									customEvent.detail &&
+									customEvent.detail.success
+								) {
+									clearTimeout( timeoutId );
+									requestSuccessResolve();
+								} else {
+									clearTimeout( timeoutId );
+									requestSuccessReject(
+										new Error(
+											customEvent.detail.error ||
+												'URL Metric request failed'
+										)
+									);
+								}
+							}
+
+							document.addEventListener(
+								'OD_PRIME_URL_METRICS_REQUEST_STATUS',
+								/** @type {( event: Event ) => void} */ (
+									handleMessage
+								),
+								{ once: true }
+							);
+						}
+					)
 				);
 			} );
 
@@ -298,7 +322,7 @@ async function init() {
 	/**
 	 * Cursor object to track position in pagination when fetching URL batches.
 	 *
-	 * @type {import("./types.ts").URLBatchCursor}
+	 * @type {?import("./types.ts").URLBatchCursor}
 	 */
 	let cursor = null;
 
@@ -312,7 +336,7 @@ async function init() {
 	/**
 	 * Token used to verify REST API requests server side when in priming mode.
 	 *
-	 * @type {string}
+	 * @type {?string}
 	 */
 	let verificationToken = null;
 
@@ -364,20 +388,24 @@ async function init() {
 					signal
 				);
 			} catch ( error ) {
+				const errorMessage = getErrorMessage( error );
 				// Refresh verification token if expired.
 				if (
-					error.message.includes(
+					errorMessage.includes(
 						'priming_mode_verification_token_expired'
 					)
 				) {
 					verificationToken = getVerificationToken();
+					if ( ! verificationToken ) {
+						break;
+					}
 					i--;
 				} else {
 					// Log the error and continue processing the next task.
 					spinner.fail(
-						`Error processing task ${ i + 1 }. Error: ${
-							error.message
-						}`
+						`Error processing task ${
+							i + 1
+						}. Error: ${ errorMessage }`
 					);
 				}
 			}

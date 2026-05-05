@@ -290,7 +290,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, array{ set_up: Closure }>
 	 */
 	public function data_provider_test_od_get_current_url_metrics_etag(): array {
 		return array(
@@ -503,6 +503,20 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 						);
 						$etag_after = $get_etag();
 						$this->assertNotEquals( $etag, $etag_after );
+					};
+				},
+			),
+
+			'null_wp_query_posts'         => array(
+				'set_up' => function (): Closure {
+					$post = self::factory()->post->create_and_get();
+					$this->assertInstanceOf( WP_Post::class, $post );
+					$this->go_to( '/' );
+					global $wp_query;
+					unset( $wp_query->posts );
+
+					return function ( array $etag_data ): void {
+						$this->assertSame( array(), $etag_data['queried_posts'] );
 					};
 				},
 			),

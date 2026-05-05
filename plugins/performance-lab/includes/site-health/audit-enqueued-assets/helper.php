@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -70,7 +72,13 @@ function perflab_aea_audit_blocking_assets(): array {
 
 		if ( 'SCRIPT' === $tag ) {
 			$src = $processor->get_attribute( 'src' );
+
+			// Skip scripts with empty or whitespace-only src attributes as they never load external scripts which block rendering.
 			if ( ! is_string( $src ) ) {
+				continue;
+			}
+			$src = trim( $src );
+			if ( '' === $src ) {
 				continue;
 			}
 
@@ -119,7 +127,13 @@ function perflab_aea_audit_blocking_assets(): array {
 			}
 
 			$href = $processor->get_attribute( 'href' );
+
+			// Skip stylesheets with empty or whitespace-only href attributes since they may be using a deferred loading technique.
 			if ( ! is_string( $href ) ) {
+				continue;
+			}
+			$href = trim( $href );
+			if ( '' === $href ) {
 				continue;
 			}
 

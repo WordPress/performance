@@ -6,9 +6,9 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "github_actions"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'github_actions'
     cooldown:
       default-days: 7
 
@@ -18,15 +18,19 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "javascript"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'javascript'
     cooldown:
       default-days: 7
     groups:
       wordpress-packages:
         patterns:
           - '@wordpress/*'
+    ignore:
+      # This is to remain compatible with the node in ../.nvmrc and <https://github.com/WordPress/gutenberg/blob/trunk/.nvmrc>.
+      - dependency-name: '@types/node'
+        versions: ['>= 21']
 
   - package-ecosystem: composer
     directory: '/'
@@ -34,9 +38,9 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "php"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'php'
     cooldown:
       default-days: 7
     groups:

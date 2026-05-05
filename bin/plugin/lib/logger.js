@@ -22,8 +22,8 @@ module.exports = {
 	log,
 	formats: {
 		title: bold,
-		error: ( text ) => bold( error( text ) ),
-		warning: ( text ) => bold( warning( text ) ),
-		success: ( text ) => bold( success( text ) ),
+		error: ( /** @type {string} */ text ) => bold( error( text ) ),
+		warning: ( /** @type {string} */ text ) => bold( warning( text ) ),
+		success: ( /** @type {string} */ text ) => bold( success( text ) ),
 	},
 };

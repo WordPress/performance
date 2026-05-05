@@ -20,14 +20,8 @@ const {
 /**
  * WordPress dependencies
  */
+// @ts-ignore -- No declaration file for this module.
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
-
-/*
- * Temporary workaround because 'view-transitions' should not be added to `plugins.json` just yet, since it is not
- * ready to be released.
- * TODO: Remove this workaround once the plugin is added to `plugins.json`.
- */
-standalonePlugins.push( 'view-transitions' );
 
 const defaultBuildConfig = {
 	entry: {},
@@ -403,7 +397,9 @@ const buildPlugin = ( env ) => {
 				],
 			} ),
 			{
-				apply: ( compiler ) => {
+				apply: (
+					/** @type {import('webpack').Compiler} */ compiler
+				) => {
 					// Before run, delete the build directory.
 					compiler.hooks.beforeRun.tap( 'BeforeRunPlugin', () => {
 						deleteFileOrDirectory( to );

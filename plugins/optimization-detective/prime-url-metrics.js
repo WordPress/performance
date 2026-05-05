@@ -9,86 +9,97 @@
 	/**
 	 * Button element that toggles processing state.
 	 *
-	 * @type {HTMLButtonElement}
+	 * @type {HTMLButtonElement|null}
 	 */
-	const controlButton = document.querySelector(
+	const controlButtonElement = document.querySelector(
 		'button#od-priming-mode-control-button'
 	);
 
 	/**
 	 * Progress bar element displaying current task completion progress.
 	 *
-	 * @type {HTMLProgressElement}
+	 * @type {HTMLProgressElement|null}
 	 */
-	const progressBar = document.querySelector(
+	const progressBarElement = document.querySelector(
 		'progress#od-priming-mode-progress'
 	);
 
 	/**
 	 * Container element displaying the status of URL metrics priming.
 	 *
-	 * @type {HTMLDivElement}
+	 * @type {HTMLDivElement|null}
 	 */
-	const statusContainer = document.querySelector(
+	const statusContainerElement = document.querySelector(
 		'div#od-priming-mode-status-container'
 	);
 
 	/**
 	 * Iframe used to load pages for priming URL metrics.
 	 *
-	 * @type {HTMLIFrameElement}
+	 * @type {HTMLIFrameElement|null}
 	 */
-	const iframe = document.querySelector( 'iframe#od-priming-mode-iframe' );
+	const iframeElement = document.querySelector(
+		'iframe#od-priming-mode-iframe'
+	);
 
 	/**
 	 * Container that holds the iframe.
 	 *
-	 * @type {HTMLDivElement}
+	 * @type {HTMLDivElement|null}
 	 */
-	const iframeContainer = document.querySelector(
+	const iframeContainerElement = document.querySelector(
 		'div#od-priming-mode-iframe-container'
 	);
 
 	/**
 	 * Element that displays the current batch number being processed.
 	 *
-	 * @type {HTMLSpanElement}
+	 * @type {HTMLSpanElement|null}
 	 */
-	const currentBatchElement = document.querySelector(
+	const currentBatchDisplayElement = document.querySelector(
 		'span#od-priming-mode-current-batch'
 	);
 
 	/**
 	 *  Element that displays the current task number being processed.
 	 *
-	 * @type {HTMLSpanElement}
+	 * @type {HTMLSpanElement|null}
 	 */
-	const currentTaskElement = document.querySelector(
+	const currentTaskDisplayElement = document.querySelector(
 		'span#od-priming-mode-current-task'
 	);
 
 	/**
 	 * Element that displays the total number of tasks in the current batch.
 	 *
-	 * @type {HTMLSpanElement}
+	 * @type {HTMLSpanElement|null}
 	 */
-	const totalTasksInBatchElement = document.querySelector(
+	const totalTasksInBatchDisplayElement = document.querySelector(
 		'span#od-priming-mode-total-tasks-in-batch'
 	);
 
 	// Ensure all required elements are present.
 	if (
-		! controlButton ||
-		! progressBar ||
-		! statusContainer ||
-		! iframe ||
-		! iframeContainer ||
-		! currentBatchElement ||
-		! currentTaskElement ||
-		! totalTasksInBatchElement
+		! controlButtonElement ||
+		! progressBarElement ||
+		! statusContainerElement ||
+		! iframeElement ||
+		! iframeContainerElement ||
+		! currentBatchDisplayElement ||
+		! currentTaskDisplayElement ||
+		! totalTasksInBatchDisplayElement
 	) {
 		return;
 	}
+
+	const controlButton = controlButtonElement;
+	const progressBar = progressBarElement;
+	const statusContainer = statusContainerElement;
+	const iframe = iframeElement;
+	const iframeContainer = iframeContainerElement;
+	const currentBatchElement = currentBatchDisplayElement;
+	const currentTaskElement = currentTaskDisplayElement;
+	const totalTasksInBatchElement = totalTasksInBatchDisplayElement;
 
 	/**
 	 * Flag indicating whether priming is currently in progress.
@@ -193,6 +204,16 @@
 	}
 
 	/**
+	 * Gets a loggable error message from an unknown error.
+	 *
+	 * @param {unknown} error Error value.
+	 * @return {string} Error message.
+	 */
+	function getErrorMessage( error ) {
+		return error instanceof Error ? error.message : String( error );
+	}
+
+	/**
 	 * Toggles the processing state of the priming task.
 	 */
 	function toggleProcessing() {
@@ -229,6 +250,9 @@
 				if ( ! currentBatch ) {
 					await prepareNextBatch();
 					if ( ! isNextBatchAvailable ) {
+						break;
+					}
+					if ( ! currentBatch ) {
 						break;
 					}
 				}
@@ -317,9 +341,10 @@
 					abortController.signal
 				);
 			} catch ( error ) {
-				log( error.message );
+				const errorMessage = getErrorMessage( error );
+				log( errorMessage );
 				if (
-					error.message.includes(
+					errorMessage.includes(
 						'priming_mode_verification_token_expired'
 					)
 				) {

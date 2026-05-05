@@ -78,9 +78,12 @@
 	/**
 	 * Button element for publishing, allowing page leave after click.
 	 *
-	 * @type {HTMLInputElement}
+	 * @type {HTMLInputElement|null}
 	 */
 	const updateButton = document.querySelector( 'input#publish' );
+	if ( ! updateButton ) {
+		return;
+	}
 
 	/**
 	 * Flag that indicates if navigation away from page is allowed.

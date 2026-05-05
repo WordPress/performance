@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -54,8 +56,8 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 	 * }
 	 */
 	public function get_registration_args(): array {
-		// The slug and cache_purge_post_id args are further validated via the validate_callback for the 'hmac' parameter,
-		// they are provided as input with the 'url' argument to create the HMAC by the server.
+		// The slug and cache_purge_post_id args are further validated in the callback by checking against the 'hmac'
+		// parameter. They are provided as input with the 'url' argument to create the HMAC by the server.
 		$args = array(
 			'slug'                                 => array(
 				'type'        => 'string',
@@ -80,16 +82,10 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'minimum'     => 1,
 			),
 			'hmac'                                 => array(
-				'type'              => 'string',
-				'description'       => __( 'HMAC originally computed by server required to authorize the request.', 'optimization-detective' ),
-				'required'          => true,
-				'pattern'           => '^[0-9a-f]+\z',
-				'validate_callback' => static function ( string $hmac, WP_REST_Request $request ) {
-					if ( '' === $hmac || ! od_verify_url_metrics_storage_hmac( $hmac, $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ?? null ) ) {
-						return new WP_Error( 'invalid_hmac', __( 'URL Metrics HMAC verification failure.', 'optimization-detective' ) );
-					}
-					return true;
-				},
+				'type'        => 'string',
+				'description' => __( 'HMAC originally computed by server required to authorize the request.', 'optimization-detective' ),
+				'required'    => true,
+				'pattern'     => '^[0-9a-f]+\z',
 			),
 			'prime_url_metrics_verification_token' => array(
 				'type'        => 'string',
@@ -184,6 +180,15 @@ final class OD_REST_URL_Metrics_Store_Endpoint {
 				'rest_cross_origin_forbidden',
 				__( 'Cross-origin requests are not allowed for this endpoint.', 'optimization-detective' ),
 				array( 'status' => 403 )
+			);
+		}
+
+		// This validation is done here as opposed to a validate_callback for the arg since here the params have all been validated and sanitized.
+		if ( ! od_verify_url_metrics_storage_hmac( $request['hmac'], $request['slug'], $request['current_etag'], $request['url'], $request['cache_purge_post_id'] ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				__( 'URL Metrics HMAC verification failure.', 'optimization-detective' ),
+				array( 'status' => 400 )
 			);
 		}
 

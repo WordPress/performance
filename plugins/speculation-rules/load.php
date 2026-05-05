@@ -15,6 +15,8 @@
  * @package speculation-rules
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -59,8 +61,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// Otherwise, register this copy if it is actually the one installed in the directory for plugins.
 			rtrim( WP_PLUGIN_DIR, '/' ) === dirname( __DIR__ )
 		) {
-			$GLOBALS[ $global_var_name ]['version'] = $version;
-			$GLOBALS[ $global_var_name ]['load']    = $load;
+			$GLOBALS[ $global_var_name ]['version'] = $version; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
+			$GLOBALS[ $global_var_name ]['load']    = $load; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
 		}
 	}
 )(

@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -29,6 +31,8 @@ add_action( 'admin_enqueue_scripts', 'od_enqueue_prime_url_metrics_scripts' );
 add_action( 'enqueue_block_editor_assets', 'od_enqueue_block_editor_prime_url_metrics_scripts' );
 add_filter( 'redirect_post_location', 'od_add_data_to_post_update_redirect_url_for_classic_editor' );
 add_filter( 'plugin_action_links_' . OPTIMIZATION_DETECTIVE_MAIN_FILE, 'od_add_settings_action_link' );
+add_action( 'after_plugin_row_meta', 'od_render_installed_extensions_admin_notice_in_plugin_row', 30 );
+add_filter( 'plugin_row_meta', 'od_render_extensions_meta_link', 10, 2 );
 add_action( 'rest_api_init', 'od_register_rest_url_metric_store_endpoint' );
 add_filter( 'rest_pre_dispatch', 'od_decompress_rest_request_body', 10, 3 );
 add_action( 'rest_api_init', 'od_register_rest_url_metric_priming_endpoint' );

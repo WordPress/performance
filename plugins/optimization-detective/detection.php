@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -109,7 +111,7 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 	/**
 	 * Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_gzip_url_metric_store_request_payloads
 	 *
 	 * @param bool $gzip_url_metric_store_request_payloads Whether to use gzip to compress URL Metric JSON.
@@ -206,7 +208,7 @@ function od_register_rest_url_metric_store_endpoint(): void {
 /**
  * Decompresses the REST API request body for the URL Metrics endpoint.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @phpstan-param WP_REST_Request<array<string, mixed>> $request

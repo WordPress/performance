@@ -5,6 +5,8 @@
  * @package performance-lab
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -595,7 +597,7 @@ function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
 	}
 
 	/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
-	$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+	$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentionally applying core filter.
 
 	if ( ! is_array( $plugin_links ) || ! array_key_exists( 'settings', $plugin_links ) ) {
 		return null;

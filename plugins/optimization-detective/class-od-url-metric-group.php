@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -274,7 +276,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 * @since 0.9.0 If the current environment's generated ETag does not match the URL Metric's ETag, the URL Metric is considered stale.
-	 * @since n.e.x.t Negative freshness TTL values now disable timestamp-based freshness checks.
+	 * @since 1.0.0 Negative freshness TTL values now disable timestamp-based freshness checks.
 	 *
 	 * @return bool Whether complete.
 	 */

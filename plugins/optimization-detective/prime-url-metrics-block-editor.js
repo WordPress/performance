@@ -98,6 +98,16 @@
 	}
 
 	/**
+	 * Gets a loggable error message from an unknown error.
+	 *
+	 * @param {unknown} error Error value.
+	 * @return {string} Error message.
+	 */
+	function getErrorMessage( error ) {
+		return error instanceof Error ? error.message : String( error );
+	}
+
+	/**
 	 * Primes the URL metrics for all viewports.
 	 *
 	 * @return {Promise<void>} The promise that resolves to void.
@@ -131,7 +141,7 @@
 						abortController.signal
 					);
 				} catch ( error ) {
-					log( error.message );
+					log( getErrorMessage( error ) );
 					if ( abortController.signal.aborted ) {
 						throw error;
 					}

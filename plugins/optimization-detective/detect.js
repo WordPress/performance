@@ -99,7 +99,8 @@ function isStorageLocked( currentTime, storageLockTTL ) {
 
 	try {
 		const storageLockTime = parseInt(
-			sessionStorage.getItem( storageLockTimeSessionKey )
+			sessionStorage.getItem( storageLockTimeSessionKey ) || '',
+			10
 		);
 		return (
 			! isNaN( storageLockTime ) &&
@@ -142,9 +143,9 @@ function createLogger(
 	/**
 	 * Constructs the args to pass to the logging function.
 	 *
-	 * @param {Array}   message       - The message(s) to log.
-	 * @param {boolean} includeSource - Whether to include the source. This should be true for warnings or errors.
-	 * @return {Array} Amended message.
+	 * @param {Array<any>} message       - The message(s) to log.
+	 * @param {boolean}    includeSource - Whether to include the source. This should be true for warnings or errors.
+	 * @return {Array<any>} Amended message.
 	 */
 	const constructLogArgs = ( message, includeSource = false ) => {
 		return [ prefix, ...message, includeSource ? logSource : null ].filter(
@@ -317,7 +318,7 @@ function getCurrentTime() {
  *
  * @param {Object} obj - Object to recursively freeze.
  */
-function recursiveFreeze( obj ) {
+function recursiveFreeze( /** @type {Record<string, any>} */ obj ) {
 	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
 		const value = obj[ prop ];
 		if ( null !== value && typeof value === 'object' ) {
@@ -430,7 +431,9 @@ function extendElementData( xpath, properties ) {
 		}
 	}
 	const elementData = elementsByXPath.get( xpath );
-	Object.assign( elementData, properties );
+	if ( elementData ) {
+		Object.assign( elementData, properties );
+	}
 	debounceCompressUrlMetric();
 }
 
@@ -530,7 +533,7 @@ function debounceCompressUrlMetric() {
  */
 async function forceCompressUrlMetric() {
 	if ( ! compressionEnabled ) {
-		return null;
+		return;
 	}
 	if ( null !== recompressionTimeout ) {
 		clearTimeout( recompressionTimeout );
@@ -768,7 +771,7 @@ export default async function detect( {
 		alreadySubmittedSessionStorageKey in sessionStorage
 	) {
 		const previousVisitTime = parseInt(
-			sessionStorage.getItem( alreadySubmittedSessionStorageKey ),
+			sessionStorage.getItem( alreadySubmittedSessionStorageKey ) || '',
 			10
 		);
 		if (
@@ -842,7 +845,12 @@ export default async function detect( {
 			 * @param {Element} element
 			 * @return {[Element, string]} Tuple of an element and its XPath.
 			 */
-			( element ) => [ element, element.getAttribute( 'data-od-xpath' ) ]
+			( element ) => [
+				element,
+				/** @type {string} */ (
+					element.getAttribute( 'data-od-xpath' )
+				),
+			]
 		)
 	);
 
@@ -862,24 +870,26 @@ export default async function detect( {
 	// Wait for the intersection observer to report back on the initially visible elements.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
 	if ( breadcrumbedElementsMap.size > 0 ) {
-		await new Promise( ( resolve ) => {
-			intersectionObserver = new IntersectionObserver(
-				( entries ) => {
-					for ( const entry of entries ) {
-						elementIntersections.push( entry );
+		await /** @type {Promise<void>} */ (
+			new Promise( ( resolve ) => {
+				intersectionObserver = new IntersectionObserver(
+					( entries ) => {
+						for ( const entry of entries ) {
+							elementIntersections.push( entry );
+						}
+						resolve();
+					},
+					{
+						root: null, // To watch for intersection relative to the device's viewport.
+						threshold: 0.0, // As soon as even one pixel is visible.
 					}
-					resolve();
-				},
-				{
-					root: null, // To watch for intersection relative to the device's viewport.
-					threshold: 0.0, // As soon as even one pixel is visible.
-				}
-			);
+				);
 
-			for ( const element of breadcrumbedElementsMap.keys() ) {
-				intersectionObserver.observe( element );
-			}
-		} );
+				for ( const element of breadcrumbedElementsMap.keys() ) {
+					intersectionObserver.observe( element );
+				}
+			} )
+		);
 
 		// Stop observing as soon as the page scrolls since we only want initial-viewport elements.
 		win.addEventListener( 'scroll', disconnectIntersectionObserver, {
@@ -892,25 +902,27 @@ export default async function detect( {
 	const lcpMetricCandidates = [];
 
 	// Get at least one LCP candidate. More may be reported before the page finishes loading.
-	await new Promise( ( resolve ) => {
-		onLCP(
-			/**
-			 * Handles an LCP metric being reported.
-			 *
-			 * @param {LCPMetric|LCPMetricWithAttribution} metric
-			 */
-			( metric ) => {
-				lcpMetricCandidates.push( metric );
-				resolve();
-			},
-			{
-				// This avoids needing to click to finalize the LCP candidate. While this is helpful for testing, it also
-				// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
-				// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
-				reportAllChanges: true,
-			}
-		);
-	} );
+	await /** @type {Promise<void>} */ (
+		new Promise( ( resolve ) => {
+			onLCP(
+				/**
+				 * Handles an LCP metric being reported.
+				 *
+				 * @param {LCPMetric|LCPMetricWithAttribution} metric
+				 */
+				( metric ) => {
+					lcpMetricCandidates.push( metric );
+					resolve();
+				},
+				{
+					// This avoids needing to click to finalize the LCP candidate. While this is helpful for testing, it also
+					// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
+					// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
+					reportAllChanges: true,
+				}
+			);
+		} )
+	);
 
 	// Stop observing the initial viewport.
 	disconnectIntersectionObserver();
@@ -971,7 +983,7 @@ export default async function detect( {
 	/** @type {boolean} */
 	let extensionHasFinalize = false;
 
-	/** @type {Promise[]} */
+	/** @type {Promise<void>[]} */
 	const extensionInitializePromises = [];
 
 	/** @type {string[]} */
@@ -1063,26 +1075,32 @@ export default async function detect( {
 	debounceCompressUrlMetric();
 
 	// Wait for the page to be hidden.
-	await new Promise( async ( resolve ) => {
-		if ( ! primeModeVerificationToken ) {
-			win.addEventListener( 'pagehide', resolve, { once: true } );
-			win.addEventListener( 'pageswap', resolve, { once: true } );
-			doc.addEventListener(
-				'visibilitychange',
-				() => {
-					if ( doc.visibilityState === 'hidden' ) {
-						// TODO: This will fire even when switching tabs.
-						resolve();
-					}
-				},
-				{ once: true }
-			);
-		} else {
-			await scrollToBottomOfPage();
-			await forceCompressUrlMetric();
-			resolve();
-		}
-	} );
+	await /** @type {Promise<void>} */ (
+		new Promise( async ( resolve ) => {
+			if ( ! primeModeVerificationToken ) {
+				win.addEventListener( 'pagehide', () => resolve(), {
+					once: true,
+				} );
+				win.addEventListener( 'pageswap', () => resolve(), {
+					once: true,
+				} );
+				doc.addEventListener(
+					'visibilitychange',
+					() => {
+						if ( doc.visibilityState === 'hidden' ) {
+							// TODO: This will fire even when switching tabs.
+							resolve();
+						}
+					},
+					{ once: true }
+				);
+			} else {
+				await scrollToBottomOfPage();
+				await forceCompressUrlMetric();
+				resolve();
+			}
+		} )
+	);
 
 	// Only proceed with submitting the URL Metric if the viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
@@ -1093,7 +1111,7 @@ export default async function detect( {
 
 	// Finalize extensions.
 	if ( extensions.size > 0 ) {
-		/** @type {Promise[]} */
+		/** @type {Promise<void>[]} */
 		const extensionFinalizePromises = [];
 
 		/** @type {string[]} */
@@ -1172,9 +1190,10 @@ export default async function detect( {
 		return;
 	}
 	compressionEnabled = compressionEnabled && null !== compressedPayload;
-	const payloadBlob = compressionEnabled
-		? compressedPayload
-		: new Blob( [ jsonBody ], { type: 'application/json' } );
+	const payloadBlob =
+		compressionEnabled && compressedPayload
+			? compressedPayload
+			: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
 		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
@@ -1247,6 +1266,7 @@ export default async function detect( {
 		);
 	}
 
+	/** @type {Record<string, string>} */
 	const headers = {
 		'Content-Type': 'application/json',
 	};
@@ -1272,8 +1292,10 @@ export default async function detect( {
 			}
 			notifyStatus( { success: true }, primeModeSource );
 		} catch ( err ) {
+			const errorMessage =
+				err instanceof Error ? err.message : 'Unknown error';
 			notifyStatus(
-				{ success: false, error: err.message },
+				{ success: false, error: errorMessage },
 				primeModeSource
 			);
 		}
