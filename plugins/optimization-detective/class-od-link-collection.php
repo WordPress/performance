@@ -128,18 +128,12 @@ final class OD_Link_Collection implements Countable {
 	 * @return LinkAttributes[] Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
 	private function get_prepared_links(): array {
-		$links_by_rel = array_values( $this->links_by_rel );
-		if ( count( $links_by_rel ) === 0 ) {
-			// This condition is needed for PHP 7.2 and PHP 7.3 in which array_merge() fails if passed a spread empty array: 'array_merge() expects at least 1 parameter, 0 given'.
-			return array();
-		}
-
 		return array_merge(
 			...array_map(
 				function ( array $links ): array {
 					return $this->merge_consecutive_links( $links );
 				},
-				$links_by_rel
+				array_values( $this->links_by_rel )
 			)
 		);
 	}
