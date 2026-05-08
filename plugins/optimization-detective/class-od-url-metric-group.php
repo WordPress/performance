@@ -257,9 +257,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			// Sort URL Metrics in descending order by timestamp.
 			usort(
 				$this->url_metrics,
-				static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
-					return $b->get_timestamp() <=> $a->get_timestamp();
-				}
+				static fn ( OD_URL_Metric $a, OD_URL_Metric $b ): int => $b->get_timestamp() <=> $a->get_timestamp()
 			);
 
 			// Only keep the sample size of the newest URL Metrics.
@@ -355,9 +353,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			// Prefer to use URL Metrics, which have a current ETag.
 			$url_metrics = array_filter(
 				$this->url_metrics,
-				function ( OD_URL_Metric $url_metric ): bool {
-					return $url_metric->get_etag() === $this->get_collection()->get_current_etag();
-				}
+				fn ( OD_URL_Metric $url_metric ): bool => $url_metric->get_etag() === $this->get_collection()->get_current_etag()
 			);
 
 			// Otherwise, if no URL Metrics have a current ETag, fall back to using all the stale ones.

@@ -521,9 +521,7 @@ class OD_URL_Metric implements JsonSerializable {
 	public function get_elements(): array {
 		if ( null === $this->elements ) {
 			$this->elements = array_map(
-				function ( array $element ): OD_Element {
-					return new OD_Element( $element, $this );
-				},
+				fn ( array $element ): OD_Element => new OD_Element( $element, $this ),
 				$this->data['elements']
 			);
 		}
@@ -541,9 +539,7 @@ class OD_URL_Metric implements JsonSerializable {
 		$data = $this->data;
 
 		$data['elements'] = array_map(
-			static function ( OD_Element $element ): array {
-				return $element->jsonSerialize();
-			},
+			static fn ( OD_Element $element ): array => $element->jsonSerialize(),
 			$this->get_elements()
 		);
 

@@ -130,9 +130,7 @@ final class OD_Link_Collection implements Countable {
 	private function get_prepared_links(): array {
 		return array_merge(
 			...array_map(
-				function ( array $links ): array {
-					return $this->merge_consecutive_links( $links );
-				},
+				fn ( array $links ): array => $this->merge_consecutive_links( $links ),
 				array_values( $this->links_by_rel )
 			)
 		);
