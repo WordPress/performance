@@ -122,6 +122,8 @@
 			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
 		</properties>
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+		<!-- WordPress code style requires @var docblocks (Squiz.Commenting.VariableComment.MissingVar) even when redundant with the native type hint. -->
+		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.UselessAnnotation" />
 	</rule>
 
 	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
