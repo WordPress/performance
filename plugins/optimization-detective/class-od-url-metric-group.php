@@ -30,7 +30,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var OD_URL_Metric[]
 	 */
-	private $url_metrics;
+	private array $url_metrics;
 
 	/**
 	 * Minimum possible viewport width for the group (exclusive).
@@ -39,7 +39,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<0, max>
 	 */
-	private $minimum_viewport_width;
+	private int $minimum_viewport_width;
 
 	/**
 	 * Maximum possible viewport width for the group (inclusive), where null means it is unbounded.
@@ -48,7 +48,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<1, max>|null
 	 */
-	private $maximum_viewport_width;
+	private ?int $maximum_viewport_width;
 
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
@@ -57,7 +57,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<1, max>
 	 */
-	private $sample_size;
+	private int $sample_size;
 
 	/**
 	 * Freshness age (TTL) for a given URL Metric.
@@ -66,7 +66,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<-1, max>
 	 */
-	private $freshness_ttl;
+	private int $freshness_ttl;
 
 	/**
 	 * Collection that this instance belongs to.
@@ -75,7 +75,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var OD_URL_Metric_Group_Collection
 	 */
-	private $collection;
+	private OD_URL_Metric_Group_Collection $collection;
 
 	/**
 	 * Result cache.
@@ -89,7 +89,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
 	 *      }
 	 */
-	private $result_cache = array();
+	private array $result_cache = array();
 
 	/**
 	 * Constructor.
