@@ -115,7 +115,6 @@
 	</rule>
 	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
 		<properties>
-			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
 			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
@@ -124,6 +123,11 @@
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
 		<!-- WordPress code style requires @var docblocks (Squiz.Commenting.VariableComment.MissingVar) even when redundant with the native type hint. -->
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.UselessAnnotation" />
+	</rule>
+
+	<!-- Don't require native property type hints in tests; test fixtures and PHPUnit helpers should not have to match the strict typing applied to source. -->
+	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 
 	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
