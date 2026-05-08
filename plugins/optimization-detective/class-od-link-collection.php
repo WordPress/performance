@@ -50,7 +50,7 @@ final class OD_Link_Collection implements Countable {
 	 *
 	 * @var array<string, Link[]>
 	 */
-	private $links_by_rel = array();
+	private array $links_by_rel = array();
 
 	/**
 	 * Adds link.
