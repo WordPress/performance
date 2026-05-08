@@ -33,12 +33,12 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	const LAZY_VIDEO_CLASS_NAME = 'od-lazy-video';
 
 	/**
-	 * Whether the lazy-loading script was added to the body.
+	 * Count of lazy-loaded videos on the page.
 	 *
-	 * @since 0.2.0
-	 * @var bool
+	 * @since n.e.x.t
+	 * @var int
 	 */
-	protected $added_lazy_script = false;
+	protected $lazy_loaded_video_count = 0;
 
 	/**
 	 * Visits a tag.
@@ -242,9 +242,20 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
 		}
 
-		if ( ! $this->added_lazy_script ) {
-			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_video_lazy_load_script(), array( 'type' => 'module' ) ) );
-			$this->added_lazy_script = true;
+		++$this->lazy_loaded_video_count;
+	}
+
+	/**
+	 * Inserts lazy-load script if needed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 */
+	public function insert_lazy_load_script_if_needed( OD_Template_Optimization_Context $context ): void {
+		if ( $this->lazy_loaded_video_count > 0 ) {
+			$script = wp_get_inline_script_tag( image_prioritizer_get_video_lazy_load_script(), array( 'type' => 'module' ) );
+			$context->append_body_html( $script );
 		}
 	}
 }
