@@ -27,7 +27,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 * @since 1.0.0
 	 * @var array<string, string>
 	 */
-	private $contexts;
+	private array $contexts;
 
 	/**
 	 * Constructor.
