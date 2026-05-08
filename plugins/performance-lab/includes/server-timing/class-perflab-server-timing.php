@@ -196,9 +196,7 @@ class Perflab_Server_Timing {
 				},
 				$this->registered_metrics
 			),
-			static function ( $value ) {
-				return null !== $value;
-			}
+			static fn ( $value ) => null !== $value
 		);
 
 		return implode( ', ', $metric_header_values );
