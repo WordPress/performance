@@ -51,7 +51,25 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 * @since 0.3.0
 	 * @var array<array{OD_URL_Metric_Group, LcpElementExternalBackgroundImage}>
 	 */
-	private $group_common_lcp_element_external_background_images;
+	private $group_common_lcp_element_external_background_images = array();
+
+	/**
+	 * Gathers the tuples of URL Metric group and the common LCP element external background image.
+	 *
+	 * This is called during the `od_start_template_optimization` action, which is before any tag visitor is first invoked.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Template_Optimization_Context $context Template optimization context.
+	 */
+	public function gather_group_common_lcp_element_external_background_images( OD_Template_Optimization_Context $context ): void {
+		foreach ( $context->url_metric_group_collection as $group ) {
+			$common = $this->get_common_lcp_element_external_background_image( $group );
+			if ( is_array( $common ) ) {
+				$this->group_common_lcp_element_external_background_images[] = array( $group, $common );
+			}
+		}
+	}
 
 	/**
 	 * Visits a tag.
@@ -143,19 +161,6 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 * @param OD_Tag_Visitor_Context $context Context.
 	 */
 	private function maybe_preload_external_lcp_background_image( OD_Tag_Visitor_Context $context ): void {
-		// Gather the tuples of URL Metric group and the common LCP element external background image.
-		// Note the groups of URL Metrics do not change across invocations, we just need to compute this once for all.
-		// TODO: Instead of populating this here, it could be done once per invocation during the od_start_template_optimization action since the page's OD_URL_Metric_Group_Collection is available there.
-		if ( ! is_array( $this->group_common_lcp_element_external_background_images ) ) {
-			$this->group_common_lcp_element_external_background_images = array();
-			foreach ( $context->url_metric_group_collection as $group ) {
-				$common = $this->get_common_lcp_element_external_background_image( $group );
-				if ( is_array( $common ) ) {
-					$this->group_common_lcp_element_external_background_images[] = array( $group, $common );
-				}
-			}
-		}
-
 		// There are no common LCP background images, so abort.
 		if ( count( $this->group_common_lcp_element_external_background_images ) === 0 ) {
 			return;
