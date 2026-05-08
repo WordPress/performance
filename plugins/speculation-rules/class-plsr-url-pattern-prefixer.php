@@ -40,9 +40,7 @@ class PLSR_URL_Pattern_Prefixer {
 	public function __construct( array $contexts = array() ) {
 		if ( count( $contexts ) > 0 ) {
 			$this->contexts = array_map(
-				static function ( string $str ): string {
-					return self::escape_pattern_string( trailingslashit( $str ) );
-				},
+				static fn ( string $str ): string => self::escape_pattern_string( trailingslashit( $str ) ),
 				$contexts
 			);
 		} else {
