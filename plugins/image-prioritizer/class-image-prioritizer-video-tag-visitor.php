@@ -216,24 +216,18 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			if ( 'auto' !== $initial_preload ) {
 				$processor->set_attribute( 'preload', 'auto' );
 			}
-			if ( null !== $processor->get_attribute( 'loading' ) ) {
-				$processor->remove_attribute( 'loading' );
-			}
+			$processor->remove_attribute( 'loading' );
 			return;
 		}
 
 		// If the element is visible in any viewport, do not lazy-load it.
 		if ( $max_intersection_ratio > 0 ) {
-			if ( null !== $processor->get_attribute( 'loading' ) ) {
-				$processor->remove_attribute( 'loading' );
-			}
+			$processor->remove_attribute( 'loading' );
 			return;
 		}
 
 		// Add native lazy loading for browsers that support it.
-		if ( 'lazy' !== $this->get_attribute_value( $processor, 'loading' ) ) {
-			$processor->set_attribute( 'loading', 'lazy' );
-		}
+		$processor->set_attribute( 'loading', 'lazy' );
 
 		if ( 'none' !== $initial_preload ) {
 			$processor->set_attribute( 'data-original-preload', null !== $initial_preload ? $initial_preload : 'default' );
