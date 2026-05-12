@@ -1,13 +1,18 @@
 export type ViewTransitionAnimationConfig = {
 	useGlobalTransitionNames: boolean;
 	usePostTransitionNames: boolean;
+	targetName?: string;
 };
+
+export type ViewTransitionsAnimationMap = {
+	default: ViewTransitionAnimationConfig;
+} & Record< string, ViewTransitionAnimationConfig | false >;
 
 export type ViewTransitionsConfig = {
 	postSelector?: string;
 	globalTransitionNames?: Record< string, string >;
 	postTransitionNames?: Record< string, string >;
-	animations?: Record< string, ViewTransitionAnimationConfig >;
+	animations?: ViewTransitionsAnimationMap;
 	paginationBase: string;
 };
 
