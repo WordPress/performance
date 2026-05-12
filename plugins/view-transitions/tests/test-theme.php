@@ -48,4 +48,37 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 		$this->assertTrue( wp_style_is( 'plvt-view-transitions', 'registered' ) );
 		$this->assertTrue( wp_style_is( 'plvt-view-transitions', 'enqueued' ) );
 	}
+
+	/**
+	 * @covers ::plvt_load_view_transitions
+	 * @covers ::plvt_sanitize_view_transitions_theme_support
+	 * @covers ::plvt_inject_animation_duration
+	 */
+	public function test_plvt_load_view_transitions_injects_duration_for_additional_transition_stylesheets(): void {
+		// Clear up style if it is already registered.
+		if ( wp_style_is( 'plvt-view-transitions', 'registered' ) ) {
+			unset( wp_styles()->registered['plvt-view-transitions'] );
+		}
+
+		remove_theme_support( 'view-transitions' );
+		add_theme_support(
+			'view-transitions',
+			array(
+				'default-animation'                 => 'fade',
+				'default-animation-duration'        => 500,
+				'chronological-forwards-animation'  => 'slide-from-right',
+				'chronological-backwards-animation' => 'slide-from-left',
+			)
+		);
+
+		plvt_sanitize_view_transitions_theme_support();
+		plvt_load_view_transitions();
+
+		$styles = wp_styles()->registered['plvt-view-transitions']->extra['after'] ?? array();
+
+		$this->assertIsArray( $styles );
+		$this->assertNotEmpty( $styles );
+		$this->assertStringContainsString( '--plvt-view-transition-animation-duration: 0.5s;', implode( '', $styles ) );
+		$this->assertStringContainsString( 'html:active-view-transition-type(chronological-forwards)', implode( '', $styles ) );
+	}
 }

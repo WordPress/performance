@@ -399,6 +399,7 @@ function plvt_load_view_transitions(): void {
 
 		$additional_animation_args       = isset( $theme_support[ $transition_type . '-animation-args' ] ) ? (array) $theme_support[ $transition_type . '-animation-args' ] : array();
 		$additional_animation_stylesheet = $animation_registry->get_animation_stylesheet( $transition_animation_alias, $additional_animation_args );
+		$additional_animation_stylesheet = plvt_inject_animation_duration( $additional_animation_stylesheet, absint( $theme_support['default-animation-duration'] ) );
 		if ( '' !== $additional_animation_stylesheet ) {
 			wp_add_inline_style(
 				'plvt-view-transitions',
