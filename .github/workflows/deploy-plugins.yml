@@ -55,7 +55,7 @@ jobs:
     name: 'Deploy Plugin: ${{ matrix.plugin }}'
     needs: pre-run
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       contents: read # Required to clone the repo.
       deployments: write # Required by bobheadxi/deployments to create and update deployments.
