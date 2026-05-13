@@ -55,11 +55,6 @@ module.exports = [
 					ignore: [ '@octokit/rest' ],
 				},
 			],
-			// Restore the pre-ESLint-9 behavior of not reporting unused `catch` bindings.
-			'no-unused-vars': [
-				'error',
-				{ ignoreRestSiblings: true, caughtErrors: 'none' },
-			],
 		},
 	},
 ];
