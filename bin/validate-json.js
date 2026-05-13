@@ -88,6 +88,7 @@ async function fetchSchema( schemaUrl ) {
 
 	const controller = new AbortController();
 
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const timeout = setTimeout( () => controller.abort(), 5000 );
 
 	try {

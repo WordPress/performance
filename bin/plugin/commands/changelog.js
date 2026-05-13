@@ -156,7 +156,7 @@ function formatChangelog( milestone, pullRequests ) {
 		);
 	if ( typeGroups[ MISSING_TYPE ] ) {
 		const prURLs = typeGroups[ MISSING_TYPE ].map(
-			( { html_url } ) => html_url
+			( { html_url } ) => html_url // eslint-disable-line camelcase
 		);
 		throw new Error(
 			`The following pull-requests are missing a "${ TYPE_PREFIX }xyz" label: ${ prURLs.join(

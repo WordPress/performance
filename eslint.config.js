@@ -1,42 +1,29 @@
 /**
- * ESLint flat config (ESLint 8+)
- * Based on WordPress coding standards
+ * ESLint flat config.
+ *
+ * Extends the shared configuration shipped with `@wordpress/scripts` (which is
+ * based on the WordPress coding standards) and layers the project-specific
+ * tweaks on top.
  */
 
-const importPlugin = require( 'eslint-plugin-import' );
-const jsdocPlugin = require( 'eslint-plugin-jsdoc' );
+/**
+ * External dependencies
+ */
+const globals = require( 'globals' );
+// @ts-ignore -- No declaration file for this module.
+const wpScriptsConfig = require( '@wordpress/scripts/config/eslint.config.cjs' );
 
 module.exports = [
+	...wpScriptsConfig,
 	{
-		// Ignore patterns
-		ignores: [
-			'vendor/',
-			'node_modules/',
-			'build/',
-			'**/build/**',
-			'dist/',
-			'**/*.min.js',
-			'**/*.min.css',
-		],
+		// Ignore patterns in addition to those provided by @wordpress/scripts.
+		ignores: [ 'dist/', '**/*.min.js', '**/*.min.css' ],
 	},
 	{
 		files: [ '**/*.js' ],
-		plugins: {
-			import: importPlugin,
-			jsdoc: jsdocPlugin,
-		},
 		languageOptions: {
-			ecmaVersion: 2020,
-			sourceType: 'module',
 			globals: {
-				// Browser
-				window: 'readonly',
-				document: 'readonly',
-				navigator: 'readonly',
-				console: 'readonly',
-				// WordPress
-				wp: 'readonly',
-				wpApiSettings: 'readonly',
+				...globals.browser,
 			},
 		},
 		rules: {
@@ -44,28 +31,29 @@ module.exports = [
 			'import/no-unresolved': [
 				'error',
 				{
+					// `@octokit/rest` is an ESM-only package referenced solely from
+					// JSDoc `@typedef` imports in `bin/plugin`, which the import
+					// resolver cannot follow.
 					ignore: [ '@octokit/rest' ],
 				},
+			],
+			// Restore the pre-ESLint-9 behavior of not reporting unused `catch` bindings.
+			'no-unused-vars': [
+				'error',
+				{ ignoreRestSiblings: true, caughtErrors: 'none' },
 			],
 		},
 	},
 	{
-		files: [ 'plugins/view-transitions/js/**/*.js' ],
-		plugins: {
-			jsdoc: jsdocPlugin,
+		// Node-based build tooling and CLI scripts.
+		files: [ 'bin/**/*.js', '*.config.js' ],
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
 		},
 		rules: {
-			'jsdoc/no-undefined-types': [
-				'error',
-				{
-					definedTypes: [
-						'Element',
-						'PageSwapEvent',
-						'PageRevealEvent',
-						'ViewTransition',
-					],
-				},
-			],
+			'no-console': 'off',
 		},
 	},
 ];
