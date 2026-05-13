@@ -29,6 +29,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       security-events: write # Required to upload CodeQL results.
     steps:

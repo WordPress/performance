@@ -27,6 +27,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    timeout-minutes: 20
     permissions:
       contents: read       # Required to clone the repo.
       pull-requests: read  # Required by dorny/paths-filter to read PR file changes.
@@ -74,6 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     # Always run this job, even if detect-changes was skipped
     if: always() && (needs.detect-changes.result == 'success' || needs.detect-changes.result == 'skipped')
+    timeout-minutes: 20
     permissions:
       contents: read # Required to clone the repo.
     outputs:
@@ -142,7 +144,7 @@ jobs:
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
     permissions:
-      contents: read
+      contents: read # Required for actions/download-artifact to download workflow artifacts.
     timeout-minutes: 20
     strategy:
       fail-fast: false

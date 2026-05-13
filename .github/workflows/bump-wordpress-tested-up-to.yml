@@ -16,6 +16,7 @@ jobs:
   prepare-matrix:
     name: Prepare plugins matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to clone the repo.
     outputs:
@@ -45,6 +46,7 @@ jobs:
     name: Update "Tested up to" value for ${{ matrix.plugin }}
     needs: prepare-matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to clone the repo.
     env:

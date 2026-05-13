@@ -27,6 +27,7 @@ jobs:
   check-type-label:
     name: Check [Type] Label
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions: {}
     steps:
       - if: contains( env.LABELS, '[Type]' ) == false
@@ -34,6 +35,7 @@ jobs:
   check-milestone:
     name: Check Milestone
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions: {}
     steps:
       - if: github.event.pull_request.milestone == null && contains( env.LABELS, 'no milestone' ) == false

@@ -24,6 +24,7 @@ jobs:
   pre-run:
     name: Pre-run
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # Required to clone the repo.
     outputs:
@@ -54,6 +55,7 @@ jobs:
     name: 'Deploy Plugin: ${{ matrix.plugin }}'
     needs: pre-run
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       deployments: write # Required by bobheadxi/deployments to create and update deployments.
     strategy:
@@ -165,6 +167,7 @@ jobs:
     name: Add release assets
     needs: [pre-run, deploy]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       actions: read   # Required to look up workflow run artifacts via the GitHub API.
       contents: write # Required by softprops/action-gh-release to upload release assets.
