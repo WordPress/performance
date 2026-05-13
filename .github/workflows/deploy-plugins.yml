@@ -57,6 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      contents: read # Required to clone the repo.
       deployments: write # Required by bobheadxi/deployments to create and update deployments.
     strategy:
       matrix:

@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      contents: read # Required for actions/checkout to read the repository.
       security-events: write # Required to upload CodeQL results.
     steps:
       - name: Checkout
