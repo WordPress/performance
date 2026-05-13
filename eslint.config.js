@@ -20,12 +20,30 @@ module.exports = [
 		ignores: [ 'dist/', '**/*.min.js', '**/*.min.css' ],
 	},
 	{
+		// Browser globals for client-side scripts (everything but the Node tooling below).
 		files: [ '**/*.js' ],
+		ignores: [ 'bin/**', '*.config.js' ],
 		languageOptions: {
 			globals: {
 				...globals.browser,
 			},
 		},
+	},
+	{
+		// Node-based build tooling and CLI scripts (CommonJS).
+		files: [ 'bin/**/*.js', '*.config.js' ],
+		languageOptions: {
+			sourceType: 'commonjs',
+			globals: {
+				...globals.node,
+			},
+		},
+		rules: {
+			'no-console': 'off',
+		},
+	},
+	{
+		files: [ '**/*.js' ],
 		rules: {
 			'jsdoc/valid-types': 'off',
 			'import/no-unresolved': [
@@ -42,18 +60,6 @@ module.exports = [
 				'error',
 				{ ignoreRestSiblings: true, caughtErrors: 'none' },
 			],
-		},
-	},
-	{
-		// Node-based build tooling and CLI scripts.
-		files: [ 'bin/**/*.js', '*.config.js' ],
-		languageOptions: {
-			globals: {
-				...globals.node,
-			},
-		},
-		rules: {
-			'no-console': 'off',
 		},
 	},
 ];
