@@ -17,7 +17,7 @@ module.exports = [
 	...wpScriptsConfig,
 	{
 		// Ignore patterns in addition to those provided by @wordpress/scripts.
-		ignores: [ 'dist/', '**/*.min.js', '**/*.min.css' ],
+		ignores: [ 'dist/', '**/*.min.js' ],
 	},
 	{
 		// Browser globals for client-side scripts (everything but the Node tooling below).
