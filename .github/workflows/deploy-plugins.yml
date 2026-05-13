@@ -16,12 +16,16 @@ on:
         description: 'Debug mode (run without publishing).'
         default: false
 
+# Disable permissions for all available scopes.
+# Enable permissions for specific scopes as needed on job level.
 permissions: {}
 
 jobs:
   pre-run:
     name: Pre-run
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to clone the repo.
     outputs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
@@ -51,8 +55,7 @@ jobs:
     needs: pre-run
     runs-on: ubuntu-latest
     permissions:
-      actions: write
-      deployments: write
+      deployments: write # Required by bobheadxi/deployments to create and update deployments.
     strategy:
       matrix:
         plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
@@ -163,8 +166,8 @@ jobs:
     needs: [pre-run, deploy]
     runs-on: ubuntu-latest
     permissions:
-      actions: read
-      contents: write
+      actions: read   # Required to look up workflow run artifacts via the GitHub API.
+      contents: write # Required by softprops/action-gh-release to upload release assets.
     if: github.event_name == 'release'
     strategy:
       matrix:

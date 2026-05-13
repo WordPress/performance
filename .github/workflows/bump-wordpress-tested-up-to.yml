@@ -8,10 +8,16 @@ on:
         description: 'Plugin slug (leave empty for all plugins)'
         required: false
 
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   prepare-matrix:
     name: Prepare plugins matrix
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to clone the repo.
     outputs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
@@ -39,6 +45,8 @@ jobs:
     name: Update "Tested up to" value for ${{ matrix.plugin }}
     needs: prepare-matrix
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to clone the repo.
     env:
       PLUGIN_SLUG: ${{ matrix.plugin }}
     strategy:

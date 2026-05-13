@@ -50,9 +50,8 @@ jobs:
     name: Generate a list of props
     runs-on: ubuntu-latest
     permissions:
-      # The action needs permission `write` permission for PRs in order to add a comment.
-      pull-requests: write
-      contents: read
+      pull-requests: write # Required by WordPress/props-bot-action to post the props comment on the PR.
+      contents: read       # Required to clone the repo.
     timeout-minutes: 20
     # The job will run when pull requests are open, ready for review and:
     #
