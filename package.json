@@ -4,7 +4,7 @@
 	"license": "GPL-2.0-or-later",
 	"repository": "git+https://github.com/WordPress/performance.git",
 	"engines": {
-		"node": ">=20.10.0",
+		"node": ">=20.19.0",
 		"npm": ">=10.2.3"
 	},
 	"dependencies": {
@@ -16,10 +16,10 @@
 		"@playwright/test": "^1.59.1",
 		"@types/lodash": "4.17.24",
 		"@types/node": "^20.19.39",
-		"@wordpress/e2e-test-utils-playwright": "^1.43.0",
-		"@wordpress/env": "^11.3.0",
-		"@wordpress/prettier-config": "^4.43.0",
-		"@wordpress/scripts": "^31.8.0",
+		"@wordpress/e2e-test-utils-playwright": "^1.44.0",
+		"@wordpress/env": "^11.4.0",
+		"@wordpress/prettier-config": "^4.44.0",
+		"@wordpress/scripts": "^32.0.0",
 		"ajv": "8.20.0",
 		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
@@ -28,6 +28,7 @@
 		"css-minimizer-webpack-plugin": "^8.0.0",
 		"fast-glob": "^3.3.3",
 		"fs-extra": "^11.3.4",
+		"globals": "^17.6.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.4.0",
 		"lodash": "4.18.1",

@@ -96,7 +96,7 @@
 			target.textContent = __( 'Active', 'performance-lab' );
 			target.classList.remove( 'updating-message' );
 			target.classList.add( 'disabled' );
-		} catch ( error ) {
+		} catch {
 			a11y.speak( __( 'Plugin failed to activate.', 'performance-lab' ) );
 
 			target.classList.remove( 'updating-message' );
