@@ -22,7 +22,7 @@ module.exports = [
 	{
 		// Browser globals for client-side scripts (everything but the Node tooling below).
 		files: [ '**/*.js' ],
-		ignores: [ 'bin/**', '*.config.js' ],
+		ignores: [ 'bin/**', 'tools/**', '*.config.js' ],
 		languageOptions: {
 			globals: {
 				...globals.browser,
@@ -31,7 +31,7 @@ module.exports = [
 	},
 	{
 		// Node-based build tooling and CLI scripts (CommonJS).
-		files: [ 'bin/**/*.js', '*.config.js' ],
+		files: [ 'bin/**/*.js', 'tools/**/*.js', '*.config.js' ],
 		languageOptions: {
 			sourceType: 'commonjs',
 			globals: {
