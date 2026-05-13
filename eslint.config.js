@@ -13,6 +13,16 @@ const globals = require( 'globals' );
 // @ts-ignore -- No declaration file for this module.
 const wpScriptsConfig = require( '@wordpress/scripts/config/eslint.config.cjs' );
 
+// Build tooling, CLI scripts, and root-level config files — Node CommonJS,
+// not browser code. Used both to exclude these from the browser-globals block
+// and as the target of the dedicated Node tooling override below.
+const nodeToolingFiles = [
+	'bin/**/*.js',
+	'tools/**/*.js',
+	'*.config.js',
+	'.*.js',
+];
+
 module.exports = [
 	...wpScriptsConfig,
 	{
@@ -22,7 +32,7 @@ module.exports = [
 	{
 		// Browser globals for client-side scripts (everything but the Node tooling below).
 		files: [ '**/*.js' ],
-		ignores: [ 'bin/**', 'tools/**', '*.config.js', '.*.js' ],
+		ignores: nodeToolingFiles,
 		languageOptions: {
 			globals: {
 				...globals.browser,
@@ -31,7 +41,7 @@ module.exports = [
 	},
 	{
 		// Node-based build tooling and CLI scripts (CommonJS).
-		files: [ 'bin/**/*.js', 'tools/**/*.js', '*.config.js', '.*.js' ],
+		files: nodeToolingFiles,
 		languageOptions: {
 			sourceType: 'commonjs',
 			globals: {
