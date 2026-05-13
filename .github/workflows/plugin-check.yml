@@ -143,8 +143,7 @@ jobs:
     if: needs.prepare-matrix.result == 'success' && needs.prepare-matrix.outputs.plugins != '[]'
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read # Required for actions/download-artifact to download workflow artifacts.
+    permissions: {}
     timeout-minutes: 20
     strategy:
       fail-fast: false
