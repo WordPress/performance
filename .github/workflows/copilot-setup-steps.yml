@@ -42,6 +42,22 @@ jobs:
         # `prepare` script that wires up husky. Run it explicitly so the agent's
         # commits get the pre-commit hooks (phpstan-diff, PHPCS) applied.
         run: npm run prepare
+      - name: Set up PHP
+        # Pinned to 8.2 because that's the WordPress.org-reported most-used
+        # PHP version, so it matches what the majority of plugin users run.
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        with:
+          php-version: '8.2'
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - name: Cache Composer downloads
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - name: Composer install
         run: composer install --no-interaction --no-progress
       - name: Build assets
