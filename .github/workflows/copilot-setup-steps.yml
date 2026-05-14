@@ -37,6 +37,11 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
+      - name: Install husky git hooks
+        # The repo's .npmrc sets `ignore-scripts = true`, so `npm ci` skips the
+        # `prepare` script that wires up husky. Run it explicitly so the agent's
+        # commits get the pre-commit hooks (phpstan-diff, PHPCS) applied.
+        run: npm run prepare
       - name: Composer install
         run: composer install --no-interaction --no-progress
       - name: Build assets
