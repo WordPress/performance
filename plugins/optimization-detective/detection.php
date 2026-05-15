@@ -135,7 +135,7 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 		'cachePurgePostId'       => od_get_cache_purge_post_id(),
 		'urlMetricHMAC'          => od_get_url_metrics_storage_hmac( $slug, $current_etag, $current_url, $cache_purge_post_id ),
 		'urlMetricGroupStatuses' => array_map(
-			static fn ( OD_URL_Metric_Group $group ): array => array(
+			static fn ( OD_URL_Metric_Group $group ) => array(
 				'minimumViewportWidth' => $group->get_minimum_viewport_width(), // Exclusive.
 				'maximumViewportWidth' => $group->get_maximum_viewport_width(), // Inclusive.
 				'complete'             => $group->is_complete(),
