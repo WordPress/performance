@@ -8,6 +8,18 @@
 class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 
 	/**
+	 * @covers ::webp_uploads_modern_image_format_settings_section_callback
+	 */
+	public function test_webp_uploads_modern_image_format_settings_section_callback(): void {
+		ob_start();
+		webp_uploads_modern_image_format_settings_section_callback();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'https://wordpress.org/plugins/webp-uploads/#faq', $output );
+		$this->assertStringContainsString( '<a href=', $output );
+	}
+
+	/**
 	 * @covers ::webp_uploads_add_settings_action_link
 	 */
 	public function test_webp_uploads_add_settings_action_link(): void {
