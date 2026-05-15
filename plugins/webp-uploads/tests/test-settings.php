@@ -8,27 +8,21 @@
 class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 
 	/**
-	 * @covers ::webp_uploads_modern_image_format_settings_section_callback
+	 * @covers ::webp_uploads_add_media_settings_fields
 	 */
-	public function test_webp_uploads_modern_image_format_settings_section_callback(): void {
+	public function test_webp_uploads_add_media_settings_fields_section_description(): void {
+		global $wp_settings_sections;
+		webp_uploads_add_media_settings_fields();
+
+		$callback = $wp_settings_sections['media']['perflab_modern_image_format_settings']['callback'];
+		$this->assertIsCallable( $callback );
+
 		ob_start();
-		webp_uploads_modern_image_format_settings_section_callback();
+		call_user_func( $callback );
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'https://wordpress.org/plugins/webp-uploads/#faq', $output );
 		$this->assertStringContainsString( '<a href=', $output );
-	}
-
-	/**
-	 * @covers ::webp_uploads_add_media_settings_fields
-	 */
-	public function test_webp_uploads_add_media_settings_fields_registers_section_callback(): void {
-		global $wp_settings_sections;
-		webp_uploads_add_media_settings_fields();
-		$this->assertSame(
-			'webp_uploads_modern_image_format_settings_section_callback',
-			$wp_settings_sections['media']['perflab_modern_image_format_settings']['callback']
-		);
 	}
 
 	/**

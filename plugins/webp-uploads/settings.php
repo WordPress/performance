@@ -71,25 +71,6 @@ function webp_uploads_register_media_settings_field(): void {
 add_action( 'init', 'webp_uploads_register_media_settings_field' );
 
 /**
- * Renders the description for the Modern Image Formats settings section.
- *
- * @since 3.10.0
- */
-function webp_uploads_modern_image_format_settings_section_callback(): void {
-	printf(
-		'<p>%s</p>',
-		wp_kses(
-			sprintf(
-				/* translators: %s: URL to the plugin FAQ on WordPress.org */
-				__( 'If modern format images are not being generated after upload, see the <a href="%s">FAQ</a> for common reasons.', 'webp-uploads' ),
-				'https://wordpress.org/plugins/webp-uploads/#faq'
-			),
-			array( 'a' => array( 'href' => array() ) )
-		)
-	);
-}
-
-/**
  * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
  * @since 1.0.0
@@ -98,7 +79,19 @@ function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
 		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
-		'webp_uploads_modern_image_format_settings_section_callback',
+		static function (): void {
+			printf(
+				'<p>%s</p>',
+				wp_kses(
+					sprintf(
+						/* translators: %s: URL to the plugin FAQ on WordPress.org */
+						__( 'If modern format images are not being generated after upload, see the <a href="%s">FAQ</a> for common reasons.', 'webp-uploads' ),
+						'https://wordpress.org/plugins/webp-uploads/#faq'
+					),
+					array( 'a' => array( 'href' => array() ) )
+				)
+			);
+		},
 		'media',
 		array(
 			'before_section' => '<div id="modern-image-formats">',
