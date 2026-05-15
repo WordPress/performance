@@ -180,7 +180,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'jpeg and picture enabled' => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => true,
-				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img data-wp-picture-wrapped="true" width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'fallback_jpeg'   => false,
@@ -659,5 +659,101 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$this->assertSame( $image, $twice, 'Re-wrapping an already-wrapped picture should return the input unchanged.' );
 		$this->assertSame( 1, substr_count( $twice, '<picture ' ) );
+	}
+
+	/**
+	 * A `<picture>` produced for a `wp_get_attachment_image()` call that is then
+	 * embedded in post content must not be wrapped a second time when the content
+	 * runs through `the_content` (`wp_filter_content_tags()` -> `wp_content_img_tag`).
+	 *
+	 * Regression test: `wp_filter_content_tags()` extracts only the inner `<img>`
+	 * substring, so the `stripos( $image, '<picture' )` guard alone never sees the
+	 * surrounding wrapper. The `data-wp-picture-wrapped` marker closes that gap.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_in_content_is_not_double_wrapped(): void {
+		$this->opt_in_to_picture_element();
+
+		// `wp_get_attachment_image()` now returns a `<picture>`; the inner `<img>`
+		// keeps the `wp-image-{ID}` class so `wp_filter_content_tags()` can resolve
+		// the attachment on the content pass.
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+		$this->assertStringStartsWith( '<picture ', $image, 'Precondition: the image should be wrapped once.' );
+
+		// Simulate the markup being placed into post content and rendered.
+		$rendered = apply_filters( 'the_content', $image );
+
+		$this->assertSame(
+			1,
+			substr_count( $rendered, '<picture' ),
+			'An image embedded in content must be wrapped in exactly one <picture> element.'
+		);
+		$this->assertSame(
+			1,
+			substr_count( $rendered, '<img ' ),
+			'Exactly one <img> element should remain after the content pass.'
+		);
+	}
+
+	/**
+	 * `webp_uploads_wrap_image_in_picture()` must not emit an empty `<picture>`
+	 * wrapper (one with no `<source>` children) when no modern-format source can
+	 * be resolved for the attachment.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wrap_image_in_picture_skips_empty_wrapper_when_no_sources(): void {
+		$this->opt_in_to_picture_element();
+
+		// Let the first `wp_calculate_image_srcset()` call (core building the
+		// `<img>`) succeed so the tag keeps its `srcset`/`sizes`, then force every
+		// later call (the per-mime-type lookups inside the wrapper) to come back
+		// empty, leaving no `<source>` to emit.
+		$call = 0;
+		add_filter(
+			'wp_calculate_image_srcset',
+			static function ( $sources ) use ( &$call ) {
+				++$call;
+				return $call > 1 ? array() : $sources;
+			}
+		);
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array( 'class' => 'wp-image-' . self::$image_id )
+		);
+
+		$this->assertStringNotContainsString( '<picture', $image, 'No <picture> wrapper should be emitted when there are no <source> elements.' );
+		$this->assertStringStartsWith( '<img ', $image );
+	}
+
+	/**
+	 * The deprecated `webp_uploads_update_featured_image()` shim must still exist
+	 * and return rewritten markup, so third-party callers do not fatal-error.
+	 *
+	 * @expectedDeprecated webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_update_featured_image
+	 */
+	public function test_webp_uploads_update_featured_image_is_deprecated_but_functional(): void {
+		$this->assertTrue( function_exists( 'webp_uploads_update_featured_image' ) );
+
+		$html = wp_get_attachment_image( self::$image_id, 'large', false, array( 'class' => 'wp-image-' . self::$image_id ) );
+
+		// @phpstan-ignore function.deprecated (Intentionally exercising the deprecated shim.)
+		$result = webp_uploads_update_featured_image( $html, 0, self::$image_id );
+
+		$this->assertStringContainsString( '<img ', $result );
 	}
 }

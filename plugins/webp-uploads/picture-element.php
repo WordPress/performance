@@ -31,10 +31,25 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
-	// Idempotency: bail if the input is already wrapped in a picture element, to
-	// avoid double-wrapping when multiple rewrite paths fire on the same markup
-	// (e.g. wp_get_attachment_image -> the_content -> wp_content_img_tag).
-	if ( false !== stripos( $image, '<picture' ) ) {
+	/*
+	 * Idempotency: bail if this markup has already been processed, to avoid
+	 * double-wrapping when more than one rewrite path fires on the same image.
+	 *
+	 * Two distinct cases are guarded:
+	 *
+	 * 1. The full `<picture>` string is passed in again.
+	 * 2. Only the inner `<img>` is passed in again. This happens when a
+	 *    `<picture>` produced for a `wp_get_attachment_image()` call is embedded
+	 *    in post content: `wp_filter_content_tags()` then extracts that inner
+	 *    `<img>` and runs it back through this function via `wp_content_img_tag`.
+	 *    The surrounding `<picture>` is not visible at that point, so the wrapped
+	 *    `<img>` carries a `data-wp-picture-wrapped` marker (added below) to be
+	 *    recognised here.
+	 */
+	if (
+		false !== stripos( $image, '<picture' ) ||
+		false !== stripos( $image, 'data-wp-picture-wrapped' )
+	) {
 		return $image;
 	}
 
@@ -176,6 +191,22 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 				);
 			}
 		}
+	}
+
+	// Never emit a `<picture>` with no `<source>` children: if every modern-format
+	// source failed to resolve (e.g. the attachment has no modern sub-sizes), return
+	// the original markup untouched instead of a pointless empty wrapper element.
+	if ( '' === $picture_sources ) {
+		return $image;
+	}
+
+	// Tag the inner `<img>` so a later rewrite pass (for example `wp_content_img_tag`
+	// once this markup is embedded in post content) recognises it as already wrapped
+	// and skips it. See the idempotency guard above.
+	$marker = new WP_HTML_Tag_Processor( $image );
+	if ( $marker->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$marker->set_attribute( 'data-wp-picture-wrapped', 'true' );
+		$image = $marker->get_updated_html();
 	}
 
 	return sprintf(
