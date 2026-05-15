@@ -534,6 +534,9 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 	}
 
 	$cache_control = wp_remote_retrieve_header( $response, 'cache-control' );
+	if ( is_array( $cache_control ) ) {
+		$cache_control = implode( ', ', $cache_control );
+	}
 	if ( '' !== $cache_control ) {
 		$directives = array_map( 'trim', explode( ',', strtolower( $cache_control ) ) );
 		if ( in_array( 'no-store', $directives, true ) ) {
