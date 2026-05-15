@@ -524,9 +524,27 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		);
 	}
 
-	// TODO: A non-cacheable response should also be considered an error.
-	// TODO: A size of zero could be considered an error too.
-	return strlen( wp_remote_retrieve_body( $response ) );
+	$body = wp_remote_retrieve_body( $response );
+
+	if ( strlen( $body ) === 0 ) {
+		return new WP_Error(
+			'zero_size',
+			esc_html__( 'The asset returned an empty response body.', 'performance-lab' )
+		);
+	}
+
+	$cache_control = wp_remote_retrieve_header( $response, 'cache-control' );
+	if ( '' !== $cache_control ) {
+		$directives = array_map( 'trim', explode( ',', strtolower( $cache_control ) ) );
+		if ( in_array( 'no-store', $directives, true ) ) {
+			return new WP_Error(
+				'not_cacheable',
+				esc_html__( 'The asset response has a Cache-Control: no-store directive and will not be cached by browsers.', 'performance-lab' )
+			);
+		}
+	}
+
+	return strlen( $body );
 }
 
 /**

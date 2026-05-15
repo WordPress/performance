@@ -156,6 +156,7 @@ class Audit_Assets_Mock_Assets {
 					return array(
 						'response' => self::$mocked_responses[ $url ],
 						'body'     => self::$mocked_responses[ $url ]['body'] ?? '',
+						'headers'  => self::$mocked_responses[ $url ]['headers'] ?? array(),
 					);
 				}
 				return $preempt;

@@ -520,8 +520,69 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script1.js' ) );
 		$this->assertWPError( perflab_aea_get_asset_size( 'https://example.com/script2.js' ) );
-		$this->assertEquals( 0, perflab_aea_get_asset_size( 'https://example.com/script3.js' ) );
+		$zero_size_result = perflab_aea_get_asset_size( 'https://example.com/script3.js' );
+		$this->assertWPError( $zero_size_result );
+		$this->assertSame( 'zero_size', $zero_size_result->get_error_code() );
 		$this->assertEquals( 1000, perflab_aea_get_asset_size( 'https://example.com/script4.js' ) );
+	}
+
+	/**
+	 * Tests perflab_aea_get_asset_size() with a Cache-Control: no-store response.
+	 *
+	 * @covers ::perflab_aea_get_asset_size
+	 */
+	public function test_perflab_aea_get_asset_size_not_cacheable(): void {
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::mock_requests(
+			array(
+				array(
+					'url'      => 'https://example.com/no-store.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'no-store' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/no-store-with-extras.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'no-store, must-revalidate' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/no-cache.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'no-cache' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/cacheable.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'max-age=3600' ),
+					),
+				),
+			)
+		);
+
+		$no_store_result = perflab_aea_get_asset_size( 'https://example.com/no-store.js' );
+		$this->assertWPError( $no_store_result );
+		$this->assertSame( 'not_cacheable', $no_store_result->get_error_code() );
+
+		$no_store_extras_result = perflab_aea_get_asset_size( 'https://example.com/no-store-with-extras.js' );
+		$this->assertWPError( $no_store_extras_result );
+		$this->assertSame( 'not_cacheable', $no_store_extras_result->get_error_code() );
+
+		// no-cache means revalidate, not no-store — should not be flagged.
+		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/no-cache.js' ) );
+
+		// Normal cacheable response should return size.
+		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/cacheable.js' ) );
 	}
 
 	/**
