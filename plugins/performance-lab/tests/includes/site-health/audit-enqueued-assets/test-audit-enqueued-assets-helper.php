@@ -567,6 +567,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 						'headers' => array( 'cache-control' => 'max-age=3600' ),
 					),
 				),
+				array(
+					'url'      => 'https://example.com/no-store-array-header.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => array( 'no-store', 'must-revalidate' ) ),
+					),
+				),
 			)
 		);
 
@@ -583,6 +591,11 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 		// Normal cacheable response should return size.
 		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/cacheable.js' ) );
+
+		// Cache-Control header returned as an array (multiple headers) should still be detected.
+		$no_store_array_result = perflab_aea_get_asset_size( 'https://example.com/no-store-array-header.js' );
+		$this->assertWPError( $no_store_array_result );
+		$this->assertSame( 'not_cacheable', $no_store_array_result->get_error_code() );
 	}
 
 	/**
