@@ -95,9 +95,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 						// Store this value in a global to later subtract it from total query time after template.
 						$GLOBALS['perflab_query_time_before_template'] = array_reduce(
 							$query_times,
-							static function ( float $acc, float $query_time ): float {
-								return $acc + $query_time;
-							},
+							static fn ( float $acc, float $query_time ): float => $acc + $query_time,
 							0.0
 						);
 						$metric->set_value( $GLOBALS['perflab_query_time_before_template'] * 1000.0 );

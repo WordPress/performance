@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
  * Description: Improves responsive images with better sizes calculations and auto-sizes for lazy-loaded images.
  * Requires at least: 6.8
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * Version: 1.7.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

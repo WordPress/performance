@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/webp-uploads
  * Description: Converts images to more modern formats such as WebP or AVIF during upload.
  * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * Version: 2.6.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
