@@ -195,7 +195,7 @@ function formatChangelog( milestone, pullRequests ) {
 					// Add trailing period.
 					.replace( /\s*\.?$/, '' )
 					.concat( '.' );
-				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`; // eslint-disable-line camelcase
+				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`;
 			} )
 			.filter( Boolean )
 			.sort()

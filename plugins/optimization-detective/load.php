@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
  * Description: Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
  * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * Version: 1.0.0-beta5
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
  * Description: Enables browsers to speculatively prerender or prefetch pages to achieve near-instant loads based on user interaction.
  * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * Version: 1.6.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
