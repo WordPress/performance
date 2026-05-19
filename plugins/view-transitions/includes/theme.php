@@ -56,16 +56,19 @@ function plvt_polyfill_theme_support(): void {
  * @since 1.0.0
  * @access private
  *
- * @global array<string, mixed> $_wp_theme_features Theme support features added and their arguments.
+ * @global bool|null            $plvt_has_theme_support_with_args Whether the current theme explicitly supports view transitions with custom config.
+ * @global array<string, mixed> $_wp_theme_features               Theme support features added and their arguments.
  */
 function plvt_sanitize_view_transitions_theme_support(): void {
-	global $_wp_theme_features;
+	global $plvt_has_theme_support_with_args, $_wp_theme_features;
 
 	if ( ! isset( $_wp_theme_features['view-transitions'] ) ) {
+		$plvt_has_theme_support_with_args = false;
 		return;
 	}
 
-	$args = $_wp_theme_features['view-transitions'];
+	$args                             = $_wp_theme_features['view-transitions'];
+	$plvt_has_theme_support_with_args = true !== $args;
 
 	$defaults = array(
 		'post-selector'                     => '.wp-block-post.post, article.post, body.single main',

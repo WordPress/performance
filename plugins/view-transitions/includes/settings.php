@@ -23,23 +23,39 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function plvt_get_view_transition_animation_labels(): array {
 	return array(
-		'fade'                           => _x( 'Fade (default)', 'animation label', 'view-transitions' ),
-		'slide-from-right'               => _x( 'Slide (from right)', 'animation label', 'view-transitions' ),
-		'slide-from-left'                => _x( 'Slide (from left)', 'animation label', 'view-transitions' ),
-		'slide-from-bottom'              => _x( 'Slide (from bottom)', 'animation label', 'view-transitions' ),
-		'slide-from-top'                 => _x( 'Slide (from top)', 'animation label', 'view-transitions' ),
-		'slide-chronological-pagination' => _x( 'Slide (Chronological and Pagination)', 'animation label', 'view-transitions' ),
-		'swipe-from-right'               => _x( 'Swipe (from right)', 'animation label', 'view-transitions' ),
-		'swipe-from-left'                => _x( 'Swipe (from left)', 'animation label', 'view-transitions' ),
-		'swipe-from-bottom'              => _x( 'Swipe (from bottom)', 'animation label', 'view-transitions' ),
-		'swipe-from-top'                 => _x( 'Swipe (from top)', 'animation label', 'view-transitions' ),
-		'swipe-chronological-pagination' => _x( 'Swipe (Chronological and Pagination)', 'animation label', 'view-transitions' ),
-		'wipe-from-right'                => _x( 'Wipe (from right)', 'animation label', 'view-transitions' ),
-		'wipe-from-left'                 => _x( 'Wipe (from left)', 'animation label', 'view-transitions' ),
-		'wipe-from-bottom'               => _x( 'Wipe (from bottom)', 'animation label', 'view-transitions' ),
-		'wipe-from-top'                  => _x( 'Wipe (from top)', 'animation label', 'view-transitions' ),
-		'wipe-chronological-pagination'  => _x( 'Wipe (Chronological and Pagination)', 'animation label', 'view-transitions' ),
+		'fade'              => _x( 'Fade (default)', 'animation label', 'view-transitions' ),
+		'slide-from-right'  => _x( 'Slide (from right)', 'animation label', 'view-transitions' ),
+		'slide-from-left'   => _x( 'Slide (from left)', 'animation label', 'view-transitions' ),
+		'slide-from-bottom' => _x( 'Slide (from bottom)', 'animation label', 'view-transitions' ),
+		'slide-from-top'    => _x( 'Slide (from top)', 'animation label', 'view-transitions' ),
+		'swipe-from-right'  => _x( 'Swipe (from right)', 'animation label', 'view-transitions' ),
+		'swipe-from-left'   => _x( 'Swipe (from left)', 'animation label', 'view-transitions' ),
+		'swipe-from-bottom' => _x( 'Swipe (from bottom)', 'animation label', 'view-transitions' ),
+		'swipe-from-top'    => _x( 'Swipe (from top)', 'animation label', 'view-transitions' ),
+		'wipe-from-right'   => _x( 'Wipe (from right)', 'animation label', 'view-transitions' ),
+		'wipe-from-left'    => _x( 'Wipe (from left)', 'animation label', 'view-transitions' ),
+		'wipe-from-bottom'  => _x( 'Wipe (from bottom)', 'animation label', 'view-transitions' ),
+		'wipe-from-top'     => _x( 'Wipe (from top)', 'animation label', 'view-transitions' ),
 	);
+}
+
+/**
+ * Returns the supported animation for chronological and pagination transitions.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $animation Animation slug or alias.
+ * @return string|false Animation, or false if the animation does not support chronological and pagination
+ *                      transitions.
+ */
+function plvt_get_supported_directional_animation( string $animation ) {
+	foreach ( array( 'slide', 'swipe', 'wipe' ) as $directional_animation ) {
+		if ( 0 === strpos( $animation, $directional_animation . '-' ) ) {
+			return $directional_animation;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -50,12 +66,14 @@ function plvt_get_view_transition_animation_labels(): array {
  * @since 1.0.0
  * @see plvt_sanitize_view_transitions_theme_support()
  *
- * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, enable_directional_transitions: bool, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Default setting value.
  *
  *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
+ *     @type bool   $enable_directional_transitions        Whether to enable chronological and pagination transitions
+ *                                                         for supported animation.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -69,6 +87,7 @@ function plvt_get_setting_default(): array {
 	return array(
 		'override_theme_config'                 => false,
 		'default_transition_animation'          => 'fade',
+		'enable_directional_transitions'        => false,
 		'default_transition_animation_duration' => 400,
 		'header_selector'                       => 'header',
 		'main_selector'                         => 'main',
@@ -84,12 +103,14 @@ function plvt_get_setting_default(): array {
  *
  * @since 1.0.0
  *
- * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, enable_directional_transitions: bool, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Stored setting value.
  *
  *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
+ *     @type bool   $enable_directional_transitions        Whether to enable chronological and pagination transitions
+ *                                                         for supported animation families.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -109,12 +130,14 @@ function plvt_get_stored_setting_value(): array {
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
+ * @return array{ override_theme_config: bool, default_transition_animation: non-empty-string, enable_directional_transitions: bool, default_transition_animation_duration: int, header_selector: non-empty-string, main_selector: non-empty-string, post_title_selector: non-empty-string, post_thumbnail_selector: non-empty-string, post_content_selector: non-empty-string, enable_admin_transitions: bool } {
  *     Sanitized setting.
  *
  *     @type bool   $override_theme_config                 Whether to override the current theme's configuration. Otherwise,
  *                                                         the other frontend specific settings won't be applied.
  *     @type string $default_transition_animation          Default view transition animation.
+ *     @type bool   $enable_directional_transitions        Whether to enable chronological and pagination transitions
+ *                                                         for supported animation families.
  *     @type int    $default_transition_animation_duration Default transition animation duration in milliseconds.
  *     @type string $header_selector                       CSS selector for the global header element.
  *     @type string $main_selector                         CSS selector for the global main element.
@@ -163,12 +186,25 @@ function plvt_sanitize_setting( $input ): array {
 
 	$checkbox_options = array(
 		'override_theme_config',
+		'enable_directional_transitions',
 		'enable_admin_transitions',
 	);
 	foreach ( $checkbox_options as $checkbox_option ) {
 		if ( isset( $input[ $checkbox_option ] ) ) {
 			$value[ $checkbox_option ] = (bool) $input[ $checkbox_option ];
 		}
+	}
+
+	if ( ! is_string( plvt_get_supported_directional_animation( $value['default_transition_animation'] ) ) ) {
+		if ( isset( $input['enable_directional_transitions'] ) && (bool) $input['enable_directional_transitions'] ) {
+			add_settings_error(
+				'plvt_view_transitions',
+				'plvt_directional_transitions_requires_supported_animation',
+				__( 'Chronological and pagination transitions require a supported default transition animation.', 'view-transitions' ),
+				'warning'
+			);
+		}
+		$value['enable_directional_transitions'] = false;
 	}
 
 	return $value;
@@ -234,17 +270,15 @@ function plvt_apply_settings_to_theme_support(): void {
 	$args = $_wp_theme_features['view-transitions'];
 
 	// Apply the settings.
-	$args['default-animation']          = $options['default_transition_animation'];
-	$args['default-animation-duration'] = absint( $options['default_transition_animation_duration'] );
+	$args['default-animation']                 = $options['default_transition_animation'];
+	$args['default-animation-duration']        = absint( $options['default_transition_animation_duration'] );
+	$args['chronological-forwards-animation']  = false;
+	$args['chronological-backwards-animation'] = false;
+	$args['pagination-forwards-animation']     = false;
+	$args['pagination-backwards-animation']    = false;
 
-	// Automatically enable chronological and pagination animations for special animation options.
-	$chronological_pagination_animations = array(
-		'slide-chronological-pagination' => 'slide',
-		'swipe-chronological-pagination' => 'swipe',
-		'wipe-chronological-pagination'  => 'wipe',
-	);
-	if ( isset( $chronological_pagination_animations[ $args['default-animation'] ] ) ) {
-		$base_animation                            = $chronological_pagination_animations[ $args['default-animation'] ];
+	$base_animation = plvt_get_supported_directional_animation( $args['default-animation'] );
+	if ( $options['enable_directional_transitions'] && is_string( $base_animation ) ) {
 		$args['chronological-forwards-animation']  = $base_animation . '-from-right';
 		$args['chronological-backwards-animation'] = $base_animation . '-from-left';
 		$args['pagination-forwards-animation']     = $base_animation . '-from-right';
@@ -347,6 +381,11 @@ function plvt_add_setting_ui(): void {
 			'title'       => __( 'Default Transition Animation', 'view-transitions' ),
 			'description' => __( 'Choose the animation that is used for the default view transition type.', 'view-transitions' ),
 		),
+		'enable_directional_transitions'        => array(
+			'section'     => 'plvt_view_transitions',
+			'title'       => __( 'Chronological And Pagination Transitions', 'view-transitions' ),
+			'description' => __( 'Enable directional transitions for chronological and paginated navigation. This only applies when the selected default animation is supported.', 'view-transitions' ),
+		),
 		'default_transition_animation_duration' => array(
 			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
@@ -399,7 +438,7 @@ function plvt_add_setting_ui(): void {
 		);
 
 		// Remove 'label_for' for checkbox fields to avoid duplicate label association.
-		if ( 'override_theme_config' === $slug || 'enable_admin_transitions' === $slug ) {
+		if ( 'override_theme_config' === $slug || 'enable_directional_transitions' === $slug || 'enable_admin_transitions' === $slug ) {
 			unset( $additional_args['label_for'] );
 		}
 
@@ -423,17 +462,18 @@ function plvt_add_setting_ui(): void {
  * @since 1.0.0
  * @access private
  *
- * @param array{ field: non-empty-string, title: non-empty-string, description: string, label_for: non-empty-string } $args {
+ * @param array{ field: non-empty-string, title: non-empty-string, description: string, label_for?: non-empty-string } $args {
  *     Associative array of arguments.
  *
  *     @type string $field       The slug of the sub setting controlled by the field.
  *     @type string $title       The title for the field.
  *     @type string $description Optional. A description to show for the field.
- *     @type string $label_for   ID to use for the field control.
+ *     @type string $label_for   Optional. ID to use for the field control.
  * }
  */
 function plvt_render_settings_field( array $args ): void {
-	$option = plvt_get_stored_setting_value();
+	$option   = plvt_get_stored_setting_value();
+	$field_id = $args['label_for'] ?? "plvt-view-transitions-field-{$args['field']}";
 
 	switch ( $args['field'] ) {
 		case 'default_transition_animation':
@@ -445,6 +485,7 @@ function plvt_render_settings_field( array $args ): void {
 			$choices = array(); // Defined just for consistency.
 			break;
 		case 'override_theme_config':
+		case 'enable_directional_transitions':
 		case 'enable_admin_transitions':
 			$type    = 'checkbox';
 			$choices = array(); // Defined just for consistency.
@@ -459,12 +500,12 @@ function plvt_render_settings_field( array $args ): void {
 	if ( 'select' === $type ) {
 		?>
 		<select
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			id="<?php echo esc_attr( $field_id ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			<?php
 			if ( '' !== $args['description'] ) {
 				?>
-				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+				aria-describedby="<?php echo esc_attr( $field_id . '-description' ); ?>"
 				<?php
 			}
 			?>
@@ -500,14 +541,14 @@ function plvt_render_settings_field( array $args ): void {
 		?>
 		<input
 			<?php echo ( 'number' === $type ) ? 'type="number"' : ''; ?>
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			id="<?php echo esc_attr( $field_id ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
 			<?php
 			if ( '' !== $args['description'] ) {
 				?>
-				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+				aria-describedby="<?php echo esc_attr( $field_id . '-description' ); ?>"
 				<?php
 			}
 			?>
@@ -518,7 +559,7 @@ function plvt_render_settings_field( array $args ): void {
 	if ( '' !== $args['description'] && 'checkbox' !== $type ) {
 		?>
 		<p
-			id="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+			id="<?php echo esc_attr( $field_id . '-description' ); ?>"
 			class="description"
 			style="max-width: 800px;"
 		>
