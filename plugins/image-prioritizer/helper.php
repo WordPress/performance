@@ -174,9 +174,7 @@ function image_prioritizer_validate_background_image_url( string $url ) {
 	}
 
 	$allowed_hosts = array_map(
-		static function ( $host ) {
-			return wp_parse_url( $host, PHP_URL_HOST );
-		},
+		static fn ( $host ) => wp_parse_url( $host, PHP_URL_HOST ),
 		get_allowed_http_origins()
 	);
 

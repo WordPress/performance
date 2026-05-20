@@ -1,0 +1,66 @@
+name: Copilot Setup Steps
+
+# Pre-warms the GitHub Copilot coding agent's development environment so that
+# everything fetched from the network (WordPress core from wordpress.org,
+# Composer/npm packages, and the Docker images wp-env needs) is available
+# before Copilot's network firewall engages. Without this, `npm run test-php`
+# fails when `wp-env start` tries to download WordPress and is blocked at the
+# DNS layer.
+#
+# The filename and the `copilot-setup-steps` job name are required exactly —
+# Copilot will not pick up the workflow otherwise.
+# See: https://docs.github.com/en/copilot/customizing-copilot/customizing-the-development-environment-for-copilot-coding-agent
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+permissions: {}
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: Install husky git hooks
+        # The repo's .npmrc sets `ignore-scripts = true`, so `npm ci` skips the
+        # `prepare` script that wires up husky. Run it explicitly so the agent's
+        # commits get the pre-commit hooks (phpstan-diff, PHPCS) applied.
+        run: npm run prepare
+      - name: Set up PHP
+        # Pinned to 8.2 because that's the WordPress.org-reported most-used
+        # PHP version, so it matches what the majority of plugin users run.
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
+        with:
+          php-version: '8.2'
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - name: Cache Composer downloads
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Composer install
+        run: composer install --no-interaction --no-progress
+      - name: Build assets
+        run: npm run build
+      - name: Install WordPress and start environment
+        run: npm run wp-env start

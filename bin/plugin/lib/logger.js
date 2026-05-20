@@ -16,7 +16,7 @@ const error = createStyledText( 'red' );
 const warning = createStyledText( 'yellowBright' );
 const success = createStyledText( 'green' );
 
-const log = console.log; // eslint-disable-line no-console
+const log = console.log;
 
 module.exports = {
 	log,

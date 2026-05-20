@@ -32,7 +32,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 *
 	 * @var array<non-empty-string, TagVisitorCallback>
 	 */
-	private $visitors = array();
+	private array $visitors = array();
 
 	/**
 	 * Registers a tag visitor.
