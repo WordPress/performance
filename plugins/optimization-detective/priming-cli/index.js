@@ -86,7 +86,9 @@ function checkEnvironment() {
 		} catch ( error ) {
 			spinner.fail(
 				chalk.red(
-					`${ check.name } check failed: ${ check.errorMessage }`
+					`${ check.name } check failed: ${
+						check.errorMessage
+					} Details: ${ getErrorMessage( error ) }`
 				)
 			);
 			return false;

@@ -150,6 +150,7 @@
 			}
 			isProcessing = false;
 		} catch ( error ) {
+			log( getErrorMessage( error ) );
 			isProcessing = false;
 		}
 	}
