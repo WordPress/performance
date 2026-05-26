@@ -36,7 +36,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @var OD_URL_Metric_Group[]
 	 * @phpstan-var non-empty-array<OD_URL_Metric_Group>
 	 */
-	private $groups;
+	private array $groups;
 
 	/**
 	 * The current ETag.
@@ -44,7 +44,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.9.0
 	 * @var non-empty-string
 	 */
-	private $current_etag;
+	private string $current_etag;
 
 	/**
 	 * Breakpoints in max widths.
@@ -59,7 +59,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.1.0
 	 * @var positive-int[]
 	 */
-	private $breakpoints;
+	private array $breakpoints;
 
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
@@ -67,7 +67,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.1.0
 	 * @var int<1, max>
 	 */
-	private $sample_size;
+	private int $sample_size;
 
 	/**
 	 * Freshness age (TTL) for a given URL Metric.
@@ -77,7 +77,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.1.0
 	 * @var int<-1, max>
 	 */
-	private $freshness_ttl;
+	private int $freshness_ttl;
 
 	/**
 	 * Result cache.
@@ -95,7 +95,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
-	private $result_cache = array();
+	private array $result_cache = array();
 
 	/**
 	 * Constructor.

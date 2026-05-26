@@ -106,7 +106,7 @@ function isStorageLocked( currentTime, storageLockTTL ) {
 			! isNaN( storageLockTime ) &&
 			currentTime < storageLockTime + storageLockTTL * 1000
 		);
-	} catch ( e ) {
+	} catch {
 		return false;
 	}
 }
@@ -122,7 +122,7 @@ function setStorageLock( currentTime ) {
 			storageLockTimeSessionKey,
 			String( currentTime )
 		);
-	} catch ( e ) {}
+	} catch {}
 }
 
 /**
@@ -220,7 +220,7 @@ function getExtensionNameFromScriptModuleUrl( scriptModuleUrl ) {
 			return matches[ 1 ];
 		}
 		return url.pathname;
-	} catch ( err ) {
+	} catch {
 		return scriptModuleUrl;
 	}
 }

@@ -27,9 +27,10 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    timeout-minutes: 20
     permissions:
-      contents: read
-      pull-requests: read
+      contents: read       # Required to clone the repo.
+      pull-requests: read  # Required by dorny/paths-filter to read PR file changes.
     outputs:
       changed-plugins: ${{ steps.filter-plugins.outputs.changed-plugins }}
     steps:
@@ -74,14 +75,15 @@ jobs:
     runs-on: ubuntu-latest
     # Always run this job, even if detect-changes was skipped
     if: always() && (needs.detect-changes.result == 'success' || needs.detect-changes.result == 'skipped')
+    timeout-minutes: 20
     permissions:
-      contents: read
+      contents: read # Required to clone the repo.
     outputs:
       plugins: ${{ steps.set-matrix.outputs.plugins }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+      - uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # 2.37.1
         with:
           php-version: '8.3'
 
@@ -141,8 +143,7 @@ jobs:
     if: needs.prepare-matrix.result == 'success' && needs.prepare-matrix.outputs.plugins != '[]'
     name: Check ${{ matrix.plugin }}
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
+    permissions: {}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -156,7 +157,7 @@ jobs:
           path: build
 
       - name: Run plugin check
-        uses: wordpress/plugin-check-action@6f5a57e173c065a394b78688f75df543e4011902 # main
+        uses: wordpress/plugin-check-action@18573eb38f13543484a1f095672dae3849a4fbb0 # main
         with:
           build-dir: ./build/${{ matrix.plugin }}
           slug: ${{ matrix.plugin }}

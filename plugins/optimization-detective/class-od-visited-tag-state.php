@@ -28,7 +28,7 @@ final class OD_Visited_Tag_State {
 	 * @since 1.0.0
 	 * @var bool
 	 */
-	private $should_track_tag;
+	private bool $should_track_tag;
 
 	/**
 	 * Constructor.

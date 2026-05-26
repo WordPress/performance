@@ -10,7 +10,7 @@ on:
       - '.github/workflows/js-lint.yml'
       - '**.js'
       - '**.json'
-      - '.eslint*'
+      - 'eslint.config.*'
       - '.nvmrc'
       - '.wp-env.json'
       - '**/package.json'
@@ -21,7 +21,7 @@ on:
       - '.github/workflows/js-lint.yml'
       - '**.js'
       - '**.json'
-      - '.eslint*'
+      - 'eslint.config.*'
       - '.nvmrc'
       - '.wp-env.json'
       - '**/package.json'
@@ -31,13 +31,25 @@ on:
       - reopened
       - synchronize
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   js-lint:
     name: JS Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read # Required to clone the repo.
     steps:
-      - uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Node.js (via .nvmrc)
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0

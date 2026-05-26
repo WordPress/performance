@@ -34,7 +34,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @since 0.7.0
 	 * @var WP_REST_Request<array<string, mixed>>
 	 */
-	private $request;
+	private WP_REST_Request $request;
 
 	/**
 	 * ID for the od_url_metrics post.
@@ -44,7 +44,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @since 1.0.0
 	 * @var positive-int
 	 */
-	private $url_metrics_id;
+	private int $url_metrics_id;
 
 	/**
 	 * URL Metric group collection.
@@ -52,7 +52,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @since 0.7.0
 	 * @var OD_URL_Metric_Group_Collection
 	 */
-	private $url_metric_group_collection;
+	private OD_URL_Metric_Group_Collection $url_metric_group_collection;
 
 	/**
 	 * URL Metric group.
@@ -60,7 +60,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @since 0.7.0
 	 * @var OD_URL_Metric_Group
 	 */
-	private $url_metric_group;
+	private OD_URL_Metric_Group $url_metric_group;
 
 	/**
 	 * URL Metric.
@@ -68,7 +68,7 @@ final class OD_URL_Metric_Store_Request_Context {
 	 * @since 0.7.0
 	 * @var OD_URL_Metric
 	 */
-	private $url_metric;
+	private OD_URL_Metric $url_metric;
 
 	/**
 	 * Constructor.
