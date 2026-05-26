@@ -270,6 +270,7 @@
 				}
 			}
 		} catch ( error ) {
+			log( getErrorMessage( error ) );
 			if ( ! isTabHidden && ! abortController.signal.aborted ) {
 				isProcessing = false;
 				controlButton.textContent = __(
