@@ -101,9 +101,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/helper.php';
 
-		// Deprecations.
-		require_once __DIR__ . '/deprecated.php';
-
 		// Core infrastructure classes.
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
