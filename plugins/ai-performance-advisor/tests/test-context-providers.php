@@ -316,7 +316,7 @@ class AIPA_Test_Context_Providers extends WP_UnitTestCase {
 	/**
 	 * @covers AIPA_Provider_PageSpeed
 	 */
-	public function test_pagespeed_provider_handles_unparseable_body(): void {
+	public function test_pagespeed_provider_handles_unparsable_body(): void {
 		$this->mock_http( 200, 'this is not json' );
 		$data = ( new AIPA_Provider_PageSpeed() )->collect();
 		$this->assertArrayHasKey( 'error', $data );

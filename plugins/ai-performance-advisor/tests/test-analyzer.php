@@ -153,7 +153,7 @@ class AIPA_Test_Analyzer extends WP_UnitTestCase {
 	/**
 	 * @covers AIPA_Analyzer
 	 */
-	public function test_analyze_returns_empty_for_unparseable_response(): void {
+	public function test_analyze_returns_empty_for_unparsable_response(): void {
 		$this->force_available();
 		$this->set_ai_response( 'totally not json' );
 
