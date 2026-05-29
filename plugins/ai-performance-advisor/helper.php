@@ -24,6 +24,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool Whether AI recommendations can be generated.
  */
 function aipa_is_ai_available(): bool {
+	/**
+	 * Short-circuits the AI availability check.
+	 *
+	 * Returning a boolean from this filter bypasses the built-in detection, which is
+	 * useful for forcing the advisor on or off (for example when a host manages
+	 * provider availability itself, or in tests).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool|null $pre Null to run the built-in detection, or a boolean to force the result.
+	 */
+	$pre = apply_filters( 'aipa_pre_is_ai_available', null );
+	if ( is_bool( $pre ) ) {
+		return $pre;
+	}
+
 	static $available = null;
 	if ( null !== $available ) {
 		return $available;

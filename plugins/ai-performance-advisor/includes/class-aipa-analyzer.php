@@ -81,13 +81,30 @@ class AIPA_Analyzer {
 			(string) wp_json_encode( $context )
 		);
 
-		try {
-			$result = wp_ai_client_prompt( $user_prompt )
-				->using_system_instruction( $this->get_system_instruction() )
-				->using_temperature( 0.2 )
-				->generate_text();
-		} catch ( \Throwable $e ) {
-			return new WP_Error( 'aipa_ai_request_failed', $e->getMessage() );
+		/**
+		 * Short-circuits the call to the AI model.
+		 *
+		 * Returning a non-null value (a string of model output, or a WP_Error) from
+		 * this filter bypasses the built-in AI Client request. This is the seam used
+		 * by tests, and lets integrators route the request through their own client.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string|WP_Error|null $pre         Null to call the AI Client, or pre-computed output.
+		 * @param string               $user_prompt The user prompt that would be sent.
+		 * @param array<string, mixed> $context     The assembled context payload.
+		 */
+		$result = apply_filters( 'aipa_pre_generate_text', null, $user_prompt, $context );
+
+		if ( null === $result ) {
+			try {
+				$result = wp_ai_client_prompt( $user_prompt )
+					->using_system_instruction( $this->get_system_instruction() )
+					->using_temperature( 0.2 )
+					->generate_text();
+			} catch ( \Throwable $e ) {
+				return new WP_Error( 'aipa_ai_request_failed', $e->getMessage() );
+			}
 		}
 
 		if ( is_wp_error( $result ) ) {
