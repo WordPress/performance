@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-AIPerformanceAdvisor" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
+	<description>WordPress Coding Standards for AI Performance Advisor Plugin</description>
+
+	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="ai-performance-advisor"/>
+
+	<config name="minimum_wp_version" value="7.0"/>
+
+	<file>.</file>
+</ruleset>

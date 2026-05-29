@@ -101,6 +101,7 @@
 			"WP_MULTISITE=1 php vendor/bin/phpunit --exclude-group=ms-excluded"
 		],
 		"test-multisite:plugins": [
+			"@test-multisite:ai-performance-advisor",
 			"@test-multisite:auto-sizes",
 			"@test-multisite:dominant-color-images",
 			"@test-multisite:embed-optimizer",
@@ -112,6 +113,7 @@
 			"@test-multisite:web-worker-offloading",
 			"@test-multisite:webp-uploads"
 		],
+		"test-multisite:ai-performance-advisor": "@test-multisite --verbose --testsuite ai-performance-advisor",
 		"test-multisite:auto-sizes": "@test-multisite --verbose --testsuite auto-sizes",
 		"test-multisite:dominant-color-images": "@test-multisite --verbose --testsuite dominant-color-images",
 		"test-multisite:embed-optimizer": "@test-multisite --verbose --testsuite embed-optimizer",
@@ -123,6 +125,7 @@
 		"test-multisite:web-worker-offloading": "@test-multisite --verbose --testsuite web-worker-offloading",
 		"test-multisite:webp-uploads": "@test-multisite --verbose --testsuite webp-uploads",
 		"test:plugins": [
+			"@test:ai-performance-advisor",
 			"@test:auto-sizes",
 			"@test:dominant-color-images",
 			"@test:embed-optimizer",
@@ -134,6 +137,7 @@
 			"@test:web-worker-offloading",
 			"@test:webp-uploads"
 		],
+		"test:ai-performance-advisor": "@test --verbose --testsuite ai-performance-advisor",
 		"test:auto-sizes": "@test --verbose --testsuite auto-sizes",
 		"test:dominant-color-images": "@test --verbose --testsuite dominant-color-images",
 		"test:embed-optimizer": "@test --verbose --testsuite embed-optimizer",

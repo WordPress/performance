@@ -18,6 +18,7 @@ parameters:
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
+		- tools/phpstan/stubs/ai-client.stub
 	stubFiles:
 		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:

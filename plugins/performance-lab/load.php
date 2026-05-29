@@ -97,6 +97,10 @@ function perflab_get_standalone_plugin_data(): array {
 	 * - 'experimental' (boolean, optional)
 	 */
 	return array(
+		'ai-performance-advisor'  => array(
+			'constant'     => 'AI_PERFORMANCE_ADVISOR_VERSION',
+			'experimental' => true,
+		),
 		'auto-sizes'              => array(
 			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
 			'experimental' => false,
