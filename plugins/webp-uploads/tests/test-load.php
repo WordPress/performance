@@ -1310,4 +1310,63 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$featured_image = get_the_post_thumbnail( $post_id );
 		$this->assertStringStartsWith( '<picture ', $featured_image );
 	}
+
+	/**
+	 * Ensure webp_uploads_remove_sources_files() deletes the full-size source file
+	 * when the output format differs from the original upload format.
+	 *
+	 * When the plugin replaces the attached file with a converted format (e.g. AVIF),
+	 * the deletion function must still delete that source file rather than incorrectly
+	 * skipping it due to its MIME type matching the current attached file's type.
+	 *
+	 * This calls webp_uploads_remove_sources_files() directly rather than going through
+	 * wp_delete_attachment(), because WordPress's own file cleanup would mask the bug
+	 * by deleting the attached file (which after replacement is the converted file).
+	 *
+	 * @ticket 2358
+	 *
+	 * @covers ::webp_uploads_remove_sources_files
+	 * @dataProvider data_provider_supported_image_types
+	 */
+	public function test_it_should_remove_the_full_size_source_file_when_the_attachment_is_deleted( string $image_type ): void {
+		$mime_type = 'image/' . $image_type;
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		$this->set_image_output_type( $image_type );
+
+		$attachment_id = self::factory()->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg'
+		);
+
+		$file    = get_attached_file( $attachment_id, true );
+		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+
+		$this->assertIsString( $file );
+		$this->assertFileExists( $file );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// Verify the full-size source was created and the file was replaced.
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertArrayHasKey( $mime_type, $metadata['sources'] );
+		$full_size_source_file = path_join( $dirname, $metadata['sources'][ $mime_type ]['file'] );
+		$this->assertFileExists( $full_size_source_file );
+
+		// Confirm the attached file's MIME type differs from the post MIME type
+		// (i.e. the plugin replaced the file).
+		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+		$this->assertSame( $mime_type, wp_check_filetype( $file )['type'] );
+
+		// Call the plugin's deletion function directly to verify it properly
+		// cleans up its own source files without relying on WordPress's cleanup.
+		webp_uploads_remove_sources_files( $attachment_id );
+
+		// Verify the full-size source file was deleted by the plugin.
+		$this->assertFileDoesNotExist(
+			$full_size_source_file,
+			"The full-size $image_type source file should have been deleted by the plugin."
+		);
+	}
 }
