@@ -85,12 +85,12 @@ jobs:
       - name: Install WordPress
         run: |
           if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run wp-env-test -- start --xdebug=coverage
+            npm run wp-env-test start -- --xdebug=coverage
           else
-            npm run wp-env-test -- start
+            npm run wp-env-test start
           fi
       - name: Composer Install
-        run: npm run wp-env-test -- run cli --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
+        run: npm run wp-env-test run cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Update Composer Dependencies
         run: composer update --with-all-dependencies --no-interaction --no-progress
       - name: Install PHPUnit
