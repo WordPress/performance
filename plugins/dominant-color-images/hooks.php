@@ -38,6 +38,10 @@ function dominant_color_metadata( $metadata, int $attachment_id ): array {
 		if ( isset( $dominant_color_data['has_transparency'] ) ) {
 			$metadata['has_transparency'] = $dominant_color_data['has_transparency'];
 		}
+
+		if ( isset( $dominant_color_data['lqip'] ) ) {
+			$metadata['lqip'] = $dominant_color_data['lqip'];
+		}
 	}
 
 	return $metadata;
@@ -78,7 +82,14 @@ function dominant_color_update_attachment_image_attributes( $attr, WP_Post $atta
 	if ( isset( $image_meta['dominant_color'] ) && is_string( $image_meta['dominant_color'] ) && '' !== $image_meta['dominant_color'] ) {
 		$attr['data-dominant-color'] = esc_attr( $image_meta['dominant_color'] );
 		$style_attribute             = isset( $attr['style'] ) && is_string( $attr['style'] ) ? $attr['style'] : '';
-		$attr['style']               = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';' . $style_attribute;
+		$style_attribute             = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';' . $style_attribute;
+
+		// Append the LQIP custom property if available.
+		if ( isset( $image_meta['lqip'] ) && is_int( $image_meta['lqip'] ) ) {
+			$style_attribute = '--lqip:' . (int) $image_meta['lqip'] . ';' . $style_attribute;
+		}
+
+		$attr['style'] = $style_attribute;
 	}
 
 	return $attr;
@@ -146,7 +157,13 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 	if ( isset( $image_meta['dominant_color'] ) && is_string( $image_meta['dominant_color'] ) && '' !== $image_meta['dominant_color'] ) {
 		$processor->set_attribute( 'data-dominant-color', $image_meta['dominant_color'] );
 
-		$style_attribute = '--dominant-color: #' . $image_meta['dominant_color'] . '; ';
+		$style_attribute = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ';
+
+		// Append the LQIP custom property if available.
+		if ( isset( $image_meta['lqip'] ) && is_int( $image_meta['lqip'] ) ) {
+			$style_attribute = '--lqip:' . (int) $image_meta['lqip'] . '; ' . $style_attribute;
+		}
+
 		if ( null !== $processor->get_attribute( 'style' ) ) {
 			$style_attribute .= $processor->get_attribute( 'style' );
 		}
@@ -178,6 +195,35 @@ function dominant_color_add_inline_style(): void {
 	wp_add_inline_style( $handle, $custom_css );
 }
 add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
+
+/**
+ * Enqueue the LQIP CSS stylesheet on the frontend.
+ *
+ * When the DOMINANT_COLOR_LQIP_HOVER constant is defined and truthy, an
+ * additional inline rule hides the image content on hover (via
+ * object-position) so the gradient placeholder peeks through.
+ *
+ * @since 1.3.0
+ */
+function dominant_color_enqueue_lqip_css(): void {
+	$css_path = __DIR__ . '/assets/lqip.css';
+
+	if ( ! file_exists( $css_path ) ) {
+		return;
+	}
+
+	$css_url = plugin_dir_url( __FILE__ ) . 'assets/lqip.css';
+
+	wp_enqueue_style( 'dominant-color-lqip', $css_url, array(), '1.3.0' );
+
+	if ( defined( 'DOMINANT_COLOR_LQIP_HOVER' ) && DOMINANT_COLOR_LQIP_HOVER ) {
+		wp_add_inline_style(
+			'dominant-color-lqip',
+			'[style*="--lqip:"]:hover,.force-lqip{object-position:999px 999px}'
+		);
+	}
+}
+add_action( 'wp_enqueue_scripts', 'dominant_color_enqueue_lqip_css' );
 
 /**
  * Displays the HTML generator tag for the Image Placeholders plugin.
@@ -231,7 +277,8 @@ function dominant_color_admin_script(): void {
 				replaced += ' data-dominant-color="{{ data.dominantColor }}"';
 				replaced += ' data-has-transparency="{{ data.hasTransparency }}"';
 				let hasStyleAttr = false;
-				const colorStyle = "{{ data.dominantColor ? '--dominant-color: #' + data.dominantColor + ';' : '' }}";
+				const lqipStyle   = "{{ data.lqip ? '--lqip:' + data.lqip + '; ' : '' }}";
+				const colorStyle  = lqipStyle + "{{ data.dominantColor ? '--dominant-color: #' + data.dominantColor + ';' : '' }}";
 				replaced = replaced.replace( /\sstyle="/, ( styleMatch ) => {
 					hasStyleAttr = true;
 					return styleMatch + colorStyle;
@@ -280,6 +327,11 @@ function dominant_color_prepare_attachment_for_js( $response, WP_Post $attachmen
 	$response['hasTransparency'] = '';
 	if ( isset( $meta['has_transparency'] ) ) {
 		$response['hasTransparency'] = (bool) $meta['has_transparency'];
+	}
+
+	$response['lqip'] = 0;
+	if ( isset( $meta['lqip'] ) && is_int( $meta['lqip'] ) ) {
+		$response['lqip'] = $meta['lqip'];
 	}
 
 	return $response;

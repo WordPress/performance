@@ -116,4 +116,86 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		}
 		return false;
 	}
+
+	/**
+	 * Get the 3×2 grid pixel values from the image.
+	 *
+	 * The grid is a 3-column × 2-row sampling of the image, resized to
+	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
+	 * in LQIP generation.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return array<int, array{r: int, g: int, b: int}> 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B].
+	 */
+	public function get_lqip_grid_values(): array {
+
+		// Skip LQIP generation for images with transparency (the gradient
+		// placeholder would show through transparent areas).
+		$has_transparency = $this->has_transparency();
+		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
+			return array();
+		}
+
+		$small = imagecreatetruecolor( 3, 2 );
+		if ( false === $small ) {
+			return array();
+		}
+
+		// Fill with fully transparent white so imagecopyresampled can blend
+		// against it, then we will flatten below.
+		imagesavealpha( $small, true );
+		$transparent = imagecolorallocatealpha( $small, 255, 255, 255, 127 );
+		if ( false !== $transparent ) {
+			imagefill( $small, 0, 0, $transparent );
+		}
+
+		$image_width  = (int) imagesx( $this->image );
+		$image_height = (int) imagesy( $this->image );
+		imagecopyresampled( $small, $this->image, 0, 0, 0, 0, 3, 2, $image_width, $image_height );
+
+		// Flatten any residual alpha against white background so the
+		// returned RGB values are always opaque.
+		$flat = imagecreatetruecolor( 3, 2 );
+		if ( false !== $flat ) {
+			$white = imagecolorallocate( $flat, 255, 255, 255 );
+			if ( false !== $white ) {
+				imagefill( $flat, 0, 0, $white );
+			}
+			imagealphablending( $flat, true );
+			imagesavealpha( $flat, false );
+			imagecopy( $flat, $small, 0, 0, 0, 0, 3, 2 );
+			$small = $flat;
+		}
+
+		// Cell positions: left-to-right, top-to-bottom.
+		$cell_positions = array(
+			array( 0, 0 ),
+			array( 1, 0 ),
+			array( 2, 0 ),
+			array( 0, 1 ),
+			array( 1, 1 ),
+			array( 2, 1 ),
+		);
+
+		$values = array();
+
+		foreach ( $cell_positions as $pos ) {
+			$rgb = imagecolorat( $small, $pos[0], $pos[1] );
+			if ( false === $rgb ) {
+				continue;
+			}
+			$values[] = array(
+				'r' => ( $rgb >> 16 ) & 0xFF,
+				'g' => ( $rgb >> 8 ) & 0xFF,
+				'b' => $rgb & 0xFF,
+			);
+		}
+
+		if ( count( $values ) < 6 ) {
+			return array();
+		}
+
+		return $values;
+	}
 }

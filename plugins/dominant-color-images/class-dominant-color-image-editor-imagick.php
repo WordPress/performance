@@ -54,9 +54,11 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		}
 
 		try {
-			// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
-			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
-			$pixel = $this->image->getImagePixelColor( 0, 0 );
+			// Clone so $this->image is not mutated — otherwise subsequent
+			// calls (e.g. get_lqip_grid_values) would operate on a 1×1 image.
+			$thumb = clone $this->image;
+			$thumb->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
+			$pixel = $thumb->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
 
 			// Cast to int: ImagickPixel::getColor() may return floats depending on
@@ -117,6 +119,68 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
 			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Get the 3×2 grid pixel values from the image.
+	 *
+	 * The grid is a 3-column × 2-row sampling of the image, resized to
+	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
+	 * in LQIP generation.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return array<int, array{r: int, g: int, b: int}> 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B].
+	 */
+	public function get_lqip_grid_values(): array {
+
+		// Skip LQIP generation for images with transparency (the gradient
+		// placeholder would show through transparent areas).
+		$has_transparency = $this->has_transparency();
+		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
+			return array();
+		}
+
+		try {
+			$small = clone $this->image;
+
+			// Resize to 3×2.
+			$small->resizeImage( 3, 2, Imagick::FILTER_LANCZOS, 1 );
+			$small->sharpenImage( 0, 0.5 );
+
+			// Flatten if the image has an alpha channel.
+			if ( is_callable( array( $small, 'getImageAlphaChannel' ) ) && $small->getImageAlphaChannel() ) {
+				$small->setImageBackgroundColor( 'white' );
+				$small = $small->mergeImageLayers( Imagick::LAYERMETHOD_FLATTEN );
+			}
+
+			// Cell positions: left-to-right, top-to-bottom.
+			$cell_positions = array(
+				array( 0, 0 ),
+				array( 1, 0 ),
+				array( 2, 0 ),
+				array( 0, 1 ),
+				array( 1, 1 ),
+				array( 2, 1 ),
+			);
+
+			$values = array();
+
+			foreach ( $cell_positions as $pos ) {
+				$pixel    = $small->getImagePixelColor( $pos[0], $pos[1] );
+				$color    = $pixel->getColor();
+				$values[] = array(
+					'r' => $color['r'],
+					'g' => $color['g'],
+					'b' => $color['b'],
+				);
+			}
+
+			return $values;
+
+		} catch ( Exception $e ) {
+			return array();
 		}
 	}
 }

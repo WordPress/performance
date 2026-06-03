@@ -158,11 +158,26 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 
 	$dominant_color_data['has_transparency'] = $has_transparency;
 
-	$dominant_color = $editor->get_dominant_color();
-	if ( is_wp_error( $dominant_color ) ) {
-		return $dominant_color;
+	$rgb = $editor->get_dominant_color_rgb();
+	if ( is_wp_error( $rgb ) ) {
+		return $rgb;
 	}
-	$dominant_color_data['dominant_color'] = $dominant_color;
+	$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+	$dominant_color_data['dominant_color'] = $hex;
+
+	// LQIP generation — available if the editor implements the required methods.
+	if ( method_exists( $editor, 'get_lqip_grid_values' ) ) {
+		require_once __DIR__ . '/lqip-generator.php';
+
+		$grid = $editor->get_lqip_grid_values();
+		if ( ! empty( $grid ) ) {
+			try {
+				$dominant_color_data['lqip'] = dominant_color_lqip_generate( $rgb, $grid );
+			} catch ( \UnexpectedValueException $e ) {
+				wp_trigger_error( 'dominant_color_lqip_generate', $e->getMessage() );
+			}
+		}
+	}
 
 	return $dominant_color_data;
 }

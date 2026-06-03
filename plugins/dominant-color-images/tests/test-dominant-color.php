@@ -17,8 +17,10 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
+	 * @param bool     $expected_transparency Expected transparency.
+	 * @param int|null $expected_lqip Expected LQIP value, or null if not expected.
 	 */
-	public function test_dominant_color_metadata( string $image_path, array $expected_color ): void {
+	public function test_dominant_color_metadata( string $image_path, array $expected_color, bool $expected_transparency, ?int $expected_lqip ): void {
 		$this->skip_if_mime_type_unsupported( $image_path );
 
 		// Non-existing attachment.
@@ -31,6 +33,13 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
 		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
 		$this->assertContains( $dominant_color_metadata['dominant_color'], $expected_color );
+
+		if ( null === $expected_lqip ) {
+			$this->assertArrayNotHasKey( 'lqip', $dominant_color_metadata );
+		} else {
+			$this->assertArrayHasKey( 'lqip', $dominant_color_metadata );
+			$this->assertSame( $expected_lqip, $dominant_color_metadata['lqip'] );
+		}
 	}
 
 	/**
@@ -68,8 +77,9 @@ class Test_Dominant_Color extends TestCase {
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
 	 * @param bool     $expected_transparency Expected transparency.
+	 * @param int|null $expected_lqip Expected LQIP value, or null if not expected.
 	 */
-	public function test_has_transparency_metadata( string $image_path, array $expected_color, bool $expected_transparency ): void {
+	public function test_has_transparency_metadata( string $image_path, array $expected_color, bool $expected_transparency, ?int $expected_lqip ): void {
 		$this->skip_if_mime_type_unsupported( $image_path );
 
 		// Non-existing attachment.
@@ -80,6 +90,13 @@ class Test_Dominant_Color extends TestCase {
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		$this->assertSame( $expected_transparency, $transparency_metadata['has_transparency'] );
+
+		if ( null === $expected_lqip ) {
+			$this->assertArrayNotHasKey( 'lqip', $transparency_metadata );
+		} else {
+			$this->assertArrayHasKey( 'lqip', $transparency_metadata );
+			$this->assertSame( $expected_lqip, $transparency_metadata['lqip'] );
+		}
 	}
 
 	/**
@@ -137,9 +154,15 @@ class Test_Dominant_Color extends TestCase {
 
 		$this->assertStringContainsString( 'data-has-transparency="' . wp_json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 
+		$image_meta = wp_get_attachment_metadata( $attachment_id );
+
 		foreach ( $expected_color as $color ) {
 			if ( str_contains( $filtered_image_tags_added, $color ) ) {
-				$this->assertStringContainsString( 'style="--dominant-color: #' . $color . ';"', $filtered_image_tags_added );
+				if ( $expected_transparency ) {
+					$this->assertStringNotContainsString( '--lqip:', $filtered_image_tags_added );
+				} else {
+					$this->assertStringContainsString( '--lqip:' . $image_meta['lqip'] . '; --dominant-color: #' . $color . ';', $filtered_image_tags_added );
+				}
 				$this->assertStringContainsString( 'data-dominant-color="' . $color . '"', $filtered_image_tags_added );
 				break;
 			}
@@ -212,10 +235,10 @@ class Test_Dominant_Color extends TestCase {
 
 		$filtered_image = sprintf( $filtered_image, $src, $width, $height );
 
-		$this->assertStringContainsString(
-			$expected,
-			dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id )
-		);
+		$image_meta = wp_get_attachment_metadata( $attachment_id );
+
+		$result = dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id );
+		$this->assertStringContainsString( $expected, $result );
 	}
 
 	/**
@@ -227,11 +250,11 @@ class Test_Dominant_Color extends TestCase {
 		return array(
 			'no existing inline styles' => array(
 				'filtered_image' => '<img src="%s" width="%d" height="%d" alt="" />',
-				'expected'       => 'style="--dominant-color: #fe0000;"',
+				'expected'       => '--lqip:174772; --dominant-color: #fe0000;',
 			),
 			'existing inline styles'    => array(
 				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" alt="" />',
-				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
+				'expected'       => '--lqip:174772; --dominant-color: #fe0000; color: #ffffff',
 			),
 		);
 	}
@@ -247,6 +270,8 @@ class Test_Dominant_Color extends TestCase {
 	public function test_dominant_color_update_attachment_image_attributes( string $style_attr, string $expected ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg' );
 
+		$image_meta = wp_get_attachment_metadata( $attachment_id );
+
 		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );
 	}
@@ -260,15 +285,15 @@ class Test_Dominant_Color extends TestCase {
 		return array(
 			'no inline styles'                   => array(
 				'style_attr' => '',
-				'expected'   => 'style="--dominant-color: #fe0000;"',
+				'expected'   => '--lqip:174772;--dominant-color: #fe0000;',
 			),
 			'inline style with end semicolon'    => array(
 				'style_attr' => 'color: #ffffff;',
-				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff;"',
+				'expected'   => '--lqip:174772;--dominant-color: #fe0000;color: #ffffff;',
 			),
 			'inline style without end semicolon' => array(
 				'style_attr' => 'color: #ffffff',
-				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff"',
+				'expected'   => '--lqip:174772;--dominant-color: #fe0000;color: #ffffff',
 			),
 		);
 	}
@@ -464,6 +489,7 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertStringContainsString( 'data-dominant-color', $output );
 		$this->assertStringContainsString( 'data-has-transparency', $output );
 		$this->assertStringContainsString( '--dominant-color', $output );
+		$this->assertStringContainsString( '--lqip:', $output );
 	}
 
 	/**
@@ -475,14 +501,30 @@ class Test_Dominant_Color extends TestCase {
 		$meta = array(
 			'dominant_color'   => 'ff0000',
 			'has_transparency' => true,
+			'lqip'             => 174772,
 		);
 
 		$response = dominant_color_prepare_attachment_for_js( array(), $attachment, $meta );
 
 		$this->assertArrayHasKey( 'dominantColor', $response );
 		$this->assertArrayHasKey( 'hasTransparency', $response );
+		$this->assertArrayHasKey( 'lqip', $response );
 		$this->assertEquals( 'ff0000', $response['dominantColor'] );
 		$this->assertTrue( $response['hasTransparency'] );
+		$this->assertSame( 174772, $response['lqip'] );
+	}
+
+	/**
+	 * @covers ::dominant_color_lqip_generate
+	 */
+	public function test_dominant_color_lqip_generate(): void {
+		require_once __DIR__ . '/../lqip-generator.php';
+
+		$rgb = array( 'r' => 255, 'g' => 0, 'b' => 0 );
+		$grid_rgb = array_fill( 0, 6, $rgb );
+		$result = dominant_color_lqip_generate( $rgb, $grid_rgb );
+
+		$this->assertSame( 174781, $result );
 	}
 
 	/**
