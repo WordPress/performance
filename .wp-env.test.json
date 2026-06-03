@@ -16,6 +16,8 @@
 		"./plugins/webp-uploads"
 	],
 	"config": {
+		"WP_DEBUG": false,
+		"SCRIPT_DEBUG": false,
 		"FS_METHOD": "direct"
 	},
 	"mappings": {
