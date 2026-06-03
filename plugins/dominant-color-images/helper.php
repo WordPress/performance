@@ -155,16 +155,14 @@ function dominant_color_get_attachment_file_path( int $attachment_id, string $si
 		return false;
 	}
 
-	if ( ! isset( $imagedata['sizes'][ $size ] ) ) {
+	$filepath = get_attached_file( $attachment_id );
+	if ( false === $filepath ) {
 		return false;
 	}
 
-	$file = get_attached_file( $attachment_id );
-	if ( false === $file ) {
-		return false;
+	if ( isset( $imagedata['sizes'][ $size ] ) ) {
+		$filepath = str_replace( wp_basename( $filepath ), $imagedata['sizes'][ $size ]['file'], $filepath );
 	}
-
-	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
 	return $filepath;
 }
