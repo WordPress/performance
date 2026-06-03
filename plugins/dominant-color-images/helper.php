@@ -130,7 +130,16 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	if ( is_wp_error( $dominant_color ) ) {
 		return $dominant_color;
 	}
-	$dominant_color_data['dominant_color'] = $dominant_color;
+
+	$hex = dominant_color_rgb_to_hex( $dominant_color['r'], $dominant_color['g'], $dominant_color['b'] );
+	if ( null === $hex ) {
+		return new WP_Error(
+			'image_editor_dominant_color_error',
+			__( 'Dominant color detection failed.', 'dominant-color-images' )
+		);
+	}
+	$dominant_color_data['dominant_color'] = $hex;
+
 
 	return $dominant_color_data;
 }

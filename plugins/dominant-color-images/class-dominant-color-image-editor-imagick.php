@@ -21,11 +21,11 @@ declare( strict_types = 1 );
 class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 	/**
-	 * Get dominant color from a file.
+	 * Get dominant color from a file as raw RGB values.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string|WP_Error Dominant hex color string, or an error on failure.
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
 	 */
 	public function get_dominant_color() {
 
@@ -38,12 +38,12 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
-			$hex   = dominant_color_rgb_to_hex( $color['r'], $color['g'], $color['b'] );
-			if ( null === $hex ) {
-				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-			}
 
-			return $hex;
+			return array(
+				'r' => $color['r'],
+				'g' => $color['g'],
+				'b' => $color['b'],
+			);
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
 			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );

@@ -152,7 +152,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 
 		$result = $editor->get_dominant_color();
 
-		$this->assertEquals( 'ff0000', $result );
+		$this->assertEquals( array( 'r' => 255, 'g' => 0, 'b' => 0 ), $result );
 	}
 
 	/**
