@@ -96,7 +96,6 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	if ( false === $file ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
-	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	/**
 	 * Editor.
@@ -113,7 +112,6 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 			),
 		)
 	);
-	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
