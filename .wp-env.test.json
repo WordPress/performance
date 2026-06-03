@@ -1,6 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
 	"testsEnvironment": false,
+	"port": 8889,
 	"core": null,
 	"plugins": [
 		"./plugins/optimization-detective",
@@ -15,6 +16,9 @@
 		"./plugins/webp-uploads"
 	],
 	"config": {
-		"WP_DEVELOPMENT_MODE": "plugin"
+		"FS_METHOD": "direct"
+	},
+	"mappings": {
+		"wp-content/plugins/performance": "."
 	}
 }
