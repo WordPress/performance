@@ -62,5 +62,13 @@ jobs:
         run: composer install --no-interaction --no-progress
       - name: Build assets
         run: npm run build
-      - name: Install WordPress and start environment
-        run: npm run wp-env start
+      - name: Install WordPress and start environments
+        run: |
+          set -euo pipefail
+          trap 'kill 0' ERR
+
+          npm run wp-env start &
+          npm run wp-env-test start &
+
+          wait -n
+          wait -n
