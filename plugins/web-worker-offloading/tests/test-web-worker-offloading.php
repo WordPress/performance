@@ -207,19 +207,16 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$set_up();
 
 		$normalize = static function ( $html ) {
-			// See <https://core.trac.wordpress.org/ticket/63887>.
-			if ( method_exists( 'WP_HTML_Tag_Processor', 'set_modifiable_text' ) ) { // @phpstan-ignore function.alreadyNarrowedType
-				// This normalization logic is only relevant to WP>=6.9-alpha anyway.
-				$p = new WP_HTML_Tag_Processor( $html );
-				while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-					$text = $p->get_modifiable_text();
-					$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
-					$p->set_modifiable_text( $text );
-				}
-				$html = $p->get_updated_html();
+			// Strip the sourceURL comment that core appends to inline script text. See <https://core.trac.wordpress.org/ticket/63887>.
+			$p = new WP_HTML_Tag_Processor( $html );
+			while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+				$text = $p->get_modifiable_text();
+				$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
+				$p->set_modifiable_text( $text );
 			}
+			$html = $p->get_updated_html();
 
-			// This is admittedly EXTREMELY naïve. We should be using the assertEqualHTML method instead as of WP 6.9, but in the meantime, since WWO is proposed for deprecation, this is quick and dirty.
+			// This is admittedly EXTREMELY naïve, but since WWO is proposed for deprecation, this is quick and dirty.
 			$html = preg_replace_callback(
 				'/<script ([^>]+)>/',
 				static function ( array $matches ): string {

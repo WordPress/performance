@@ -278,11 +278,6 @@ trait Optimization_Detective_Test_Helpers {
 
 		$buffer = od_optimize_template_output_buffer( $buffer );
 
-		// When testing WP versions prior to 6.9, ensure the output buffer accounts for the change to entity encoding in <https://core.trac.wordpress.org/changeset/60919>.
-		if ( ! is_wp_version_compatible( '6.9' ) ) {
-			$buffer = str_replace( '&#039;', '&apos;', $buffer );
-		}
-
 		$home_url_needles = array( home_url( '/', 'http' ), home_url( '/', 'https' ) );
 
 		// Normalize script module content so changes do not impact snapshots.
