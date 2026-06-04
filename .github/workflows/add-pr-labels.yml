@@ -1,0 +1,23 @@
+name: Add Pull Request Labels
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+permissions: {}
+
+jobs:
+  add-pr-labels:
+    name: Add Plugin Labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Apply plugin labels from changed paths
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6.1.0
+        with:
+          configuration-path: .github/workflows/labeler-config.yml
+          sync-labels: true
