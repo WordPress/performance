@@ -144,7 +144,10 @@ class Perflab_Server_Timing {
 	/**
 	 * Outputs the Server-Timing header.
 	 *
-	 * This method must be called before rendering the page.
+	 * This must run before the response body is flushed. When output buffering is enabled it is called at the
+	 * {@see 'wp_finalized_template_enhancement_output_buffer'} action, after the template has been captured and
+	 * enhanced; otherwise it is called at the {@see 'wp_before_include_template'} action, right before the template
+	 * is included. Any extra arguments passed by those hooks are ignored.
 	 *
 	 * @since 1.8.0
 	 */
@@ -236,54 +239,28 @@ class Perflab_Server_Timing {
 	/**
 	 * Adds hooks to send the Server-Timing header.
 	 *
-	 * When output buffering is enabled, buffer as early as possible so that any other plugins that also do output
-	 * buffering will be able to register Server-Timing metrics. The first output buffer callback to be registered
-	 * is the last one to be called, so by starting the Server-Timing output buffer as soon as possible we can be
-	 * assured that other plugins' output buffer callbacks will run before the Server-Timing one that sends the
-	 * Server-Timing header.
+	 * Since WordPress 6.9, this relies on the template enhancement output buffer introduced in Core-43258 (see
+	 * r60936) rather than starting its own output buffer.
+	 *
+	 * When output buffering is enabled, the header is sent at the {@see 'wp_finalized_template_enhancement_output_buffer'}
+	 * action so that metrics measured while the template is rendering are included. Registering a callback on that
+	 * action also opts in to starting the core output buffer (see {@see wp_should_output_buffer_template_for_enhancement()}),
+	 * and core ensures the {@see 'wp_template_enhancement_output_buffer'} filter (used by other consumers such as
+	 * Optimization Detective) runs before this action, so their metrics are captured before the header is sent.
+	 *
+	 * When output buffering is disabled, the header is sent at the {@see 'wp_before_include_template'} action, right
+	 * before the template is included. Note this action only fires when the resolved template is a readable file,
+	 * unlike the previously used `template_include` filter which fired unconditionally.
 	 *
 	 * @since 3.2.0
+	 * @since n.e.x.t Relies on the WordPress 6.9 template enhancement output buffer instead of starting its own.
 	 */
 	public function add_hooks(): void {
 		if ( $this->use_output_buffer() ) {
-			add_action( 'template_redirect', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
+			add_action( 'wp_finalized_template_enhancement_output_buffer', array( $this, 'send_header' ) );
 		} else {
-			add_filter( 'template_include', array( $this, 'on_template_include' ), PHP_INT_MAX );
+			add_action( 'wp_before_include_template', array( $this, 'send_header' ) );
 		}
-	}
-
-	/**
-	 * Hook callback for the 'template_include' filter.
-	 *
-	 * This effectively initializes the class to send the Server-Timing header at the right point.
-	 *
-	 * This method is solely intended for internal use within WordPress.
-	 *
-	 * @since 1.8.0
-	 *
-	 * @param mixed $passthrough Optional. Filter value. Default null.
-	 * @return mixed Unmodified value of $passthrough.
-	 */
-	public function on_template_include( $passthrough = null ) {
-		$this->send_header();
-		return $passthrough;
-	}
-
-	/**
-	 * Starts output buffering to send the Server-Timing header right before returning the buffer.
-	 *
-	 * @since 3.2.0
-	 */
-	public function start_output_buffer(): void {
-		ob_start(
-			function ( string $output, ?int $phase ): string {
-				// Only send the header when the buffer is not being cleaned.
-				if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === 0 ) {
-					$this->send_header();
-				}
-				return $output;
-			}
-		);
 	}
 
 	/**
