@@ -234,7 +234,23 @@ async function validateFile( filePath ) {
 }
 
 const args = process.argv.slice( 2 );
-const patterns = args.length > 0 ? args : [ '**/*.json' ];
+const patterns =
+	args.length > 0
+		? args.map( ( arg ) => {
+				if (
+					fs.existsSync( arg ) &&
+					fs.statSync( arg ).isDirectory()
+				) {
+					// Ensure that the glob patterns use forward slashes, as fast-glob requires them even on Windows
+					// and treats backslashes as escape characters.
+					return (
+						arg.replace( /\\/g, '/' ).replace( /\/$/, '' ) +
+						'/**/*.json'
+					);
+				}
+				return arg;
+		  } )
+		: [ '**/*.json' ];
 
 ( async () => {
 	const files = await fg( patterns, {
