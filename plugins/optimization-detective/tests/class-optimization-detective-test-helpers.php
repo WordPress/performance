@@ -283,77 +283,95 @@ trait Optimization_Detective_Test_Helpers {
 			$buffer = str_replace( '&#039;', '&apos;', $buffer );
 		}
 
+		$home_url_needles = array( home_url( '/', 'http' ), home_url( '/', 'https' ) );
+
 		// Normalize script module content so changes do not impact snapshots.
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
-		$buffer = preg_replace_callback(
-			'#(<script type="module">)(.+?)(</script>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if ( 'module' !== strtolower( (string) $processor->get_attribute( 'type' ) ) ) {
+				continue;
+			}
 
-				$text = str_replace( "/* <![CDATA[ */\n", '', $text );
-				$text = str_replace( "/* ]]> */\n", '', $text );
-				$text = trim( $text );
-				if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
-					$text = '/* ' . $matches[0] . ' ... */';
-				} elseif ( 1 === preg_match( '/^async function load/', $text ) ) {
-					$text = '/* detect loader */';
-				}
+			$text = $processor->get_modifiable_text();
+			if ( ! is_string( $text ) ) {
+				continue;
+			}
 
-				// Normalize versions which occur in sourceURL.
-				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+			$text = str_replace( "/* <![CDATA[ */\n", '', $text );
+			$text = str_replace( "/* ]]> */\n", '', $text );
+			$text = trim( $text );
+			if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
+				$text = '/* ' . $matches[0] . ' ... */';
+			} elseif ( 1 === preg_match( '/^async function load/', $text ) ) {
+				$text = '/* detect loader */';
+			}
 
-				// Ensure any home URLs are normalized to account for variations in the testing environment.
-				$text = str_replace(
-					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
-					'https://example.com/',
-					$text
-				);
+			// Normalize versions which occur in sourceURL.
+			$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
 
-				return $start_tag . $text . $end_tag;
-			},
-			$buffer
-		);
+			// Ensure any home URLs are normalized to account for variations in the testing environment.
+			$text = str_replace(
+				$home_url_needles,
+				'https://example.com/',
+				$text
+			);
 
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
+			$processor->set_modifiable_text( $text );
+		}
+		$buffer = $processor->get_updated_html();
+
+		// Normalize detect-args JSON script content so detect payloads do not impact snapshots.
 		// TODO: This should use assertEqualHTML() once 6.9 is the minimum supported version.
-		$buffer = preg_replace_callback(
-			'#(<script (?:type="application/json" id="optimization-detective-detect-args"|id="optimization-detective-detect-args" type="application/json")>)(.+?)(</script>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if (
+				'optimization-detective-detect-args' !== $processor->get_attribute( 'id' )
+				||
+				'application/json' !== strtolower( (string) $processor->get_attribute( 'type' ) )
+			) {
+				continue;
+			}
 
-				$data = json_decode( $text, true );
-				if ( is_array( $data ) && 2 === count( $data ) && is_string( $data[0] ) && is_array( $data[1] ) ) {
-					$text = '[]';
-				}
+			$text = $processor->get_modifiable_text();
+			if ( ! is_string( $text ) ) {
+				continue;
+			}
 
-				return '<script type="application/json" id="optimization-detective-detect-args">' . $text . $end_tag;
-			},
-			$buffer
+			$data = json_decode( $text, true );
+			if ( is_array( $data ) && 2 === count( $data ) && is_string( $data[0] ) && is_array( $data[1] ) ) {
+				$text = '[]';
+			}
+
+			$processor->set_modifiable_text( $text );
+		}
+		// WP_HTML_Tag_Processor preserves source attribute order; normalize to match snapshots (type before id).
+		$buffer = str_replace(
+			'<script id="optimization-detective-detect-args" type="application/json">',
+			'<script type="application/json" id="optimization-detective-detect-args">',
+			$processor->get_updated_html()
 		);
 
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
-		$buffer = preg_replace_callback(
-			'#(<style[^>]*?>)(.+?)(</style>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+		// Normalize style content so changes do not impact snapshots.
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
+			$text = $processor->get_modifiable_text();
+			if ( ! is_string( $text ) ) {
+				continue;
+			}
 
-				// Normalize versions which occur in sourceURL.
-				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+			// Normalize versions which occur in sourceURL.
+			$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
 
-				// Ensure any home URLs are normalized to account for variations in the testing environment.
-				$text = str_replace(
-					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
-					'https://example.com/',
-					$text
-				);
+			// Ensure any home URLs are normalized to account for variations in the testing environment.
+			$text = str_replace(
+				$home_url_needles,
+				'https://example.com/',
+				$text
+			);
 
-				return $start_tag . $text . $end_tag;
-			},
-			$buffer
-		);
+			$processor->set_modifiable_text( $text );
+		}
+		$buffer = $processor->get_updated_html();
 
 		// Undo replacements so that the placeholders are restored to the buffer for persisting in the snapshot.
 		$snapshot = $buffer;
