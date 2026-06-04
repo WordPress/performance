@@ -19,5 +19,5 @@ jobs:
       - name: Apply plugin labels from changed paths
         uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6.1.0
         with:
-          configuration-path: .github/workflows/labeler-config.yml
+          configuration-path: .github/labeler-config.yml
           sync-labels: true
