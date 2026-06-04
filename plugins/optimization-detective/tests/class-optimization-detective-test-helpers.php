@@ -8,6 +8,8 @@
  * @noinspection PhpUnhandledExceptionInspection
  */
 
+use PHPUnit\Framework\ExpectationFailedException;
+
 /**
  * @phpstan-type ElementDataSubset array{
  *     xpath: string,
@@ -191,16 +193,6 @@ trait Optimization_Detective_Test_Helpers {
 	}
 
 	/**
-	 * Removes initial tabs from the lines in the input.
-	 *
-	 * @param string $input Input.
-	 * @return string Output.
-	 */
-	public function remove_initial_tabs( string $input ): string {
-		return (string) preg_replace( '/^\t+/m', '', $input );
-	}
-
-	/**
 	 * Gets JSON-serializable data from an array of JsonSerializable objects.
 	 *
 	 * @param JsonSerializable[] $items Items.
@@ -316,7 +308,6 @@ trait Optimization_Detective_Test_Helpers {
 		$buffer = $processor->get_updated_html();
 
 		// Normalize detect-args JSON script content so detect payloads do not impact snapshots.
-		// TODO: This should use assertEqualHTML() once 6.9 is the minimum supported version.
 		$processor = new WP_HTML_Tag_Processor( $buffer );
 		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
 			if (
@@ -339,12 +330,7 @@ trait Optimization_Detective_Test_Helpers {
 
 			$processor->set_modifiable_text( $text );
 		}
-		// WP_HTML_Tag_Processor preserves source attribute order; normalize to match snapshots (type before id).
-		$buffer = str_replace(
-			'<script id="optimization-detective-detect-args" type="application/json">',
-			'<script type="application/json" id="optimization-detective-detect-args">',
-			$processor->get_updated_html()
-		);
+		$buffer = $processor->get_updated_html();
 
 		// Normalize style content so changes do not impact snapshots.
 		$processor = new WP_HTML_Tag_Processor( $buffer );
@@ -374,27 +360,25 @@ trait Optimization_Detective_Test_Helpers {
 			$snapshot = str_replace( array_values( $replacements ), array_keys( $replacements ), $snapshot );
 		}
 
-		$buffer = $this->remove_initial_tabs( $buffer );
-		if ( is_string( $expected ) ) {
-			$expected = $this->remove_initial_tabs( $expected );
-		}
-
-		if ( $buffer !== $expected ) {
-			file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		}
-
 		$rel_actual_file   = str_replace( trailingslashit( getcwd() ), '', $actual_file );
 		$rel_expected_file = str_replace( trailingslashit( getcwd() ), '', $expected_file );
 		$rel_buffer_file   = str_replace( trailingslashit( getcwd() ), '', $buffer_file );
 
 		if ( null === $expected ) {
+			file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			$this->markTestIncomplete( "Examine $actual_file to see if it is expected and if so rename to $expected_file." );
 		} else {
-			$this->assertEquals(
-				$expected,
-				$buffer,
-				"Examine $rel_actual_file for differences with $rel_buffer_file and if acceptable move to $rel_expected_file"
-			);
+			try {
+				$this->assertEqualHTML(
+					$expected,
+					$buffer,
+					null,
+					"Examine $rel_actual_file for differences with $rel_buffer_file and if acceptable move to $rel_expected_file"
+				);
+			} catch ( ExpectationFailedException $e ) {
+				file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				throw $e;
+			}
 		}
 	}
 }
