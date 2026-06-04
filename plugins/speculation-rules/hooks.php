@@ -86,3 +86,16 @@ function plsr_render_generator_meta_tag(): void {
 	echo '<meta name="generator" content="speculation-rules ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'plsr_render_generator_meta_tag' );
+
+/**
+ * Prints the Origin Trial meta tag if a token is configured.
+ *
+ * @since 1.7.0
+ */
+function plsr_print_origin_trial_meta_tag(): void {
+	$option = plsr_get_stored_setting_value();
+	if ( '' !== $option['origin_trial_token'] && 'prerender_until_script' === $option['mode'] && plsr_is_speculative_loading_enabled() ) {
+		echo '<meta http-equiv="origin-trial" content="' . esc_attr( $option['origin_trial_token'] ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'plsr_print_origin_trial_meta_tag', 1 );

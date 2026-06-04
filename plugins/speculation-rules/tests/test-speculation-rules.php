@@ -128,6 +128,7 @@ class Test_Speculation_Rules extends WP_UnitTestCase {
 		}
 
 		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
+		$this->assertSame( 1, has_action( 'wp_head', 'plsr_print_origin_trial_meta_tag' ) );
 	}
 
 	/**
@@ -140,5 +141,54 @@ class Test_Speculation_Rules extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'speculation-rules ' . SPECULATION_RULES_VERSION, $tag );
+	}
+
+	/**
+	 * Test printing the origin trial meta tag.
+	 *
+	 * @covers ::plsr_print_origin_trial_meta_tag
+	 */
+	public function test_plsr_print_origin_trial_meta_tag(): void {
+		// Ensure no user is logged in so that plsr_is_speculative_loading_enabled() returns true.
+		wp_set_current_user( 0 );
+
+		// Enable pretty permalinks to bypass speculative loading checks.
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%hour%/%minute%/%second%' );
+
+		// Case 1: Empty token.
+		update_option(
+			'plsr_speculation_rules',
+			array(
+				'mode'               => 'prerender_until_script',
+				'origin_trial_token' => '',
+			)
+		);
+		$this->assertSame( '', get_echo( 'plsr_print_origin_trial_meta_tag' ) );
+
+		// Case 2: Mode is not prerender_until_script (e.g. prerender).
+		update_option(
+			'plsr_speculation_rules',
+			array(
+				'mode'               => 'prerender',
+				'origin_trial_token' => 'test-token',
+			)
+		);
+		$this->assertSame( '', get_echo( 'plsr_print_origin_trial_meta_tag' ) );
+
+		// Case 3: Token is set and mode is prerender_until_script.
+		update_option(
+			'plsr_speculation_rules',
+			array(
+				'mode'               => 'prerender_until_script',
+				'origin_trial_token' => 'test-token',
+			)
+		);
+		$tag = get_echo( 'plsr_print_origin_trial_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'origin-trial', $tag );
+		$this->assertStringContainsString( 'test-token', $tag );
+
+		// Clean up.
+		update_option( 'permalink_structure', '' );
 	}
 }
