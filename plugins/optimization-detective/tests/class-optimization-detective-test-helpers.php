@@ -293,7 +293,7 @@ trait Optimization_Detective_Test_Helpers {
 			}
 
 			$text = $processor->get_modifiable_text();
-			if ( ! $text ) {
+			if ( empty( $text ) ) {
 				continue;
 			}
 
@@ -333,7 +333,7 @@ trait Optimization_Detective_Test_Helpers {
 			}
 
 			$text = $processor->get_modifiable_text();
-			if ( ! $text ) {
+			if ( empty( $text ) ) {
 				continue;
 			}
 
@@ -355,7 +355,7 @@ trait Optimization_Detective_Test_Helpers {
 		$processor = new WP_HTML_Tag_Processor( $buffer );
 		while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
 			$text = $processor->get_modifiable_text();
-			if ( ! $text ) {
+			if ( empty( $text ) ) {
 				continue;
 			}
 
