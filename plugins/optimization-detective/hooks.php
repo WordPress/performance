@@ -18,7 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // @codeCoverageIgnoreStart
 add_action( 'init', 'od_initialize_extensions', PHP_INT_MAX );
-add_filter( 'template_include', 'od_buffer_output', PHP_INT_MAX );
+
+// Backward compatibility with WP<6.9.
+if ( ! function_exists( 'wp_start_template_enhancement_output_buffer' ) ) {
+	add_filter( 'template_include', 'od_buffer_output', PHP_INT_MAX );
+}
+
 OD_URL_Metrics_Post_Type::add_hooks();
 OD_Storage_Lock::add_hooks();
 add_action( 'wp', 'od_maybe_add_template_output_buffer_filter' );
