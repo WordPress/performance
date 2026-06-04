@@ -152,7 +152,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var non-empty-string[]
 	 */
-	private $open_stack_tags = array();
+	private array $open_stack_tags = array();
 
 	/**
 	 * Stack of the attributes for open tags.
@@ -163,7 +163,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 1.0.0
 	 * @var array<array<non-empty-string, string>>
 	 */
-	private $open_stack_attributes = array();
+	private array $open_stack_attributes = array();
 
 	/**
 	 * Open stack indices.
@@ -171,7 +171,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var non-negative-int[]
 	 */
-	private $open_stack_indices = array();
+	private array $open_stack_indices = array();
 
 	/**
 	 * Bookmarked open stacks.
@@ -184,7 +184,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var array<string, array{tags: non-empty-string[], attributes: array<array<non-empty-string, string>>, indices: non-negative-int[]}>
 	 */
-	private $bookmarked_open_stacks = array();
+	private array $bookmarked_open_stacks = array();
 
 	/**
 	 * (Transitional) XPath for the current tag.
@@ -195,7 +195,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 1.0.0
 	 * @var string|null
 	 */
-	private $current_xpath = null;
+	private ?string $current_xpath = null;
 
 	/**
 	 * Whether the previous tag does not expect a closer.
@@ -203,7 +203,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var bool
 	 */
-	private $previous_tag_without_closer = false;
+	private bool $previous_tag_without_closer = false;
 
 	/**
 	 * Mapping of bookmark name to a list of HTML strings which will be inserted at the time get_updated_html() is called.
@@ -211,7 +211,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var array<non-empty-string, string[]>
 	 */
-	private $buffered_text_replacements = array();
+	private array $buffered_text_replacements = array();
 
 	/**
 	 * Whether the end of the document was reached.
@@ -220,7 +220,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see self::next_token()
 	 * @var bool
 	 */
-	private $reached_end_of_document = false;
+	private bool $reached_end_of_document = false;
 
 	/**
 	 * Count for the number of times that the cursor was moved.
@@ -230,7 +230,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see self::next_token()
 	 * @see self::seek()
 	 */
-	private $cursor_move_count = 0;
+	private int $cursor_move_count = 0;
 
 	/**
 	 * Finds the next tag.
