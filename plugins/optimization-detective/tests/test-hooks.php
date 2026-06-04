@@ -14,7 +14,13 @@ class Test_OD_Hooks extends WP_UnitTestCase {
 	 */
 	public function test_hooks_added(): void {
 		$this->assertEquals( PHP_INT_MAX, has_action( 'init', 'od_initialize_extensions' ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
+
+		// Backward compatibility with WP<6.9.
+		if ( version_compare( $GLOBALS['wp_version'], '6.9', '<' ) ) {
+			$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
+		} else {
+			$this->assertFalse( has_filter( 'template_include', 'od_buffer_output' ) );
+		}
 
 		$this->assertEquals( 10, has_filter( 'wp', 'od_maybe_add_template_output_buffer_filter' ) );
 		$this->assertEquals( 10, has_action( 'wp_head', 'od_render_generator_meta_tag' ) );
