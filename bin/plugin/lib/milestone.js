@@ -16,19 +16,19 @@
  *
  * @return {Promise<import('@octokit/rest').RestEndpointMethodTypes['issues']['listMilestones']['response']['data'][0]|void>} Promise resolving to milestone, if exists.
  */
-async function getMilestoneByTitle( octokit, owner, repo, title ) {
-	const options = octokit.issues.listMilestones.endpoint.merge( {
+async function getMilestoneByTitle(octokit, owner, repo, title) {
+	const options = octokit.issues.listMilestones.endpoint.merge({
 		owner,
 		repo,
 		state: 'all',
-	} );
+	});
 
-	const responses = octokit.paginate.iterator( options );
+	const responses = octokit.paginate.iterator(options);
 
-	for await ( const response of responses ) {
+	for await (const response of responses) {
 		const milestones = response.data;
-		for ( const milestone of milestones ) {
-			if ( milestone.title === title ) {
+		for (const milestone of milestones) {
+			if (milestone.title === title) {
 				return milestone;
 			}
 		}
@@ -55,32 +55,32 @@ async function getIssuesByMilestone(
 	state,
 	closedSince
 ) {
-	const options = octokit.issues.listForRepo.endpoint.merge( {
+	const options = octokit.issues.listForRepo.endpoint.merge({
 		owner,
 		repo,
 		milestone,
 		state,
-		...( closedSince && {
+		...(closedSince && {
 			since: closedSince,
-		} ),
-	} );
+		}),
+	});
 
-	const responses = octokit.paginate.iterator( options );
+	const responses = octokit.paginate.iterator(options);
 
 	const pulls = [];
 
-	for await ( const response of responses ) {
+	for await (const response of responses) {
 		const issues = response.data;
-		pulls.push( ...issues );
+		pulls.push(...issues);
 	}
 
-	if ( closedSince ) {
-		const closedSinceTimestamp = new Date( closedSince );
+	if (closedSince) {
+		const closedSinceTimestamp = new Date(closedSince);
 
 		return pulls.filter(
-			( pull ) =>
+			(pull) =>
 				pull.closed_at &&
-				closedSinceTimestamp < new Date( pull.closed_at )
+				closedSinceTimestamp < new Date(pull.closed_at)
 		);
 	}
 

@@ -11,8 +11,8 @@
  * @type {InitViewTransitionsFunction}
  * @param {ViewTransitionsConfig} config - The view transitions configuration.
  */
-window.plvtInitViewTransitions = ( config ) => {
-	if ( ! window.navigation || ! ( 'CSSViewTransitionRule' in window ) ) {
+window.plvtInitViewTransitions = (config) => {
+	if (!window.navigation || !('CSSViewTransitionRule' in window)) {
 		window.console.warn(
 			'View transitions not loaded as the browser is lacking support.'
 		);
@@ -34,29 +34,28 @@ window.plvtInitViewTransitions = ( config ) => {
 	) => {
 		const animations = config.animations || {};
 
-		const globalEntries = animations[ transitionType ]
+		const globalEntries = animations[transitionType]
 			.useGlobalTransitionNames
-			? Object.entries( config.globalTransitionNames || {} ).map(
-					( [ selector, name ] ) => {
-						const element = bodyElement.querySelector( selector );
-						return [ element, name ];
+			? Object.entries(config.globalTransitionNames || {}).map(
+					([selector, name]) => {
+						const element = bodyElement.querySelector(selector);
+						return [element, name];
 					}
-			  )
+				)
 			: [];
 
 		const postEntries =
-			animations[ transitionType ].usePostTransitionNames &&
-			articleElement
-				? Object.entries( config.postTransitionNames || {} ).map(
-						( [ selector, name ] ) => {
+			animations[transitionType].usePostTransitionNames && articleElement
+				? Object.entries(config.postTransitionNames || {}).map(
+						([selector, name]) => {
 							const element =
-								articleElement.querySelector( selector );
-							return [ element, name ];
+								articleElement.querySelector(selector);
+							return [element, name];
 						}
-				  )
+					)
 				: [];
 
-		return [ ...globalEntries, ...postEntries ];
+		return [...globalEntries, ...postEntries];
 	};
 
 	/**
@@ -70,10 +69,10 @@ window.plvtInitViewTransitions = ( config ) => {
 	 *
 	 * @param {ViewTransition} viewTransition The view transition to suppress rejections for.
 	 */
-	const suppressViewTransitionRejections = ( viewTransition ) => {
+	const suppressViewTransitionRejections = (viewTransition) => {
 		const noop = () => {};
-		viewTransition.ready.catch( noop );
-		viewTransition.finished.catch( noop );
+		viewTransition.ready.catch(noop);
+		viewTransition.finished.catch(noop);
 	};
 
 	/**
@@ -83,9 +82,9 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @param {Promise<void>}     vtPromise Promise that resolves after the view transition has been completed.
 	 * @return {Promise<void>} Promise that resolves after the view transition names were reset.
 	 */
-	const setTemporaryViewTransitionNames = async ( entries, vtPromise ) => {
-		for ( const [ element, name ] of entries ) {
-			if ( ! element ) {
+	const setTemporaryViewTransitionNames = async (entries, vtPromise) => {
+		for (const [element, name] of entries) {
+			if (!element) {
 				continue;
 			}
 			element.style.viewTransitionName = name;
@@ -93,8 +92,8 @@ window.plvtInitViewTransitions = ( config ) => {
 
 		await vtPromise;
 
-		for ( const [ element ] of entries ) {
-			if ( ! element ) {
+		for (const [element] of entries) {
+			if (!element) {
 				continue;
 			}
 			element.style.viewTransitionName = '';
@@ -110,11 +109,11 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @param {string} append    Selector to append to the main selector.
 	 * @return {string} Combined selector.
 	 */
-	const appendSelectors = ( selectors, append ) => {
+	const appendSelectors = (selectors, append) => {
 		return selectors
-			.split( ',' )
-			.map( ( subselector ) => subselector.trim() + ' ' + append )
-			.join( ',' );
+			.split(',')
+			.map((subselector) => subselector.trim() + ' ' + append)
+			.join(',');
 	};
 
 	/**
@@ -123,10 +122,10 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @return {Element|null} Post element, or null if none is found.
 	 */
 	const getArticle = () => {
-		if ( ! config.postSelector ) {
+		if (!config.postSelector) {
 			return null;
 		}
-		return document.querySelector( config.postSelector );
+		return document.querySelector(config.postSelector);
 	};
 
 	/**
@@ -135,19 +134,19 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * @param {string} url Post URL (permalink) to find post element.
 	 * @return {Element|null} Post element, or null if none is found.
 	 */
-	const getArticleForUrl = ( url ) => {
-		if ( ! config.postSelector ) {
+	const getArticleForUrl = (url) => {
+		if (!config.postSelector) {
 			return null;
 		}
 		const postLinkSelector = appendSelectors(
 			config.postSelector,
 			'a[href="' + url + '"]'
 		);
-		const articleLink = document.querySelector( postLinkSelector );
-		if ( ! articleLink ) {
+		const articleLink = document.querySelector(postLinkSelector);
+		if (!articleLink) {
 			return null;
 		}
-		return articleLink.closest( config.postSelector );
+		return articleLink.closest(config.postSelector);
 	};
 
 	/**
@@ -158,33 +157,33 @@ window.plvtInitViewTransitions = ( config ) => {
 	 */
 	window.addEventListener(
 		'pageswap',
-		( /** @type {PageSwapEvent} */ event ) => {
-			if ( event.viewTransition ) {
+		(/** @type {PageSwapEvent} */ event) => {
+			if (event.viewTransition) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
-				suppressViewTransitionRejections( event.viewTransition );
-				event.viewTransition.types.add( transitionType );
+				suppressViewTransitionRejections(event.viewTransition);
+				event.viewTransition.types.add(transitionType);
 
 				let viewTransitionEntries;
-				if ( document.body.classList.contains( 'single' ) ) {
+				if (document.body.classList.contains('single')) {
 					viewTransitionEntries = getViewTransitionEntries(
 						transitionType,
 						document.body,
 						getArticle()
 					);
 				} else if (
-					document.body.classList.contains( 'home' ) ||
-					document.body.classList.contains( 'blog' ) ||
-					document.body.classList.contains( 'archive' )
+					document.body.classList.contains('home') ||
+					document.body.classList.contains('blog') ||
+					document.body.classList.contains('archive')
 				) {
-					if ( event.activation?.entry.url ) {
+					if (event.activation?.entry.url) {
 						viewTransitionEntries = getViewTransitionEntries(
 							transitionType,
 							document.body,
-							getArticleForUrl( event.activation.entry.url )
+							getArticleForUrl(event.activation.entry.url)
 						);
 					}
 				}
-				if ( viewTransitionEntries ) {
+				if (viewTransitionEntries) {
 					setTemporaryViewTransitionNames(
 						viewTransitionEntries,
 						event.viewTransition.finished
@@ -202,22 +201,22 @@ window.plvtInitViewTransitions = ( config ) => {
 	 */
 	window.addEventListener(
 		'pagereveal',
-		( /** @type {PageRevealEvent} */ event ) => {
-			if ( event.viewTransition ) {
+		(/** @type {PageRevealEvent} */ event) => {
+			if (event.viewTransition) {
 				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
-				suppressViewTransitionRejections( event.viewTransition );
-				event.viewTransition.types.add( transitionType );
+				suppressViewTransitionRejections(event.viewTransition);
+				event.viewTransition.types.add(transitionType);
 
 				let viewTransitionEntries;
-				if ( document.body.classList.contains( 'single' ) ) {
+				if (document.body.classList.contains('single')) {
 					viewTransitionEntries = getViewTransitionEntries(
 						transitionType,
 						document.body,
 						getArticle()
 					);
 				} else if (
-					document.body.classList.contains( 'home' ) ||
-					document.body.classList.contains( 'archive' )
+					document.body.classList.contains('home') ||
+					document.body.classList.contains('archive')
 				) {
 					viewTransitionEntries = getViewTransitionEntries(
 						transitionType,
@@ -225,11 +224,11 @@ window.plvtInitViewTransitions = ( config ) => {
 						window.navigation?.activation?.from?.url
 							? getArticleForUrl(
 									window.navigation.activation.from.url
-							  )
+								)
 							: null
 					);
 				}
-				if ( viewTransitionEntries ) {
+				if (viewTransitionEntries) {
 					setTemporaryViewTransitionNames(
 						viewTransitionEntries,
 						event.viewTransition.ready

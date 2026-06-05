@@ -1,5 +1,5 @@
 // h/t https://stackoverflow.com/a/59801602/93579
-type ExcludeProps< T > = { [ k: string ]: any } & { [ K in keyof T ]?: never };
+type ExcludeProps<T> = { [k: string]: any } & { [K in keyof T]?: never };
 
 import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 import {
@@ -19,7 +19,7 @@ export interface ElementData {
 	boundingClientRect: DOMRectReadOnly;
 }
 
-export type ExtendedElementData = ExcludeProps< ElementData >;
+export type ExtendedElementData = ExcludeProps<ElementData>;
 
 export interface URLMetric {
 	url: string;
@@ -30,7 +30,7 @@ export interface URLMetric {
 	elements: ElementData[];
 }
 
-export type ExtendedRootData = ExcludeProps< URLMetric >;
+export type ExtendedRootData = ExcludeProps<URLMetric>;
 
 export interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
@@ -49,7 +49,7 @@ export type OnLCPWithAttributionFunction = typeof onLCPWithAttribution;
 export type OnINPWithAttributionFunction = typeof onINPWithAttribution;
 export type OnCLSWithAttributionFunction = typeof onCLSWithAttribution;
 
-export type LogFunction = ( ...message: any[] ) => void;
+export type LogFunction = (...message: any[]) => void;
 
 export interface Logger {
 	log: LogFunction;
@@ -59,8 +59,8 @@ export interface Logger {
 }
 
 export type GetRootDataFunction = () => URLMetric;
-export type ExtendRootDataFunction = ( properties: ExtendedRootData ) => void;
-export type GetElementDataFunction = ( xpath: string ) => ElementData | null;
+export type ExtendRootDataFunction = (properties: ExtendedRootData) => void;
+export type GetElementDataFunction = (xpath: string) => ElementData | null;
 export type ExtendElementDataFunction = (
 	xpath: string,
 	properties: ExtendedElementData
@@ -83,7 +83,7 @@ export type InitializeArgs = {
 	readonly extendElementData: ExtendElementDataFunction;
 };
 
-export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
+export type InitializeCallback = (args: InitializeArgs) => Promise<void>;
 
 export type FinalizeArgs = {
 	readonly getRootData: GetRootDataFunction;
@@ -97,7 +97,7 @@ export type FinalizeArgs = {
 	readonly error: LogFunction;
 };
 
-export type FinalizeCallback = ( args: FinalizeArgs ) => Promise< void >;
+export type FinalizeCallback = (args: FinalizeArgs) => Promise<void>;
 
 export interface Extension {
 	readonly name?: string;

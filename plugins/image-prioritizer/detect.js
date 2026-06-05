@@ -27,10 +27,10 @@ export const name = 'Image Prioritizer';
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { log, onLCP, extendRootData } ) {
+export async function initialize({ log, onLCP, extendRootData }) {
 	onLCP(
-		( metric ) => {
-			handleLCPMetric( metric, extendRootData, log );
+		(metric) => {
+			handleLCPMetric(metric, extendRootData, log);
 		},
 		{
 			// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
@@ -50,12 +50,12 @@ export async function initialize( { log, onLCP, extendRootData } ) {
  * @param {ExtendRootDataFunction} extendRootData - Function to extend root data with.
  * @param {LogFunction}            log            - The function to call with log messages.
  */
-function handleLCPMetric( metric, extendRootData, log ) {
-	for ( const entry of metric.entries ) {
+function handleLCPMetric(metric, extendRootData, log) {
+	for (const entry of metric.entries) {
 		// Look only for LCP entries that have a URL and a corresponding element which is not an IMG or VIDEO.
 		if (
-			! entry.url ||
-			! ( entry.element instanceof HTMLElement ) ||
+			!entry.url ||
+			!(entry.element instanceof HTMLElement) ||
 			entry.element instanceof HTMLImageElement ||
 			entry.element instanceof HTMLVideoElement
 		) {
@@ -63,38 +63,38 @@ function handleLCPMetric( metric, extendRootData, log ) {
 		}
 
 		// Always ignore data: URLs.
-		if ( entry.url.startsWith( 'data:' ) ) {
+		if (entry.url.startsWith('data:')) {
 			continue;
 		}
 
 		// Skip elements that have the background image defined inline.
 		// These are handled by Image_Prioritizer_Background_Image_Styled_Tag_Visitor.
-		if ( entry.element.style.backgroundImage ) {
+		if (entry.element.style.backgroundImage) {
 			continue;
 		}
 
 		// Skip URLs that are excessively long. This is the maxLength defined in image_prioritizer_add_element_item_schema_properties().
-		if ( entry.url.length > 500 ) {
-			log( `Skipping very long URL: ${ entry.url }` );
+		if (entry.url.length > 500) {
+			log(`Skipping very long URL: ${entry.url}`);
 			return;
 		}
 
 		// Also skip Custom Elements which have excessively long tag names. This is the maxLength defined in image_prioritizer_add_element_item_schema_properties().
-		if ( entry.element.tagName.length > 100 ) {
-			log( `Skipping very long tag name: ${ entry.element.tagName }` );
+		if (entry.element.tagName.length > 100) {
+			log(`Skipping very long tag name: ${entry.element.tagName}`);
 			return;
 		}
 
 		// Note that getAttribute() is used instead of properties so that null can be returned in case of an absent attribute.
 		// The maxLengths are defined in image_prioritizer_add_element_item_schema_properties().
-		const id = entry.element.getAttribute( 'id' );
-		if ( typeof id === 'string' && id.length > 100 ) {
-			log( `Skipping very long ID: ${ id }` );
+		const id = entry.element.getAttribute('id');
+		if (typeof id === 'string' && id.length > 100) {
+			log(`Skipping very long ID: ${id}`);
 			return;
 		}
-		const className = entry.element.getAttribute( 'class' );
-		if ( typeof className === 'string' && className.length > 500 ) {
-			log( `Skipping very long className: ${ className }` );
+		const className = entry.element.getAttribute('class');
+		if (typeof className === 'string' && className.length > 500) {
+			log(`Skipping very long className: ${className}`);
 			return;
 		}
 
@@ -108,12 +108,9 @@ function handleLCPMetric( metric, extendRootData, log ) {
 			class: className,
 		};
 
-		log(
-			'Detected external LCP background image:',
-			externalBackgroundImage
-		);
-		extendRootData( {
+		log('Detected external LCP background image:', externalBackgroundImage);
+		extendRootData({
 			lcpElementExternalBackgroundImage: externalBackgroundImage,
-		} );
+		});
 	}
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const { styleText } = require( 'node:util' );
+const { styleText } = require('node:util');
 
 /**
  * Create a function that applies a style to text using `node:util.styleText`.
@@ -9,12 +9,12 @@ const { styleText } = require( 'node:util' );
  * @param {Parameters<typeof import('node:util').styleText>[0]} style - Style to apply to the text.
  * @return {function(string):string} Function that applies the style to the text.
  */
-const createStyledText = ( style ) => ( text ) => styleText( style, text );
+const createStyledText = (style) => (text) => styleText(style, text);
 
-const bold = createStyledText( 'bold' );
-const error = createStyledText( 'red' );
-const warning = createStyledText( 'yellowBright' );
-const success = createStyledText( 'green' );
+const bold = createStyledText('bold');
+const error = createStyledText('red');
+const warning = createStyledText('yellowBright');
+const success = createStyledText('green');
 
 const log = console.log;
 
@@ -22,8 +22,8 @@ module.exports = {
 	log,
 	formats: {
 		title: bold,
-		error: ( /** @type {string} */ text ) => bold( error( text ) ),
-		warning: ( /** @type {string} */ text ) => bold( warning( text ) ),
-		success: ( /** @type {string} */ text ) => bold( success( text ) ),
+		error: (/** @type {string} */ text) => bold(error(text)),
+		warning: (/** @type {string} */ text) => bold(warning(text)),
+		success: (/** @type {string} */ text) => bold(success(text)),
 	},
 };

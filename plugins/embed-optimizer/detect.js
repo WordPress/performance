@@ -25,18 +25,18 @@ export const name = 'Embed Optimizer';
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( {
+export async function initialize({
 	log,
 	error,
 	getElementData,
 	extendElementData,
-} ) {
+}) {
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
 
-	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
+	for (/** @type {HTMLElement} */ const embedWrapper of embedWrappers) {
 		monitorEmbedWrapperForResizes(
 			embedWrapper,
 			extendElementData,
@@ -64,32 +64,32 @@ function monitorEmbedWrapperForResizes(
 	error
 ) {
 	const xpath = embedWrapper.dataset.odXpath;
-	if ( ! xpath ) {
-		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
+	if (!xpath) {
+		throw new Error('Embed wrapper missing data-od-xpath attribute.');
 	}
-	const observer = new ResizeObserver( ( entries ) => {
-		const [ entry ] = entries;
+	const observer = new ResizeObserver((entries) => {
+		const [entry] = entries;
 
 		try {
-			extendElementData( xpath, {
+			extendElementData(xpath, {
 				resizedBoundingClientRect: entry.contentRect,
-			} );
-			const elementData = getElementData( xpath );
-			if ( elementData ) {
+			});
+			const elementData = getElementData(xpath);
+			if (elementData) {
 				log(
-					`Resized element ${ xpath }:`,
+					`Resized element ${xpath}:`,
 					elementData.boundingClientRect,
 					'=>',
 					entry.contentRect
 				);
 			}
-		} catch ( err ) {
+		} catch (err) {
 			error(
-				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
+				`Failed to extend element data for ${xpath} with resizedBoundingClientRect:`,
 				entry.contentRect,
 				err
 			);
 		}
-	} );
-	observer.observe( embedWrapper, { box: 'content-box' } );
+	});
+	observer.observe(embedWrapper, { box: 'content-box' });
 }

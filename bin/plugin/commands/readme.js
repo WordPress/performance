@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const fs = require( 'fs' );
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Internal dependencies
  */
-const { log, formats } = require( '../lib/logger' );
-const config = require( '../config' );
-const { getChangelog } = require( './changelog' );
-const { plugins } = require( '../../../plugins.json' );
+const { log, formats } = require('../lib/logger');
+const config = require('../config');
+const { getChangelog } = require('./changelog');
+const { plugins } = require('../../../plugins.json');
 
 /**
  * @typedef WPReadmeCommandOptions
@@ -36,11 +36,11 @@ exports.options = [
  *
  * @param {WPReadmeCommandOptions} opt
  */
-exports.handler = async ( opt ) => {
-	await updateReadme( {
+exports.handler = async (opt) => {
+	await updateReadme({
 		plugin: opt.plugin,
 		token: opt.token,
-	} );
+	});
 };
 
 /**
@@ -50,22 +50,22 @@ exports.handler = async ( opt ) => {
  * @param {string} changelog  Changelog in markdown.
  * @return {string} Success status message.
  */
-function updateReadmeChangelog( readmeFile, changelog ) {
-	const fileContent = fs.readFileSync( readmeFile, 'utf-8' );
+function updateReadmeChangelog(readmeFile, changelog) {
+	const fileContent = fs.readFileSync(readmeFile, 'utf-8');
 
 	const stableTagVersionMatches = fileContent.match(
 		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
-	if ( ! stableTagVersionMatches ) {
-		throw new Error( `Unable to locate stable tag in ${ readmeFile }` );
+	if (!stableTagVersionMatches) {
+		throw new Error(`Unable to locate stable tag in ${readmeFile}`);
 	}
-	const stableTagVersion = stableTagVersionMatches[ 1 ];
+	const stableTagVersion = stableTagVersionMatches[1];
 
 	const regex = new RegExp(
-		`(== Changelog ==\n+)(= ${ stableTagVersion } =\n+)([^=]+)`
+		`(== Changelog ==\n+)(= ${stableTagVersion} =\n+)([^=]+)`
 	);
 
-	const versionHeading = `= ${ stableTagVersion } =\n\n`;
+	const versionHeading = `= ${stableTagVersion} =\n\n`;
 	const normalizedChangelog = changelog.trimEnd() + '\n';
 
 	let status = '';
@@ -73,31 +73,31 @@ function updateReadmeChangelog( readmeFile, changelog ) {
 	// Try to merge the new changelog with the existing changelog.
 	let newContent = fileContent.replace(
 		regex,
-		( match, changelogHeading, _versionHeading, existingChangelog ) => {
-			const newChangelog = `${ changelogHeading }${ _versionHeading.trimEnd() }\n\n${ normalizedChangelog }`;
-			if ( existingChangelog.trim() !== '' ) {
+		(match, changelogHeading, _versionHeading, existingChangelog) => {
+			const newChangelog = `${changelogHeading}${_versionHeading.trimEnd()}\n\n${normalizedChangelog}`;
+			if (existingChangelog.trim() !== '') {
 				status =
 					'Merged existing changelog with the new changelog in an Other section.';
-				return `${ newChangelog }\n**Other**\n\n${ existingChangelog }`;
+				return `${newChangelog}\n**Other**\n\n${existingChangelog}`;
 			}
 			status = 'Populated empty changelog section.';
-			return `${ newChangelog }${ existingChangelog }`;
+			return `${newChangelog}${existingChangelog}`;
 		}
 	);
 
 	// No replacement was done, so we need to insert a new section.
-	if ( newContent === fileContent ) {
-		newContent = fileContent.replace( /(== Changelog ==\n+)/, ( match ) => {
+	if (newContent === fileContent) {
+		newContent = fileContent.replace(/(== Changelog ==\n+)/, (match) => {
 			status = 'Added new changelog section.';
-			return `${ match }${ versionHeading }${ normalizedChangelog }\n`;
-		} );
+			return `${match}${versionHeading}${normalizedChangelog}\n`;
+		});
 	}
 
-	if ( newContent === fileContent ) {
-		throw new Error( 'Failed to insert changelog into readme.' );
+	if (newContent === fileContent) {
+		throw new Error('Failed to insert changelog into readme.');
 	}
 
-	fs.writeFileSync( readmeFile, newContent );
+	fs.writeFileSync(readmeFile, newContent);
 
 	return status;
 }
@@ -108,16 +108,16 @@ function updateReadmeChangelog( readmeFile, changelog ) {
  * @param {string} readmeFilePath Readme file path.
  * @return {string} Stable tag.
  */
-function getStableTag( readmeFilePath ) {
-	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
+function getStableTag(readmeFilePath) {
+	const readmeContents = fs.readFileSync(readmeFilePath, 'utf-8');
 
 	const stableTagVersionMatches = readmeContents.match(
 		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
-	if ( ! stableTagVersionMatches ) {
-		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
+	if (!stableTagVersionMatches) {
+		throw new Error(`Unable to locate stable tag in ${readmeFilePath}`);
 	}
-	return stableTagVersionMatches[ 1 ];
+	return stableTagVersionMatches[1];
 }
 
 /**
@@ -125,54 +125,47 @@ function getStableTag( readmeFilePath ) {
  *
  * @param {WPReadmeCommandOptions} settings
  */
-async function updateReadme( settings ) {
-	const pluginRoot = path.resolve( __dirname, '../../../' );
+async function updateReadme(settings) {
+	const pluginRoot = path.resolve(__dirname, '../../../');
 
-	if ( settings.plugin && ! plugins.includes( settings.plugin ) ) {
-		throw new Error( `Unrecognized plugin: ${ settings.plugin }` );
+	if (settings.plugin && !plugins.includes(settings.plugin)) {
+		throw new Error(`Unrecognized plugin: ${settings.plugin}`);
 	}
 
 	const pluginSlugs = [];
 
-	if ( settings.plugin ) {
-		pluginSlugs.push( settings.plugin );
+	if (settings.plugin) {
+		pluginSlugs.push(settings.plugin);
 	} else {
-		pluginSlugs.push( ...plugins );
+		pluginSlugs.push(...plugins);
 	}
 
-	for ( const pluginSlug of pluginSlugs ) {
+	for (const pluginSlug of pluginSlugs) {
 		try {
 			const pluginDirectory = path.resolve(
 				pluginRoot,
 				'plugins',
 				pluginSlug
 			);
-			const readmeFilePath = path.resolve(
-				pluginDirectory,
-				'readme.txt'
-			);
-			const stableTag = getStableTag( readmeFilePath );
-			const changelog = await getChangelog( {
+			const readmeFilePath = path.resolve(pluginDirectory, 'readme.txt');
+			const stableTag = getStableTag(readmeFilePath);
+			const changelog = await getChangelog({
 				owner: config.githubRepositoryOwner,
 				repo: config.githubRepositoryName,
-				milestone: `${ pluginSlug } ${ stableTag }`,
+				milestone: `${pluginSlug} ${stableTag}`,
 				token: settings.token,
-			} );
-			const status = updateReadmeChangelog( readmeFilePath, changelog );
+			});
+			const status = updateReadmeChangelog(readmeFilePath, changelog);
 
 			log(
 				formats.success(
-					`💃 ${ pluginSlug } successfully updated for version ${ stableTag }: ${ status }`
+					`💃 ${pluginSlug} successfully updated for version ${stableTag}: ${status}`
 				)
 			);
-		} catch ( error ) {
+		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
-			log(
-				formats.error(
-					`${ pluginSlug } failed to update: ${ message }`
-				)
-			);
+			log(formats.error(`${pluginSlug} failed to update: ${message}`));
 		}
 	}
 }

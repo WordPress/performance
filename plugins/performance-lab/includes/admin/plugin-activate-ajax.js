@@ -2,7 +2,7 @@
  * Handles activation of Performance Features (Plugins) using AJAX.
  */
 
-( function () {
+(function () {
 	// @ts-ignore
 	const { i18n, a11y, apiFetch } = wp;
 	const { __ } = i18n;
@@ -17,27 +17,27 @@
 	 *
 	 * @param {MouseEvent} event - The click event object.
 	 */
-	function enqueuePluginActivation( event ) {
+	function enqueuePluginActivation(event) {
 		// Prevent the default link behavior.
 		event.preventDefault();
 
-		const target = /** @type {HTMLElement} */ ( event.target );
+		const target = /** @type {HTMLElement} */ (event.target);
 
 		if (
-			target.classList.contains( 'updating-message' ) ||
-			target.classList.contains( 'disabled' )
+			target.classList.contains('updating-message') ||
+			target.classList.contains('disabled')
 		) {
 			return;
 		}
 
-		target.classList.add( 'updating-message' );
-		target.textContent = __( 'Waiting…', 'performance-lab' );
+		target.classList.add('updating-message');
+		target.textContent = __('Waiting…', 'performance-lab');
 
-		const pluginSlug = /** @type {string} */ ( target.dataset.pluginSlug );
-		activationQueue.push( { target, pluginSlug } );
+		const pluginSlug = /** @type {string} */ (target.dataset.pluginSlug);
+		activationQueue.push({ target, pluginSlug });
 
 		// Start processing the queue if not already doing so.
-		if ( ! isProcessingActivation ) {
+		if (!isProcessingActivation) {
 			handlePluginActivation();
 		}
 	}
@@ -49,7 +49,7 @@
 	 */
 	async function handlePluginActivation() {
 		const activationItem = activationQueue.shift();
-		if ( ! activationItem ) {
+		if (!activationItem) {
 			isProcessingActivation = false;
 			return;
 		}
@@ -58,49 +58,49 @@
 
 		const { target, pluginSlug } = activationItem;
 
-		target.textContent = __( 'Activating…', 'performance-lab' );
+		target.textContent = __('Activating…', 'performance-lab');
 
-		a11y.speak( __( 'Activating…', 'performance-lab' ) );
+		a11y.speak(__('Activating…', 'performance-lab'));
 
 		try {
 			// Activate the plugin/feature via the REST API.
-			await apiFetch( {
-				path: `/performance-lab/v1/features/${ pluginSlug }:activate`,
+			await apiFetch({
+				path: `/performance-lab/v1/features/${pluginSlug}:activate`,
 				method: 'POST',
-			} );
+			});
 
 			// Fetch the plugin/feature information via the REST API.
 			/** @type {{settingsUrl: string|null}} */
-			const featureInfo = await apiFetch( {
-				path: `/performance-lab/v1/features/${ pluginSlug }`,
+			const featureInfo = await apiFetch({
+				path: `/performance-lab/v1/features/${pluginSlug}`,
 				method: 'GET',
-			} );
+			});
 
-			if ( featureInfo.settingsUrl ) {
+			if (featureInfo.settingsUrl) {
 				const actionButtonList = document.querySelector(
-					`.plugin-card-${ pluginSlug } .plugin-action-buttons`
+					`.plugin-card-${pluginSlug} .plugin-action-buttons`
 				);
 
-				const listItem = document.createElement( 'li' );
-				const anchor = document.createElement( 'a' );
+				const listItem = document.createElement('li');
+				const anchor = document.createElement('a');
 
 				anchor.href = featureInfo.settingsUrl;
-				anchor.textContent = __( 'Settings', 'performance-lab' );
+				anchor.textContent = __('Settings', 'performance-lab');
 
-				listItem.appendChild( anchor );
-				actionButtonList?.appendChild( listItem );
+				listItem.appendChild(anchor);
+				actionButtonList?.appendChild(listItem);
 			}
 
-			a11y.speak( __( 'Plugin activated.', 'performance-lab' ) );
+			a11y.speak(__('Plugin activated.', 'performance-lab'));
 
-			target.textContent = __( 'Active', 'performance-lab' );
-			target.classList.remove( 'updating-message' );
-			target.classList.add( 'disabled' );
+			target.textContent = __('Active', 'performance-lab');
+			target.classList.remove('updating-message');
+			target.classList.add('disabled');
 		} catch {
-			a11y.speak( __( 'Plugin failed to activate.', 'performance-lab' ) );
+			a11y.speak(__('Plugin failed to activate.', 'performance-lab'));
 
-			target.classList.remove( 'updating-message' );
-			target.textContent = __( 'Activate', 'performance-lab' );
+			target.classList.remove('updating-message');
+			target.textContent = __('Activate', 'performance-lab');
 		} finally {
 			handlePluginActivation();
 		}
@@ -108,10 +108,10 @@
 
 	// Attach the event listeners.
 	document
-		.querySelectorAll( '.perflab-install-active-plugin[data-plugin-slug]' )
-		.forEach( ( item ) => {
-			item.addEventListener( 'click', ( event ) =>
-				enqueuePluginActivation( /** @type {MouseEvent} */ ( event ) )
+		.querySelectorAll('.perflab-install-active-plugin[data-plugin-slug]')
+		.forEach((item) => {
+			item.addEventListener('click', (event) =>
+				enqueuePluginActivation(/** @type {MouseEvent} */ (event))
 			);
-		} );
-} )();
+		});
+})();

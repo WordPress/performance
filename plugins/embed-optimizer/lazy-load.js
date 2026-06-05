@@ -10,9 +10,9 @@ const lazyEmbedsScripts = document.querySelectorAll(
 const lazyEmbedScriptsByParents = new Map();
 
 const lazyEmbedObserver = new IntersectionObserver(
-	( entries ) => {
-		for ( const entry of entries ) {
-			if ( entry.isIntersecting ) {
+	(entries) => {
+		for (const entry of entries) {
+			if (entry.isIntersecting) {
 				const lazyEmbedParent = entry.target;
 				const lazyEmbedScript =
 					/** @type {HTMLScriptElement} */ lazyEmbedScriptsByParents.get(
@@ -22,8 +22,8 @@ const lazyEmbedObserver = new IntersectionObserver(
 					/** @type {HTMLScriptElement} */ document.createElement(
 						'script'
 					);
-				for ( const attr of lazyEmbedScript.attributes ) {
-					if ( attr.nodeName === 'type' ) {
+				for (const attr of lazyEmbedScript.attributes) {
+					if (attr.nodeName === 'type') {
 						// Omit type=application/vnd.embed-optimizer.javascript type.
 						continue;
 					}
@@ -34,8 +34,8 @@ const lazyEmbedObserver = new IntersectionObserver(
 						attr.nodeValue
 					);
 				}
-				lazyEmbedScript.replaceWith( embedScript );
-				lazyEmbedObserver.unobserve( lazyEmbedParent );
+				lazyEmbedScript.replaceWith(embedScript);
+				lazyEmbedObserver.unobserve(lazyEmbedParent);
 			}
 		}
 	},
@@ -45,11 +45,11 @@ const lazyEmbedObserver = new IntersectionObserver(
 	}
 );
 
-for ( const lazyEmbedScript of lazyEmbedsScripts ) {
+for (const lazyEmbedScript of lazyEmbedsScripts) {
 	const lazyEmbedParent =
 		/** @type {HTMLElement} */ lazyEmbedScript.parentNode;
-	if ( lazyEmbedParent instanceof HTMLElement ) {
-		lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
-		lazyEmbedObserver.observe( lazyEmbedParent );
+	if (lazyEmbedParent instanceof HTMLElement) {
+		lazyEmbedScriptsByParents.set(lazyEmbedParent, lazyEmbedScript);
+		lazyEmbedObserver.observe(lazyEmbedParent);
 	}
 }

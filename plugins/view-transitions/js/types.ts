@@ -5,9 +5,9 @@ export type ViewTransitionAnimationConfig = {
 
 export type ViewTransitionsConfig = {
 	postSelector?: string;
-	globalTransitionNames?: Record< string, string >;
-	postTransitionNames?: Record< string, string >;
-	animations?: Record< string, ViewTransitionAnimationConfig >;
+	globalTransitionNames?: Record<string, string>;
+	postTransitionNames?: Record<string, string>;
+	animations?: Record<string, ViewTransitionAnimationConfig>;
 };
 
 export type InitViewTransitionsFunction = (
@@ -20,5 +20,5 @@ declare global {
 	}
 }
 
-export type PageSwapListenerFunction = ( event: PageSwapEvent ) => void;
-export type PageRevealListenerFunction = ( event: PageRevealEvent ) => void;
+export type PageSwapListenerFunction = (event: PageSwapEvent) => void;
+export type PageRevealListenerFunction = (event: PageRevealEvent) => void;

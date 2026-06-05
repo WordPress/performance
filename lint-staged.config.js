@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
+const fs = require('fs');
 
 /**
  * Internal dependencies
  */
-const { plugins } = require( './plugins.json' );
+const { plugins } = require('./plugins.json');
 
 /**
  * @type {import('lint-staged').Configuration}
  */
 const config = {
-	'**/*.{js,ts,mjs}': [ 'npm run lint-js', () => 'npm run tsc' ],
-	'**/*.json': [ 'npm run lint-json' ],
+	'**/*.{js,ts,mjs}': ['npm run lint-js', () => 'npm run tsc'],
+	'**/*.json': ['npm run lint-json'],
 	'**/*.php': () => 'composer phpstan',
 	'*.php': 'composer lint',
 	'/tools/**.php': 'composer lint',
@@ -22,13 +22,12 @@ const config = {
 	'composer.{json,lock}': () => 'composer validate --strict',
 };
 
-for ( const plugin of plugins ) {
-	const phpcsConfig = fs.existsSync( `plugins/${ plugin }/phpcs.xml` )
-		? `plugins/${ plugin }/phpcs.xml`
-		: `plugins/${ plugin }/phpcs.xml.dist`;
-	config[
-		`plugins/${ plugin }/**/*.php`
-	] = `composer lint -- --standard=${ phpcsConfig }`;
+for (const plugin of plugins) {
+	const phpcsConfig = fs.existsSync(`plugins/${plugin}/phpcs.xml`)
+		? `plugins/${plugin}/phpcs.xml`
+		: `plugins/${plugin}/phpcs.xml.dist`;
+	config[`plugins/${plugin}/**/*.php`] =
+		`composer lint -- --standard=${phpcsConfig}`;
 }
 
 module.exports = config;
