@@ -9,9 +9,9 @@
 /**
  * External dependencies
  */
-const globals = require('globals');
+const globals = require( 'globals' );
 // @ts-ignore -- No declaration file for this module.
-const wpScriptsConfig = require('@wordpress/scripts/config/eslint.config.cjs');
+const wpScriptsConfig = require( '@wordpress/scripts/config/eslint.config.cjs' );
 
 // Build tooling, CLI scripts, and root-level config files — Node CommonJS,
 // not browser code. Used both to exclude these from the browser-globals block
@@ -27,11 +27,11 @@ module.exports = [
 	...wpScriptsConfig,
 	{
 		// Ignore patterns in addition to those provided by @wordpress/scripts.
-		ignores: ['dist/', '**/*.min.js'],
+		ignores: [ 'dist/', '**/*.min.js' ],
 	},
 	{
 		// Browser globals for client-side scripts (everything but the Node tooling below).
-		files: ['**/*.js'],
+		files: [ '**/*.js' ],
 		ignores: nodeToolingFiles,
 		languageOptions: {
 			globals: {
@@ -53,7 +53,7 @@ module.exports = [
 		},
 	},
 	{
-		files: ['**/*.js'],
+		files: [ '**/*.js' ],
 		rules: {
 			'jsdoc/valid-types': 'off',
 			'import/no-unresolved': [
@@ -62,7 +62,7 @@ module.exports = [
 					// `@octokit/rest` is an ESM-only package referenced solely from
 					// JSDoc `@typedef` imports in `bin/plugin`, which the import
 					// resolver cannot follow.
-					ignore: ['@octokit/rest'],
+					ignore: [ '@octokit/rest' ],
 				},
 			],
 		},

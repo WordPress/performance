@@ -29,8 +29,8 @@ jobs:
     if: github.event_name == 'pull_request'
     timeout-minutes: 20
     permissions:
-      contents: read       # Required to clone the repo.
-      pull-requests: read  # Required by dorny/paths-filter to read PR file changes.
+      contents: read # Required to clone the repo.
+      pull-requests: read # Required by dorny/paths-filter to read PR file changes.
     outputs:
       changed-plugins: ${{ steps.filter-plugins.outputs.changed-plugins }}
     steps:

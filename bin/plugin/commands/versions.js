@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-const fs = require('fs');
-const path = require('path');
-const glob = require('fast-glob');
-const { log, formats } = require('../lib/logger');
+const fs = require( 'fs' );
+const path = require( 'path' );
+const glob = require( 'fast-glob' );
+const { log, formats } = require( '../lib/logger' );
 
 /**
  * Internal dependencies
  */
-const { plugins } = require('../../../plugins.json');
+const { plugins } = require( '../../../plugins.json' );
 
 /**
  * @typedef WPVersionsCommandOptions
@@ -33,58 +33,60 @@ exports.options = [
  * @param {string} pluginDirectory
  * @return {Promise<string>} Consistent version.
  */
-async function checkPluginDirectory(pluginDirectory) {
-	const readmeFilePath = path.resolve(pluginDirectory, 'readme.txt');
-	const readmeContents = fs.readFileSync(readmeFilePath, 'utf-8');
+async function checkPluginDirectory( pluginDirectory ) {
+	const readmeFilePath = path.resolve( pluginDirectory, 'readme.txt' );
+	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
 		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
-	if (!stableTagVersionMatches) {
-		throw new Error(`Unable to locate stable tag in ${readmeFilePath}`);
+	if ( ! stableTagVersionMatches ) {
+		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
 	}
-	const stableTagVersion = stableTagVersionMatches[1];
+	const stableTagVersion = stableTagVersionMatches[ 1 ];
 
 	const latestChangelogMatches = readmeContents.match(
 		/^== Changelog ==\n+= (\d+\.\d+\.\d+(?:-[\w\.]+)?) =$/m
 	);
-	if (!latestChangelogMatches) {
+	if ( ! latestChangelogMatches ) {
 		throw new Error(
 			'Unable to locate latest version entry in readme changelog.'
 		);
 	}
-	const latestChangelogVersion = latestChangelogMatches[1];
+	const latestChangelogVersion = latestChangelogMatches[ 1 ];
 
 	// Find the bootstrap file.
 	let phpBootstrapFileContents = null;
-	for (const phpFile of await glob(path.resolve(pluginDirectory, '*.php'))) {
-		const phpFileContents = fs.readFileSync(phpFile, 'utf-8');
-		if (/^<\?php\n\/\*\*\n \* Plugin Name:/.test(phpFileContents)) {
+	for ( const phpFile of await glob(
+		path.resolve( pluginDirectory, '*.php' )
+	) ) {
+		const phpFileContents = fs.readFileSync( phpFile, 'utf-8' );
+		if ( /^<\?php\n\/\*\*\n \* Plugin Name:/.test( phpFileContents ) ) {
 			phpBootstrapFileContents = phpFileContents;
 			break;
 		}
 	}
-	if (!phpBootstrapFileContents) {
-		throw new Error('Unable to locate the PHP bootstrap file.');
+	if ( ! phpBootstrapFileContents ) {
+		throw new Error( 'Unable to locate the PHP bootstrap file.' );
 	}
 
 	const headerVersionMatches = phpBootstrapFileContents.match(
 		/^ \* Version:\s+(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
-	if (!headerVersionMatches) {
+	if ( ! headerVersionMatches ) {
 		throw new Error(
 			'Unable to locate version in plugin PHP bootstrap file header.'
 		);
 	}
-	const headerVersion = headerVersionMatches[1];
+	const headerVersion = headerVersionMatches[ 1 ];
 
 	const phpLiteralVersionMatches = phpBootstrapFileContents.match(
 		/'(\d+\.\d+\.\d+(?:-[\w\.]+)?)'/
 	);
-	if (!phpLiteralVersionMatches) {
-		throw new Error('Unable to locate the PHP literal version.');
+	if ( ! phpLiteralVersionMatches ) {
+		throw new Error( 'Unable to locate the PHP literal version.' );
 	}
-	const phpLiteralVersion = phpLiteralVersionMatches[1];
+	const phpLiteralVersion = phpLiteralVersionMatches[ 1 ];
 
 	const allVersions = [
 		stableTagVersion,
@@ -93,9 +95,9 @@ async function checkPluginDirectory(pluginDirectory) {
 		phpLiteralVersion,
 	];
 
-	if (!allVersions.every((version) => version === stableTagVersion)) {
+	if ( ! allVersions.every( ( version ) => version === stableTagVersion ) ) {
 		throw new Error(
-			`Version mismatch: ${JSON.stringify(
+			`Version mismatch: ${ JSON.stringify(
 				{
 					latestChangelogVersion,
 					headerVersion,
@@ -104,7 +106,7 @@ async function checkPluginDirectory(pluginDirectory) {
 				},
 				null,
 				4
-			)}`
+			) }`
 		);
 	}
 
@@ -121,43 +123,43 @@ async function checkPluginDirectory(pluginDirectory) {
  *
  * @param {WPVersionsCommandOptions} opt Command options.
  */
-exports.handler = async (opt) => {
+exports.handler = async ( opt ) => {
 	const pluginDirectories = [];
-	const pluginRoot = path.resolve(__dirname, '../../../');
+	const pluginRoot = path.resolve( __dirname, '../../../' );
 
-	for (const pluginSlug of plugins) {
-		if (!opt.plugin || pluginSlug === opt.plugin) {
+	for ( const pluginSlug of plugins ) {
+		if ( ! opt.plugin || pluginSlug === opt.plugin ) {
 			pluginDirectories.push(
-				path.resolve(pluginRoot, 'plugins', pluginSlug)
+				path.resolve( pluginRoot, 'plugins', pluginSlug )
 			);
 		}
 	}
 
 	let errorCount = 0;
-	for (const pluginDirectory of pluginDirectories) {
-		const slug = path.basename(pluginDirectory);
+	for ( const pluginDirectory of pluginDirectories ) {
+		const slug = path.basename( pluginDirectory );
 		try {
-			const version = await checkPluginDirectory(pluginDirectory);
-			if (version.includes('-')) {
+			const version = await checkPluginDirectory( pluginDirectory );
+			if ( version.includes( '-' ) ) {
 				log(
 					formats.warning(
-						`⚠ ${slug}: ${version} (pre-release identifier is present)`
+						`⚠ ${ slug }: ${ version } (pre-release identifier is present)`
 					)
 				);
 			} else {
-				log(formats.success(`✅ ${slug}: ${version} `));
+				log( formats.success( `✅ ${ slug }: ${ version } ` ) );
 			}
-		} catch (error) {
+		} catch ( error ) {
 			errorCount++;
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
-			log(formats.error(`❌ ${slug}: ${message}`));
+			log( formats.error( `❌ ${ slug }: ${ message }` ) );
 		}
 	}
 
-	if (errorCount > 0) {
+	if ( errorCount > 0 ) {
 		throw new Error(
-			`There are ${errorCount} plugin(s) with inconsistent versions.`
+			`There are ${ errorCount } plugin(s) with inconsistent versions.`
 		);
 	}
 };

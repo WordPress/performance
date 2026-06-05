@@ -8,49 +8,49 @@
 async function load() {
 	// Wait until the resources on the page have fully loaded.
 	await /** @type {Promise<void>} */ (
-		new Promise((resolve) => {
-			if (document.readyState === 'complete') {
+		new Promise( ( resolve ) => {
+			if ( document.readyState === 'complete' ) {
 				resolve();
 			} else {
-				window.addEventListener('load', () => resolve(), {
+				window.addEventListener( 'load', () => resolve(), {
 					once: true,
-				});
+				} );
 			}
-		})
+		} )
 	);
 
 	// Wait yet further until idle.
-	if (typeof requestIdleCallback === 'function') {
-		await new Promise((resolve) => {
-			requestIdleCallback(resolve);
-		});
+	if ( typeof requestIdleCallback === 'function' ) {
+		await new Promise( ( resolve ) => {
+			requestIdleCallback( resolve );
+		} );
 	}
 
 	const argsScript = document.getElementById(
 		'optimization-detective-detect-args'
 	);
-	if (!(argsScript instanceof HTMLScriptElement)) {
-		throw new Error('Missing: SCRIPT#optimization-detective-detect-args');
+	if ( ! ( argsScript instanceof HTMLScriptElement ) ) {
+		throw new Error( 'Missing: SCRIPT#optimization-detective-detect-args' );
 	}
-	const data = JSON.parse(argsScript.textContent);
+	const data = JSON.parse( argsScript.textContent );
 	if (
-		!Array.isArray(data) ||
+		! Array.isArray( data ) ||
 		data.length !== 2 ||
-		'string' !== typeof data[0] ||
-		'object' !== typeof data[1]
+		'string' !== typeof data[ 0 ] ||
+		'object' !== typeof data[ 1 ]
 	) {
 		throw new Error(
 			'SCRIPT#optimization-detective-detect-args is not [ string, object ]'
 		);
 	}
 
-	const detectSrc = data[0];
+	const detectSrc = data[ 0 ];
 	const detectArgs =
-		/** @type {import("./detect.js").DetectFunctionArgs} */ data[1];
+		/** @type {import("./detect.js").DetectFunctionArgs} */ data[ 1 ];
 	const detect = /** @type {import("./detect.js").DetectFunction} */ (
-		(await import(detectSrc)).default
+		( await import( detectSrc ) ).default
 	);
-	await detect(detectArgs);
+	await detect( detectArgs );
 }
 
 load();

@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
-const { groupBy } = require('lodash');
+const { groupBy } = require( 'lodash' );
 
 /**
  * Internal dependencies
  */
-const { log, formats } = require('../lib/logger');
+const { log, formats } = require( '../lib/logger' );
 const {
 	getMilestoneByTitle,
 	getIssuesByMilestone,
-} = require('../lib/milestone');
-const config = require('../config');
+} = require( '../lib/milestone' );
+const config = require( '../config' );
 
 const MISSING_TYPE = 'MISSING_TYPE';
 const TYPE_PREFIX = '[Type] ';
@@ -21,7 +21,7 @@ const PRIMARY_TYPE_LABELS = {
 	'[Type] Enhancement': 'Enhancements',
 	'[Type] Bug': 'Bug Fixes',
 };
-const PRIMARY_TYPE_ORDER = Object.values(PRIMARY_TYPE_LABELS);
+const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
 const SKIP_CHANGELOG_LABEL = 'skip changelog';
 
 /** @typedef {import('@octokit/rest').Octokit} GitHub */
@@ -59,13 +59,13 @@ exports.options = [
  *
  * @param {WPChangelogCommandOptions} opt
  */
-exports.handler = async (opt) => {
-	await createChangelog({
+exports.handler = async ( opt ) => {
+	await createChangelog( {
 		owner: config.githubRepositoryOwner,
 		repo: config.githubRepositoryName,
 		milestone: opt.milestone,
 		token: opt.token,
-	});
+	} );
 };
 
 /**
@@ -77,7 +77,7 @@ exports.handler = async (opt) => {
  *
  * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to array of pull requests.
  */
-async function fetchAllPullRequests(octokit, settings) {
+async function fetchAllPullRequests( octokit, settings ) {
 	const { owner, repo, milestone: milestoneTitle } = settings;
 	const milestone = await getMilestoneByTitle(
 		octokit,
@@ -86,8 +86,10 @@ async function fetchAllPullRequests(octokit, settings) {
 		milestoneTitle
 	);
 
-	if (!milestone) {
-		throw new Error(`Cannot find milestone by title: ${milestoneTitle}`);
+	if ( ! milestone ) {
+		throw new Error(
+			`Cannot find milestone by title: ${ milestoneTitle }`
+		);
 	}
 
 	const issues = await getIssuesByMilestone(
@@ -100,7 +102,7 @@ async function fetchAllPullRequests(octokit, settings) {
 
 	// Return all merged pull requests.
 	return issues.filter(
-		(issue) => issue.pull_request && issue.pull_request.merged_at
+		( issue ) => issue.pull_request && issue.pull_request.merged_at
 	);
 }
 
@@ -112,28 +114,28 @@ async function fetchAllPullRequests(octokit, settings) {
  *
  * @return {string} Type label, or MISSING_TYPE.
  */
-function getIssueType(issue) {
+function getIssueType( issue ) {
 	const typeLabels = issue.labels
-		.map((label) => (typeof label === 'string' ? label : label.name))
+		.map( ( label ) => ( typeof label === 'string' ? label : label.name ) )
 		.filter(
 			/**
 			 * @param {string|undefined} label - Label.
 			 * @return {label is string} Whether label starts with type prefix.
 			 */
-			(label) =>
-				typeof label === 'string' && label.startsWith(TYPE_PREFIX)
+			( label ) =>
+				typeof label === 'string' && label.startsWith( TYPE_PREFIX )
 		);
 
-	if (!typeLabels.length) {
+	if ( ! typeLabels.length ) {
 		return MISSING_TYPE;
 	}
 
-	const firstLabel = typeLabels[0];
-	if (PRIMARY_TYPE_LABELS[firstLabel]) {
-		return PRIMARY_TYPE_LABELS[firstLabel];
+	const firstLabel = typeLabels[ 0 ];
+	if ( PRIMARY_TYPE_LABELS[ firstLabel ] ) {
+		return PRIMARY_TYPE_LABELS[ firstLabel ];
 	}
 
-	return firstLabel.replace(TYPE_PREFIX, '');
+	return firstLabel.replace( TYPE_PREFIX, '' );
 }
 
 /**
@@ -144,62 +146,62 @@ function getIssueType(issue) {
  *
  * @return {string} The formatted changelog string (without the heading).
  */
-function formatChangelog(milestone, pullRequests) {
+function formatChangelog( milestone, pullRequests ) {
 	let changelog = '';
 
 	// Group PRs by type.
 	const typeGroups =
 		/** @type {Object<string, IssuesListForRepoResponseItem[]>} */ (
-			groupBy(pullRequests, getIssueType)
+			groupBy( pullRequests, getIssueType )
 		);
-	if (typeGroups[MISSING_TYPE]) {
-		const prURLs = typeGroups[MISSING_TYPE].map(
-			({ html_url }) => html_url // eslint-disable-line camelcase
+	if ( typeGroups[ MISSING_TYPE ] ) {
+		const prURLs = typeGroups[ MISSING_TYPE ].map(
+			( { html_url } ) => html_url // eslint-disable-line camelcase
 		);
 		throw new Error(
-			`The following pull-requests are missing a "${TYPE_PREFIX}xyz" label: ${prURLs.join(
+			`The following pull-requests are missing a "${ TYPE_PREFIX }xyz" label: ${ prURLs.join(
 				', '
-			)}`
+			) }`
 		);
 	}
 
 	// Sort types by changelog significance, then alphabetically.
-	const typeGroupNames = Object.keys(typeGroups).sort((a, b) => {
-		const aIndex = PRIMARY_TYPE_ORDER.indexOf(a);
-		const bIndex = PRIMARY_TYPE_ORDER.indexOf(b);
-		if (aIndex > -1 && bIndex > -1) {
+	const typeGroupNames = Object.keys( typeGroups ).sort( ( a, b ) => {
+		const aIndex = PRIMARY_TYPE_ORDER.indexOf( a );
+		const bIndex = PRIMARY_TYPE_ORDER.indexOf( b );
+		if ( aIndex > -1 && bIndex > -1 ) {
 			return aIndex - bIndex;
 		}
-		if (aIndex === -1 && bIndex === -1) {
-			return a.localeCompare(b);
+		if ( aIndex === -1 && bIndex === -1 ) {
+			return a.localeCompare( b );
 		}
 		return aIndex > -1 ? -1 : 1;
-	});
+	} );
 
-	for (const group of typeGroupNames) {
+	for ( const group of typeGroupNames ) {
 		// Start a new section within the changelog.
 		changelog += '**' + group + '**\n\n';
 
-		const typeGroupPRs = typeGroups[group];
+		const typeGroupPRs = typeGroups[ group ];
 		typeGroupPRs
-			.map((issue) => {
+			.map( ( issue ) => {
 				const title = issue.title
 					// Strip trailing whitespace.
 					.trim()
 					// Ensure first letter is uppercase.
-					.replace(/^([a-z])/, (_match, firstLetter) =>
+					.replace( /^([a-z])/, ( _match, firstLetter ) =>
 						firstLetter.toUpperCase()
 					)
 					// Add trailing period.
-					.replace(/\s*\.?$/, '')
-					.concat('.');
-				return `* ${title} ([${issue.number}](${issue.html_url}))`;
-			})
-			.filter(Boolean)
+					.replace( /\s*\.?$/, '' )
+					.concat( '.' );
+				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`;
+			} )
+			.filter( Boolean )
 			.sort()
-			.forEach((entry) => {
-				changelog += `${entry}\n`;
-			});
+			.forEach( ( entry ) => {
+				changelog += `${ entry }\n`;
+			} );
 
 		changelog += '\n';
 	}
@@ -214,34 +216,34 @@ function formatChangelog(milestone, pullRequests) {
  *
  * @return {Promise<string>} Promise resolving to changelog.
  */
-async function getChangelog(settings) {
-	const { Octokit } = await import('@octokit/rest');
-	const octokit = new Octokit({
+async function getChangelog( settings ) {
+	const { Octokit } = await import( '@octokit/rest' );
+	const octokit = new Octokit( {
 		auth: settings.token,
-	});
+	} );
 
-	const pullRequests = await fetchAllPullRequests(octokit, settings);
-	if (!pullRequests.length) {
+	const pullRequests = await fetchAllPullRequests( octokit, settings );
+	if ( ! pullRequests.length ) {
 		throw new Error(
-			`There are no merged pull requests associated with the milestone ${settings.milestone}`
+			`There are no merged pull requests associated with the milestone ${ settings.milestone }`
 		);
 	}
 
 	const nonSkippedPullRequests = pullRequests.filter(
-		(pullRequest) =>
-			!pullRequest.labels
-				.map((label) =>
+		( pullRequest ) =>
+			! pullRequest.labels
+				.map( ( label ) =>
 					typeof label === 'string' ? label : label.name
 				)
-				.find((name) => name === SKIP_CHANGELOG_LABEL)
+				.find( ( name ) => name === SKIP_CHANGELOG_LABEL )
 	);
-	if (!nonSkippedPullRequests.length) {
+	if ( ! nonSkippedPullRequests.length ) {
 		throw new Error(
-			`All of the merged pull requests in the ${settings.milestone} milestone have the "${SKIP_CHANGELOG_LABEL}" label.`
+			`All of the merged pull requests in the ${ settings.milestone } milestone have the "${ SKIP_CHANGELOG_LABEL }" label.`
 		);
 	}
 
-	return formatChangelog(settings.milestone, nonSkippedPullRequests);
+	return formatChangelog( settings.milestone, nonSkippedPullRequests );
 }
 
 /**
@@ -249,8 +251,8 @@ async function getChangelog(settings) {
  *
  * @param {WPChangelogSettings} settings Changelog settings.
  */
-async function createChangelog(settings) {
-	if (settings.milestone === undefined) {
+async function createChangelog( settings ) {
+	if ( settings.milestone === undefined ) {
 		log(
 			formats.error(
 				'A milestone must be provided via the --milestone (-m) argument.'
@@ -261,20 +263,20 @@ async function createChangelog(settings) {
 
 	log(
 		formats.title(
-			`\n💃Preparing changelog for milestone: "${settings.milestone}"\n\n`
+			`\n💃Preparing changelog for milestone: "${ settings.milestone }"\n\n`
 		)
 	);
 
 	let changelog;
 	try {
-		changelog = await getChangelog(settings);
-	} catch (error) {
-		if (error instanceof Error) {
-			changelog = formats.error(error.stack ?? error.message);
+		changelog = await getChangelog( settings );
+	} catch ( error ) {
+		if ( error instanceof Error ) {
+			changelog = formats.error( error.stack ?? error.message );
 		}
 	}
 
-	log(changelog);
+	log( changelog );
 }
 
 // Export getChangelog function to reuse in `readme` command.

@@ -3,31 +3,31 @@
 /**
  * External dependencies
  */
-const { program } = require('commander');
+const { program } = require( 'commander' );
 
 /**
  * Internal dependencies
  */
-const { formats } = require('./lib/logger');
+const { formats } = require( './lib/logger' );
 
 const withOptions = (
 	/** @type {import('commander').Command} */ command,
 	/** @type {{description: string, argname: string, defaults?: string|boolean|string[]|null}[]} */ options
 ) => {
-	options.forEach(({ description, argname, defaults }) => {
-		command = command.option(argname, description, defaults ?? undefined);
-	});
+	options.forEach( ( { description, argname, defaults } ) => {
+		command = command.option( argname, description, defaults ?? undefined );
+	} );
 	return command;
 };
 
-const catchException = (/** @type {Function} */ handler) => {
-	return async (/** @type {any[]} */ ...args) => {
+const catchException = ( /** @type {Function} */ handler ) => {
+	return async ( /** @type {any[]} */ ...args ) => {
 		try {
-			await handler(...args);
-		} catch (error) {
+			await handler( ...args );
+		} catch ( error ) {
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
-			console.error(formats.error(message));
+			console.error( formats.error( message ) );
 			process.exitCode = 1;
 		}
 	};
@@ -39,42 +39,42 @@ const catchException = (/** @type {Function} */ handler) => {
 const {
 	handler: changelogHandler,
 	options: changelogOptions,
-} = require('./commands/changelog');
+} = require( './commands/changelog' );
 const {
 	handler: readmeHandler,
 	options: readmeOptions,
-} = require('./commands/readme');
+} = require( './commands/readme' );
 const {
 	handler: sinceHandler,
 	options: sinceOptions,
-} = require('./commands/since');
+} = require( './commands/since' );
 const {
 	handler: versionsHandler,
 	options: versionsOptions,
-} = require('./commands/versions');
+} = require( './commands/versions' );
 
-withOptions(program.command('release-plugin-changelog'), changelogOptions)
-	.alias('changelog')
-	.description('Generates a changelog from merged pull requests')
-	.action(catchException(changelogHandler));
+withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
+	.alias( 'changelog' )
+	.description( 'Generates a changelog from merged pull requests' )
+	.action( catchException( changelogHandler ) );
 
-withOptions(program.command('release-plugin-since'), sinceOptions)
-	.alias('since')
+withOptions( program.command( 'release-plugin-since' ), sinceOptions )
+	.alias( 'since' )
 	.description(
 		'Updates "n.e.x.t" tags with the current release version in the "Stable tag" of readme.txt'
 	)
-	.action(catchException(sinceHandler));
+	.action( catchException( sinceHandler ) );
 
-withOptions(program.command('plugin-readme'), readmeOptions)
-	.alias('readme')
+withOptions( program.command( 'plugin-readme' ), readmeOptions )
+	.alias( 'readme' )
 	.description(
 		'Updates the changelog in the readme.txt file for the stable tag (requires milestones to be named "$plugin_slug $stable_tag")'
 	)
-	.action(catchException(readmeHandler));
+	.action( catchException( readmeHandler ) );
 
-withOptions(program.command('verify-version-consistency'), versionsOptions)
-	.alias('versions')
-	.description('Verifies consistency of versions in plugins')
-	.action(catchException(versionsHandler));
+withOptions( program.command( 'verify-version-consistency' ), versionsOptions )
+	.alias( 'versions' )
+	.description( 'Verifies consistency of versions in plugins' )
+	.action( catchException( versionsHandler ) );
 
-program.parse(process.argv);
+program.parse( process.argv );

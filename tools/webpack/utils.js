@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const { chdir } = require('process');
-const { spawnSync } = require('child_process');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const fs = require( 'fs' );
+const path = require( 'path' );
+const { chdir } = require( 'process' );
+const { spawnSync } = require( 'child_process' );
+const CssMinimizerPlugin = require( 'css-minimizer-webpack-plugin' );
 
 /**
  * Return plugin root path.
@@ -10,7 +10,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
  * @return {string} The plugin root path.
  */
 const getPluginRootPath = () => {
-	return path.resolve(__dirname, '../../');
+	return path.resolve( __dirname, '../../' );
 };
 
 /**
@@ -20,9 +20,9 @@ const getPluginRootPath = () => {
  *
  * @return {void}
  */
-const deleteFileOrDirectory = (_path) => {
-	if (fs.existsSync(_path)) {
-		fs.rmSync(_path, { recursive: true });
+const deleteFileOrDirectory = ( _path ) => {
+	if ( fs.existsSync( _path ) ) {
+		fs.rmSync( _path, { recursive: true } );
 	}
 };
 
@@ -33,15 +33,15 @@ const deleteFileOrDirectory = (_path) => {
  *
  * @return {string|false} The plugin version or false if not found.
  */
-const getPluginVersion = (pluginPath) => {
-	const readmePath = path.resolve(pluginPath, 'readme.txt');
+const getPluginVersion = ( pluginPath ) => {
+	const readmePath = path.resolve( pluginPath, 'readme.txt' );
 
-	const fileContent = fs.readFileSync(readmePath, 'utf-8');
+	const fileContent = fs.readFileSync( readmePath, 'utf-8' );
 	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)/i;
-	const match = versionRegex.exec(fileContent);
+	const match = versionRegex.exec( fileContent );
 
-	if (match) {
-		return match[1];
+	if ( match ) {
+		return match[ 1 ];
 	}
 
 	return false;
@@ -55,30 +55,30 @@ const getPluginVersion = (pluginPath) => {
  *
  * @return {void}
  */
-const generateBuildManifest = (slug, from) => {
-	const version = getPluginVersion(from);
+const generateBuildManifest = ( slug, from ) => {
+	const version = getPluginVersion( from );
 
-	if (!version) {
-		throw new Error(`Plugin version not found for "${slug}".`);
+	if ( ! version ) {
+		throw new Error( `Plugin version not found for "${ slug }".` );
 	}
 
-	const buildDir = path.resolve(getPluginRootPath(), 'build');
+	const buildDir = path.resolve( getPluginRootPath(), 'build' );
 
-	if (!fs.existsSync(buildDir)) {
-		fs.mkdirSync(buildDir);
+	if ( ! fs.existsSync( buildDir ) ) {
+		fs.mkdirSync( buildDir );
 	}
 
 	/** @type {Record<string, string>} */
 	let manifest = {};
-	const manifestPath = path.resolve(buildDir, 'manifest.json');
+	const manifestPath = path.resolve( buildDir, 'manifest.json' );
 
-	if (fs.existsSync(manifestPath)) {
-		manifest = require(manifestPath);
+	if ( fs.existsSync( manifestPath ) ) {
+		manifest = require( manifestPath );
 	}
 
-	manifest[slug] = version;
+	manifest[ slug ] = version;
 
-	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+	fs.writeFileSync( manifestPath, JSON.stringify( manifest, null, 2 ) );
 };
 
 /**
@@ -89,16 +89,16 @@ const generateBuildManifest = (slug, from) => {
  *
  * @return {Buffer|string} The transformed content.
  */
-const assetDataTransformer = (content, absoluteFrom) => {
-	if ('package.json' !== path.basename(absoluteFrom)) {
+const assetDataTransformer = ( content, absoluteFrom ) => {
+	if ( 'package.json' !== path.basename( absoluteFrom ) ) {
 		return content;
 	}
 
 	const contentAsString = content.toString();
-	const contentAsJson = JSON.parse(contentAsString);
+	const contentAsJson = JSON.parse( contentAsString );
 	const { version } = contentAsJson;
 
-	return `<?php return array('dependencies' => array(), 'version' => '${version}');`;
+	return `<?php return array('dependencies' => array(), 'version' => '${ version }');`;
 };
 
 /**
@@ -109,12 +109,12 @@ const assetDataTransformer = (content, absoluteFrom) => {
  *
  * @return {Promise<string>} A promise that resolves to the transformed (minified) content.
  */
-const cssMinifyTransformer = (content, absoluteFrom) => {
+const cssMinifyTransformer = ( content, absoluteFrom ) => {
 	const cssContent = content.toString();
 
 	return Promise.resolve(
 		CssMinimizerPlugin.cssnanoMinify(
-			{ [absoluteFrom]: cssContent },
+			{ [ absoluteFrom ]: cssContent },
 			undefined,
 			{
 				preset: [
@@ -127,9 +127,9 @@ const cssMinifyTransformer = (content, absoluteFrom) => {
 				],
 			}
 		)
-	).then((result) => {
+	).then( ( result ) => {
 		return result.code;
-	});
+	} );
 };
 
 /**
@@ -140,16 +140,20 @@ const cssMinifyTransformer = (content, absoluteFrom) => {
  *
  * @return {void}
  */
-const createPluginZip = (pluginPath, pluginName) => {
-	chdir(pluginPath);
+const createPluginZip = ( pluginPath, pluginName ) => {
+	chdir( pluginPath );
 
-	const proc = spawnSync('zip', ['-r', `${pluginName}.zip`, pluginName]);
+	const proc = spawnSync( 'zip', [
+		'-r',
+		`${ pluginName }.zip`,
+		pluginName,
+	] );
 
-	if (0 !== proc.status) {
-		if (proc.error) {
+	if ( 0 !== proc.status ) {
+		if ( proc.error ) {
 			throw proc.error;
 		} else {
-			throw new Error(proc.stderr.toString() || proc.stdout.toString());
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
 		}
 	}
 };

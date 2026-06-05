@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-const fs = require('fs');
-const path = require('path');
-const glob = require('fast-glob');
-const { log, formats } = require('../lib/logger');
+const fs = require( 'fs' );
+const path = require( 'path' );
+const glob = require( 'fast-glob' );
+const { log, formats } = require( '../lib/logger' );
 
 /**
  * Internal dependencies
  */
-const { plugins } = require('../../../plugins.json');
+const { plugins } = require( '../../../plugins.json' );
 
 /**
  * @typedef WPSinceCommandOptions
@@ -29,63 +29,71 @@ exports.options = [
  *
  * @param {WPSinceCommandOptions} opt Command options.
  */
-exports.handler = async (opt) => {
-	if (opt.plugin && !plugins.includes(opt.plugin)) {
+exports.handler = async ( opt ) => {
+	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
 		throw new Error(
-			`The plugin "${opt.plugin}" is not a valid plugin managed as part of this project.`
+			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 		);
 	}
 
 	const pluginDirectories = [];
-	const pluginRoot = path.resolve(__dirname, '../../../');
+	const pluginRoot = path.resolve( __dirname, '../../../' );
 
-	if (opt.plugin) {
-		pluginDirectories.push(path.resolve(pluginRoot, 'plugins', opt.plugin));
+	if ( opt.plugin ) {
+		pluginDirectories.push(
+			path.resolve( pluginRoot, 'plugins', opt.plugin )
+		);
 	} else {
-		for (const pluginSlug of plugins) {
+		for ( const pluginSlug of plugins ) {
 			pluginDirectories.push(
-				path.resolve(pluginRoot, 'plugins', pluginSlug)
+				path.resolve( pluginRoot, 'plugins', pluginSlug )
 			);
 		}
 	}
 
-	for (const pluginDirectory of pluginDirectories) {
+	for ( const pluginDirectory of pluginDirectories ) {
 		const patterns = [];
-		const ignore = ['**/node_modules', '**/vendor', '**/bin', '**/build'];
-		const pluginSlug = path.basename(pluginDirectory);
+		const ignore = [ '**/node_modules', '**/vendor', '**/bin', '**/build' ];
+		const pluginSlug = path.basename( pluginDirectory );
 
-		const readmeFile = path.resolve(pluginDirectory, 'readme.txt');
-		const readmeContent = fs.readFileSync(readmeFile, 'utf-8');
+		const readmeFile = path.resolve( pluginDirectory, 'readme.txt' );
+		const readmeContent = fs.readFileSync( readmeFile, 'utf-8' );
 		const readmeContentMatches = readmeContent.match(
 			/^Stable tag:\s+(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 		);
-		if (!readmeContentMatches) {
+		if ( ! readmeContentMatches ) {
 			throw new Error(
-				`Unable to parse out "Stable tag" from ${readmeFile}.`
+				`Unable to parse out "Stable tag" from ${ readmeFile }.`
 			);
 		}
-		const version = readmeContentMatches[1];
+		const version = readmeContentMatches[ 1 ];
 
-		patterns.push(`${pluginDirectory}/**/*.php`);
-		patterns.push(`${pluginDirectory}/**/*.js`);
+		patterns.push( `${ pluginDirectory }/**/*.php` );
+		patterns.push( `${ pluginDirectory }/**/*.js` );
 
-		const files = await glob(patterns, {
+		const files = await glob( patterns, {
 			ignore,
-		});
+		} );
 
-		const regexps = [/(@since\s+)n\.e\.x\.t/g, /('[^']*?)n\.e\.x\.t(?=')/g];
+		const regexps = [
+			/(@since\s+)n\.e\.x\.t/g,
+			/('[^']*?)n\.e\.x\.t(?=')/g,
+		];
 
 		let replacementCount = 0;
-		for (const file of files) {
-			for (const regexp of regexps) {
-				const content = fs.readFileSync(file, 'utf-8');
-				if (regexp.test(content)) {
+		for ( const file of files ) {
+			for ( const regexp of regexps ) {
+				const content = fs.readFileSync( file, 'utf-8' );
+				if ( regexp.test( content ) ) {
 					fs.writeFileSync(
 						file,
-						content.replace(regexp, function (matches, sinceTag) {
-							replacementCount++;
-							return sinceTag + version;
-						})
+						content.replace(
+							regexp,
+							function ( matches, sinceTag ) {
+								replacementCount++;
+								return sinceTag + version;
+							}
+						)
 					);
 				}
 			}
@@ -94,27 +102,27 @@ exports.handler = async (opt) => {
 		// Update versions in Changelog and Upgrade Notices.
 		const readmeContentUpdated = readmeContent.replace(
 			/(^= )(n\.e\.x\.t)( =$)/gm,
-			function (matches, before, next, after) {
+			function ( matches, before, next, after ) {
 				replacementCount++;
 				return before + version + after;
 			}
 		);
-		if (readmeContent !== readmeContentUpdated) {
-			fs.writeFileSync(readmeFile, readmeContentUpdated);
+		if ( readmeContent !== readmeContentUpdated ) {
+			fs.writeFileSync( readmeFile, readmeContentUpdated );
 		}
 
-		const commonMessage = `Using version ${version} for ${pluginSlug}: `;
-		if (replacementCount > 0) {
+		const commonMessage = `Using version ${ version } for ${ pluginSlug }: `;
+		if ( replacementCount > 0 ) {
 			log(
 				formats.success(
 					commonMessage +
-						(replacementCount === 1
+						( replacementCount === 1
 							? '1 replacement'
-							: `${replacementCount} replacements`)
+							: `${ replacementCount } replacements` )
 				)
 			);
 		} else {
-			log(commonMessage + 'No replacements');
+			log( commonMessage + 'No replacements' );
 		}
 	}
 };

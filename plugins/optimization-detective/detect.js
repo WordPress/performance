@@ -72,18 +72,18 @@ const compressionDebounceWaitDuration = 1000;
  * @param {number} storageLockTTL - Storage lock TTL in seconds.
  * @return {boolean} Whether storage is locked.
  */
-function isStorageLocked(currentTime, storageLockTTL) {
-	if (storageLockTTL === 0) {
+function isStorageLocked( currentTime, storageLockTTL ) {
+	if ( storageLockTTL === 0 ) {
 		return false;
 	}
 
 	try {
 		const storageLockTime = parseInt(
-			sessionStorage.getItem(storageLockTimeSessionKey) || '',
+			sessionStorage.getItem( storageLockTimeSessionKey ) || '',
 			10
 		);
 		return (
-			!isNaN(storageLockTime) &&
+			! isNaN( storageLockTime ) &&
 			currentTime < storageLockTime + storageLockTTL * 1000
 		);
 	} catch {
@@ -96,9 +96,12 @@ function isStorageLocked(currentTime, storageLockTTL) {
  *
  * @param {number} currentTime - Current time in milliseconds.
  */
-function setStorageLock(currentTime) {
+function setStorageLock( currentTime ) {
 	try {
-		sessionStorage.setItem(storageLockTimeSessionKey, String(currentTime));
+		sessionStorage.setItem(
+			storageLockTimeSessionKey,
+			String( currentTime )
+		);
 	} catch {}
 }
 
@@ -115,7 +118,7 @@ function createLogger(
 	prefix = null,
 	scriptModuleUrl = null
 ) {
-	const logSource = scriptModuleUrl ? `\nSource: ${scriptModuleUrl}` : null;
+	const logSource = scriptModuleUrl ? `\nSource: ${ scriptModuleUrl }` : null;
 
 	/**
 	 * Constructs the args to pass to the logging function.
@@ -124,9 +127,9 @@ function createLogger(
 	 * @param {boolean}    includeSource - Whether to include the source. This should be true for warnings or errors.
 	 * @return {Array<any>} Amended message.
 	 */
-	const constructLogArgs = (message, includeSource = false) => {
-		return [prefix, ...message, includeSource ? logSource : null].filter(
-			(value) => value !== null
+	const constructLogArgs = ( message, includeSource = false ) => {
+		return [ prefix, ...message, includeSource ? logSource : null ].filter(
+			( value ) => value !== null
 		);
 	};
 
@@ -136,10 +139,10 @@ function createLogger(
 		 *
 		 * @param {...*} message - The message(s) to log.
 		 */
-		log(...message) {
-			if (debugMode) {
+		log( ...message ) {
+			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.log(...constructLogArgs(message, false));
+				console.log( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -148,10 +151,10 @@ function createLogger(
 		 *
 		 * @param {...*} message - The message(s) to log as info.
 		 */
-		info(...message) {
-			if (debugMode) {
+		info( ...message ) {
+			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.info(...constructLogArgs(message, false));
+				console.info( ...constructLogArgs( message, false ) );
 			}
 		},
 
@@ -160,10 +163,10 @@ function createLogger(
 		 *
 		 * @param {...*} message - The message(s) to log as a warning.
 		 */
-		warn(...message) {
-			if (debugMode) {
+		warn( ...message ) {
+			if ( debugMode ) {
 				// eslint-disable-next-line no-console
-				console.warn(...constructLogArgs(message, true));
+				console.warn( ...constructLogArgs( message, true ) );
 			}
 		},
 
@@ -172,9 +175,9 @@ function createLogger(
 		 *
 		 * @param {...*} message - The message(s) to log as an error.
 		 */
-		error(...message) {
+		error( ...message ) {
 			// eslint-disable-next-line no-console
-			console.error(...constructLogArgs(message, true));
+			console.error( ...constructLogArgs( message, true ) );
 		},
 	};
 }
@@ -187,12 +190,14 @@ function createLogger(
  * @param {string} scriptModuleUrl - Script module URL.
  * @return {string} Derived extension name.
  */
-function getExtensionNameFromScriptModuleUrl(scriptModuleUrl) {
+function getExtensionNameFromScriptModuleUrl( scriptModuleUrl ) {
 	try {
-		const url = new URL(scriptModuleUrl, win.location.href);
-		const matches = url.pathname.match(/\/(?:themes|plugins)\/([^\/]+)\//);
-		if (matches) {
-			return matches[1];
+		const url = new URL( scriptModuleUrl, win.location.href );
+		const matches = url.pathname.match(
+			/\/(?:themes|plugins)\/([^\/]+)\//
+		);
+		if ( matches ) {
+			return matches[ 1 ];
 		}
 		return url.pathname;
 	} catch {
@@ -210,18 +215,18 @@ function getExtensionNameFromScriptModuleUrl(scriptModuleUrl) {
  * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
  * @return {URLMetricGroupStatus} The URL metric group for the viewport width.
  */
-function getGroupForViewportWidth(viewportWidth, urlMetricGroupStatuses) {
-	for (const urlMetricGroupStatus of urlMetricGroupStatuses) {
+function getGroupForViewportWidth( viewportWidth, urlMetricGroupStatuses ) {
+	for ( const urlMetricGroupStatus of urlMetricGroupStatuses ) {
 		if (
 			viewportWidth > urlMetricGroupStatus.minimumViewportWidth &&
-			(null === urlMetricGroupStatus.maximumViewportWidth ||
-				viewportWidth <= urlMetricGroupStatus.maximumViewportWidth)
+			( null === urlMetricGroupStatus.maximumViewportWidth ||
+				viewportWidth <= urlMetricGroupStatus.maximumViewportWidth )
 		) {
 			return urlMetricGroupStatus;
 		}
 	}
 	throw new Error(
-		`${consoleLogPrefix} Unexpectedly unable to locate group for the current viewport width.`
+		`${ consoleLogPrefix } Unexpectedly unable to locate group for the current viewport width.`
 	);
 }
 
@@ -240,7 +245,7 @@ async function getAlreadySubmittedSessionStorageKey(
 	urlMetricGroupStatus,
 	{ warn, error }
 ) {
-	if (!win.crypto || !win.crypto.subtle) {
+	if ( ! win.crypto || ! win.crypto.subtle ) {
 		warn(
 			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
 		);
@@ -253,7 +258,7 @@ async function getAlreadySubmittedSessionStorageKey(
 			currentUrl,
 			urlMetricGroupStatus.minimumViewportWidth,
 			urlMetricGroupStatus.maximumViewportWidth || '',
-		].join('-');
+		].join( '-' );
 
 		/*
 		 * Note that the components are hashed for a couple of reasons:
@@ -264,13 +269,13 @@ async function getAlreadySubmittedSessionStorageKey(
 		 *
 		 * The SHA-1 algorithm is chosen since it is the fastest and there is no need for cryptographic security.
 		 */
-		const msgBuffer = new TextEncoder().encode(message);
-		const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
-		const hashHex = Array.from(new Uint8Array(hashBuffer))
-			.map((b) => b.toString(16).padStart(2, '0'))
-			.join('');
-		return `odSubmitted-${hashHex}`;
-	} catch (err) {
+		const msgBuffer = new TextEncoder().encode( message );
+		const hashBuffer = await crypto.subtle.digest( 'SHA-1', msgBuffer );
+		const hashHex = Array.from( new Uint8Array( hashBuffer ) )
+			.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
+			.join( '' );
+		return `odSubmitted-${ hashHex }`;
+	} catch ( err ) {
 		error(
 			'Unable to generate sessionStorage key for already-submitted URL due to error:',
 			err
@@ -293,14 +298,14 @@ function getCurrentTime() {
  *
  * @param {Object} obj - Object to recursively freeze.
  */
-function recursiveFreeze(/** @type {Record<string, any>} */ obj) {
-	for (const prop of Object.getOwnPropertyNames(obj)) {
-		const value = obj[prop];
-		if (null !== value && typeof value === 'object') {
-			recursiveFreeze(value);
+function recursiveFreeze( /** @type {Record<string, any>} */ obj ) {
+	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
+		const value = obj[ prop ];
+		if ( null !== value && typeof value === 'object' ) {
+			recursiveFreeze( value );
 		}
 	}
-	Object.freeze(obj);
+	Object.freeze( obj );
 }
 
 /**
@@ -317,7 +322,7 @@ let urlMetric;
  * @see {ExtendedElementData}
  * @type {Set<string>}
  */
-const reservedRootPropertyKeys = new Set(['url', 'viewport', 'elements']);
+const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
 
 /**
  * Gets root URL Metric data.
@@ -326,8 +331,8 @@ const reservedRootPropertyKeys = new Set(['url', 'viewport', 'elements']);
  * @return {URLMetric} URL Metric.
  */
 function getRootData() {
-	const immutableUrlMetric = structuredClone(urlMetric);
-	recursiveFreeze(immutableUrlMetric);
+	const immutableUrlMetric = structuredClone( urlMetric );
+	recursiveFreeze( immutableUrlMetric );
 	return immutableUrlMetric;
 }
 
@@ -337,13 +342,13 @@ function getRootData() {
  * @type {ExtendRootDataFunction}
  * @param {ExtendedRootData} properties
  */
-function extendRootData(properties) {
-	for (const key of Object.getOwnPropertyNames(properties)) {
-		if (reservedRootPropertyKeys.has(key)) {
-			throw new Error(`Disallowed setting of key '${key}' on root.`);
+function extendRootData( properties ) {
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if ( reservedRootPropertyKeys.has( key ) ) {
+			throw new Error( `Disallowed setting of key '${ key }' on root.` );
 		}
 	}
-	Object.assign(urlMetric, properties);
+	Object.assign( urlMetric, properties );
 	debounceCompressUrlMetric();
 }
 
@@ -361,14 +366,14 @@ const elementsByXPath = new Map();
  * @see {ExtendedRootData}
  * @type {Set<string>}
  */
-const reservedElementPropertyKeys = new Set([
+const reservedElementPropertyKeys = new Set( [
 	'isLCP',
 	'isLCPCandidate',
 	'xpath',
 	'intersectionRatio',
 	'intersectionRect',
 	'boundingClientRect',
-]);
+] );
 
 /**
  * Gets element data.
@@ -377,11 +382,11 @@ const reservedElementPropertyKeys = new Set([
  * @param {string} xpath - XPath.
  * @return {ElementData|null} Element data, or null if no element for the XPath exists.
  */
-function getElementData(xpath) {
-	const elementData = elementsByXPath.get(xpath);
-	if (elementData) {
-		const cloned = structuredClone(elementData);
-		recursiveFreeze(cloned);
+function getElementData( xpath ) {
+	const elementData = elementsByXPath.get( xpath );
+	if ( elementData ) {
+		const cloned = structuredClone( elementData );
+		recursiveFreeze( cloned );
 		return cloned;
 	}
 	return null;
@@ -394,18 +399,20 @@ function getElementData(xpath) {
  * @param {string}              xpath      - XPath.
  * @param {ExtendedElementData} properties - Properties.
  */
-function extendElementData(xpath, properties) {
-	if (!elementsByXPath.has(xpath)) {
-		throw new Error(`Unknown element with XPath: ${xpath}`);
+function extendElementData( xpath, properties ) {
+	if ( ! elementsByXPath.has( xpath ) ) {
+		throw new Error( `Unknown element with XPath: ${ xpath }` );
 	}
-	for (const key of Object.getOwnPropertyNames(properties)) {
-		if (reservedElementPropertyKeys.has(key)) {
-			throw new Error(`Disallowed setting of key '${key}' on element.`);
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if ( reservedElementPropertyKeys.has( key ) ) {
+			throw new Error(
+				`Disallowed setting of key '${ key }' on element.`
+			);
 		}
 	}
-	const elementData = elementsByXPath.get(xpath);
-	if (elementData) {
-		Object.assign(elementData, properties);
+	const elementData = elementsByXPath.get( xpath );
+	if ( elementData ) {
+		Object.assign( elementData, properties );
 	}
 	debounceCompressUrlMetric();
 }
@@ -416,15 +423,15 @@ function extendElementData(xpath, properties) {
  * @param {string} jsonString - JSON string to compress.
  * @return {Promise<Blob>} Compressed data.
  */
-async function compress(jsonString) {
-	const encodedData = new TextEncoder().encode(jsonString);
-	const compressedDataStream = new Blob([encodedData])
+async function compress( jsonString ) {
+	const encodedData = new TextEncoder().encode( jsonString );
+	const compressedDataStream = new Blob( [ encodedData ] )
 		.stream()
-		.pipeThrough(new CompressionStream('gzip'));
+		.pipeThrough( new CompressionStream( 'gzip' ) );
 	const compressedDataBuffer = await new Response(
 		compressedDataStream
 	).arrayBuffer();
-	return new Blob([compressedDataBuffer], { type: 'application/gzip' });
+	return new Blob( [ compressedDataBuffer ], { type: 'application/gzip' } );
 }
 
 /**
@@ -464,31 +471,31 @@ let compressionEnabled = true;
  * Debounces the compression of the URL Metric.
  */
 function debounceCompressUrlMetric() {
-	if (!compressionEnabled) {
+	if ( ! compressionEnabled ) {
 		return;
 	}
-	if (null !== recompressionTimeout) {
-		clearTimeout(recompressionTimeout);
+	if ( null !== recompressionTimeout ) {
+		clearTimeout( recompressionTimeout );
 		recompressionTimeout = null;
 	}
 	if (
 		null !== idleCallbackHandle &&
 		typeof cancelIdleCallback === 'function'
 	) {
-		cancelIdleCallback(idleCallbackHandle);
+		cancelIdleCallback( idleCallbackHandle );
 		idleCallbackHandle = null;
 	}
-	recompressionTimeout = setTimeout(async () => {
-		if (typeof requestIdleCallback === 'function') {
-			await new Promise((resolve) => {
-				idleCallbackHandle = requestIdleCallback(resolve);
-			});
+	recompressionTimeout = setTimeout( async () => {
+		if ( typeof requestIdleCallback === 'function' ) {
+			await new Promise( ( resolve ) => {
+				idleCallbackHandle = requestIdleCallback( resolve );
+			} );
 			idleCallbackHandle = null;
 		}
 		try {
-			compressedPayload = await compress(JSON.stringify(urlMetric));
-		} catch (err) {
-			const { error } = createLogger(false, consoleLogPrefix);
+			compressedPayload = await compress( JSON.stringify( urlMetric ) );
+		} catch ( err ) {
+			const { error } = createLogger( false, consoleLogPrefix );
 			error(
 				'Failed to compress URL Metric falling back to sending uncompressed data:',
 				err
@@ -496,7 +503,7 @@ function debounceCompressUrlMetric() {
 			compressionEnabled = false;
 		}
 		recompressionTimeout = null;
-	}, compressionDebounceWaitDuration);
+	}, compressionDebounceWaitDuration );
 }
 
 /**
@@ -545,7 +552,7 @@ function debounceCompressUrlMetric() {
  * @type {DetectFunction}
  * @param {DetectFunctionArgs} args - Args.
  */
-export default async function detect({
+export default async function detect( {
 	minViewportAspectRatio,
 	maxViewportAspectRatio,
 	isDebug,
@@ -564,36 +571,38 @@ export default async function detect({
 	freshnessTTL,
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
-}) {
-	const logger = createLogger(isDebug, consoleLogPrefix);
+} ) {
+	const logger = createLogger( isDebug, consoleLogPrefix );
 	const { log, warn, error } = logger;
 	compressionEnabled = gzdecodeAvailable;
 
-	if (isDebug && Array.isArray(urlMetricGroupCollection?.groups)) {
+	if ( isDebug && Array.isArray( urlMetricGroupCollection?.groups ) ) {
 		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
-		for (const group of urlMetricGroupCollection.groups) {
-			for (const otherUrlMetric of group.url_metrics) {
+		for ( const group of urlMetricGroupCollection.groups ) {
+			for ( const otherUrlMetric of group.url_metrics ) {
 				otherUrlMetric.creationDate = new Date(
 					otherUrlMetric.timestamp * 1000
 				);
-				allUrlMetrics.push(otherUrlMetric);
+				allUrlMetrics.push( otherUrlMetric );
 			}
 		}
-		log('Stored URL Metric Group Collection:', urlMetricGroupCollection);
-		allUrlMetrics.sort((a, b) => b.timestamp - a.timestamp);
+		log( 'Stored URL Metric Group Collection:', urlMetricGroupCollection );
+		allUrlMetrics.sort( ( a, b ) => b.timestamp - a.timestamp );
 		log(
 			'Stored URL Metrics in reverse chronological order:',
 			allUrlMetrics
 		);
 	}
 
-	if (win.innerWidth === 0 || win.innerHeight === 0) {
-		log('Window must have non-zero dimensions for URL Metric collection.');
+	if ( win.innerWidth === 0 || win.innerHeight === 0 ) {
+		log(
+			'Window must have non-zero dimensions for URL Metric collection.'
+		);
 		return;
 	}
 
-	if (doc.visibilityState === 'hidden' && !doc.prerendering) {
-		log('Page opened in background tab so URL Metric is not collected.');
+	if ( doc.visibilityState === 'hidden' && ! doc.prerendering ) {
+		log( 'Page opened in background tab so URL Metric is not collected.' );
 		return;
 	}
 
@@ -602,8 +611,8 @@ export default async function detect({
 		win.innerWidth,
 		urlMetricGroupStatuses
 	);
-	if (urlMetricGroupStatus.complete) {
-		log('No need for URL Metrics from the current viewport.');
+	if ( urlMetricGroupStatus.complete ) {
+		log( 'No need for URL Metrics from the current viewport.' );
 		return;
 	}
 
@@ -620,13 +629,13 @@ export default async function detect({
 		alreadySubmittedSessionStorageKey in sessionStorage
 	) {
 		const previousVisitTime = parseInt(
-			sessionStorage.getItem(alreadySubmittedSessionStorageKey) || '',
+			sessionStorage.getItem( alreadySubmittedSessionStorageKey ) || '',
 			10
 		);
 		if (
-			!isNaN(previousVisitTime) &&
-			(freshnessTTL < 0 ||
-				(getCurrentTime() - previousVisitTime) / 1000 < freshnessTTL)
+			! isNaN( previousVisitTime ) &&
+			( freshnessTTL < 0 ||
+				( getCurrentTime() - previousVisitTime ) / 1000 < freshnessTTL )
 		) {
 			log(
 				'The current client session already submitted a fresh URL Metric for this URL so a new one will not be collected now.'
@@ -642,7 +651,7 @@ export default async function detect({
 		aspectRatio > maxViewportAspectRatio
 	) {
 		warn(
-			`Viewport aspect ratio (${aspectRatio}) is not in the accepted range of ${minViewportAspectRatio} to ${maxViewportAspectRatio}.`
+			`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
 		);
 		return;
 	}
@@ -651,8 +660,8 @@ export default async function detect({
 	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
-	if (isStorageLocked(getCurrentTime(), storageLockTTL)) {
-		warn('Aborted detection due to storage being locked.');
+	if ( isStorageLocked( getCurrentTime(), storageLockTTL ) ) {
+		warn( 'Aborted detection due to storage being locked.' );
 		return;
 	}
 
@@ -672,31 +681,33 @@ export default async function detect({
 		/** @type {OnLCPFunction|OnLCPWithAttributionFunction} */ onLCP,
 		/** @type {OnINPFunction|OnINPWithAttributionFunction} */ onINP,
 		/** @type {OnCLSFunction|OnCLSWithAttributionFunction} */ onCLS,
-	} = await import(webVitalsLibrarySrc);
+	} = await import( webVitalsLibrarySrc );
 
 	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
-	if (doc.documentElement.scrollTop > 0) {
+	if ( doc.documentElement.scrollTop > 0 ) {
 		warn(
 			'Aborted detection since initial scroll position of page is not at the top.'
 		);
 		return;
 	}
 
-	log('Proceeding with detection');
+	log( 'Proceeding with detection' );
 
-	const breadcrumbedElements = doc.body.querySelectorAll('[data-od-xpath]');
+	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
 	/** @type {Map<Element, string>} */
 	const breadcrumbedElementsMap = new Map(
-		[...breadcrumbedElements].map(
+		[ ...breadcrumbedElements ].map(
 			/**
 			 * @param {Element} element
 			 * @return {[Element, string]} Tuple of an element and its XPath.
 			 */
-			(element) => [
+			( element ) => [
 				element,
-				/** @type {string} */ (element.getAttribute('data-od-xpath')),
+				/** @type {string} */ (
+					element.getAttribute( 'data-od-xpath' )
+				),
 			]
 		)
 	);
@@ -708,21 +719,21 @@ export default async function detect({
 	let intersectionObserver;
 
 	function disconnectIntersectionObserver() {
-		if (intersectionObserver instanceof IntersectionObserver) {
+		if ( intersectionObserver instanceof IntersectionObserver ) {
 			intersectionObserver.disconnect();
-			win.removeEventListener('scroll', disconnectIntersectionObserver); // Clean up, even though this is registered with once:true.
+			win.removeEventListener( 'scroll', disconnectIntersectionObserver ); // Clean up, even though this is registered with once:true.
 		}
 	}
 
 	// Wait for the intersection observer to report back on the initially visible elements.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
-	if (breadcrumbedElementsMap.size > 0) {
+	if ( breadcrumbedElementsMap.size > 0 ) {
 		await /** @type {Promise<void>} */ (
-			new Promise((resolve) => {
+			new Promise( ( resolve ) => {
 				intersectionObserver = new IntersectionObserver(
-					(entries) => {
-						for (const entry of entries) {
-							elementIntersections.push(entry);
+					( entries ) => {
+						for ( const entry of entries ) {
+							elementIntersections.push( entry );
 						}
 						resolve();
 					},
@@ -732,17 +743,17 @@ export default async function detect({
 					}
 				);
 
-				for (const element of breadcrumbedElementsMap.keys()) {
-					intersectionObserver.observe(element);
+				for ( const element of breadcrumbedElementsMap.keys() ) {
+					intersectionObserver.observe( element );
 				}
-			})
+			} )
 		);
 
 		// Stop observing as soon as the page scrolls since we only want initial-viewport elements.
-		win.addEventListener('scroll', disconnectIntersectionObserver, {
+		win.addEventListener( 'scroll', disconnectIntersectionObserver, {
 			once: true,
 			passive: true,
-		});
+		} );
 	}
 
 	/** @type {(LCPMetric|LCPMetricWithAttribution)[]} */
@@ -750,15 +761,15 @@ export default async function detect({
 
 	// Get at least one LCP candidate. More may be reported before the page finishes loading.
 	await /** @type {Promise<void>} */ (
-		new Promise((resolve) => {
+		new Promise( ( resolve ) => {
 			onLCP(
 				/**
 				 * Handles an LCP metric being reported.
 				 *
 				 * @param {LCPMetric|LCPMetricWithAttribution} metric
 				 */
-				(metric) => {
-					lcpMetricCandidates.push(metric);
+				( metric ) => {
+					lcpMetricCandidates.push( metric );
 					resolve();
 				},
 				{
@@ -768,7 +779,7 @@ export default async function detect({
 					reportAllChanges: true,
 				}
 			);
-		})
+		} )
 	);
 
 	// Stop observing the initial viewport.
@@ -783,38 +794,40 @@ export default async function detect({
 		elements: [],
 	};
 
-	const lcpMetric = lcpMetricCandidates[lcpMetricCandidates.length - 1];
+	const lcpMetric = lcpMetricCandidates[ lcpMetricCandidates.length - 1 ];
 
 	// Populate the elements in the URL Metric.
-	for (const elementIntersection of elementIntersections) {
-		const xpath = breadcrumbedElementsMap.get(elementIntersection.target);
-		if (!xpath) {
-			warn('Unable to look up XPath for element');
+	for ( const elementIntersection of elementIntersections ) {
+		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
+		if ( ! xpath ) {
+			warn( 'Unable to look up XPath for element' );
 			continue;
 		}
 
 		const element = /** @type {Element|null} */ (
-			lcpMetric?.entries[0]?.element
+			lcpMetric?.entries[ 0 ]?.element
 		);
 		const isLCP = elementIntersection.target === element;
 
 		/** @type {ElementData} */
 		const elementData = {
 			isLCP,
-			isLCPCandidate: !!lcpMetricCandidates.find((lcpMetricCandidate) => {
-				const candidateElement = /** @type {Element|null} */ (
-					lcpMetricCandidate.entries[0]?.element
-				);
-				return candidateElement === elementIntersection.target;
-			}),
+			isLCPCandidate: !! lcpMetricCandidates.find(
+				( lcpMetricCandidate ) => {
+					const candidateElement = /** @type {Element|null} */ (
+						lcpMetricCandidate.entries[ 0 ]?.element
+					);
+					return candidateElement === elementIntersection.target;
+				}
+			),
 			xpath,
 			intersectionRatio: elementIntersection.intersectionRatio,
 			intersectionRect: elementIntersection.intersectionRect,
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetric.elements.push(elementData);
-		elementsByXPath.set(elementData.xpath, elementData);
+		urlMetric.elements.push( elementData );
+		elementsByXPath.set( elementData.xpath, elementData );
 	}
 	breadcrumbedElementsMap.clear(); // No longer needed.
 
@@ -836,29 +849,29 @@ export default async function detect({
 
 	// Load all extensions in parallel.
 	await Promise.all(
-		extensionModuleUrls.map(async (extensionModuleUrl) => {
+		extensionModuleUrls.map( async ( extensionModuleUrl ) => {
 			const extension = /** @type {Extension} */ await import(
 				extensionModuleUrl
 			);
-			extensions.set(extensionModuleUrl, extension);
-		})
+			extensions.set( extensionModuleUrl, extension );
+		} )
 	);
 
 	// Initialize extensions.
-	for (const [extensionModuleUrl, extension] of extensions.entries()) {
+	for ( const [ extensionModuleUrl, extension ] of extensions.entries() ) {
 		try {
 			const extensionLogger = createLogger(
 				isDebug,
 				`[Optimization Detective: ${
 					extension.name ||
-					getExtensionNameFromScriptModuleUrl(extensionModuleUrl)
+					getExtensionNameFromScriptModuleUrl( extensionModuleUrl )
 				}]`,
 				extensionModuleUrl
 			);
 
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
-			if (extension.initialize instanceof Function) {
-				const initializePromise = extension.initialize({
+			if ( extension.initialize instanceof Function ) {
+				const initializePromise = extension.initialize( {
 					isDebug,
 					...extensionLogger,
 					onTTFB,
@@ -870,22 +883,22 @@ export default async function detect({
 					extendRootData,
 					getElementData,
 					extendElementData,
-				});
-				if (initializePromise instanceof Promise) {
-					extensionInitializePromises.push(initializePromise);
-					initializingExtensionModuleUrls.push(extensionModuleUrl);
+				} );
+				if ( initializePromise instanceof Promise ) {
+					extensionInitializePromises.push( initializePromise );
+					initializingExtensionModuleUrls.push( extensionModuleUrl );
 				}
 			}
 
-			if (extension.finalize instanceof Function) {
+			if ( extension.finalize instanceof Function ) {
 				extensionLogger.warn(
 					'Use of the finalize function in extensions is deprecated. Please refactor your extension to use the initialize function instead, and update the URL Metric data as soon as a change is detected rather than waiting until finalization.'
 				);
 				extensionHasFinalize = true;
 			}
-		} catch (err) {
+		} catch ( err ) {
 			error(
-				`Failed to start initializing extension '${extensionModuleUrl}':`,
+				`Failed to start initializing extension '${ extensionModuleUrl }':`,
 				err
 			);
 		}
@@ -895,90 +908,97 @@ export default async function detect({
 	const settledInitializePromises = await Promise.allSettled(
 		extensionInitializePromises
 	);
-	for (const [
+	for ( const [
 		i,
 		settledInitializePromise,
-	] of settledInitializePromises.entries()) {
-		if (settledInitializePromise.status === 'rejected') {
+	] of settledInitializePromises.entries() ) {
+		if ( settledInitializePromise.status === 'rejected' ) {
 			error(
-				`Failed to initialize extension '${initializingExtensionModuleUrls[i]}':`,
+				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
 				settledInitializePromise.reason
 			);
 		}
 	}
 
-	if (compressionEnabled && extensionHasFinalize) {
+	if ( compressionEnabled && extensionHasFinalize ) {
 		compressionEnabled = false;
 		warn(
 			'URL Metric compression is disabled because one or more extensions use the deprecated finalize function.'
 		);
 	}
 
-	log('Current URL Metric:', urlMetric);
+	log( 'Current URL Metric:', urlMetric );
 
 	// Compress the URL Metric once so that even if there are no extensions available or extending the URL Metric, it is compressed.
 	debounceCompressUrlMetric();
 
 	// Wait for the page to be hidden.
 	await /** @type {Promise<void>} */ (
-		new Promise((resolve) => {
-			win.addEventListener('pagehide', () => resolve(), { once: true });
-			win.addEventListener('pageswap', () => resolve(), { once: true });
+		new Promise( ( resolve ) => {
+			win.addEventListener( 'pagehide', () => resolve(), { once: true } );
+			win.addEventListener( 'pageswap', () => resolve(), { once: true } );
 			doc.addEventListener(
 				'visibilitychange',
 				() => {
-					if (doc.visibilityState === 'hidden') {
+					if ( doc.visibilityState === 'hidden' ) {
 						// TODO: This will fire even when switching tabs.
 						resolve();
 					}
 				},
 				{ once: true }
 			);
-		})
+		} )
 	);
 
 	// Only proceed with submitting the URL Metric if the viewport stayed the same size. Changing the viewport size (e.g. due
 	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
-	if (didWindowResize) {
-		log('Aborting URL Metric collection due to viewport size change.');
+	if ( didWindowResize ) {
+		log( 'Aborting URL Metric collection due to viewport size change.' );
 		return;
 	}
 
 	// Finalize extensions.
-	if (extensions.size > 0) {
+	if ( extensions.size > 0 ) {
 		/** @type {Promise<void>[]} */
 		const extensionFinalizePromises = [];
 
 		/** @type {string[]} */
 		const finalizingExtensionModuleUrls = [];
 
-		for (const [extensionModuleUrl, extension] of extensions.entries()) {
-			if (extension.finalize instanceof Function) {
+		for ( const [
+			extensionModuleUrl,
+			extension,
+		] of extensions.entries() ) {
+			if ( extension.finalize instanceof Function ) {
 				const extensionLogger = createLogger(
 					isDebug,
 					`[Optimization Detective: ${
 						extension.name ||
-						getExtensionNameFromScriptModuleUrl(extensionModuleUrl)
+						getExtensionNameFromScriptModuleUrl(
+							extensionModuleUrl
+						)
 					}]`,
 					extensionModuleUrl
 				);
 
 				try {
-					const finalizePromise = extension.finalize({
+					const finalizePromise = extension.finalize( {
 						isDebug,
 						...extensionLogger,
 						getRootData,
 						getElementData,
 						extendElementData,
 						extendRootData,
-					});
-					if (finalizePromise instanceof Promise) {
-						extensionFinalizePromises.push(finalizePromise);
-						finalizingExtensionModuleUrls.push(extensionModuleUrl);
+					} );
+					if ( finalizePromise instanceof Promise ) {
+						extensionFinalizePromises.push( finalizePromise );
+						finalizingExtensionModuleUrls.push(
+							extensionModuleUrl
+						);
 					}
-				} catch (err) {
+				} catch ( err ) {
 					error(
-						`Unable to start finalizing extension '${extensionModuleUrl}':`,
+						`Unable to start finalizing extension '${ extensionModuleUrl }':`,
 						err
 					);
 				}
@@ -989,13 +1009,13 @@ export default async function detect({
 		const settledFinalizePromises = await Promise.allSettled(
 			extensionFinalizePromises
 		);
-		for (const [
+		for ( const [
 			i,
 			settledFinalizePromise,
-		] of settledFinalizePromises.entries()) {
-			if (settledFinalizePromise.status === 'rejected') {
+		] of settledFinalizePromises.entries() ) {
+			if ( settledFinalizePromise.status === 'rejected' ) {
 				error(
-					`Failed to finalize extension '${finalizingExtensionModuleUrls[i]}':`,
+					`Failed to finalize extension '${ finalizingExtensionModuleUrls[ i ] }':`,
 					settledFinalizePromise.reason
 				);
 			}
@@ -1009,10 +1029,10 @@ export default async function detect({
 	const maxBodyLengthKiB = 64;
 	const maxBodyLengthBytes = maxBodyLengthKiB * 1024;
 
-	const jsonBody = JSON.stringify(urlMetric);
-	if (jsonBody.length > maxUrlMetricSize) {
+	const jsonBody = JSON.stringify( urlMetric );
+	if ( jsonBody.length > maxUrlMetricSize ) {
 		error(
-			`URL Metric is ${jsonBody.length.toLocaleString()} bytes, exceeding the maximum size of ${maxUrlMetricSize.toLocaleString()} bytes:`,
+			`URL Metric is ${ jsonBody.length.toLocaleString() } bytes, exceeding the maximum size of ${ maxUrlMetricSize.toLocaleString() } bytes:`,
 			urlMetric
 		);
 		return;
@@ -1021,9 +1041,9 @@ export default async function detect({
 	const payloadBlob =
 		compressionEnabled && compressedPayload
 			? compressedPayload
-			: new Blob([jsonBody], { type: 'application/json' });
+			: new Blob( [ jsonBody ], { type: 'application/json' } );
 	const percentOfBudget =
-		(payloadBlob.size / (maxBodyLengthKiB * 1000)) * 100;
+		( payloadBlob.size / ( maxBodyLengthKiB * 1000 ) ) * 100;
 
 	/*
 	 * According to the fetch() spec:
@@ -1031,11 +1051,11 @@ export default async function detect({
 	 * This is what browsers also implement for navigator.sendBeacon(). Therefore, if the size of the JSON is greater
 	 * than the maximum, we should avoid even trying to send it.
 	 */
-	if (payloadBlob.size > maxBodyLengthBytes) {
+	if ( payloadBlob.size > maxBodyLengthBytes ) {
 		error(
-			`Unable to send URL Metric because it is ${payloadBlob.size.toLocaleString()} bytes, ${Math.round(
+			`Unable to send URL Metric because it is ${ payloadBlob.size.toLocaleString() } bytes, ${ Math.round(
 				percentOfBudget
-			)}% of ${maxBodyLengthKiB} KiB limit:`,
+			) }% of ${ maxBodyLengthKiB } KiB limit:`,
 			urlMetric
 		);
 		return;
@@ -1043,64 +1063,64 @@ export default async function detect({
 
 	// Even though the server may reject the REST API request, we still have to set the storage lock
 	// because we can't look at the response when sending a beacon.
-	setStorageLock(getCurrentTime());
+	setStorageLock( getCurrentTime() );
 
 	// Remember that the URL Metric was submitted for this URL to avoid having multiple entries submitted by the same client.
-	if (null !== alreadySubmittedSessionStorageKey) {
+	if ( null !== alreadySubmittedSessionStorageKey ) {
 		sessionStorage.setItem(
 			alreadySubmittedSessionStorageKey,
-			String(getCurrentTime())
+			String( getCurrentTime() )
 		);
 	}
 
 	let message = 'Sending URL Metric (';
-	message += `${payloadBlob.size.toLocaleString()} bytes`;
-	message += `, ${Math.round(
+	message += `${ payloadBlob.size.toLocaleString() } bytes`;
+	message += `, ${ Math.round(
 		percentOfBudget
-	)}% of ${maxBodyLengthKiB} KiB limit`;
-	if (compressionEnabled) {
-		message += `, gzip compressed -${Math.round(
-			((jsonBody.length - payloadBlob.size) / jsonBody.length) * 100
-		)}%`;
+	) }% of ${ maxBodyLengthKiB } KiB limit`;
+	if ( compressionEnabled ) {
+		message += `, gzip compressed -${ Math.round(
+			( ( jsonBody.length - payloadBlob.size ) / jsonBody.length ) * 100
+		) }%`;
 	} else {
 		message += ', uncompressed';
 	}
 	message += '):';
 
 	// The threshold of 50% is used because the limit for all beacons combined is 64 KiB, not just the data for one beacon.
-	if (percentOfBudget < 50) {
-		log(message, urlMetric);
+	if ( percentOfBudget < 50 ) {
+		log( message, urlMetric );
 	} else {
-		warn(message, urlMetric);
+		warn( message, urlMetric );
 	}
 
-	const url = new URL(restApiEndpoint);
-	if (typeof restApiNonce === 'string') {
-		url.searchParams.set('_wpnonce', restApiNonce);
+	const url = new URL( restApiEndpoint );
+	if ( typeof restApiNonce === 'string' ) {
+		url.searchParams.set( '_wpnonce', restApiNonce );
 	}
-	url.searchParams.set('slug', urlMetricSlug);
-	url.searchParams.set('current_etag', currentETag);
-	if (typeof cachePurgePostId === 'number') {
+	url.searchParams.set( 'slug', urlMetricSlug );
+	url.searchParams.set( 'current_etag', currentETag );
+	if ( typeof cachePurgePostId === 'number' ) {
 		url.searchParams.set(
 			'cache_purge_post_id',
 			cachePurgePostId.toString()
 		);
 	}
-	url.searchParams.set('hmac', urlMetricHMAC);
+	url.searchParams.set( 'hmac', urlMetricHMAC );
 
 	/** @type {Record<string, string>} */
 	const headers = {
 		'Content-Type': 'application/json',
 	};
-	if (compressionEnabled) {
-		headers['Content-Encoding'] = 'gzip';
+	if ( compressionEnabled ) {
+		headers[ 'Content-Encoding' ] = 'gzip';
 	}
 
-	const request = new Request(url, {
+	const request = new Request( url, {
 		method: 'POST',
 		body: payloadBlob,
 		headers,
 		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
-	});
-	await fetch(request);
+	} );
+	await fetch( request );
 }

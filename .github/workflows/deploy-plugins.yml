@@ -170,7 +170,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      actions: read   # Required to look up workflow run artifacts via the GitHub API.
+      actions: read # Required to look up workflow run artifacts via the GitHub API.
       contents: write # Required by softprops/action-gh-release to upload release assets.
     if: github.event_name == 'release'
     strategy:

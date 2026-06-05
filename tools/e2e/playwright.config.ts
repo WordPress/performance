@@ -9,7 +9,7 @@ import { defineConfig } from '@playwright/test';
 // @ts-ignore -- No declaration file for this module.
 import baseConfig from '@wordpress/scripts/config/playwright.config.js';
 
-const config = defineConfig({
+const config = defineConfig( {
 	...baseConfig,
 	projects: [
 		{
@@ -17,6 +17,6 @@ const config = defineConfig({
 			testDir: '../../plugins/auto-sizes/tests/e2e/specs',
 		},
 	],
-});
+} );
 
 export default config;
