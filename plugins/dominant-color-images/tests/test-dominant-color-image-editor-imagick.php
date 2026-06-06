@@ -27,23 +27,25 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 		}
 
 		$required_formats = array( 'JPEG', 'PNG', 'GIF', 'WEBP' );
-		foreach ( $required_formats as $required_format ) {
-			if ( ! in_array( $required_format, Imagick::queryFormats( $required_format ), true ) ) {
-				return;
-			}
+		try {
+			$supported_formats = Imagick::queryFormats();
+		} catch ( Exception $exception ) {
+			$this->markTestSkipped( sprintf( 'Unable to query Imagick formats: %s', $exception->getMessage() ) );
 		}
-
-		add_filter(
-			'wp_image_editors',
-			static function ( array $editors ): array {
-				return array_filter(
-					$editors,
-					static function ( $editor ): bool {
-						return WP_Image_Editor_Imagick::class === $editor;
-					}
-				);
-			}
-		);
+		$missing_formats = array_diff( $required_formats, $supported_formats );
+		if ( 0 === count( $missing_formats ) ) {
+			add_filter(
+				'wp_image_editors',
+				static function ( array $editors ): array {
+					return array_filter(
+						$editors,
+						static function ( $editor ): bool {
+							return WP_Image_Editor_Imagick::class === $editor;
+						}
+					);
+				}
+			);
+		}
 	}
 
 	/**
