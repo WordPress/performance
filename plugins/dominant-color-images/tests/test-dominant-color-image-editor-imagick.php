@@ -26,6 +26,13 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
+		$required_formats = array( 'JPEG', 'PNG', 'GIF', 'WEBP' );
+		foreach ( $required_formats as $required_format ) {
+			if ( ! in_array( $required_format, Imagick::queryFormats( $required_format ), true ) ) {
+				return;
+			}
+		}
+
 		add_filter(
 			'wp_image_editors',
 			static function ( array $editors ): array {
