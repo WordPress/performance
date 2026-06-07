@@ -15,6 +15,27 @@ const config = require( '../config' );
 
 const MISSING_TYPE = 'MISSING_TYPE';
 const TYPE_PREFIX = '[Type] ';
+
+/**
+ * Mapping from plugin folder slug to its GitHub label.
+ * Used to look up cross-plugin PRs when building a changelog.
+ *
+ * @since n.e.x.t
+ *
+ * @type {Object<string, string>}
+ */
+const PLUGIN_SLUG_TO_LABEL_MAP = {
+	'auto-sizes': '[Plugin] Enhanced Responsive Images',
+	'dominant-color-images': '[Plugin] Image Placeholders',
+	'embed-optimizer': '[Plugin] Embed Optimizer',
+	'image-prioritizer': '[Plugin] Image Prioritizer',
+	'optimization-detective': '[Plugin] Optimization Detective',
+	'performance-lab': '[Plugin] Performance Lab',
+	'speculation-rules': '[Plugin] Speculative Loading',
+	'view-transitions': '[Plugin] View Transitions',
+	'web-worker-offloading': '[Plugin] Web Worker Offloading',
+	'webp-uploads': '[Plugin] Modern Image Formats',
+};
 const PRIMARY_TYPE_LABELS = {
 	'[Type] Feature': 'Features',
 	'[Type] Enhancement': 'Enhancements',
@@ -29,17 +50,19 @@ const SKIP_CHANGELOG_LABEL = 'skip changelog';
 /**
  * @typedef WPChangelogCommandOptions
  *
- * @property {string}  milestone Milestone title.
- * @property {string=} token     Optional personal access token.
+ * @property {string}  milestone   Milestone title.
+ * @property {string=} token       Optional personal access token.
+ * @property {string=} pluginLabel Optional plugin label used to fetch cross-plugin PRs.
  */
 
 /**
  * @typedef WPChangelogSettings
  *
- * @property {string}  owner     Repository owner.
- * @property {string}  repo      Repository name.
- * @property {string}  milestone Milestone title.
- * @property {string=} token     Optional personal access token.
+ * @property {string}  owner       Repository owner.
+ * @property {string}  repo        Repository name.
+ * @property {string}  milestone   Milestone title.
+ * @property {string=} token       Optional personal access token.
+ * @property {string=} pluginLabel Optional plugin label used to fetch cross-plugin PRs.
  */
 
 exports.options = [
@@ -51,6 +74,11 @@ exports.options = [
 		argname: '-t, --token <token>',
 		description: 'GitHub token',
 	},
+	{
+		argname: '-l, --plugin-label <pluginLabel>',
+		description:
+			'Plugin label (e.g. "[Plugin] Embed Optimizer"). When provided, merged PRs carrying this label and assigned to any open milestone are also included in the changelog.',
+	},
 ];
 
 /**
@@ -59,17 +87,85 @@ exports.options = [
  * @param {WPChangelogCommandOptions} opt
  */
 exports.handler = async ( opt ) => {
+	// If no plugin label was explicitly provided, try to derive it from the
+	// milestone title using the "plugin-slug version" convention.
+	let pluginLabel = opt.pluginLabel;
+	if ( ! pluginLabel ) {
+		const milestoneSlug = opt.milestone
+			? opt.milestone.split( ' ' )[ 0 ]
+			: undefined;
+		pluginLabel = milestoneSlug
+			? PLUGIN_SLUG_TO_LABEL_MAP[ milestoneSlug ]
+			: undefined;
+	}
+
 	await createChangelog( {
 		owner: config.githubRepositoryOwner,
 		repo: config.githubRepositoryName,
 		milestone: opt.milestone,
 		token: opt.token,
+		pluginLabel,
 	} );
 };
 
 /**
+ * Returns a promise resolving to merged pull requests that carry a given plugin
+ * label and are associated with any open milestone. This is used to include
+ * cross-plugin PRs in a changelog: a PR primarily assigned to Plugin A's
+ * milestone but also labeled for Plugin B will appear in Plugin B's changelog.
+ *
+ * @since n.e.x.t
+ *
+ * @param {GitHub} octokit     GitHub REST client.
+ * @param {string} owner       Repository owner.
+ * @param {string} repo        Repository name.
+ * @param {string} pluginLabel Plugin label to search for (e.g. "[Plugin] Embed Optimizer").
+ *
+ * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to merged pull requests.
+ */
+async function fetchCrossPluginPullRequests(
+	octokit,
+	owner,
+	repo,
+	pluginLabel
+) {
+	// Fetch all open milestones so we can check PR membership.
+	const milestonesResponse = await octokit.paginate(
+		octokit.issues.listMilestones,
+		{ owner, repo, state: 'open' }
+	);
+
+	if ( ! milestonesResponse.length ) {
+		return [];
+	}
+
+	const openMilestoneNumbers = new Set(
+		milestonesResponse.map( ( m ) => m.number )
+	);
+
+	// Search for closed issues with the plugin label.
+	const labeledIssues = await octokit.paginate( octokit.issues.listForRepo, {
+		owner,
+		repo,
+		labels: pluginLabel,
+		state: 'closed',
+	} );
+
+	// Keep only merged pull requests that are associated with an open milestone.
+	return labeledIssues.filter(
+		( issue ) =>
+			issue.pull_request &&
+			issue.pull_request.merged_at &&
+			issue.milestone &&
+			openMilestoneNumbers.has( issue.milestone.number )
+	);
+}
+
+/**
  * Returns a promise resolving to an array of merged pull requests associated with the
- * changelog settings object.
+ * changelog settings object. When a plugin label is provided (or derivable from the
+ * milestone title), merged PRs carrying that label and assigned to any open milestone
+ * are also included so that cross-plugin PRs appear in every relevant changelog.
  *
  * @param {GitHub}              octokit  GitHub REST client.
  * @param {WPChangelogSettings} settings Changelog settings.
@@ -77,7 +173,7 @@ exports.handler = async ( opt ) => {
  * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to array of pull requests.
  */
 async function fetchAllPullRequests( octokit, settings ) {
-	const { owner, repo, milestone: milestoneTitle } = settings;
+	const { owner, repo, milestone: milestoneTitle, pluginLabel } = settings;
 	const milestone = await getMilestoneByTitle(
 		octokit,
 		owner,
@@ -99,10 +195,45 @@ async function fetchAllPullRequests( octokit, settings ) {
 		'closed'
 	);
 
-	// Return all merged pull requests.
-	return issues.filter(
+	// Primary pull requests: merged PRs in the specified milestone.
+	const primaryPRs = issues.filter(
 		( issue ) => issue.pull_request && issue.pull_request.merged_at
 	);
+
+	if ( ! pluginLabel ) {
+		return primaryPRs;
+	}
+
+	// Bonus: also include merged PRs with the plugin label that are assigned to
+	// a different open milestone (cross-plugin PRs in a monorepo).
+	const crossPluginPRs = await fetchCrossPluginPullRequests(
+		octokit,
+		owner,
+		repo,
+		pluginLabel
+	);
+
+	if ( ! crossPluginPRs.length ) {
+		return primaryPRs;
+	}
+
+	// Merge and deduplicate by PR number, giving precedence to primary PRs.
+	const seen = new Set( primaryPRs.map( ( pr ) => pr.number ) );
+	const extraPRs = crossPluginPRs.filter( ( pr ) => {
+		// Exclude PRs already covered by the primary milestone.
+		if ( seen.has( pr.number ) ) {
+			return false;
+		}
+		// Exclude PRs whose milestone is the same as the one we're generating
+		// the changelog for (they are already included via primaryPRs).
+		if ( pr.milestone && pr.milestone.number === milestone.number ) {
+			return false;
+		}
+		seen.add( pr.number );
+		return true;
+	} );
+
+	return [ ...primaryPRs, ...extraPRs ];
 }
 
 /**
