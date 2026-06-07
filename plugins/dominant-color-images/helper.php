@@ -91,9 +91,6 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( false === $file ) {
-		$file = get_attached_file( $attachment_id );
-	}
-	if ( false === $file ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
 
