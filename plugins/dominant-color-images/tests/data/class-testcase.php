@@ -182,7 +182,6 @@ abstract class TestCase extends WP_UnitTestCase {
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
@@ -209,7 +208,6 @@ abstract class TestCase extends WP_UnitTestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
@@ -227,7 +225,6 @@ abstract class TestCase extends WP_UnitTestCase {
 		$image_path = TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg';
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
@@ -245,7 +242,6 @@ abstract class TestCase extends WP_UnitTestCase {
 	 */
 	public function test_get_dominant_color_none_images( string $image_path ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
