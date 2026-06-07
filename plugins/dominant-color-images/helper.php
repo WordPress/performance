@@ -136,6 +136,28 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 }
 
 /**
+ * Retrieves attachment metadata for an image attachment.
+ *
+ * @since 1.0.0
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return array|null Attachment metadata array or null if not an image or metadata unavailable.
+ */
+function dominant_color_get_attachment_metadata( int $attachment_id ) {
+
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return null;
+	}
+
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return null;
+	}
+
+	return $image_meta;
+}
+
+/**
  * Gets file path of image based on size.
  *
  * @since 1.0.0
@@ -145,18 +167,16 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
  * @return false|string Path to an image or false if not found.
  */
 function dominant_color_get_attachment_file_path( int $attachment_id, string $size = 'medium' ) {
-	$imagedata = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $imagedata ) ) {
-		return false;
-	}
 
 	$filepath = get_attached_file( $attachment_id );
 	if ( false === $filepath ) {
 		return false;
 	}
 
-	if ( isset( $imagedata['sizes'][ $size ] ) ) {
-		$filepath = str_replace( wp_basename( $filepath ), $imagedata['sizes'][ $size ]['file'], $filepath );
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
+
+	if ( isset( $image_meta['sizes'][ $size ] ) ) {
+		$filepath = str_replace( wp_basename( $filepath ), $image_meta['sizes'][ $size ]['file'], $filepath );
 	}
 
 	return $filepath;
@@ -171,13 +191,7 @@ function dominant_color_get_attachment_file_path( int $attachment_id, string $si
  * @return string|null Hex value of dominant color or null if not set.
  */
 function dominant_color_get_dominant_color( int $attachment_id ): ?string {
-	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-		return null;
-	}
-	$image_meta = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $image_meta ) ) {
-		return null;
-	}
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
 	if ( ! isset( $image_meta['dominant_color'] ) ) {
 		return null;
@@ -195,10 +209,7 @@ function dominant_color_get_dominant_color( int $attachment_id ): ?string {
  * @return bool|null Whether the image has transparency, or null if not set.
  */
 function dominant_color_has_transparency( int $attachment_id ): ?bool {
-	$image_meta = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $image_meta ) ) {
-		return null;
-	}
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
 	if ( ! isset( $image_meta['has_transparency'] ) ) {
 		return null;
@@ -206,7 +217,6 @@ function dominant_color_has_transparency( int $attachment_id ): ?bool {
 
 	return $image_meta['has_transparency'];
 }
-
 
 /**
  * Gets hex color from RGB.
