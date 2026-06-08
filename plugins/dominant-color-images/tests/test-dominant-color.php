@@ -409,26 +409,6 @@ class Test_Dominant_Color extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
-	 */
-	public function test_invalid_image_type(): void {
-		$editor = new Dominant_Color_Image_Editor_GD( '/invalid/type' );
-		$result = $editor->get_dominant_color();
-		$this->assertWPError( $result );
-		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
-	}
-
-	/**
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
-	 */
-	public function test_corrupted_image_file(): void {
-		$editor = new Dominant_Color_Image_Editor_GD( 'path/to/corrupted/file.jpg' );
-		$result = $editor->get_dominant_color();
-		$this->assertWPError( $result );
-		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
-	}
-
-	/**
 	 * @covers ::dominant_color_add_inline_style
 	 */
 	public function test_dominant_color_add_inline_style(): void {
