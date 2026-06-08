@@ -77,33 +77,40 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 	 * @covers ::get_dominant_color
 	 */
 	public function test_get_dominant_color_success(): void {
-		$im = imagecreatetruecolor( 1, 1 );
+		$im  = imagecreatetruecolor( 1, 1 );
 		$red = imagecolorallocate( $im, 255, 0, 0 );
 		imagefill( $im, 0, 0, $red );
 
-		$editor = new Dominant_Color_Image_Editor_GD( null );
+		$editor     = new Dominant_Color_Image_Editor_GD( null );
 		$reflection = new ReflectionClass( $editor );
-		$property = $reflection->getProperty( 'image' );
+		$property   = $reflection->getProperty( 'image' );
 		$property->setAccessible( true );
 		$property->setValue( $editor, $im );
 
 		$result = $editor->get_dominant_color();
 
 		$this->assertIsArray( $result );
-		$this->assertSame( array( 'r' => 255, 'g' => 0, 'b' => 0 ), $result );
+		$this->assertSame(
+			array(
+				'r' => 255,
+				'g' => 0,
+				'b' => 0,
+			),
+			$result
+		);
 	}
 
 	/**
 	 * @covers ::has_transparency
 	 */
 	public function test_has_no_transparency(): void {
-		$im = imagecreatetruecolor( 1, 1 );
+		$im  = imagecreatetruecolor( 1, 1 );
 		$red = imagecolorallocate( $im, 255, 0, 0 );
 		imagefill( $im, 0, 0, $red );
 
-		$editor = new Dominant_Color_Image_Editor_GD( null );
+		$editor     = new Dominant_Color_Image_Editor_GD( null );
 		$reflection = new ReflectionClass( $editor );
-		$property = $reflection->getProperty( 'image' );
+		$property   = $reflection->getProperty( 'image' );
 		$property->setAccessible( true );
 		$property->setValue( $editor, $im );
 
@@ -116,13 +123,13 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 	 * @covers ::has_transparency
 	 */
 	public function test_has_transparency_with_transparency(): void {
-		$im = imagecreatetruecolor( 1, 1 );
+		$im          = imagecreatetruecolor( 1, 1 );
 		$alpha_color = imagecolorallocatealpha( $im, 255, 0, 0, 64 );
 		imagefill( $im, 0, 0, $alpha_color );
 
-		$editor = new Dominant_Color_Image_Editor_GD( null );
+		$editor     = new Dominant_Color_Image_Editor_GD( null );
 		$reflection = new ReflectionClass( $editor );
-		$property = $reflection->getProperty( 'image' );
+		$property   = $reflection->getProperty( 'image' );
 		$property->setAccessible( true );
 		$property->setValue( $editor, $im );
 

@@ -140,7 +140,6 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	}
 	$dominant_color_data['dominant_color'] = $hex;
 
-
 	return $dominant_color_data;
 }
 
@@ -150,9 +149,9 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
  * @since 1.0.0
  *
  * @param int $attachment_id Attachment ID.
- * @return array|null Attachment metadata array or null if not an image or metadata unavailable.
+ * @return array<string, mixed>|null Attachment metadata array, or null if not an image or metadata unavailable.
  */
-function dominant_color_get_attachment_metadata( int $attachment_id ) {
+function dominant_color_get_attachment_metadata( int $attachment_id ): ?array {
 
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
 		return null;

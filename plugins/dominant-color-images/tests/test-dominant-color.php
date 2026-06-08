@@ -26,7 +26,7 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
+		$attachment_id           = self::factory()->attachment->create_upload_object( $image_path );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
 		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
@@ -76,7 +76,7 @@ class Test_Dominant_Color extends TestCase {
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
+		$attachment_id         = self::factory()->attachment->create_upload_object( $image_path );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		$this->assertSame( $expected_transparency, $transparency_metadata['has_transparency'] );
