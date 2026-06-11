@@ -125,9 +125,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 	 * provided, they should be applied. But if the entire page is the target, they would visually mess with the
 	 * animation.
 	 */
-	$is_specific_target_name = static function ( string $alias, array $args ): bool {
-		return '*' === $args['target-name'] ? false : true;
-	};
+	$is_specific_target_name = static fn ( string $alias, array $args ): bool => ! ( '*' === $args['target-name'] );
 
 	/*
 	 * This callback is used to return horizontal and vertical offsets (-1, 0, or 1) based on whether the given alias

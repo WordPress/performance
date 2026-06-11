@@ -348,7 +348,6 @@ const buildPlugin = ( env ) => {
 	}
 
 	if ( ! standalonePlugins.includes( env.plugin ) ) {
-		// eslint-disable-next-line no-console
 		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
 		return defaultBuildConfig;

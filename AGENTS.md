@@ -38,13 +38,23 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 ### Running a Local Environment
 
-This project uses `@wordpress/env` to create a local development environment.
+This project uses `@wordpress/env` to create local environments. There are two,
+each defined by its own config file and running as fully isolated containers:
 
-* Check if the environment is already running: `npm run wp-env status`
-* Start the environment: `npm run wp-env start`
-* Stop the environment: `npm run wp-env stop`
+* **Development** (for browsing) — `.wp-env.json`, at `http://localhost:8888`.
+* **Tests** (for PHPUnit and E2E) — `.wp-env.test.json`, at `http://localhost:8889`.
 
-The environment will by default be located at `http://localhost:8888` but this can be overridden by `.wp-env.override.json`.
+The `wp-env-test` script is shorthand for `wp-env --config=.wp-env.test.json`.
+
+* Check if the environments are running: `npm run wp-env status` / `npm run wp-env-test status`
+* Start the environments: `npm run wp-env start` / `npm run wp-env-test start`
+* Stop the environments: `npm run wp-env stop` / `npm run wp-env-test stop`
+
+The `test-php*` and `test-e2e*` scripts run against the tests environment, so
+start it with `npm run wp-env-test start` before running them.
+
+Each environment can be overridden locally (these files are git-ignored):
+`.wp-env.override.json` for development and `.wp-env.test.override.json` for tests.
 
 ## Code Style
 
@@ -80,7 +90,7 @@ Every file, function, class, method constant, and global variable must have an a
 
 Follow coding conventions in WordPress core. Namespaces are generally not used, as they are not normally used in WordPress core code. Procedural programming patterns are favored where classes play a supporting role, rather than everything being written in OOP.
 
-Whenever possible, the most specific PHP type hints should be used, when backward compatible with PHP 7.2, the minimum version of PHP supported by WordPress and this repository. When native PHP type cannot be used, PHPStan's [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) should be used, including not only the basic types but also subtypes like `non-empty-string`, [integer ranges](https://phpstan.org/writing-php-code/phpdoc-types#integer-ranges), [general arrays](https://phpstan.org/writing-php-code/phpdoc-types#general-arrays), and especially [array shapes](https://phpstan.org/writing-php-code/phpdoc-types#array-shapes). The types should comply with PHPStan's level 10. The one exception for using PHP types is whenever a function is used as a filter. Since plugins can supply any value at all when filtering, use the expected type with a union to `mixed`. The first statement in the function in this case must always check the type, and if it is not the expected type, override it to be so.
+Whenever possible, the most specific PHP type hints should be used, when backward compatible with PHP 7.4, the minimum version of PHP supported by WordPress and this repository. When native PHP type cannot be used, PHPStan's [PHPDoc Types](https://phpstan.org/writing-php-code/phpdoc-types) should be used, including not only the basic types but also subtypes like `non-empty-string`, [integer ranges](https://phpstan.org/writing-php-code/phpdoc-types#integer-ranges), [general arrays](https://phpstan.org/writing-php-code/phpdoc-types#general-arrays), and especially [array shapes](https://phpstan.org/writing-php-code/phpdoc-types#array-shapes). The types should comply with PHPStan's level 10. The one exception for using PHP types is whenever a function is used as a filter. Since plugins can supply any value at all when filtering, use the expected type with a union to `mixed`. The first statement in the function in this case must always check the type, and if it is not the expected type, override it to be so.
 
 Never render HTML `SCRIPT` tags directly in HTML. Always use the relevant APIs in WordPress for adding scripts, including `wp_enqueue_script()`, `wp_add_inline_script()`, `wp_localize_script()`, `wp_print_script_tag()`, `wp_print_inline_script_tag()`, `wp_enqueue_script_module()` among others. Favor modules over classic scripts.
 

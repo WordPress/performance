@@ -824,11 +824,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param string $expected                 Expected output.
 	 */
 	public function test_image_block_with_two_equal_column_block( string $ancestor_block_alignment, string $image_block_alignment, string $expected ): void {
-		// Skip test for WordPress versions below 6.8.
-		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
-		}
-
 		$block_content = $this->get_columns_block_markup(
 			$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
 			array(
@@ -960,11 +955,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param string $expected                 Expected output.
 	 */
 	public function test_image_block_with_two_different_width_column_block( string $ancestor_block_alignment, string $image_block_alignment, string $expected ): void {
-		// Skip test for WordPress versions below 6.8.
-		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
-		}
-
 		$block_content = $this->get_columns_block_markup(
 			$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
 			array(
@@ -1097,11 +1087,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param string $expected                Expected output.
 	 */
 	public function test_image_block_with_parent_columns_and_its_parent_group_block( string $group_block_alignment, string $columns_block_alignment, string $image_block_alignment, string $expected ): void {
-		// Skip test for WordPress versions below 6.8.
-		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
-		}
-
 		$block_content = $this->get_group_block_markup(
 			$this->get_columns_block_markup(
 				$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
@@ -1307,11 +1292,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_two_column_layout_renders_correct_sizes_attribute(): void {
-		// Skip test for WordPress versions below 6.8.
-		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
-		}
-
 		$block_content = '<!-- wp:columns -->
 			<div class="wp-block-columns"><!-- wp:column -->
 			<div class="wp-block-column">
@@ -1335,11 +1315,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @cover ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_three_column_layout_renders_correct_sizes_attribute(): void {
-		// Skip test for WordPress versions below 6.8.
-		if ( version_compare( get_bloginfo( 'version' ), '6.8', '<' ) ) {
-			$this->markTestSkipped( 'This test requires WordPress 6.8 or higher.' );
-		}
-
 		$block_content = '<!-- wp:columns -->
 			<div class="wp-block-columns"><!-- wp:column -->
 			<div class="wp-block-column">
