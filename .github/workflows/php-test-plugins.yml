@@ -90,7 +90,7 @@ jobs:
             npm run wp-env-test start
           fi
       - name: Composer Install
-        run: npm run wp-env-test run cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
+        run: npm run wp-env-test run wordpress -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Update Composer Dependencies
         run: composer update --with-all-dependencies --no-interaction --no-progress
       - name: Install PHPUnit
@@ -136,7 +136,7 @@ jobs:
           fi
       - name: Upload single site coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./single-site-reports
@@ -145,7 +145,7 @@ jobs:
           fail_ci_if_error: true
       - name: Upload multisite coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./multisite-reports
