@@ -207,29 +207,29 @@ jobs:
       - name: Run plugin check
         run: |
           echo "::group::Debugging information"
-          wp-env run cli wp cli info
-          wp-env run cli wp plugin list
+          wp-env run wordpress wp cli info
+          wp-env run wordpress wp plugin list
           echo "::endgroup::"
 
           echo "::group::Install plugin-check"
-          wp-env run cli wp plugin install plugin-check --activate
+          wp-env run wordpress wp plugin install plugin-check --activate
           echo "::endgroup::"
 
           echo "::group::Install dependencies"
-          DEPENDENCIES=$(wp-env run cli wp plugin get "$PLUGIN_SLUG" --field=requires_plugins | tr ',' ' ' | tr -d '\r')
+          DEPENDENCIES=$(wp-env run wordpress wp plugin get "$PLUGIN_SLUG" --field=requires_plugins | tr ',' ' ' | tr -d '\r')
           if [ -n "${DEPENDENCIES// /}" ]; then
             echo "Installing plugin dependencies: $DEPENDENCIES"
-            wp-env run cli wp plugin install --activate $DEPENDENCIES
+            wp-env run wordpress wp plugin install --activate $DEPENDENCIES
           else
             echo "Plugin has no dependencies"
           fi
           echo "::endgroup::"
 
-          wp-env run cli wp plugin activate "$PLUGIN_SLUG"
+          wp-env run wordpress wp plugin activate "$PLUGIN_SLUG"
 
           echo "::group::Run Plugin Check"
           RESULTS="${RUNNER_TEMP}/plugin-check-results.json"
-          wp-env run cli wp plugin check "$PLUGIN_SLUG" \
+          wp-env run wordpress wp plugin check "$PLUGIN_SLUG" \
             --format=json \
             --ignore-codes=readme_reserved_contributors,WordPress.WP.I18n.TextDomainMismatch \
             --slug="$PLUGIN_SLUG" \
