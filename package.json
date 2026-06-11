@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-		"web-vitals": "5.2.0"
+		"web-vitals": "5.3.0"
 	},
 	"devDependencies": {
 		"@octokit/rest": "^22.0.1",
@@ -23,7 +23,7 @@
 		"ajv": "8.20.0",
 		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
-		"commander": "14.0.3",
+		"commander": "15.0.0",
 		"copy-webpack-plugin": "^14.0.0",
 		"css-minimizer-webpack-plugin": "^8.0.0",
 		"fast-glob": "^3.3.3",
