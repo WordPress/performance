@@ -3,7 +3,7 @@
  * Plugin Name: Web Worker Offloading
  * Plugin URI: https://github.com/WordPress/performance/issues/176
  * Description: Offloads select JavaScript execution to a Web Worker to reduce work on the main thread and improve the Interaction to Next Paint (INP) metric.
- * Requires at least: 6.6
+ * Requires at least: 6.9
  * Requires PHP: 7.4
  * Version: 0.2.1
  * Author: WordPress Performance Team

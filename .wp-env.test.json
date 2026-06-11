@@ -1,9 +1,9 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
 	"testsEnvironment": false,
+	"port": 8889,
 	"core": null,
 	"plugins": [
-		"./plugins/ai-performance-advisor",
 		"./plugins/optimization-detective",
 		"./plugins/auto-sizes",
 		"./plugins/dominant-color-images",
@@ -16,6 +16,11 @@
 		"./plugins/webp-uploads"
 	],
 	"config": {
-		"WP_DEVELOPMENT_MODE": "plugin"
+		"WP_DEBUG": false,
+		"SCRIPT_DEBUG": false,
+		"FS_METHOD": "direct"
+	},
+	"mappings": {
+		"wp-content/plugins/performance": "."
 	}
 }
