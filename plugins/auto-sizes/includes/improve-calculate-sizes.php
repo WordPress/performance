@@ -358,7 +358,19 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	}
 
 	if ( 'core/gallery' === $block['blockName'] ) {
-		$context['gallery_column_count'] = $block['attrs']['columns'] ?? 3;
+		// Get column count, if explicitly set.
+		if ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
+			$context['gallery_column_count'] = $block['attrs']['columns'] ?? '';
+		}
+
+		/*
+		 * If column count is not explicitly set, use the number of inner blocks as a fallback,
+		 * but only for up to 3 images to avoid incorrect context for larger galleries.
+		 */
+		$gallery_image_block_count = count( $block['innerBlocks'] );
+		if ( $gallery_image_block_count <= 3 ) {
+			$context['gallery_column_count'] = $gallery_image_block_count;
+		}
 	}
 
 	if ( 'core/image' === $block['blockName'] ) {
