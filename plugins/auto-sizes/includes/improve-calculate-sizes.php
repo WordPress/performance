@@ -316,6 +316,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/group'               => array( 'max_alignment' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
+		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
@@ -344,6 +345,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		'core/columns',
 		'core/group',
 		'core/post-featured-image',
+		'core/gallery',
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
@@ -353,6 +355,28 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
 		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
+	}
+
+	if ( 'core/gallery' === $block['blockName'] ) {
+		$context['gallery_column_count'] = $block['attrs']['columns'] ?? 3;
+	}
+
+	if ( 'core/image' === $block['blockName'] ) {
+		$current_width = 1.0;
+		if ( isset( $parent_block->context['gallery_column_count'] ) && $parent_block->context['gallery_column_count'] ) {
+			// Default to equally divided width if not explicitly set.
+			$current_width = $current_width / $parent_block->context['gallery_column_count'];
+		}
+
+		// Multiply with parent's width if available.
+		if (
+			isset( $parent_block->context['container_relative_width'] ) &&
+			( $current_width > 0.0 || $current_width < 1.0 )
+		) {
+			$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
+		} else {
+			$context['container_relative_width'] = $current_width;
+		}
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {
