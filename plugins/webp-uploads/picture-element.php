@@ -45,12 +45,20 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 *    The surrounding `<picture>` is not visible at that point, so the wrapped
 	 *    `<img>` carries a `data-wp-picture-wrapped` marker (added below) to be
 	 *    recognised here.
+	 *
+	 * The markup is parsed with WP_HTML_Tag_Processor rather than matched as a
+	 * raw substring, so a literal `<picture` or `data-wp-picture-wrapped` string
+	 * appearing inside an attribute value (such as `alt` text) cannot trigger a
+	 * false positive.
 	 */
-	if (
-		false !== stripos( $image, '<picture' ) ||
-		false !== stripos( $image, 'data-wp-picture-wrapped' )
-	) {
-		return $image;
+	$processor = new WP_HTML_Tag_Processor( $image );
+	while ( $processor->next_tag() ) {
+		if ( 'PICTURE' === $processor->get_tag() ) {
+			return $image;
+		}
+		if ( 'IMG' === $processor->get_tag() && null !== $processor->get_attribute( 'data-wp-picture-wrapped' ) ) {
+			return $image;
+		}
 	}
 
 	$original_file_mime_type = webp_uploads_get_attachment_file_mime_type( $attachment_id );
