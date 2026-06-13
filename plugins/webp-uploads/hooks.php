@@ -583,11 +583,7 @@ function webp_uploads_filter_image_tag( string $filtered_image, string $context,
  * @return string The filtered HTML.
  */
 function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachment_id, $size, bool $icon, array $attr ): string {
-	if ( '' === $html || 0 === $attachment_id || true === $icon ) {
-		return $html;
-	}
-
-	if ( ! webp_uploads_in_frontend_body() ) {
+	if ( '' === $html || 0 === $attachment_id || true === $icon || ! webp_uploads_in_frontend_body() ) {
 		return $html;
 	}
 
