@@ -1332,12 +1332,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Check if AVIF encoding is supported.
 	 *
+	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
+	 * where it returns true for AVIF support even if only decoding is supported but not encoding.
+	 *
 	 * @return bool True if AVIF encoding is supported, false otherwise.
 	 */
 	public function check_avif_encoding_support(): bool {
 		static $encoding_support = null;
 		if ( null === $encoding_support ) {
 			if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && class_exists( 'ImagickException' ) ) {
+				// Only reliable way to check for AVIF encoding support is to attempt to encode an image and catch the exception if it fails.
 				try {
 					$i = new Imagick();
 					$i->newImage( 10, 10, 'white' );

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c3204f8e5db949cb57216c4298159ef",
+    "content-hash": "db2f9e6e70aa48e3a3ac721761dc9c9e",
     "packages": [],
     "packages-dev": [
         {
@@ -689,16 +689,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.34",
+            "version": "0.4.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "2da4cdab8ac153926628877fbacebc80ba175b7c"
+                "reference": "1dbd55178db0faa8f85dc262985b858657990923"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/2da4cdab8ac153926628877fbacebc80ba175b7c",
-                "reference": "2da4cdab8ac153926628877fbacebc80ba175b7c",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/1dbd55178db0faa8f85dc262985b858657990923",
+                "reference": "1dbd55178db0faa8f85dc262985b858657990923",
                 "shasum": ""
             },
             "type": "library",
@@ -715,9 +715,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.34"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.35"
             },
-            "time": "2025-12-02T00:23:47+00:00"
+            "time": "2026-05-18T00:50:58+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -2504,16 +2504,16 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.9.4",
+            "version": "7.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
-                "reference": "15fd216bf6516670d8d07b938675925bfa5c15b0"
+                "reference": "06828a65f8276e31368fbe4c5f3d445332abc4c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/15fd216bf6516670d8d07b938675925bfa5c15b0",
-                "reference": "15fd216bf6516670d8d07b938675925bfa5c15b0",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/06828a65f8276e31368fbe4c5f3d445332abc4c5",
+                "reference": "06828a65f8276e31368fbe4c5f3d445332abc4c5",
                 "shasum": ""
             },
             "type": "library",
@@ -2548,7 +2548,7 @@
                 "issues": "https://github.com/wp-phpunit/issues",
                 "source": "https://github.com/wp-phpunit/wp-phpunit"
             },
-            "time": "2026-02-04T01:48:23+00:00"
+            "time": "2026-05-21T02:56:35+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",
@@ -2620,12 +2620,12 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.2 || ^8.0",
+        "php": "^7.4 || ^8.0",
         "ext-json": "*"
     },
     "platform-dev": {},
     "platform-overrides": {
-        "php": "7.2"
+        "php": "7.4"
     },
     "plugin-api-version": "2.9.0"
 }
