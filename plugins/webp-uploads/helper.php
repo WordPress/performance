@@ -597,7 +597,7 @@ function webp_uploads_check_image_transparency( ?string $filename ): bool {
 		$filename = $file;
 	}
 
-	if ( ! is_string( $filename ) || ! file_exists( $filename ) ) {
+	if ( ! file_exists( $filename ) ) {
 		return false;
 	}
 

@@ -34,7 +34,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		 *
 		 * @var WebP_Uploads_Image_Editor_Imagick|null $current_instance The current instance.
 		 */
-		public static $current_instance = null;
+		public static ?WebP_Uploads_Image_Editor_Imagick $current_instance = null;
 
 		/**
 		 * Stores already checked images for transparency.
@@ -43,7 +43,7 @@ if ( class_exists( 'WebP_Uploads_Image_Editor_Imagick_Base' ) ) {
 		 *
 		 * @var array<string, bool> Associative array with file paths as keys and transparency detection results as values.
 		 */
-		private static $checked_images = array();
+		private static array $checked_images = array();
 
 		/**
 		 * Load the image and set the current instance.
