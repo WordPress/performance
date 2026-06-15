@@ -180,7 +180,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'jpeg and picture enabled' => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => true,
-				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img data-wp-picture-wrapped="true" width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img data-wp-picture-wrapped width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'fallback_jpeg'   => false,

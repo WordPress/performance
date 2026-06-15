@@ -213,7 +213,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	// and skips it. See the idempotency guard above.
 	$marker = new WP_HTML_Tag_Processor( $image );
 	if ( $marker->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-		$marker->set_attribute( 'data-wp-picture-wrapped', 'true' );
+		$marker->set_attribute( 'data-wp-picture-wrapped', true );
 		$image = $marker->get_updated_html();
 	}
 

@@ -573,13 +573,13 @@ function webp_uploads_filter_image_tag( string $filtered_image, string $context,
  * their return values feed non-HTML contexts (OG tags, RSS, JSON) where
  * silently substituting a modern format is unsafe.
  *
- * @since 2.7.0
+ * @since n.e.x.t
  *
- * @param string       $html          HTML img element or empty string on failure.
- * @param int          $attachment_id Image attachment ID.
- * @param string|int[] $size          Requested image size.
- * @param bool         $icon          Whether the image should fall back to a mime type icon.
- * @param string[]     $attr          Array of attribute values for the image markup, keyed by attribute name.
+ * @param string                 $html          HTML img element or empty string on failure.
+ * @param int<1, max>            $attachment_id Image attachment ID.
+ * @param string|array{int, int} $size          Requested image size.
+ * @param bool                   $icon          Whether the image should fall back to a mime type icon.
+ * @param array<string, string>  $attr          Array of attribute values for the image markup, keyed by attribute name.
  * @return string The filtered HTML.
  */
 function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachment_id, $size, bool $icon, array $attr ): string {
@@ -593,12 +593,12 @@ function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachm
 	 * Returning false short-circuits the rewrite and preserves the original HTML. This gives
 	 * integrators a surgical per-call opt-out in addition to `remove_filter()`.
 	 *
-	 * @since 2.7.0
+	 * @since n.e.x.t
 	 *
-	 * @param bool         $should_filter Whether to apply modern-format rewriting. Default true.
-	 * @param int          $attachment_id Image attachment ID.
-	 * @param string|int[] $size          Requested image size.
-	 * @param string[]     $attr          Attribute array passed to `wp_get_attachment_image()`.
+	 * @param bool                   $should_filter Whether to apply modern-format rewriting. Default true.
+	 * @param int<1, max>            $attachment_id Image attachment ID.
+	 * @param string|array{int, int} $size          Requested image size.
+	 * @param array<string, string>  $attr          Attribute array passed to `wp_get_attachment_image()`.
 	 */
 	if ( ! apply_filters( 'webp_uploads_filter_wp_get_attachment_image', true, $attachment_id, $size, $attr ) ) {
 		return $html;
