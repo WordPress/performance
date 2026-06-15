@@ -576,10 +576,11 @@ function webp_uploads_filter_image_tag( string $filtered_image, string $context,
  * @since n.e.x.t
  *
  * @param string                 $html          HTML img element or empty string on failure.
- * @param int<1, max>            $attachment_id Image attachment ID.
+ * @param int                    $attachment_id Image attachment ID.
  * @param string|array{int, int} $size          Requested image size.
  * @param bool                   $icon          Whether the image should fall back to a mime type icon.
  * @param array<string, string>  $attr          Array of attribute values for the image markup, keyed by attribute name.
+ * @phpstan-param int<1, max> $attachment_id
  * @return string The filtered HTML.
  */
 function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachment_id, $size, bool $icon, array $attr ): string {
