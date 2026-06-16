@@ -37,6 +37,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 				'measure_callback' => static function ( $metric ): void {
 					// The 'timestart' global is set right at the beginning of WordPress execution.
 					$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+					$metric->set_start_time( $GLOBALS['timestart'] );
 				},
 				'access_cap'       => 'exist',
 			)
@@ -177,6 +178,27 @@ function perflab_register_default_server_timing_template_metrics(): void {
 					'measure_callback' => static function ( $metric ): void {
 						// The 'timestart' global is set right at the beginning of WordPress execution.
 						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+						$metric->set_start_time( $GLOBALS['timestart'] );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+
+			perflab_server_timing_register_metric(
+				'response-start',
+				array(
+					'measure_callback' => static function ( $metric ): void {
+						$metric->set_start_time( $GLOBALS['timestart'] );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+
+			perflab_server_timing_register_metric(
+				'response-end',
+				array(
+					'measure_callback' => static function ( $metric ): void {
+						$metric->set_start_time( microtime( true ) );
 					},
 					'access_cap'       => 'exist',
 				)
@@ -231,6 +253,7 @@ function perflab_register_default_server_timing_template_metrics(): void {
 								0.0
 							);
 							$metric->set_value( ( $total_query_time - $GLOBALS['perflab_query_time_before_template'] ) * 1000.0 );
+							$metric->set_start_time( $GLOBALS['perflab_query_time_before_template'] );
 						},
 						'access_cap'       => 'exist',
 					)
