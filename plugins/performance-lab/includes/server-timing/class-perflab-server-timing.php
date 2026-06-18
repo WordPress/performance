@@ -309,11 +309,14 @@ class Perflab_Server_Timing {
 		}
 
 		if ( null !== $description ) {
-			// Sanitize description for HTTP header quoted-string format.
-			// Remove control characters (CR/LF) and escape backslashes and quotes.
-			$sanitized_description = str_replace( array( "\r", "\n" ), '', $description );
-			$sanitized_description = addcslashes( $sanitized_description, '\\"' );
-			$parts[]               = sprintf( 'desc="%s"', $sanitized_description );
+			// Sanitize the description for the HTTP header quoted-string format (RFC 7230).
+			// Strip control characters (incl. CR/LF), which are not representable in a quoted-string,
+			// then escape the backslash and double-quote characters that require a quoted-pair.
+			$sanitized_description = (string) preg_replace( '/[\x00-\x1F\x7F]/', '', $description );
+			if ( '' !== $sanitized_description ) {
+				$sanitized_description = addcslashes( $sanitized_description, '\\"' );
+				$parts[]               = sprintf( 'desc="%s"', $sanitized_description );
+			}
 		}
 
 		return implode( ';', $parts );

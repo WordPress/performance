@@ -407,7 +407,7 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	 */
 	public function data_get_header_with_description_edge_cases(): array {
 		return array(
-			'description with double quote'    => array(
+			'description with double quote'        => array(
 				'wp-quoted;desc="Say \\"hello\\""',
 				array(
 					'quoted' => array(
@@ -418,7 +418,7 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 				),
 			),
-			'description with backslash'       => array(
+			'description with backslash'           => array(
 				'wp-backslash;desc="path\\\\to\\\\file"',
 				array(
 					'backslash' => array(
@@ -429,7 +429,7 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 				),
 			),
-			'description with newline'         => array(
+			'description with newline'             => array(
 				'wp-newline;desc="Line 1Line 2"',
 				array(
 					'newline' => array(
@@ -440,12 +440,35 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 				),
 			),
-			'description with carriage return' => array(
+			'description with carriage return'     => array(
 				'wp-cr;desc="BeforeAfter"',
 				array(
 					'cr' => array(
 						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
 							$metric->set_description( "Before\rAfter" );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'description with other control chars' => array(
+				'wp-controls;desc="AB"',
+				array(
+					'controls' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_description( "A\x00\x01\x0B\x0C\x1F\x7FB" );
+						},
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'description of only control chars'    => array(
+				'wp-only-controls;dur=50',
+				array(
+					'only-controls' => array(
+						'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+							$metric->set_value( 50 );
+							$metric->set_description( "\r\n\x00" );
 						},
 						'access_cap'       => 'exist',
 					),
