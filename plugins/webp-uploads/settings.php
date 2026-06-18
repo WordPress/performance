@@ -206,7 +206,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		<br />
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'AVIF transparency support is not available.', 'webp-uploads' ); ?></b></p>
-			<p><?php esc_html_e( 'Transparent images may lose transparency when generated as AVIF. Use WebP instead, or contact your hosting provider about updating ImageMagick.', 'webp-uploads' ); ?></p>
+			<p><?php esc_html_e( 'Current ImageMagick version does not support transparent AVIF images, so contact your hosting provider for more information.', 'webp-uploads' ); ?></p>
 		</div>
 	<?php endif; ?>
 	<?php

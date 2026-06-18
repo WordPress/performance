@@ -678,4 +678,46 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	public function test_webp_uploads_sanitize_image_format( $input, string $expected ): void {
 		$this->assertSame( $expected, webp_uploads_sanitize_image_format( $input ) );
 	}
+
+	/**
+	 * Data provider for ImageMagick version strings.
+	 *
+	 * @return array<string, array{string, bool}> Test data with version strings and expected support.
+	 */
+	public function data_provider_imagick_versions(): array {
+		return array(
+			'ImageMagick 6.8.9 Q16 x86_64'              => array( 'ImageMagick 6.8.9-9 Q16 x86_64 2018-09-28 https://imagemagick.org/index.php', false ),
+			'ImageMagick 6.9.11 Q16 x86_64'             => array( 'ImageMagick 6.9.11-60 Q16 x86_64 2021-01-01 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 below minimum revision' => array( 'ImageMagick 6.9.12-27 Q16 x86_64 2021-10-24 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 just below minimum revision' => array( 'ImageMagick 6.9.12-67 Q16 x86_64 2025-06-01 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 exact minimum revision' => array( 'ImageMagick 6.9.12-68 Q16 x86_64 2025-06-04 https://imagemagick.org', true ),
+			'ImageMagick 6.9.13 above minimum revision' => array( 'ImageMagick 6.9.13-17 Q16 x86_64', true ),
+			'ImageMagick 7.0.24 above minimum major version' => array( 'ImageMagick 7.0.24 Q16 x86_64', true ),
+			'ImageMagick 7.0.25 above minimum major version' => array( 'ImageMagick 7.0.25 Q16 x86_64', true ),
+			'ImageMagick 7.1.0 Q16-HDRI x86_64'         => array( 'ImageMagick 7.1.0-57 Q16-HDRI x86_64 d68553b17:20221230 https://imagemagick.org', true ),
+			'ImageMagick 7.1.1 Q16 aarch64'             => array( 'ImageMagick 7.1.1-15 Q16 aarch64 98eceff6a:20230729 https://imagemagick.org', true ),
+			'ImageMagick 7.1.2 Q16-HDRI x86_64'         => array( 'ImageMagick 7.1.2-7 Q16-HDRI x86_64 23405 https://imagemagick.org', true ),
+			'Empty string should return false'          => array( '', false ),
+			'Invalid string without version should be false' => array( 'Invalid version string', false ),
+			'String with only text should be false'     => array( 'ImageMagick', false ),
+			'Malformed version string should be false'  => array( 'ImageMagick x.y.z', false ),
+		);
+	}
+
+	/**
+	 * Tests webp_uploads_imagick_avif_transparency_supported checks version correctly.
+	 *
+	 * @dataProvider data_provider_imagick_versions
+	 * @covers ::webp_uploads_imagick_avif_transparency_supported
+	 *
+	 * @param string $version          ImageMagick version string.
+	 * @param bool   $expected_support Expected transparency support result.
+	 */
+	public function test_webp_uploads_imagick_avif_transparency_supported_checks_version( string $version, bool $expected_support ): void {
+		remove_all_filters( 'webp_uploads_imagick_avif_transparency_supported' );
+
+		$result = webp_uploads_imagick_avif_transparency_supported( $version );
+
+		$this->assertSame( $expected_support, $result );
+	}
 }

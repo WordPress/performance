@@ -5,7 +5,9 @@
  * @package webp-uploads
  */
 
-class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
+use WebP_Uploads\Tests\TestCase;
+
+class Test_WebP_Uploads_Settings extends TestCase {
 
 	/**
 	 * @covers ::webp_uploads_add_media_settings_fields
@@ -42,5 +44,31 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 			),
 			webp_uploads_add_settings_action_link( $default_action_links )
 		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
+	 */
+	public function test_webp_uploads_generate_avif_webp_setting_callback_disables_avif_and_shows_warning(): void {
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		$this->set_image_output_type( 'avif' );
+		$this->mock_avif_transparency_support( false );
+		$output    = get_echo( 'webp_uploads_generate_avif_webp_setting_callback' );
+		$processor = new WP_HTML_Tag_Processor( $output );
+
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'OPTION' ) ) );
+		$this->assertSame( 'webp', $processor->get_attribute( 'value' ) );
+		$this->assertNotNull( $processor->get_attribute( 'selected' ) );
+
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'OPTION' ) ) );
+		$this->assertSame( 'avif', $processor->get_attribute( 'value' ) );
+		$this->assertNotNull( $processor->get_attribute( 'disabled' ) );
+		$this->assertNull( $processor->get_attribute( 'selected' ) );
+
+		$this->assertStringContainsString( 'AVIF transparency support is not available.', $output );
+		$this->assertStringContainsString( 'Current ImageMagick version does not support transparent AVIF images', $output );
 	}
 }
