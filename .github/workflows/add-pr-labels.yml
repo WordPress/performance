@@ -6,7 +6,8 @@ on:
      types:
       - opened
       - synchronize
-
+    branches:
+      - trunk
 permissions: {}
 
 jobs:
