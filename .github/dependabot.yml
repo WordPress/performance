@@ -29,8 +29,8 @@ updates:
           - '@wordpress/*'
     ignore:
       # This is to remain compatible with the node in ../.nvmrc and <https://github.com/WordPress/gutenberg/blob/trunk/.nvmrc>.
-      - dependency-name: "@types/node"
-        versions: [">= 21"]
+      - dependency-name: '@types/node'
+        versions: ['>= 21']
 
   - package-ecosystem: composer
     directory: '/'

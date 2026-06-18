@@ -20,6 +20,7 @@ const {
 /**
  * WordPress dependencies
  */
+// @ts-ignore -- No declaration file for this module.
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 const defaultBuildConfig = {
@@ -347,7 +348,6 @@ const buildPlugin = ( env ) => {
 	}
 
 	if ( ! standalonePlugins.includes( env.plugin ) ) {
-		// eslint-disable-next-line no-console
 		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
 		return defaultBuildConfig;
@@ -384,7 +384,9 @@ const buildPlugin = ( env ) => {
 				],
 			} ),
 			{
-				apply: ( compiler ) => {
+				apply: (
+					/** @type {import('webpack').Compiler} */ compiler
+				) => {
 					// Before run, delete the build directory.
 					compiler.hooks.beforeRun.tap( 'BeforeRunPlugin', () => {
 						deleteFileOrDirectory( to );

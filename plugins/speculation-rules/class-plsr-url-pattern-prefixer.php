@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -25,7 +27,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 * @since 1.0.0
 	 * @var array<string, string>
 	 */
-	private $contexts;
+	private array $contexts;
 
 	/**
 	 * Constructor.
@@ -38,9 +40,7 @@ class PLSR_URL_Pattern_Prefixer {
 	public function __construct( array $contexts = array() ) {
 		if ( count( $contexts ) > 0 ) {
 			$this->contexts = array_map(
-				static function ( string $str ): string {
-					return self::escape_pattern_string( trailingslashit( $str ) );
-				},
+				static fn ( string $str ): string => self::escape_pattern_string( trailingslashit( $str ) ),
 				$contexts
 			);
 		} else {

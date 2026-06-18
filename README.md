@@ -11,19 +11,19 @@ For WordPress and PHP version requirements, please refer to the [CONTRIBUTING.md
 
 The feature plugins which are currently highlighted by this plugin are:
 
-Plugin                          | Slug                      | Experimental | Links
---------------------------------|---------------------------|--------------|-------------
-[Embed Optimizer][5]            | `embed-optimizer`         | No           | [Source][13], [Issues][21], [PRs][29]
-[Enhanced Responsive Images][6] | `auto-sizes`              | No           | [Source][14], [Issues][22], [PRs][30]
-[Image Placeholders][1]         | `dominant-color-images`   | No           | [Source][9],  [Issues][17], [PRs][25]
-[Image Prioritizer][7]          | `image-prioritizer`       | No           | [Source][15], [Issues][23], [PRs][31]
-[Instant Back/Forward][41]      | `nocache-bfcache`         | No           | [Source][42], [Issues][43], [PRs][44]
-[Modern Image Formats][2]       | `webp-uploads`            | No           | [Source][10], [Issues][18], [PRs][26]
-[Optimization Detective][33]    | `optimization-detective`  | No           | [Source][34], [Issues][35], [PRs][36]
-[Performant Translations][3]    | `performant-translations` | No           | [Source][11], [Issues][19], [PRs][27]
-[Speculative Loading][4]        | `speculation-rules`       | No           | [Source][12], [Issues][20], [PRs][28]
-[View Transitions][37]          | `view-transitions`        | Yes          | [Source][38], [Issues][39], [PRs][40]
-[Web Worker Offloading][8]      | `web-worker-offloading`   | Yes          | [Source][16], [Issues][24], [PRs][32]
+Plugin                          | Slug                      | Experimental           | Links
+--------------------------------|---------------------------|------------------------|-------------
+[Embed Optimizer][5]            | `embed-optimizer`         | No                     | [Source][13], [Issues][21], [PRs][29]
+[Enhanced Responsive Images][6] | `auto-sizes`              | No                     | [Source][14], [Issues][22], [PRs][30]
+[Image Placeholders][1]         | `dominant-color-images`   | No                     | [Source][9],  [Issues][17], [PRs][25]
+[Image Prioritizer][7]          | `image-prioritizer`       | No                     | [Source][15], [Issues][23], [PRs][31]
+[Instant Back/Forward][41]      | `nocache-bfcache`         | No                     | [Source][42], [Issues][43], [PRs][44]
+[Modern Image Formats][2]       | `webp-uploads`            | No                     | [Source][10], [Issues][18], [PRs][26]
+[Optimization Detective][33]    | `optimization-detective`  | No                     | [Source][34], [Issues][35], [PRs][36]
+[Performant Translations][3]    | `performant-translations` | No                     | [Source][11], [Issues][19], [PRs][27]
+[Speculative Loading][4]        | `speculation-rules`       | No                     | [Source][12], [Issues][20], [PRs][28]
+[View Transitions][37]          | `view-transitions`        | Yes                    | [Source][38], [Issues][39], [PRs][40]
+[Web Worker Offloading][8]      | `web-worker-offloading`   | Yes ([sunsetting][45]) | [Source][16], [Issues][24], [PRs][32]
 
 [1]: https://wordpress.org/plugins/dominant-color-images/
 [2]: https://wordpress.org/plugins/webp-uploads/
@@ -72,5 +72,7 @@ Plugin                          | Slug                      | Experimental | Lin
 [36]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+Optimization%20Detective%22
 [40]: https://github.com/WordPress/performance/pulls?q=is%3Apr+is%3Aopen+label%3A%22%5BPlugin%5D+View%20Transitions%22
 [44]: https://github.com/westonruter/nocache-bfcache/pulls
+
+[45]: https://github.com/WordPress/performance/issues/2284
 
 Note that the plugin names sometimes diverge from the plugin slugs due to scope changes. For example, a plugin's purpose may change as some of its features are merged into WordPress core.

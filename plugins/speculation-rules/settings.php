@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -324,7 +326,7 @@ function plsr_render_settings_field( array $args ): void {
 			</div>
 			<?php
 			// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
-			$js = <<<'JS'
+			$js  = <<<'JS'
 				const authOptions = document.getElementById( 'plsr-authentication-setting' );
 				const noticeDiv = document.getElementById( 'plsr-auth-notice' );
 				if ( authOptions && noticeDiv ) {
@@ -338,8 +340,7 @@ function plsr_render_settings_field( array $args ): void {
 						noticeDiv.classList.toggle( 'notice-warning', ! isLoggedOut );
 					} );
 				}
-JS;
-			// 👆 This 'JS;' line can only be indented two tabs when minimum PHP version is increased to 7.3+.
+			JS;
 			$js .= "\n//# sourceURL=speculation-rules-auth-admin-notice";
 			wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 			?>

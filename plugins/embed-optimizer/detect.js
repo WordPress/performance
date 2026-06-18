@@ -63,10 +63,10 @@ function monitorEmbedWrapperForResizes(
 	log,
 	error
 ) {
-	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
+	const xpath = embedWrapper.dataset.odXpath;
+	if ( ! xpath ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
-	const xpath = embedWrapper.dataset.odXpath;
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
 
@@ -75,12 +75,14 @@ function monitorEmbedWrapperForResizes(
 				resizedBoundingClientRect: entry.contentRect,
 			} );
 			const elementData = getElementData( xpath );
-			log(
-				`Resized element ${ xpath }:`,
-				elementData.boundingClientRect,
-				'=>',
-				entry.contentRect
-			);
+			if ( elementData ) {
+				log(
+					`Resized element ${ xpath }:`,
+					elementData.boundingClientRect,
+					'=>',
+					entry.contentRect
+				);
+			}
 		} catch ( err ) {
 			error(
 				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,

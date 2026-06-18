@@ -3,11 +3,12 @@
 	<description>Sniffs for WordPress plugins</description>
 
 	<rule ref="PHPCompatibility"/>
-	<config name="testVersion" value="7.2-"/>
+	<config name="testVersion" value="7.4-"/>
 
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
+	<rule ref="Generic.PHP.RequireStrictTypes"/>
 
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
@@ -114,13 +115,19 @@
 	</rule>
 	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
 		<properties>
-			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
 			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
 			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
 		</properties>
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+		<!-- WordPress code style requires @var docblocks (Squiz.Commenting.VariableComment.MissingVar) even when redundant with the native type hint. -->
+		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.UselessAnnotation" />
+	</rule>
+
+	<!-- Don't require native property type hints in tests; test fixtures and PHPUnit helpers should not have to match the strict typing applied to source. -->
+	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 
 	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
@@ -137,6 +144,10 @@
 	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotSanitized">
 		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.PHP.RequireStrictTypes.MissingDeclaration">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/**</exclude-pattern>
 	</rule>
 
 	<!-- Exclude built plugins and built assets in plugins. -->

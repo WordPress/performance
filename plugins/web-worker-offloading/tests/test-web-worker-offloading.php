@@ -71,10 +71,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
-		// See <https://core.trac.wordpress.org/ticket/63887>.
-		$before_data = preg_replace( ':\n//# sourceURL=.+$:', '', $before_data );
-		$after_data  = preg_replace( ':\n//# sourceURL=.+$:', '', $after_data );
-
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
@@ -86,7 +82,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			wp_json_encode( $partytown_config, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 			$before_data
 		);
-		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
+		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ) . "\n//# sourceURL=web-worker-offloading-js-after", $after_data );
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 	}
 
@@ -110,7 +106,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_enqueue_script( 'foo' );
 				},
-				'expected' => '<script id="foo-js-before">console.log("Hello, Before World!");</script><script id="foo-js-after">console.log("Hello, After World!");</script>',
+				'expected' => '<script id="foo-js-before">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script id="foo-js-after">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 			'add-script-for-web-worker-offloading'       => array(
 				'set_up'   => static function (): void {
@@ -139,7 +135,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, Before World!");', 'before' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script>',
 			),
 			'add-script-for-web-worker-offloading-with-after-data' => array(
 				'set_up'   => static function (): void {
@@ -147,7 +143,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 			'add-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -156,7 +152,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 			'add-async-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -165,7 +161,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script data-wp-strategy="async" id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script data-wp-strategy="async" id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 			'add-defer-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -174,7 +170,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script data-wp-strategy="defer" id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script data-wp-strategy="defer" id="foo-js" src="https://example.com/foo.js?ver=1.0.0" type="text/partytown"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 			'add-inline-script-offloaded-to-web-worker'  => array(
 				'set_up'   => static function (): void {
@@ -184,7 +180,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_script_add_data( 'foo', 'worker', true );
 					wp_enqueue_script( 'foo' );
 				},
-				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");//# sourceURL=foo-js-before</script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");//# sourceURL=foo-js-after</script>',
 			),
 		);
 	}
@@ -207,19 +203,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$set_up();
 
 		$normalize = static function ( $html ) {
-			// See <https://core.trac.wordpress.org/ticket/63887>.
-			if ( method_exists( 'WP_HTML_Tag_Processor', 'set_modifiable_text' ) ) { // @phpstan-ignore function.alreadyNarrowedType
-				// This normalization logic is only relevant to WP>=6.9-alpha anyway.
-				$p = new WP_HTML_Tag_Processor( $html );
-				while ( $p->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-					$text = $p->get_modifiable_text();
-					$text = preg_replace( ':\n//# sourceURL=.+$:', '', $text );
-					$p->set_modifiable_text( $text );
-				}
-				$html = $p->get_updated_html();
-			}
-
-			// This is admittedly EXTREMELY naïve. We should be using the assertEqualHTML method instead as of WP 6.9, but in the meantime, since WWO is proposed for deprecation, this is quick and dirty.
+			// This is admittedly EXTREMELY naïve, but since WWO is proposed for deprecation, this is quick and dirty.
 			$html = preg_replace_callback(
 				'/<script ([^>]+)>/',
 				static function ( array $matches ): string {
@@ -395,5 +379,34 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$this->assertFalse( function_exists( 'plwwo_google_site_kit_configure' ) );
 		$this->assertFalse( function_exists( 'plwwo_rank_math_configure' ) );
 		$this->assertFalse( function_exists( 'plwwo_woocommerce_configure' ) );
+	}
+
+	/**
+	 * Test the sunset notice hook.
+	 *
+	 * @covers ::plwwo_render_sunset_notice
+	 */
+	public function test_plwwo_render_sunset_notice_hook(): void {
+		$this->assertEquals( 10, has_action( 'after_plugin_row_meta', 'plwwo_render_sunset_notice' ) );
+	}
+
+	/**
+	 * Test rendering the sunset notice.
+	 *
+	 * @covers ::plwwo_render_sunset_notice
+	 */
+	public function test_plwwo_render_sunset_notice_rendering(): void {
+		$plugin_file = 'web-worker-offloading/load.php';
+
+		$output = get_echo( 'plwwo_render_sunset_notice', array( $plugin_file ) );
+
+		$this->assertStringContainsString( 'notice-warning', $output );
+		$this->assertStringContainsString( 'The Web Worker Offloading plugin is proposed for being sunset.', $output );
+		$this->assertStringContainsString( 'Interaction to Next Paint (INP)', $output );
+		$this->assertStringContainsString( 'https://wordpress.org/support/plugin/web-worker-offloading/', $output );
+
+		// Test with different plugin file.
+		$output = get_echo( 'plwwo_render_sunset_notice', array( 'other-plugin/load.php' ) );
+		$this->assertEmpty( $output );
 	}
 }

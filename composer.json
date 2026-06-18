@@ -12,7 +12,7 @@
 		"issues": "https://github.com/WordPress/performance/issues"
 	},
 	"require": {
-		"php": "^7.2 || ^8.0",
+		"php": "^7.4 || ^8.0",
 		"ext-json": "*"
 	},
 	"suggest": {
@@ -31,7 +31,7 @@
 		"squizlabs/php_codesniffer": "^3.9",
 		"szepeviktor/phpstan-wordpress": "^1.3",
 		"wp-coding-standards/wpcs": "^3.1",
-		"wp-phpunit/wp-phpunit": "^6.5",
+		"wp-phpunit/wp-phpunit": "^7.0",
 		"yoast/phpunit-polyfills": "^4.0",
 		"phpstan/php-8-stubs": "^0.4.0",
 		"phpstan/phpstan-strict-rules": "^1.6"
@@ -43,7 +43,7 @@
 			"composer/installers": true
 		},
 		"platform": {
-			"php": "7.2"
+			"php": "7.4"
 		}
 	},
 	"scripts": {
@@ -96,9 +96,9 @@
 		"lint:web-worker-offloading": "@lint -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
 		"lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
 		"phpstan": "phpstan analyse --memory-limit=2048M",
-		"test": "phpunit --strict-coverage",
+		"test": "php vendor/bin/phpunit --strict-coverage",
 		"test-multisite": [
-			"WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
+			"WP_MULTISITE=1 php vendor/bin/phpunit --exclude-group=ms-excluded"
 		],
 		"test-multisite:plugins": [
 			"@test-multisite:auto-sizes",

@@ -6,6 +6,8 @@
  * @since 1.8.0
  */
 
+declare( strict_types = 1 );
+
 /**
  * Class representing a single Server-Timing metric.
  *
@@ -19,7 +21,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var string
 	 */
-	private $slug;
+	private string $slug;
 
 	/**
 	 * The metric value in milliseconds.
@@ -27,7 +29,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var int|float|null
 	 */
-	private $value;
+	private $value; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- TODO: Use native int|float|null union type when PHP 8.0 is the minimum.
 
 	/**
 	 * The value measured before relevant execution logic in seconds, if used.
@@ -35,7 +37,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var float|null
 	 */
-	private $before_value;
+	private ?float $before_value = null;
 
 	/**
 	 * The metric description.

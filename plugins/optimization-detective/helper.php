@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -293,7 +295,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		),
 		'embed-optimizer'   => array(
 			'name'        => __( 'Embed Optimizer', 'optimization-detective' ),
-			'description' => __( 'Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.', 'optimization-detective' ),
+			'description' => __( 'Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.', 'optimization-detective' ),
 			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=embed-optimizer&TB_iframe=true&width=772' ),
 		),
 	);

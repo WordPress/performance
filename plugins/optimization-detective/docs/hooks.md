@@ -38,7 +38,7 @@ of the `OD_Tag_Visitor_Context` object which includes the following read-only pr
 
 - `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current open tag.
 - `$url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The URL Metrics which may include information about the current tag to inform what optimizations the callback performs.
-- `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add preload links and preconnect links as needed.
+- `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add `preload`, `preconnect`, and `dns-prefetch` links as needed.
 - `$url_metrics_id` (`positive-int|null`): The post ID for the `od_url_metrics` post from which the URL Metrics were loaded (if any). For advanced usage.
 
 Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child elements)

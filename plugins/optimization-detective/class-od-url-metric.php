@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -69,15 +71,17 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since 0.1.0
 	 * @var Data
 	 */
-	protected $data;
+	protected array $data;
 
 	/**
 	 * Elements.
 	 *
+	 * Lazily initialized in {@see self::get_elements()} from data['elements'].
+	 *
 	 * @since 0.7.0
-	 * @var OD_Element[]
+	 * @var OD_Element[]|null
 	 */
-	protected $elements;
+	protected ?array $elements = null;
 
 	/**
 	 * Group.
@@ -85,7 +89,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since 0.7.0
 	 * @var OD_URL_Metric_Group|null
 	 */
-	protected $group = null;
+	protected ?OD_URL_Metric_Group $group = null;
 
 	/**
 	 * Constructor.
@@ -515,11 +519,9 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		if ( ! is_array( $this->elements ) ) {
+		if ( null === $this->elements ) {
 			$this->elements = array_map(
-				function ( array $element ): OD_Element {
-					return new OD_Element( $element, $this );
-				},
+				fn ( array $element ): OD_Element => new OD_Element( $element, $this ),
 				$this->data['elements']
 			);
 		}
@@ -537,9 +539,7 @@ class OD_URL_Metric implements JsonSerializable {
 		$data = $this->data;
 
 		$data['elements'] = array_map(
-			static function ( OD_Element $element ): array {
-				return $element->jsonSerialize();
-			},
+			static fn ( OD_Element $element ): array => $element->jsonSerialize(),
 			$this->get_elements()
 		);
 

@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -172,9 +174,7 @@ function image_prioritizer_validate_background_image_url( string $url ) {
 	}
 
 	$allowed_hosts = array_map(
-		static function ( $host ) {
-			return wp_parse_url( $host, PHP_URL_HOST );
-		},
+		static fn ( $host ) => wp_parse_url( $host, PHP_URL_HOST ),
 		get_allowed_http_origins()
 	);
 

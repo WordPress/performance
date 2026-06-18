@@ -10,19 +10,24 @@ const { program } = require( 'commander' );
  */
 const { formats } = require( './lib/logger' );
 
-const withOptions = ( command, options ) => {
+const withOptions = (
+	/** @type {import('commander').Command} */ command,
+	/** @type {{description: string, argname: string, defaults?: string|boolean|string[]|null}[]} */ options
+) => {
 	options.forEach( ( { description, argname, defaults } ) => {
-		command = command.option( argname, description, defaults );
+		command = command.option( argname, description, defaults ?? undefined );
 	} );
 	return command;
 };
 
-const catchException = ( handler ) => {
-	return async ( ...args ) => {
+const catchException = ( /** @type {Function} */ handler ) => {
+	return async ( /** @type {any[]} */ ...args ) => {
 		try {
 			await handler( ...args );
 		} catch ( error ) {
-			console.error( formats.error( error.message ) ); // eslint-disable-line no-console
+			const message =
+				error instanceof Error ? error.message : 'Unknown error';
+			console.error( formats.error( message ) );
 			process.exitCode = 1;
 		}
 	};
