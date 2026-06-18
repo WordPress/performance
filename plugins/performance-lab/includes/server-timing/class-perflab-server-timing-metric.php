@@ -43,7 +43,7 @@ class Perflab_Server_Timing_Metric {
 	 * The metric description.
 	 *
 	 * @since n.e.x.t
-	 * @var string|null
+	 * @var non-empty-string|null
 	 */
 	private ?string $description = null;
 
@@ -182,7 +182,7 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string|null The metric description, or null if none set.
+	 * @return non-empty-string|null The metric description, or null if none set.
 	 */
 	public function get_description(): ?string {
 		return $this->description;
