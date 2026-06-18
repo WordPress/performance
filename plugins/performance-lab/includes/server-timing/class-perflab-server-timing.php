@@ -32,7 +32,7 @@ class Perflab_Server_Timing {
 	 * @since 1.8.0
 	 * @var array<string, Perflab_Server_Timing_Metric>
 	 */
-	private $registered_metrics = array();
+	private array $registered_metrics = array();
 
 	/**
 	 * Map of registered metric slugs and their registered data.
@@ -41,7 +41,7 @@ class Perflab_Server_Timing {
 	 * @phpstan-var array<string, MetricArguments>
 	 * @var array<string, array>
 	 */
-	private $registered_metrics_data = array();
+	private array $registered_metrics_data = array();
 
 	/**
 	 * Registers a metric to calculate for the Server-Timing header.
@@ -196,9 +196,7 @@ class Perflab_Server_Timing {
 				},
 				$this->registered_metrics
 			),
-			static function ( $value ) {
-				return null !== $value;
-			}
+			static fn ( $value ) => null !== $value
 		);
 
 		return implode( ', ', $metric_header_values );

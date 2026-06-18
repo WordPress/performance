@@ -29,7 +29,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @var bool
 	 */
-	private $added_lazy_script = false;
+	private bool $added_lazy_script = false;
 
 	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.

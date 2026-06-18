@@ -331,9 +331,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	private function add_image_preload_link_for_lcp_element_groups( OD_Tag_Visitor_Context $context, string $xpath, array $attributes ): void {
 		$attributes = array_filter(
 			$attributes,
-			static function ( $attribute_value ) {
-				return is_string( $attribute_value ) && '' !== $attribute_value;
-			}
+			static fn ( $attribute_value ) => is_string( $attribute_value ) && '' !== $attribute_value
 		);
 
 		/**

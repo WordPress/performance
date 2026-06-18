@@ -33,7 +33,7 @@ final class OD_Tag_Visitor_Context {
 	 * @since 0.4.0
 	 * @var OD_HTML_Tag_Processor
 	 */
-	private $processor;
+	private OD_HTML_Tag_Processor $processor;
 
 	/**
 	 * URL Metric group collection.
@@ -41,7 +41,7 @@ final class OD_Tag_Visitor_Context {
 	 * @since 0.4.0
 	 * @var OD_URL_Metric_Group_Collection
 	 */
-	private $url_metric_group_collection;
+	private OD_URL_Metric_Group_Collection $url_metric_group_collection;
 
 	/**
 	 * Link collection.
@@ -49,7 +49,7 @@ final class OD_Tag_Visitor_Context {
 	 * @since 0.4.0
 	 * @var OD_Link_Collection
 	 */
-	private $link_collection;
+	private OD_Link_Collection $link_collection;
 
 	/**
 	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
@@ -59,7 +59,7 @@ final class OD_Tag_Visitor_Context {
 	 * @since 1.0.0
 	 * @var positive-int|null
 	 */
-	private $url_metrics_id;
+	private ?int $url_metrics_id;
 
 	/**
 	 * Visited tag state.
@@ -69,7 +69,7 @@ final class OD_Tag_Visitor_Context {
 	 * @since 1.0.0
 	 * @var OD_Visited_Tag_State
 	 */
-	private $visited_tag_state;
+	private OD_Visited_Tag_State $visited_tag_state;
 
 	/**
 	 * Constructor.
