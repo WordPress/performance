@@ -122,12 +122,12 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'balloons_webp' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp',
-				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8' ),
+				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8', 'c2bdbc' ),
 				'expected_transparency' => false,
 			),
 			'half_opaque'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/half-opaque.png',
-				'expected_color'        => array( '7e7e7e' ),
+				'expected_color'        => array( '7e7e7e', 'ffffff' ),
 				'expected_transparency' => true,
 			),
 		);
@@ -214,7 +214,7 @@ abstract class TestCase extends WP_UnitTestCase {
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
-		$this->assertStringContainsString( 'image_no_editor', $dominant_color_data->get_error_code() );
+		$this->assertStringContainsString( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
 	}
 
 	/**

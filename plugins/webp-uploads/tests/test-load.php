@@ -774,10 +774,15 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<string>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types(): array {
-		return array(
+		$data = array(
 			'webp' => array( 'webp' ),
-			'avif' => array( 'avif' ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif'] = array( 'avif' );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -786,12 +791,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<int, string|true>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types_with_threshold(): array {
-		return array(
+		$data = array(
 			'webp'                    => array( 'webp' ),
 			'webp with 850 threshold' => array( 'webp', true ),
-			'avif'                    => array( 'avif' ),
-			'avif with 850 threshold' => array( 'avif', true ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif']                    = array( 'avif' );
+			$data['avif with 850 threshold'] = array( 'avif', true );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -1094,6 +1104,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
 		}
 
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is not supported.' );
+		}
+
 		$this->set_image_output_type( 'avif' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp' );
@@ -1309,5 +1323,35 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$featured_image = get_the_post_thumbnail( $post_id );
 		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
+
+	/**
+	 * Check if AVIF encoding is supported.
+	 *
+	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
+	 * where it returns true for AVIF support even if only decoding is supported but not encoding.
+	 *
+	 * @return bool True if AVIF encoding is supported, false otherwise.
+	 */
+	public function check_avif_encoding_support(): bool {
+		static $encoding_support = null;
+		if ( null === $encoding_support ) {
+			if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && class_exists( 'ImagickException' ) ) {
+				// Only reliable way to check for AVIF encoding support is to attempt to encode an image and catch the exception if it fails.
+				try {
+					$i = new Imagick();
+					$i->newImage( 10, 10, 'white' );
+					$i->setImageFormat( 'avif' );
+					$i->getImageBlob();
+					$encoding_support = true;
+				} catch ( ImagickException $e ) {
+					$encoding_support = false;
+				}
+			} else {
+				$encoding_support = false;
+			}
+		}
+
+		return $encoding_support;
 	}
 }
