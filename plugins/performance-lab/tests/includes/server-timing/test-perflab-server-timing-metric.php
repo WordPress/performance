@@ -114,6 +114,7 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 	 */
 	public function test_set_description_with_empty_string_is_treated_as_unset(): void {
 		$this->metric->set_description( 'Database queries' );
+		$this->assertIsString( $this->metric->get_description() );
 		$this->metric->set_description( '' );
 		$this->assertNull( $this->metric->get_description() );
 	}
