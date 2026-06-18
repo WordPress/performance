@@ -17,12 +17,9 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 		$callback = $wp_settings_sections['media']['perflab_modern_image_format_settings']['callback'];
 		$this->assertIsCallable( $callback );
 
-		ob_start();
-		call_user_func( $callback );
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'https://wordpress.org/plugins/webp-uploads/#faq', $output );
-		$this->assertStringContainsString( '<a href=', $output );
+		$processor = new WP_HTML_Tag_Processor( get_echo( $callback ) );
+		$this->assertTrue( $processor->next_tag( 'A' ) );
+		$this->assertSame( 'https://wordpress.org/plugins/webp-uploads/#faq', $processor->get_attribute( 'href' ) );
 	}
 
 	/**
