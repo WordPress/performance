@@ -358,16 +358,18 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	}
 
 	if ( 'core/gallery' === $block['blockName'] ) {
-		// Get column count, if explicitly set.
-		if ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
+		if ( wp_is_mobile() ) {
+			// On mobile, the gallery is always 2 column.
+			$context['gallery_column_count'] = 2;
+		} elseif ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
 			$context['gallery_column_count'] = $block['attrs']['columns'] ?? '';
 		} else {
 			/*
-			 * Fallback to the inner block count if column count isn't explicitly set.
-			 * Cap the columns at 3 to prevent layout issues, as the default gallery
-			 * style wraps images to new lines after 3 columns.
-			 * See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
-			 */
+			* Fallback to the inner block count if column count isn't explicitly set.
+			* Cap the columns at 3 to prevent layout issues, as the default gallery
+			* style wraps images to new lines after 3 columns.
+			* See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
+			*/
 			$gallery_image_block_count = count( $block['innerBlocks'] );
 			if ( $gallery_image_block_count <= 3 ) {
 				$context['gallery_column_count'] = $gallery_image_block_count;
