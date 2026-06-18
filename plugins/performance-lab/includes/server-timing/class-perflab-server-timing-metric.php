@@ -156,9 +156,12 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * Sets the metric description.
 	 *
+	 * An empty string is treated as no description, in which case the metric is
+	 * emitted without a `desc` parameter.
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param non-empty-string $description The metric description.
+	 * @param string $description The metric description. Pass an empty string to unset it.
 	 */
 	public function set_description( string $description ): void {
 		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
@@ -171,7 +174,7 @@ class Perflab_Server_Timing_Metric {
 			return;
 		}
 
-		$this->description = $description;
+		$this->description = '' !== $description ? $description : null;
 	}
 
 	/**

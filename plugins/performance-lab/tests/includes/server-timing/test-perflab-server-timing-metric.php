@@ -107,4 +107,14 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 
 		$this->assertSame( 'before', $this->metric->get_description() );
 	}
+
+	/**
+	 * @covers Perflab_Server_Timing_Metric::set_description
+	 * @covers Perflab_Server_Timing_Metric::get_description
+	 */
+	public function test_set_description_with_empty_string_is_treated_as_unset(): void {
+		$this->metric->set_description( 'Database queries' );
+		$this->metric->set_description( '' );
+		$this->assertNull( $this->metric->get_description() );
+	}
 }

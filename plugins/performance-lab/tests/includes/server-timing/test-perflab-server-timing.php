@@ -301,18 +301,22 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	 * @return array<string, array{0: string, 1: array<string, MetricArguments>}>
 	 */
 	public function data_get_header_with_description(): array {
-		$measure_with_description = static function ( Perflab_Server_Timing_Metric $metric ): void {
+		$measure_with_description  = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 100 );
 			$metric->set_description( 'Database queries' );
 		};
-		$measure_description_only = static function ( Perflab_Server_Timing_Metric $metric ): void {
+		$measure_description_only  = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_description( 'Cache operations' );
 		};
-		$measure_duration_only    = static function ( Perflab_Server_Timing_Metric $metric ): void {
+		$measure_duration_only     = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 50 );
 		};
-		$measure_name_only        = static function ( Perflab_Server_Timing_Metric $metric ): void {
+		$measure_name_only         = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			unset( $metric );
+		};
+		$measure_empty_description = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			$metric->set_value( 50 );
+			$metric->set_description( '' );
 		};
 
 		return array(
@@ -348,6 +352,15 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 				array(
 					'missed-cache' => array(
 						'measure_callback' => $measure_name_only,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'metric with empty description'        => array(
+				'wp-empty-desc;dur=50',
+				array(
+					'empty-desc' => array(
+						'measure_callback' => $measure_empty_description,
 						'access_cap'       => 'exist',
 					),
 				),
