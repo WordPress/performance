@@ -45,7 +45,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since n.e.x.t
 	 * @var string|null
 	 */
-	private $description = null;
+	private ?string $description = null;
 
 	/**
 	 * Constructor.
