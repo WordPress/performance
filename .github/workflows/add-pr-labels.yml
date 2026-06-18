@@ -3,7 +3,6 @@ name: Add Pull Request Labels
 on:
   pull_request_target:
     types:
-     types:
       - opened
       - synchronize
     branches:
