@@ -186,6 +186,13 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
 	<?php endif; ?>
+	<?php if ( $avif_supported && ! webp_uploads_imagick_avif_transparency_supported() ) : ?>
+		<br />
+		<div class="notice notice-warning inline">
+			<p><b><?php esc_html_e( 'AVIF transparency support is not available.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'Transparent images may lose transparency when generated as AVIF. Use WebP instead, or contact your hosting provider about updating ImageMagick.', 'webp-uploads' ); ?></p>
+		</div>
+	<?php endif; ?>
 	<?php
 }
 

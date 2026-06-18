@@ -40,7 +40,7 @@ function webp_uploads_imagick_avif_transparency_supported_test(): array {
 		'test'        => 'is_imagick_avif_transparency_supported_enabled',
 	);
 
-	if ( ! webp_uploads_imagick_avif_transparency_supported() ) {
+	if ( 'avif' === webp_uploads_get_image_output_format() && ! webp_uploads_imagick_avif_transparency_supported() ) {
 		$result['status']  = 'recommended';
 		$result['label']   = __( 'Your site does not support AVIF transparency', 'webp-uploads' );
 		$result['actions'] = sprintf(
