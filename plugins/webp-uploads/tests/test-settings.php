@@ -8,6 +8,21 @@
 class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 
 	/**
+	 * @covers ::webp_uploads_add_media_settings_fields
+	 */
+	public function test_webp_uploads_add_media_settings_fields_section_description(): void {
+		global $wp_settings_sections;
+		webp_uploads_add_media_settings_fields();
+
+		$callback = $wp_settings_sections['media']['perflab_modern_image_format_settings']['callback'];
+		$this->assertIsCallable( $callback );
+
+		$processor = new WP_HTML_Tag_Processor( get_echo( $callback ) );
+		$this->assertTrue( $processor->next_tag( 'A' ) );
+		$this->assertSame( 'https://wordpress.org/plugins/webp-uploads/#faq', $processor->get_attribute( 'href' ) );
+	}
+
+	/**
 	 * @covers ::webp_uploads_add_settings_action_link
 	 */
 	public function test_webp_uploads_add_settings_action_link(): void {

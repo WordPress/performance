@@ -79,7 +79,19 @@ function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
 		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
-		'__return_empty_string',
+		static function (): void {
+			printf(
+				'<p>%s</p>',
+				wp_kses(
+					sprintf(
+						/* translators: %s: URL to the plugin FAQ on WordPress.org */
+						__( 'If modern format images are not being generated after upload, see the <a href="%s">FAQ</a> for common reasons.', 'webp-uploads' ),
+						'https://wordpress.org/plugins/webp-uploads/#faq'
+					),
+					array( 'a' => array( 'href' => array() ) )
+				)
+			);
+		},
 		'media',
 		array(
 			'before_section' => '<div id="modern-image-formats">',
