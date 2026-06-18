@@ -173,7 +173,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	</label>
 	<p class="description" id="perflab_modern_image_format_description">
 		<?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?>
-		<?php esc_html_e( 'Generated images may be discarded if the modern image format file is larger than the original uploaded image.', 'webp-uploads' ); ?>
+		<?php esc_html_e( 'Generated images may be discarded if the file in the modern format is larger than the originally uploaded image.', 'webp-uploads' ); ?>
 	</p>
 	<?php if ( ! $avif_supported ) : ?>
 		<br />
