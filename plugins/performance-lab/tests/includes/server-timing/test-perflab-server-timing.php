@@ -298,7 +298,7 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @return array<string, mixed>
+	 * @return array<string, array{0: string, 1: array<string, MetricArguments>}>
 	 */
 	public function data_get_header_with_description(): array {
 		$measure_with_description = static function ( Perflab_Server_Timing_Metric $metric ): void {
@@ -390,7 +390,7 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @return array<string, mixed>
+	 * @return array<string, array{0: string, 1: array<string, MetricArguments>}>
 	 */
 	public function data_get_header_with_description_edge_cases(): array {
 		return array(
