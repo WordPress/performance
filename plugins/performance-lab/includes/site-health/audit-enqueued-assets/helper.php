@@ -539,10 +539,22 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 	}
 	if ( '' !== $cache_control ) {
 		$directives = array_map( 'trim', explode( ',', strtolower( $cache_control ) ) );
-		if ( in_array( 'no-store', $directives, true ) ) {
+		if ( in_array( 'no-store', $directives, true ) || in_array( 'no-cache', $directives, true ) || in_array( 'max-age=0', $directives, true ) ) {
 			return new WP_Error(
 				'not_cacheable',
-				esc_html__( 'The asset response has a Cache-Control: no-store directive and will not be cached by browsers.', 'performance-lab' )
+				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
+			);
+		}
+	} else {
+		// No Cache-Control header: fall back to Expires. A past date means the asset is not cacheable.
+		$expires = wp_remote_retrieve_header( $response, 'expires' );
+		if ( is_array( $expires ) ) {
+			$expires = end( $expires );
+		}
+		if ( '' !== $expires && strtotime( $expires ) <= time() ) {
+			return new WP_Error(
+				'not_cacheable',
+				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
 			);
 		}
 	}

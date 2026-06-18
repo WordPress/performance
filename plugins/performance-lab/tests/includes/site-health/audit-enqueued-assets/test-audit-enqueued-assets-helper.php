@@ -527,7 +527,7 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_aea_get_asset_size() with a Cache-Control: no-store response.
+	 * Tests perflab_aea_get_asset_size() with non-cacheable responses.
 	 *
 	 * @covers ::perflab_aea_get_asset_size
 	 */
@@ -560,6 +560,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 					),
 				),
 				array(
+					'url'      => 'https://example.com/max-age-zero.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'max-age=0' ),
+					),
+				),
+				array(
 					'url'      => 'https://example.com/cacheable.js',
 					'response' => array(
 						'code'    => 200,
@@ -575,6 +583,22 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 						'headers' => array( 'cache-control' => array( 'no-store', 'must-revalidate' ) ),
 					),
 				),
+				array(
+					'url'      => 'https://example.com/expires-past.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'expires' => 'Thu, 01 Jan 1970 00:00:00 GMT' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/expires-future.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'expires' => gmdate( 'D, d M Y H:i:s', time() + 3600 ) . ' GMT' ),
+					),
+				),
 			)
 		);
 
@@ -586,8 +610,15 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$this->assertWPError( $no_store_extras_result );
 		$this->assertSame( 'not_cacheable', $no_store_extras_result->get_error_code() );
 
-		// no-cache means revalidate, not no-store — should not be flagged.
-		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/no-cache.js' ) );
+		// no-cache forces revalidation on every request and should be flagged.
+		$no_cache_result = perflab_aea_get_asset_size( 'https://example.com/no-cache.js' );
+		$this->assertWPError( $no_cache_result );
+		$this->assertSame( 'not_cacheable', $no_cache_result->get_error_code() );
+
+		// max-age=0 forces revalidation on every request and should be flagged.
+		$max_age_zero_result = perflab_aea_get_asset_size( 'https://example.com/max-age-zero.js' );
+		$this->assertWPError( $max_age_zero_result );
+		$this->assertSame( 'not_cacheable', $max_age_zero_result->get_error_code() );
 
 		// Normal cacheable response should return size.
 		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/cacheable.js' ) );
@@ -596,6 +627,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$no_store_array_result = perflab_aea_get_asset_size( 'https://example.com/no-store-array-header.js' );
 		$this->assertWPError( $no_store_array_result );
 		$this->assertSame( 'not_cacheable', $no_store_array_result->get_error_code() );
+
+		// Expires in the past with no Cache-Control should be flagged.
+		$expires_past_result = perflab_aea_get_asset_size( 'https://example.com/expires-past.js' );
+		$this->assertWPError( $expires_past_result );
+		$this->assertSame( 'not_cacheable', $expires_past_result->get_error_code() );
+
+		// Expires in the future with no Cache-Control should return size.
+		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/expires-future.js' ) );
 	}
 
 	/**
