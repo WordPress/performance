@@ -514,3 +514,40 @@ function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string 
 	$mime_type = $filetype['type'] ?? get_post_mime_type( $attachment_id );
 	return is_string( $mime_type ) ? $mime_type : '';
 }
+
+/**
+ * Checks if Imagick has AVIF transparency support.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|null $version Optional Imagick version string. If not provided, the version will be retrieved from the Imagick class.
+ * @return bool True if Imagick has AVIF transparency support, false otherwise.
+ */
+function webp_uploads_imagick_avif_transparency_supported( ?string $version = null ): bool {
+	$supported       = false;
+	$imagick_version = $version;
+
+	if ( null === $imagick_version && extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) ) {
+		$imagick_version = Imagick::getVersion();
+		$imagick_version = $imagick_version['versionString'];
+	}
+
+	if ( null !== $imagick_version && '' !== $imagick_version && (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version, $matches ) ) {
+		$imagick_version = $matches[0];
+	}
+
+	if ( null === $imagick_version || '' === $imagick_version ) {
+		return false;
+	}
+
+	$supported = version_compare( $imagick_version, '6.9.12-68', '>=' );
+
+	/**
+	 * Filters whether Imagick has AVIF transparency support.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $supported Whether AVIF transparency is supported.
+	 */
+	return (bool) apply_filters( 'webp_uploads_imagick_avif_transparency_supported', $supported );
+}

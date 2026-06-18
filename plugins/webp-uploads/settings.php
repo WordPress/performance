@@ -153,9 +153,10 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
-	$selected       = webp_uploads_get_image_output_format();
-	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
-	$webp_supported = webp_uploads_mime_type_supported( 'image/webp' );
+	$selected                    = webp_uploads_get_image_output_format();
+	$avif_supported              = webp_uploads_mime_type_supported( 'image/avif' );
+	$avif_transparency_supported = webp_uploads_imagick_avif_transparency_supported();
+	$webp_supported              = webp_uploads_mime_type_supported( 'image/webp' );
 
 	// If neither format is support, the entire field is not shown.
 	if ( ! $avif_supported && ! $webp_supported ) {
@@ -170,7 +171,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	}
 
 	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( ! $avif_supported && 'avif' === $selected ) {
+	if ( ! ( $avif_supported && $avif_transparency_supported ) && 'avif' === $selected ) {
 		$selected = 'webp';
 	} elseif ( ! $webp_supported && 'webp' === $selected ) {
 		$selected = 'avif';
@@ -178,7 +179,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	?>
 	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
 		<option value="webp"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_supported ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
-		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_supported ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
+		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! ( $avif_supported && $avif_transparency_supported ) ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 	</select>
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
@@ -199,6 +200,13 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+		</div>
+	<?php endif; ?>
+	<?php if ( $avif_supported && ! $avif_transparency_supported ) : ?>
+		<br />
+		<div class="notice notice-warning inline">
+			<p><b><?php esc_html_e( 'AVIF transparency support is not available.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'Transparent images may lose transparency when generated as AVIF. Use WebP instead, or contact your hosting provider about updating ImageMagick.', 'webp-uploads' ); ?></p>
 		</div>
 	<?php endif; ?>
 	<?php
