@@ -538,8 +538,18 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		$cache_control = implode( ', ', $cache_control );
 	}
 	if ( '' !== $cache_control ) {
-		$directives = array_map( 'trim', explode( ',', strtolower( $cache_control ) ) );
-		if ( in_array( 'no-store', $directives, true ) || in_array( 'no-cache', $directives, true ) || in_array( 'max-age=0', $directives, true ) ) {
+		// Parse the directives into a name => value map so values like max-age can be compared numerically.
+		$directives = array();
+		foreach ( explode( ',', strtolower( $cache_control ) ) as $directive ) {
+			$parts               = explode( '=', $directive, 2 );
+			$name                = trim( $parts[0] );
+			$directives[ $name ] = isset( $parts[1] ) ? trim( $parts[1], " \t\n\r\0\x0B\"'" ) : '';
+		}
+		if (
+			array_key_exists( 'no-store', $directives ) ||
+			array_key_exists( 'no-cache', $directives ) ||
+			( array_key_exists( 'max-age', $directives ) && 0 === (int) $directives['max-age'] )
+		) {
 			return new WP_Error(
 				'not_cacheable',
 				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )

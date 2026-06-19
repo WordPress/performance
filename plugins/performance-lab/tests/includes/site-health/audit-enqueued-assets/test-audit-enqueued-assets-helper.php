@@ -576,6 +576,22 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 					),
 				),
 				array(
+					'url'      => 'https://example.com/max-age-zero-quoted.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'max-age="0"' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/max-age-zero-spaced.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'cache-control' => 'public, max-age = 0' ),
+					),
+				),
+				array(
 					'url'      => 'https://example.com/no-store-array-header.js',
 					'response' => array(
 						'code'    => 200,
@@ -630,6 +646,16 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 		// Normal cacheable response should return size.
 		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/cacheable.js' ) );
+
+		// max-age with a quoted zero value should be flagged.
+		$max_age_zero_quoted_result = perflab_aea_get_asset_size( 'https://example.com/max-age-zero-quoted.js' );
+		$this->assertWPError( $max_age_zero_quoted_result );
+		$this->assertSame( 'not_cacheable', $max_age_zero_quoted_result->get_error_code() );
+
+		// max-age with whitespace around the equals sign and a zero value should be flagged.
+		$max_age_zero_spaced_result = perflab_aea_get_asset_size( 'https://example.com/max-age-zero-spaced.js' );
+		$this->assertWPError( $max_age_zero_spaced_result );
+		$this->assertSame( 'not_cacheable', $max_age_zero_spaced_result->get_error_code() );
 
 		// Cache-Control header returned as an array (multiple headers) should still be detected.
 		$no_store_array_result = perflab_aea_get_asset_size( 'https://example.com/no-store-array-header.js' );
