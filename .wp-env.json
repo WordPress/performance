@@ -3,6 +3,7 @@
 	"testsEnvironment": false,
 	"core": null,
 	"plugins": [
+		"./plugins/ai-performance-advisor",
 		"./plugins/optimization-detective",
 		"./plugins/auto-sizes",
 		"./plugins/dominant-color-images",
