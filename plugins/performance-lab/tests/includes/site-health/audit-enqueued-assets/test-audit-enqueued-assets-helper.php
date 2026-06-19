@@ -511,8 +511,9 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 				array(
 					'url'      => 'https://example.com/script4.js',
 					'response' => array(
-						'code' => 200,
-						'body' => str_repeat( 'A', 1000 ),
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 1000 ),
+						'headers' => array( 'cache-control' => 'max-age=3600' ),
 					),
 				),
 			)
@@ -623,6 +624,30 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 						'headers' => array( 'expires' => '0' ),
 					),
 				),
+				array(
+					'url'      => 'https://example.com/no-headers.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array(),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/last-modified-only.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'last-modified' => 'Mon, 01 Jan 2024 00:00:00 GMT' ),
+					),
+				),
+				array(
+					'url'      => 'https://example.com/etag-only.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'etag' => '"abc123"' ),
+					),
+				),
 			)
 		);
 
@@ -674,6 +699,17 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 		$expires_invalid_result = perflab_aea_get_asset_size( 'https://example.com/expires-invalid.js' );
 		$this->assertWPError( $expires_invalid_result );
 		$this->assertSame( 'not_cacheable', $expires_invalid_result->get_error_code() );
+
+		// No Cache-Control, no Expires, and no validator should be flagged.
+		$no_headers_result = perflab_aea_get_asset_size( 'https://example.com/no-headers.js' );
+		$this->assertWPError( $no_headers_result );
+		$this->assertSame( 'not_cacheable', $no_headers_result->get_error_code() );
+
+		// No Cache-Control and no Expires but a Last-Modified validator allows heuristic caching, so it should return size.
+		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/last-modified-only.js' ) );
+
+		// No Cache-Control and no Expires but an ETag validator allows heuristic caching, so it should return size.
+		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/etag-only.js' ) );
 	}
 
 	/**

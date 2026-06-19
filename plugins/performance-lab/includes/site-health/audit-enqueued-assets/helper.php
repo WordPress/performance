@@ -563,18 +563,40 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 			);
 		}
 	} else {
-		// No Cache-Control header: fall back to Expires. A past date means the asset is not cacheable.
+		// No Cache-Control header: fall back to Expires.
 		$expires = wp_remote_retrieve_header( $response, 'expires' );
 		if ( is_array( $expires ) ) {
 			$expires = end( $expires );
 		}
-		// An invalid Expires value is treated as already expired per RFC 7234.
-		$expires_timestamp = '' !== $expires ? strtotime( $expires ) : false;
-		if ( '' !== $expires && ( false === $expires_timestamp || $expires_timestamp <= time() ) ) {
-			return new WP_Error(
-				'not_cacheable',
-				esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
-			);
+		if ( '' !== $expires ) {
+			// An invalid Expires value is treated as already expired per RFC 7234.
+			$expires_timestamp = strtotime( $expires );
+			if ( false === $expires_timestamp || $expires_timestamp <= time() ) {
+				return new WP_Error(
+					'not_cacheable',
+					esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
+				);
+			}
+		} else {
+			// No Cache-Control and no Expires: heuristic caching is only viable when a validator
+			// (Last-Modified or ETag) is present. Without one, the asset effectively cannot be cached.
+			$has_validator = false;
+			foreach ( array( 'last-modified', 'etag' ) as $validator_header ) {
+				$value = wp_remote_retrieve_header( $response, $validator_header );
+				if ( is_array( $value ) ) {
+					$value = implode( '', $value );
+				}
+				if ( '' !== $value ) {
+					$has_validator = true;
+					break;
+				}
+			}
+			if ( ! $has_validator ) {
+				return new WP_Error(
+					'not_cacheable',
+					esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
+				);
+			}
 		}
 	}
 
