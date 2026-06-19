@@ -65,7 +65,7 @@ withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 withOptions( program.command( 'release-plugin-since' ), sinceOptions )
 	.alias( 'since' )
 	.description(
-		'Updates "n.e.x.t" tags with the current release version in the "Stable tag" of readme.txt'
+		'Replaces "n.e.x.t" tags with the release version (the "Stable tag" of readme.txt) for plugins with an open, dated release milestone (use --all for every plugin)'
 	)
 	.action( catchException( sinceHandler ) );
 

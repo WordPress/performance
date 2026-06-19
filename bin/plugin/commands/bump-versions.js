@@ -207,6 +207,10 @@ async function getReleaseMilestones( token ) {
 	return releaseMilestones;
 }
 
+// Export getReleaseMilestones so other release commands (e.g. `since`) can target the
+// same set of plugins.
+exports.getReleaseMilestones = getReleaseMilestones;
+
 /**
  * Bumps the version everywhere it needs to be set for a single plugin.
  *

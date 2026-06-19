@@ -10,17 +10,31 @@ const { log, formats } = require( '../lib/logger' );
  * Internal dependencies
  */
 const { plugins } = require( '../../../plugins.json' );
+const { getReleaseMilestones } = require( './bump-versions' );
 
 /**
  * @typedef WPSinceCommandOptions
  *
- * @property {string=} plugin Plugin slug.
+ * @property {string=}  plugin Plugin slug.
+ * @property {string=}  token  Optional personal GitHub access token.
+ * @property {boolean=} all    Update every plugin, ignoring release milestones (legacy behavior).
  */
 
 exports.options = [
 	{
 		argname: '-p, --plugin <plugin>',
-		description: 'Plugin slug. Defaults to update all.',
+		description:
+			'Plugin slug. Defaults to all plugins with an open, dated release milestone.',
+	},
+	{
+		argname: '-t, --token <token>',
+		description: 'GitHub token',
+	},
+	{
+		argname: '-a, --all',
+		description:
+			'Update all plugins, ignoring release milestones (legacy behavior). When combined with --plugin, that plugin is updated without checking for a milestone.',
+		defaults: false,
 	},
 ];
 
@@ -36,20 +50,36 @@ exports.handler = async ( opt ) => {
 		);
 	}
 
-	const pluginDirectories = [];
-	const pluginRoot = path.resolve( __dirname, '../../../' );
-
-	if ( opt.plugin ) {
-		pluginDirectories.push(
-			path.resolve( pluginRoot, 'plugins', opt.plugin )
-		);
+	let targetSlugs;
+	if ( opt.all ) {
+		// Legacy behavior: update every plugin (or the given one), ignoring milestones.
+		targetSlugs = opt.plugin ? [ opt.plugin ] : plugins;
 	} else {
-		for ( const pluginSlug of plugins ) {
-			pluginDirectories.push(
-				path.resolve( pluginRoot, 'plugins', pluginSlug )
+		// Default: only update plugins that are being released, i.e. those with an open
+		// milestone that has a due date and whose title does not contain "n.e.x.t".
+		const releaseSlugs = ( await getReleaseMilestones( opt.token ) ).map(
+			( milestone ) => milestone.slug
+		);
+		targetSlugs = opt.plugin
+			? releaseSlugs.filter( ( slug ) => slug === opt.plugin )
+			: releaseSlugs;
+
+		if ( targetSlugs.length === 0 ) {
+			log(
+				formats.warning(
+					opt.plugin
+						? `⚠ Skipping ${ opt.plugin }: no open release milestone with a due date (and without "n.e.x.t") was found. Pass --all to update it anyway.`
+						: '⚠ No plugins have an open release milestone with a due date (and without "n.e.x.t"); nothing to update. Pass --all to update every plugin.'
+				)
 			);
+			return;
 		}
 	}
+
+	const pluginRoot = path.resolve( __dirname, '../../../' );
+	const pluginDirectories = targetSlugs.map( ( pluginSlug ) =>
+		path.resolve( pluginRoot, 'plugins', pluginSlug )
+	);
 
 	for ( const pluginDirectory of pluginDirectories ) {
 		const patterns = [];
