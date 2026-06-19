@@ -3,8 +3,8 @@
  * Plugin Name: View Transitions
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/view-transitions
  * Description: Adds smooth transitions between navigations to your WordPress site.
- * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
  * Version: 1.2.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

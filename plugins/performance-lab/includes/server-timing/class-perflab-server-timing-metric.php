@@ -21,7 +21,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var string
 	 */
-	private $slug;
+	private string $slug;
 
 	/**
 	 * The metric value in milliseconds.
@@ -29,7 +29,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var int|float|null
 	 */
-	private $value;
+	private $value; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- TODO: Use native int|float|null union type when PHP 8.0 is the minimum.
 
 	/**
 	 * The value measured before relevant execution logic in seconds, if used.
@@ -37,7 +37,15 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 * @var float|null
 	 */
-	private $before_value;
+	private ?float $before_value = null;
+
+	/**
+	 * The metric description.
+	 *
+	 * @since n.e.x.t
+	 * @var non-empty-string|null
+	 */
+	private ?string $description = null;
 
 	/**
 	 * Constructor.
@@ -143,5 +151,40 @@ class Perflab_Server_Timing_Metric {
 		}
 
 		$this->set_value( ( microtime( true ) - $this->before_value ) * 1000.0 );
+	}
+
+	/**
+	 * Sets the metric description.
+	 *
+	 * An empty string is treated as no description, in which case the metric is
+	 * emitted without a `desc` parameter.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $description The metric description. Pass an empty string to unset it.
+	 */
+	public function set_description( string $description ): void {
+		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: WordPress action name */
+				sprintf( esc_html__( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				''
+			);
+			return;
+		}
+
+		$this->description = '' !== $description ? $description : null;
+	}
+
+	/**
+	 * Gets the metric description.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return non-empty-string|null The metric description, or null if none set.
+	 */
+	public function get_description(): ?string {
+		return $this->description;
 	}
 }
