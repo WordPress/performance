@@ -39,7 +39,8 @@ exports.options = [
 ];
 
 /**
- * Replaces "@since n.e.x.t" tags in the code with the current release version.
+ * Replaces "n.e.x.t" version placeholders (in "@since"/"@deprecated" tags, single-quoted
+ * version literals, and readme changelog/upgrade-notice headings) with the release version.
  *
  * @param {WPSinceCommandOptions} opt Command options.
  */
@@ -106,7 +107,7 @@ exports.handler = async ( opt ) => {
 		} );
 
 		const regexps = [
-			/(@since\s+)n\.e\.x\.t/g,
+			/(@(?:since|deprecated)\s+)n\.e\.x\.t/g,
 			/('[^']*?)n\.e\.x\.t(?=')/g,
 		];
 
@@ -117,13 +118,10 @@ exports.handler = async ( opt ) => {
 				if ( regexp.test( content ) ) {
 					fs.writeFileSync(
 						file,
-						content.replace(
-							regexp,
-							function ( matches, sinceTag ) {
-								replacementCount++;
-								return sinceTag + version;
-							}
-						)
+						content.replace( regexp, function ( matches, tag ) {
+							replacementCount++;
+							return tag + version;
+						} )
 					);
 				}
 			}
