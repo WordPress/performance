@@ -545,14 +545,21 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 			$name                = trim( $parts[0] );
 			$directives[ $name ] = isset( $parts[1] ) ? trim( $parts[1], " \t\n\r\0\x0B\"'" ) : '';
 		}
-		if (
-			array_key_exists( 'no-store', $directives ) ||
-			array_key_exists( 'no-cache', $directives ) ||
-			( array_key_exists( 'max-age', $directives ) && 0 === (int) $directives['max-age'] )
-		) {
+		if ( array_key_exists( 'no-store', $directives ) ) {
+			// no-store forbids browsers from caching the asset at all.
 			return new WP_Error(
 				'not_cacheable',
 				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
+			);
+		}
+		if (
+			array_key_exists( 'no-cache', $directives ) ||
+			( array_key_exists( 'max-age', $directives ) && 0 === (int) $directives['max-age'] )
+		) {
+			// no-cache and max-age=0 permit caching but force revalidation on every request.
+			return new WP_Error(
+				'not_cacheable',
+				esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
 			);
 		}
 	} else {
@@ -566,7 +573,7 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		if ( '' !== $expires && ( false === $expires_timestamp || $expires_timestamp <= time() ) ) {
 			return new WP_Error(
 				'not_cacheable',
-				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
+				esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
 			);
 		}
 	}
