@@ -89,7 +89,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 	 *
 	 * See https://github.com/WordPress/performance/issues/2468.
 	 */
-	if ( empty( $metadata['width'] ) || empty( $metadata['height'] ) ) {
+	if ( ! isset( $metadata['width'], $metadata['height'] ) || (int) $metadata['width'] < 1 || (int) $metadata['height'] < 1 ) {
 		$image_size = wp_getimagesize( $file );
 		if ( ! is_array( $image_size ) ) {
 			return $metadata;
