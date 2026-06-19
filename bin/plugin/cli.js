@@ -52,6 +52,10 @@ const {
 	handler: versionsHandler,
 	options: versionsOptions,
 } = require( './commands/versions' );
+const {
+	handler: bumpVersionsHandler,
+	options: bumpVersionsOptions,
+} = require( './commands/bump-versions' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -76,5 +80,12 @@ withOptions( program.command( 'verify-version-consistency' ), versionsOptions )
 	.alias( 'versions' )
 	.description( 'Verifies consistency of versions in plugins' )
 	.action( catchException( versionsHandler ) );
+
+withOptions( program.command( 'bump-plugin-versions' ), bumpVersionsOptions )
+	.alias( 'bump-versions' )
+	.description(
+		'Bumps plugin versions based on open, dated release milestones (titled "$plugin_slug $version" without "n.e.x.t")'
+	)
+	.action( catchException( bumpVersionsHandler ) );
 
 program.parse( process.argv );

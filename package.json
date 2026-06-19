@@ -42,6 +42,7 @@
 	},
 	"scripts": {
 		"changelog": "./bin/plugin/cli.js changelog",
+		"bump-versions": "./bin/plugin/cli.js bump-versions",
 		"since": "./bin/plugin/cli.js since",
 		"readme": "./bin/plugin/cli.js readme",
 		"versions": "./bin/plugin/cli.js versions",
