@@ -599,6 +599,14 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 						'headers' => array( 'expires' => gmdate( 'D, d M Y H:i:s', time() + 3600 ) . ' GMT' ),
 					),
 				),
+				array(
+					'url'      => 'https://example.com/expires-invalid.js',
+					'response' => array(
+						'code'    => 200,
+						'body'    => str_repeat( 'A', 500 ),
+						'headers' => array( 'expires' => '0' ),
+					),
+				),
 			)
 		);
 
@@ -635,6 +643,11 @@ class Test_Audit_Enqueued_Assets_Helper extends WP_Ajax_UnitTestCase {
 
 		// Expires in the future with no Cache-Control should return size.
 		$this->assertEquals( 500, perflab_aea_get_asset_size( 'https://example.com/expires-future.js' ) );
+
+		// An invalid Expires value is treated as already expired per RFC 7234 and should be flagged.
+		$expires_invalid_result = perflab_aea_get_asset_size( 'https://example.com/expires-invalid.js' );
+		$this->assertWPError( $expires_invalid_result );
+		$this->assertSame( 'not_cacheable', $expires_invalid_result->get_error_code() );
 	}
 
 	/**

@@ -551,7 +551,9 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		if ( is_array( $expires ) ) {
 			$expires = end( $expires );
 		}
-		if ( '' !== $expires && strtotime( $expires ) <= time() ) {
+		// An invalid Expires value is treated as already expired per RFC 7234.
+		$expires_timestamp = '' !== $expires ? strtotime( $expires ) : false;
+		if ( '' !== $expires && ( false === $expires_timestamp || $expires_timestamp <= time() ) ) {
 			return new WP_Error(
 				'not_cacheable',
 				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
