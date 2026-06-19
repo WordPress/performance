@@ -434,6 +434,32 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Falls back to WebP output when AVIF is selected but AVIF transparency is not supported.
+	 *
+	 * @covers ::webp_uploads_get_upload_image_mime_transforms
+	 */
+	public function test_it_should_fall_back_to_webp_when_avif_transparency_not_supported(): void {
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		$this->set_image_output_type( 'avif' );
+		$this->mock_avif_transparency_support( false );
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/webp' ),
+			),
+			$transforms
+		);
+	}
+
+	/**
 	 * Returns transforms array with fallback to original mime with invalid transforms array.
 	 */
 	public function test_it_should_return_fallback_transforms_when_overwritten_invalid_transforms(): void {

@@ -68,7 +68,7 @@ class Test_WebP_Uploads_Settings extends TestCase {
 		$this->assertNotNull( $processor->get_attribute( 'disabled' ) );
 		$this->assertNull( $processor->get_attribute( 'selected' ) );
 
-		$this->assertStringContainsString( 'AVIF transparency support is not available.', $output );
+		$this->assertStringContainsString( 'AVIF is supported, but not fully: transparency support is lacking.', $output );
 		$this->assertStringContainsString( 'Current ImageMagick version does not support transparent AVIF images', $output );
 	}
 }
