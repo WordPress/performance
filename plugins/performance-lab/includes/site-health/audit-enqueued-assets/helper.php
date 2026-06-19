@@ -524,9 +524,83 @@ function perflab_aea_get_asset_size( string $resource_url ) {
 		);
 	}
 
-	// TODO: A non-cacheable response should also be considered an error.
-	// TODO: A size of zero could be considered an error too.
-	return strlen( wp_remote_retrieve_body( $response ) );
+	$body = wp_remote_retrieve_body( $response );
+
+	if ( strlen( $body ) === 0 ) {
+		return new WP_Error(
+			'zero_size',
+			esc_html__( 'The asset returned an empty response body.', 'performance-lab' )
+		);
+	}
+
+	$cache_control = wp_remote_retrieve_header( $response, 'cache-control' );
+	if ( is_array( $cache_control ) ) {
+		$cache_control = implode( ', ', $cache_control );
+	}
+	if ( '' !== $cache_control ) {
+		// Parse the directives into a name => value map so values like max-age can be compared numerically.
+		$directives = array();
+		foreach ( explode( ',', strtolower( $cache_control ) ) as $directive ) {
+			$parts               = explode( '=', $directive, 2 );
+			$name                = trim( $parts[0] );
+			$directives[ $name ] = isset( $parts[1] ) ? trim( $parts[1], " \t\n\r\0\x0B\"'" ) : '';
+		}
+		if ( array_key_exists( 'no-store', $directives ) ) {
+			// no-store forbids browsers from caching the asset at all.
+			return new WP_Error(
+				'not_cacheable',
+				esc_html__( 'The asset response cannot be cached by browsers.', 'performance-lab' )
+			);
+		}
+		if (
+			array_key_exists( 'no-cache', $directives ) ||
+			( array_key_exists( 'max-age', $directives ) && 0 === (int) $directives['max-age'] )
+		) {
+			// no-cache and max-age=0 permit caching but force revalidation on every request.
+			return new WP_Error(
+				'not_cacheable',
+				esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
+			);
+		}
+	} else {
+		// No Cache-Control header: fall back to Expires.
+		$expires = wp_remote_retrieve_header( $response, 'expires' );
+		if ( is_array( $expires ) ) {
+			$expires = end( $expires );
+		}
+		if ( '' !== $expires ) {
+			// An invalid Expires value is treated as already expired per RFC 7234.
+			$expires_timestamp = strtotime( $expires );
+			if ( false === $expires_timestamp || $expires_timestamp <= time() ) {
+				return new WP_Error(
+					'not_cacheable',
+					esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
+				);
+			}
+		} else {
+			// No Cache-Control and no Expires: heuristic caching is only viable when a validator
+			// (Last-Modified or ETag) is present. Without one, the asset effectively cannot be cached.
+			$has_validator = false;
+			foreach ( array( 'last-modified', 'etag' ) as $validator_header ) {
+				$value = wp_remote_retrieve_header( $response, $validator_header );
+				if ( is_array( $value ) ) {
+					$value = implode( '', $value );
+				}
+				if ( '' !== $value ) {
+					$has_validator = true;
+					break;
+				}
+			}
+			if ( ! $has_validator ) {
+				return new WP_Error(
+					'not_cacheable',
+					esc_html__( 'The asset response may not be fully cacheable by browsers.', 'performance-lab' )
+				);
+			}
+		}
+	}
+
+	return strlen( $body );
 }
 
 /**
