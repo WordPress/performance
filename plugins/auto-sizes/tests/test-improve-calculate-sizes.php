@@ -1476,6 +1476,73 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
+	 * 'sizes' attribute based on the number of images and columns.
+	 *
+	 * @dataProvider data_gallery_block_with_explicitly_columns_set
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param int    $image_count              Number of images.
+	 * @param string $expected                 Expected output.
+	 */
+	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment = '', string $image_block_alignment = '', int $image_count = 3, string $expected ): void {
+		$image_block = '';
+		for ( $i = 0; $i < $image_count; $i++ ) {
+			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
+		}
+		$block_content = $this->get_gallery_block_markup(
+			$image_block,
+			array(
+				'align' => $ancestor_block_alignment,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider for testing Gallery block layout sizes with explicit columns.
+	 *
+	 * @return array<string, array<mixed>> Arguments passed to the test method.
+	 */
+	public static function data_gallery_block_with_explicitly_columns_set(): array {
+		return array(
+			'Default alignment, 1 image (1 column)'   => array(
+				'',
+				'',
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 2 images (2 columns)' => array(
+				'',
+				'',
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 3 images (3 columns)' => array(
+				'',
+				'',
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 6 images (maxes out column constraints)' => array(
+				'',
+				'',
+				6,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 9 images (maxes out column constraints)' => array(
+				'',
+				'',
+				9,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
@@ -1596,6 +1663,36 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			wp_json_encode( $atts ),
 			esc_attr( $align_class ),
 			$column_block
+		);
+	}
+
+	/**
+	 * Helper to generate gallery block markup.
+	 *
+	 * This function generates a WordPress gallery block with optional alignment.
+	 *
+	 * @param string       $content Content to be included in the columns.
+	 * @param array<mixed> $atts    Optional. Block attributes. Default empty array.
+	 * @return string The generated columns block markup.
+	 */
+	public function get_gallery_block_markup( string $content, array $atts = array() ): string {
+		$atts = wp_parse_args(
+			$atts,
+			array(
+				'linkTo' => 'none',
+			)
+		);
+
+		$align_class = '' !== $atts['align'] ? ' align' . $atts['align'] : '';
+
+		// Generate and return the final columns block markup.
+		return sprintf(
+			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
+			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $align_class . '">
+				%1$s
+			</figure>
+			<!-- /wp:gallery -->',
+			$content
 		);
 	}
 }
