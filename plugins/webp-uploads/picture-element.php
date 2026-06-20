@@ -7,6 +7,14 @@
  * @since 2.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Potentially wrap an image tag in a picture element.
  *
@@ -19,7 +27,7 @@
  * @return string The new image tag.
  */
 function webp_uploads_wrap_image_in_picture( string $image, string $context, int $attachment_id ): string {
-	if ( 'the_content' !== $context ) {
+	if ( ! in_array( $context, array( 'the_content', 'post_thumbnail_html', 'widget_block_content' ), true ) ) {
 		return $image;
 	}
 
@@ -41,14 +49,33 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		array_unshift( $image_sizes, $image_meta );
 	}
 
+	// Extract sizes using regex to parse image tag, then use to retrieve tag.
+	$width     = 0;
+	$height    = 0;
+	$processor = new WP_HTML_Tag_Processor( $image );
+	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$width  = (int) $processor->get_attribute( 'width' );
+		$height = (int) $processor->get_attribute( 'height' );
+	}
+	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
+
+	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use );
+	if ( false === $image_src ) {
+		return $image;
+	}
+	list( $src, $width, $height ) = $image_src;
+	$size_array                   = array( absint( $width ), absint( $height ) );
+
 	// Collect all the sub size image mime types.
 	$mime_type_data = array();
 	foreach ( $image_sizes as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
 			foreach ( $size['sources'] as $mime_type => $data ) {
-				$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
-				$mime_type_data[ $mime_type ]['w'][ $size['width'] ]  = $data;
-				$mime_type_data[ $mime_type ]['h'][ $size['height'] ] = $data;
+				if ( wp_image_matches_ratio( $size_array[0], $size_array[1], $size['width'], $size['height'] ) ) {
+					$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
+					$mime_type_data[ $mime_type ]['w'][ $size['width'] ]  = $data;
+					$mime_type_data[ $mime_type ]['h'][ $size['height'] ] = $data;
+				}
 			}
 		}
 	}
@@ -96,23 +123,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 
 	// Add each mime type to the picture's sources.
 	$picture_sources = '';
-
-	// Extract sizes using regex to parse image tag, then use to retrieve tag.
-	$width     = 0;
-	$height    = 0;
-	$processor = new WP_HTML_Tag_Processor( $image );
-	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-		$width  = (int) $processor->get_attribute( 'width' );
-		$height = (int) $processor->get_attribute( 'height' );
-	}
-	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-
-	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use );
-	if ( false === $image_src ) {
-		return $image;
-	}
-	list( $src, $width, $height ) = $image_src;
-	$size_array                   = array( absint( $width ), absint( $height ) );
 
 	// Gets the srcset and sizes from the IMG tag.
 	$sizes  = $processor->get_attribute( 'sizes' );

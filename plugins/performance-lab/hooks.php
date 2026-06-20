@@ -67,27 +67,30 @@ function perflab_get_standalone_plugin_data(): array {
 	return array(
 		'auto-sizes'              => array(
 			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'dominant-color-images'   => array(
 			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
 		),
 		'embed-optimizer'         => array(
 			'constant'     => 'EMBED_OPTIMIZER_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'image-prioritizer'       => array(
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
-			'experimental' => true,
+			'experimental' => false,
 		),
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
+		'nocache-bfcache'         => array(
+			'constant' => 'WestonRuter\NocacheBFCache\VERSION',
+		),
 		'speculation-rules'       => array(
 			'constant' => 'SPECULATION_RULES_VERSION',
 		),
-		'web-worker-offloading'   => array(
-			'constant'     => 'WEB_WORKER_OFFLOADING_VERSION',
+		'view-transitions'        => array(
+			'constant'     => 'VIEW_TRANSITIONS_VERSION',
 			'experimental' => true,
 		),
 		'webp-uploads'            => array(
@@ -115,11 +118,13 @@ function perflab_get_standalone_plugin_version_constants(): array {
  * the frontend.
  *
  * This function will short-circuit if at least one of the constants
- * 'PERFLAB_DISABLE_SERVER_TIMING' or 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is
- * set as true.
+ * 'PERFLAB_DISABLE_SERVER_TIMING' or
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true or if the
+ * 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant is not set to a truthy value.
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
+ * @since 4.0.0 No longer places the drop-in on new sites by default, unless the `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` constant is set to true.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -131,7 +136,14 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		return;
 	}
 
+	// Bail if the drop-in is not enabled.
+	if ( ! defined( 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' ) || ! PERFLAB_PLACE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
 	// Bail if disabled via constant.
+	// This constant is maintained only for backward compatibility and should not be relied upon in new implementations.
+	// Use the 'PERFLAB_PLACE_OBJECT_CACHE_DROPIN' constant instead to control drop-in placement.
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
 		return;
 	}

@@ -1,33 +1,42 @@
 === Image Prioritizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   0.2.0
+Tested up to: 7.0
+Stable tag:   1.0.0-beta3
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
-Tags:         performance, optimization, image, lcp, lazy-load
+Tags:         performance, optimization, image, optimization-detective
 
-Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy-loading.
+Prioritizes the loading of images and videos based on how they appear to actual visitors: adds fetchpriority, preloads, lazy-loads, and sets sizes.
 
 == Description ==
 
-This plugin optimizes the loading of images (and videos) with prioritization, lazy loading, and more accurate image size selection.
+This plugin optimizes the loading of images (and videos) with prioritization to improve [Largest Contentful Paint](https://web.dev/articles/lcp) (LCP), lazy loading, and more accurate image size selection.
 
 The current optimizations include:
 
-1. Ensure `fetchpriority=high` is only added to an `IMG` when it is the Largest Contentful Paint (LCP) element across all responsive breakpoints.
-2. Add breakpoint-specific `fetchpriority=high` preload links for the LCP elements which are `IMG` elements or elements with a CSS `background-image` inline style.
-3. Apply lazy-loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport. (Additionally, [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is then also correctly applied.)
-4. Implement lazy-loading of CSS background images added via inline `style` attributes.
-5. Add `fetchpriority=low` to `IMG` tags which appear in the initial viewport but are not visible, such as when they are subsequent carousel slides.
+1. Add breakpoint-specific `fetchpriority=high` preload links (both as `LINK[rel=preload]` elements and `Link` response headers) for image URLs of LCP elements:
+   1. An `IMG` element, including the `srcset`/`sizes` attributes supplied as `imagesrcset`/`imagesizes` on the `LINK`.
+   2. The first `SOURCE` element with a `type` attribute in a `PICTURE` element. (Art-directed `PICTURE` elements using media queries are not supported.)
+   3. An element with a CSS `background-image` inline `style` attribute.
+   4. An element with a CSS `background-image` applied with a stylesheet (when the image is from an allowed origin).
+   5. A `VIDEO` element's `poster` image.
+2. Ensure `fetchpriority=high` is only added to an `IMG` when it is the LCP element across all responsive breakpoints.
+3. Add `fetchpriority=low` to `IMG` tags which appear in the initial viewport but are not visible, such as when they are subsequent carousel slides.
+4. Lazy loading:
+   1. Apply lazy loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport.
+   2. Implement lazy loading of CSS background images added via inline `style` attributes.
+   3. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
+5. Responsive image sizes:
+   1. Ensure [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is set on `IMG` tags after setting correct lazy-loading (above).
+   2. ~~Compute the `sizes` attribute using the widths of an image collected from URL Metrics for each breakpoint (when not lazy-loaded since then handled by `sizes=auto`).~~ (This has been removed due to an [issue](https://github.com/WordPress/performance/issues/2098); use [Enhanced Responsive Images instead](https://wordpress.org/plugins/auto-sizes/).)
 6. Reduce the size of the `poster` image of a `VIDEO` from full size to the size appropriate for the maximum width of the video (on desktop).
-7. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
 
 **This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency.** Please refer to that plugin for additional background on how this plugin works as well as additional developer options.
 
 👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages. As such, you won't see optimizations applied immediately after activating the plugin. Please wait for URL Metrics to be gathered for both mobile and desktop visits. And since administrator users are not normal visitors typically, optimizations are not applied for admins by default.
 
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 
@@ -62,6 +71,53 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta3 =
+
+**Enhancements**
+
+* Add URL Metric mutation helpers to extension initialization API. ([1951](https://github.com/WordPress/performance/pull/1951))
+* Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
+
+**Bug Fixes**
+
+* Allow background image URLs for file types the web server doesn't know about, e.g. when AVIF is sent as `application/octet-stream`. ([1956](https://github.com/WordPress/performance/pull/1956))
+* Remove responsive image sizes computation. ([2109](https://github.com/WordPress/performance/pull/2109))
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+
+**Bug Fixes**
+
+* Fix URL encoding in Link HTTP response header. ([1907](https://github.com/WordPress/performance/pull/1907))
+* Fix unpredictable LCP element being identified in a URL Metric Group. ([1903](https://github.com/WordPress/performance/pull/1903))
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Bump version to 1.0.0-beta1 to indicate graduation from being experimental. See [1846](https://github.com/WordPress/performance/pull/1846).
+* Compute responsive `sizes` attribute based on the `width` from the `boundingClientRect` in captured URL Metrics. ([1840](https://github.com/WordPress/performance/pull/1840))
+
+= 0.3.1 =
+
+**Bug Fixes**
+
+* Remove erroneous check for resource initiator type when considering whether to submit LCP background image. ([1760](https://github.com/WordPress/performance/pull/1760))
+
+= 0.3.0 =
+
+**Enhancements**
+
+* Add preload links LCP picture elements. ([1707](https://github.com/WordPress/performance/pull/1707))
+* Harden validation of user-submitted LCP background image URL. ([1713](https://github.com/WordPress/performance/pull/1713))
+* Lazy load background images added via inline style attributes. ([1708](https://github.com/WordPress/performance/pull/1708))
+* Preload image URLs for LCP elements with external background images. ([1697](https://github.com/WordPress/performance/pull/1697))
+* Serve unminified scripts when `SCRIPT_DEBUG` is enabled. ([1643](https://github.com/WordPress/performance/pull/1643))
 
 = 0.2.0 =
 

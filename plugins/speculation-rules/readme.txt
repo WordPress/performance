@@ -1,8 +1,8 @@
 === Speculative Loading ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   1.3.1
+Tested up to: 7.0
+Stable tag:   1.6.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, javascript, speculation rules, prerender, prefetch
@@ -11,11 +11,9 @@ Enables browsers to speculatively prerender or prefetch pages to achieve near-in
 
 == Description ==
 
-This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered.
+This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered. This core Speculative Loading functionality was [merged into WordPress 6.8](https://make.wordpress.org/core/2025/03/06/speculative-loading-in-6-8/), but it only prefetches with conservative eagerness by default. In contrast, this plugin defaults to prerendering with moderate eagerness (i.e. when interacting with a link), and it provides a user interface to customize the mode and eagerness via the "Speculative Loading" section on the _Settings > Reading_ admin screen.
 
-See the [Speculation Rules WICG specification draft](https://wicg.github.io/nav-speculation/speculation-rules.html).
-
-By default, the plugin is configured to prerender WordPress frontend URLs when the user interacts with a relevant link. This can be customized via the "Speculative Loading" section in the _Settings > Reading_ admin screen.
+By default, speculative loading is only enabled for logged-out users, since unauthenticated pages are typically only eligible for caching and so more efficient to prefetch/prerender. This means that sites with frequent logged-in users on the frontend—such as e-commerce, forums, or membership sites—will not benefit from the feature. If your server can handle the additional load (for example, with persistent object caching), you can opt in to enable speculative loading for all logged-in users or for administrators only. This setting exclusively affects frontend pages; admin screens are always excluded.
 
 A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the `no-prerender` CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
 
@@ -41,6 +39,11 @@ _This plugin was formerly known as Speculation Rules._
 1. Upload the entire `speculation-rules` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
 3. Activate the **Speculative Loading** plugin.
+
+= After activation =
+
+1. Visit the **Settings > Reading** admin screen.
+2. Use the controls in the **Speculative Loading** section to configure speculative loading.
 
 == Frequently Asked Questions ==
 
@@ -82,6 +85,17 @@ add_filter(
 
 As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
 
+= Are there any special considerations for speculative loading behavior? =
+
+For safety reasons, the entire speculative loading feature is disabled by default for logged-in users and for sites that do not use pretty permalinks. The latter is the case because plugins often use URLs with custom query parameters to let users perform actions, and such URLs should not be speculatively loaded. For sites without pretty permalinks, it is impossible or at least extremely complex to differentiate between which query parameters are Core defaults and which query parameters are custom.
+
+If you are running this plugin on a site without pretty permalinks and are confident that there are no custom query parameters in use that can cause state changes, you can opt in to enabling speculative loading via the `plsr_enabled_without_pretty_permalinks` filter:
+
+`
+<?php
+add_filter( 'plsr_enabled_without_pretty_permalinks', '__return_true' );
+`
+
 = How will this impact analytics and personalization? =
 
 Prerendering can affect analytics and personalization.
@@ -107,6 +121,26 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.6.0 =
+
+**Enhancements**
+
+* Add Speculative Loading opt-in for authenticated requests. ([2097](https://github.com/WordPress/performance/pull/2097))
+* Add warning notice to Speculative Loading setting for authenticated users when persistent object cache is not present. ([2144](https://github.com/WordPress/performance/pull/2144))
+* Update Speculative Loading readme description to note purpose after core merge. ([2120](https://github.com/WordPress/performance/pull/2120))
+
+= 1.5.0 =
+
+**Enhancements**
+
+* Add support for Speculative Loading WP Core API, loading the plugin's own API implementation conditionally. ([1883](https://github.com/WordPress/performance/pull/1883))
+
+= 1.4.0 =
+
+**Enhancements**
+
+* Implement speculative loading considerations for safer behavior. ([1784](https://github.com/WordPress/performance/pull/1784))
 
 = 1.3.1 =
 

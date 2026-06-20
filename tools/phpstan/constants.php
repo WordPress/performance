@@ -6,6 +6,7 @@
  */
 
 define( 'TESTS_PLUGIN_DIR', './' );
+define( 'TESTS_REPO_ROOT_DIR', './' );
 define( 'WPINC', 'wp-includes' );
 
 define( 'SPECULATION_RULES_VERSION', '0.0.0' );

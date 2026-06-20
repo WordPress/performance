@@ -20,6 +20,7 @@ const {
 /**
  * WordPress dependencies
  */
+// @ts-ignore -- No declaration file for this module.
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 const defaultBuildConfig = {
@@ -40,6 +41,7 @@ const pluginsWithBuild = [
 	'embed-optimizer',
 	'image-prioritizer',
 	'optimization-detective',
+	'view-transitions',
 	'web-worker-offloading',
 ];
 
@@ -68,6 +70,7 @@ const performanceLab = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Performance Lab Assets',
 				color: '#2196f3',
@@ -105,6 +108,7 @@ const embedOptimizer = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Embed Optimizer Assets',
 				color: '#2196f3',
@@ -133,6 +137,10 @@ const imagePrioritizer = ( env ) => {
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
+						from: `${ pluginDir }/detect.js`,
+						to: `${ pluginDir }/detect.min.js`,
+					},
+					{
 						from: `${ pluginDir }/lazy-load-video.js`,
 						to: `${ pluginDir }/lazy-load-video.min.js`,
 					},
@@ -150,6 +158,7 @@ const imagePrioritizer = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Image Prioritizer Assets',
 				color: '#2196f3',
@@ -187,6 +196,11 @@ const optimizationDetective = ( env ) => {
 						info: { minimized: true },
 					},
 					{
+						from: `${ source }/dist/web-vitals.attribution.js`,
+						to: `${ destination }/build/web-vitals-attribution.js`,
+						info: { minimized: true },
+					},
+					{
 						from: `${ source }/package.json`,
 						to: `${ destination }/build/web-vitals.asset.php`,
 						transform: {
@@ -195,13 +209,76 @@ const optimizationDetective = ( env ) => {
 						},
 					},
 					{
+						from: `${ destination }/detect-loader.js`,
+						to: `${ destination }/detect-loader.min.js`,
+					},
+					{
 						from: `${ destination }/detect.js`,
 						to: `${ destination }/detect.min.js`,
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Optimization Detective Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: View Transitions
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const viewTransitions = ( env ) => {
+	if ( env.plugin && env.plugin !== 'view-transitions' ) {
+		return defaultBuildConfig;
+	}
+
+	const destination = path.resolve( __dirname, 'plugins/view-transitions' );
+
+	return {
+		...sharedConfig,
+		name: 'view-transitions',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ destination }/js/view-transitions.js`,
+						to: `${ destination }/js/view-transitions.min.js`,
+					},
+					{
+						from: `${ destination }/css/view-transition-animation-slide.css`,
+						to: `${ destination }/css/view-transition-animation-slide.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+					{
+						from: `${ destination }/css/view-transition-animation-swipe.css`,
+						to: `${ destination }/css/view-transition-animation-swipe.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+					{
+						from: `${ destination }/css/view-transition-animation-wipe.css`,
+						to: `${ destination }/css/view-transition-animation-wipe.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+				],
+			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
+			new WebpackBar( {
+				name: 'Building View Transitions Assets',
 				color: '#2196f3',
 			} ),
 		],
@@ -249,6 +326,7 @@ const webWorkerOffloading = ( env ) => {
 					},
 				],
 			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Web Worker Offloading Assets',
 				color: '#FFC107',
@@ -270,7 +348,6 @@ const buildPlugin = ( env ) => {
 	}
 
 	if ( ! standalonePlugins.includes( env.plugin ) ) {
-		// eslint-disable-next-line no-console
 		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
 		return defaultBuildConfig;
@@ -297,6 +374,7 @@ const buildPlugin = ( env ) => {
 							dot: true,
 							ignore: [
 								'**/.wordpress-org',
+								'**/docs',
 								'**/phpcs.xml.dist',
 								'**/tests',
 								'**/*.[Cc]ache',
@@ -306,7 +384,9 @@ const buildPlugin = ( env ) => {
 				],
 			} ),
 			{
-				apply: ( compiler ) => {
+				apply: (
+					/** @type {import('webpack').Compiler} */ compiler
+				) => {
 					// Before run, delete the build directory.
 					compiler.hooks.beforeRun.tap( 'BeforeRunPlugin', () => {
 						deleteFileOrDirectory( to );
@@ -323,6 +403,7 @@ const buildPlugin = ( env ) => {
 					} );
 				},
 			},
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: `Building ${ env.plugin } Plugin`,
 				color: '#4caf50',
@@ -337,6 +418,7 @@ module.exports = [
 	embedOptimizer,
 	imagePrioritizer,
 	optimizationDetective,
+	viewTransitions,
 	webWorkerOffloading,
 	buildPlugin,
 ];

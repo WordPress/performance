@@ -7,9 +7,13 @@
  * @since 3.1.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds server timing to REST API response.
@@ -20,8 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return WP_REST_Response|WP_Error Filtered response.
  */
 function perflab_rest_post_dispatch_add_server_timing( $response ) {
-	// TODO: Change condition to use wp_is_rest_endpoint() once minimum-supported version is WordPress 6.5.
-	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! $response instanceof WP_REST_Response ) {
+	if ( ! wp_is_rest_endpoint() || ! $response instanceof WP_REST_Response ) {
 		return $response;
 	}
 

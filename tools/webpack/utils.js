@@ -37,7 +37,7 @@ const getPluginVersion = ( pluginPath ) => {
 	const readmePath = path.resolve( pluginPath, 'readme.txt' );
 
 	const fileContent = fs.readFileSync( readmePath, 'utf-8' );
-	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)/i;
 	const match = versionRegex.exec( fileContent );
 
 	if ( match ) {
@@ -68,6 +68,7 @@ const generateBuildManifest = ( slug, from ) => {
 		fs.mkdirSync( buildDir );
 	}
 
+	/** @type {Record<string, string>} */
 	let manifest = {};
 	const manifestPath = path.resolve( buildDir, 'manifest.json' );
 
@@ -149,9 +150,11 @@ const createPluginZip = ( pluginPath, pluginName ) => {
 	] );
 
 	if ( 0 !== proc.status ) {
-		throw new Error(
-			proc.error || proc.stderr.toString() || proc.stdout.toString()
-		);
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
 	}
 };
 

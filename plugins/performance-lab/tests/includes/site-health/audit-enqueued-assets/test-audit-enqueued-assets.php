@@ -8,164 +8,236 @@
 
 class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
-	const WARNING_SCRIPTS_THRESHOLD = 31;
-	const WARNING_STYLES_THRESHOLD  = 11;
-
 	/**
-	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
+	 * Tests perflab_aea_audit_enqueued_scripts() when blocking scripts are present.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
-	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
+	public function test_perflab_aea_audit_enqueued_scripts_blocking_scripts_are_present(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
 		$this->current_user_can_view_site_health_checks_cap();
 
-		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
-		perflab_aea_audit_enqueued_scripts();
-		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
-		$this->assertIsArray( $transient );
-		$this->assertEquals( 3, count( $transient ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'  => 'script.js',
-					'size' => 1000,
-				),
-				array(
-					'src'  => 'script.js',
-					'size' => 1000,
-				),
-				array(
-					'src'  => 'script.js',
-					'size' => 1000,
-				),
-			),
-			$transient
-		);
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::mock_assets( 'scripts', 3 );
+		Audit_Assets_Mock_Assets::mock_requests();
+
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertArrayHasKey( 'assets', $result );
+		$this->assertArrayHasKey( 'scripts', $result['assets'] );
+		$this->assertIsArray( $result['assets']['scripts'] );
+		$this->assertEquals( 3, count( $result['assets']['scripts'] ) );
+		foreach ( $result['assets']['scripts'] as $script ) {
+			$this->assertArrayHasKey( 'src', $script );
+			$this->assertArrayHasKey( 'size', $script );
+			$this->assertArrayHasKey( 'error', $script );
+		}
 	}
 
 	/**
-	 * Tests perflab_aea_audit_enqueued_scripts() with no transient.
-	 * Enqueued scripts ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 * Tests perflab_aea_audit_enqueued_scripts() with blocking scripts.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
 		$this->current_user_can_view_site_health_checks_cap();
+		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_script( 'script1', 'example1.com', array() );
-		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array() );
-		wp_enqueue_script( 'script3', 'example3.com', array() );
+		wp_enqueue_script( 'script1', 'https://first.example.com', array(), null );
+		wp_enqueue_script( 'script2', '/wp-includes/example2.js', array(), null );
+		wp_enqueue_script( 'script3', 'https://third.example.com', array(), null );
 		wp_dequeue_script( 'script3' );
+		wp_enqueue_script( 'script-async', 'https://async-script.example.com', array(), null, true );
+		wp_enqueue_script( 'script-defer', 'https://defer-script.example.com', array(), null, true );
+		wp_enqueue_script( 'type-noscript', 'https://non-javascript.example.com', array(), null );
+		wp_enqueue_script( 'no-src', 'https://no-src.example.com', array(), null );
+		wp_enqueue_script( 'boolean-src', 'https://boolean-src.example.com', array(), null );
+		wp_enqueue_script( 'empty-src', 'https://empty-src.example.com', array(), null );
+		wp_enqueue_script( 'whitespace-src', 'https://whitespace-src.example.com', array(), null );
+		wp_enqueue_script_module( 'module1', 'https://module1.example.com/', array(), null );
 
-		$inline_script = 'console.log("after");';
-		wp_add_inline_script( 'script1', $inline_script );
-
-		get_echo( 'wp_print_scripts' );
-		perflab_aea_audit_enqueued_scripts();
-		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
-		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 1, count( $transient ) );
-		$this->assertEqualSets(
-			array(
-				array(
-					'src'  => 'example1.com',
-					'size' => 0 + mb_strlen( $inline_script, '8bit' ),
-				),
-			),
-			$transient
+		add_theme_support( 'html5', array( 'script' ) );
+		add_filter(
+			'wp_script_attributes',
+			static function ( $attributes ) {
+				if ( 'script-async-js' === $attributes['id'] ) {
+					$attributes['async'] = true;
+				} elseif ( 'script-defer-js' === $attributes['id'] ) {
+					$attributes['defer'] = true;
+				} elseif ( 'type-noscript-js' === $attributes['id'] ) {
+					$attributes['type'] = 'noscript';
+				} elseif ( 'no-src-js' === $attributes['id'] ) {
+					unset( $attributes['src'] );
+				} elseif ( 'boolean-src-js' === $attributes['id'] ) {
+					$attributes['src'] = true;
+				} elseif ( 'empty-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '';
+				} elseif ( 'whitespace-src-js' === $attributes['id'] ) {
+					$attributes['src'] = '   ';
+				}
+				return $attributes;
+			}
 		);
-	}
-
-	/**
-	 * Tests perflab_aea_audit_enqueued_styles() when transient is already set.
-	 */
-	public function test_perflab_aea_audit_enqueued_styles_transient_already_set(): void {
-		/**
-		 * Prepare scenario for test.
-		 */
-		$this->mock_is_front_page();
-		$this->current_user_can_view_site_health_checks_cap();
-
-		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_styles();
-		$transient = get_transient( 'aea_enqueued_front_page_styles' );
-		$this->assertIsArray( $transient );
-		$this->assertEquals( 3, count( $transient ) );
-		$this->assertEqualSets(
+		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'src'  => 'style.css',
-					'size' => 1000,
+					'url'      => 'https://first.example.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Example 1");',
+					),
 				),
 				array(
-					'src'  => 'style.css',
-					'size' => 1000,
+					'url'      => home_url( '/wp-includes/example2.js' ),
+					'response' => array(
+						'code' => 200,
+						'body' => 'console.log("Example 2");',
+					),
 				),
-				array(
-					'src'  => 'style.css',
-					'size' => 1000,
-				),
+			)
+		);
+		Audit_Assets_Mock_Assets::mock_requests();
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertIsArray( $result['assets'] );
+		$assets = $result['assets'];
+		$this->assertArrayHasKey( 'scripts', $assets );
+		$this->assertNotEmpty( $assets['scripts'] );
+
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'/wp-includes/example2.js',
 			),
-			$transient
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['scripts'], 'src' )
+			)
 		);
 	}
 
 	/**
-	 * Tests perflab_aea_audit_enqueued_styles() with no transient.
-	 * Enqueued styles ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 * Tests perflab_aea_audit_enqueued_styles() with blocking styles.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
 	 */
 	public function test_perflab_aea_audit_enqueued_styles(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
-		$this->mock_is_front_page();
 		$this->current_user_can_view_site_health_checks_cap();
+		Audit_Assets_Mock_Assets::clear_mocked();
 
-		wp_enqueue_style( 'style1', 'example1.com', array() );
-		wp_enqueue_style( 'style_to_be_discarded', '/wp-includes/example2.com', array() );
-		wp_enqueue_style( 'style3', 'example3.com', array() );
+		wp_enqueue_style( 'style1', 'https://first.example.com', array(), null );
+		wp_enqueue_style( 'style2', '/wp-includes/example2.css', array(), null );
+		wp_enqueue_style( 'style3', 'https://third.example.com', array(), null );
 		wp_dequeue_style( 'style3' );
+		wp_enqueue_style( 'style-print', 'https://print-style.example.com', array(), null, 'print' );
 
-		// Adding inline style to style1.
-		$style  = ".test {\n";
-		$style .= "\tbackground: red;\n";
-		$style .= '}';
-		wp_add_inline_style( 'style1', $style );
+		// The href for the following styles is mutated via the style_loader_tag filter below.
+		wp_enqueue_style( 'style-no-href', 'https://style-no-href.example.com', array(), null );
+		wp_enqueue_style( 'style-boolean-href', 'https://style-boolean-href.example.com', array(), null );
+		wp_enqueue_style( 'style-empty-href', 'https://style-empty-href.example.com', array(), null );
+		wp_enqueue_style( 'style-whitespace-href', 'https://style-whitespace-href.example.com', array(), null );
+
+		// Filter to manipulate style href attributes for testing various edge cases.
+		add_filter(
+			'style_loader_tag',
+			function ( $tag, $handle ) {
+				$create_processor_state = function ( string $html ): WP_HTML_Tag_Processor {
+					$processor = new WP_HTML_Tag_Processor( $html );
+					$this->assertTrue( $processor->next_tag( 'LINK' ), 'Expected a LINK to be present.' );
+					$this->assertSame( 'stylesheet', $processor->get_attribute( 'rel' ), 'Expected LINK to be a stylesheet.' );
+					return $processor;
+				};
+				if ( 'style-no-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->remove_attribute( 'href' ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-boolean-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->set_attribute( 'href', true ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-empty-href' === $handle ) {
+					$processor = $create_processor_state( $tag );
+					$this->assertTrue( $processor->set_attribute( 'href', '' ) );
+					$tag = $processor->get_updated_html();
+				} elseif ( 'style-whitespace-href' === $handle ) {
+					// Note: The HTML Tag Processor cannot be used here because attempting to set an invalid URL to the href will be rejected.
+					$tag = str_replace(
+						'https://style-whitespace-href.example.com',
+						'   ',
+						$tag,
+						$count
+					);
+					$this->assertSame( 1, $count, 'Expected string to be replaced.' );
+				}
+				return $tag;
+			},
+			10,
+			2
+		);
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
 		remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		get_echo( 'wp_print_styles' );
 
-		perflab_aea_audit_enqueued_styles();
-		$transient = get_transient( 'aea_enqueued_front_page_styles' );
-		$this->assertNotEmpty( $transient );
-		$this->assertEquals( 1, count( $transient ) );
-		$this->assertEqualSets(
+		Audit_Assets_Mock_Assets::add_mock_responses(
 			array(
 				array(
-					'src'  => 'example1.com',
-					'size' => 0 + mb_strlen( $style, '8bit' ),
+					'url'      => 'https://first.example.com',
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: red; }',
+					),
 				),
+				array(
+					'url'      => home_url( '/wp-includes/example2.css' ),
+					'response' => array(
+						'code' => 200,
+						'body' => 'body { background-color: blue; }',
+					),
+				),
+			)
+		);
+
+		Audit_Assets_Mock_Assets::mock_requests();
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertIsArray( $result['assets'] );
+		$assets = $result['assets'];
+		$this->assertArrayHasKey( 'styles', $assets );
+		$this->assertNotEmpty( $assets['styles'] );
+
+		$this->assertSame(
+			array(
+				'https://first.example.com',
+				'/wp-includes/example2.css',
 			),
-			$transient
+			array_map(
+				static function ( $src ) {
+					return str_replace( home_url( '/' ), '/', $src );
+				},
+				wp_list_pluck( $assets['styles'], 'src' )
+			)
 		);
 	}
 
 	/**
 	 * Make sure perflab_aea_add_enqueued_assets_test adds the right information.
+	 *
+	 * @covers ::perflab_aea_add_enqueued_assets_test
 	 */
 	public function test_perflab_aea_add_enqueued_assets_test(): void {
 		$initial_tests = array(
-			'direct' => array(
+			'async' => array(
 				'initial' => array(
 					'label' => 'Label',
 					'test'  => 'test',
@@ -173,10 +245,10 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 			),
 		);
 
-		$expected           = $initial_tests;
-		$expected['direct'] = array_merge(
-			$expected['direct'],
-			Site_Health_Mock_Responses::return_added_test_info_site_health()['direct']
+		$expected          = $initial_tests;
+		$expected['async'] = array_merge(
+			$expected['async'],
+			Site_Health_Mock_Responses::return_added_test_info_site_health()['async']
 		);
 
 		$this->assertEqualSets(
@@ -186,102 +258,80 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test perflab_aea_enqueued_js_assets_test() no transient saved.
+	 * Tests perflab_aea_audit_blocking_assets functionality when the home request fails.
+	 *
+	 * @covers ::perflab_aea_audit_blocking_assets
+	 * @dataProvider data_perflab_aea_audit_blocking_assets_home_request_failure
+	 *
+	 * @param array<string|mixed> $mocked_response The mocked response to simulate the HTTP request.
 	 */
-	public function test_perflab_aea_enqueued_js_assets_test_no_transient(): void {
-		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_js_assets_test() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_js_assets_test() with data in transient ( less than WARNING_SCRIPTS_threshold ).
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( 1 );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_js_assets_test() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_js_assets_test() with data in transient ( more than WARNING_SCRIPTS_threshold ).
-	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( self::WARNING_SCRIPTS_THRESHOLD );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_js_assets_test() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_css_assets_test() no transient saved.
-	 */
-	public function test_perflab_aea_enqueued_css_assets_test_no_transient(): void {
-		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_css_assets_test() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_css_assets_test() with data in transient ( less than WARNING_STYLES_threshold ).
-	 */
-	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( 1 );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_css_assets_test() );
-	}
-
-	/**
-	 * Test perflab_aea_enqueued_css_assets_test() with data in transient ( more than WARNING_STYLES_threshold ).
-	 */
-	public function test_aea_enqueued_cdd_assets_test_with_assets_more_than_threshold(): void {
-		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( self::WARNING_STYLES_THRESHOLD );
-		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_css_assets_test() );
-	}
-
-	/**
-	 * Tests perflab_aea_invalidate_cache_transients() functionality.
-	 */
-	public function test_perflab_aea_invalidate_cache_transients(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data();
-		Audit_Assets_Transients_Set::set_style_transient_with_data();
-		perflab_aea_invalidate_cache_transients();
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
-	}
-
-	/**
-	 * Tests perflab_aea_clean_aea_audit_action() functionality.
-	 */
-	public function test_perflab_aea_clean_aea_audit_action(): void {
-		Audit_Assets_Transients_Set::set_script_transient_with_data();
-		Audit_Assets_Transients_Set::set_style_transient_with_data();
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
-		$_GET['action']       = 'clean_aea_audit';
+	public function test_perflab_aea_audit_blocking_assets_home_request_failure( array $mocked_response ): void {
 		$this->current_user_can_view_site_health_checks_cap();
-		$redirected_url = null;
-		add_filter(
-			'wp_redirect',
-			static function ( $url ) use ( &$redirected_url ) {
-				$redirected_url = $url;
-				return false;
-			}
-		);
-		$_REQUEST['_wp_http_referer'] = add_query_arg(
+		Audit_Assets_Mock_Assets::clear_mocked();
+		Audit_Assets_Mock_Assets::add_mock_responses( array( $mocked_response ) );
+		Audit_Assets_Mock_Assets::mock_requests( array( $mocked_response ) );
+
+		// Avoid deprecation warning due to related change in WordPress 6.4.
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+
+		$result = perflab_aea_audit_blocking_assets();
+		$this->assertSameSets(
 			array(
-				'_wpnonce' => 'foo',
-				'action'   => 'bar',
+				'response' => $mocked_response['response'],
+				'assets'   => array(
+					'scripts' => array(),
+					'styles'  => array(),
+				),
 			),
-			home_url( '/' )
+			is_wp_error( $result['response'] ) ? $result : array(
+				'response' => $result['response']['response'],
+				'assets'   => $result['assets'],
+			)
 		);
-		perflab_aea_clean_aea_audit_action();
-		$this->assertSame( home_url( '/' ), $redirected_url );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
 	}
 
 	/**
-	 * Mock is_home in $wp_query.
+	 * Data provider for test_perflab_aea_audit_blocking_assets_home_request_failure.
+	 *
+	 * @return array<string, array{ mocked_responses: array{ url: string, response: WP_Error|array{ code: positive-int, body: string } } }>
 	 */
-	public function mock_is_front_page(): void {
-		global $wp_query;
-		$wp_query->is_home = true;
+	public function data_perflab_aea_audit_blocking_assets_home_request_failure(): array {
+		return array(
+			'home_page_request_error'               => array(
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => new WP_Error( 'error', 'Error message' ),
+				),
+			),
+			'home_page_request_non_200_status_code' => array(
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 404,
+						'body' => '',
+					),
+				),
+			),
+			'home_page_request_empty_body'          => array(
+				'mocked_responses' => array(
+					'url'      => home_url( '/' ),
+					'response' => array(
+						'code' => 200,
+						'body' => '',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Tests that hooks are set correctly.
+	 *
+	 * @covers ::perflab_aea_add_enqueued_assets_test
+	 */
+	public function test_hooks_are_set(): void {
+		$this->assertSame( 10, has_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' ) );
+		$this->assertSame( 10, has_action( 'wp_ajax_health-check-enqueued-blocking-assets-test', 'perflab_aea_enqueued_ajax_blocking_assets_test' ) );
 	}
 
 	/**
@@ -290,27 +340,5 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 	public function current_user_can_view_site_health_checks_cap(): void {
 		$current_user = wp_get_current_user();
 		$current_user->add_cap( 'view_site_health_checks' );
-	}
-
-	/**
-	 * @param int $number_of_assets Number of assets mocked.
-	 * @return array<string, mixed>
-	 */
-	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( int $number_of_assets = 5 ): array {
-		if ( $number_of_assets < self::WARNING_SCRIPTS_THRESHOLD ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_less_than_threshold( $number_of_assets );
-		}
-		return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_more_than_threshold( $number_of_assets );
-	}
-
-	/**
-	 * @param int $number_of_assets Number of styles mocked.
-	 * @return array<string, mixed>
-	 */
-	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( int $number_of_assets = 5 ): array {
-		if ( $number_of_assets < self::WARNING_STYLES_THRESHOLD ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_threshold( $number_of_assets );
-		}
-		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 }

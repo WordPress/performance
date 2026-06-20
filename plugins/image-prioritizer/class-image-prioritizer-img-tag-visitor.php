@@ -6,10 +6,13 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Tag visitor that optimizes IMG tags.
@@ -25,7 +28,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 * Visits a tag.
 	 *
 	 * @since 0.1.0
-	 * @since n.e.x.t Separate the processing of IMG and PICTURE elements.
+	 * @since 0.3.0 Separate the processing of IMG and PICTURE elements.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL Metrics.
@@ -46,7 +49,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Process an IMG element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_HTML_Tag_Processor  $processor HTML tag processor.
 	 * @param OD_Tag_Visitor_Context $context   Tag visitor context.
@@ -145,20 +148,31 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
-		// Ensure that sizes=auto is set properly.
-		$sizes = $processor->get_attribute( 'sizes' );
-		if ( is_string( $sizes ) ) {
+		// Ensure that sizes is set properly when it is a responsive image (it has a srcset attribute).
+		if ( is_string( $processor->get_attribute( 'srcset' ) ) ) {
+			$sizes = $processor->get_attribute( 'sizes' );
+			if ( ! is_string( $sizes ) ) {
+				$sizes = '';
+			}
+
 			$is_lazy  = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
 			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
 
 			if ( $is_lazy && ! $has_auto ) {
-				$processor->set_attribute( 'sizes', "auto, $sizes" );
+				$new_sizes = 'auto';
+				if ( '' !== trim( $sizes, " \t\f\r\n" ) ) {
+					$new_sizes .= ', ';
+				}
+				$sizes = $new_sizes . $sizes;
 			} elseif ( ! $is_lazy && $has_auto ) {
 				// Remove auto from the beginning of the list.
-				$processor->set_attribute(
-					'sizes',
-					(string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes )
-				);
+				$sizes = (string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes );
+			}
+
+			if ( '' === trim( $sizes, " \t\f\r\n" ) ) {
+				$processor->remove_attribute( 'sizes' );
+			} else {
+				$processor->set_attribute( 'sizes', $sizes );
 			}
 		}
 
@@ -183,7 +197,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Process a PICTURE element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_HTML_Tag_Processor  $processor HTML tag processor.
 	 * @param OD_Tag_Visitor_Context $context   Tag visitor context.
@@ -202,7 +216,11 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		$crossorigin    = null;
 
 		// Loop through child tags until we reach the closing PICTURE tag.
-		while ( $processor->next_tag() ) {
+		// As of 1.0.0-beta3, next_tag() allows $query and is beginning to migrate to skip tag closers by default.
+		// In versions prior to this, the method always visited closers and passing a $query actually threw an exception.
+		$tag_query = version_compare( OPTIMIZATION_DETECTIVE_VERSION, '1.0.0-beta3', '>=' )
+			? array( 'tag_closers' => 'visit' ) : null;
+		while ( $processor->next_tag( $tag_query ) ) {
 			$tag = $processor->get_tag();
 
 			// If we reached the closing PICTURE tag, break.
@@ -283,7 +301,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 * Returns null if the src attribute is not a string (i.e. src was used as a boolean attribute was used), if it
 	 * it has an empty string value after trimming, or if it is a data: URL.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_HTML_Tag_Processor $processor      Processor.
 	 * @param 'src'|'srcset'        $attribute_name Attribute name.
@@ -304,7 +322,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Adds a LINK with the supplied attributes for each viewport group when the provided XPath is the LCP element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Context          $context    Tag visitor context.
 	 * @param string                          $xpath      XPath of the element.
@@ -313,9 +331,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	private function add_image_preload_link_for_lcp_element_groups( OD_Tag_Visitor_Context $context, string $xpath, array $attributes ): void {
 		$attributes = array_filter(
 			$attributes,
-			static function ( $attribute_value ) {
-				return is_string( $attribute_value ) && '' !== $attribute_value;
-			}
+			static fn ( $attribute_value ) => is_string( $attribute_value ) && '' !== $attribute_value
 		);
 
 		/**
@@ -351,7 +367,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Gets the parent tag name.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return string|null The parent tag name or null if not found.

@@ -1,0 +1,254 @@
+name: Plugin Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'release/**'
+      - trunk
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+
+# Cancels all previous workflow runs for pull requests that have not completed.
+concurrency:
+  # The concurrency group contains the workflow name and the branch name for pull requests
+  # or the commit hash for any other events.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 20
+    permissions:
+      contents: read       # Required to clone the repo.
+      pull-requests: read  # Required by dorny/paths-filter to read PR file changes.
+    outputs:
+      changed-plugins: ${{ steps.filter-plugins.outputs.changed-plugins }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Generate filters from plugins.json
+        id: generate-filters
+        run: |
+          FILTERS=""
+          # Add filters for each plugin
+          for plugin in $(jq -r '.plugins[]' plugins.json); do
+              FILTERS="${FILTERS}${plugin}:\n  - 'plugins/${plugin}/**'\n"
+          done
+          # Add filter for global files that affect all plugins
+          FILTERS="${FILTERS}global:\n  - 'plugins.json'\n  - 'package.json'\n  - 'package-lock.json'\n  - 'composer.json'\n  - 'composer.lock'\n  - 'webpack.config.js'\n  - '.github/workflows/plugin-check.yml'\n"
+          printf "%b" "$FILTERS" > /tmp/filters.yml
+          cat /tmp/filters.yml
+
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: /tmp/filters.yml
+
+      - name: Collect changed plugins
+        id: filter-plugins
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+          GLOBAL_CHANGED: ${{ steps.filter.outputs.global }}
+        run: |
+          # If global files changed, return all plugins
+          if [ "$GLOBAL_CHANGED" = "true" ]; then
+              ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+              echo "changed-plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+          else
+              # Filter out 'global' from changes and return only plugin names
+              PLUGIN_CHANGES=$(echo "$CHANGES" | jq -c '[.[] | select(. != "global")]')
+              echo "changed-plugins=$PLUGIN_CHANGES" >> $GITHUB_OUTPUT
+          fi
+
+  prepare-matrix:
+    needs: [detect-changes]
+    runs-on: ubuntu-latest
+    # Always run this job, even if detect-changes was skipped
+    if: always() && (needs.detect-changes.result == 'success' || needs.detect-changes.result == 'skipped')
+    timeout-minutes: 20
+    permissions:
+      contents: read # Required to clone the repo.
+    outputs:
+      plugins: ${{ steps.set-matrix.outputs.plugins }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.3'
+
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: npm install
+        run: npm ci
+
+      - name: Determine plugins to build
+        id: determine-plugins
+        env:
+          CHANGED_PLUGINS: ${{ needs.detect-changes.outputs.changed-plugins }}
+        run: |
+          ALL_PLUGINS=$(jq -c '.plugins' plugins.json)
+
+          # For non-PR events (push to trunk/release branches), build all plugins
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+              echo "plugins=$ALL_PLUGINS" >> $GITHUB_OUTPUT
+              exit 0
+          fi
+
+          # For PRs, use the changed plugins from detect-changes
+          echo "plugins=$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
+
+      - name: Build plugins
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
+        run: |
+          # Build each plugin from the JSON array
+          for plugin in $(echo "$PLUGINS" | jq -r '.[]'); do
+              echo "Building plugin: $plugin"
+              npm run "build:plugin:$plugin"
+          done
+
+      - name: Upload built plugins
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: built-plugins
+          path: build/
+          retention-days: 1
+
+      - name: Set matrix output
+        id: set-matrix
+        env:
+          PLUGINS: ${{ steps.determine-plugins.outputs.plugins }}
+        run: |
+          # Output the plugins list for the matrix
+          echo "plugins=$PLUGINS" >> $GITHUB_OUTPUT
+
+  plugin-check:
+    needs: prepare-matrix
+    # Only run if prepare-matrix succeeded and has plugins to check
+    if: needs.prepare-matrix.result == 'success' && needs.prepare-matrix.outputs.plugins != '[]'
+    name: Check ${{ matrix.plugin }}
+    runs-on: ubuntu-24.04
+    permissions: {}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJson(needs.prepare-matrix.outputs.plugins) }}
+    steps:
+      - name: Download built plugins
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: built-plugins
+          path: build
+
+      # The following steps inline wordpress/plugin-check-action to add
+      # "testsEnvironment": false to the auto-generated .wp-env.json.
+      # The upstream action's default config triggers a bug in @wordpress/env's
+      # legacy dual-environment startup path on the ubuntu-24.04 runner image
+      # >=20260525.161 (Node.js 24.16.0), where wp-env start silently exits 0
+      # without booting Docker. See https://github.com/WordPress/plugin-check-action/issues/579
+      # Revert to `uses: wordpress/plugin-check-action@...` once the upstream
+      # issue is resolved.
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24'
+
+      - name: Setup wp-env
+        env:
+          BUILD_DIR: ./build/${{ matrix.plugin }}
+        run: |
+          PLUGIN_DIR=$(realpath "$BUILD_DIR")
+          PLUGIN_SLUG=$(basename "$PLUGIN_DIR")
+          echo "PLUGIN_DIR=$PLUGIN_DIR" >> "$GITHUB_ENV"
+          echo "PLUGIN_SLUG=$PLUGIN_SLUG" >> "$GITHUB_ENV"
+
+          # Note: plugin-check is intentionally NOT listed here — the URL
+          # download path appears to be where wp-env silently dies on the new
+          # runner image. Installed via wp-cli below instead.
+          cat > .wp-env.json <<EOF
+          {
+            "core": null,
+            "port": 8880,
+            "testsEnvironment": false,
+            "mappings": { "wp-content/plugins/${PLUGIN_SLUG}": "${PLUGIN_DIR}" }
+          }
+          EOF
+
+          # Pin @wordpress/env to a known-good version rather than tracking
+          # latest, so a future regression in wp-env can't silently break CI
+          # the way https://github.com/WordPress/gutenberg/issues/78762 just did.
+          # Bump intentionally when picking up upstream fixes.
+          npm -g --no-fund i @wordpress/env@11.7.0
+
+      - name: Start wp-env
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          shell: bash
+          command: wp-env start
+
+      - name: Run plugin check
+        run: |
+          echo "::group::Debugging information"
+          wp-env run cli wp cli info
+          wp-env run cli wp plugin list
+          echo "::endgroup::"
+
+          echo "::group::Install plugin-check"
+          wp-env run cli wp plugin install plugin-check --activate
+          echo "::endgroup::"
+
+          echo "::group::Install dependencies"
+          DEPENDENCIES=$(wp-env run cli wp plugin get "$PLUGIN_SLUG" --field=requires_plugins | tr ',' ' ' | tr -d '\r')
+          if [ -n "${DEPENDENCIES// /}" ]; then
+            echo "Installing plugin dependencies: $DEPENDENCIES"
+            wp-env run cli wp plugin install --activate $DEPENDENCIES
+          else
+            echo "Plugin has no dependencies"
+          fi
+          echo "::endgroup::"
+
+          wp-env run cli wp plugin activate "$PLUGIN_SLUG"
+
+          echo "::group::Run Plugin Check"
+          RESULTS="${RUNNER_TEMP}/plugin-check-results.json"
+          wp-env run cli wp plugin check "$PLUGIN_SLUG" \
+            --format=json \
+            --ignore-codes=readme_reserved_contributors,WordPress.WP.I18n.TextDomainMismatch \
+            --slug="$PLUGIN_SLUG" \
+            --exclude-files=.wp-env.json \
+            --require=./wp-content/plugins/plugin-check/cli.php \
+            > "$RESULTS"
+          cat "$RESULTS"
+          echo "::endgroup::"
+
+          # Fail if Plugin Check reported any findings.
+          if [ -s "$RESULTS" ] && [ "$(jq 'length' "$RESULTS")" -gt 0 ]; then
+            echo "::error::Plugin Check reported issues for $PLUGIN_SLUG"
+            exit 1
+          fi
+
+      - name: Upload plugin-check results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plugin-check-results-${{ matrix.plugin }}
+          path: ${{ runner.temp }}/plugin-check-results.json
+          if-no-files-found: ignore

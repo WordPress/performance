@@ -13,7 +13,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
@@ -25,7 +24,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
     types:
@@ -33,33 +31,50 @@ on:
       - reopened
       - synchronize
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   php-test-plugins:
-    name: "PHP ${{ matrix.php }} / WP ${{ matrix.wp }}"
+    name: 'PHP ${{ matrix.php }} / WP ${{ matrix.wp }}'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read # Required to clone the repo.
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.0', '7.4', '7.3', '7.2']
-        wp: [ 'latest' ]
+        php: ['8.1', '8.0', '7.4']
+        wp: ['latest']
         coverage: [false]
         include:
           - php: '7.4'
-            wp: '6.6'
+            wp: '6.9'
           - php: '8.3'
             wp: 'trunk'
+          - php: '8.4'
+            wp: 'trunk'
+          - php: '8.5'
+            wp: 'trunk'
           - php: '8.2'
+            phpunit: '^9.6'
             wp: 'latest'
-            # coverage: true # TODO: Uncomment once coverage reports are fixed. See <https://github.com/WordPress/performance/pull/1586#issuecomment-2474498387>.
+            coverage: ${{ !startsWith(github.actor, 'dependabot') }}
     env:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
     steps:
-      - uses: styfle/cancel-workflow-action@0.12.1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -68,38 +83,72 @@ jobs:
       - name: Build assets
         run: npm run build
       - name: Install WordPress
-        run: npm run wp-env start
+        run: |
+          if [ "${{ matrix.coverage }}" == "true" ]; then
+            npm run wp-env-test start -- --xdebug=coverage
+          else
+            npm run wp-env-test start
+          fi
       - name: Composer Install
-        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
+        run: npm run wp-env-test run wordpress -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
+      - name: Update Composer Dependencies
+        run: composer update --with-all-dependencies --no-interaction --no-progress
+      - name: Install PHPUnit
+        run: |
+          if [ "${{ matrix.php }}" == "8.2" ]; then
+            # Version 2.1.0 of doctrine/instantiator started requiring PHP 8.4: <https://github.com/doctrine/instantiator/pull/148>.
+            composer require phpunit/phpunit:${{ matrix.phpunit }} "doctrine/instantiator:<2.1" --with-all-dependencies --ignore-platform-reqs
+          else
+            composer require --dev phpunit/phpunit:${{ matrix.phpunit }}
+          fi
+        if: matrix.phpunit != ''
       - name: Running single site unit tests
         run: |
           if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run test-php -- --coverage-clover=coverage-${{ github.sha }}.xml
+            npm run test-php:performance-lab -- -- -- --coverage-clover=./single-site-reports/coverage-performance-lab.xml
+            npm run test-php:auto-sizes -- -- -- --coverage-clover=./single-site-reports/coverage-auto-sizes.xml
+            npm run test-php:dominant-color-images -- -- -- --coverage-clover=./single-site-reports/coverage-dominant-color-images.xml
+            npm run test-php:embed-optimizer -- -- -- --coverage-clover=./single-site-reports/coverage-embed-optimizer.xml
+            npm run test-php:image-prioritizer -- -- -- --coverage-clover=./single-site-reports/coverage-image-prioritizer.xml
+            npm run test-php:optimization-detective -- -- -- --coverage-clover=./single-site-reports/coverage-optimization-detective.xml
+            npm run test-php:speculation-rules -- -- -- --coverage-clover=./single-site-reports/coverage-speculation-rules.xml
+            npm run test-php:view-transitions -- -- -- --coverage-clover=./single-site-reports/coverage-view-transitions.xml
+            npm run test-php:web-worker-offloading -- -- -- --coverage-clover=./single-site-reports/coverage-web-worker-offloading.xml
+            npm run test-php:webp-uploads -- -- -- --coverage-clover=./single-site-reports/coverage-webp-uploads.xml
           else
             npm run test-php
           fi
       - name: Running multisite unit tests
         run: |
           if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run test-php-multisite -- --coverage-clover=coverage-multisite-${{ github.sha }}.xml
+            npm run test-php-multisite:performance-lab -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-performance-lab.xml
+            npm run test-php-multisite:auto-sizes -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-auto-sizes.xml
+            npm run test-php-multisite:dominant-color-images -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-dominant-color-images.xml
+            npm run test-php-multisite:embed-optimizer -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-embed-optimizer.xml
+            npm run test-php-multisite:image-prioritizer -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-image-prioritizer.xml
+            npm run test-php-multisite:optimization-detective -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-optimization-detective.xml
+            npm run test-php-multisite:speculation-rules -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-speculation-rules.xml
+            npm run test-php-multisite:view-transitions -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-view-transitions.xml
+            npm run test-php-multisite:web-worker-offloading -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-web-worker-offloading.xml
+            npm run test-php-multisite:webp-uploads -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-webp-uploads.xml
           else
             npm run test-php-multisite
           fi
       - name: Upload single site coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-${{ github.sha }}.xml
+          directory: ./single-site-reports
           flags: single
           name: ${{ matrix.php }}-single-site-coverage
           fail_ci_if_error: true
       - name: Upload multisite coverage reports to Codecov
         if: ${{ matrix.coverage == true }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-multisite-${{ github.sha }}.xml
+          directory: ./multisite-reports
           flags: multisite
           name: ${{ matrix.php }}-multisite-coverage
           fail_ci_if_error: true

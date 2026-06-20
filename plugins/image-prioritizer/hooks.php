@@ -6,8 +6,12 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 add_action( 'od_init', 'image_prioritizer_init' );
+// @codeCoverageIgnoreEnd

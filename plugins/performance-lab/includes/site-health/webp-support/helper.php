@@ -6,9 +6,13 @@
  * @since 2.1.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Callback for webp_enabled test.
@@ -17,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
  */
-function webp_uploads_check_webp_supported_test(): array {
+function perflab_webp_uploads_check_webp_supported_test(): array {
 	$result = array(
 		'label'       => __( 'Your site supports WebP', 'performance-lab' ),
 		'status'      => 'good',

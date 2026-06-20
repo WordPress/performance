@@ -6,6 +6,14 @@
  * @since 1.8.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Class controlling the Server-Timing header.
  *
@@ -24,7 +32,7 @@ class Perflab_Server_Timing {
 	 * @since 1.8.0
 	 * @var array<string, Perflab_Server_Timing_Metric>
 	 */
-	private $registered_metrics = array();
+	private array $registered_metrics = array();
 
 	/**
 	 * Map of registered metric slugs and their registered data.
@@ -33,7 +41,7 @@ class Perflab_Server_Timing {
 	 * @phpstan-var array<string, MetricArguments>
 	 * @var array<string, array>
 	 */
-	private $registered_metrics_data = array();
+	private array $registered_metrics_data = array();
 
 	/**
 	 * Registers a metric to calculate for the Server-Timing header.
@@ -188,9 +196,7 @@ class Perflab_Server_Timing {
 				},
 				$this->registered_metrics
 			),
-			static function ( $value ) {
-				return null !== $value;
-			}
+			static fn ( $value ) => null !== $value
 		);
 
 		return implode( ', ', $metric_header_values );
@@ -209,7 +215,7 @@ class Perflab_Server_Timing {
 	 */
 	public function use_output_buffer(): bool {
 		$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
-		$enabled = ! empty( $options['output_buffering'] );
+		$enabled = isset( $options['output_buffering'] ) && (bool) $options['output_buffering'];
 
 		/**
 		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
@@ -220,7 +226,7 @@ class Perflab_Server_Timing {
 		 *
 		 * @since 1.8.0
 		 *
-		 * @param bool $use_output_buffer Whether to use an output buffer.
+		 * @param bool $enabled Whether to use an output buffer.
 		 */
 		return (bool) apply_filters( 'perflab_server_timing_use_output_buffer', $enabled );
 	}
@@ -284,23 +290,35 @@ class Perflab_Server_Timing {
 	 * @since 1.8.0
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
-	 * @return string|null Segment for the Server-Timing header, or null if no value set.
+	 * @return string Segment for the Server-Timing header.
 	 */
-	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): ?string {
-		$value = $metric->get_value();
-
-		// If no value is set, make sure it's just passed through.
-		if ( null === $value ) {
-			return null;
-		}
-
-		if ( is_float( $value ) ) {
-			$value = round( $value, 2 );
-		}
+	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): string {
+		$value       = $metric->get_value();
+		$description = $metric->get_description();
 
 		// See https://github.com/WordPress/performance/issues/955.
 		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );
 
-		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
+		$parts = array( sprintf( 'wp-%s', $name ) );
+
+		if ( null !== $value ) {
+			if ( is_float( $value ) ) {
+				$value = round( $value, 2 );
+			}
+			$parts[] = sprintf( 'dur=%s', $value );
+		}
+
+		if ( null !== $description ) {
+			// Sanitize the description for the HTTP header quoted-string format (RFC 7230).
+			// Strip control characters (incl. CR/LF), which are not representable in a quoted-string,
+			// then escape the backslash and double-quote characters that require a quoted-pair.
+			$sanitized_description = (string) preg_replace( '/[\x00-\x1F\x7F]/', '', $description );
+			if ( '' !== $sanitized_description ) {
+				$sanitized_description = addcslashes( $sanitized_description, '\\"' );
+				$parts[]               = sprintf( 'desc="%s"', $sanitized_description );
+			}
+		}
+
+		return implode( ';', $parts );
 	}
 }

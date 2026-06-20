@@ -24,13 +24,11 @@ class Test_Speculation_Rules_Uninstall extends WP_UnitTestCase {
 	 * Load uninstall.php.
 	 */
 	private function require_uninstall(): void {
-		require __DIR__ . '/../../../plugins/speculation-rules/uninstall.php';
+		require TESTS_PLUGIN_DIR . '/uninstall.php';
 	}
 
 	/**
 	 * Test option deletion.
-	 *
-	 * @covers ::plsr_delete_plugin_option
 	 */
 	public function test_delete_plugin_option(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );

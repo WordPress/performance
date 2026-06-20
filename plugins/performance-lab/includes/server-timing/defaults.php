@@ -6,9 +6,13 @@
  * @since 1.8.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 // Do not add any of the hooks if Server-Timing is disabled.
 if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
@@ -23,7 +27,9 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
  * @since 1.8.0
  */
 function perflab_register_default_server_timing_before_template_metrics(): void {
-	$calculate_before_template_metrics = static function (): void {
+	$current_function = __FUNCTION__;
+
+	$calculate_before_template_metrics = static function () use ( $current_function ): void {
 		// WordPress execution prior to serving the template.
 		perflab_server_timing_register_metric(
 			'before-template',
@@ -42,18 +48,54 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 			perflab_server_timing_register_metric(
 				'before-template-db-queries',
 				array(
-					'measure_callback' => static function ( $metric ): void {
+					'measure_callback' => static function ( $metric ) use ( $current_function ): void {
+						// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
+						$queries = $GLOBALS['wpdb']->queries ?? array();
+
 						// This should never happen, but some odd database implementations may be doing it wrong.
-						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+						if ( ! is_array( $queries ) ) {
+							wp_trigger_error(
+								$current_function,
+								esc_html(
+									sprintf(
+										/* translators: 1: before-template-db-queries, 2: $wpdb->queries */
+										__( 'Unable to compute server timing for "%1$s" because %2$s is not an array.', 'performance-lab' ),
+										'before-template-db-queries',
+										'$wpdb->queries'
+									)
+								)
+							);
 							return;
+						}
+
+						/**
+						 * Query times.
+						 *
+						 * @var float[] $query_times
+						 */
+						$query_times = array();
+						foreach ( $queries as $query ) {
+							if ( ! is_array( $query ) || ! isset( $query[1] ) || ! is_float( $query[1] ) ) {
+								wp_trigger_error(
+									$current_function,
+									esc_html(
+										sprintf(
+											/* translators: 1: before-template-db-queries, 2: $wpdb->queries */
+											__( 'Unable to compute server timing for "%1$s" because a saved query in %2$s lacks the elapsed time as the second array value.', 'performance-lab' ),
+											'before-template-db-queries',
+											'$wpdb->queries'
+										)
+									)
+								);
+								return;
+							}
+							$query_times[] = $query[1];
 						}
 
 						// Store this value in a global to later subtract it from total query time after template.
 						$GLOBALS['perflab_query_time_before_template'] = array_reduce(
-							$GLOBALS['wpdb']->queries,
-							static function ( $acc, $query ) {
-								return $acc + $query[1];
-							},
+							$query_times,
+							static fn ( float $acc, float $query_time ): float => $acc + $query_time,
 							0.0
 						);
 						$metric->set_value( $GLOBALS['perflab_query_time_before_template'] * 1000.0 );
@@ -153,19 +195,38 @@ function perflab_register_default_server_timing_template_metrics(): void {
 					array(
 						'measure_callback' => static function ( $metric ): void {
 							// This global should typically be set when this is called, but check just in case.
-							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) ) {
+							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) || ! is_float( $GLOBALS['perflab_query_time_before_template'] ) ) {
 								return;
 							}
 
+							// If no queries have been run yet, $wpdb->queries will be null, which is valid (0 queries).
+							$queries = $GLOBALS['wpdb']->queries ?? array();
+
 							// This should never happen, but some odd database implementations may be doing it wrong.
-							if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+							if ( ! is_array( $queries ) ) {
+								// A notice is already emitted above, but if $perflab_query_time_before_template was not
+								// set, then this condition wouldn't be checked in the first place.
 								return;
+							}
+
+							/**
+							 * Query times.
+							 *
+							 * @var float[] $query_times
+							 */
+							$query_times = array();
+							foreach ( $queries as $query ) {
+								if ( ! is_array( $query ) || ! isset( $query[1] ) || ! is_float( $query[1] ) ) {
+									// A notice is already emitted above.
+									return;
+								}
+								$query_times[] = $query[1];
 							}
 
 							$total_query_time = array_reduce(
-								$GLOBALS['wpdb']->queries,
-								static function ( $acc, $query ) {
-									return $acc + $query[1];
+								$query_times,
+								static function ( float $acc, float $query_time ): float {
+									return $acc + $query_time;
 								},
 								0.0
 							);

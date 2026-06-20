@@ -12,6 +12,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
+	 * @covers ::__construct
 	 * @covers ::get
 	 * @covers ::get_url_metric
 	 * @covers ::get_url_metric_group
@@ -39,7 +40,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 		);
 
 		$element_data = array(
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/HEADER/*[1][self::IMG]',
 			'isLCP'              => false,
 			'isLCPCandidate'     => true,
 			'intersectionRatio'  => 0.123,

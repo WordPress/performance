@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   3.6.1
+Tested up to: 7.0
+Stable tag:   4.1.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -11,18 +11,20 @@ Performance plugin from the WordPress Performance Team, which is a collection of
 
 == Description ==
 
-The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions. 
+The Performance Lab plugin is a collection of features focused on enhancing the performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions.
 
 The feature plugins which are currently featured by this plugin are:
 
+* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
 * [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
+* [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
+* [Instant Back/Forward](https://wordpress.org/plugins/nocache-bfcache/)
 * [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) (dependency for Embed Optimizer and Image Prioritizer)
 * [Performant Translations](https://wordpress.org/plugins/performant-translations/)
 * [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
-* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) _(experimental)_
-* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
-* [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) _(experimental)_
-* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
+* [View Transitions](https://wordpress.org/plugins/view-transitions/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
@@ -70,6 +72,67 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.1.0 =
+
+**Bug Fixes**
+
+* Fix invalid Server-Timing logic for database query timing when `$wpdb->queries` is `null` due to no query having been done yet. ([2346](https://github.com/WordPress/performance/pull/2346))
+
+**Documentation**
+
+* Remove Web Worker Offloading from being featured by Performance Lab. ([2404](https://github.com/WordPress/performance/pull/2404))
+
+= 4.0.1 =
+
+**Bug Fixes**
+
+* Add notices and improved type checking for `$wpdb->queries` when attempting to compute server-timing for database queries. ([2159](https://github.com/WordPress/performance/pull/2159))
+* Skip stylesheets with empty `href` attributes in Site Health audit. ([2281](https://github.com/WordPress/performance/pull/2281), [2328](https://github.com/WordPress/performance/pull/2328))
+* Use proper escape function. ([2246](https://github.com/WordPress/performance/pull/2246))
+
+= 4.0.0 =
+
+**Enhancements**
+
+* Add Instant Back/Forward to list of performance feature plugins. ([2119](https://github.com/WordPress/performance/pull/2119))
+* Add admin pointers to promote new Performance Lab features. ([2122](https://github.com/WordPress/performance/pull/2122))
+* Implement opt-in `PERFLAB_PLACE_OBJECT_CACHE_DROPIN` for  Server-Timing `object-cache.php` placement. ([1996](https://github.com/WordPress/performance/pull/1996))
+* Use `wp_is_rest_endpoint()` to detect if we are handling a REST API request. ([2094](https://github.com/WordPress/performance/pull/2094))
+
+**Bug Fixes**
+
+* Fix TypeError in `perflab_aao_query_autoloaded_options()` by serializing non-scalar option values. ([1934](https://github.com/WordPress/performance/pull/1934))
+* Omit admin pointer for new plugin if plugin is already active. ([2143](https://github.com/WordPress/performance/pull/2143))
+* Prevent effective asset cache headers audit from running on local/development environments. ([2035](https://github.com/WordPress/performance/pull/2035))
+* Use HTML Tag Processor to audit blocking scripts & styles in Site Health’s enqueued-assets test. ([2059](https://github.com/WordPress/performance/pull/2059))
+
+= 3.9.0 =
+
+**Enhancements**
+
+* Remove experimental flags from Embed Optimizer and Image Prioritizer. ([1846](https://github.com/WordPress/performance/pull/1846))
+
+= 3.8.0 =
+
+**Enhancements**
+
+* Add Site Health test for `Cache-Control: no-store` page response header which disables bfcache. ([1807](https://github.com/WordPress/performance/pull/1807))
+* Add Site Health test to verify that static assets are served with far-future expires. ([1727](https://github.com/WordPress/performance/pull/1727))
+* Enqueue scripts using `plugins_url()` instead of `plugin_dir_url()`. ([1761](https://github.com/WordPress/performance/pull/1761))
+
+= 3.7.0 =
+
+**Enhancements**
+
+* Add guidance for managing Performance feature plugins. ([1734](https://github.com/WordPress/performance/pull/1734))
+* Automatically discover plugin dependencies when obtaining Performance feature plugins from WordPress.org. ([1680](https://github.com/WordPress/performance/pull/1680))
+* Disregard transient cache in `perflab_query_plugin_info()` when a plugin is absent. ([1694](https://github.com/WordPress/performance/pull/1694))
+* Minify script used for ajax activation of features; warn if absent and serve original file when SCRIPT_DEBUG is enabled. ([1658](https://github.com/WordPress/performance/pull/1658))
+
+**Bug Fixes**
+
+* Fix latest plugin version not being downloaded consistently. ([1693](https://github.com/WordPress/performance/pull/1693))
 
 = 3.6.1 =
 
@@ -580,6 +643,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 4.0.0 =
+
+This release introduces two new features: View Transitions which adds smooth transitions between navigations on your site, and Instant Back/Forward which enables back/forward cache (bfcache) for instant history navigations.
 
 = 3.2.0 =
 

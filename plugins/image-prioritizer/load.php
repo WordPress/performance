@@ -3,10 +3,10 @@
  * Plugin Name: Image Prioritizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer
  * Description: Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds <code>fetchpriority</code> and applies lazy-loading.
- * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
  * Requires Plugins: optimization-detective
- * Version: 0.2.0
+ * Version: 1.0.0-beta3
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -16,10 +16,13 @@
  * @package image-prioritizer
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -65,13 +68,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// Otherwise, register this copy if it is actually the one installed in the directory for plugins.
 			rtrim( WP_PLUGIN_DIR, '/' ) === dirname( __DIR__ )
 		) {
-			$GLOBALS[ $global_var_name ]['version'] = $version;
-			$GLOBALS[ $global_var_name ]['load']    = $load;
+			$GLOBALS[ $global_var_name ]['version'] = $version; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
+			$GLOBALS[ $global_var_name ]['load']    = $load; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
 		}
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.2.0',
+	'1.0.0-beta3',
 	static function ( string $version ): void {
 		if ( defined( 'IMAGE_PRIORITIZER_VERSION' ) ) {
 			return;

@@ -3,21 +3,19 @@ includes:
 parameters:
 	level: 8
 	treatPhpDocTypesAsCertain: false
-	phpVersion: 70200
 	paths:
 		- plugins
-		- tests
 		- performance.php
 	bootstrapFiles:
 		- tools/phpstan/constants.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
 	scanFiles:
-		# These are needed due config.platform.php being 7.2 in composer.json and wordpress-stubs not including polyfills.
+		# These are needed due config.platform.php being 7.4 in composer.json and wordpress-stubs not including polyfills.
 		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
-		- phpstan/vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
-		- phpstan/vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
-		- phpstan/vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
 	stubFiles:
 		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
@@ -108,11 +106,3 @@ parameters:
 		-
 			identifier: no.private.function
 			path: */tests/*
-		-
-			# TODO: Remove this to fix https://github.com/WordPress/performance/issues/1219
-			identifier: empty.notAllowed
-			paths:
-				- */tests/*
-				- plugins/dominant-color-images
-				- plugins/performance-lab
-				- plugins/webp-uploads

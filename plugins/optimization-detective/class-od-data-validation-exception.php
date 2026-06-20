@@ -6,15 +6,17 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Exception thrown when failing to validate URL Metrics data.
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_Data_Validation_Exception extends Exception {}

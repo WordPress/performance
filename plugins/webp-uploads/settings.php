@@ -7,9 +7,13 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Registers setting for generating JPEG in addition to the selected modern format for image uploads.
@@ -75,7 +79,19 @@ function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
 		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
-		'__return_empty_string',
+		static function (): void {
+			printf(
+				'<p>%s</p>',
+				wp_kses(
+					sprintf(
+						/* translators: %s: URL to the plugin FAQ on WordPress.org */
+						__( 'If modern format images are not being generated after upload, see the <a href="%s">FAQ</a> for common reasons.', 'webp-uploads' ),
+						'https://wordpress.org/plugins/webp-uploads/#faq'
+					),
+					array( 'a' => array( 'href' => array() ) )
+				)
+			);
+		},
 		'media',
 		array(
 			'before_section' => '<div id="modern-image-formats">',
@@ -167,7 +183,10 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 	</label>
-	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?></p>
+	<p class="description" id="perflab_modern_image_format_description">
+		<?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?>
+		<?php esc_html_e( 'Generated images may be discarded if the file in the modern format is larger than the originally uploaded image.', 'webp-uploads' ); ?>
+	</p>
 	<?php if ( ! $avif_supported ) : ?>
 		<br />
 		<div class="notice notice-warning inline">
@@ -204,7 +223,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 /**
  * Renders the settings field for generating all fallback image sizes.
  *
- * @since n.e.x.t
+ * @since 2.4.0
  */
 function webp_uploads_generate_all_fallback_sizes_callback(): void {
 	$all_fallback_sizes_enabled   = webp_uploads_should_generate_all_fallback_sizes();
@@ -283,7 +302,7 @@ function webp_uploads_generate_all_fallback_sizes_callback(): void {
 		}
 
 		fallbackCheckbox.addEventListener( 'change', toggleAllFallbackSizes );
-	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id ); ?> );
+	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
 	</script>
 	<?php
 }
@@ -375,7 +394,7 @@ function webp_uploads_use_picture_element_callback(): void {
 				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
 			}
 		} );
-	} )( <?php echo wp_json_encode( $picture_element_hidden_id ); ?> );
+	} )( <?php echo wp_json_encode( $picture_element_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
 	</script>
 	<?php
 }

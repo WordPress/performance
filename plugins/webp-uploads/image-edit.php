@@ -7,9 +7,13 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds sources to metadata for an attachment.
@@ -84,7 +88,11 @@ function webp_uploads_update_sources( array $metadata, array $valid_mime_transfo
 		}
 
 		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
-			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
+			if (
+				! isset( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ||
+				! is_string( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ||
+				'' === $subsized_images[ $targeted_mime ][ $size_name ]['file']
+			) {
 				continue;
 			}
 
@@ -122,7 +130,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 	}
 
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
-	if ( empty( $transforms[ $mime_type ] ) ) {
+	if ( ! isset( $transforms[ $mime_type ] ) || ! is_array( $transforms[ $mime_type ] ) || 0 === count( $transforms[ $mime_type ] ) ) {
 		return null;
 	}
 
@@ -142,7 +150,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 			}
 			$callback_executed = true;
 			// No sizes to be created.
-			if ( empty( $metadata['sizes'] ) ) {
+			if ( ! isset( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) || 0 === count( $metadata['sizes'] ) ) {
 				return $metadata;
 			}
 
@@ -161,7 +169,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 					}
 
 					if (
-						isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
+						isset( $metadata['sizes'][ $size_name ]['file'] ) &&
 						$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file']
 					) {
 						$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
@@ -403,7 +411,7 @@ function webp_uploads_backup_sources( int $attachment_id, array $data ): array {
  * @param array<string, array{ file: string, filesize: int }> $sources       An array with the full sources to be stored on the next available key.
  */
 function webp_uploads_backup_full_image_sources( int $attachment_id, array $sources ): void {
-	if ( empty( $sources ) ) {
+	if ( 0 === count( $sources ) ) {
 		return;
 	}
 
@@ -433,7 +441,7 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
 	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
 
-	if ( empty( $backup_sizes ) ) {
+	if ( 0 === count( $backup_sizes ) ) {
 		return null;
 	}
 
@@ -517,5 +525,5 @@ function webp_uploads_restore_image( int $attachment_id, array $data ): array {
  */
 function webp_uploads_image_edit_thumbnails_separately(): bool {
 	/** This filter is documented in wp-admin/includes/image-edit.php */
-	return (bool) apply_filters( 'image_edit_thumbnails_separately', false );
+	return (bool) apply_filters( 'image_edit_thumbnails_separately', false ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Intentionally applying core filter.
 }

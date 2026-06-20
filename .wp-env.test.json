@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"testsEnvironment": false,
+	"port": 8889,
+	"core": null,
+	"plugins": [
+		"./plugins/optimization-detective",
+		"./plugins/auto-sizes",
+		"./plugins/dominant-color-images",
+		"./plugins/embed-optimizer",
+		"./plugins/image-prioritizer",
+		"./plugins/performance-lab",
+		"./plugins/speculation-rules",
+		"./plugins/view-transitions",
+		"./plugins/web-worker-offloading",
+		"./plugins/webp-uploads"
+	],
+	"config": {
+		"WP_DEBUG": false,
+		"SCRIPT_DEBUG": false,
+		"FS_METHOD": "direct"
+	},
+	"mappings": {
+		"wp-content/plugins/performance": "."
+	}
+}

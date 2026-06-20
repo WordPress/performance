@@ -1,0 +1,41 @@
+@property --plvt-view-transition-animation-slide-horizontal-offset {
+	syntax: "<number>";
+	initial-value: 1;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-slide-vertical-offset {
+	syntax: "<number>";
+	initial-value: 0;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-duration {
+	syntax: "<time>";
+	initial-value: 1s;
+	inherits: false;
+}
+
+@keyframes plvt-view-transition-animation-slide-old {
+	to {
+		translate: calc(100vw * var(--plvt-view-transition-animation-slide-horizontal-offset) * -1) calc(100vw * var(--plvt-view-transition-animation-slide-vertical-offset) * -1);
+	}
+}
+
+@keyframes plvt-view-transition-animation-slide-new {
+	from {
+		translate: calc(100vw * var(--plvt-view-transition-animation-slide-horizontal-offset)) calc(100vw * var(--plvt-view-transition-animation-slide-vertical-offset));
+	}
+}
+
+::view-transition-group(*) {
+	animation-duration: var(--plvt-view-transition-animation-duration);
+}
+
+::view-transition-old(*) {
+	animation-name: plvt-view-transition-animation-slide-old;
+}
+
+::view-transition-new(*) {
+	animation-name: plvt-view-transition-animation-slide-new;
+}
