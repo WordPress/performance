@@ -154,7 +154,12 @@ function plsr_sanitize_setting( $input ): array {
 		$value['authentication'] = $default_value['authentication'];
 	}
 
-	return $value;
+	// Return an explicit array literal so the sealed return shape is preserved (array_intersect_key() above yields a loose remainder).
+	return array(
+		'mode'           => $value['mode'],
+		'eagerness'      => $value['eagerness'],
+		'authentication' => $value['authentication'],
+	);
 }
 
 /**
