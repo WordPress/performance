@@ -93,8 +93,8 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  * @since 0.3.0
  * @access private
  *
- * @param array<string, array{type: string}> $additional_properties Additional properties.
- * @return array<string, array{type: string}> Additional properties.
+ * @param array<string, array{type: string, ...}> $additional_properties Additional properties.
+ * @return array<string, array{type: string, ...}> Additional properties.
  */
 function embed_optimizer_add_element_item_schema_properties( array $additional_properties ): array {
 	$additional_properties['resizedBoundingClientRect'] = array(

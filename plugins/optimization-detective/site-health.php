@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  * @access private
  *
- * @param array{direct: array<string, array{label: string, test: string}>}|mixed $tests Site Health Tests.
- * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
+ * @param array{direct: array<string, array{label: string, test: callable}>, ...}|mixed $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: callable}>, ...} Amended tests.
  */
 function od_add_rest_api_availability_test( $tests ): array {
 	if ( ! is_array( $tests ) ) {
@@ -186,7 +186,7 @@ function od_compose_site_health_result( $response ): array {
  * @access private
  *
  * @param bool $use_cached Whether to use a previous response cached in a transient.
- * @return array{ response: array{ code: int, message: string }, body: string }|WP_Error Response.
+ * @return array{ response: array{ code: int, message: string }, body: string, ... }|WP_Error Response.
  */
 function od_get_rest_api_health_check_response( bool $use_cached ) {
 	$transient_key = 'od_rest_api_health_check_response';

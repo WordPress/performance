@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
- * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
+ * @param array{direct: array<string, array{label: string, test: string}>, ...} $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: string}>, async: array<string, array{label: string, test: string, ...}>, ...} Amended tests.
  */
 function perflab_aea_add_enqueued_assets_test( array $tests ): array {
 	$tests['async']['enqueued_blocking_assets'] = array(
