@@ -250,7 +250,7 @@ function plsr_add_setting_ui(): void {
 			'plsr_render_settings_field',
 			'reading',
 			'plsr_speculation_rules',
-			array_merge(
+			array_merge( // @phpstan-ignore argument.type (WordPress documents add_settings_field()'s $args as arbitrary extra arguments forwarded to the field callback, but php-stubs/wordpress-stubs types it as a sealed array{label_for?, class?}. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 				array( 'field' => $slug ),
 				$args
 			)
