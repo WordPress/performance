@@ -19,12 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array{ prefetch: string, prerender: string } Associative array of `$mode => $label` pairs.
+ * @return array{ prefetch: string, prerender: string, prerender_until_script: string } Associative array of `$mode => $label` pairs.
  */
 function plsr_get_mode_labels(): array {
 	return array(
-		'prefetch'  => _x( 'Prefetch', 'setting label', 'speculation-rules' ),
-		'prerender' => _x( 'Prerender', 'setting label', 'speculation-rules' ),
+		'prefetch'               => _x( 'Prefetch', 'setting label', 'speculation-rules' ),
+		'prerender'              => _x( 'Prerender', 'setting label', 'speculation-rules' ),
+		'prerender_until_script' => _x( 'Prerender until script', 'setting label', 'speculation-rules' ),
 	);
 }
 
@@ -69,7 +70,7 @@ function plsr_get_authentication_labels(): array {
  */
 function plsr_get_field_description( string $field ): string {
 	$descriptions = array(
-		'mode'           => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
+		'mode'           => __( 'Prerendering will lead to faster load times than prefetching. Prerender until script starts rendering but pauses before executing script elements. Prefetching is the safest choice for interactive content.', 'speculation-rules' ),
 		'eagerness'      => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 		'authentication' => sprintf(
 			/* translators: %s: URL to persistent object cache documentation */
@@ -85,19 +86,21 @@ function plsr_get_field_description( string $field ): string {
  *
  * @since 1.0.0
  *
- * @return array{ mode: 'prerender', eagerness: 'moderate', authentication: 'logged_out' } {
+ * @return array{ mode: 'prerender', eagerness: 'moderate', authentication: 'logged_out', origin_trial_token: string } {
  *     Default setting value.
  *
- *     @type string $mode           Mode.
- *     @type string $eagerness      Eagerness.
- *     @type string $authentication Authentication.
+ *     @type string $mode               Mode.
+ *     @type string $eagerness          Eagerness.
+ *     @type string $authentication     Authentication.
+ *     @type string $origin_trial_token Origin trial token.
  * }
  */
 function plsr_get_setting_default(): array {
 	return array(
-		'mode'           => 'prerender',
-		'eagerness'      => 'moderate',
-		'authentication' => 'logged_out',
+		'mode'               => 'prerender',
+		'eagerness'          => 'moderate',
+		'authentication'     => 'logged_out',
+		'origin_trial_token' => '',
 	);
 }
 
@@ -106,12 +109,13 @@ function plsr_get_setting_default(): array {
  *
  * @since 1.4.0
  *
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender'|'prerender_until_script', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any', origin_trial_token: string } {
  *     Stored setting value.
  *
- *     @type string $mode           Mode.
- *     @type string $eagerness      Eagerness.
- *     @type string $authentication Authentication.
+ *     @type string $mode               Mode.
+ *     @type string $eagerness          Eagerness.
+ *     @type string $authentication     Authentication.
+ *     @type string $origin_trial_token Origin trial token.
  * }
  */
 function plsr_get_stored_setting_value(): array {
@@ -125,12 +129,13 @@ function plsr_get_stored_setting_value(): array {
  * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender'|'prerender_until_script', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any', origin_trial_token: string } {
  *     Sanitized setting.
  *
- *     @type string $mode           Mode.
- *     @type string $eagerness      Eagerness.
- *     @type string $authentication Authentication.
+ *     @type string $mode               Mode.
+ *     @type string $eagerness          Eagerness.
+ *     @type string $authentication     Authentication.
+ *     @type string $origin_trial_token Origin trial token.
  * }
  */
 function plsr_sanitize_setting( $input ): array {
@@ -154,6 +159,8 @@ function plsr_sanitize_setting( $input ): array {
 		$value['authentication'] = $default_value['authentication'];
 	}
 
+	$value['origin_trial_token'] = sanitize_text_field( $value['origin_trial_token'] );
+
 	return $value;
 }
 
@@ -176,20 +183,24 @@ function plsr_register_setting(): void {
 				'schema' => array(
 					'type'                 => 'object',
 					'properties'           => array(
-						'mode'           => array(
+						'mode'               => array(
 							'description' => wp_strip_all_tags( plsr_get_field_description( 'mode' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
-						'eagerness'      => array(
+						'eagerness'          => array(
 							'description' => wp_strip_all_tags( plsr_get_field_description( 'eagerness' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
-						'authentication' => array(
+						'authentication'     => array(
 							'description' => wp_strip_all_tags( plsr_get_field_description( 'authentication' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
+						),
+						'origin_trial_token' => array(
+							'description' => __( 'Origin Trial Token for Prerender Until Script.', 'speculation-rules' ),
+							'type'        => 'string',
 						),
 					),
 					'additionalProperties' => false,
@@ -225,17 +236,21 @@ function plsr_add_setting_ui(): void {
 	);
 
 	$fields = array(
-		'mode'           => array(
+		'mode'               => array(
 			'title'       => __( 'Speculation Mode', 'speculation-rules' ),
 			'description' => plsr_get_field_description( 'mode' ),
 		),
-		'eagerness'      => array(
+		'eagerness'          => array(
 			'title'       => __( 'Eagerness', 'speculation-rules' ),
 			'description' => plsr_get_field_description( 'eagerness' ),
 		),
-		'authentication' => array(
+		'authentication'     => array(
 			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
 			'description' => plsr_get_field_description( 'authentication' ),
+		),
+		'origin_trial_token' => array(
+			'title'       => __( 'Origin Trial Token', 'speculation-rules' ),
+			'description' => __( 'If you are using the "Prerender until script" mode in production, you can register for the Chrome Origin Trial and paste your token here to enable it for visitors.', 'speculation-rules' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
@@ -260,7 +275,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * @since 1.0.0
  * @access private
  *
- * @param array{ field: 'mode'|'eagerness'|'authentication', title: non-empty-string, description: non-empty-string } $args {
+ * @param array{ field: 'mode'|'eagerness'|'authentication'|'origin_trial_token', title: non-empty-string, description: non-empty-string } $args {
  *     Associative array of arguments.
  *
  *     @type string $field       The slug of the sub setting controlled by the field.
@@ -281,6 +296,26 @@ function plsr_render_settings_field( array $args ): void {
 		case 'authentication':
 			$choices = plsr_get_authentication_labels();
 			break;
+		case 'origin_trial_token':
+			$value = $option['origin_trial_token'];
+			?>
+			<fieldset id="plsr-origin_trial_token-setting">
+				<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
+				<p>
+					<input
+						name="plsr_speculation_rules[origin_trial_token]"
+						type="text"
+						class="regular-text"
+						value="<?php echo esc_attr( $value ); ?>"
+						placeholder="e.g. ApX...=="
+					>
+				</p>
+				<p class="description" style="max-width: 800px;">
+					<?php echo esc_html( $args['description'] ); ?>
+				</p>
+			</fieldset>
+			<?php
+			return;
 		default:
 			// Invalid (and this case should never occur).
 			return; // @codeCoverageIgnore

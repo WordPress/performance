@@ -288,6 +288,22 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
+	public function test_plsr_get_speculation_rules_prerender_until_script(): void {
+		update_option( 'plsr_speculation_rules', array( 'mode' => 'prerender_until_script' ) );
+
+		$rules = plsr_get_speculation_rules();
+
+		$this->assertArrayHasKey( 'prerender_until_script', $rules );
+		$this->assertCount( 4, $rules['prerender_until_script'][0]['where']['and'] );
+		$this->assertSame(
+			'.no-prerender, .no-prerender_until_script',
+			$rules['prerender_until_script'][0]['where']['and'][3]['not']['selector_matches']
+		);
+	}
+
+	/**
+	 * @covers ::plsr_get_speculation_rules
+	 */
 	public function test_plsr_get_speculation_rules_prefetch(): void {
 		update_option( 'plsr_speculation_rules', array( 'mode' => 'prefetch' ) );
 

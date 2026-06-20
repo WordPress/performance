@@ -49,7 +49,7 @@ function plsr_filter_speculation_rules_configuration( $config ): ?array {
  * @since 1.5.0
  *
  * @param string[]|mixed $href_exclude_paths Additional path patterns to disable speculative loading for.
- * @param string         $mode               Mode used to apply speculative loading. Either 'prefetch' or 'prerender'.
+ * @param string         $mode               Mode used to apply speculative loading. Either 'prefetch', 'prerender', or 'prerender_until_script'.
  * @return string[] Filtered $href_exclude_paths.
  */
 function plsr_filter_speculation_rules_exclude_paths( $href_exclude_paths, string $mode ): array {

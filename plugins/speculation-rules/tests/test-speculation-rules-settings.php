@@ -67,9 +67,10 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	/** @return array<string, mixed> */
 	public function data_plsr_sanitize_setting(): array {
 		$default_value = array(
-			'mode'           => 'prerender',
-			'eagerness'      => 'moderate',
-			'authentication' => 'logged_out',
+			'mode'               => 'prerender',
+			'eagerness'          => 'moderate',
+			'authentication'     => 'logged_out',
+			'origin_trial_token' => '',
 		);
 
 		return array(
@@ -215,17 +216,19 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		update_option(
 			'plsr_speculation_rules',
 			array(
-				'mode'           => 'prefetch',
-				'eagerness'      => 'moderate',
-				'authentication' => 'logged_out',
+				'mode'               => 'prefetch',
+				'eagerness'          => 'moderate',
+				'authentication'     => 'logged_out',
+				'origin_trial_token' => '',
 			)
 		);
 		$settings = plsr_get_stored_setting_value();
 		$this->assertEquals(
 			array(
-				'mode'           => 'prefetch',
-				'eagerness'      => 'moderate',
-				'authentication' => 'logged_out',
+				'mode'               => 'prefetch',
+				'eagerness'          => 'moderate',
+				'authentication'     => 'logged_out',
+				'origin_trial_token' => '',
 			),
 			$settings
 		);
@@ -283,23 +286,29 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 */
 	public function data_provider_to_test_render_settings_field(): array {
 		return array(
-			'mode'           => array(
+			'mode'               => array(
 				'field'       => 'mode',
 				'value'       => 'prefetch',
 				'title'       => 'Speculation Mode',
 				'description' => 'The mode description',
 			),
-			'eagerness'      => array(
+			'eagerness'          => array(
 				'field'       => 'eagerness',
 				'value'       => 'moderate',
 				'title'       => 'Eagerness',
 				'description' => 'The eagerness description',
 			),
-			'authentication' => array(
+			'authentication'     => array(
 				'field'       => 'authentication',
 				'value'       => 'any',
 				'title'       => 'Authentication',
 				'description' => 'The authentication description.',
+			),
+			'origin_trial_token' => array(
+				'field'       => 'origin_trial_token',
+				'value'       => 'some_token',
+				'title'       => 'Origin Trial Token',
+				'description' => 'The origin trial token description.',
 			),
 		);
 	}
@@ -332,7 +341,11 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 				&&
 				$p->get_attribute( 'value' ) === $value
 			) {
-				$found = null !== $p->get_attribute( 'checked' );
+				if ( 'origin_trial_token' === $field ) {
+					$found = true;
+				} else {
+					$found = null !== $p->get_attribute( 'checked' );
+				}
 				break;
 			}
 		}

@@ -99,6 +99,21 @@ class Test_Speculation_Rules_WP_Core_API extends WP_UnitTestCase {
 		$this->assertSame( array( '/personalized/*' ), plsr_filter_speculation_rules_exclude_paths( '/personalized/*', 'prefetch' ) );
 	}
 
+	/**
+	 * @covers ::plsr_filter_speculation_rules_configuration
+	 */
+	public function test_plsr_filter_speculation_rules_configuration_with_prerender_until_script(): void {
+		add_filter( 'plsr_enabled_without_pretty_permalinks', '__return_true' );
+		update_option( 'plsr_speculation_rules', array( 'mode' => 'prerender_until_script' ) );
+		$this->assertSame(
+			array(
+				'mode'      => 'prerender_until_script',
+				'eagerness' => 'moderate',
+			),
+			plsr_filter_speculation_rules_configuration( null )
+		);
+	}
+
 	private function disable_pretty_permalinks(): void {
 		update_option( 'permalink_structure', '' );
 	}

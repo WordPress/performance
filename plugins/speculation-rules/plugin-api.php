@@ -63,7 +63,7 @@ function plsr_get_speculation_rules(): array {
 	 *
 	 * @param string[] $href_exclude_paths Additional paths to disable speculative prerendering for. The base exclude paths,
 	 *                                     such as for wp-admin, cannot be removed.
-	 * @param string   $mode               Mode used to apply speculative prerendering. Either 'prefetch' or 'prerender'.
+	 * @param string   $mode               Mode used to apply speculative prerendering. Either 'prefetch', 'prerender', or 'prerender_until_script'.
 	 */
 	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', array(), $mode );
 
@@ -117,6 +117,12 @@ function plsr_get_speculation_rules(): array {
 		$rules[0]['where']['and'][] = array(
 			'not' => array(
 				'selector_matches' => '.no-prerender',
+			),
+		);
+	} elseif ( 'prerender_until_script' === $mode ) {
+		$rules[0]['where']['and'][] = array(
+			'not' => array(
+				'selector_matches' => '.no-prerender, .no-prerender_until_script',
 			),
 		);
 	}
