@@ -90,7 +90,7 @@ exports.handler = async ( opt ) => {
 		const readmeFile = path.resolve( pluginDirectory, 'readme.txt' );
 		const readmeContent = fs.readFileSync( readmeFile, 'utf-8' );
 		const readmeContentMatches = readmeContent.match(
-			/^Stable tag:\s+(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
+			/^Stable tag:\s+(\d+\.\d+\.\d+(?:-[\w.]+)?)$/m
 		);
 		if ( ! readmeContentMatches ) {
 			throw new Error(
@@ -118,7 +118,7 @@ exports.handler = async ( opt ) => {
 				if ( regexp.test( content ) ) {
 					fs.writeFileSync(
 						file,
-						content.replace( regexp, function ( matches, tag ) {
+						content.replace( regexp, function ( _matches, tag ) {
 							replacementCount++;
 							return tag + version;
 						} )
@@ -130,7 +130,7 @@ exports.handler = async ( opt ) => {
 		// Update versions in Changelog and Upgrade Notices.
 		const readmeContentUpdated = readmeContent.replace(
 			/(^= )(n\.e\.x\.t)( =$)/gm,
-			function ( matches, before, next, after ) {
+			function ( _matches, before, _next, after ) {
 				replacementCount++;
 				return before + version + after;
 			}
