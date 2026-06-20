@@ -256,7 +256,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				1 === $length &&
 				0x002D === $code_unit
 			) {
-				$result .= '\\' . $ident[ $i ];
+				$result .= '\\-';
 				continue;
 			}
 

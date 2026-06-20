@@ -16,6 +16,8 @@ parameters:
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
+		# ValueError is a PHP 8 class, caught for forward compatibility but absent under the PHP 7.4 platform target.
+		- vendor/phpstan/php-8-stubs/stubs/Zend/ValueError.php
 	stubFiles:
 		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
@@ -123,6 +125,12 @@ parameters:
 			path: */tests/*
 		-
 			identifier: catch.internalClass
+			path: */tests/*
+		-
+			identifier: method.alreadyNarrowedType
+			path: */tests/*
+		-
+			identifier: argument.unresolvableType
 			path: */tests/*
 		-
 			identifier: no.private.method

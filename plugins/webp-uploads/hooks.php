@@ -337,6 +337,11 @@ function webp_uploads_filter_image_editor_output_format( $output_format, ?string
 		$output_format = array();
 	}
 
+	// Without a known source mime type there is nothing to map.
+	if ( null === $mime_type ) {
+		return $output_format;
+	}
+
 	// Use the original mime type if this type is allowed.
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 	if (

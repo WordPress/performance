@@ -385,7 +385,9 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 				arsort( $breadcrumb_counts );
 				$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
-				$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
+				$lcp_element = ( null !== $most_common_breadcrumb_index && isset( $breadcrumb_element[ $most_common_breadcrumb_index ] ) )
+					? $breadcrumb_element[ $most_common_breadcrumb_index ]
+					: null;
 			} else {
 				$lcp_element = null;
 			}
