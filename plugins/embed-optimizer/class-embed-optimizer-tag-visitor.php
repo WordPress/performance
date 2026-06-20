@@ -145,7 +145,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		/**
 		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport width.
 		 *
-		 * @var array<int, array{group: OD_URL_Metric_Group, height: int}> $minimums
+		 * @var array<int, array{group: OD_URL_Metric_Group, height: float}> $minimums
 		 */
 		$minimums = array();
 
@@ -191,7 +191,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				$style_rule = sprintf(
 					'#%s { min-height: %dpx; }',
 					$this->escape_css( $element_id ),
-					$minimum['height']
+					(int) $minimum['height']
 				);
 
 				$media_feature = od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() );
