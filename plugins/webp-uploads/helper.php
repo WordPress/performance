@@ -122,11 +122,14 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
 		// The filtered image provided all we need to short-circuit here.
 		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
-			return $image;
+			return array(
+				'file'     => $image['file'],
+				'filesize' => $image['filesize'],
+			);
 		}
 
 		// Supply the filesize based on the filter-provided path.
-		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+		if ( array_key_exists( 'path', $image ) ) {
 			$filesize = wp_filesize( $image['path'] );
 			if ( $filesize > 0 ) {
 				return array(
