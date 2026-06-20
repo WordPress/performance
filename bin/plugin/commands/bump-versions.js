@@ -233,7 +233,7 @@ async function bumpPlugin( pluginDirectory, version, dryRun ) {
 	let updatedBootstrap = replaceOne(
 		bootstrapContents,
 		new RegExp( `^( \\* Version:\\s+)${ VERSION_PATTERN }$`, 'm' ),
-		( match, prefix ) => `${ prefix }${ version }`,
+		( _match, prefix ) => `${ prefix }${ version }`,
 		`Unable to locate the "Version" header in ${ relativeBootstrap }.`
 	);
 
@@ -263,7 +263,7 @@ async function bumpPlugin( pluginDirectory, version, dryRun ) {
 	const stableTagUpdated = replaceOne(
 		readmeContents,
 		new RegExp( `^(Stable tag:\\s*)${ VERSION_PATTERN }$`, 'm' ),
-		( match, prefix ) => `${ prefix }${ version }`,
+		( _match, prefix ) => `${ prefix }${ version }`,
 		`Unable to locate "Stable tag" in ${ readmeFile }.`
 	);
 
@@ -359,7 +359,7 @@ function ensureChangelogEntry( readmeContents, version ) {
 	const contents = replaceOne(
 		readmeContents,
 		/^(== Changelog ==\n+)/m,
-		( match, heading ) => `${ heading }= ${ version } =\n\n`,
+		( _match, heading ) => `${ heading }= ${ version } =\n\n`,
 		'Unable to locate the "== Changelog ==" section in readme.txt.'
 	);
 
