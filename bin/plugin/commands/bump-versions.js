@@ -91,7 +91,10 @@ exports.handler = async ( opt ) => {
 	// Guard against two dated milestones targeting the same plugin, which would be ambiguous.
 	const byPlugin = /** @type {Record<string, ReleaseMilestone[]>} */ ( {} );
 	for ( const milestone of selected ) {
-		( byPlugin[ milestone.slug ] ??= [] ).push( milestone );
+		if ( ! byPlugin[ milestone.slug ] ) {
+			byPlugin[ milestone.slug ] = [];
+		}
+		byPlugin[ milestone.slug ].push( milestone );
 	}
 	const ambiguous = Object.entries( byPlugin ).filter(
 		( [ , list ] ) => list.length > 1
