@@ -103,9 +103,9 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	 *
 	 * @param array{
 	 *            file: string,
-	 *            path?: string,
+	 *            path?: non-empty-string|mixed,
 	 *            filesize?: int
-	 *        }|null|WP_Error $image         Image data, null, or WP_Error.
+	 *        }|null|WP_Error $image         Image data, null, or WP_Error. The `path` is validated at runtime since this is a pluggable filter.
 	 * @param int             $attachment_id The ID of the attachment from where this image would be created.
 	 * @param string          $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array{
@@ -129,7 +129,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		}
 
 		// Supply the filesize based on the filter-provided path.
-		if ( array_key_exists( 'path', $image ) ) {
+		if ( array_key_exists( 'path', $image ) && is_string( $image['path'] ) ) {
 			$filesize = wp_filesize( $image['path'] );
 			if ( $filesize > 0 ) {
 				return array(
