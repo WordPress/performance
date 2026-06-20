@@ -5,7 +5,8 @@
  * @package performance-lab
  */
 
-define( 'TESTS_PLUGIN_DIR', './' );
+// Non-resolvable sentinel: test bootstraps set this to the plugin-under-test dir at runtime, so its require() targets cannot be modeled here. The distinctive value lets phpstan.neon.dist ignore just those requires by message.
+define( 'TESTS_PLUGIN_DIR', '/tests-plugin-dir' );
 define( 'TESTS_REPO_ROOT_DIR', './' );
 define( 'WPINC', 'wp-includes' );
 
