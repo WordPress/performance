@@ -638,4 +638,6 @@ function perflab_print_row_meta_install_notice( string $plugin_file ): void {
 		wp_kses( $message, array( 'a' => array( 'href' => array() ) ) )
 	);
 }
+
 add_action( 'after_plugin_row_meta', 'perflab_print_row_meta_install_notice' );
+

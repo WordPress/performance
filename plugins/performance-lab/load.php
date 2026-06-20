@@ -105,8 +105,10 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
 		),
 		'embed-optimizer'         => array(
-			'constant'     => 'EMBED_OPTIMIZER_VERSION',
-			'experimental' => false,
+			'constant'         => 'EMBED_OPTIMIZER_VERSION',
+			'experimental'     => false,
+			// Soft dependency: Optimization Detective enhances functionality.
+			'suggests_plugins' => array( 'optimization-detective' ),
 		),
 		'image-prioritizer'       => array(
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',

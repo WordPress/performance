@@ -15,9 +15,273 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Gets plugin info for the given plugin slug from WordPress.org.
+ * Gets local plugin information for Performance Lab standalone plugins.
+ *
+ * This function provides fallback data when external API requests to WordPress.org
+ * are disabled or fail, allowing the Performance Lab interface to still show
+ * cards for locally installed performance plugins.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[] $plugin_slugs Array of plugin slugs to get local info for.
+ * @return array<string, array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string, is_installed: bool, is_active: bool}> Local plugin data keyed by slug.
+ */
+function perflab_get_local_plugin_fallback_data( array $plugin_slugs ): array {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+	$local_plugins = get_plugins();
+	$fallback_data = array();
+
+	foreach ( $plugin_slugs as $plugin_slug ) {
+		// Look for plugin files that match this slug.
+		$plugin_file = perflab_find_local_plugin_file( $local_plugins, $plugin_slug );
+
+		if ( false === $plugin_file ) {
+			continue; // Plugin not installed locally.
+		}
+
+		$plugin_headers = $local_plugins[ $plugin_file ];
+		$is_active      = is_plugin_active( $plugin_file );
+
+		// Build normalized plugin data similar to WordPress.org API response.
+		$readme_description = perflab_get_plugin_readme_description( $plugin_file );
+		$description        = '' !== $readme_description ? $readme_description : ( $plugin_headers['Description'] ?? '' );
+
+		$fallback_data[ $plugin_slug ] = array(
+			'name'              => $plugin_headers['Name'] ?? $plugin_slug,
+			'slug'              => $plugin_slug,
+			'short_description' => $description,
+			'requires'          => $plugin_headers['RequiresWP'] ?? false,
+			'requires_php'      => $plugin_headers['RequiresPHP'] ?? false,
+			'requires_plugins'  => perflab_get_plugin_dependencies( $plugin_slug, $plugin_headers ),
+			'version'           => $plugin_headers['Version'] ?? '0.0.0',
+			'is_installed'      => true,
+			'is_active'         => $is_active,
+		);
+	}
+
+	return $fallback_data;
+}
+
+/**
+ * Finds the plugin file for a given slug among installed plugins.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, array<string, string>> $local_plugins Array from get_plugins().
+ * @param string                               $plugin_slug   Plugin slug to find.
+ * @return string|false Plugin file path relative to plugins directory, or false if not found.
+ */
+function perflab_find_local_plugin_file( array $local_plugins, string $plugin_slug ) {
+	foreach ( $local_plugins as $plugin_file => $plugin_data ) {
+		// Extract directory name from plugin file path.
+		$plugin_dir = strtok( $plugin_file, '/' );
+
+		if ( $plugin_dir === $plugin_slug ) {
+			return $plugin_file;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Gets plugin description from readme file.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $plugin_file Plugin file path.
+ * @return string Plugin description from readme or empty string.
+ */
+function perflab_get_plugin_readme_description( string $plugin_file ): string {
+	$plugin_dir  = dirname( WP_PLUGIN_DIR . '/' . $plugin_file );
+	$readme_path = $plugin_dir . '/readme.txt';
+
+	if ( ! file_exists( $readme_path ) ) {
+		return '';
+	}
+
+	$readme_content = file_get_contents( $readme_path );
+	if ( false === $readme_content ) {
+		return '';
+	}
+
+	// Parse description from readme - it's the paragraph BEFORE "== Description ==".
+	if ( 1 === preg_match( '/^(.+?)\s*==\s*Description\s*==/s', $readme_content, $matches ) ) {
+		$lines = array_map( 'trim', explode( "\n", trim( $matches[1] ) ) );
+
+		// Find the first substantial line after the header section.
+		$description_line = '';
+		$in_header        = true;
+
+		foreach ( $lines as $line ) {
+			if ( $in_header && ( '' === $line || false !== strpos( $line, ':' ) ) ) {
+				continue; // Skip header lines and empty lines.
+			}
+			$in_header = false;
+
+			if ( '' !== $line ) {
+				$description_line = $line;
+				break;
+			}
+		}
+
+		return trim( $description_line );
+	}
+
+	return '';
+}
+
+/**
+ * Gets plugin dependencies including both header requirements and known soft dependencies.
+ *
+ * @since n.e.x.t
+ *
+ * @param string                $plugin_slug    Plugin slug.
+ * @param array<string, string> $plugin_headers Plugin headers array.
+ * @return list<non-falsy-string> Array of required plugin slugs.
+ */
+function perflab_get_plugin_dependencies( string $plugin_slug, array $plugin_headers ): array {
+	$requires_plugins = array();
+
+	// Check for RequiresPlugins header (WordPress 6.5+).
+	if ( isset( $plugin_headers['RequiresPlugins'] ) && '' !== $plugin_headers['RequiresPlugins'] ) {
+		$plugins          = array_map( 'trim', explode( ',', $plugin_headers['RequiresPlugins'] ) );
+		$requires_plugins = array_merge( $requires_plugins, $plugins );
+	}
+
+	// Add soft dependencies from standalone plugin data.
+	$standalone_data = perflab_get_standalone_plugin_data();
+	if ( isset( $standalone_data[ $plugin_slug ]['suggests_plugins'] ) ) {
+		$requires_plugins = array_merge( $requires_plugins, $standalone_data[ $plugin_slug ]['suggests_plugins'] );
+	}
+
+	/* @var array<int, non-falsy-string> $filtered */
+	$filtered = array_filter( $requires_plugins );
+	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
+	/* @var list<non-falsy-string> $result */
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
+	return $result;
+}
+
+/**
+ * Adds soft dependencies (suggested plugins) to an existing list of required plugins.
+ *
+ * @since n.e.x.t
+ *
+ * @param string   $plugin_slug       Plugin slug.
+ * @param string[] $requires_plugins  Current list of required plugin slugs.
+ * @return list<non-falsy-string> Merged list with suggested plugins included.
+ */
+function perflab_add_suggested_plugins( string $plugin_slug, array $requires_plugins = array() ): array {
+	$standalone_data = perflab_get_standalone_plugin_data();
+	if ( isset( $standalone_data[ $plugin_slug ]['suggests_plugins'] ) ) {
+		$requires_plugins = array_merge( $requires_plugins, $standalone_data[ $plugin_slug ]['suggests_plugins'] );
+	}
+
+	/* @var array<int, non-falsy-string> $filtered */
+	$filtered = array_filter( $requires_plugins );
+	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
+	/* @var list<non-falsy-string> $result */
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
+	return $result;
+}
+
+/**
+ * Parse requires_plugins from plugin headers.
+ *
+ * Back-compat wrapper retained for tests; delegates to perflab_get_plugin_dependencies()
+ * and applies minimal historical behavior.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, string> $plugin_headers Plugin headers array.
+ * @param string                $plugin_slug    Plugin slug to determine dependencies.
+ * @return list<non-falsy-string> Array of required plugin slugs.
+ */
+function perflab_parse_requires_plugins( array $plugin_headers, string $plugin_slug ): array {
+	$deps = perflab_get_plugin_dependencies( $plugin_slug, $plugin_headers );
+
+	// Historical behavior: Image Prioritizer also depends on Optimization Detective.
+	// In production this should be declared via RequiresPlugins, but keep here to avoid behavior changes.
+	if ( 'image-prioritizer' === $plugin_slug ) {
+		$deps[] = 'optimization-detective';
+	}
+
+	/* @var array<int, non-falsy-string> $filtered */
+	$filtered = array_filter( $deps );
+	$unique   = array_unique( $filtered );
+	// Reindex to ensure a list without relying on array_values (for PHPStan template inference).
+	/* @var list<non-falsy-string> $result */
+	$result = array();
+	foreach ( $unique as $dep ) {
+		$result[] = $dep;
+	}
+	return $result;
+}
+
+/**
+ * Sanitize plugin description for display.
+ *
+ * Back-compat wrapper retained for tests.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $description Raw plugin description.
+ * @return string Sanitized description.
+ */
+function perflab_sanitize_plugin_description( string $description ): string {
+	if ( '' === $description ) {
+		return '';
+	}
+
+	// Strip all HTML tags and decode entities.
+	$description = wp_strip_all_tags( $description );
+	$description = html_entity_decode( $description, ENT_QUOTES, 'UTF-8' );
+
+	return trim( $description );
+}
+
+/**
+ * Check if external requests are blocked or likely to fail.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if external requests are blocked or should be avoided.
+ */
+function perflab_are_external_requests_blocked(): bool {
+	// Check if external requests are explicitly blocked.
+	if ( defined( 'WP_HTTP_BLOCK_EXTERNAL' ) && WP_HTTP_BLOCK_EXTERNAL ) {
+		// Check if wordpress.org is in the allowed hosts.
+		$allowed_hosts = defined( 'WP_ACCESSIBLE_HOSTS' ) ? WP_ACCESSIBLE_HOSTS : '';
+		if ( '' === $allowed_hosts ) {
+			return true;
+		}
+
+		$allowed_hosts_array = array_map( 'trim', explode( ',', $allowed_hosts ) );
+		if ( ! in_array( 'wordpress.org', $allowed_hosts_array, true ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Get plugin info for the given plugin slug from WordPress.org.
+ *
+ * Falls back to local plugin data when external requests are disabled or fail.
  *
  * @since 2.8.0
+ * @since n.e.x.t Added fallback to local plugin data when external requests fail.
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
  * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], version: string}|WP_Error Array of plugin data or WP_Error if failed.
@@ -35,6 +299,21 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 			);
 		}
 		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
+	}
+
+	// Check if external requests are blocked and if we should use local fallback.
+	$should_use_fallback = perflab_are_external_requests_blocked();
+
+	if ( $should_use_fallback ) {
+		// Try to get local plugin data instead.
+		$local_data = perflab_get_local_plugin_fallback_data( array( $plugin_slug ) );
+		if ( isset( $local_data[ $plugin_slug ] ) ) {
+			// Cache the local data with a shorter expiration.
+			$cached_plugins                 = is_array( $plugins ) ? $plugins : array();
+			$cached_plugins[ $plugin_slug ] = $local_data[ $plugin_slug ];
+			set_transient( $transient_key, $cached_plugins, 5 * MINUTE_IN_SECONDS );
+			return $local_data[ $plugin_slug ];
+		}
 	}
 
 	$fields = array(
@@ -62,6 +341,19 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugins    = array();
 
 	if ( is_wp_error( $response ) ) {
+		// Try local fallback first before giving up.
+		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
+
+		if ( count( $local_fallback_data ) > 0 ) {
+			// We have some local plugins to show, cache them.
+			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
+
+			if ( isset( $local_fallback_data[ $plugin_slug ] ) ) {
+				return $local_fallback_data[ $plugin_slug ];
+			}
+		}
+
+		// No local fallback available, store error.
 		$plugins[ $plugin_slug ] = array(
 			'error' => array(
 				'code'    => 'api_error',
@@ -79,6 +371,19 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 		$has_errors = true;
 	} elseif ( ! is_object( $response ) || ! property_exists( $response, 'plugins' ) ) {
+		// Try local fallback first before giving up.
+		$local_fallback_data = perflab_get_local_plugin_fallback_data( perflab_get_standalone_plugins() );
+
+		if ( count( $local_fallback_data ) > 0 ) {
+			// We have some local plugins to show, cache them.
+			set_transient( $transient_key, $local_fallback_data, 5 * MINUTE_IN_SECONDS );
+
+			if ( isset( $local_fallback_data[ $plugin_slug ] ) ) {
+				return $local_fallback_data[ $plugin_slug ];
+			}
+		}
+
+		// No local fallback available, store error.
 		$plugins[ $plugin_slug ] = array(
 			'error' => array(
 				'code'    => 'no_plugins',
@@ -158,7 +463,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 }
 
 /**
- * Returns an array of WPP standalone plugins.
+ * Return an array of WPP standalone plugins.
  *
  * @since 2.8.0
  *
@@ -171,7 +476,7 @@ function perflab_get_standalone_plugins(): array {
 }
 
 /**
- * Renders plugin UI for managing standalone plugins within PL Settings screen.
+ * Render plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since 2.8.0
  */
@@ -429,9 +734,10 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	}
 
 	// Add recommended plugins (soft dependencies) to the list of plugins installed and activated.
-	if ( 'embed-optimizer' === $plugin_slug ) {
-		$plugin_data['requires_plugins'][] = 'optimization-detective';
-	}
+	$plugin_data['requires_plugins'] = perflab_add_suggested_plugins(
+		$plugin_slug,
+		$plugin_data['requires_plugins'] ?? array()
+	);
 
 	// Install and activate plugin dependencies first.
 	foreach ( $plugin_data['requires_plugins'] as $requires_plugin_slug ) {
