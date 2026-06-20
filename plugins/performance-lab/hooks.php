@@ -31,7 +31,7 @@ function perflab_get_generator_content(): string {
 	}
 
 	return sprintf(
-	// Use the plugin slug as it is immutable.
+		// Use the plugin slug as it is immutable.
 		'performance-lab %1$s; plugins: %2$s',
 		PERFLAB_VERSION,
 		implode( ', ', $active_plugins )
