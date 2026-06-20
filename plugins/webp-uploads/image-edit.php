@@ -295,7 +295,8 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
- *     original_image: string
+ *     original_image: string,
+ *     sources?: array<string, array{ file: string, filesize: int }>
  * } The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( array $data, int $attachment_id ): array {
@@ -348,7 +349,8 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
- *     original_image: string
+ *     original_image: string,
+ *     sources?: array<string, array{ file: string, filesize: int }>
  * } The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( int $attachment_id, array $data ): array {

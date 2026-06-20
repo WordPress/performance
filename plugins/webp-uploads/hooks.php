@@ -52,7 +52,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     sources?: array<string, array{
  *         file: string,
  *         filesize: int
- *     }>
+ *     }>,
+ *     ...
  * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
