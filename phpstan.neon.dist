@@ -56,11 +56,35 @@ parameters:
 			identifier: no.private.function
 			message: '/function plwwo_.*/'
 			path: plugins/web-worker-offloading/*
+		-
+			identifier: no.private.function
+			message: '/function embed_optimizer_.*/'
+			path: plugins/embed-optimizer/*
+		-
+			identifier: no.private.function
+			message: '/function image_prioritizer_.*/'
+			path: plugins/image-prioritizer/*
+		-
+			identifier: no.private.function
+			message: '/function plsr_.*/'
+			path: plugins/speculation-rules/*
+		-
+			identifier: no.private.function
+			message: '/function plvt_.*/'
+			path: plugins/view-transitions/*
+		-
+			identifier: no.private.class
+			message: '/class PLVT_.*/'
+			path: plugins/view-transitions/*
+		-
+			identifier: no.private.function
+			message: '/function perflab_.*/'
+			path: plugins/performance-lab/*
 		# Ignore errors related to the plugin not running from inside a WP environment, so paths like ABSPATH . WPINC don't resolve.
 		-
 			identifier: requireOnce.fileNotFound
 		-
-			identifier: includeOnce.fileNotFound
+			identifier: require.fileNotFound
 		-
 			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
 			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
@@ -83,9 +107,6 @@ parameters:
 			identifier: encapsedStringPart.nonString
 			path: */tests/*
 		-
-			identifier: offsetAccess.invalidOffset
-			path: */tests/*
-		-
 			identifier: assign.propertyType
 			path: */tests/*
 		-
@@ -98,7 +119,10 @@ parameters:
 			identifier: staticMethod.dynamicCall
 			path: */tests/*
 		-
-			identifier: no.private.class
+			identifier: phpunit.assertEquals
+			path: */tests/*
+		-
+			identifier: catch.internalClass
 			path: */tests/*
 		-
 			identifier: no.private.method
