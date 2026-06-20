@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      sources?: array<string, array{ file: string, filesize: int }>,
  *      original_image?: string
  * } $metadata
- * @phpstan-param array<string, array{ file: string, path: string }> $main_images
+ * @phpstan-param array<string, array{ file: string, path: string, ... }> $main_images
  * @phpstan-param array<string, array<string, array{ file: string }>> $subsized_images
  *
  * @param array    $metadata              Metadata of the attachment.
@@ -332,7 +332,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  *       width: int,
  *       height: int,
  *       file: string,
- *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *       image_meta: array<string, mixed>,
  *       filesize: int,
  *       original_image: string,
@@ -346,7 +346,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  *     width: int,
  *     height: int,
  *     file: string,
- *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
  *     original_image: string,
@@ -477,10 +477,11 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *        width: int,
  *        height: int,
  *        file: string,
- *        sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *        sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *        image_meta: array<string, mixed>,
  *        filesize: int,
- *        original_image: string
+ *        original_image: string,
+ *        sources?: array<string, array{ file: string, filesize: int }>
  *    } $data
  *
  * @param int                  $attachment_id The ID of the attachment.
@@ -489,7 +490,7 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *     width: int,
  *     height: int,
  *     file: string,
- *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
  *     sources?: array<string, array{ file: string, filesize: int }>,
