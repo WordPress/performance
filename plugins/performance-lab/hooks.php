@@ -8,10 +8,11 @@
 
 declare( strict_types = 1 );
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
+// @codeCoverageIgnoreEnd
 
 /**
  * Gets the content attribute for the generator tag for the Performance Lab plugin.
