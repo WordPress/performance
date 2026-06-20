@@ -422,6 +422,7 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
  *                        code: int|false,
  *                        message: string|false,
  *                    },
+ *                    ...
  *                } $response
  *
  * @param WP_Error|array<string, mixed> $response The response from the home page retrieval.
