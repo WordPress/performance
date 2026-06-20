@@ -20,7 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  * @access private
  *
- * @param array{direct: array<string, array{label: string, test: callable}>, ...}|mixed $tests Site Health Tests.
+ * @param array<string, mixed>|mixed $tests Site Health Tests.
+ * @phpstan-param array{direct: array<string, array{label: string, test: callable}>, ...}|mixed $tests
  * @return array{direct: array<string, array{label: string, test: callable}>, ...} Amended tests.
  */
 function od_add_rest_api_availability_test( $tests ): array {

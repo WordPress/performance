@@ -312,8 +312,10 @@ function webp_uploads_in_frontend_body(): bool {
  *
  * @since 1.0.0
  *
- * @param array{ filesize?: int, ... } $original   An array with the metadata of the attachment.
- * @param array{ filesize?: int, ... } $additional An array containing the filename and file size for additional mime.
+ * @param array<string, mixed> $original   An array with the metadata of the attachment.
+ * @param array<string, mixed> $additional An array containing the filename and file size for additional mime.
+ * @phpstan-param array{ filesize?: int, ... } $original
+ * @phpstan-param array{ filesize?: int, ... } $additional
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
 function webp_uploads_should_discard_additional_image_file( array $original, array $additional ): bool {

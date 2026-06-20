@@ -19,7 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array{direct: array<string, array{label: string, test: string}>, ...} $tests Site Health Tests.
+ * @param array<string, mixed> $tests Site Health Tests.
+ * @phpstan-param array{direct: array<string, array{label: string, test: string}>, ...} $tests
  * @return array{direct: array<string, array{label: string, test: string}>, async: array<string, array{label: string, test: string, ...}>, ...} Amended tests.
  */
 function perflab_aea_add_enqueued_assets_test( array $tests ): array {
