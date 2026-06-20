@@ -57,9 +57,12 @@ exports.options = [
  *
  * A release milestone is an open milestone whose title is "<plugin-slug> <version>"
  * (i.e. it does not contain "n.e.x.t") and which has a due date set. For each such
- * milestone, the target version is applied to the plugin's bootstrap PHP file header,
- * its PHP version constant, the "Stable tag" in readme.txt, and a new (empty) changelog
- * entry is inserted so the readme is ready for `npm run readme`.
+ * milestone, the target version is applied to:
+ *
+ *  - the plugin's bootstrap PHP file header,
+ *  - its PHP version constant,
+ *  - the "Stable tag" in readme.txt, and
+ *  - a new (empty) changelog entry is inserted so the readme is ready for `npm run readme`.
  *
  * @param {WPBumpVersionsCommandOptions} opt
  */
