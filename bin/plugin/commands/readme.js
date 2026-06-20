@@ -47,7 +47,7 @@ exports.handler = async ( opt ) => {
  * Updates the `readme.txt` file with the given changelog.
  *
  * @param {string} readmeFile Readme file path.
- * @param {string} changelog  Changelog in markdown.
+ * @param {string} changelog  Changelog in Markdown format.
  * @return {string} Success status message.
  */
 function updateReadmeChangelog( readmeFile, changelog ) {
