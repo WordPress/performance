@@ -327,28 +327,12 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 				return null;
 			}
 
-			// The following arrays all share array indices.
-
 			/**
-			 * Seen breadcrumb counts.
+			 * Breadcrumbs keyed by element XPath: how often each is the LCP element, and the latest matching element.
 			 *
-			 * @var array<int, non-empty-string> $seen_breadcrumbs
+			 * @var array<non-empty-string, array{count: int, element: OD_Element}> $breadcrumbs
 			 */
-			$seen_breadcrumbs = array();
-
-			/**
-			 * Breadcrumb counts.
-			 *
-			 * @var array<int, non-negative-int> $breadcrumb_counts
-			 */
-			$breadcrumb_counts = array();
-
-			/**
-			 * Breadcrumb element.
-			 *
-			 * @var array<int, OD_Element> $breadcrumb_element
-			 */
-			$breadcrumb_element = array();
+			$breadcrumbs = array();
 
 			// Prefer to use URL Metrics, which have a current ETag.
 			$url_metrics = array_filter(
@@ -367,27 +351,27 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 						continue;
 					}
 
-					$i = array_search( $element->get_xpath(), $seen_breadcrumbs, true );
-					if ( false === $i ) {
-						$i                       = count( $seen_breadcrumbs );
-						$seen_breadcrumbs[ $i ]  = $element->get_xpath();
-						$breadcrumb_counts[ $i ] = 0;
+					$xpath = $element->get_xpath();
+					if ( ! isset( $breadcrumbs[ $xpath ] ) ) {
+						$breadcrumbs[ $xpath ] = array(
+							'count'   => 0,
+							'element' => $element,
+						);
 					}
-
-					$breadcrumb_counts[ $i ] += 1;
-					$breadcrumb_element[ $i ] = $element;
+					++$breadcrumbs[ $xpath ]['count'];
+					$breadcrumbs[ $xpath ]['element'] = $element;
 					break; // We found the LCP element for the URL Metric, go to the next URL Metric.
 				}
 			}
 
-			// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
-			if ( count( $seen_breadcrumbs ) > 0 ) {
-				arsort( $breadcrumb_counts );
-				$most_common_breadcrumb_index = key( $breadcrumb_counts );
-
-				$lcp_element = ( null !== $most_common_breadcrumb_index && isset( $breadcrumb_element[ $most_common_breadcrumb_index ] ) )
-					? $breadcrumb_element[ $most_common_breadcrumb_index ]
-					: null;
+			// Sort by count in descending order so the most common breadcrumb's element is first.
+			if ( count( $breadcrumbs ) > 0 ) {
+				uasort(
+					$breadcrumbs,
+					static fn ( array $a, array $b ): int => $b['count'] <=> $a['count']
+				);
+				$most_common = reset( $breadcrumbs );
+				$lcp_element = $most_common['element'];
 			} else {
 				$lcp_element = null;
 			}
