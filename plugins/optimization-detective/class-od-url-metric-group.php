@@ -330,7 +330,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			/**
 			 * Breadcrumbs keyed by element XPath: how often each is the LCP element, and the latest matching element.
 			 *
-			 * @var array<non-empty-string, array{count: int, element: OD_Element}> $breadcrumbs
+			 * @var array<non-empty-string, array{count: int<1, max>, element: OD_Element}> $breadcrumbs
 			 */
 			$breadcrumbs = array();
 
@@ -354,12 +354,13 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 					$xpath = $element->get_xpath();
 					if ( ! isset( $breadcrumbs[ $xpath ] ) ) {
 						$breadcrumbs[ $xpath ] = array(
-							'count'   => 0,
+							'count'   => 1,
 							'element' => $element,
 						);
+					} else {
+						++$breadcrumbs[ $xpath ]['count'];
+						$breadcrumbs[ $xpath ]['element'] = $element;
 					}
-					++$breadcrumbs[ $xpath ]['count'];
-					$breadcrumbs[ $xpath ]['element'] = $element;
 					break; // We found the LCP element for the URL Metric, go to the next URL Metric.
 				}
 			}
