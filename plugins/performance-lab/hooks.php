@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Performance Lab
+ * Hook callbacks used for Performance Lab.
  *
  * @package performance-lab
  * @since n.e.x.t
