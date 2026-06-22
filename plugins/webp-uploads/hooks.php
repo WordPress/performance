@@ -52,7 +52,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     sources?: array<string, array{
  *         file: string,
  *         filesize: int
- *     }>
+ *     }>,
+ *     ...
  * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
@@ -162,6 +163,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 			// Replace the attached file with the custom MIME type version.
 			if ( false !== $original_image ) {
+				// @phpstan-ignore no.private.function
 				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
 			}
 
@@ -333,6 +335,11 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
 function webp_uploads_filter_image_editor_output_format( $output_format, ?string $filename, ?string $mime_type ): array {
 	if ( ! is_array( $output_format ) ) {
 		$output_format = array();
+	}
+
+	// Without a known source mime type there is nothing to map.
+	if ( null === $mime_type ) {
+		return $output_format;
 	}
 
 	// Use the original mime type if this type is allowed.

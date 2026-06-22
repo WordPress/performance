@@ -201,7 +201,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 *
 	 * @param OD_HTML_Tag_Processor  $processor HTML tag processor.
 	 * @param OD_Tag_Visitor_Context $context   Tag visitor context.
-	 * @return bool Whether the tag should be tracked in URL Metrics.
+	 * @return false Whether the tag should be tracked in URL Metrics; always false since PICTURE elements are not themselves tracked.
 	 */
 	private function process_picture( OD_HTML_Tag_Processor $processor, OD_Tag_Visitor_Context $context ): bool {
 		/**
