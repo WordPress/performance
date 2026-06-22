@@ -1018,6 +1018,28 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Test that the output format is normalized and short-circuited for invalid or unknown input.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_normalize_non_array_output_format_and_return_early_without_mime_type(): void {
+		// A non-array output format is normalized to an empty array; a null mime type returns it unchanged.
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( 'not-an-array', null, null ),
+			'A non-array output format should be normalized to an empty array.'
+		);
+
+		// An existing output format mapping is returned unchanged when there is no source mime type to map.
+		$output_format = array( 'image/png' => 'image/webp' );
+		$this->assertSame(
+			$output_format,
+			webp_uploads_filter_image_editor_output_format( $output_format, '/tmp/image.png', null ),
+			'The output format mapping should be returned unchanged when the source mime type is null.'
+		);
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::webp_uploads_render_generator
