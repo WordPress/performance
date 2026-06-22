@@ -51,7 +51,7 @@ function perflab_render_generator(): void {
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
 }
-add_action( 'wp_head', 'perflab_render_generator' );
+add_action( 'wp_head', 'perflab_render_generator' ); // @codeCoverageIgnore
 
 /**
  * Gets the standalone plugins and their data.
@@ -233,7 +233,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 	// Set timeout of 1 hour before retrying again (only relevant in case the above failed).
 	set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
 }
-add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
+add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' ); // @codeCoverageIgnore
 
 /**
  * Removes the Performance Lab's object cache drop-in from the drop-ins folder.
@@ -283,7 +283,7 @@ function perflab_maybe_remove_object_cache_dropin(): void {
 	// Delete transient for drop-in check in case the plugin is reactivated shortly after.
 	delete_transient( 'perflab_set_object_cache_dropin' );
 }
-register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
+register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' ); // @codeCoverageIgnore
 
 /**
  * Redirects legacy module page to the performance feature page.
@@ -306,7 +306,7 @@ function perflab_no_access_redirect_module_to_performance_feature_page(): void {
 		exit;
 	}
 }
-add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_performance_feature_page' );
+add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_performance_feature_page' ); // @codeCoverageIgnore
 
 /**
  * Cleanup function to delete legacy 'perflab_modules_settings' option if present.
@@ -318,4 +318,4 @@ function perflab_cleanup_option(): void {
 		delete_option( 'perflab_modules_settings' );
 	}
 }
-add_action( 'admin_init', 'perflab_cleanup_option' );
+add_action( 'admin_init', 'perflab_cleanup_option' ); // @codeCoverageIgnore
