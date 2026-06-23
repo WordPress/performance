@@ -774,10 +774,15 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<string>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types(): array {
-		return array(
+		$data = array(
 			'webp' => array( 'webp' ),
-			'avif' => array( 'avif' ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif'] = array( 'avif' );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -786,12 +791,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<int, string|true>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types_with_threshold(): array {
-		return array(
+		$data = array(
 			'webp'                    => array( 'webp' ),
 			'webp with 850 threshold' => array( 'webp', true ),
-			'avif'                    => array( 'avif' ),
-			'avif with 850 threshold' => array( 'avif', true ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif']                    = array( 'avif' );
+			$data['avif with 850 threshold'] = array( 'avif', true );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -1008,6 +1018,28 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Test that the output format is normalized and short-circuited for invalid or unknown input.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_normalize_non_array_output_format_and_return_early_without_mime_type(): void {
+		// A non-array output format is normalized to an empty array; a null mime type returns it unchanged.
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( 'not-an-array', null, null ),
+			'A non-array output format should be normalized to an empty array.'
+		);
+
+		// An existing output format mapping is returned unchanged when there is no source mime type to map.
+		$output_format = array( 'image/png' => 'image/webp' );
+		$this->assertSame(
+			$output_format,
+			webp_uploads_filter_image_editor_output_format( $output_format, '/tmp/image.png', null ),
+			'The output format mapping should be returned unchanged when the source mime type is null.'
+		);
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::webp_uploads_render_generator
@@ -1092,6 +1124,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 		// Ensure the AVIF MIME type is supported; skip the test if not.
 		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is not supported.' );
 		}
 
 		$this->set_image_output_type( 'avif' );
@@ -1309,5 +1345,35 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$featured_image = get_the_post_thumbnail( $post_id );
 		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
+
+	/**
+	 * Check if AVIF encoding is supported.
+	 *
+	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
+	 * where it returns true for AVIF support even if only decoding is supported but not encoding.
+	 *
+	 * @return bool True if AVIF encoding is supported, false otherwise.
+	 */
+	public function check_avif_encoding_support(): bool {
+		static $encoding_support = null;
+		if ( null === $encoding_support ) {
+			if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && class_exists( 'ImagickException' ) ) {
+				// Only reliable way to check for AVIF encoding support is to attempt to encode an image and catch the exception if it fails.
+				try {
+					$i = new Imagick();
+					$i->newImage( 10, 10, 'white' );
+					$i->setImageFormat( 'avif' );
+					$i->getImageBlob();
+					$encoding_support = true;
+				} catch ( ImagickException $e ) {
+					$encoding_support = false;
+				}
+			} else {
+				$encoding_support = false;
+			}
+		}
+
+		return $encoding_support;
 	}
 }

@@ -38,13 +38,23 @@ This is a monorepo for the WordPress Performance Team, containing a collection o
 
 ### Running a Local Environment
 
-This project uses `@wordpress/env` to create a local development environment.
+This project uses `@wordpress/env` to create local environments. There are two,
+each defined by its own config file and running as fully isolated containers:
 
-* Check if the environment is already running: `npm run wp-env status`
-* Start the environment: `npm run wp-env start`
-* Stop the environment: `npm run wp-env stop`
+* **Development** (for browsing) — `.wp-env.json`, at `http://localhost:8888`.
+* **Tests** (for PHPUnit and E2E) — `.wp-env.test.json`, at `http://localhost:8889`.
 
-The environment will by default be located at `http://localhost:8888` but this can be overridden by `.wp-env.override.json`.
+The `wp-env-test` script is shorthand for `wp-env --config=.wp-env.test.json`.
+
+* Check if the environments are running: `npm run wp-env status` / `npm run wp-env-test status`
+* Start the environments: `npm run wp-env start` / `npm run wp-env-test start`
+* Stop the environments: `npm run wp-env stop` / `npm run wp-env-test stop`
+
+The `test-php*` and `test-e2e*` scripts run against the tests environment, so
+start it with `npm run wp-env-test start` before running them.
+
+Each environment can be overridden locally (these files are git-ignored):
+`.wp-env.override.json` for development and `.wp-env.test.override.json` for tests.
 
 ## Code Style
 

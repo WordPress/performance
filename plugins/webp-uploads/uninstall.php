@@ -25,7 +25,7 @@ if ( is_multisite() ) {
 	);
 
 	foreach ( $webp_uploads_site_ids as $webp_uploads_site_id ) {
-		switch_to_blog( $webp_uploads_site_id );
+		switch_to_blog( $webp_uploads_site_id ); // @phpstan-ignore argument.type (get_sites( 'fields' => 'ids' ) returns int[], but php-stubs/wordpress-stubs uses a sealed array shape in its conditional return type so the narrowing is lost when extra args are passed. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 		webp_uploads_delete_plugin_option();
 		restore_current_blog();
 	}
