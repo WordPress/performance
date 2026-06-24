@@ -71,3 +71,25 @@ function webp_uploads_media_setting_style(): void {
 	</style>
 	<?php
 }
+
+/**
+ * Updates the references of the featured image to the new image format if available.
+ *
+ * @since 1.0.0
+ * @deprecated n.e.x.t Featured images are now rewritten through the `wp_get_attachment_image`
+ *                     filter; see webp_uploads_filter_wp_get_attachment_image().
+ *
+ * @param string $html          The current HTML markup of the featured image.
+ * @param int    $post_id       The current post ID where the featured image is requested.
+ * @param int    $attachment_id The ID of the attachment image.
+ * @return string The updated HTML markup.
+ */
+function webp_uploads_update_featured_image( string $html, int $post_id, int $attachment_id ): string {
+	_deprecated_function( __FUNCTION__, 'Modern Image Formats n.e.x.t', 'webp_uploads_filter_wp_get_attachment_image()' );
+
+	if ( webp_uploads_is_picture_element_enabled() ) {
+		return webp_uploads_wrap_image_in_picture( $html, 'post_thumbnail_html', $attachment_id );
+	}
+
+	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
+}
