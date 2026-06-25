@@ -1494,8 +1494,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		$block_content = $this->get_gallery_block_markup(
 			$image_block,
 			array(
-				'align'   => $ancestor_block_alignment,
-				'columns' => '',
+				'align' => $ancestor_block_alignment,
 			)
 		);
 
@@ -1980,7 +1979,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 		$class  = '';
 		$class .= '' !== $atts['align'] ? ' align' . $atts['align'] : '';
-		$class .= '' !== $atts['columns'] ? ' columns-' . $atts['columns'] : ' columns-default';
+		$class .= ' columns-' . ( ( isset( $atts['columns'] ) && '' !== $atts['columns'] ) ? $atts['columns'] : 'default' );
 
 		// Generate and return the final columns block markup.
 		return sprintf(
