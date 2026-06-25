@@ -384,11 +384,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
 	if ( 'core/image' === $block['blockName'] && isset( $parent_block ) && 'core/gallery' === $parent_block->parsed_block['blockName'] ) {
-		$columns      = $parent_block->context['gallery_column_count'] ?? 3;
+		$columns      = $parent_block->context['gallery_column_count'] ?? 0;
 		$total_images = $parent_block->context['gallery_total_images'] ?? 0;
 
-		// Baseline uniform width division.
-		$current_width = 1.0 / $columns;
+		$current_width = 1.0;
 
 		if ( $total_images > 0 ) {
 			// Sequential rendering tracker.
