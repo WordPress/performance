@@ -97,10 +97,10 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 	 */
 	public function test_get_dominant_color_linear_light(): void {
 		/*
-		 * A 2x2 black/white checkerboard has a 50/50 split.
-		 * Averaging in gamma-encoded sRGB gives #808080 (~128).
-		 * Averaging in linear light gives #BCBCBC (~188).
-		 * Verify the editor uses the latter.
+		 * A 2x2 black/white checkerboard has an equal split.
+		 * Averaging in gamma-encoded sRGB gives a gray around 128.
+		 * Averaging in linear light gives a much lighter gray around 188.
+		 * Verify the editor uses linear-light averaging.
 		 */
 		$im    = imagecreatetruecolor( 2, 2 );
 		$white = imagecolorallocate( $im, 255, 255, 255 );
@@ -116,7 +116,7 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 		$property->setAccessible( true );
 		$property->setValue( $editor, $im );
 
-		$result = $editor->get_dominant_color();
+		$result = $editor->get_dominant_color_rgb();
 
 		$this->assertIsArray( $result );
 		// The result should be far from the gamma-space average (128) and

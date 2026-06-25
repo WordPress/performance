@@ -86,7 +86,7 @@ function dominant_color_update_attachment_image_attributes( $attr, WP_Post $atta
 
 		// Append the LQIP custom property if available.
 		if ( isset( $image_meta['lqip'] ) && is_int( $image_meta['lqip'] ) ) {
-			$style_attribute = '--lqip:' . (int) $image_meta['lqip'] . ';' . $style_attribute;
+			$style_attribute = '--lqip:' . $image_meta['lqip'] . ';' . $style_attribute;
 		}
 
 		$attr['style'] = $style_attribute;
@@ -161,7 +161,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 
 		// Append the LQIP custom property if available.
 		if ( isset( $image_meta['lqip'] ) && is_int( $image_meta['lqip'] ) ) {
-			$style_attribute = '--lqip:' . (int) $image_meta['lqip'] . '; ' . $style_attribute;
+			$style_attribute = '--lqip:' . $image_meta['lqip'] . '; ' . $style_attribute;
 		}
 
 		if ( null !== $processor->get_attribute( 'style' ) ) {

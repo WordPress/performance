@@ -520,9 +520,13 @@ class Test_Dominant_Color extends TestCase {
 	public function test_dominant_color_lqip_generate(): void {
 		require_once __DIR__ . '/../lqip-generator.php';
 
-		$rgb = array( 'r' => 255, 'g' => 0, 'b' => 0 );
+		$rgb      = array(
+			'r' => 255,
+			'g' => 0,
+			'b' => 0,
+		);
 		$grid_rgb = array_fill( 0, 6, $rgb );
-		$result = dominant_color_lqip_generate( $rgb, $grid_rgb );
+		$result   = dominant_color_lqip_generate( $rgb, $grid_rgb );
 
 		$this->assertSame( 174781, $result );
 	}

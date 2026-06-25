@@ -100,11 +100,11 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$include_transparent = false;
 
 		do {
-			$sum_r         = 0.0;
-			$sum_g         = 0.0;
-			$sum_b         = 0.0;
-			$count         = 0;
-			$loop_again    = false;
+			$sum_r      = 0.0;
+			$sum_g      = 0.0;
+			$sum_b      = 0.0;
+			$count      = 0;
+			$loop_again = false;
 
 			for ( $y = 0; $y < $image_height; $y++ ) {
 				for ( $x = 0; $x < $image_width; $x++ ) {
@@ -114,9 +114,9 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 					}
 
 					if ( $is_truecolor ) {
-						$r     = ( $rgb >> 16 ) & 0xFF;
-						$g     = ( $rgb >> 8 ) & 0xFF;
-						$b     = $rgb & 0xFF;
+						$r = ( $rgb >> 16 ) & 0xFF;
+						$g = ( $rgb >> 8 ) & 0xFF;
+						$b = $rgb & 0xFF;
 						if ( ! $include_transparent ) {
 							$alpha = ( $rgb >> 24 ) & 0x7F;
 							if ( $alpha > 0 ) {
@@ -140,7 +140,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 					$sum_r += $srgb_to_linear[ $r ];
 					$sum_g += $srgb_to_linear[ $g ];
 					$sum_b += $srgb_to_linear[ $b ];
-					$count++;
+					++$count;
 				}
 			}
 
@@ -234,8 +234,8 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 			imagefill( $small, 0, 0, $transparent );
 		}
 
-		$image_width  = (int) imagesx( $this->image );
-		$image_height = (int) imagesy( $this->image );
+		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
+		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
 		imagecopyresampled( $small, $this->image, 0, 0, 0, 0, 3, 2, $image_width, $image_height );
 
 		// Flatten any residual alpha against white background so the

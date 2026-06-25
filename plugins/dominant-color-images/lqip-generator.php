@@ -26,7 +26,7 @@ declare( strict_types = 1 );
  * The grid pixels are in left-to-right, top-to-bottom order.
  * The RGB values are converted to OKLab internally.
  *
- * @param array{r: int, g: int, b: int} $rgb     Base / dominant colour as ['r' => R, 'g' => G, 'b' => B] (0-255).
+ * @param array{r: int, g: int, b: int}             $rgb     Base / dominant colour as ['r' => R, 'g' => G, 'b' => B] (0-255).
  * @param array<int, array{r: int, g: int, b: int}> $grid_rgb 6 grid cell colours as ['r'=>R, 'g'=>G, 'b'=>B].
  *
  * @return int LQIP integer in the range [-524288, 524287].
@@ -71,12 +71,6 @@ function dominant_color_lqip_generate( array $rgb, array $grid_rgb ): int {
 		( ( $ll & 3 ) << 6 ) +
 		( ( $aaa & 7 ) << 3 ) +
 		( $bbb & 7 );
-
-	if ( $lqip < -999999 || $lqip > 999999 ) {
-		throw new \UnexpectedValueException(
-			"LQIP value {$lqip} is out of the valid range [-999999, 999999]."
-		);
-	}
 
 	return $lqip;
 }
@@ -141,7 +135,6 @@ function dominant_color_lqip_bits_to_lab( int $ll, int $aaa, int $bbb ): array {
  *
  * @param float $x      The component value.
  * @param float $chroma The chroma (sqrt(a²+b²)) of the colour.
- * @return float
  */
 function dominant_color_lqip_scale_component_for_diff( float $x, float $chroma ): float {
 	return $x / ( 1e-6 + $chroma ** 0.5 );
@@ -157,8 +150,8 @@ function dominant_color_lqip_scale_component_for_diff( float $x, float $chroma )
  * @return array{ll: int, aaa: int, bbb: int}
  */
 function dominant_color_lqip_find_oklab_bits( float $target_l, float $target_a, float $target_b ): array {
-	$target_chroma   = hypot( $target_a, $target_b );
-$scaled_target_a = dominant_color_lqip_scale_component_for_diff( $target_a, $target_chroma );
+	$target_chroma       = hypot( $target_a, $target_b );
+	$scaled_target_a     = dominant_color_lqip_scale_component_for_diff( $target_a, $target_chroma );
 		$scaled_target_b = dominant_color_lqip_scale_component_for_diff( $target_b, $target_chroma );
 
 	$best_bits = array( 0, 0, 0 );
@@ -172,7 +165,7 @@ $scaled_target_a = dominant_color_lqip_scale_component_for_diff( $target_a, $tar
 
 				$gray_penalty = ( 4 === $aaa && 3 === $bbb ) ? 0.04 : 0.0;
 
-$scaled_a = dominant_color_lqip_scale_component_for_diff( $lab['a'], $chroma );
+				$scaled_a     = dominant_color_lqip_scale_component_for_diff( $lab['a'], $chroma );
 					$scaled_b = dominant_color_lqip_scale_component_for_diff( $lab['b'], $chroma );
 
 				$diff = $gray_penalty + sqrt(
@@ -195,4 +188,3 @@ $scaled_a = dominant_color_lqip_scale_component_for_diff( $lab['a'], $chroma );
 		'bbb' => $best_bits[2],
 	);
 }
-
