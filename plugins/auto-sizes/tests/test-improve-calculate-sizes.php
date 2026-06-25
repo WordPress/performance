@@ -1494,7 +1494,8 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		$block_content = $this->get_gallery_block_markup(
 			$image_block,
 			array(
-				'align' => $ancestor_block_alignment,
+				'align'   => $ancestor_block_alignment,
+				'columns' => '',
 			)
 		);
 
