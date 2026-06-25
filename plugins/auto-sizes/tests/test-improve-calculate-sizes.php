@@ -1556,7 +1556,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param string $big_img_expected         Expected sizes attribute output for large images.
 	 * @param string $small_img_expected       Expected sizes attribute output for small images (optional).
 	 */
-	public function test_gallery_block_with_columns_set( string $ancestor_block_alignment = '', string $image_block_alignment = '', int $image_count = 3, int $columns = 3, string $big_img_expected, string $small_img_expected = '' ): void {
+	public function test_gallery_block_with_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, int $columns, string $big_img_expected, string $small_img_expected = '' ): void {
 		$image_block = '';
 		for ( $i = 0; $i < $image_count; $i++ ) {
 			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
