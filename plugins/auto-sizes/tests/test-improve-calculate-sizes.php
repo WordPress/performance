@@ -1816,6 +1816,23 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 77px) 100vw, 77px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+
+			// Rendom setup.
+			'Default alignment, 15 image (5 columns)' => array(
+				'',
+				'',
+				15,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+			),
+			'Default alignment, 15 image (6 columns)' => array(
+				'',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
 		);
 	}
 
@@ -1960,12 +1977,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			)
 		);
 
-		$align_class = '' !== $atts['align'] ? ' align' . $atts['align'] : '';
+		$class  = '';
+		$class .= '' !== $atts['align'] ? ' align' . $atts['align'] : '';
+		$class .= '' !== $atts['columns'] ? ' columns-' . $atts['columns'] : ' columns-default';
 
 		// Generate and return the final columns block markup.
 		return sprintf(
 			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
-			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $align_class . '">
+			<figure class="wp-block-gallery has-nested-images is-cropped' . $class . '">
 				%1$s
 			</figure>
 			<!-- /wp:gallery -->',
