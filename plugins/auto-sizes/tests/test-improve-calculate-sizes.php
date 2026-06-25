@@ -1818,7 +1818,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
 
-			// Rendom setup.
+			// Random image columns setup.
 			'Default alignment, 15 image (5 columns)' => array(
 				'',
 				'',
