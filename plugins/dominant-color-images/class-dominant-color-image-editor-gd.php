@@ -23,6 +23,9 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	/**
 	 * Get dominant color from a file.
 	 *
+	 * Averages all pixels in linear light to avoid the gamma-skewed
+	 * dominant color that results from averaging gamma-encoded sRGB values.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
@@ -52,28 +55,109 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
-		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
-		$shorted_image = imagecreatetruecolor( 1, 1 );
-		if ( false === $shorted_image ) {
-			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-		}
-		// Note: These two functions only return integers, but they used to return int|false in PHP<8. This was changed in the PHP documentation in
-		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
-		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
-		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
+
 		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
 		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
-		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
-		$rgb = imagecolorat( $shorted_image, 0, 0 );
-		if ( false === $rgb ) {
+		// Build a 256-entry LUT for sRGB 8-bit → linear float conversion.
+		$srgb_to_linear = array();
+		for ( $i = 0; $i < 256; $i++ ) {
+			$val = $i / 255;
+			if ( $val <= 0.04045 ) {
+				$srgb_to_linear[ $i ] = $val / 12.92;
+			} else {
+				$srgb_to_linear[ $i ] = pow( ( $val + 0.055 ) / 1.055, 2.4 );
+			}
+		}
+
+		// Helper: linear float (0.0–1.0) → sRGB 8-bit integer.
+		$linear_to_srgb = static function ( float $linear ): int {
+			if ( $linear <= 0.0031308 ) {
+				$srgb = 12.92 * $linear;
+			} else {
+				$srgb = 1.055 * pow( $linear, 1 / 2.4 ) - 0.055;
+			}
+			$clamped = max( 0.0, min( 1.0, $srgb ) );
+			return (int) round( $clamped * 255 );
+		};
+
+		// Determine if the image is truecolor or palette-based.
+		$is_truecolor = imageistruecolor( $this->image );
+
+		// For palette-based images, cache the palette for fast lookup.
+		$palette = null;
+		if ( ! $is_truecolor ) {
+			$palette    = array();
+			$num_colors = imagecolorstotal( $this->image );
+			for ( $i = 0; $i < $num_colors; $i++ ) {
+				$palette[ $i ] = imagecolorsforindex( $this->image, $i );
+			}
+		}
+
+		// Iterate every pixel, decode to linear light, and accumulate.
+		// Skip transparent pixels on the first pass; if no opaque pixels
+		// are found, fall back to including all pixels.
+		$include_transparent = false;
+
+		do {
+			$sum_r         = 0.0;
+			$sum_g         = 0.0;
+			$sum_b         = 0.0;
+			$count         = 0;
+			$loop_again    = false;
+
+			for ( $y = 0; $y < $image_height; $y++ ) {
+				for ( $x = 0; $x < $image_width; $x++ ) {
+					$rgb = imagecolorat( $this->image, $x, $y );
+					if ( false === $rgb ) {
+						continue;
+					}
+
+					if ( $is_truecolor ) {
+						$r     = ( $rgb >> 16 ) & 0xFF;
+						$g     = ( $rgb >> 8 ) & 0xFF;
+						$b     = $rgb & 0xFF;
+						if ( ! $include_transparent ) {
+							$alpha = ( $rgb >> 24 ) & 0x7F;
+							if ( $alpha > 0 ) {
+								continue;
+							}
+						}
+					} else {
+						$index = $rgb;
+						if ( ! isset( $palette[ $index ] ) ) {
+							continue;
+						}
+						$rgba = $palette[ $index ];
+						$r    = $rgba['red'];
+						$g    = $rgba['green'];
+						$b    = $rgba['blue'];
+						if ( ! $include_transparent && $rgba['alpha'] > 0 ) {
+							continue;
+						}
+					}
+
+					$sum_r += $srgb_to_linear[ $r ];
+					$sum_g += $srgb_to_linear[ $g ];
+					$sum_b += $srgb_to_linear[ $b ];
+					$count++;
+				}
+			}
+
+			if ( 0 === $count && ! $include_transparent ) {
+				$include_transparent = true;
+				$loop_again          = true;
+			}
+		} while ( $loop_again );
+
+		if ( 0 === $count ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
 
 		return array(
-			'r' => ( $rgb >> 16 ) & 0xFF,
-			'g' => ( $rgb >> 8 ) & 0xFF,
-			'b' => $rgb & 0xFF,
+			'r' => $linear_to_srgb( $sum_r / $count ),
+			'g' => $linear_to_srgb( $sum_g / $count ),
+			'b' => $linear_to_srgb( $sum_b / $count ),
 		);
 	}
 

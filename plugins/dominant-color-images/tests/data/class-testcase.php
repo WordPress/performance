@@ -39,7 +39,7 @@ abstract class TestCase extends WP_UnitTestCase {
 		return array(
 			'animated_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/animated.gif',
-				'expected_color'        => array( '874e4e', '864e4e', 'df7f7f' ),
+				'expected_color'        => array( 'e3a3a3', 'e3a5a5' ),
 				'expected_transparency' => true,
 				'expected_lqip'         => null,
 			),
@@ -82,7 +82,7 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'trans_gif'     => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/trans.gif',
-				'expected_color'        => array( '5a5a5a', '020202' ),
+				'expected_color'        => array( '5a5a5a', '828282' ),
 				'expected_transparency' => true,
 				'expected_lqip'         => null,
 			),
@@ -107,7 +107,7 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'trans_png'     => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/trans.png',
-				'expected_color'        => array( '000000' ),
+				'expected_color'        => array( '000000', 'f7f7f7' ),
 				'expected_transparency' => true,
 				'expected_lqip'         => null,
 			),
@@ -138,15 +138,21 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'balloons_webp' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp',
-				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8', 'c2bdbc' ),
+				'expected_color'        => array( 'c9c4c6', 'cac5c8' ),
 				'expected_transparency' => false,
 				'expected_lqip'         => 169443,
 			),
 			'half_opaque'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/half-opaque.png',
-				'expected_color'        => array( '7e7e7e', 'ffffff' ),
+				'expected_color'        => array( '7e7e7e', 'ffffff', '000000' ),
 				'expected_transparency' => true,
 				'expected_lqip'         => null,
+			),
+			'checkerboard_bw_2x2' => array(
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/checkerboard-bw-2x2.png',
+				'expected_color'        => array( 'bbbbbb', 'bcbcbc' ),
+				'expected_transparency' => false,
+				'expected_lqip'         => 67299,
 			),
 		);
 	}

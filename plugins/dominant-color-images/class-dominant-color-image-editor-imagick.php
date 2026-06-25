@@ -57,7 +57,11 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			// Clone so $this->image is not mutated — otherwise subsequent
 			// calls (e.g. get_lqip_grid_values) would operate on a 1×1 image.
 			$thumb = clone $this->image;
+
+			// Convert to linear RGB before resizing to avoid gamma-skewed averaging.
+			$thumb->transformImageColorspace( Imagick::COLORSPACE_RGB );
 			$thumb->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
+			$thumb->transformImageColorspace( Imagick::COLORSPACE_SRGB );
 			$pixel = $thumb->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
 

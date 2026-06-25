@@ -93,6 +93,46 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 	}
 
 	/**
+	 * @covers ::get_dominant_color
+	 */
+	public function test_get_dominant_color_linear_light(): void {
+		/*
+		 * A 2x2 black/white checkerboard has a 50/50 split.
+		 * Averaging in gamma-encoded sRGB gives #808080 (~128).
+		 * Averaging in linear light gives #BCBCBC (~188).
+		 * Verify the editor uses the latter.
+		 */
+		$im    = imagecreatetruecolor( 2, 2 );
+		$white = imagecolorallocate( $im, 255, 255, 255 );
+		$black = imagecolorallocate( $im, 0, 0, 0 );
+		imagesetpixel( $im, 0, 0, $white );
+		imagesetpixel( $im, 1, 0, $black );
+		imagesetpixel( $im, 0, 1, $black );
+		imagesetpixel( $im, 1, 1, $white );
+
+		$editor     = new Dominant_Color_Image_Editor_GD( null );
+		$reflection = new ReflectionClass( $editor );
+		$property   = $reflection->getProperty( 'image' );
+		$property->setAccessible( true );
+		$property->setValue( $editor, $im );
+
+		$result = $editor->get_dominant_color();
+
+		$this->assertIsArray( $result );
+		// The result should be far from the gamma-space average (128) and
+		// close to the linear-light average (188). Allow ±1 for rounding.
+		$this->assertGreaterThan( 180, $result['r'] );
+		$this->assertGreaterThan( 180, $result['g'] );
+		$this->assertGreaterThan( 180, $result['b'] );
+		$this->assertLessThan( 200, $result['r'] );
+		$this->assertLessThan( 200, $result['g'] );
+		$this->assertLessThan( 200, $result['b'] );
+		// All channels should be equal for a neutral checkerboard.
+		$this->assertSame( $result['r'], $result['g'] );
+		$this->assertSame( $result['g'], $result['b'] );
+	}
+
+	/**
 	 * @covers ::has_transparency
 	 */
 	public function test_has_no_transparency(): void {
