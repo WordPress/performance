@@ -1569,10 +1569,15 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		);
 
 		$result = apply_filters( 'the_content', $block_content );
-		$this->assertStringContainsString( $big_img_expected, $result );
 
-		if ( '' !== $small_img_expected ) {
-			$this->assertStringContainsString( $small_img_expected, $result );
+		if ( '' === $small_img_expected || $small_img_expected === $big_img_expected ) {
+			$this->assertSame( $image_count, substr_count( $result, $big_img_expected ) );
+		} else {
+			$remainder            = $columns > 0 ? ( $image_count % $columns ) : 0;
+			$small_expected_count = 0 === $remainder ? 0 : $remainder;
+			$big_expected_count   = $image_count - $small_expected_count;
+			$this->assertSame( $big_expected_count, substr_count( $result, $big_img_expected ) );
+			$this->assertSame( $small_expected_count, substr_count( $result, $small_img_expected ) );
 		}
 	}
 
@@ -1671,7 +1676,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				5,
 				2,
 				'sizes="(max-width: 310px) 100vw, 310px" ',
-				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
 			'Default alignment, 4 image (3 columns)'  => array(
 				'',
