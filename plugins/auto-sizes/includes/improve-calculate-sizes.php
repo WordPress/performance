@@ -316,7 +316,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/group'               => array( 'max_alignment' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
-		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width', 'gallery_total_images', 'gallery_current_image_index' ),
+		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width', 'gallery_total_images' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
@@ -361,8 +361,6 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$gallery_image_block_count = count( $block['innerBlocks'] );
 		// Store the total number of inner images in the gallery context for child blocks to access.
 		$context['gallery_total_images'] = $gallery_image_block_count;
-		// Initialize a counter to track the current image index during rendering.
-		$context['gallery_current_image_index'] = 0;
 
 		if ( wp_is_mobile() ) {
 			// On mobile, the gallery is always 2 column.

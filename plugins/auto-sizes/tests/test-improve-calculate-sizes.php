@@ -1978,7 +1978,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		);
 
 		$class  = '';
-		$class .= '' !== $atts['align'] ? ' align' . $atts['align'] : '';
+		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
 		$class .= ' columns-' . ( ( isset( $atts['columns'] ) && '' !== $atts['columns'] ) ? $atts['columns'] : 'default' );
 
 		// Generate and return the final columns block markup.
