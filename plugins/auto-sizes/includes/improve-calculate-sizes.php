@@ -389,7 +389,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 		$current_width = 1.0;
 
-		if ( $total_images > 0 ) {
+		if ( $total_images > 0 && $columns > 0 ) {
 			// Sequential rendering tracker.
 			static $last_parent_gallery = null;
 			static $image_index         = 0;
