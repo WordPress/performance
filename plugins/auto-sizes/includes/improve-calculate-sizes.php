@@ -362,10 +362,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		// Store the total number of inner images in the gallery context for child blocks to access.
 		$context['gallery_total_images'] = $gallery_image_block_count;
 
-		if ( wp_is_mobile() ) {
-			// On mobile, the gallery is always 2 column.
-			$context['gallery_column_count'] = 2;
-		} elseif ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
+		if ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
 			$context['gallery_column_count'] = $block['attrs']['columns'] ?? '';
 		} elseif ( $gallery_image_block_count <= 3 ) {
 			/*
