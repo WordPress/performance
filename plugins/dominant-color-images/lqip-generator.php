@@ -20,6 +20,12 @@
 
 declare( strict_types = 1 );
 
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Generate an LQIP integer from an RGB colour and 6 grid pixels.
  *
