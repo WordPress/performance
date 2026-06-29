@@ -372,7 +372,6 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$editor->rotate_right()->save();
 
 		$full_size_key = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
-		// @phpstan-ignore-next-line method.impossibleType (Work around PHPStan remembering the return value above being null but now being a string. This is instead of adding rememberPossiblyImpureFunctionValues:false to the config.)
 		$this->assertIsString( $full_size_key );
 		$this->assertSizeNameIsHashed( 'full', $full_size_key );
 	}

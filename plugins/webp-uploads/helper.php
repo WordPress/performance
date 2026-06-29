@@ -106,9 +106,9 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	 *            file: string,
 	 *            path?: string,
 	 *            filesize?: int
-	 *        }|null|WP_Error $image         Image data, null, or WP_Error.
-	 * @param int             $attachment_id The ID of the attachment from where this image would be created.
-	 * @param string          $image_size    The size name that would be used to create this image, out of the registered subsizes.
+	 *        }|null|WP_Error|mixed $image         Image data, null, or WP_Error.
+	 * @param int                   $attachment_id The ID of the attachment from where this image would be created.
+	 * @param string                $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array{
 	 *            width: int,
 	 *            height: int,
@@ -123,11 +123,14 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
 		// The filtered image provided all we need to short-circuit here.
 		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
-			return $image;
+			return array(
+				'file'     => $image['file'],
+				'filesize' => $image['filesize'],
+			);
 		}
 
 		// Supply the filesize based on the filter-provided path.
-		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+		if ( array_key_exists( 'path', $image ) && is_string( $image['path'] ) ) {
 			$filesize = wp_filesize( $image['path'] );
 			if ( $filesize > 0 ) {
 				return array(
@@ -310,8 +313,10 @@ function webp_uploads_in_frontend_body(): bool {
  *
  * @since 1.0.0
  *
- * @param array{ filesize?: int } $original   An array with the metadata of the attachment.
- * @param array{ filesize?: int } $additional An array containing the filename and file size for additional mime.
+ * @param array<string, mixed> $original   An array with the metadata of the attachment.
+ * @param array<string, mixed> $additional An array containing the filename and file size for additional mime.
+ * @phpstan-param array{ filesize?: int, ... } $original
+ * @phpstan-param array{ filesize?: int, ... } $additional
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
 function webp_uploads_should_discard_additional_image_file( array $original, array $additional ): bool {

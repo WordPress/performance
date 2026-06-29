@@ -772,6 +772,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			} else {
 				$start = $this->bookmarks[ $bookmark ]->start;
 
+				// @phpstan-ignore no.private.class
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
 					0,

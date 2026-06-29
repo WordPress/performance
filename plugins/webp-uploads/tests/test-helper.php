@@ -319,6 +319,43 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Tests that the filesize is derived from the path when the webp_uploads_pre_generate_additional_image_source filter returns a path but no filesize.
+	 *
+	 * @covers ::webp_uploads_generate_additional_image_source
+	 */
+	public function test_it_should_use_filesize_from_path_when_filter_webp_uploads_pre_generate_additional_image_source_omits_filesize(): void {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		$path          = TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg';
+		$attachment_id = self::factory()->attachment->create_upload_object( $path );
+		$this->assertIsInt( $attachment_id );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			static function () use ( $path ) {
+				return array(
+					'file' => 'image.webp',
+					'path' => $path,
+				);
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertSame( wp_filesize( $path ), $result['filesize'] );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
+	}
+
+	/**
 	 * Return an error when filter webp_uploads_pre_generate_additional_image_source returns WP_Error.
 	 */
 	public function test_it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error(): void {
