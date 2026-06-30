@@ -359,7 +359,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
-		return webp_uploads_avif_supported() && webp_uploads_avif_transparency_supported();
+		return webp_uploads_avif_transparency_supported();
 	}
 
 	return true;
