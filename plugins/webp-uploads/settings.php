@@ -155,7 +155,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 
 	$selected                    = webp_uploads_get_image_output_format();
 	$avif_supported              = webp_uploads_avif_supported();
-	$avif_transparency_supported = webp_uploads_imagick_avif_transparency_supported();
+	$avif_transparency_supported = webp_uploads_avif_transparency_supported();
 	$webp_supported              = webp_uploads_mime_type_supported( 'image/webp' );
 
 	// If neither format is support, the entire field is not shown.

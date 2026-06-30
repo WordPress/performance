@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function webp_uploads_get_upload_image_mime_transforms(): array {
 
 	// Check the selected output format.
-	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' ) && webp_uploads_imagick_avif_transparency_supported();
+	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
 	$output_format  = $avif_supported ? webp_uploads_get_image_output_format() : 'webp';
 
 	$default_transforms = array(
@@ -357,8 +357,9 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 		return false;
 	}
 
+	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
-		return webp_uploads_avif_supported() && webp_uploads_imagick_avif_transparency_supported();
+		return webp_uploads_avif_supported() && webp_uploads_avif_transparency_supported();
 	}
 
 	return true;
@@ -366,8 +367,6 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 /**
  * Checks if the server supports AVIF image format.
- *
- * In certain server environments Image editors can report a false positive for AVIF support.
  *
  * @since n.e.x.t
  *
@@ -381,6 +380,36 @@ function webp_uploads_avif_supported(): bool {
 	if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
 		return function_exists( 'imageavif' );
 	}
+	return webp_uploads_imagick_avif_supported( $editor );
+}
+
+/**
+ * Checks if the server supports transparent AVIF images.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if the server supports transparent AVIF images, false otherwise.
+ */
+function webp_uploads_avif_transparency_supported(): bool {
+	$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+	if ( false === $editor ) {
+		return false;
+	}
+	if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
+		return function_exists( 'imageavif' );
+	}
+	return webp_uploads_imagick_avif_supported( $editor ) && webp_uploads_imagick_avif_transparency_supported();
+}
+
+/**
+ * Checks if Imagick supports AVIF format on the server.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $editor The image editor class name.
+ * @return bool True if Imagick supports AVIF, false otherwise.
+ */
+function webp_uploads_imagick_avif_supported( string $editor ): bool {
 	if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
 		return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
 	}
