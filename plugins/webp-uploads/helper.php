@@ -576,19 +576,18 @@ function webp_uploads_imagick_avif_transparency_supported( ?string $version = nu
 	$imagick_version = $version;
 
 	if ( null === $imagick_version && extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) ) {
-		$imagick_version = Imagick::getVersion();
-		$imagick_version = $imagick_version['versionString'];
+		$version_info    = Imagick::getVersion();
+		$imagick_version = is_array( $version_info ) && isset( $version_info['versionString'] ) && is_string( $version_info['versionString'] )
+			? $version_info['versionString']
+			: '';
 	}
 
-	if ( null !== $imagick_version && '' !== $imagick_version && (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version, $matches ) ) {
-		$imagick_version = $matches[0];
-	}
-
-	if ( null === $imagick_version || '' === $imagick_version ) {
+	if ( null === $imagick_version || '' === $imagick_version || ! (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version, $matches ) ) {
 		return false;
 	}
 
-	$supported = version_compare( $imagick_version, '6.9.12-68', '>=' );
+	$imagick_version = $matches[0];
+	$supported       = version_compare( $imagick_version, '6.9.12-68', '>=' );
 
 	/**
 	 * Filters whether Imagick has AVIF transparency support.

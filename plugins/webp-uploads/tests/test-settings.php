@@ -50,8 +50,9 @@ class Test_WebP_Uploads_Settings extends TestCase {
 	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
 	 */
 	public function test_webp_uploads_generate_avif_webp_setting_callback_disables_avif_and_shows_warning(): void {
-		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
-			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+		if ( ! is_string( $editor ) || ! webp_uploads_imagick_avif_supported( $editor ) ) {
+			$this->markTestSkipped( 'Test requires WP_Image_Editor_Imagick.' );
 		}
 
 		$this->set_image_output_type( 'avif' );
