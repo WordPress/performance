@@ -395,6 +395,7 @@ function webp_uploads_avif_transparency_supported(): bool {
 	if ( false === $editor ) {
 		return false;
 	}
+	// GD's imageavif() preserves alpha, so AVIF support implies transparency support. The transparency regression is specific to older ImageMagick.
 	if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
 		return function_exists( 'imageavif' );
 	}
