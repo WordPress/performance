@@ -566,7 +566,14 @@ function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string 
 /**
  * Checks if Imagick has AVIF transparency support.
  *
+ * ImageMagick versions prior to 6.9.12-68 report AVIF support (so AVIF images can be
+ * generated), but they do not preserve the alpha channel when encoding AVIF. As a result,
+ * transparent images converted to AVIF on those versions silently lose their transparency.
+ * Support for AVIF transparency was added in 6.9.12-68, so this gates on that minimum version.
+ *
  * @since n.e.x.t
+ *
+ * @link https://github.com/WordPress/performance/issues/2237
  *
  * @param string|null $version Optional Imagick version string. If not provided, the version will be retrieved from the Imagick class.
  * @return bool True if Imagick has AVIF transparency support, false otherwise.
@@ -584,6 +591,7 @@ function webp_uploads_imagick_avif_transparency_supported( ?string $version = nu
 	if ( null === $imagick_version || '' === $imagick_version || ! (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version, $matches ) ) {
 		$supported = false;
 	} else {
+		// Transparency in AVIF is only handled correctly as of ImageMagick 6.9.12-68.
 		$imagick_version = $matches[0];
 		$supported       = version_compare( $imagick_version, '6.9.12-68', '>=' );
 	}
