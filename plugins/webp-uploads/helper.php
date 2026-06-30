@@ -391,15 +391,15 @@ function webp_uploads_avif_supported(): bool {
  * @return bool True if the server supports transparent AVIF images, false otherwise.
  */
 function webp_uploads_avif_transparency_supported(): bool {
-	$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
-	if ( false === $editor ) {
+	if ( ! webp_uploads_avif_supported() ) {
 		return false;
 	}
-	// GD's imageavif() preserves alpha, so AVIF support implies transparency support. The transparency regression is specific to older ImageMagick.
-	if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
-		return function_exists( 'imageavif' );
+	// AVIF is supported at this point. GD's imageavif() preserves alpha, so for GD (and any non-Imagick editor) AVIF support implies transparency support. The transparency regression is specific to older ImageMagick.
+	$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+	if ( is_string( $editor ) && is_a( $editor, WP_Image_Editor_Imagick::class, true ) ) {
+		return webp_uploads_imagick_avif_transparency_supported();
 	}
-	return webp_uploads_imagick_avif_supported( $editor ) && webp_uploads_imagick_avif_transparency_supported();
+	return true;
 }
 
 /**
