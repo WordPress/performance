@@ -194,19 +194,18 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
+	<?php elseif ( ! $avif_transparency_supported ) : ?>
+		<br />
+		<div class="notice notice-warning inline">
+			<p><b><?php esc_html_e( 'AVIF is supported, but not fully: transparency support is lacking.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'Current ImageMagick version does not support transparent AVIF images, so contact your hosting provider for more information.', 'webp-uploads' ); ?></p>
+		</div>
 	<?php endif; ?>
 	<?php if ( ! $webp_supported ) : ?>
 		<br />
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
-		</div>
-	<?php endif; ?>
-	<?php if ( $avif_supported && ! $avif_transparency_supported ) : ?>
-		<br />
-		<div class="notice notice-warning inline">
-			<p><b><?php esc_html_e( 'AVIF is supported, but not fully: transparency support is lacking.', 'webp-uploads' ); ?></b></p>
-			<p><?php esc_html_e( 'Current ImageMagick version does not support transparent AVIF images, so contact your hosting provider for more information.', 'webp-uploads' ); ?></p>
 		</div>
 	<?php endif; ?>
 	<?php
