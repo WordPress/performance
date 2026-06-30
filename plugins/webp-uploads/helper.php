@@ -347,6 +347,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  * Includes special handling for false positives on AVIF support.
  *
  * @since 2.0.0
+ * @since n.e.x.t AVIF is now only reported as supported when the server can also encode transparent AVIF images.
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
