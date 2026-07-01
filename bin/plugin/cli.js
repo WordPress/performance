@@ -72,7 +72,7 @@ withOptions( program.command( 'release-plugin-since' ), sinceOptions )
 withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
 	.description(
-		'Updates the changelog in the readme.txt file for the stable tag (requires milestones to be named "$plugin_slug $stable_tag")'
+		'Updates the changelog in the readme.txt file for the stable tag of plugins with an open, dated release milestone (use --all for every plugin); requires milestones to be named "$plugin_slug $stable_tag"'
 	)
 	.action( catchException( readmeHandler ) );
 
