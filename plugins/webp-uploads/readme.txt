@@ -67,6 +67,16 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 2.7.0 =
 
+**Enhancements**
+
+* Add explanation for discarded modern image outputs. ([2518](https://github.com/WordPress/performance/pull/2518))
+* Link to FAQ from settings section. ([2480](https://github.com/WordPress/performance/pull/2480))
+* Rewrite `img` tags output by `wp_get_attachment_image()`. ([2451](https://github.com/WordPress/performance/pull/2451))
+
+**Bug Fixes**
+
+* Disable AVIF when ImageMagick does not support AVIF transparency. ([2540](https://github.com/WordPress/performance/pull/2540))
+
 = 2.6.1 =
 
 **Bug Fixes**

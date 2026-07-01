@@ -58,6 +58,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.2.1 =
 
+**Bug Fixes**
+
+* Fix `InvalidStateError` on bfcache navigations. ([2438](https://github.com/WordPress/performance/pull/2438))
+
 = 1.2.0 =
 
 **Enhancements**

@@ -75,6 +75,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 4.2.0 =
 
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum PHP requirement from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Enqueued Assets audit: treat zero-size and no-store responses as errors. ([2481](https://github.com/WordPress/performance/pull/2481))
+* Server Timing - Allow description and make duration optional. ([2379](https://github.com/WordPress/performance/pull/2379))
+
 = 4.1.0 =
 
 **Bug Fixes**
