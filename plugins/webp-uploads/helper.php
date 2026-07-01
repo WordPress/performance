@@ -347,7 +347,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  * Includes special handling for false positives on AVIF support.
  *
  * @since 2.0.0
- * @since n.e.x.t AVIF is now only reported as supported when the server can also encode transparent AVIF images.
+ * @since 2.7.0 AVIF is now only reported as supported when the server can also encode transparent AVIF images.
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
@@ -368,7 +368,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 /**
  * Checks if the server supports AVIF image format.
  *
- * @since n.e.x.t
+ * @since 2.7.0
  *
  * @return bool True if the server supports AVIF, false otherwise.
  */
@@ -386,7 +386,7 @@ function webp_uploads_avif_supported(): bool {
 /**
  * Checks if the server supports transparent AVIF images.
  *
- * @since n.e.x.t
+ * @since 2.7.0
  *
  * @return bool True if the server supports transparent AVIF images, false otherwise.
  */
@@ -405,7 +405,7 @@ function webp_uploads_avif_transparency_supported(): bool {
 /**
  * Checks if Imagick supports AVIF format on the server.
  *
- * @since n.e.x.t
+ * @since 2.7.0
  *
  * @param string $editor The image editor class name.
  * @return bool True if Imagick supports AVIF, false otherwise.
@@ -572,7 +572,7 @@ function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string 
  * transparent images converted to AVIF on those versions silently lose their transparency.
  * Support for AVIF transparency was added in 6.9.12-68, so this gates on that minimum version.
  *
- * @since n.e.x.t
+ * @since 2.7.0
  *
  * @link https://github.com/WordPress/performance/issues/2237
  *
@@ -600,7 +600,7 @@ function webp_uploads_imagick_avif_transparency_supported( ?string $version = nu
 	/**
 	 * Filters whether Imagick has AVIF transparency support.
 	 *
-	 * @since n.e.x.t
+	 * @since 2.7.0
 	 *
 	 * @param bool $supported Whether AVIF transparency is supported.
 	 */
