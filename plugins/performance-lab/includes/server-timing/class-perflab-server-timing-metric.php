@@ -42,7 +42,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * The metric description.
 	 *
-	 * @since n.e.x.t
+	 * @since 4.2.0
 	 * @var non-empty-string|null
 	 */
 	private ?string $description = null;
@@ -159,7 +159,7 @@ class Perflab_Server_Timing_Metric {
 	 * An empty string is treated as no description, in which case the metric is
 	 * emitted without a `desc` parameter.
 	 *
-	 * @since n.e.x.t
+	 * @since 4.2.0
 	 *
 	 * @param string $description The metric description. Pass an empty string to unset it.
 	 */
@@ -180,7 +180,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * Gets the metric description.
 	 *
-	 * @since n.e.x.t
+	 * @since 4.2.0
 	 *
 	 * @return non-empty-string|null The metric description, or null if none set.
 	 */

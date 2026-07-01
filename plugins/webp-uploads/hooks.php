@@ -580,7 +580,7 @@ function webp_uploads_filter_image_tag( string $filtered_image, string $context,
  * their return values feed non-HTML contexts (OG tags, RSS, JSON) where
  * silently substituting a modern format is unsafe.
  *
- * @since n.e.x.t
+ * @since 2.7.0
  *
  * @param string                 $html          HTML img element or empty string on failure.
  * @param int                    $attachment_id Image attachment ID.
@@ -601,7 +601,7 @@ function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachm
 	 * Returning false short-circuits the rewrite and preserves the original HTML. This gives
 	 * integrators a surgical per-call opt-out in addition to `remove_filter()`.
 	 *
-	 * @since n.e.x.t
+	 * @since 2.7.0
 	 *
 	 * @param bool                   $should_filter Whether to apply modern-format rewriting. Default true.
 	 * @param int<1, max>            $attachment_id Image attachment ID.
