@@ -3,7 +3,7 @@
  * Hook callbacks used for Performance Lab.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 4.2.0
  */
 
 declare( strict_types = 1 );
