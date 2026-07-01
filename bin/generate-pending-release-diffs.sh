@@ -42,7 +42,10 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 	remote_stable_tag=$( grep "Stable tag:" "$stable_dir/$plugin_slug/readme.txt" | awk '{print $3}' )
 	local_stable_tag=$( grep "Stable tag:" "build/$plugin_slug/readme.txt" | awk '{print $3}' )
 
-	rsync -avz --delete --exclude=".svn" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
+	# Exclude minified assets: they are build artifacts derived from their sources, so
+	# diffing them just adds noise. Excluding them here also protects the stable copies
+	# from --delete, so svn status/diff below will not report them.
+	rsync -avz --delete --exclude=".svn" --exclude="*.min.js" --exclude="*.min.css" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
 
 	cd "$stable_dir/$plugin_slug/"
 
