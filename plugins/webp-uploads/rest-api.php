@@ -40,7 +40,9 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 		foreach ( $details['sources'] as $mime => &$mime_details ) {
 			$mime_details['source_url'] = str_replace( $image_url_basename, $mime_details['file'], $details['source_url'] );
 		}
+		unset( $mime_details );
 	}
+	unset( $details );
 
 	$full_src = wp_get_attachment_image_src( $post->ID, 'full' );
 	if (
@@ -54,6 +56,7 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
 			$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
 		}
+		unset( $mime_details );
 
 		$data['media_details']['sizes']['full']['sources'] = $data['media_details']['sources'];
 		unset( $data['media_details']['sources'] );

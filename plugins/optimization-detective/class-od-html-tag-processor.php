@@ -263,7 +263,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
 	 *
 	 * @since 0.4.0
-	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
+	 * @deprecated 1.0.0 Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
@@ -772,6 +772,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			} else {
 				$start = $this->bookmarks[ $bookmark ]->start;
 
+				// @phpstan-ignore no.private.class
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
 					0,
