@@ -105,7 +105,7 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	/**
 	 * Data provider for oEmbed HTML tests.
 	 *
-	 * @return array<int, array{string, string|null}>
+	 * @return array<int, array{0: string, 1: string|null, 2?: bool}>
 	 */
 	public function get_data_to_test_filter_oembed_html_data(): array {
 		return array(
