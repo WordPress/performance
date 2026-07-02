@@ -1377,6 +1377,25 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 */
+	public function test_wp_get_attachment_image_is_rewritten_to_webp_without_attrs(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'large' );
+
+		$this->assertStringContainsString( '.webp', $html );
+		$this->assertStringNotContainsString( 'leaves.jpg', $html );
+
+		$processor = new WP_HTML_Tag_Processor( $html );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Only one IMG tag should be present.' );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
 	public function test_wp_get_attachment_image_opt_out_filter_returns_original_html(): void {
 		$this->opt_in_to_jpeg_and_webp();
 		$this->mock_frontend_body_hooks();
