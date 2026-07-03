@@ -1499,7 +1499,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		);
 
 		$result = apply_filters( 'the_content', $block_content );
-		$this->assertStringContainsString( $expected, $result );
+		$this->assertSame( $image_count, substr_count( $result, $expected ), 'Expected all gallery images to have the same calculated sizes attribute.' );
 	}
 
 	/**
