@@ -595,8 +595,8 @@ function webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $si
 		$html = '';
 	}
 	$attachment_id = (int) $attachment_id;
-	$icon          = (int) $icon;
-	if ( '' === $html || 0 === $attachment_id || true === (bool) $icon || ! webp_uploads_in_frontend_body() ) {
+	$icon          = (bool) $icon;
+	if ( '' === $html || 0 === $attachment_id || true === $icon || ! webp_uploads_in_frontend_body() ) {
 		return $html;
 	}
 
