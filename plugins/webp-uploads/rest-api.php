@@ -66,7 +66,9 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	) {
 		$full_url_basename = wp_basename( $full_src[0] );
 		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
-			$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
+			if ( is_array( $mime_details ) && isset( $mime_details['file'] ) && is_string( $mime_details['file'] ) ) {
+				$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
+			}
 		}
 		unset( $mime_details );
 
