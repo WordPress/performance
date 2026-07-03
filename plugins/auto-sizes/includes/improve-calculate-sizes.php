@@ -362,10 +362,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		// Store the total number of inner images in the gallery context for child blocks to access.
 		$context['gallery_total_images'] = $gallery_image_block_count;
 
-		if ( wp_is_mobile() ) {
-			// On mobile, the gallery is always 2 columns.
-			$context['gallery_column_count'] = 2;
-		} elseif ( isset( $block['attrs']['columns'] ) && is_numeric( $block['attrs']['columns'] ) && (int) $block['attrs']['columns'] > 0 ) {
+		if ( isset( $block['attrs']['columns'] ) && is_numeric( $block['attrs']['columns'] ) && (int) $block['attrs']['columns'] > 0 ) {
 			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
 		} elseif ( $gallery_image_block_count <= 3 ) {
 			/*
@@ -414,10 +411,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		}
 
 		// Multiply with parent's width if available.
-		if (
-			isset( $parent_block->context['container_relative_width'] ) &&
-			( $current_width > 0.0 || $current_width < 1.0 )
-		) {
+		if ( isset( $parent_block->context['container_relative_width'] ) ) {
 			$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 		} else {
 			$context['container_relative_width'] = $current_width;
