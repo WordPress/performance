@@ -377,7 +377,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 	if ( 'core/image' === $block['blockName'] ) {
 		$current_width = 1.0;
-		if ( isset( $parent_block->context['gallery_column_count'] ) && $parent_block->context['gallery_column_count'] ) {
+		if ( $parent_block instanceof WP_Block && isset( $parent_block->context['gallery_column_count'] ) && $parent_block->context['gallery_column_count'] ) {
 			$gallery_columns = max( 1, (int) $parent_block->context['gallery_column_count'] );
 
 			// Default to equally divided width if not explicitly set.
@@ -386,6 +386,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 		// Multiply with parent's width if available.
 		if (
+			$parent_block instanceof WP_Block &&
 			isset( $parent_block->context['container_relative_width'] ) &&
 			( $current_width > 0.0 || $current_width < 1.0 )
 		) {
