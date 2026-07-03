@@ -1492,6 +1492,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_non_string_is_passed(): void {
+		$this->mock_frontend_body_hooks();
+		$this->assertSame(
+			'',
+			webp_uploads_filter_wp_get_attachment_image( false, 0, 'medium', true, array() )
+		);
+	}
+
+	/**
 	 * Check if AVIF encoding is supported.
 	 *
 	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
