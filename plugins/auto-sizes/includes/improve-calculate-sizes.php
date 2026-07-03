@@ -363,9 +363,9 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$context['gallery_total_images'] = $gallery_image_block_count;
 
 		if ( wp_is_mobile() ) {
-			// On mobile, the gallery is always 2 column.
+			// On mobile, the gallery is always 2 columns.
 			$context['gallery_column_count'] = 2;
-		} elseif ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
+		} elseif ( isset( $block['attrs']['columns'] ) && is_numeric( $block['attrs']['columns'] ) && (int) $block['attrs']['columns'] > 0 ) {
 			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
 		} elseif ( $gallery_image_block_count <= 3 ) {
 			/*
