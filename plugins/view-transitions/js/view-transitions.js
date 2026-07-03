@@ -66,7 +66,7 @@ window.plvtInitViewTransitions = ( config ) => {
 	 * and finished promises reject. Without a rejection handler, these surface as
 	 * "Uncaught (in promise) InvalidStateError" errors.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.2.1
 	 *
 	 * @param {ViewTransition} viewTransition The view transition to suppress rejections for.
 	 */

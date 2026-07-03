@@ -1486,7 +1486,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param int    $image_count              Number of images.
 	 * @param string $expected                 Expected output.
 	 */
-	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment = '', string $image_block_alignment = '', int $image_count = 3, string $expected ): void {
+	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, string $expected ): void {
 		$image_block = '';
 		for ( $i = 0; $i < $image_count; $i++ ) {
 			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
@@ -1970,9 +1970,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * This function generates a WordPress gallery block with optional alignment.
 	 *
-	 * @param string       $content Content to be included in the columns.
+	 * @param string       $content Content to be included in the gallery.
 	 * @param array<mixed> $atts    Optional. Block attributes. Default empty array.
-	 * @return string The generated columns block markup.
+	 * @return string The generated gallery block markup.
 	 */
 	public function get_gallery_block_markup( string $content, array $atts = array() ): string {
 		$atts = wp_parse_args(
@@ -1986,7 +1986,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
 		$class .= ' columns-' . ( ( isset( $atts['columns'] ) && '' !== $atts['columns'] ) ? $atts['columns'] : 'default' );
 
-		// Generate and return the final columns block markup.
+		// Generate and return the final gallery block markup.
 		return sprintf(
 			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
 			<figure class="wp-block-gallery has-nested-images is-cropped' . $class . '">

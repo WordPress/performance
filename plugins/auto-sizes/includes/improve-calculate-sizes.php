@@ -366,7 +366,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			// On mobile, the gallery is always 2 column.
 			$context['gallery_column_count'] = 2;
 		} elseif ( isset( $block['attrs']['columns'] ) && '' !== $block['attrs']['columns'] ) {
-			$context['gallery_column_count'] = $block['attrs']['columns'] ?? '';
+			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
 		} elseif ( $gallery_image_block_count <= 3 ) {
 			/*
 			 * Fallback to the inner block count if column count isn't explicitly set.
