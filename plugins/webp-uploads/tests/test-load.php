@@ -1388,9 +1388,40 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 * Data provider for testing how the `$attr` argument is normalized before being passed to the filter.
+	 *
+	 * @return array<string, array{ attr: string|array<string, mixed>|false, expected_attr: array<string, mixed> }>
 	 */
-	public function test_wp_get_attachment_image_when_passing_empty_string_as_attrs(): void {
+	public function data_provider_to_test_attr_normalization(): array {
+		return array(
+			'empty string'  => array(
+				'attr'          => '',
+				'expected_attr' => array(),
+			),
+			'query string'  => array(
+				'attr'          => 'loading=lazy',
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'array'         => array(
+				'attr'          => array( 'loading' => 'lazy' ),
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'invalid value' => array(
+				'attr'          => false,
+				'expected_attr' => array(),
+			),
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 *
+	 * @dataProvider data_provider_to_test_attr_normalization
+	 *
+	 * @param string|array<string, mixed>|false $attr          The attributes passed to the filter.
+	 * @param array<string, mixed>              $expected_attr The expected attributes passed to the inner filter.
+	 */
+	public function test_wp_get_attachment_image_attr_normalization( $attr, array $expected_attr ): void {
 		$this->opt_in_to_jpeg_and_webp();
 		$this->mock_frontend_body_hooks();
 
@@ -1417,14 +1448,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 			4
 		);
 
-		$this->assertSame( $html, webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, false, '' ) );
+		$this->assertSame( $html, webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, false, $attr ) );
 		$this->assertCount( 1, $filter_args );
 		$this->assertSame(
 			array(
 				'should_filter' => true,
 				'attachment_id' => $attachment_id,
 				'size'          => $size,
-				'attr'          => array(),
+				'attr'          => $expected_attr,
 			),
 			$filter_args[0]
 		);
