@@ -1683,12 +1683,13 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			)
 		);
 
-		$align_class = '' !== $atts['align'] ? ' align' . $atts['align'] : '';
+		$class  = '';
+		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
 
 		// Generate and return the final columns block markup.
 		return sprintf(
 			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
-			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $align_class . '">
+			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $class . '">
 				%1$s
 			</figure>
 			<!-- /wp:gallery -->',
