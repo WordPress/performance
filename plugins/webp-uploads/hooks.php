@@ -595,7 +595,7 @@ function webp_uploads_filter_wp_get_attachment_image( string $html, int $attachm
 		return $html;
 	}
 
-	if ( '' === $attr ) {
+	if ( ! is_array( $attr ) ) {
 		$attr = array();
 	}
 

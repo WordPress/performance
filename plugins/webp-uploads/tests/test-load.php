@@ -1390,6 +1390,49 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 */
+	public function test_wp_get_attachment_image_when_passing_empty_string_as_attrs(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$size          = 'large';
+
+		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id, $size );
+
+		$html = sprintf(
+			'<img src="%s" width="%d" height="%d" alt="">',
+			esc_url( $src ),
+			(int) $width,
+			(int) $height
+		);
+
+		$filter_args = array();
+		add_filter(
+			'webp_uploads_filter_wp_get_attachment_image',
+			static function ( $should_filter, $attachment_id, $size, $attr ) use ( &$filter_args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- They are used in compact!
+				$filter_args[] = compact( 'should_filter', 'attachment_id', 'size', 'attr' );
+				return false;
+			},
+			10,
+			4
+		);
+
+		$this->assertSame( $html, webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, false, '' ) );
+		$this->assertCount( 1, $filter_args );
+		$this->assertSame(
+			array(
+				'should_filter' => true,
+				'attachment_id' => $attachment_id,
+				'size'          => $size,
+				'attr'          => array(),
+			),
+			$filter_args[0]
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
 	public function test_wp_get_attachment_image_opt_out_filter_returns_original_html(): void {
 		$this->opt_in_to_jpeg_and_webp();
 		$this->mock_frontend_body_hooks();
