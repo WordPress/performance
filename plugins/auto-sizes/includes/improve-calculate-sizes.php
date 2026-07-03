@@ -365,11 +365,11 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
 		} else {
 			/*
-			* Fallback to the inner block count if column count isn't explicitly set.
-			* Cap the columns at 3 to prevent layout issues, as the default gallery
-			* style wraps images to new lines after 3 columns.
-			* See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
-			*/
+			 * Fallback to the inner block count if column count isn't explicitly set.
+			 * Cap the columns at 3 to prevent layout issues, as the default gallery
+			 * style wraps images to new lines after 3 columns.
+			 * See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
+			 */
 			$gallery_image_block_count       = count( $block['innerBlocks'] );
 			$context['gallery_column_count'] = min( max( 1, $gallery_image_block_count ), 3 );
 		}
