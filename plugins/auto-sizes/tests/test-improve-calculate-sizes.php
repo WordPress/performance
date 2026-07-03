@@ -1486,7 +1486,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 * @param int    $image_count              Number of images.
 	 * @param string $expected                 Expected output.
 	 */
-	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment = '', string $image_block_alignment = '', int $image_count = 3, string $expected ): void {
+	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, string $expected ): void {
 		$image_block = '';
 		for ( $i = 0; $i < $image_count; $i++ ) {
 			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
