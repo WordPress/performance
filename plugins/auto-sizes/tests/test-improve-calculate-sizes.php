@@ -1671,9 +1671,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 *
 	 * This function generates a WordPress gallery block with optional alignment.
 	 *
-	 * @param string       $content Content to be included in the columns.
+	 * @param string       $content Content to be included in the gallery.
 	 * @param array<mixed> $atts    Optional. Block attributes. Default empty array.
-	 * @return string The generated columns block markup.
+	 * @return string The generated gallery block markup.
 	 */
 	public function get_gallery_block_markup( string $content, array $atts = array() ): string {
 		$atts = wp_parse_args(
@@ -1686,7 +1686,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		$class  = '';
 		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
 
-		// Generate and return the final columns block markup.
+		// Generate and return the final gallery block markup.
 		return sprintf(
 			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
 			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $class . '">
