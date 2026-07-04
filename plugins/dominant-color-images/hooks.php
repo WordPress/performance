@@ -219,13 +219,6 @@ function dominant_color_enqueue_lqip_css(): void {
 	$css_url = plugin_dir_url( __FILE__ ) . 'assets/lqip' . $suffix . '.css';
 
 	wp_enqueue_style( 'dominant-color-lqip', $css_url, array(), 'n.e.x.t' );
-
-	if ( defined( 'DOMINANT_COLOR_LQIP_HOVER' ) && DOMINANT_COLOR_LQIP_HOVER ) {
-		wp_add_inline_style(
-			'dominant-color-lqip',
-			'[style*="--lqip:"]:hover,.force-lqip{object-position:999px 999px}'
-		);
-	}
 }
 add_action( 'wp_enqueue_scripts', 'dominant_color_enqueue_lqip_css' );
 
