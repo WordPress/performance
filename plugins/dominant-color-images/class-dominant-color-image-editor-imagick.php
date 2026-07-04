@@ -133,17 +133,17 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
 	 * in LQIP generation.
 	 *
-	 * @since 1.3.0
+	 * @since n.e.x.t
 	 *
-	 * @return array<int, array{r: int, g: int, b: int}> 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B].
+	 * @return array<int, array{r: int, g: int, b: int}>|WP_Error 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B], or WP_Error on failure.
 	 */
-	public function get_lqip_grid_values(): array {
+	public function get_lqip_grid_values() {
 
 		// Skip LQIP generation for images with transparency (the gradient
 		// placeholder would show through transparent areas).
 		$has_transparency = $this->has_transparency();
 		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
-			return array();
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 
 		try {
@@ -184,7 +184,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			return $values;
 
 		} catch ( Exception $e ) {
-			return array();
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 	}
 }

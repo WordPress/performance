@@ -15,7 +15,7 @@
  * Algorithm ported from https://github.com/nicktacular/css-only-lqip-generator
  *
  * @package dominant-color-images
- * @since 1.3.0
+ * @since n.e.x.t
  */
 
 declare( strict_types = 1 );

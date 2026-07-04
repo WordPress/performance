@@ -169,7 +169,7 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	require_once __DIR__ . '/lqip-generator.php';
 
 	$grid = $editor->get_lqip_grid_values();
-	if ( array() !== $grid ) {
+	if ( ! is_wp_error( $grid ) ) {
 		try {
 			$dominant_color_data['lqip'] = dominant_color_lqip_generate( $rgb, $grid );
 		} catch ( \UnexpectedValueException $e ) {

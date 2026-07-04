@@ -49,7 +49,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 * @return array{r: int<0, 255>, g: int<0, 255>, b: int<0, 255>}|WP_Error RGB values (0-255), or WP_Error on failure.
 	 */
 	public function get_dominant_color_rgb() {
 		if ( ! (bool) $this->image ) {
@@ -208,22 +208,22 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
 	 * in LQIP generation.
 	 *
-	 * @since 1.3.0
+	 * @since n.e.x.t
 	 *
-	 * @return array<int, array{r: int, g: int, b: int}> 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B].
+	 * @return array<int, array{r: int, g: int, b: int}>|WP_Error 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B], or WP_Error on failure.
 	 */
-	public function get_lqip_grid_values(): array {
+	public function get_lqip_grid_values() {
 
 		// Skip LQIP generation for images with transparency (the gradient
 		// placeholder would show through transparent areas).
 		$has_transparency = $this->has_transparency();
 		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
-			return array();
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 
 		$small = imagecreatetruecolor( 3, 2 );
 		if ( false === $small ) {
-			return array();
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 
 		// Fill with fully transparent white so imagecopyresampled can blend
@@ -277,7 +277,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		}
 
 		if ( count( $values ) < 6 ) {
-			return array();
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 
 		return $values;
