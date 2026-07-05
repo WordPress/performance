@@ -188,6 +188,29 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 }
 
 /**
+ * Filters the list of Optimization Detective extension module URLs to include the DevTools discovery module.
+ *
+ * This exposes the current URL Metric to Chrome DevTools for agents so that an AI agent can inspect it while
+ * debugging page performance. It is only added when WP_DEBUG is enabled, since this is a development tool.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string[]|mixed $extension_module_urls Extension module URLs.
+ * @return string[] Extension module URLs.
+ */
+function od_filter_extension_module_urls_for_devtools_discovery( $extension_module_urls ): array {
+	if ( ! is_array( $extension_module_urls ) ) {
+		$extension_module_urls = array();
+	}
+	$extension_module_urls[] = add_query_arg(
+		array( 'ver' => OPTIMIZATION_DETECTIVE_VERSION ),
+		plugins_url( od_get_asset_path( 'devtools-discovery.js' ), __FILE__ )
+	);
+	return $extension_module_urls;
+}
+
+/**
  * Registers the REST API endpoint for storing URL Metrics.
  *
  * @since 1.0.0

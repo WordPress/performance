@@ -326,4 +326,20 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
 		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
 	}
+
+	/**
+	 * Test od_filter_extension_module_urls_for_devtools_discovery().
+	 *
+	 * @covers ::od_filter_extension_module_urls_for_devtools_discovery
+	 */
+	public function test_od_filter_extension_module_urls_for_devtools_discovery(): void {
+		$urls = od_filter_extension_module_urls_for_devtools_discovery( null );
+		$this->assertCount( 1, $urls );
+		$this->assertStringContainsString( 'devtools-discovery', $urls[0] );
+
+		$urls = od_filter_extension_module_urls_for_devtools_discovery( array( 'foo.js' ) );
+		$this->assertCount( 2, $urls );
+		$this->assertStringContainsString( 'foo.js', $urls[0] );
+		$this->assertStringContainsString( 'devtools-discovery', $urls[1] );
+	}
 }

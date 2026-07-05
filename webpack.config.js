@@ -216,6 +216,10 @@ const optimizationDetective = ( env ) => {
 						from: `${ destination }/detect.js`,
 						to: `${ destination }/detect.min.js`,
 					},
+					{
+						from: `${ destination }/devtools-discovery.js`,
+						to: `${ destination }/devtools-discovery.min.js`,
+					},
 				],
 			} ),
 			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
