@@ -548,4 +548,75 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$this->assertSame( $did_initialize ? 1 : 0, did_action( 'od_start_template_optimization' ) );
 		$this->assertSame( $did_initialize ? 1 : 0, did_action( 'od_finish_template_optimization' ) );
 	}
+
+	/**
+	 * Adds a preload link for the given href at the od_finish_template_optimization action.
+	 *
+	 * @param non-empty-string $href Href.
+	 */
+	private function add_preload_link_at_finish( string $href ): void {
+		add_action(
+			'od_finish_template_optimization',
+			static function ( OD_Template_Optimization_Context $context ) use ( $href ): void {
+				$context->link_collection->add_link(
+					array(
+						'rel'  => 'preload',
+						'href' => $href,
+						'as'   => 'image',
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Tests the default value for the maximum Link response header length.
+	 *
+	 * @covers ::od_get_maximum_link_response_header_length
+	 */
+	public function test_od_get_maximum_link_response_header_length_default(): void {
+		$this->assertSame( 4 * KB_IN_BYTES, od_get_maximum_link_response_header_length() );
+	}
+
+	/**
+	 * Tests that the od_link_response_header_max_length filter can change the maximum Link response header length.
+	 *
+	 * @covers ::od_get_maximum_link_response_header_length
+	 */
+	public function test_od_get_maximum_link_response_header_length_filter(): void {
+		add_filter(
+			'od_link_response_header_max_length',
+			static function (): int {
+				return 8 * KB_IN_BYTES;
+			}
+		);
+		$this->assertSame( 8 * KB_IN_BYTES, od_get_maximum_link_response_header_length() );
+	}
+
+	/**
+	 * Tests that an invalid od_link_response_header_max_length filter value falls back to the default.
+	 *
+	 * @covers ::od_get_maximum_link_response_header_length
+	 */
+	public function test_od_get_maximum_link_response_header_length_invalid_value(): void {
+		add_filter( 'od_link_response_header_max_length', '__return_zero' );
+		$this->setExpectedIncorrectUsage( 'Filter: &#039;od_link_response_header_max_length&#039;' );
+
+		$this->assertSame( 4 * KB_IN_BYTES, od_get_maximum_link_response_header_length() );
+	}
+
+	/**
+	 * Tests that the HTML link tag fallback is output even when the corresponding Link response header would be
+	 * oversized, so preloading is never lost even when the header is skipped.
+	 *
+	 * @covers ::od_optimize_template_output_buffer
+	 */
+	public function test_link_tag_html_fallback_always_output_for_oversized_link(): void {
+		$href = 'https://example.com/' . str_repeat( 'a', 5000 ) . '.jpg';
+		$this->add_preload_link_at_finish( $href );
+
+		$buffer = od_optimize_template_output_buffer( '<html><head></head><body></body></html>' );
+
+		$this->assertStringContainsString( $href, $buffer );
+	}
 }
