@@ -79,3 +79,66 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	return new WP_REST_Response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 2 );
+
+/**
+ * Ensures the REST attachment response's `source_url` points to the original uploaded file when
+ * this plugin has swapped the attachment's main file for a modern format.
+ *
+ * When the fallback setting is disabled, the plugin replaces the attachment's main file with the
+ * generated modern-format version and backs up the true original in the `original_image` metadata.
+ * `source_url` is what the Image/Gallery blocks read to build the "Link to image file" href, so
+ * without this it would point to the modern-format file instead of the original upload. This is
+ * intentionally scoped to the REST response only: `wp_get_attachment_url()` itself must keep
+ * returning the swapped file everywhere else, since that's what the plugin's own `<img>` tag
+ * rewriting relies on to show the modern format.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_REST_Response $response The response object so far.
+ * @param WP_Post          $post     The attachment post object.
+ * @return WP_REST_Response The response object, with `source_url` corrected where applicable.
+ */
+function webp_uploads_update_rest_attachment_original_source_url( WP_REST_Response $response, WP_Post $post ): WP_REST_Response {
+	$data = $response->get_data();
+	if ( ! is_array( $data ) || ! isset( $data['source_url'] ) || ! is_string( $data['source_url'] ) || '' === $data['source_url'] ) {
+		return $response;
+	}
+
+	$metadata = wp_get_attachment_metadata( $post->ID );
+	if ( ! is_array( $metadata ) || ! isset( $metadata['original_image'] ) || ! is_string( $metadata['original_image'] ) || '' === $metadata['original_image'] ) {
+		return $response;
+	}
+
+	$attached_file = get_attached_file( $post->ID );
+	if ( false === $attached_file ) {
+		return $response;
+	}
+
+	/*
+	 * Compare the mime type of the currently attached file against the backed-up original, not
+	 * `get_post_mime_type()`: WordPress intentionally keeps the post's mime type as the original
+	 * one for compatibility even after this plugin swaps the attached file. Core's own "-scaled"
+	 * resizing keeps the same file mime type as the original; only override when this plugin
+	 * actually swapped the attachment to a different mime type.
+	 */
+	$current_mime  = wp_check_filetype( $attached_file )['type'];
+	$original_mime = wp_check_filetype( $metadata['original_image'] )['type'];
+	if ( ! is_string( $current_mime ) || $original_mime === $current_mime ) {
+		return $response;
+	}
+
+	$original_path = wp_get_original_image_path( $post->ID );
+	if ( false === $original_path || ! file_exists( $original_path ) ) {
+		return $response;
+	}
+
+	$original_url = path_join( dirname( $data['source_url'] ), $metadata['original_image'] );
+
+	$data['source_url'] = $original_url;
+	if ( isset( $data['media_details']['sizes']['full']['source_url'] ) ) {
+		$data['media_details']['sizes']['full']['source_url'] = $original_url;
+	}
+
+	return new WP_REST_Response( $data );
+}
+add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment_original_source_url', 10, 2 );
