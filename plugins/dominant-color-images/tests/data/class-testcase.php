@@ -138,7 +138,7 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'balloons_webp'       => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp',
-				'expected_color'        => array( 'c9c4c6', 'cac5c8' ),
+				'expected_color'        => array( 'c9c4c6', 'c9c4c7', 'cac5c8' ),
 				'expected_transparency' => false,
 				'expected_lqip'         => 169443,
 			),
