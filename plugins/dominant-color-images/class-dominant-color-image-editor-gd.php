@@ -119,8 +119,12 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 			$count      = 0;
 			$loop_again = false;
 
-			for ( $y = 0; $y < $image_height; $y += $sample_step ) {
-				for ( $x = 0; $x < $image_width; $x += $sample_step ) {
+			// Use distinct step variables to avoid Generic.CodeAnalysis.JumbledIncrementer
+			// false positive (same $sample_step in both incrementers).
+			$y_step = $sample_step;
+			$x_step = $sample_step;
+			for ( $y = 0; $y < $image_height; $y += $y_step ) {
+				for ( $x = 0; $x < $image_width; $x += $x_step ) {
 					$rgb = imagecolorat( $this->image, $x, $y );
 					if ( false === $rgb ) {
 						continue;
