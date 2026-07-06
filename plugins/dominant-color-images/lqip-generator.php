@@ -12,7 +12,7 @@
  * The encoded integer is valid in the range [-999999, 999999] for use
  * as a CSS custom property.
  *
- * Algorithm ported from https://github.com/nicktacular/css-only-lqip-generator
+ * Algorithm ported from https://github.com/Kalabasa/leanrada.com/blob/bca158ebdc8488364ecac923413ca40b2326826d/main/site/common.css#L140-L337
  *
  * @package dominant-color-images
  * @since n.e.x.t

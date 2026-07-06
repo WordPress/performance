@@ -235,8 +235,6 @@ class Test_Dominant_Color extends TestCase {
 
 		$filtered_image = sprintf( $filtered_image, $src, $width, $height );
 
-		$image_meta = wp_get_attachment_metadata( $attachment_id );
-
 		$result = dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id );
 		$this->assertStringContainsString( $expected, $result );
 	}
@@ -269,8 +267,6 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function test_dominant_color_update_attachment_image_attributes( string $style_attr, string $expected ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg' );
-
-		$image_meta = wp_get_attachment_metadata( $attachment_id );
 
 		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );

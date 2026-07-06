@@ -9,6 +9,12 @@
  * Ported from https://github.com/Kalabasa/leanrada.com/blob/bca158ebdc8488364ecac923413ca40b2326826d/main/site/common.css#L140-L337
  */
 
+@property --lqip {
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 0;
+}
+
 [style*="--lqip:"] {
 	--lqip-ca: mod(round(down, calc((var(--lqip) + 524288) / 262144)), 4);
 	--lqip-cb: mod(round(down, calc((var(--lqip) + 524288) / 65536)), 4);
