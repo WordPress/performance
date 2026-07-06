@@ -59,6 +59,19 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
 		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
 
+		// Sample pixels with a step when the image is large so the
+		// per-pixel PHP loop stays fast even when the source image is
+		// very large (e.g. when the 'medium' subsize is unavailable).
+		// Sampling (skipping pixels) preserves the original colors,
+		// whereas resampling (imagecopyresampled) interpolates and
+		// shifts the average (e.g. balloons.webp c8c3c6 vs cac5c8).
+		$max_dimension = 150;
+		$sample_step   = 1;
+		if ( $image_width > $max_dimension || $image_height > $max_dimension ) {
+			$scale       = min( $max_dimension / $image_width, $max_dimension / $image_height );
+			$sample_step = max( 1, (int) round( 1 / $scale ) );
+		}
+
 		// Build a 256-entry LUT for sRGB 8-bit → linear float conversion.
 		$srgb_to_linear = array();
 		for ( $i = 0; $i < 256; $i++ ) {
@@ -106,8 +119,8 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 			$count      = 0;
 			$loop_again = false;
 
-			for ( $y = 0; $y < $image_height; $y++ ) {
-				for ( $x = 0; $x < $image_width; $x++ ) {
+			for ( $y = 0; $y < $image_height; $y += $sample_step ) {
+				for ( $x = 0; $x < $image_width; $x += $sample_step ) {
 					$rgb = imagecolorat( $this->image, $x, $y );
 					if ( false === $rgb ) {
 						continue;
