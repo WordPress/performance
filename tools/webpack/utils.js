@@ -133,7 +133,56 @@ const cssMinifyTransformer = ( content, absoluteFrom ) => {
 };
 
 /**
+ * Compute a content fingerprint for a zip archive, ignoring entry timestamps.
+ *
+ * Uses `unzip -v`, which lists each entry's uncompressed size, CRC-32 checksum,
+ * and name. The date and time columns are omitted so that two archives with
+ * identical contents produce the same fingerprint even when built at different
+ * times.
+ *
+ * @param {string} zipPath The path to the zip file.
+ *
+ * @return {string|null} The fingerprint, or null if the archive does not exist.
+ */
+const getZipContentFingerprint = ( zipPath ) => {
+	if ( ! fs.existsSync( zipPath ) ) {
+		return null;
+	}
+
+	const proc = spawnSync( 'unzip', [ '-v', zipPath ] );
+
+	if ( 0 !== proc.status ) {
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
+	}
+
+	const lineRegex =
+		/^\s*(\d+)\s+\S+\s+\d+\s+\S+\s+\d\d-\d\d-\d\d\d\d\s+\d\d:\d\d\s+([0-9a-f]{8})\s+(.*)$/;
+
+	return proc.stdout
+		.toString()
+		.split( '\n' )
+		.map( ( line ) => {
+			const match = lineRegex.exec( line );
+			return match
+				? `${ match[ 1 ] }:${ match[ 2 ] }:${ match[ 3 ] }`
+				: null;
+		} )
+		.filter( Boolean )
+		.join( '\n' );
+};
+
+/**
  * Create plugins zip file using `zip` command.
+ *
+ * The archive is built into a temporary file first and only replaces the
+ * existing zip when its contents actually change. This leaves the existing
+ * file (and its modified time) untouched when a rebuild produces identical
+ * output. Building fresh each time also ensures files removed from the plugin
+ * do not linger in an updated-in-place archive.
  *
  * @param {string} pluginPath The path where the plugin build is located.
  * @param {string} pluginName The name of the plugin.
@@ -143,19 +192,34 @@ const cssMinifyTransformer = ( content, absoluteFrom ) => {
 const createPluginZip = ( pluginPath, pluginName ) => {
 	chdir( pluginPath );
 
-	const proc = spawnSync( 'zip', [
-		'-r',
-		`${ pluginName }.zip`,
-		pluginName,
-	] );
+	const zipFile = `${ pluginName }.zip`;
+	const tempZipFile = `${ pluginName }.zip.tmp`;
+
+	deleteFileOrDirectory( tempZipFile );
+
+	const proc = spawnSync( 'zip', [ '-r', tempZipFile, pluginName ] );
 
 	if ( 0 !== proc.status ) {
+		deleteFileOrDirectory( tempZipFile );
 		if ( proc.error ) {
 			throw proc.error;
 		} else {
 			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
 		}
 	}
+
+	// If the freshly built archive matches the existing one, discard it so the
+	// existing file is left untouched.
+	if (
+		fs.existsSync( zipFile ) &&
+		getZipContentFingerprint( zipFile ) ===
+			getZipContentFingerprint( tempZipFile )
+	) {
+		deleteFileOrDirectory( tempZipFile );
+		return;
+	}
+
+	fs.renameSync( tempZipFile, zipFile );
 };
 
 module.exports = {
@@ -165,5 +229,6 @@ module.exports = {
 	generateBuildManifest,
 	assetDataTransformer,
 	cssMinifyTransformer,
+	getZipContentFingerprint,
 	createPluginZip,
 };
