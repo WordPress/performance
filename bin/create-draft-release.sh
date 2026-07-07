@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Create a draft GitHub release for the current release date using the combined per-plugin
 # changelogs (from `npm run prepare-release-notes`) as the release notes.
 #
