@@ -38,10 +38,15 @@ if ! git ls-remote --exit-code --heads origin "$target" &> /dev/null; then
 	exit 1
 fi
 
-# Avoid clobbering an existing release/tag; drafts are cheap to delete and recreate.
-if gh release view "$tag" &> /dev/null; then
-	echo "Error: A release for tag \"$tag\" already exists. Delete it first with:" >&2
-	echo "       gh release delete \"$tag\"" >&2
+# Avoid clobbering an existing release. A draft is cheap to delete and recreate, but a
+# published release is immutable, so a new release date must be supplied instead.
+if is_draft="$(gh release view "$tag" --json isDraft --jq '.isDraft' 2> /dev/null)"; then
+	if [ "$is_draft" = 'true' ]; then
+		echo "Error: A draft release for tag \"$tag\" already exists. If it is no longer needed, delete it first with:" >&2
+		echo "       gh release delete \"$tag\"" >&2
+	else
+		echo "Error: A release for tag \"$tag\" has already been published and cannot be overridden. Supply a different RELEASE_DATE." >&2
+	fi
 	exit 1
 fi
 
