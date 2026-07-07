@@ -398,7 +398,9 @@ const buildPlugin = ( env ) => {
 
 						// If zip flag is passed, create a zip file.
 						if ( env.zip ) {
-							createPluginZip( buildDir, env.plugin );
+							createPluginZip( buildDir, env.plugin, {
+								force: Boolean( env.force ),
+							} );
 						}
 					} );
 				},
