@@ -378,7 +378,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	}
 
 	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
-	if ( 'core/image' === $block['blockName'] && isset( $parent_block ) && 'core/gallery' === $parent_block->parsed_block['blockName'] ) {
+	if ( 'core/image' === $block['blockName'] && $parent_block instanceof WP_Block && 'core/gallery' === $parent_block->parsed_block['blockName'] ) {
 		$columns      = $parent_block->context['gallery_column_count'] ?? 0;
 		$total_images = $parent_block->context['gallery_total_images'] ?? 0;
 
