@@ -382,11 +382,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		}
 
 		// Multiply with parent's width if available.
-		if ( isset( $parent_block->context['container_relative_width'] ) ) {
-			$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
-		} else {
-			$context['container_relative_width'] = $current_width;
-		}
+		$context['container_relative_width'] = ( $parent_block->context['container_relative_width'] ?? 1 ) * $current_width;
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {
