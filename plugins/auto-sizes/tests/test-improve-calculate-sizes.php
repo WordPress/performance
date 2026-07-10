@@ -1477,16 +1477,16 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
-	 * 'sizes' attribute based on the number of images and explicit columns set.
+	 * 'sizes' attribute based on the number of images and the configured automatic column count.
 	 *
-	 * @dataProvider data_gallery_block_with_explicitly_columns_set
+	 * @dataProvider data_gallery_block_with_automatic_columns_set
 	 *
 	 * @param string $ancestor_block_alignment Ancestor block alignment.
 	 * @param string $image_block_alignment    Image block alignment.
 	 * @param int    $image_count              Number of images.
 	 * @param string $expected                 Expected output.
 	 */
-	public function test_gallery_block_with_explicitly_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, string $expected ): void {
+	public function test_gallery_block_with_automatic_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, string $expected ): void {
 		$image_block = '';
 		for ( $i = 0; $i < $image_count; $i++ ) {
 			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
@@ -1503,11 +1503,11 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for testing Gallery block layout sizes with explicit columns.
+	 * Data provider for testing Gallery block layout sizes with automatic columns set.
 	 *
 	 * @return array<string, array<mixed>> Arguments passed to the test method.
 	 */
-	public static function data_gallery_block_with_explicitly_columns_set(): array {
+	public static function data_gallery_block_with_automatic_columns_set(): array {
 		return array(
 			'Default alignment, 1 image (1 column)'   => array(
 				'',
