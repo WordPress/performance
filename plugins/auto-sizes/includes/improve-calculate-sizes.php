@@ -316,7 +316,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/group'               => array( 'max_alignment' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
-		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width' ),
+		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width', 'gallery_total_images' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
@@ -358,27 +358,56 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	}
 
 	if ( 'core/gallery' === $block['blockName'] ) {
+		$gallery_image_block_count = count( $block['innerBlocks'] );
+		// Store the total number of inner images in the gallery context for child blocks to access.
+		$context['gallery_total_images'] = $gallery_image_block_count;
+
 		if ( isset( $block['attrs']['columns'] ) && is_numeric( $block['attrs']['columns'] ) && (int) $block['attrs']['columns'] > 0 ) {
 			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
-		} else {
+		} elseif ( $gallery_image_block_count <= 3 ) {
 			/*
 			 * Fallback to the inner block count if column count isn't explicitly set.
 			 * Cap the columns at 3 to prevent layout issues, as the default gallery
 			 * style wraps images to new lines after 3 columns.
 			 * See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
 			 */
-			$gallery_image_block_count       = count( $block['innerBlocks'] );
-			$context['gallery_column_count'] = min( max( 1, $gallery_image_block_count ), 3 );
+			$context['gallery_column_count'] = $gallery_image_block_count;
+		} else {
+			$context['gallery_column_count'] = 3;
 		}
 	}
 
-	if ( 'core/image' === $block['blockName'] ) {
-		$current_width = 1.0;
-		if ( $parent_block instanceof WP_Block && isset( $parent_block->context['gallery_column_count'] ) && $parent_block->context['gallery_column_count'] ) {
-			$gallery_columns = max( 1, (int) $parent_block->context['gallery_column_count'] );
+	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
+	if ( 'core/image' === $block['blockName'] && isset( $parent_block ) && 'core/gallery' === $parent_block->parsed_block['blockName'] ) {
+		$columns      = $parent_block->context['gallery_column_count'] ?? 0;
+		$total_images = $parent_block->context['gallery_total_images'] ?? 0;
 
-			// Default to equally divided width if not explicitly set.
-			$current_width = $current_width / $gallery_columns;
+		$current_width = 1.0;
+
+		if ( $total_images > 0 && $columns > 0 ) {
+			// Sequential rendering tracker.
+			static $last_parent_gallery = null;
+			static $image_index         = 0;
+
+			// If the parent block object changes, reset the index for the new gallery.
+			if ( $last_parent_gallery !== $parent_block ) {
+				$last_parent_gallery = $parent_block;
+				$image_index         = 0;
+			}
+
+			$remainder              = $total_images % $columns;
+			$full_rows_images_count = $total_images - $remainder;
+
+			if ( $remainder > 0 && $image_index >= $full_rows_images_count ) {
+				// Image falls in the last, incomplete row. Distribute evenly among leftovers.
+				$current_width = 1.0 / $remainder;
+			} else {
+				// Image falls within the perfect full grid rows.
+				$current_width = 1.0 / $columns;
+			}
+
+			// Move to the next image index for the next iteration.
+			++$image_index;
 		}
 
 		// Multiply with parent's width if available.

@@ -1477,7 +1477,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
-	 * 'sizes' attribute based on the number of images and columns.
+	 * 'sizes' attribute based on the number of images and explicit columns set.
 	 *
 	 * @dataProvider data_gallery_block_with_explicitly_columns_set
 	 *
@@ -1537,6 +1537,305 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'',
 				'',
 				9,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
+	 * 'sizes' attribute based on the number of images and columns.
+	 *
+	 * @dataProvider data_gallery_block_with_columns_set
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param int    $image_count              Number of images.
+	 * @param int    $columns                  Number of columns in the gallery.
+	 * @param string $big_img_expected         Expected sizes attribute output for large images.
+	 * @param string $small_img_expected       Expected sizes attribute output for small images (optional).
+	 */
+	public function test_gallery_block_with_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, int $columns, string $big_img_expected, string $small_img_expected = '' ): void {
+		$image_block = '';
+		for ( $i = 0; $i < $image_count; $i++ ) {
+			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
+		}
+		$block_content = $this->get_gallery_block_markup(
+			$image_block,
+			array(
+				'align'   => $ancestor_block_alignment,
+				'columns' => $columns,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		if ( '' === $small_img_expected || $small_img_expected === $big_img_expected ) {
+			$this->assertSame( $image_count, substr_count( $result, $big_img_expected ) );
+		} else {
+			$remainder            = $columns > 0 ? ( $image_count % $columns ) : 0;
+			$small_expected_count = 0 === $remainder ? 0 : $remainder;
+			$big_expected_count   = $image_count - $small_expected_count;
+			$this->assertSame( $big_expected_count, substr_count( $result, $big_img_expected ) );
+			$this->assertSame( $small_expected_count, substr_count( $result, $small_img_expected ) );
+		}
+	}
+
+	/**
+	 * Data provider for testing Gallery block layout sizes with columns set.
+	 *
+	 * @return array<string, array<mixed>> Arguments passed to the test method.
+	 */
+	public static function data_gallery_block_with_columns_set(): array {
+		return array(
+			// Equal image and columns.
+			'Default alignment, 1 image (1 column)'   => array(
+				'',
+				'',
+				1,
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 2 images (2 columns)' => array(
+				'',
+				'',
+				2,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 3 images (3 columns)' => array(
+				'',
+				'',
+				3,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 4 images (4 columns)' => array(
+				'',
+				'',
+				4,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+			),
+			'Default alignment, 5 images (5 columns)' => array(
+				'',
+				'',
+				5,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+			),
+			'Default alignment, 6 images (6 columns)' => array(
+				'',
+				'',
+				6,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+			),
+			'Default alignment, 7 images (7 columns)' => array(
+				'',
+				'',
+				7,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+			),
+			'Default alignment, 8 images (8 columns)' => array(
+				'',
+				'',
+				8,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+			),
+
+			// Different combination of image and columns.
+			'Default alignment, 2 images (1 columns)' => array(
+				'',
+				'',
+				2,
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 3 image (2 columns)'  => array(
+				'',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 4 image (2 columns)'  => array(
+				'',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 5 image (2 columns)'  => array(
+				'',
+				'',
+				5,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 4 image (3 columns)'  => array(
+				'',
+				'',
+				4,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 5 image (3 columns)'  => array(
+				'',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 6 image (3 columns)'  => array(
+				'',
+				'',
+				6,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 5 image (4 columns)'  => array(
+				'',
+				'',
+				5,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 6 image (4 columns)'  => array(
+				'',
+				'',
+				6,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 7 image (4 columns)'  => array(
+				'',
+				'',
+				7,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 6 image (5 columns)'  => array(
+				'',
+				'',
+				6,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 7 image (5 columns)'  => array(
+				'',
+				'',
+				7,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 8 image (5 columns)'  => array(
+				'',
+				'',
+				8,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 7 image (6 columns)'  => array(
+				'',
+				'',
+				7,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 8 image (6 columns)'  => array(
+				'',
+				'',
+				8,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 9 image (6 columns)'  => array(
+				'',
+				'',
+				9,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 8 image (7 columns)'  => array(
+				'',
+				'',
+				8,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 9 image (7 columns)'  => array(
+				'',
+				'',
+				9,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 10 image (7 columns)' => array(
+				'',
+				'',
+				10,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Default alignment, 9 image (8 columns)'  => array(
+				'',
+				'',
+				9,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Default alignment, 10 image (8 columns)' => array(
+				'',
+				'',
+				10,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Default alignment, 11 image (8 columns)' => array(
+				'',
+				'',
+				11,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+
+			// Random image columns setup.
+			'Default alignment, 15 image (5 columns)' => array(
+				'',
+				'',
+				15,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+			),
+			'Default alignment, 15 image (6 columns)' => array(
+				'',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
 		);
@@ -1685,11 +1984,12 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 		$class  = '';
 		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
+		$class .= ' columns-' . ( ( isset( $atts['columns'] ) && '' !== $atts['columns'] ) ? $atts['columns'] : 'default' );
 
 		// Generate and return the final gallery block markup.
 		return sprintf(
 			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
-			<figure class="wp-block-gallery has-nested-images columns-default is-cropped' . $class . '">
+			<figure class="wp-block-gallery has-nested-images is-cropped' . $class . '">
 				%1$s
 			</figure>
 			<!-- /wp:gallery -->',
