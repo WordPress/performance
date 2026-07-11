@@ -124,8 +124,10 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 				$size = array( 420, 420 );
 			}
 
-			// When the wide alignment for the gallery, the child image blocks should also use the
-			// wide alignment if chile image block didn't set the alignment.
+			/*
+			 * When the wide alignment for the gallery, the child image blocks should also use the
+			 * wide alignment if chile image block didn't set the alignment.
+			 */
 			$is_parent_gallery = $block->context['galleryId'] ?? false;
 			if ( $is_parent_gallery && '' === $alignment ) {
 				$alignment = $max_alignment;
