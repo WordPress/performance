@@ -1515,11 +1515,23 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				1,
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'wide',
+				'',
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 2 images (2 columns)' => array(
 				'',
 				'',
 				2,
 				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'wide',
+				'',
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
 			),
 			'Default alignment, 3 images (3 columns)' => array(
 				'',
@@ -1527,17 +1539,35 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				3,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'wide',
+				'',
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
 			'Default alignment, 6 images (maxes out column constraints)' => array(
 				'',
 				'',
 				6,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 6 images (6 columns)' => array(
+				'wide',
+				'',
+				6,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
 			'Default alignment, 9 images (maxes out column constraints)' => array(
 				'',
 				'',
 				9,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 9 images (9 columns)' => array(
+				'wide',
+				'',
+				9,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 		);
 	}
@@ -1596,12 +1626,26 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				1,
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'wide',
+				'',
+				1,
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 2 images (2 columns)' => array(
 				'',
 				'',
 				2,
 				2,
 				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'wide',
+				'',
+				2,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
 			),
 			'Default alignment, 3 images (3 columns)' => array(
 				'',
@@ -1610,12 +1654,26 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				3,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'wide',
+				'',
+				3,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
 			'Default alignment, 4 images (4 columns)' => array(
 				'',
 				'',
 				4,
 				4,
 				'sizes="(max-width: 155px) 100vw, 155px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (4 columns)' => array(
+				'wide',
+				'',
+				4,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
 			),
 			'Default alignment, 5 images (5 columns)' => array(
 				'',
@@ -1624,12 +1682,26 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				5,
 				'sizes="(max-width: 124px) 100vw, 124px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 5 images (5 columns)' => array(
+				'wide',
+				'',
+				5,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+			),
 			'Default alignment, 6 images (6 columns)' => array(
 				'',
 				'',
 				6,
 				6,
 				'sizes="(max-width: 103px) 100vw, 103px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 images (6 columns)' => array(
+				'wide',
+				'',
+				6,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
 			),
 			'Default alignment, 7 images (7 columns)' => array(
 				'',
@@ -1638,12 +1710,26 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				7,
 				'sizes="(max-width: 88px) 100vw, 88px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 7 images (7 columns)' => array(
+				'wide',
+				'',
+				7,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+			),
 			'Default alignment, 8 images (8 columns)' => array(
 				'',
 				'',
 				8,
 				8,
 				'sizes="(max-width: 77px) 100vw, 77px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 images (8 columns)' => array(
+				'wide',
+				'',
+				8,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
 			),
 
 			// Different combination of image and columns.
@@ -1654,6 +1740,13 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				1,
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 2 images (1 column)' => array(
+				'wide',
+				'',
+				2,
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 3 image (2 columns)'  => array(
 				'',
 				'',
@@ -1662,13 +1755,27 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 3 images (2 columns)' => array(
+				'wide',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 4 image (2 columns)'  => array(
 				'',
 				'',
 				4,
 				2,
 				'sizes="(max-width: 310px) 100vw, 310px" ',
-				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (2 columns)' => array(
+				'wide',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
 			),
 			'Default alignment, 5 image (2 columns)'  => array(
 				'',
@@ -1678,6 +1785,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 5 images (2 columns)' => array(
+				'wide',
+				'',
+				5,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 4 image (3 columns)'  => array(
 				'',
 				'',
@@ -1685,6 +1800,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				3,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (3 columns)' => array(
+				'wide',
+				'',
+				4,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
 			),
 			'Default alignment, 5 image (3 columns)'  => array(
 				'',
@@ -1694,12 +1817,27 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 5 image (3 columns)' => array(
+				'wide',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
 			'Default alignment, 6 image (3 columns)'  => array(
 				'',
 				'',
 				6,
 				3,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (3 columns)' => array(
+				'wide',
+				'',
+				6,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 			'Default alignment, 5 image (4 columns)'  => array(
 				'',
@@ -1709,6 +1847,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 155px) 100vw, 155px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 5 image (4 columns)' => array(
+				'wide',
+				'',
+				5,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 6 image (4 columns)'  => array(
 				'',
 				'',
@@ -1716,6 +1862,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				4,
 				'sizes="(max-width: 155px) 100vw, 155px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (4 columns)' => array(
+				'wide',
+				'',
+				6,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
 			),
 			'Default alignment, 7 image (4 columns)'  => array(
 				'',
@@ -1725,6 +1879,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 155px) 100vw, 155px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 7 image (4 columns)' => array(
+				'wide',
+				'',
+				7,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
 			'Default alignment, 6 image (5 columns)'  => array(
 				'',
 				'',
@@ -1732,6 +1894,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				5,
 				'sizes="(max-width: 124px) 100vw, 124px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (5 columns)' => array(
+				'wide',
+				'',
+				6,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
 			),
 			'Default alignment, 7 image (5 columns)'  => array(
 				'',
@@ -1741,6 +1911,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 124px) 100vw, 124px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 7 image (5 columns)' => array(
+				'wide',
+				'',
+				7,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
 			'Default alignment, 8 image (5 columns)'  => array(
 				'',
 				'',
@@ -1748,6 +1926,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				5,
 				'sizes="(max-width: 124px) 100vw, 124px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (5 columns)' => array(
+				'wide',
+				'',
+				8,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 			'Default alignment, 7 image (6 columns)'  => array(
 				'',
@@ -1757,6 +1943,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 103px) 100vw, 103px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 7 image (6 columns)' => array(
+				'wide',
+				'',
+				7,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 8 image (6 columns)'  => array(
 				'',
 				'',
@@ -1764,6 +1958,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				6,
 				'sizes="(max-width: 103px) 100vw, 103px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (6 columns)' => array(
+				'wide',
+				'',
+				8,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
 			),
 			'Default alignment, 9 image (6 columns)'  => array(
 				'',
@@ -1773,6 +1975,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 103px) 100vw, 103px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 9 image (6 columns)' => array(
+				'wide',
+				'',
+				9,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
 			'Default alignment, 8 image (7 columns)'  => array(
 				'',
 				'',
@@ -1780,6 +1990,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				7,
 				'sizes="(max-width: 88px) 100vw, 88px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (7 columns)' => array(
+				'wide',
+				'',
+				8,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
 			),
 			'Default alignment, 9 image (7 columns)'  => array(
 				'',
@@ -1789,6 +2007,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 88px) 100vw, 88px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 9 image (7 columns)' => array(
+				'wide',
+				'',
+				9,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
 			'Default alignment, 10 image (7 columns)' => array(
 				'',
 				'',
@@ -1796,6 +2022,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				7,
 				'sizes="(max-width: 88px) 100vw, 88px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 10 image (7 columns)' => array(
+				'wide',
+				'',
+				10,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 			'Default alignment, 9 image (8 columns)'  => array(
 				'',
@@ -1805,6 +2039,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 77px) 100vw, 77px" ',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 9 image (8 columns)' => array(
+				'wide',
+				'',
+				9,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
 			'Default alignment, 10 image (8 columns)' => array(
 				'',
 				'',
@@ -1813,6 +2055,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 77px) 100vw, 77px" ',
 				'sizes="(max-width: 310px) 100vw, 310px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 10 image (8 columns)' => array(
+				'wide',
+				'',
+				10,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
 			'Default alignment, 11 image (8 columns)' => array(
 				'',
 				'',
@@ -1820,6 +2070,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				8,
 				'sizes="(max-width: 77px) 100vw, 77px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 11 image (8 columns)' => array(
+				'wide',
+				'',
+				11,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 
 			// Random image columns setup.
@@ -1830,6 +2088,13 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				5,
 				'sizes="(max-width: 124px) 100vw, 124px" ',
 			),
+			'Wide gallery alignment, Default image alignment, 15 image (5 columns)' => array(
+				'wide',
+				'',
+				15,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+			),
 			'Default alignment, 15 image (6 columns)' => array(
 				'',
 				'',
@@ -1837,6 +2102,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				6,
 				'sizes="(max-width: 103px) 100vw, 103px" ',
 				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 15 image (6 columns)' => array(
+				'wide',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
 		);
 	}
