@@ -172,46 +172,6 @@ function od_is_response_html_content_type(): bool {
 }
 
 /**
- * Gets the maximum allowed length in bytes for the Link response header.
- *
- * If the constructed Link header would exceed this length, it is omitted from the response entirely and only
- * the equivalent LINK tags are relied on, since some reverse proxies (e.g. Nginx) fail with an error such as
- * "upstream sent too big header" when a response header is too large.
- *
- * @since n.e.x.t
- * @access private
- *
- * @return positive-int Maximum allowed byte length.
- */
-function od_get_maximum_link_response_header_length(): int {
-	/**
-	 * Filters the maximum allowed length in bytes for the Link response header.
-	 *
-	 * @since n.e.x.t
-	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_link_response_header_max_length
-	 *
-	 * @param int $max_length Maximum allowed byte length.
-	 * @return int Filtered maximum allowed byte length.
-	 */
-	$length = (int) apply_filters( 'od_link_response_header_max_length', 4 * KB_IN_BYTES );
-	if ( $length <= 0 ) {
-		_doing_it_wrong(
-			esc_html( "Filter: 'od_link_response_header_max_length'" ),
-			esc_html(
-				sprintf(
-					/* translators: %s: length */
-					__( 'Invalid length "%s". Must be greater than zero.', 'optimization-detective' ),
-					$length
-				)
-			),
-			'Optimization Detective n.e.x.t'
-		);
-		$length = 4 * KB_IN_BYTES;
-	}
-	return $length;
-}
-
-/**
  * Optimizes template output buffer.
  *
  * @since 0.1.0
@@ -398,11 +358,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Additional links may have been added at the od_finish_template_optimization action, so this must come after.
 	if ( count( $link_collection ) > 0 ) {
 		$response_header_links = $link_collection->get_response_header();
-		if (
-			! is_null( $response_header_links )
-			&& ! headers_sent()
-			&& strlen( $response_header_links ) <= od_get_maximum_link_response_header_length()
-		) {
+		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
 			header( $response_header_links, false );
 		}
 		$processor->append_head_html( $link_collection->get_html() );

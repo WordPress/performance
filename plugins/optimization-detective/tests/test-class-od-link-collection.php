@@ -37,7 +37,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="100vw" crossorigin="anonymous" fetchpriority="high" as="image" media="screen" integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" referrerpolicy="origin" type="image/jpeg">
 				',
-				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="100vw"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen"; integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"; referrerpolicy="origin"; type="image/jpeg"',
+				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen"; integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"; referrerpolicy="origin"; type="image/jpeg"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -56,7 +56,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" as="image" media="screen">
 				',
-				'expected_header' => 'Link: <about:blank>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; as="image"; media="screen"',
+				'expected_header' => 'Link: <about:blank>; rel="preload"; as="image"; media="screen"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -268,7 +268,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/bar.jpg" as="image" fetchpriority="high" imagesrcset="https://example.com/&quot;bar&quot;-480w.jpg 480w, https://example.com/&quot;bar&quot;-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 				',
-				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/%22bar%22-480w.jpg 480w, https://example.com/%22bar%22-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"',
+				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; crossorigin="anonymous"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -469,7 +469,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag href="https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp" rel="preload" as="image" imagesizes="(width &lt;= 480px) 316px, (480px &lt; width &lt;= 600px) 489px, (600px &lt; width &lt;= 782px) 644px, (782px &lt; width) 644px" imagesrcset="https://example.com/wp-content/uploads/2025/02/البيسون-1024x668-jpg.webp 1024w, https://example.com/wp-content/uploads/2025/02/البيسون-300x196-jpg.webp 300w, https://example.com/wp-content/uploads/2025/02/البيسون-768x501-jpg.webp 768w, https://example.com/wp-content/uploads/2025/02/البيسون-1536x1002-jpg.webp 1536w, https://example.com/wp-content/uploads/2025/02/البيسون-2048x1336-jpg.webp 2048w">
 				',
-				'expected_header' => 'Link: <https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1024x668-jpg.webp>; rel="preload"; as="image"; imagesizes="(width <= 480px) 316px, (480px < width <= 600px) 489px, (600px < width <= 782px) 644px, (782px < width) 644px"; imagesrcset="https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1024x668-jpg.webp 1024w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-300x196-jpg.webp 300w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-768x501-jpg.webp 768w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1536x1002-jpg.webp 1536w, https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-2048x1336-jpg.webp 2048w"',
+				'expected_header' => 'Link: <https://example.com/wp-content/uploads/2025/02/%D8%A7%D9%84%D8%A8%D9%8A%D8%B3%D9%88%D9%86-1024x668-jpg.webp>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),

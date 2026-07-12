@@ -270,32 +270,22 @@ final class OD_Link_Collection implements Countable {
 			if ( isset( $link['href'] ) ) {
 				$link['href'] = $this->encode_url_for_response_header( $link['href'] );
 			} else {
-				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
+				// The about:blank is present since a Link without a reference-uri is invalid.
 				$link['href'] = 'about:blank';
-			}
-
-			// Encode the URLs in the srcset.
-			if ( isset( $link['imagesrcset'] ) ) {
-				$link['imagesrcset'] = join(
-					', ',
-					array_map(
-						function ( $image_candidate ) {
-							// Parse out the URL to separate it from the descriptor.
-							$image_candidate_parts = (array) preg_split( '/\s+/', (string) $image_candidate, 2 );
-
-							// Encode the URL.
-							$image_candidate_parts[0] = $this->encode_url_for_response_header( (string) $image_candidate_parts[0] );
-
-							// Re-join the URL with the descriptor.
-							return implode( ' ', $image_candidate_parts );
-						},
-						(array) preg_split( '/\s*,\s*/', $link['imagesrcset'] )
-					)
-				);
 			}
 
 			$link_header = '<' . $link['href'] . '>';
 			unset( $link['href'] );
+
+			/*
+			 * Omit imagesrcset/imagesizes from the Link response header. These are only relevant to the HTML
+			 * <link> tag (see get_html()) and are the primary contributor to oversized headers when responsive
+			 * images have long or non-ASCII srcset URLs across multiple viewport breakpoints, which can cause
+			 * some reverse proxies (e.g. Nginx) to reject the response with "upstream sent too big header".
+			 * Per <https://web.dev/articles/preload-responsive-images#imagesrcset-imagesizes>, the HTML <link>
+			 * element is the recommended way to preload responsive images anyway.
+			 */
+			unset( $link['imagesrcset'], $link['imagesizes'] );
 			foreach ( $link as $name => $value ) {
 				/*
 				 * Escape the value being put into an HTTP quoted string. The grammar is:

@@ -414,25 +414,6 @@ Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
 
 The filtered value must be greater than zero; otherwise it will be ignored, and a usage warning will result.
 
-### Filter: `od_link_response_header_max_length` (default: 4 KB in bytes)
-
-Filters the maximum allowed length in bytes for the `Link` response header used to preload images and other subresources discovered by Optimization Detective.
-
-Some reverse proxies (e.g. Nginx) fail a request with an error like "upstream sent too big header" if a response header grows too large, which can happen when there are long or non-ASCII `srcset` URLs across multiple viewport breakpoints. If the constructed `Link` header would exceed this length, it is omitted from the response, and only the equivalent `LINK` tags injected into the `HEAD` are relied on for preloading.
-
-The filtered value must be greater than zero; otherwise it will be ignored, and a usage warning will result.
-
-Sites that know their proxy/server can handle larger headers can raise (or remove) this cap:
-
-```php
-add_filter(
-	'od_link_response_header_max_length',
-	function (): int {
-		return 16 * KB_IN_BYTES;
-	}
-);
-```
-
 ### Filter: `od_gzip_url_metric_store_request_payloads` (default: `true` if the `gzdecode()` function exists)
 
 Filters whether URL Metric JSON data should be compressed with gzip when being submitted to the `/url-metrics:store` REST API endpoint.
