@@ -133,7 +133,7 @@ function perflab_devtools_get_environment_info(): array {
 			'stylesheet' => $theme->get_stylesheet(),
 			'version'    => $theme->get( 'Version' ),
 		),
-		'usingExternalObjectCache' => wp_using_ext_object_cache(),
+		'usingExternalObjectCache' => (bool) wp_using_ext_object_cache(),
 		'wpDebug'                  => defined( 'WP_DEBUG' ) && WP_DEBUG,
 		'saveQueries'              => defined( 'SAVEQUERIES' ) && SAVEQUERIES,
 		'isMultisite'              => is_multisite(),
@@ -163,6 +163,19 @@ function perflab_devtools_get_database_queries(): ?array {
 		return null;
 	}
 
+	return perflab_devtools_map_database_queries( $saved_queries );
+}
+
+/**
+ * Maps queries saved by wpdb via the SAVEQUERIES constant to the shape exposed to DevTools.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<int, mixed> $saved_queries Queries as saved in wpdb::$queries, where each entry is expected to be
+ *                                         an array containing the SQL, the time taken in seconds, and the caller.
+ * @return array{ count: int, totalTimeMs: float, queries: array<int, array{ sql: string, timeMs: float, caller: string }> } Queries data.
+ */
+function perflab_devtools_map_database_queries( array $saved_queries ): array {
 	$max_sql_length = 2000;
 	$queries        = array();
 	$total_time_ms  = 0.0;
