@@ -139,4 +139,37 @@ class Test_WebP_Uploads_Attachment_Url extends TestCase {
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
 		$this->assertStringEndsWith( '.webp', $processor->get_attribute( 'src' ) );
 	}
+
+	/**
+	 * When the fallback setting is disabled and the image is oversized, the plugin swaps
+	 * the attached file to the scaled modern format (e.g. `leaves-scaled.webp`) and backs
+	 * up the unscaled original in `original_image`. The REST `source_url` should still
+	 * resolve to the scaled output-format file, not the unscaled original upload, so the
+	 * "Link to image file" href stays scaled and in the modern format.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment_original_source_url
+	 */
+	public function test_source_url_points_to_scaled_output_format_when_fallback_disabled(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', false );
+
+		add_filter(
+			'big_image_size_threshold',
+			static function () {
+				return 850;
+			}
+		);
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+
+		// The attached file itself was swapped to the scaled modern format.
+		$this->assertStringEndsWith( '-scaled.webp', get_attached_file( $attachment_id ) );
+
+		$data = $this->get_rest_attachment_data( $attachment_id );
+
+		// The link must stay scaled and in the output format, not the unscaled original upload.
+		$this->assertStringEndsWith( '-scaled.webp', $data['source_url'] );
+		$this->assertSame( wp_basename( get_attached_file( $attachment_id ) ), wp_basename( $data['source_url'] ) );
+		$this->assertSame( wp_basename( get_attached_file( $attachment_id ) ), wp_basename( $data['media_details']['sizes']['full']['source_url'] ) );
+	}
 }

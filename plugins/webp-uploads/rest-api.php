@@ -127,16 +127,26 @@ function webp_uploads_update_rest_attachment_original_source_url( WP_REST_Respon
 		return $response;
 	}
 
-	$original_path = wp_get_original_image_path( $post->ID );
-	if ( false === $original_path || ! file_exists( $original_path ) ) {
+	/*
+	 * The plugin swapped the attached file to a modern format. Oversized images that
+	 * WordPress scaled to "-scaled" keep that suffix on the swapped file, and the
+	 * "Link to image file" href should stay scaled in the output format. Only fall
+	 * back to the backed-up original upload for non-scaled images, where the
+	 * `original_image` metadata has no "-scaled" suffix.
+	 */
+	if ( preg_match( '/-scaled(?=\.[^.]+$)/', $attached_file ) === 1 ) {
+		$target_url = wp_get_attachment_url( $post->ID );
+	} else {
+		$target_url = path_join( dirname( $data['source_url'] ), $metadata['original_image'] );
+	}
+
+	if ( ! is_string( $target_url ) || '' === $target_url ) {
 		return $response;
 	}
 
-	$original_url = path_join( dirname( $data['source_url'] ), $metadata['original_image'] );
-
-	$data['source_url'] = $original_url;
+	$data['source_url'] = $target_url;
 	if ( isset( $data['media_details']['sizes']['full']['source_url'] ) ) {
-		$data['media_details']['sizes']['full']['source_url'] = $original_url;
+		$data['media_details']['sizes']['full']['source_url'] = $target_url;
 	}
 
 	return new WP_REST_Response( $data );
