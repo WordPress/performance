@@ -68,6 +68,10 @@ const performanceLab = ( env ) => {
 						from: `${ pluginDir }/includes/admin/plugin-activate-ajax.js`,
 						to: `${ pluginDir }/includes/admin/plugin-activate-ajax.min.js`,
 					},
+					{
+						from: `${ pluginDir }/includes/devtools/devtools-discovery.js`,
+						to: `${ pluginDir }/includes/devtools/devtools-discovery.min.js`,
+					},
 				],
 			} ),
 			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
