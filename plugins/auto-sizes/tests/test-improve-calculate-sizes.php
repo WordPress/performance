@@ -1551,7 +1551,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				6,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
-			'Wide gallery alignment, Default image alignment, 6 images (6 columns)' => array(
+			'Wide gallery alignment, Default image alignment, 6 images (maxes out column constraints)' => array(
 				'wide',
 				'',
 				6,
@@ -1563,7 +1563,7 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				9,
 				'sizes="(max-width: 206px) 100vw, 206px" ',
 			),
-			'Wide gallery alignment, Default image alignment, 9 images (9 columns)' => array(
+			'Wide gallery alignment, Default image alignment, 9 images (maxes out column constraints)' => array(
 				'wide',
 				'',
 				9,

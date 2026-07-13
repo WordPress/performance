@@ -125,11 +125,11 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			}
 
 			/*
-			 * When the wide alignment for the gallery, the child image blocks should also use the
-			 * wide alignment if chile image block didn't set the alignment.
+			 * When a Gallery block has a wide or full alignment, child Image blocks inherit that
+			 * alignment unless the child block explicitly sets its own alignment.
 			 */
-			$is_parent_gallery = $block->context['is_parent_aligned'] ?? false;
-			if ( $is_parent_gallery && '' === $alignment ) {
+			$is_parent_gallery_aligned = (bool) ( $block->context['is_parent_aligned'] ?? false );
+			if ( $is_parent_gallery_aligned && '' === $alignment ) {
 				$alignment = $max_alignment;
 			}
 
@@ -385,8 +385,9 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			$context['gallery_column_count'] = 3;
 		}
 
-		// If the gallery is aligned, we can assume that the child images are also aligned.
-		$context['is_parent_aligned'] = true;
+		// If the gallery is wide or full aligned, treat child Image blocks as aligned too.
+		$gallery_alignment            = $block['attrs']['align'] ?? '';
+		$context['is_parent_aligned'] = 'wide' === $gallery_alignment;
 	}
 
 	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
