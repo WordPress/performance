@@ -385,7 +385,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			$context['gallery_column_count'] = 3;
 		}
 
-		// If the gallery is wide or full aligned, treat child Image blocks as aligned too.
+		// If the gallery is wide aligned, treat child Image blocks as aligned too.
 		$gallery_alignment            = $block['attrs']['align'] ?? '';
 		$context['is_parent_aligned'] = 'wide' === $gallery_alignment;
 	}
