@@ -3,7 +3,7 @@
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
  * Description: Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
- * Requires at least: 6.6
+ * Requires at least: 6.9
  * Requires PHP: 7.4
  * Version: 1.0.0-beta5
  * Author: WordPress Performance Team
@@ -101,9 +101,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 		require_once __DIR__ . '/helper.php';
-
-		// Deprecations.
-		require_once __DIR__ . '/deprecated.php';
 
 		// Core infrastructure classes.
 		require_once __DIR__ . '/class-od-data-validation-exception.php';

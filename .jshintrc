@@ -1,0 +1,23 @@
+{
+	"boss": true,
+	"curly": true,
+	"eqeqeq": true,
+	"eqnull": true,
+	"esversion": 11,
+	"expr": true,
+	"immed": true,
+	"laxbreak": true,
+	"loopfunc": true,
+	"noarg": true,
+	"nonbsp": true,
+	"quotmark": "single",
+	"undef": true,
+	"unused": true,
+
+	"node": true,
+
+	"globals": {
+		"fetch": false,
+		"AbortController": false
+	}
+}

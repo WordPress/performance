@@ -133,21 +133,23 @@ const cssMinifyTransformer = ( content, absoluteFrom ) => {
 };
 
 /**
- * Create plugins zip file using `zip` command.
+ * Compute a content fingerprint for a zip archive, ignoring entry timestamps.
  *
- * @param {string} pluginPath The path where the plugin build is located.
- * @param {string} pluginName The name of the plugin.
+ * Uses `unzip -v`, which lists each entry's uncompressed size, CRC-32 checksum,
+ * and name. The date and time columns are omitted so that two archives with
+ * identical contents produce the same fingerprint even when built at different
+ * times.
  *
- * @return {void}
+ * @param {string} zipPath The path to the zip file.
+ *
+ * @return {string|null} The fingerprint, or null if the archive does not exist.
  */
-const createPluginZip = ( pluginPath, pluginName ) => {
-	chdir( pluginPath );
+const getZipContentFingerprint = ( zipPath ) => {
+	if ( ! fs.existsSync( zipPath ) ) {
+		return null;
+	}
 
-	const proc = spawnSync( 'zip', [
-		'-r',
-		`${ pluginName }.zip`,
-		pluginName,
-	] );
+	const proc = spawnSync( 'unzip', [ '-v', zipPath ] );
 
 	if ( 0 !== proc.status ) {
 		if ( proc.error ) {
@@ -156,6 +158,133 @@ const createPluginZip = ( pluginPath, pluginName ) => {
 			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
 		}
 	}
+
+	const lineRegex =
+		/^\s*(\d+)\s+\S+\s+\d+\s+\S+\s+\d\d-\d\d-\d\d\d\d\s+\d\d:\d\d\s+([0-9a-f]{8})\s+(.*)$/;
+
+	return proc.stdout
+		.toString()
+		.split( '\n' )
+		.map( ( line ) => {
+			const match = lineRegex.exec( line );
+			return match
+				? `${ match[ 1 ] }:${ match[ 2 ] }:${ match[ 3 ] }`
+				: null;
+		} )
+		.filter( Boolean )
+		.join( '\n' );
+};
+
+/**
+ * Get untracked files that would be included in a plugin's zip archive.
+ *
+ * Lists files under the plugin source directory that Git considers untracked
+ * (and are not ignored via .gitignore), then narrows the list to those that
+ * actually made it into the build output — i.e. files that were not excluded by
+ * the copy step's ignore patterns and would therefore end up in the archive.
+ *
+ * @param {string} slug     The plugin slug.
+ * @param {string} buildDir The path to the plugin's build output directory.
+ *
+ * @return {string[]} Repo-relative paths of untracked files that would be zipped.
+ */
+const getUntrackedIncludedFiles = ( slug, buildDir ) => {
+	const root = getPluginRootPath();
+	const sourceDir = path.join( 'plugins', slug );
+
+	const proc = spawnSync(
+		'git',
+		[ 'ls-files', '--others', '--exclude-standard', '--', sourceDir ],
+		{ cwd: root }
+	);
+
+	if ( 0 !== proc.status ) {
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
+	}
+
+	return proc.stdout
+		.toString()
+		.split( '\n' )
+		.filter( Boolean )
+		.filter( ( relPath ) => {
+			const relInsidePlugin = path.relative( sourceDir, relPath );
+			return fs.existsSync( path.join( buildDir, relInsidePlugin ) );
+		} );
+};
+
+/**
+ * Create plugins zip file using `zip` command.
+ *
+ * The archive is built into a temporary file first and only replaces the
+ * existing zip when its contents actually change. This leaves the existing
+ * file (and its modified time) untouched when a rebuild produces identical
+ * output. Building fresh each time also ensures files removed from the plugin
+ * do not linger in an updated-in-place archive.
+ *
+ * The build fails if untracked files would be included in the archive, which
+ * usually indicates stray files were left in the plugin source directory by
+ * accident. Pass `force: true` (via `--env force=true`) to bypass this check.
+ *
+ * @param {string}  pluginPath      The path where the plugin build is located.
+ * @param {string}  pluginName      The name of the plugin.
+ * @param {Object}  [options]       Options.
+ * @param {boolean} [options.force] Whether to build even when untracked files
+ *                                  would be included in the archive.
+ *
+ * @return {void}
+ */
+const createPluginZip = ( pluginPath, pluginName, { force = false } = {} ) => {
+	if ( ! force ) {
+		const untrackedFiles = getUntrackedIncludedFiles(
+			pluginName,
+			path.join( pluginPath, pluginName )
+		);
+
+		if ( untrackedFiles.length > 0 ) {
+			throw new Error(
+				`Refusing to build the "${ pluginName }" plugin zip because the following untracked files would be included:\n` +
+					untrackedFiles
+						.map( ( file ) => `  - ${ file }` )
+						.join( '\n' ) +
+					'\nCommit or remove these files, or pass `--env force=true` to override.'
+			);
+		}
+	}
+
+	chdir( pluginPath );
+
+	const zipFile = `${ pluginName }.zip`;
+	const tempZipFile = `${ pluginName }.zip.tmp`;
+
+	deleteFileOrDirectory( tempZipFile );
+
+	const proc = spawnSync( 'zip', [ '-r', tempZipFile, pluginName ] );
+
+	if ( 0 !== proc.status ) {
+		deleteFileOrDirectory( tempZipFile );
+		if ( proc.error ) {
+			throw proc.error;
+		} else {
+			throw new Error( proc.stderr.toString() || proc.stdout.toString() );
+		}
+	}
+
+	// If the freshly built archive matches the existing one, discard it so the
+	// existing file is left untouched.
+	if (
+		fs.existsSync( zipFile ) &&
+		getZipContentFingerprint( zipFile ) ===
+			getZipContentFingerprint( tempZipFile )
+	) {
+		deleteFileOrDirectory( tempZipFile );
+		return;
+	}
+
+	fs.renameSync( tempZipFile, zipFile );
 };
 
 module.exports = {
@@ -165,5 +294,7 @@ module.exports = {
 	generateBuildManifest,
 	assetDataTransformer,
 	cssMinifyTransformer,
+	getZipContentFingerprint,
+	getUntrackedIncludedFiles,
 	createPluginZip,
 };

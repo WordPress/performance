@@ -60,6 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                additionalProperties?: bool,
  *                                format?: non-empty-string,
  *                                readonly?: bool,
+ *                                ...
  *                            }
  *
  * @since 0.1.0

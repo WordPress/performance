@@ -774,10 +774,15 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<string>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types(): array {
-		return array(
+		$data = array(
 			'webp' => array( 'webp' ),
-			'avif' => array( 'avif' ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif'] = array( 'avif' );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -786,12 +791,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<int, string|true>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types_with_threshold(): array {
-		return array(
+		$data = array(
 			'webp'                    => array( 'webp' ),
 			'webp with 850 threshold' => array( 'webp', true ),
-			'avif'                    => array( 'avif' ),
-			'avif with 850 threshold' => array( 'avif', true ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif']                    = array( 'avif' );
+			$data['avif with 850 threshold'] = array( 'avif', true );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -1008,6 +1018,28 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Test that the output format is normalized and short-circuited for invalid or unknown input.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_normalize_non_array_output_format_and_return_early_without_mime_type(): void {
+		// A non-array output format is normalized to an empty array; a null mime type returns it unchanged.
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( 'not-an-array', null, null ),
+			'A non-array output format should be normalized to an empty array.'
+		);
+
+		// An existing output format mapping is returned unchanged when there is no source mime type to map.
+		$output_format = array( 'image/png' => 'image/webp' );
+		$this->assertSame(
+			$output_format,
+			webp_uploads_filter_image_editor_output_format( $output_format, '/tmp/image.png', null ),
+			'The output format mapping should be returned unchanged when the source mime type is null.'
+		);
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::webp_uploads_render_generator
@@ -1092,6 +1124,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 		// Ensure the AVIF MIME type is supported; skip the test if not.
 		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is not supported.' );
 		}
 
 		$this->set_image_output_type( 'avif' );
@@ -1272,19 +1308,26 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Test that the webp_uploads_update_featured_image function is hooked to the post_thumbnail_html filter.
+	 * Featured images are now rewritten through the `wp_get_attachment_image`
+	 * filter (since `the_post_thumbnail()` routes through `wp_get_attachment_image()`),
+	 * so the direct `post_thumbnail_html` registration should no longer exist.
+	 *
+	 * @covers ::webp_uploads_init
 	 */
-	public function test_webp_uploads_update_featured_image_hooked_into_post_thumbnail_html(): void {
-		$this->assertSame( 10, has_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image' ) );
+	public function test_post_thumbnail_html_filter_is_not_registered_directly(): void {
+		$this->assertFalse( has_filter( 'post_thumbnail_html' ) );
+		$this->assertSame( 10, has_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image' ) );
 	}
 
 	/**
 	 * Test that the featured image is not wrapped in a picture element.
 	 *
-	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 * @covers ::webp_uploads_img_tag_update_mime_type
 	 */
 	public function test_webp_uploads_update_featured_image_picture_element_disabled(): void {
+		$this->mock_frontend_body_hooks();
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 		$post_id       = self::factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
@@ -1296,12 +1339,13 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Test that the featured image is wrapped in a picture element.
 	 *
-	 * @covers ::webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
 	 * @covers ::webp_uploads_wrap_image_in_picture
 	 */
 	public function test_webp_uploads_update_featured_image_picture_element_enabled(): void {
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 		$this->opt_in_to_picture_element();
+		$this->mock_frontend_body_hooks();
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
 		$post_id       = self::factory()->post->create();
@@ -1309,5 +1353,213 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$featured_image = get_the_post_thumbnail( $post_id );
 		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_is_rewritten_to_webp(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.webp', $html );
+		$this->assertStringNotContainsString( 'leaves.jpg', $html );
+
+		$processor = new WP_HTML_Tag_Processor( $html );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Only one IMG tag should be present.' );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_when_no_image_returned(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		add_filter( 'wp_get_attachment_image_src', '__return_false' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$this->assertSame( '', wp_get_attachment_image( $attachment_id, 'large' ) );
+	}
+
+	/**
+	 * Data provider for testing how the `$attr` argument is normalized before being passed to the filter.
+	 *
+	 * @return array<string, array{ attr: string|array<string, mixed>|false, expected_attr: array<string, mixed> }>
+	 */
+	public function data_provider_to_test_attr_normalization(): array {
+		return array(
+			'empty string'  => array(
+				'attr'          => '',
+				'expected_attr' => array(),
+			),
+			'query string'  => array(
+				'attr'          => 'loading=lazy',
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'array'         => array(
+				'attr'          => array( 'loading' => 'lazy' ),
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'invalid value' => array(
+				'attr'          => false,
+				'expected_attr' => array(),
+			),
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 *
+	 * @dataProvider data_provider_to_test_attr_normalization
+	 *
+	 * @param string|array<string, mixed>|false $attr          The attributes passed to the filter.
+	 * @param array<string, mixed>              $expected_attr The expected attributes passed to the inner filter.
+	 */
+	public function test_wp_get_attachment_image_attr_normalization( $attr, array $expected_attr ): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$size          = 'large';
+
+		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id, $size );
+
+		$html = sprintf(
+			'<img src="%s" width="%d" height="%d" alt="">',
+			esc_url( $src ),
+			(int) $width,
+			(int) $height
+		);
+
+		$filter_args = array();
+		add_filter(
+			'webp_uploads_filter_wp_get_attachment_image',
+			static function ( $should_filter, $attachment_id, $size, $attr ) use ( &$filter_args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- They are used in compact!
+				$filter_args[] = compact( 'should_filter', 'attachment_id', 'size', 'attr' );
+				return false;
+			},
+			10,
+			4
+		);
+
+		$this->assertSame( $html, webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, false, $attr ) );
+		$this->assertCount( 1, $filter_args );
+		$this->assertSame(
+			array(
+				'should_filter' => true,
+				'attachment_id' => $attachment_id,
+				'size'          => $size,
+				'attr'          => $expected_attr,
+			),
+			$filter_args[0]
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_opt_out_filter_returns_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		add_filter( 'webp_uploads_filter_wp_get_attachment_image', '__return_false' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_unhook_restores_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_outside_frontend_body(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		// Intentionally do NOT call mock_frontend_body_hooks().
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_icon_placeholder_requested(): void {
+		$this->mock_frontend_body_hooks();
+
+		// Directly exercise the filter callback with $icon = true; expect unchanged HTML.
+		$html = '<img src="https://example.test/wp-content/uploads/2024/01/something.jpg">';
+		$this->assertSame(
+			$html,
+			webp_uploads_filter_wp_get_attachment_image( $html, 0, 'medium', true, array() )
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_non_string_is_passed(): void {
+		$this->mock_frontend_body_hooks();
+		$this->assertSame(
+			'',
+			webp_uploads_filter_wp_get_attachment_image( false, 0, 'medium', true, array() )
+		);
+	}
+
+	/**
+	 * Check if AVIF encoding is supported.
+	 *
+	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
+	 * where it returns true for AVIF support even if only decoding is supported but not encoding.
+	 *
+	 * @return bool True if AVIF encoding is supported, false otherwise.
+	 */
+	public function check_avif_encoding_support(): bool {
+		static $encoding_support = null;
+		if ( null === $encoding_support ) {
+			if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && class_exists( 'ImagickException' ) ) {
+				// Only reliable way to check for AVIF encoding support is to attempt to encode an image and catch the exception if it fails.
+				try {
+					$i = new Imagick();
+					$i->newImage( 10, 10, 'white' );
+					$i->setImageFormat( 'avif' );
+					$i->getImageBlob();
+					$encoding_support = true;
+				} catch ( ImagickException $e ) {
+					$encoding_support = false;
+				}
+			} else {
+				$encoding_support = false;
+			}
+		}
+
+		return $encoding_support;
 	}
 }
