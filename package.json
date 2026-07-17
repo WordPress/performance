@@ -69,6 +69,7 @@
 		"test-e2e": "wp-scripts test-playwright --config tools/e2e/playwright.config.ts",
 		"test-e2e:debug": "wp-scripts test-playwright --config tools/e2e/playwright.config.ts --ui",
 		"test-e2e:auto-sizes": "wp-scripts test-playwright --config tools/e2e/playwright.config.ts --project=auto-sizes",
+		"test-unit-js": "node --test",
 		"lint-php": "composer lint:all",
 		"test-php": "wp-env --config=.wp-env.test.json run wordpress --env-cwd=/var/www/html/wp-content/plugins/performance composer test:plugins",
 		"test-php-watch": "./bin/test-php-watch.sh",
