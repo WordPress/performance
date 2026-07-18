@@ -56,6 +56,10 @@ const {
 	handler: bumpVersionsHandler,
 	options: bumpVersionsOptions,
 } = require( './commands/bump-versions' );
+const {
+	handler: prepareReleaseNotesHandler,
+	options: prepareReleaseNotesOptions,
+} = require( './commands/prepare-release-notes' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -87,5 +91,14 @@ withOptions( program.command( 'bump-plugin-versions' ), bumpVersionsOptions )
 		'Bumps plugin versions based on open, dated release milestones (titled "$plugin_slug $version" without "n.e.x.t")'
 	)
 	.action( catchException( bumpVersionsHandler ) );
+
+withOptions(
+	program.command( 'prepare-release-notes' ),
+	prepareReleaseNotesOptions
+)
+	.description(
+		'Prints the combined per-plugin changelogs (release notes) for plugins with an open, dated release milestone; progress goes to STDERR so STDOUT can be piped'
+	)
+	.action( catchException( prepareReleaseNotesHandler ) );
 
 program.parse( process.argv );
