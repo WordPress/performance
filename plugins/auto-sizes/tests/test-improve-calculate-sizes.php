@@ -1569,6 +1569,42 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				9,
 				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
+
+			/*
+			 * A full aligned gallery with a single image spans the whole viewport,
+			 * so the image covers '100vw'. Once the gallery has more than one column
+			 * the image no longer spans the viewport and the default sizes are used.
+			 */
+			'Full gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'full',
+				'',
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'full',
+				'',
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'full',
+				'',
+				3,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 6 images (maxes out column constraints)' => array(
+				'full',
+				'',
+				6,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 9 images (maxes out column constraints)' => array(
+				'full',
+				'',
+				9,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
 		);
 	}
 
@@ -2111,7 +2147,122 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 213px) 100vw, 213px" ',
 				'sizes="(max-width: 426px) 100vw, 426px" ',
 			),
+
+			/*
+			 * Full aligned galleries. Only a single column spans the whole viewport,
+			 * every other column count falls back to the default sizes, including the
+			 * images in an incomplete last row.
+			 */
+			'Full gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'full',
+				'',
+				1,
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 3 images (1 column)' => array(
+				'full',
+				'',
+				3,
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 4 images (2 columns)' => array(
+				'full',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 5 images (3 columns)' => array(
+				'full',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 15 images (6 columns)' => array(
+				'full',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
 		);
+	}
+
+	/**
+	 * Test that a Gallery block only marks its child Image blocks as aligned for
+	 * the alignments that actually break out of the content width.
+	 *
+	 * @dataProvider data_gallery_is_parent_aligned_context
+	 *
+	 * @cover ::auto_sizes_filter_render_block_context
+	 *
+	 * @param string $gallery_alignment Gallery block alignment.
+	 * @param bool   $expected          Expected 'is_parent_aligned' context value.
+	 */
+	public function test_gallery_is_parent_aligned_context( string $gallery_alignment, bool $expected ): void {
+		$block = array(
+			'blockName'   => 'core/gallery',
+			'attrs'       => '' !== $gallery_alignment ? array( 'align' => $gallery_alignment ) : array(),
+			'innerBlocks' => array(),
+		);
+
+		$context = auto_sizes_filter_render_block_context( array(), $block, null );
+
+		$this->assertArrayHasKey( 'is_parent_aligned', $context );
+		$this->assertSame( $expected, $context['is_parent_aligned'] );
+	}
+
+	/**
+	 * Data provider for testing the 'is_parent_aligned' gallery context.
+	 *
+	 * @return array<string, array{0: string, 1: bool}> Arguments passed to the test method.
+	 */
+	public static function data_gallery_is_parent_aligned_context(): array {
+		return array(
+			'wide alignment'   => array( 'wide', true ),
+			'full alignment'   => array( 'full', true ),
+			'no alignment'     => array( '', false ),
+			'left alignment'   => array( 'left', false ),
+			'right alignment'  => array( 'right', false ),
+			'center alignment' => array( 'center', false ),
+		);
+	}
+
+	/**
+	 * Test that a non gallery block never receives the 'is_parent_aligned' context,
+	 * even when it is full aligned.
+	 *
+	 * @cover ::auto_sizes_filter_render_block_context
+	 */
+	public function test_non_gallery_block_does_not_receive_is_parent_aligned_context(): void {
+		$block = array(
+			'blockName'   => 'core/group',
+			'attrs'       => array( 'align' => 'full' ),
+			'innerBlocks' => array(),
+		);
+
+		$context = auto_sizes_filter_render_block_context( array(), $block, null );
+
+		$this->assertArrayNotHasKey( 'is_parent_aligned', $context );
+	}
+
+	/**
+	 * Test that the Image block declares the context keys the gallery alignment
+	 * handling depends on.
+	 *
+	 * @cover ::auto_sizes_filter_uses_context
+	 */
+	public function test_image_block_uses_is_parent_aligned_context(): void {
+		$block_type = new WP_Block_Type( 'core/image' );
+
+		$uses_context = auto_sizes_filter_uses_context( array(), $block_type );
+
+		$this->assertContains( 'is_parent_aligned', $uses_context );
+		$this->assertContains( 'max_alignment', $uses_context );
+		$this->assertContains( 'container_relative_width', $uses_context );
 	}
 
 	/**
