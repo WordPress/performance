@@ -2167,6 +2167,14 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				1,
 				'sizes="100vw" ',
 			),
+			'Full gallery alignment, Default image alignment, 3 images (2 columns; incomplete last row with remainder=1)' => array(
+				'full',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+				'sizes="100vw" ',
+			),
 			'Full gallery alignment, Default image alignment, 4 images (2 columns)' => array(
 				'full',
 				'',
