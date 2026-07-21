@@ -133,7 +133,9 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 				$alignment = $max_alignment;
 
 				/*
-				 * If the alignment is full return the default sizes.
+				 * A full alignment normally spans the whole viewport, but inside a narrower
+				 * container (e.g. a column) the gallery is constrained to that container instead.
+				 * The resulting width cannot be expressed reliably here, so keep the default sizes.
 				 */
 				if ( 1.0 !== (float) $container_relative_width && 'full' === $alignment ) {
 					return $sizes;
