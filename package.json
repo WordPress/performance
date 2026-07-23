@@ -16,10 +16,10 @@
 		"@playwright/test": "^1.61.1",
 		"@types/lodash": "4.17.24",
 		"@types/node": "^20.19.43",
-		"@wordpress/e2e-test-utils-playwright": "1.50.0",
-		"@wordpress/env": "^11.10.0",
-		"@wordpress/prettier-config": "^4.49.0",
-		"@wordpress/scripts": "^32.6.0",
+		"@wordpress/e2e-test-utils-playwright": "1.51.0",
+		"@wordpress/env": "^11.11.0",
+		"@wordpress/prettier-config": "^4.51.0",
+		"@wordpress/scripts": "^33.0.0",
 		"ajv": "8.20.0",
 		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
@@ -37,7 +37,7 @@
 		"webpackbar": "^7.0.0"
 	},
 	"overrides": {
-		"@wordpress/e2e-test-utils-playwright": "1.50.0",
+		"@wordpress/e2e-test-utils-playwright": "1.51.0",
 		"prettier": "npm:wp-prettier@3.0.3"
 	},
 	"scripts": {
