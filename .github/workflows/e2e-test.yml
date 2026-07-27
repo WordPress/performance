@@ -26,6 +26,11 @@ on:
       - reopened
       - synchronize
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 # Disable permissions for all available scopes by default.
 # Any needed permissions should be configured at the job level.
 permissions: {}

@@ -7,6 +7,12 @@ on:
       - synchronize
     branches:
       - trunk
+
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
