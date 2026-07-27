@@ -193,8 +193,9 @@ jobs:
               throw new Error(`Invalid response from GitHub API: ${getArtifact.status}`);
             }
 
-            core.setOutput('exists', getArtifact.data.artifacts.length > 0);
-            core.debug(`Artifact for ${{ matrix.plugin }} exists: ${core.getInput('exists')} ? "true" : "false"`);
+            const exists = getArtifact.data.artifacts.length > 0;
+            core.setOutput('exists', exists);
+            core.debug(`Artifact for ${{ matrix.plugin }} exists: ${exists}`);
 
       - name: Download artifact
         if: steps.artifact-existence.outputs.exists == 'true'
