@@ -180,21 +180,26 @@ jobs:
       - name: Check artifact existence
         id: artifact-existence
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PLUGIN: ${{ matrix.plugin }}
         with:
           script: |
+            const plugin = process.env.PLUGIN;
+
             const getArtifact = await github.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts{?name}', {
               owner: context.repo.owner,
               repo: context.repo.repo,
               run_id: context.runId,
-              name: "${{ matrix.plugin }}"
+              name: plugin
             });
 
             if (getArtifact.status !== 200) {
               throw new Error(`Invalid response from GitHub API: ${getArtifact.status}`);
             }
 
-            core.setOutput('exists', getArtifact.data.artifacts.length > 0);
-            core.debug(`Artifact for ${{ matrix.plugin }} exists: ${core.getInput('exists')} ? "true" : "false"`);
+            const exists = getArtifact.data.artifacts.length > 0;
+            core.setOutput('exists', exists);
+            core.debug(`Artifact for ${plugin} exists: ${exists}`);
 
       - name: Download artifact
         if: steps.artifact-existence.outputs.exists == 'true'
