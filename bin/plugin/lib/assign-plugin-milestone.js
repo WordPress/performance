@@ -233,8 +233,4 @@ async function assignPluginMilestone( { github, context, core } ) {
 
 module.exports = {
 	assignPluginMilestone,
-	countPluginLineChanges,
-	getPluginSlugForPath,
-	getPrimaryPluginSlug,
-	selectPluginMilestone,
 };
