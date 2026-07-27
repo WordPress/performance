@@ -12,7 +12,7 @@ on:
 concurrency:
   # Group workflow runs by workflow name, along with the head branch ref of the pull request
   # or otherwise the branch or tag ref.
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions: {}
