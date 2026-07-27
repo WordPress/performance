@@ -73,7 +73,7 @@ function plsr_get_field_description( string $field ): string {
 		'eagerness'      => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 		'authentication' => sprintf(
 			/* translators: %s: URL to persistent object cache documentation */
-			__( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance, regardless of the user authentication status but <em>especially</em> when logged-in, ensure you have a <a href="%s" target="_blank">persistent object cache</a> configured. This only applies to pages on the frontend; admin screens remain excluded.', 'speculation-rules' ),
+			__( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance, regardless of the user authentication status but <em>especially</em> when logged-in, ensure you have a <a href="%s" target="_blank" rel="noopener">persistent object cache</a> configured. This only applies to pages on the frontend; admin screens remain excluded.', 'speculation-rules' ),
 			'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
 		),
 	);
@@ -316,13 +316,14 @@ function plsr_render_settings_field( array $args ): void {
 					echo wp_kses(
 						sprintf(
 							/* translators: %s: URL to persistent object cache documentation */
-							__( 'Enabling speculative loading for authenticated users may significantly increase the server load. Consider setting up a <a href="%s" target="_blank">persistent object cache</a> before enabling this feature for logged-in users.', 'speculation-rules' ),
+							__( 'Enabling speculative loading for authenticated users may significantly increase the server load. Consider setting up a <a href="%s" target="_blank" rel="noopener">persistent object cache</a> before enabling this feature for logged-in users.', 'speculation-rules' ),
 							'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
 						),
 						array(
 							'a' => array(
 								'href'   => array(),
 								'target' => array(),
+								'rel'    => array(),
 							),
 						)
 					);
@@ -359,6 +360,7 @@ function plsr_render_settings_field( array $args ): void {
 					'a'  => array(
 						'href'   => array(),
 						'target' => array(),
+						'rel'    => array(),
 					),
 					'em' => array(),
 				)

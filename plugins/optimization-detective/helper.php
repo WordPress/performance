@@ -344,7 +344,7 @@ function od_render_documentation_links(): void {
 	echo wp_kses_post(
 		sprintf(
 			/* translators: 1: project documentation URL, 2: introduction URL, 3: code reference URL, 4: extensions list URL. */
-			__( 'The <a href="%1$s" target="_blank">project documentation</a> is available on GitHub, including an <a href="%2$s" target="_blank">introduction</a>, <a href="%3$s" target="_blank">code reference</a>, and a list of <a href="%4$s" target="_blank">extensions</a>.', 'optimization-detective' ),
+			__( 'The <a href="%1$s" target="_blank" rel="noopener">project documentation</a> is available on GitHub, including an <a href="%2$s" target="_blank" rel="noopener">introduction</a>, <a href="%3$s" target="_blank" rel="noopener">code reference</a>, and a list of <a href="%4$s" target="_blank" rel="noopener">extensions</a>.', 'optimization-detective' ),
 			esc_url( 'https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs' ),
 			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md' ),
 			esc_url( 'https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md' ),

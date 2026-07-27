@@ -219,7 +219,7 @@ function perflab_render_plugins_ui(): void {
 			}
 
 			$plugin_list     .= sprintf(
-				'<li><a target="_blank" href="%s"><code>%s</code></a> %s</li>',
+				'<li><a target="_blank" rel="noopener" href="%s"><code>%s</code></a> %s</li>',
 				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
 				esc_html( $plugin_slug ),
 				esc_html( $status )
@@ -517,7 +517,9 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 
 	if ( $availability['activated'] ) {
 		$action_links[] = sprintf(
-			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+			'<button type="button" class="button button-disabled" disabled="disabled" aria-label="%s">%s</button>',
+			/* translators: %s: Plugin name. */
+			esc_attr( sprintf( __( '%s is active', 'performance-lab' ), $name ) ),
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
 	} elseif (
@@ -538,15 +540,19 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		);
 
 		$action_links[] = sprintf(
-			'<a class="button perflab-install-active-plugin" href="%s" data-plugin-slug="%s">%s</a>',
+			'<a class="button perflab-install-active-plugin" href="%s" data-plugin-slug="%s" aria-label="%s">%s</a>',
 			esc_url( $url ),
 			esc_attr( $plugin_data['slug'] ),
+			/* translators: %s: Plugin name. */
+			esc_attr( sprintf( __( 'Activate %s', 'performance-lab' ), $name ) ),
 			esc_html__( 'Activate', 'default' )
 		);
 	} else {
 		$explanation    = $availability['can_install'] ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
 		$action_links[] = sprintf(
-			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+			'<button type="button" class="button button-disabled" disabled="disabled" aria-label="%s">%s</button>',
+			/* translators: 1: Plugin name, 2: Status explanation. */
+			esc_attr( sprintf( __( '%1$s: %2$s', 'performance-lab' ), $name, $explanation ) ),
 			esc_html( $explanation )
 		);
 	}
@@ -575,7 +581,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			esc_html__( 'Learn more', 'performance-lab' )
 		);
 	} else {
-		$title_link_attr = ' target="_blank"';
+		$title_link_attr = ' target="_blank" rel="noopener"';
 
 		/* translators: %s: Plugin name. */
 		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
@@ -583,7 +589,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'] . '/';
 
 		$action_links[] = sprintf(
-			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+			'<a href="%s" aria-label="%s" target="_blank" rel="noopener">%s</a>',
 			esc_url( $details_link ),
 			esc_attr( $aria_label ),
 			esc_html__( 'Visit plugin site', 'default' )
@@ -593,8 +599,13 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	if ( $availability['activated'] ) {
 		$settings_url = perflab_get_plugin_settings_url( $plugin_data['slug'] );
 		if ( null !== $settings_url ) {
-			/* translators: %s is the settings URL */
-			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
+			$action_links[] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url( $settings_url ),
+				/* translators: %s: Plugin name. */
+				esc_attr( sprintf( __( 'Settings for %s', 'performance-lab' ), $name ) ),
+				esc_html__( 'Settings', 'performance-lab' )
+			);
 		}
 	}
 	?>
