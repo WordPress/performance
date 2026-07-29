@@ -131,6 +131,15 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$is_parent_gallery_aligned = (bool) ( $block->context['is_parent_aligned'] ?? false );
 			if ( $is_parent_gallery_aligned && '' === $alignment ) {
 				$alignment = $max_alignment;
+
+				/*
+				 * A full alignment normally spans the whole viewport, but inside a narrower
+				 * container (e.g. a column) the gallery is constrained to that container instead.
+				 * The resulting width cannot be expressed reliably here, so keep the default sizes.
+				 */
+				if ( 1.0 !== (float) $container_relative_width && 'full' === $alignment ) {
+					return $sizes;
+				}
 			}
 
 			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment, $container_relative_width );
@@ -385,9 +394,9 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			$context['gallery_column_count'] = 3;
 		}
 
-		// If the gallery is wide aligned, treat child Image blocks as aligned too.
+		// If the gallery is wide or full aligned, treat child Image blocks as aligned too.
 		$gallery_alignment            = $block['attrs']['align'] ?? '';
-		$context['is_parent_aligned'] = 'wide' === $gallery_alignment;
+		$context['is_parent_aligned'] = in_array( $gallery_alignment, array( 'wide', 'full' ), true );
 	}
 
 	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
