@@ -404,7 +404,7 @@ function embed_optimizer_print_row_meta_install_notice( string $plugin_file ): v
 			$details_url = __( 'https://wordpress.org/plugins/', 'default' ) . $od_plugin_slug . '/';
 
 			$link_start_tag = sprintf(
-				'<a href="%s" aria-label="%s" target="_blank" rel="noopener">',
+				'<a href="%s" aria-label="%s" target="_blank">',
 				esc_url( $details_url ),
 				esc_attr( $aria_label )
 			);

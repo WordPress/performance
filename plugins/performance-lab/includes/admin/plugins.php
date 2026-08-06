@@ -219,7 +219,7 @@ function perflab_render_plugins_ui(): void {
 			}
 
 			$plugin_list     .= sprintf(
-				'<li><a target="_blank" rel="noopener" href="%s"><code>%s</code></a> %s</li>',
+				'<li><a target="_blank" href="%s"><code>%s</code></a> %s</li>',
 				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
 				esc_html( $plugin_slug ),
 				esc_html( $status )
@@ -581,7 +581,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			esc_html__( 'Learn more', 'performance-lab' )
 		);
 	} else {
-		$title_link_attr = ' target="_blank" rel="noopener"';
+		$title_link_attr = ' target="_blank"';
 
 		/* translators: %s: Plugin name. */
 		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
@@ -589,7 +589,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'] . '/';
 
 		$action_links[] = sprintf(
-			'<a href="%s" aria-label="%s" target="_blank" rel="noopener">%s</a>',
+			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
 			esc_url( $details_link ),
 			esc_attr( $aria_label ),
 			esc_html__( 'Visit plugin site', 'default' )

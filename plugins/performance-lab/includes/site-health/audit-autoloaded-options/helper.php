@@ -78,7 +78,7 @@ function perflab_aao_autoloaded_options_test(): array {
 
 	$result['actions'] = sprintf(
 		/* translators: 1: HelpHub URL. 2: Link description. */
-		'<p><a target="_blank" rel="noopener" href="%1$s">%2$s</a></p>',
+		'<p><a target="_blank" href="%1$s">%2$s</a></p>',
 		esc_url( __( 'https://wordpress.org/support/article/optimization/#autoloaded-options', 'performance-lab' ) ),
 		__( 'More info about performance optimization', 'performance-lab' )
 	);

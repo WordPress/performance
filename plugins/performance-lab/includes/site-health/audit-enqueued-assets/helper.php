@@ -200,7 +200,7 @@ function perflab_aea_enqueued_blocking_assets_test(): array {
 		$result['status']  = 'recommended';
 		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
-			'<p><a target="_blank" rel="noopener" href="%1$s">%2$s</a></p>',
+			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
 			__( 'More info about performance optimization', 'performance-lab' )
 		);
