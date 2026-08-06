@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-		"web-vitals": "6.0.0"
+		"web-vitals": "6.0.1"
 	},
 	"devDependencies": {
 		"@octokit/rest": "^22.0.1",
