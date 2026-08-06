@@ -15,6 +15,7 @@ const config = require( '../config' );
 
 const MISSING_TYPE = 'MISSING_TYPE';
 const TYPE_PREFIX = '[Type] ';
+/** @type {Record<string, string>} */
 const PRIMARY_TYPE_LABELS = {
 	'[Type] Feature': 'Features',
 	'[Type] Enhancement': 'Enhancements',
@@ -116,28 +117,35 @@ async function fetchAllPullRequests( octokit, settings ) {
 function getIssueType( issue ) {
 	const typeLabels = issue.labels
 		.map( ( label ) => ( typeof label === 'string' ? label : label.name ) )
-		.filter( ( label ) => label.startsWith( TYPE_PREFIX ) );
+		.filter(
+			/**
+			 * @param {string|undefined} label - Label.
+			 * @return {label is string} Whether label starts with type prefix.
+			 */
+			( label ) =>
+				typeof label === 'string' && label.startsWith( TYPE_PREFIX )
+		);
 
 	if ( ! typeLabels.length ) {
 		return MISSING_TYPE;
 	}
 
-	if ( PRIMARY_TYPE_LABELS[ typeLabels[ 0 ] ] ) {
-		return PRIMARY_TYPE_LABELS[ typeLabels[ 0 ] ];
+	const firstLabel = typeLabels[ 0 ];
+	if ( PRIMARY_TYPE_LABELS[ firstLabel ] ) {
+		return PRIMARY_TYPE_LABELS[ firstLabel ];
 	}
 
-	return typeLabels[ 0 ].replace( TYPE_PREFIX, '' );
+	return firstLabel.replace( TYPE_PREFIX, '' );
 }
 
 /**
  * Formats the changelog string for a given list of pull requests.
  *
- * @param {string}                          milestone    Milestone title.
  * @param {IssuesListForRepoResponseItem[]} pullRequests List of pull requests.
  *
  * @return {string} The formatted changelog string (without the heading).
  */
-function formatChangelog( milestone, pullRequests ) {
+function formatChangelog( pullRequests ) {
 	let changelog = '';
 
 	// Group PRs by type.
@@ -186,7 +194,7 @@ function formatChangelog( milestone, pullRequests ) {
 					// Add trailing period.
 					.replace( /\s*\.?$/, '' )
 					.concat( '.' );
-				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`; // eslint-disable-line camelcase
+				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`;
 			} )
 			.filter( Boolean )
 			.sort()
@@ -234,7 +242,7 @@ async function getChangelog( settings ) {
 		);
 	}
 
-	return formatChangelog( settings.milestone, nonSkippedPullRequests );
+	return formatChangelog( nonSkippedPullRequests );
 }
 
 /**
@@ -263,7 +271,7 @@ async function createChangelog( settings ) {
 		changelog = await getChangelog( settings );
 	} catch ( error ) {
 		if ( error instanceof Error ) {
-			changelog = formats.error( error.stack );
+			changelog = formats.error( error.stack ?? error.message );
 		}
 	}
 

@@ -1,8 +1,8 @@
 === Web Worker Offloading ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.9
-Stable tag:   0.2.0
+Tested up to: 7.0
+Stable tag:   0.2.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, JavaScript, web worker, partytown, analytics
@@ -13,7 +13,7 @@ Offloads select JavaScript execution to a Web Worker to reduce work on the main 
 
 This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread. This should translate into improved [Interaction to Next Paint](https://web.dev/articles/inp) (INP) scores.
 
-⚠ _This functionality is experimental._ ⚠
+⚠ _This functionality is experimental, and **it is now [intended to be sunset](https://github.com/WordPress/performance/issues/2284)**._ ⚠
 
 In order to opt in a script to be loaded in a worker, simply add `worker` script data to a registered script. For example,
 if you have a script registered with the handle of `foo`, opt-in to offload it to a web worker by doing:
@@ -93,6 +93,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/web-worker-offloading) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.2.1 =
+
+* Intend to sunset. ([2404](https://github.com/WordPress/performance/pull/2404))
 
 = 0.2.0 =
 

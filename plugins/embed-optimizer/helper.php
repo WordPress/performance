@@ -6,6 +6,8 @@
  * @package embed-optimizer
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -91,8 +93,9 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  * @since 0.3.0
  * @access private
  *
- * @param array<string, array{type: string}> $additional_properties Additional properties.
- * @return array<string, array{type: string}> Additional properties.
+ * @param array<string, array<string, mixed>> $additional_properties Additional properties.
+ * @phpstan-param array<string, array{type: string, ...}> $additional_properties
+ * @return array<string, array{type: string, ...}> Additional properties.
  */
 function embed_optimizer_add_element_item_schema_properties( array $additional_properties ): array {
 	$additional_properties['resizedBoundingClientRect'] = array(

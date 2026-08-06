@@ -1,13 +1,13 @@
 === Embed Optimizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.9
-Stable tag:   1.0.0-beta4
+Tested up to: 7.0
+Stable tag:   1.0.0-beta5
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, embeds, optimization-detective
 
-Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
+Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
 
 == Description ==
 
@@ -16,14 +16,14 @@ This plugin's purpose is to optimize the performance of [embeds in WordPress](ht
 The current optimizations include:
 
 1. Lazy loading embeds just before they come into view.
-2. Adding preconnect links for embeds in the initial viewport.
+2. Adding dns-prefetch links for embeds in the initial viewport.
 3. Reserving space for embeds that resize to reduce layout shifting.
 
 **Lazy loading embeds** improves performance because embeds are generally very resource-intensive, so lazy loading them ensures that they don't compete with resources when the page is loading. Lazy loading of `IFRAME`\-based embeds is handled simply by adding the `loading=lazy` attribute. Lazy loading embeds that include `SCRIPT` tags is handled by using an Intersection Observer to watch for when the embed’s `FIGURE` container is going to enter the viewport, and then it dynamically inserts the `SCRIPT` tag.
 
 **This plugin also recommends that you install and activate the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin**, which unlocks several optimizations beyond just lazy loading. Without Optimization Detective, lazy loading can actually degrade performance *when an embed is positioned in the initial viewport*. This is because lazy loading such viewport-initial elements can degrade LCP since rendering is delayed by the logic to determine whether the element is visible. This is why WordPress Core tries its best to [avoid](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) [lazy loading](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) `IMG` tags which appear in the initial viewport, although the server-side heuristics aren’t perfect. This is where Optimization Detective comes in since it detects whether an embed appears in any breakpoint-specific viewports, like mobile, tablet, and desktop. (See also the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which extends Optimization Detective to ensure lazy loading is correctly applied based on whether an IMG is in the initial viewport.)
 
-When Optimization Detective is active, it will start keeping track of which embeds appear in the initial viewport based on actual visits to your site. With this information in hand, Embed Optimizer will then avoid lazy loading embeds which appear in the initial viewport. Furthermore, for such above-the-fold embeds Embed Optimizer will also **add preconnect links** for resources known to be used by those embeds. For example, if a YouTube embed appears in the initial viewport, Embed Optimizer with Optimization Detective will omit `loading=lazy` while also adding a preconnect link for `https://i.ytimg.com` which is the domain from which YouTube video poster images are served. Such preconnect links cause the initial-viewport embeds to load even faster.
+When Optimization Detective is active, it will start keeping track of which embeds appear in the initial viewport based on actual visits to your site. With this information in hand, Embed Optimizer will then avoid lazy loading embeds which appear in the initial viewport. Furthermore, for such above-the-fold embeds Embed Optimizer will also **add dns-prefetch links** for resources known to be used by those embeds. For example, if a YouTube embed appears in the initial viewport, Embed Optimizer with Optimization Detective will omit `loading=lazy` while also adding a `dns-prefetch` link for `https://i.ytimg.com` which is the domain from which YouTube video poster images are served. Such links cause the initial-viewport embeds to load even faster.
 
 The other major feature in Embed Optimizer enabled by Optimization Detective is the **reduction of layout shifts** caused by embeds that resize when they load. This is seen commonly in WordPress post embeds or Tweet embeds. Embed Optimizer keeps track of the resized heights of these embeds. With these resized heights stored, Embed Optimizer sets the appropriate height on the container FIGURE element as the viewport-specific `min-height` so that when the embed loads it does not cause a layout shift.
 
@@ -66,6 +66,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta5 =
+
+**Bug Fixes**
+
+* Switch initial viewport embeds from preconnect to dns-prefetch links. ([2256](https://github.com/WordPress/performance/pull/2256))
 
 = 1.0.0-beta4 =
 

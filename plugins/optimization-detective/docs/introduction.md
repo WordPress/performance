@@ -213,7 +213,7 @@ A tag visitor is simply a callback which is invoked for every open tag on the do
 
 1. `processor` (`OD_HTML_Tag_Visitor`): The HTML Tag Processor instance with the cursor at the current open tag.
 2. `url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The collection of URL Metrics collated into their viewport groups. This object includes helper methods for querying URL Metrics for data needed to perform optimizations.
-3. `link_collection` (`OD_Link_Collection`): An interface for adding preload/preconnect/etc links to the response (both as `LINK` tags and `Link` HTTP headers).
+3. `link_collection` (`OD_Link_Collection`): An interface for adding `preload`/`preconnect`/`dns-prefetch`/etc links to the response (both as `LINK` tags and `Link` HTTP headers).
 
 The context object also exposes a `track_tag()` method which is used by the tag visitor to opt in the tag for measurement and storage among the submitted URL Metric’s `elements`. This is called only after inspecting the `$processor` for whether the cursor is currently at a relevant tag, such as by looking at `$processor->get_tag()` or `$processor->has_class()`. Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child tags) since the tag processor's cursor will be reset to the current open tag after each tag visitor callback completes. This is used in extensions, for example, to optimize `PICTURE` tags (in [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)) and Embed blocks (in [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)).
 
@@ -517,7 +517,7 @@ After:
 
 ## [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
 
-> Optimizes the performance of embeds through lazy loading, preconnecting, and reserving space to reduce layout shifts.
+> Optimizes the performance of embeds through lazy loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
 
 Embeds are very resource-intensive components on a page, both in terms of their network usage and in their CPU load. The page load time suffers when out-of-viewport embeds compete to load alongside assets displayed in the initial viewport. This can be seen here in this profile of a page in which embeds from YouTube, Twitter, and TikTok are on the page but aren’t in the initial viewport:
 

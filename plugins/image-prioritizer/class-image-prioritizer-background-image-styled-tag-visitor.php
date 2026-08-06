@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -41,15 +43,17 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 * @since 0.3.0
 	 * @var bool
 	 */
-	private $added_lazy_assets = false;
+	private bool $added_lazy_assets = false;
 
 	/**
 	 * Tuples of URL Metric group and the common LCP element external background image.
 	 *
+	 * Lazily populated in {@see self::maybe_preload_external_lcp_background_image()}.
+	 *
 	 * @since 0.3.0
-	 * @var array<array{OD_URL_Metric_Group, LcpElementExternalBackgroundImage}>
+	 * @var array<array{OD_URL_Metric_Group, LcpElementExternalBackgroundImage}>|null
 	 */
-	private $group_common_lcp_element_external_background_images;
+	private ?array $group_common_lcp_element_external_background_images = null;
 
 	/**
 	 * Visits a tag.
@@ -147,7 +151,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		// Gather the tuples of URL Metric group and the common LCP element external background image.
 		// Note the groups of URL Metrics do not change across invocations, we just need to compute this once for all.
 		// TODO: Instead of populating this here, it could be done once per invocation during the od_start_template_optimization action since the page's OD_URL_Metric_Group_Collection is available there.
-		if ( ! is_array( $this->group_common_lcp_element_external_background_images ) ) {
+		if ( null === $this->group_common_lcp_element_external_background_images ) {
 			$this->group_common_lcp_element_external_background_images = array();
 			foreach ( $context->url_metric_group_collection as $group ) {
 				$common = $this->get_common_lcp_element_external_background_image( $group );
@@ -157,15 +161,17 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			}
 		}
 
+		$tuples = $this->group_common_lcp_element_external_background_images;
+
 		// There are no common LCP background images, so abort.
-		if ( count( $this->group_common_lcp_element_external_background_images ) === 0 ) {
+		if ( count( $tuples ) === 0 ) {
 			return;
 		}
 
 		$processor = $context->processor;
 		$tag_name  = strtoupper( (string) $processor->get_tag() );
-		foreach ( array_keys( $this->group_common_lcp_element_external_background_images ) as $i ) {
-			list( $group, $common ) = $this->group_common_lcp_element_external_background_images[ $i ];
+		foreach ( array_keys( $tuples ) as $i ) {
+			list( $group, $common ) = $tuples[ $i ];
 			if (
 				// Note that the browser may send a lower-case tag name in the case of XHTML or embedded SVG/MathML, but
 				// the HTML Tag Processor is currently normalizing to all upper-case. The HTML Processor on the other

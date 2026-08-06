@@ -6,6 +6,8 @@
  * @package web-worker-offloading
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -107,7 +109,7 @@ function plwwo_register_default_scripts( WP_Scripts $scripts ): void {
 		'web-worker-offloading',
 		sprintf(
 			'window.partytown = {...(window.partytown || {}), ...%s};',
-			wp_json_encode( plwwo_get_configuration(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
+			(string) wp_json_encode( plwwo_get_configuration(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 		),
 		'before'
 	);
@@ -202,7 +204,7 @@ function plwwo_render_generator_meta_tag(): void {
 /**
  * Displays a sunset warning notice for the plugin in the plugin row meta.
  *
- * @since n.e.x.t
+ * @since 0.2.1
  * @access private
  *
  * @param string $plugin_file Path to the plugin file relative to the plugins directory.

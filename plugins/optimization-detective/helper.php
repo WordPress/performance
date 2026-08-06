@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -156,7 +158,7 @@ function od_get_disabled_reasons(): array {
 			'no_cache_purge_post_id' => __( 'Page is not optimized because there is no post ID available for cache purging.', 'optimization-detective' ),
 		);
 
-		$reasons = wp_array_slice_assoc( $reason_messages, array_keys( array_filter( $disabled_flags ) ) );
+		$reasons = array_intersect_key( $reason_messages, array_filter( $disabled_flags ) );
 
 		// If no technical reasons but optimization still disabled, it's because of the filter.
 		if ( 0 === count( $reasons ) ) {
@@ -293,7 +295,7 @@ function od_maybe_render_installed_extensions_admin_notice(): void {
 		),
 		'embed-optimizer'   => array(
 			'name'        => __( 'Embed Optimizer', 'optimization-detective' ),
-			'description' => __( 'Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.', 'optimization-detective' ),
+			'description' => __( 'Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.', 'optimization-detective' ),
 			'url'         => admin_url( 'plugin-install.php?tab=plugin-information&plugin=embed-optimizer&TB_iframe=true&width=772' ),
 		),
 	);

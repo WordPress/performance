@@ -6,6 +6,8 @@
  * @since 0.3.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -30,7 +32,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 *
 	 * @var array<non-empty-string, TagVisitorCallback>
 	 */
-	private $visitors = array();
+	private array $visitors = array();
 
 	/**
 	 * Registers a tag visitor.

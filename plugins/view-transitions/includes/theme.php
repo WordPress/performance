@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -123,9 +125,7 @@ function plvt_register_view_transition_animations( PLVT_View_Transition_Animatio
 	 * provided, they should be applied. But if the entire page is the target, they would visually mess with the
 	 * animation.
 	 */
-	$is_specific_target_name = static function ( string $alias, array $args ): bool {
-		return '*' === $args['target-name'] ? false : true;
-	};
+	$is_specific_target_name = static fn ( string $alias, array $args ): bool => ! ( '*' === $args['target-name'] );
 
 	/*
 	 * This callback is used to return horizontal and vertical offsets (-1, 0, or 1) based on whether the given alias
@@ -352,7 +352,7 @@ function plvt_load_view_transitions(): void {
 
 	$init_script = sprintf(
 		'plvtInitViewTransitions( %s )',
-		wp_json_encode( $config, JSON_FORCE_OBJECT | JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
+		(string) wp_json_encode( $config, JSON_FORCE_OBJECT | JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 	);
 
 	/*

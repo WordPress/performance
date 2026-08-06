@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -26,7 +28,7 @@ final class OD_Visited_Tag_State {
 	 * @since 1.0.0
 	 * @var bool
 	 */
-	private $should_track_tag;
+	private bool $should_track_tag;
 
 	/**
 	 * Constructor.

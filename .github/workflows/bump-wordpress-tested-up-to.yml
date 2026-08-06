@@ -8,15 +8,22 @@ on:
         description: 'Plugin slug (leave empty for all plugins)'
         required: false
 
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   prepare-matrix:
     name: Prepare plugins matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # Required to clone the repo.
     outputs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Configure plugin matrix
         id: set-matrix
@@ -39,6 +46,9 @@ jobs:
     name: Update "Tested up to" value for ${{ matrix.plugin }}
     needs: prepare-matrix
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # Required to clone the repo.
     env:
       PLUGIN_SLUG: ${{ matrix.plugin }}
     strategy:
@@ -46,7 +56,7 @@ jobs:
         plugin: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download WordPress.org readme
         run: |

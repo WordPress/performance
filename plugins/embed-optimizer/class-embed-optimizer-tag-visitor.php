@@ -6,6 +6,8 @@
  * @since 0.2.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -27,7 +29,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @var bool
 	 */
-	private $added_lazy_script = false;
+	private bool $added_lazy_script = false;
 
 	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
@@ -78,11 +80,12 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * Metrics (by returning true). When visiting the parent `figure.wp-block-embed` tag, it does all the actual
 	 * processing. In particular, it will use the element metrics gathered for the child `div.wp-block-embed__wrapper`
 	 * element to set the min-height style on the `figure.wp-block-embed` to avoid layout shifts. Additionally, when
-	 * the embed is in the initial viewport for any breakpoint, it will add preconnect links for key resources.
+	 * the embed is in the initial viewport for any breakpoint, it will add dns-prefetch links for key resources.
 	 * Otherwise, if the embed is not in any initial viewport, it will add lazy-loading logic.
 	 *
 	 * @since 0.2.0
 	 * @since 0.4.0 Adds preconnect links for each viewport group and skips if the element is not in the viewport for that group.
+	 * @since 1.0.0 Switches from preconnect links to dns-prefetch links.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL Metrics.
@@ -104,7 +107,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		$this->reduce_layout_shifts( $context );
-		$this->add_preconnect_links( $context );
+		$this->add_dns_prefetch_links( $context );
 		$this->lazy_load_embeds( $context );
 
 		/*
@@ -142,7 +145,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		/**
 		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport width.
 		 *
-		 * @var array<int, array{group: OD_URL_Metric_Group, height: int}> $minimums
+		 * @var array<int, array{group: OD_URL_Metric_Group, height: float}> $minimums
 		 */
 		$minimums = array();
 
@@ -188,7 +191,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				$style_rule = sprintf(
 					'#%s { min-height: %dpx; }',
 					$this->escape_css( $element_id ),
-					$minimum['height']
+					(int) $minimum['height']
 				);
 
 				$media_feature = od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() );
@@ -253,7 +256,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				1 === $length &&
 				0x002D === $code_unit
 			) {
-				$result .= '\\' . $ident[ $i ];
+				$result .= '\\-';
 				continue;
 			}
 
@@ -280,24 +283,25 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Gets preconnect URLs based on embed type.
+	 * Gets dns-prefetch URLs based on embed type.
 	 *
 	 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
-	 * The list of hosts being preconnected to was obtained by inserting an embed into a post and then looking
+	 * The list of hosts being dns-prefetched to was obtained by inserting an embed into a post and then looking
 	 * at the network log on the frontend as the embed renders. Each should include the host of the iframe src
 	 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
 	 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
 	 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
-	 * it is a likely case of a load balancing domain name which cannot be safely preconnected since it could
+	 * it is a likely case of a load balancing domain name which cannot be effectively dns-prefetched since it could
 	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
 	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
 	 *
 	 * @since 0.4.1
+	 * @since 1.0.0 This was originally the ::get_preconnect_urls() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
-	 * @return array<non-empty-string> Array of URLs to preconnect to.
+	 * @return array<non-empty-string> Array of URLs to dns-prefetch.
 	 */
-	private function get_preconnect_urls( OD_HTML_Tag_Processor $processor ): array {
+	private function get_dns_prefetch_urls( OD_HTML_Tag_Processor $processor ): array {
 		$urls      = array();
 		$has_class = static function ( string $wanted_class ) use ( $processor ): bool {
 			return true === $processor->has_class( $wanted_class );
@@ -332,7 +336,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			// Note: The other domains used for TikTok embeds include https://lf16-tiktok-web.tiktokcdn-us.com,
 			// https://lf16-cdn-tos.tiktokcdn-us.com, and https://lf16-tiktok-common.tiktokcdn-us.com among others
 			// which either appear to be geo-targeted ('-us') _or_ load-balanced ('lf16'). So these are not added
-			// to the preconnected hosts.
+			// to the dns-prefetched hosts.
 		} elseif ( $has_class( 'wp-block-embed-amazon' ) ) {
 			$urls[] = 'https://read.amazon.com';
 			$urls[] = 'https://m.media-amazon.com';
@@ -350,17 +354,18 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Adds preconnect links for embed resources.
+	 * Adds dns-prefetch links for embed resources.
 	 *
 	 * @since 0.4.1
+	 * @since 1.0.0 This was originally the ::add_preconnect_links() method, renamed to use dns-prefetch.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
-	private function add_preconnect_links( OD_Tag_Visitor_Context $context ): void {
+	private function add_dns_prefetch_links( OD_Tag_Visitor_Context $context ): void {
 		$processor           = $context->processor;
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
-		foreach ( $this->get_preconnect_urls( $processor ) as $preconnect_url ) {
+		foreach ( $this->get_dns_prefetch_urls( $processor ) as $dns_prefetch_url ) {
 			foreach ( $context->url_metric_group_collection as $group ) {
 				if ( $group->get_element_max_intersection_ratio( $embed_wrapper_xpath ) < PHP_FLOAT_EPSILON ) {
 					continue;
@@ -368,8 +373,8 @@ final class Embed_Optimizer_Tag_Visitor {
 
 				$context->link_collection->add_link(
 					array(
-						'rel'  => 'preconnect',
-						'href' => $preconnect_url,
+						'rel'  => 'dns-prefetch',
+						'href' => $dns_prefetch_url,
 					),
 					$group->get_minimum_viewport_width(),
 					$group->get_maximum_viewport_width()
