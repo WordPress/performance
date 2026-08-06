@@ -1095,12 +1095,22 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 			)
 		);
 
-		$block_content = '<div class="wp-block" style="background-image:url(\'https://example.com/foo.jpg\')">Hello</div>';
+		if ( 'core/cover' === $block_name ) {
+			// A Cover block with a fixed background applies the background image to an inner DIV.
+			$block_content = '<div class="wp-block-cover has-parallax"><div class="wp-block-cover__image-background has-parallax" style="background-position:50% 50%;background-image:url(\'https://example.com/foo.jpg\')"></div><div class="wp-block-cover__inner-container">Hello</div></div>';
+		} else {
+			$block_content = '<div class="wp-block-group" style="background-image:url(\'https://example.com/foo.jpg\')">Hello</div>';
+		}
 
 		$filtered_block_content = image_prioritizer_add_background_image_attachment_id( $block_content, $block->parsed_block, $block );
 
+		// Locate the element which has the background image applied to it.
 		$processor = new WP_HTML_Tag_Processor( $filtered_block_content );
-		$this->assertTrue( $processor->next_tag() );
+		do {
+			$this->assertTrue( $processor->next_tag() );
+			$style = $processor->get_attribute( 'style' );
+		} while ( ! is_string( $style ) || false === strpos( $style, 'background-image' ) );
+
 		$this->assertSame(
 			$expected ? (string) $attachment_id : null,
 			$processor->get_attribute( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ATTACHMENT_ID_ATTR_NAME )

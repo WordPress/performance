@@ -334,25 +334,59 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			return null;
 		}
 
+		/*
+		 * Note that the width returned by wp_get_attachment_image_src() is the width the image is constrained to for
+		 * display rather than the width of the image file itself, so the widths are obtained from the attachment
+		 * metadata.
+		 */
+		$current_width = $this->get_attachment_image_width( $attachment_id, $current_url );
+		$smaller_width = $this->get_attachment_image_width( $attachment_id, $smaller_image[0] );
+		if ( null === $current_width || null === $smaller_width || $smaller_width >= $current_width ) {
+			return null;
+		}
+
+		return $smaller_image[0];
+	}
+
+	/**
+	 * Gets the width of the image which an attachment URL refers to.
+	 *
+	 * File extensions are disregarded when matching the URL against the attachment's files since a plugin may serve the
+	 * image in another format, as WebP Uploads does.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int              $attachment_id Attachment ID.
+	 * @param non-empty-string $url           Image URL.
+	 * @return int|null Image width, or null if the attachment has no image metadata.
+	 */
+	private function get_attachment_image_width( int $attachment_id, string $url ): ?int {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		if ( ! is_array( $metadata ) || ! isset( $metadata['width'] ) ) {
 			return null;
 		}
 
-		// Determine the width of the image currently being used, falling back to the full size width when the URL is not recognized.
-		$current_width = (int) $metadata['width'];
-		$basename      = wp_basename( (string) wp_parse_url( $current_url, PHP_URL_PATH ) );
+		$get_file_stem = static function ( string $file ): string {
+			return (string) preg_replace( '/\.\w+$/', '', wp_basename( $file ) );
+		};
+
+		$stem = $get_file_stem( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+
 		foreach ( $metadata['sizes'] ?? array() as $size ) {
-			if ( isset( $size['file'], $size['width'] ) && $size['file'] === $basename ) {
-				$current_width = (int) $size['width'];
-				break;
+			if ( isset( $size['file'], $size['width'] ) && $get_file_stem( $size['file'] ) === $stem ) {
+				return (int) $size['width'];
 			}
 		}
 
-		if ( $smaller_image[1] >= $current_width ) {
-			return null;
+		/*
+		 * An original image is only retained when the uploaded image exceeded the big image size threshold, in which
+		 * case it is larger than the full size image.
+		 */
+		if ( isset( $metadata['original_image'] ) && $get_file_stem( $metadata['original_image'] ) === $stem ) {
+			return PHP_INT_MAX;
 		}
 
-		return $smaller_image[0];
+		// Fall back to the width of the full size image, which is also the size used when the URL is not recognized.
+		return (int) $metadata['width'];
 	}
 }

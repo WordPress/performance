@@ -128,23 +128,28 @@ function image_prioritizer_add_background_image_attachment_id( $block_content, a
 		return $block_content;
 	}
 
-	// The background image is applied to the block's wrapper element, which is the first tag in the block content.
+	/*
+	 * Locate the element which the background image is applied to. For a Group block this is the block's wrapper
+	 * element, whereas for a Cover block with a fixed or repeated background it is an inner DIV. Since the block is
+	 * known to have a background image, the first such element encountered is the one belonging to this block, with any
+	 * element belonging to an inner block occurring later in the document.
+	 */
 	$processor = new WP_HTML_Tag_Processor( $block_content );
-	if ( ! $processor->next_tag() ) {
-		return $block_content;
+	while ( $processor->next_tag() ) {
+		$style = $processor->get_attribute( 'style' );
+		if ( ! is_string( $style ) || 1 !== preg_match( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::BACKGROUND_IMAGE_PATTERN, $style ) ) {
+			continue;
+		}
+
+		$processor->set_attribute(
+			Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ATTACHMENT_ID_ATTR_NAME,
+			(string) (int) $attachment_id
+		);
+
+		return $processor->get_updated_html();
 	}
 
-	$style = $processor->get_attribute( 'style' );
-	if ( ! is_string( $style ) || 1 !== preg_match( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::BACKGROUND_IMAGE_PATTERN, $style ) ) {
-		return $block_content;
-	}
-
-	$processor->set_attribute(
-		Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ATTACHMENT_ID_ATTR_NAME,
-		(string) (int) $attachment_id
-	);
-
-	return $processor->get_updated_html();
+	return $block_content;
 }
 
 /**

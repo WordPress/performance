@@ -440,27 +440,38 @@ function auto_sizes_filter_background_image_style( $content, array $parsed_block
 		return $content;
 	}
 
-	// The background image is applied to the block's wrapper element, which is the first tag in the block content.
-	$processor = new WP_HTML_Tag_Processor( $content );
-	if ( ! $processor->next_tag() ) {
+	/*
+	 * Locate the element which the background image is applied to. For a Group block this is the block's wrapper
+	 * element, whereas for a Cover block with a fixed or repeated background it is an inner DIV. Since the block is
+	 * known to have a background image, the first such element encountered is the one belonging to this block, with any
+	 * element belonging to an inner block occurring later in the document.
+	 */
+	$processor            = new WP_HTML_Tag_Processor( $content );
+	$style                = '';
+	$background_image_url = null;
+	while ( $processor->next_tag() ) {
+		$attribute_value = $processor->get_attribute( 'style' );
+		if (
+			is_string( $attribute_value )
+			&&
+			1 === preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $attribute_value, $matches )
+		) {
+			$style                = $attribute_value;
+			$background_image_url = $matches['background_image'];
+			break;
+		}
+	}
+
+	if ( null === $background_image_url ) {
 		return $content;
 	}
 
-	$style = $processor->get_attribute( 'style' );
-	if (
-		! is_string( $style )
-		||
-		1 !== preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
-	) {
-		return $content;
-	}
-
-	$smaller_image_url = auto_sizes_get_smaller_image_url( $attachment_id, $matches['background_image'], $max_width );
+	$smaller_image_url = auto_sizes_get_smaller_image_url( $attachment_id, $background_image_url, $max_width );
 	if ( null === $smaller_image_url ) {
 		return $content;
 	}
 
-	$processor->set_attribute( 'style', str_replace( $matches['background_image'], $smaller_image_url, $style ) );
+	$processor->set_attribute( 'style', str_replace( $background_image_url, $smaller_image_url, $style ) );
 
 	return $processor->get_updated_html();
 }
@@ -585,8 +596,13 @@ function auto_sizes_get_smaller_image_url( int $attachment_id, string $current_u
 		return null;
 	}
 
+	/*
+	 * Note that the width returned by wp_get_attachment_image_src() is the width the image is constrained to for
+	 * display rather than the width of the image file itself, so the widths are obtained from the attachment metadata.
+	 */
 	$current_width = auto_sizes_get_attachment_image_width( $attachment_id, $current_url );
-	if ( null === $current_width || $smaller_image[1] >= $current_width ) {
+	$smaller_width = auto_sizes_get_attachment_image_width( $attachment_id, $smaller_image[0] );
+	if ( null === $current_width || null === $smaller_width || $smaller_width >= $current_width ) {
 		return null;
 	}
 
@@ -595,6 +611,9 @@ function auto_sizes_get_smaller_image_url( int $attachment_id, string $current_u
 
 /**
  * Gets the width of the image which an attachment URL refers to.
+ *
+ * File extensions are disregarded when matching the URL against the attachment's files since a plugin may serve the
+ * image in another format, as WebP Uploads does.
  *
  * @since n.e.x.t
  *
@@ -608,11 +627,24 @@ function auto_sizes_get_attachment_image_width( int $attachment_id, string $url 
 		return null;
 	}
 
-	$basename = wp_basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	$get_file_stem = static function ( string $file ): string {
+		return (string) preg_replace( '/\.\w+$/', '', wp_basename( $file ) );
+	};
+
+	$stem = $get_file_stem( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+
 	foreach ( $metadata['sizes'] ?? array() as $size ) {
-		if ( isset( $size['file'], $size['width'] ) && $size['file'] === $basename ) {
+		if ( isset( $size['file'], $size['width'] ) && $get_file_stem( $size['file'] ) === $stem ) {
 			return (int) $size['width'];
 		}
+	}
+
+	/*
+	 * An original image is only retained when the uploaded image exceeded the big image size threshold, in which case
+	 * it is larger than the full size image.
+	 */
+	if ( isset( $metadata['original_image'] ) && $get_file_stem( $metadata['original_image'] ) === $stem ) {
+		return PHP_INT_MAX;
 	}
 
 	// Fall back to the width of the full size image, which is also the size used when the URL is not recognized.

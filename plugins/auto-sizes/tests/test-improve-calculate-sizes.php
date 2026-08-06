@@ -1572,8 +1572,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	public function test_cover_block_with_parallax_background_image(): void {
 		$full_url = (string) wp_get_attachment_image_url( self::$image_id, 'full' );
 
-		$block_content = '<!-- wp:cover {"url":"' . $full_url . '","id":' . self::$image_id . ',"hasParallax":true,"dimRatio":50} -->
-		<div class="wp-block-cover has-parallax" style="background-position:50% 50%;background-image:url(' . $full_url . ')"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph -->
+		// Note that for a Cover block with a fixed background the background image is applied to an inner DIV.
+		$block_content = '<!-- wp:cover {"url":"' . $full_url . '","id":' . self::$image_id . ',"hasParallax":true,"dimRatio":50,"sizeSlug":"full"} -->
+		<div class="wp-block-cover has-parallax"><div class="wp-block-cover__image-background wp-image-' . self::$image_id . ' size-full has-parallax" style="background-position:50% 50%;background-image:url(' . $full_url . ')"></div><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph -->
 		<p></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
