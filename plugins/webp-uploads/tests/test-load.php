@@ -1433,8 +1433,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$html = sprintf(
 			'<img src="%s" width="%d" height="%d" alt="">',
 			esc_url( $src ),
-			(int) $width,
-			(int) $height
+			$width,
+			$height
 		);
 
 		$filter_args = array();
