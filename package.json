@@ -27,7 +27,7 @@
 		"copy-webpack-plugin": "^14.0.0",
 		"css-minimizer-webpack-plugin": "^8.0.0",
 		"fast-glob": "^3.3.3",
-		"fs-extra": "^11.3.6",
+		"fs-extra": "^11.4.0",
 		"globals": "^17.8.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.2.0",
