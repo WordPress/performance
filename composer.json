@@ -24,7 +24,7 @@
 	"require-dev": {
 		"phpcompatibility/php-compatibility": "^9.3",
 		"phpstan/extension-installer": "^1.4.3",
-		"phpstan/phpstan": "2.2.5",
+		"phpstan/phpstan": "2.2.7",
 		"phpstan/phpstan-deprecation-rules": "^2.0.1",
 		"phpstan/phpstan-phpunit": "^2.0.1",
 		"slevomat/coding-standard": "^8.0",

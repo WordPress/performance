@@ -9,17 +9,17 @@
 	},
 	"dependencies": {
 		"@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-		"web-vitals": "5.3.0"
+		"web-vitals": "6.0.1"
 	},
 	"devDependencies": {
 		"@octokit/rest": "^22.0.1",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.62.0",
 		"@types/lodash": "4.17.24",
 		"@types/node": "^20.19.43",
-		"@wordpress/e2e-test-utils-playwright": "1.51.0",
-		"@wordpress/env": "^11.11.0",
-		"@wordpress/prettier-config": "^4.51.0",
-		"@wordpress/scripts": "^33.0.0",
+		"@wordpress/e2e-test-utils-playwright": "1.52.0",
+		"@wordpress/env": "^11.12.0",
+		"@wordpress/prettier-config": "^4.52.0",
+		"@wordpress/scripts": "^34.0.0",
 		"ajv": "8.20.0",
 		"ajv-draft-04": "^1.0.0",
 		"ajv-formats": "3.0.1",
@@ -27,17 +27,17 @@
 		"copy-webpack-plugin": "^14.0.0",
 		"css-minimizer-webpack-plugin": "^8.0.0",
 		"fast-glob": "^3.3.3",
-		"fs-extra": "^11.3.6",
-		"globals": "^17.7.0",
+		"fs-extra": "^11.4.0",
+		"globals": "^17.8.0",
 		"husky": "^9.1.7",
-		"lint-staged": "^17.0.8",
+		"lint-staged": "^17.2.0",
 		"lodash": "4.18.1",
 		"npm-run-all": "^4.1.5",
 		"typescript": "^6.0.3",
 		"webpackbar": "^7.0.0"
 	},
 	"overrides": {
-		"@wordpress/e2e-test-utils-playwright": "1.51.0",
+		"@wordpress/e2e-test-utils-playwright": "1.52.0",
 		"prettier": "npm:wp-prettier@3.0.3"
 	},
 	"scripts": {
