@@ -33,8 +33,8 @@ add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 9 ); // This mu
 add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 3 );
 add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 3 );
 add_filter( 'render_block_core/post-featured-image', 'auto_sizes_filter_image_tag', 10, 3 );
-add_filter( 'render_block_core/group', 'auto_sizes_add_background_image_data_attributes', 5, 2 );
-add_filter( 'render_block_core/cover', 'auto_sizes_add_background_image_data_attributes', 5, 2 );
+add_filter( 'render_block_core/group', 'auto_sizes_filter_background_image_style', 5, 3 );
+add_filter( 'render_block_core/cover', 'auto_sizes_filter_background_image_style', 5, 3 );
 add_filter( 'get_block_type_uses_context', 'auto_sizes_filter_uses_context', 10, 2 );
 add_filter( 'render_block_context', 'auto_sizes_filter_render_block_context', 10, 3 );
 // @codeCoverageIgnoreEnd

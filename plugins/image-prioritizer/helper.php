@@ -51,6 +51,8 @@ function image_prioritizer_init( string $optimization_detective_version ): void 
 
 	add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
 	add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );
+	add_filter( 'render_block_core/group', 'image_prioritizer_add_background_image_attachment_id', 10, 3 );
+	add_filter( 'render_block_core/cover', 'image_prioritizer_add_background_image_attachment_id', 10, 3 );
 	add_filter( 'od_extension_module_urls', 'image_prioritizer_filter_extension_module_urls' );
 	add_filter( 'od_url_metric_schema_root_additional_properties', 'image_prioritizer_add_root_schema_properties' );
 	add_filter( 'rest_request_before_callbacks', 'image_prioritizer_filter_rest_request_before_callbacks', 10, 3 );
@@ -87,6 +89,62 @@ function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $regis
 
 	$video_visitor = new Image_Prioritizer_Video_Tag_Visitor();
 	$registry->register( 'image-prioritizer/video', $video_visitor );
+}
+
+/**
+ * Adds the attachment ID of a block's background image as a data attribute.
+ *
+ * The background image of a Group or Cover block is applied via a `background-image` style, meaning the markup contains
+ * no indication of which attachment the image belongs to. The attachment ID is therefore exposed here so that
+ * {@see Image_Prioritizer_Background_Image_Styled_Tag_Visitor} is able to serve a smaller image once the dimensions of
+ * the element are known from the collected URL Metrics.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string|mixed         $block_content The block content about to be rendered.
+ * @param array<string, mixed> $parsed_block  The parsed block.
+ * @param WP_Block             $block         Block instance.
+ * @return string The updated block content.
+ */
+function image_prioritizer_add_background_image_attachment_id( $block_content, array $parsed_block, WP_Block $block ): string {
+	if ( ! is_string( $block_content ) || '' === $block_content ) {
+		return '';
+	}
+
+	$attachment_id = 0;
+	if ( 'core/cover' === $block->name ) {
+		if ( true === ( $block->attributes['useFeaturedImage'] ?? false ) ) {
+			$attachment_id = get_post_thumbnail_id( (int) ( $block->context['postId'] ?? 0 ) );
+		} else {
+			$attachment_id = $block->attributes['id'] ?? 0;
+		}
+	} elseif ( 'core/group' === $block->name ) {
+		// Note that a background image sourced from the theme (as opposed to the media library) has no attachment ID.
+		$attachment_id = $block->attributes['style']['background']['backgroundImage']['id'] ?? 0;
+	}
+
+	if ( ! is_numeric( $attachment_id ) || (int) $attachment_id <= 0 ) {
+		return $block_content;
+	}
+
+	// The background image is applied to the block's wrapper element, which is the first tag in the block content.
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+	if ( ! $processor->next_tag() ) {
+		return $block_content;
+	}
+
+	$style = $processor->get_attribute( 'style' );
+	if ( ! is_string( $style ) || 1 !== preg_match( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::BACKGROUND_IMAGE_PATTERN, $style ) ) {
+		return $block_content;
+	}
+
+	$processor->set_attribute(
+		Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ATTACHMENT_ID_ATTR_NAME,
+		(string) (int) $attachment_id
+	);
+
+	return $processor->get_updated_html();
 }
 
 /**

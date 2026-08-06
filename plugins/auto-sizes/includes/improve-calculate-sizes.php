@@ -313,7 +313,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/cover'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/image'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/post-featured-image' => array( 'max_alignment', 'container_relative_width' ),
-		'core/group'               => array( 'max_alignment' ),
+		'core/group'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
 	);
@@ -406,60 +406,215 @@ function auto_sizes_get_featured_image_attachment_id( int $post_id ): int {
 }
 
 /**
- * Adds data attributes for background image attachment ID to Group and Cover blocks.
+ * Reduces the size of the image used as the background image for a Group or Cover block.
  *
- * This exposes the attachment ID from block attributes as data attributes on the HTML element,
- * allowing Image Prioritizer to access this information without using attachment_url_to_postid().
- * This is particularly important for Cover blocks that may use sizes other than "full".
+ * A background image is applied via a `background-image` style, which means there is no `srcset` for the browser to
+ * select an appropriately-sized image from. The Group block furthermore provides no control over which image size is
+ * used, and the Cover block defaults to using the `full` size. Since the width of the block is known from the layout
+ * information available on a block theme, a smaller image size can be served instead.
  *
  * @since n.e.x.t
  *
- * @param string|mixed                                              $content      The block content about to be rendered.
- * @param array{ attrs?: array<string, mixed>, blockName?: string } $parsed_block The parsed block.
+ * @param string|mixed         $content      The block content about to be rendered.
+ * @param array<string, mixed> $parsed_block The parsed block.
+ * @param WP_Block             $block        Block instance.
  * @return string The updated block content.
  */
-function auto_sizes_add_background_image_data_attributes( $content, array $parsed_block ): string {
+function auto_sizes_filter_background_image_style( $content, array $parsed_block, WP_Block $block ): string {
 	if ( ! is_string( $content ) || '' === $content ) {
 		return '';
 	}
 
-	$block_name    = $parsed_block['blockName'] ?? '';
-	$attrs         = $parsed_block['attrs'] ?? array();
-	$attachment_id = null;
-	$image_url     = null;
-
-	// Extract background image data based on block type.
-	if ( 'core/cover' === $block_name ) {
-		$attachment_id = $attrs['id'] ?? null;
-		$image_url     = $attrs['url'] ?? null;
-	} elseif ( 'core/group' === $block_name ) {
-		$attachment_id = $attrs['style']['background']['backgroundImage']['id'] ?? null;
-		$image_url     = $attrs['style']['background']['backgroundImage']['url'] ?? null;
+	// Bail if not a block theme, since then the layout width cannot be determined.
+	if ( ! wp_is_block_theme() ) {
+		return $content;
 	}
 
-	// Normalize attachment ID type if possible.
-	if ( isset( $attachment_id ) && is_numeric( $attachment_id ) ) {
-		$attachment_id = (int) $attachment_id;
+	$attachment_id = auto_sizes_get_background_image_attachment_id( $block );
+	if ( 0 === $attachment_id ) {
+		return $content;
 	}
 
-	// Validate extracted data and update the element with background image.
+	$max_width = auto_sizes_calculate_background_image_max_width( $block );
+	if ( null === $max_width ) {
+		return $content;
+	}
+
+	// The background image is applied to the block's wrapper element, which is the first tag in the block content.
+	$processor = new WP_HTML_Tag_Processor( $content );
+	if ( ! $processor->next_tag() ) {
+		return $content;
+	}
+
+	$style = $processor->get_attribute( 'style' );
 	if (
-		isset( $attachment_id, $image_url ) &&
-		is_int( $attachment_id ) &&
-		$attachment_id > 0 &&
-		'' !== $image_url &&
-		is_array( wp_get_attachment_metadata( $attachment_id ) )
+		! is_string( $style )
+		||
+		1 !== preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
 	) {
-		$processor = new WP_HTML_Tag_Processor( $content );
-		while ( $processor->next_tag() ) {
-			$style = $processor->get_attribute( 'style' );
-			if ( is_string( $style ) && str_contains( $style, 'background-image:' ) && str_contains( $style, $image_url ) ) {
-				$processor->set_attribute( 'data-bg-attachment-id', (string) $attachment_id );
-				$content = $processor->get_updated_html();
-				break;
-			}
+		return $content;
+	}
+
+	$smaller_image_url = auto_sizes_get_smaller_image_url( $attachment_id, $matches['background_image'], $max_width );
+	if ( null === $smaller_image_url ) {
+		return $content;
+	}
+
+	$processor->set_attribute( 'style', str_replace( $matches['background_image'], $smaller_image_url, $style ) );
+
+	return $processor->get_updated_html();
+}
+
+/**
+ * Gets the attachment ID for the image used as the background image of a Group or Cover block.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_Block $block Block instance.
+ * @return int The attachment ID, or 0 if the block has no background image with an attachment.
+ */
+function auto_sizes_get_background_image_attachment_id( WP_Block $block ): int {
+	$attachment_id = 0;
+	if ( 'core/cover' === $block->name ) {
+		if ( true === ( $block->attributes['useFeaturedImage'] ?? false ) ) {
+			$attachment_id = auto_sizes_get_featured_image_attachment_id( (int) ( $block->context['postId'] ?? 0 ) );
+		} else {
+			$attachment_id = $block->attributes['id'] ?? 0;
+		}
+	} elseif ( 'core/group' === $block->name ) {
+		// Note that a background image sourced from the theme (as opposed to the media library) has no attachment ID.
+		$attachment_id = $block->attributes['style']['background']['backgroundImage']['id'] ?? 0;
+	}
+
+	if ( ! is_numeric( $attachment_id ) || (int) $attachment_id <= 0 ) {
+		return 0;
+	}
+
+	return (int) $attachment_id;
+}
+
+/**
+ * Calculates the maximum width at which a block's background image is displayed.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_Block $block Block instance.
+ * @return int|null Maximum width in pixels, or null if it cannot be determined (e.g. when the width depends on the viewport width).
+ */
+function auto_sizes_calculate_background_image_max_width( WP_Block $block ): ?int {
+	$constraints = AUTO_SIZES_CONSTRAINTS;
+
+	// Normalize default alignment values.
+	$align = $block->attributes['align'] ?? '';
+	$align = is_string( $align ) && array_key_exists( $align, $constraints ) ? $align : 'default';
+
+	$max_alignment = $block->context['max_alignment'] ?? '';
+	$max_alignment = is_string( $max_alignment ) && array_key_exists( $max_alignment, $constraints ) ? $max_alignment : 'full';
+
+	/*
+	 * A Cover block which is floated is constrained by core styles.
+	 * See https://github.com/WordPress/gutenberg/blob/938720602082dc50a1746bd2e33faa3d3a6096d4/packages/block-library/src/cover/style.scss#L82-L87.
+	 */
+	if ( 'core/cover' === $block->name && in_array( $align, array( 'left', 'right' ), true ) ) {
+		return 420;
+	}
+
+	$alignment = $constraints[ $align ] > $constraints[ $max_alignment ] ? $align : $max_alignment;
+
+	switch ( $alignment ) {
+		case 'full':
+			/*
+			 * The block spans the entire width of the viewport, which is not known when rendering. The Image Prioritizer
+			 * plugin is able to reduce the size of such background images since it knows the dimensions of the element
+			 * from the URL Metrics it collects.
+			 */
+			return null;
+
+		case 'wide':
+		case 'left':
+		case 'right':
+			$layout_width = auto_sizes_get_layout_width( 'wide' );
+			break;
+
+		case 'center':
+		default:
+			$layout_width = auto_sizes_get_layout_width( 'default' );
+			break;
+	}
+
+	// TODO: Add support for em, rem, vh, and vw.
+	if ( ! str_ends_with( $layout_width, 'px' ) ) {
+		return null;
+	}
+
+	$max_width = (float) substr( $layout_width, 0, -2 );
+
+	// Account for the block being inside of a container which is narrower than the layout width.
+	$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
+	if ( is_float( $container_relative_width ) && $container_relative_width > 0.0 && $container_relative_width < 1.0 ) {
+		$max_width *= $container_relative_width;
+	}
+
+	if ( $max_width <= 0.0 ) {
+		return null;
+	}
+
+	return (int) ceil( $max_width );
+}
+
+/**
+ * Gets the URL for a smaller version of an attachment's image, if one is available.
+ *
+ * This ensures that a larger image is never served in place of the image which is currently being used, which could
+ * otherwise happen when the current image is already smaller than the maximum display width.
+ *
+ * @since n.e.x.t
+ *
+ * @param int              $attachment_id Attachment ID.
+ * @param non-empty-string $current_url   URL of the image currently being used.
+ * @param int              $max_width     Maximum width at which the image is displayed.
+ * @return non-empty-string|null URL for a smaller image, or null if no smaller image is available.
+ */
+function auto_sizes_get_smaller_image_url( int $attachment_id, string $current_url, int $max_width ): ?string {
+	if ( $max_width <= 0 ) {
+		return null;
+	}
+
+	$smaller_image = wp_get_attachment_image_src( $attachment_id, array( $max_width, 0 ) );
+	if ( false === $smaller_image || '' === $smaller_image[0] || $smaller_image[0] === $current_url ) {
+		return null;
+	}
+
+	$current_width = auto_sizes_get_attachment_image_width( $attachment_id, $current_url );
+	if ( null === $current_width || $smaller_image[1] >= $current_width ) {
+		return null;
+	}
+
+	return $smaller_image[0];
+}
+
+/**
+ * Gets the width of the image which an attachment URL refers to.
+ *
+ * @since n.e.x.t
+ *
+ * @param int              $attachment_id Attachment ID.
+ * @param non-empty-string $url           Image URL.
+ * @return int|null Image width, or null if the attachment has no image metadata.
+ */
+function auto_sizes_get_attachment_image_width( int $attachment_id, string $url ): ?int {
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $metadata ) || ! isset( $metadata['width'] ) ) {
+		return null;
+	}
+
+	$basename = wp_basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	foreach ( $metadata['sizes'] ?? array() as $size ) {
+		if ( isset( $size['file'], $size['width'] ) && $size['file'] === $basename ) {
+			return (int) $size['width'];
 		}
 	}
 
-	return $content;
+	// Fall back to the width of the full size image, which is also the size used when the URL is not recognized.
+	return (int) $metadata['width'];
 }
