@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -27,7 +29,7 @@ final class PLVT_View_Transition_Animation_Registry {
 	 * @since 1.0.0
 	 * @var array<non-empty-string, PLVT_View_Transition_Animation>
 	 */
-	private $registered_animations = array();
+	private array $registered_animations = array();
 
 	/**
 	 * Map of aliases to their animation slugs.
@@ -37,7 +39,7 @@ final class PLVT_View_Transition_Animation_Registry {
 	 * @since 1.0.0
 	 * @var array<non-empty-string, non-empty-string>
 	 */
-	private $alias_map = array();
+	private array $alias_map = array();
 
 	/**
 	 * Registers a view transition animation.

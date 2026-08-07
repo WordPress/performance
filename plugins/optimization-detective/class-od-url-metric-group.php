@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -28,7 +30,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var OD_URL_Metric[]
 	 */
-	private $url_metrics;
+	private array $url_metrics;
 
 	/**
 	 * Minimum possible viewport width for the group (exclusive).
@@ -37,7 +39,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<0, max>
 	 */
-	private $minimum_viewport_width;
+	private int $minimum_viewport_width;
 
 	/**
 	 * Maximum possible viewport width for the group (inclusive), where null means it is unbounded.
@@ -46,7 +48,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<1, max>|null
 	 */
-	private $maximum_viewport_width;
+	private ?int $maximum_viewport_width;
 
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
@@ -55,7 +57,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<1, max>
 	 */
-	private $sample_size;
+	private int $sample_size;
 
 	/**
 	 * Freshness age (TTL) for a given URL Metric.
@@ -64,7 +66,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var int<-1, max>
 	 */
-	private $freshness_ttl;
+	private int $freshness_ttl;
 
 	/**
 	 * Collection that this instance belongs to.
@@ -73,7 +75,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @var OD_URL_Metric_Group_Collection
 	 */
-	private $collection;
+	private OD_URL_Metric_Group_Collection $collection;
 
 	/**
 	 * Result cache.
@@ -87,7 +89,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
 	 *      }
 	 */
-	private $result_cache = array();
+	private array $result_cache = array();
 
 	/**
 	 * Constructor.
@@ -255,9 +257,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			// Sort URL Metrics in descending order by timestamp.
 			usort(
 				$this->url_metrics,
-				static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
-					return $b->get_timestamp() <=> $a->get_timestamp();
-				}
+				static fn ( OD_URL_Metric $a, OD_URL_Metric $b ): int => $b->get_timestamp() <=> $a->get_timestamp()
 			);
 
 			// Only keep the sample size of the newest URL Metrics.
@@ -327,35 +327,17 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 				return null;
 			}
 
-			// The following arrays all share array indices.
-
 			/**
-			 * Seen breadcrumb counts.
+			 * Breadcrumbs keyed by element XPath: how often each is the LCP element, and the latest matching element.
 			 *
-			 * @var array<int, non-empty-string> $seen_breadcrumbs
+			 * @var array<non-empty-string, array{count: int<1, max>, element: OD_Element}> $breadcrumbs
 			 */
-			$seen_breadcrumbs = array();
-
-			/**
-			 * Breadcrumb counts.
-			 *
-			 * @var array<int, non-negative-int> $breadcrumb_counts
-			 */
-			$breadcrumb_counts = array();
-
-			/**
-			 * Breadcrumb element.
-			 *
-			 * @var array<int, OD_Element> $breadcrumb_element
-			 */
-			$breadcrumb_element = array();
+			$breadcrumbs = array();
 
 			// Prefer to use URL Metrics, which have a current ETag.
 			$url_metrics = array_filter(
 				$this->url_metrics,
-				function ( OD_URL_Metric $url_metric ): bool {
-					return $url_metric->get_etag() === $this->get_collection()->get_current_etag();
-				}
+				fn ( OD_URL_Metric $url_metric ): bool => $url_metric->get_etag() === $this->get_collection()->get_current_etag()
 			);
 
 			// Otherwise, if no URL Metrics have a current ETag, fall back to using all the stale ones.
@@ -369,25 +351,28 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 						continue;
 					}
 
-					$i = array_search( $element->get_xpath(), $seen_breadcrumbs, true );
-					if ( false === $i ) {
-						$i                       = count( $seen_breadcrumbs );
-						$seen_breadcrumbs[ $i ]  = $element->get_xpath();
-						$breadcrumb_counts[ $i ] = 0;
+					$xpath = $element->get_xpath();
+					if ( ! isset( $breadcrumbs[ $xpath ] ) ) {
+						$breadcrumbs[ $xpath ] = array(
+							'count'   => 1,
+							'element' => $element,
+						);
+					} else {
+						++$breadcrumbs[ $xpath ]['count'];
+						$breadcrumbs[ $xpath ]['element'] = $element;
 					}
-
-					$breadcrumb_counts[ $i ] += 1;
-					$breadcrumb_element[ $i ] = $element;
 					break; // We found the LCP element for the URL Metric, go to the next URL Metric.
 				}
 			}
 
-			// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
-			if ( count( $seen_breadcrumbs ) > 0 ) {
-				arsort( $breadcrumb_counts );
-				$most_common_breadcrumb_index = key( $breadcrumb_counts );
-
-				$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
+			// Sort by count in descending order so the most common breadcrumb's element is first.
+			if ( count( $breadcrumbs ) > 0 ) {
+				uasort(
+					$breadcrumbs,
+					static fn ( array $a, array $b ): int => $b['count'] <=> $a['count']
+				);
+				$most_common = reset( $breadcrumbs );
+				$lcp_element = $most_common['element'];
 			} else {
 				$lcp_element = null;
 			}

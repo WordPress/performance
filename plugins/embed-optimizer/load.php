@@ -3,8 +3,8 @@
  * Plugin Name: Embed Optimizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer
  * Description: Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
- * Requires at least: 6.6
- * Requires PHP: 7.2
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
  * Version: 1.0.0-beta5
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
@@ -14,6 +14,8 @@
  *
  * @package embed-optimizer
  */
+
+declare( strict_types = 1 );
 
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {

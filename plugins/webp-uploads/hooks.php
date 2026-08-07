@@ -7,6 +7,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -50,7 +52,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     sources?: array<string, array{
  *         file: string,
  *         filesize: int
- *     }>
+ *     }>,
+ *     ...
  * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
@@ -160,6 +163,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 			// Replace the attached file with the custom MIME type version.
 			if ( false !== $original_image ) {
+				// @phpstan-ignore no.private.function
 				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
 			}
 
@@ -331,6 +335,11 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
 function webp_uploads_filter_image_editor_output_format( $output_format, ?string $filename, ?string $mime_type ): array {
 	if ( ! is_array( $output_format ) ) {
 		$output_format = array();
+	}
+
+	// Without a known source mime type there is nothing to map.
+	if ( null === $mime_type ) {
+		return $output_format;
 	}
 
 	// Use the original mime type if this type is allowed.
@@ -561,6 +570,71 @@ function webp_uploads_filter_image_tag( string $filtered_image, string $context,
 }
 
 /**
+ * Filters `wp_get_attachment_image` so `<img>` tags produced outside of post
+ * content (archive templates, page builders, custom loops, featured-image
+ * template calls) also use the preferred MIME type where available.
+ *
+ * Only rewrites the HTML `<img>` (or `<picture>` wrapper in picture-element
+ * mode). Sibling URL-returning functions such as `wp_get_attachment_image_url()`
+ * and `wp_get_attachment_image_src()` are intentionally left untouched, since
+ * their return values feed non-HTML contexts (OG tags, RSS, JSON) where
+ * silently substituting a modern format is unsafe.
+ *
+ * @since 2.7.0
+ *
+ * @see wp_get_attachment_image()
+ *
+ * @param string|mixed                $html          HTML img element or empty string on failure.
+ * @param int|numeric-string          $attachment_id Image attachment ID.
+ * @param string|array{int, int}      $size          Requested image size.
+ * @param bool|mixed                  $icon          Whether the image should fall back to a mime type icon.
+ * @param array<string, mixed>|string $attr          Array of attribute values for the image markup, keyed by attribute name.
+ *                                                   May also be a query string which has not gone through {@see wp_parse_args()}
+ *                                                   if {@see wp_get_attachment_image_src()} returned false.
+ * @phpstan-param int<1, max> $attachment_id
+ * @return string The filtered HTML.
+ */
+function webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, $icon, $attr ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
+	$attachment_id = (int) $attachment_id;
+	$icon          = (bool) $icon;
+	if ( '' === $html || 0 === $attachment_id || true === $icon || ! webp_uploads_in_frontend_body() ) {
+		return $html;
+	}
+
+	if ( is_string( $attr ) ) {
+		$attr = wp_parse_args( $attr );
+	} elseif ( ! is_array( $attr ) ) {
+		$attr = array();
+	}
+
+	/**
+	 * Filters whether the Modern Image Formats plugin should rewrite an image returned by `wp_get_attachment_image()`.
+	 *
+	 * Returning false short-circuits the rewrite and preserves the original HTML. This gives
+	 * integrators a surgical per-call opt-out in addition to `remove_filter()`.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @param bool                   $should_filter Whether to apply modern-format rewriting. Default true.
+	 * @param int<1, max>            $attachment_id Image attachment ID.
+	 * @param string|array{int, int} $size          Requested image size.
+	 * @param array<string, string>  $attr          Attribute array passed to `wp_get_attachment_image()`.
+	 */
+	if ( ! apply_filters( 'webp_uploads_filter_wp_get_attachment_image', true, $attachment_id, $size, $attr ) ) {
+		return $html;
+	}
+
+	if ( webp_uploads_is_picture_element_enabled() ) {
+		return webp_uploads_wrap_image_in_picture( $html, 'wp_get_attachment_image', $attachment_id );
+	}
+
+	return webp_uploads_img_tag_update_mime_type( $html, 'wp_get_attachment_image', $attachment_id );
+}
+
+/**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
@@ -660,25 +734,6 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 
 	return $image;
 }
-
-/**
- * Updates the references of the featured image to the new image format if available, in the same way it
- * occurs in the_content of a post.
- *
- * @since 1.0.0
- *
- * @param string $html          The current HTML markup of the featured image.
- * @param int    $post_id       The current post ID where the featured image is requested.
- * @param int    $attachment_id The ID of the attachment image.
- * @return string The updated HTML markup.
- */
-function webp_uploads_update_featured_image( string $html, int $post_id, int $attachment_id ): string {
-	if ( webp_uploads_is_picture_element_enabled() ) {
-		return webp_uploads_wrap_image_in_picture( $html, 'post_thumbnail_html', $attachment_id );
-	}
-	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
-}
-add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
 
 /**
  * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
@@ -851,6 +906,11 @@ function webp_uploads_filter_block_background_images( $block_content, array $blo
 function webp_uploads_init(): void {
 	// Filter regular image tags.
 	add_filter( 'wp_content_img_tag', webp_uploads_is_picture_element_enabled() ? 'webp_uploads_wrap_image_in_picture' : 'webp_uploads_filter_image_tag', 10, 3 );
+
+	// Filter `<img>` tags produced by template tags, page builders, and any other code path that calls
+	// `wp_get_attachment_image()` directly. `the_post_thumbnail()` also routes through this, so it covers
+	// featured images previously handled by a dedicated `post_thumbnail_html` filter.
+	add_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10, 5 );
 
 	// Filter blocks that may contain background images.
 	add_filter( 'render_block_core/cover', 'webp_uploads_filter_block_background_images', 10, 2 );

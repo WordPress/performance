@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -34,7 +36,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var non-empty-string
 	 */
-	private $slug;
+	private string $slug;
 
 	/**
 	 * Unique aliases for the animation, if any.
@@ -42,7 +44,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var non-empty-string[]
 	 */
-	private $aliases = array();
+	private array $aliases = array();
 
 	/**
 	 * Whether the animation uses a stylesheet, optionally a concrete file path.
@@ -53,7 +55,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var bool|string
 	 */
-	private $use_stylesheet = false;
+	private $use_stylesheet = false; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- TODO: Use native bool|string union type when PHP 8.0 is the minimum.
 
 	/**
 	 * Whether to apply the global view transition names while using this animation.
@@ -61,7 +63,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var bool|callable
 	 */
-	private $use_global_transition_names = true;
+	private $use_global_transition_names = true; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- callable is not allowed as a native property type, and a bool|Closure union requires PHP 8.0.
 
 	/**
 	 * Whether to apply the post-specific view transition names while using this animation.
@@ -69,7 +71,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var bool|callable
 	 */
-	private $use_post_transition_names = true;
+	private $use_post_transition_names = true; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- callable is not allowed as a native property type, and a bool|Closure union requires PHP 8.0.
 
 	/**
 	 * Callback to get the stylesheet for the animation, as inline CSS.
@@ -83,7 +85,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var callable|null
 	 */
-	private $get_stylesheet_callback = null;
+	private $get_stylesheet_callback = null; // phpcs:ignore SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint -- callable is not allowed as a native property type.
 
 	/**
 	 * Default animation arguments.
@@ -94,7 +96,7 @@ final class PLVT_View_Transition_Animation {
 	 * @since 1.0.0
 	 * @var array<string, mixed>
 	 */
-	private $default_args = array();
+	private array $default_args = array();
 
 	/**
 	 * Constructor.

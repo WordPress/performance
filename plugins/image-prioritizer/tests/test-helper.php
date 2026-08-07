@@ -203,9 +203,10 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		$buffer = preg_replace( '#.+?<body[^>]*><div[^>]*>#s', '', $buffer );
 		$buffer = preg_replace( '#</div></body>.*$#s', '', $buffer );
 
-		$this->assertEquals(
-			$this->remove_initial_tabs( $expected ),
-			$this->remove_initial_tabs( $buffer ),
+		$this->assertEqualHTML(
+			$expected,
+			$buffer,
+			'<body>',
 			"Buffer snapshot:\n$buffer"
 		);
 	}
