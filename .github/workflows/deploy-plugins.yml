@@ -66,6 +66,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Setup PHP
+        # Required by the "Check if deployment is needed" step, which uses version_compare().
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: latest
+
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -96,9 +102,9 @@ jobs:
             exit 1
           fi
 
-          # Bail if the plugin is already up to date.
-          if [ "$PLUGIN_VERSION_WPORG" = "$PLUGIN_VERSION" ]; then
-            echo "::notice::The ${{ matrix.plugin }} plugin is already up to date on WordPress.org. Halting deployment."
+          # Bail if the version on WordPress.org is the same as or newer than the version being deployed.
+          if php -r 'exit( version_compare( $argv[1], $argv[2], ">=" ) ? 0 : 1 );' "$PLUGIN_VERSION_WPORG" "$PLUGIN_VERSION"; then
+            echo "::notice::The ${{ matrix.plugin }} plugin on WordPress.org is at version $PLUGIN_VERSION_WPORG, which is not older than the version being deployed ($PLUGIN_VERSION). Halting deployment."
             exit 0
           fi
 
