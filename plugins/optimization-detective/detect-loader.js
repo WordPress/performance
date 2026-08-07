@@ -22,10 +22,22 @@ async function load() {
 		} );
 	}
 
-	const data = JSON.parse(
-		document.getElementById( 'optimization-detective-detect-args' )
-			.textContent
-	);
+	const jsonScriptSelector = 'script#optimization-detective-detect-args';
+	const argsScript = document.querySelector( jsonScriptSelector );
+	if ( ! ( argsScript instanceof HTMLScriptElement ) ) {
+		throw new Error( `Missing: ${ jsonScriptSelector }` );
+	}
+	const data = JSON.parse( argsScript.text );
+	if (
+		! Array.isArray( data ) ||
+		data.length !== 2 ||
+		'string' !== typeof data[ 0 ] ||
+		'object' !== typeof data[ 1 ]
+	) {
+		throw new Error(
+			'SCRIPT#optimization-detective-detect-args is not [ string, object ]'
+		);
+	}
 
 	const detectSrc = /** @type {string} */ data[ 0 ];
 	const detectArgs =

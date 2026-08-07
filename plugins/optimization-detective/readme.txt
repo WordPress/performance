@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 7.0
-Stable tag:   1.0.0-beta5
+Stable tag:   1.0.0-beta6
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -54,6 +54,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta6 =
+
+**Security**
+
+* Add validation of the SCRIPT element containing the detection args JSON. This fixes a DOM clobbering vulnerability in which an injected element with a colliding `id` could shadow the script and cause an arbitrary module to be imported, which required an authenticated user with at least a contributor role. Props to Asaf Mozes (amosec) for [responsible disclosure](https://github.com/WordPress/performance/blob/trunk/SECURITY.md).
 
 = 1.0.0-beta5 =
 
