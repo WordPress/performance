@@ -1,7 +1,7 @@
 === Image Placeholders ===
 
 Contributors: wordpressdotorg
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag:   1.2.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
