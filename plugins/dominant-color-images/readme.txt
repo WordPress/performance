@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 7.1
-Stable tag:   1.2.1
+Stable tag:   1.3.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, dominant color
@@ -46,6 +46,8 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.3.0 =
 
 = 1.2.1 =
 
