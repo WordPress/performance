@@ -54,6 +54,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.8.0 =
 
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum required WordPress version to 6.9. ([2517](https://github.com/WordPress/performance/pull/2517))
+* Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
+
 = 1.7.0 =
 
 **Enhancements**
