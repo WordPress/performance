@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 7.1
-Stable tag:   1.0.0-beta3
+Stable tag:   1.0.0-beta4
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, optimization-detective
@@ -71,6 +71,8 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta4 =
 
 = 1.0.0-beta3 =
 
