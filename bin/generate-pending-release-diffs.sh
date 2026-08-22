@@ -42,14 +42,18 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 	remote_stable_tag=$( grep "Stable tag:" "$stable_dir/$plugin_slug/readme.txt" | awk '{print $3}' )
 	local_stable_tag=$( grep "Stable tag:" "build/$plugin_slug/readme.txt" | awk '{print $3}' )
 
-	# Exclude minified assets: they are build artifacts derived from their sources, so
+	# Exclude generated assets: they are build artifacts derived from their sources, so
 	# diffing them just adds noise. Excluding them here also protects the stable copies
-	# from --delete, so svn status/diff below will not report them.
+	# from --delete, so svn status/diff below will not report them. The build/*.js bundles
+	# are minified despite not carrying a .min.js suffix, and each is a single line, so any
+	# change to one renders as a whole-file rewrite: the two web-vitals bundles alone were
+	# 35% of the entire diff. Their sibling build/*.asset.php is deliberately NOT excluded,
+	# since its 'version' is the compact signal that the bundled library changed.
 	# Compare by checksum (-c) and stamp copied files with a fresh mtime (--no-times).
 	# Both are required: "Tested up to: 7.0" -> "7.1" is a same-length edit, and rsync's
 	# default quick check (size+mtime) as well as SVN's own stat cache would each conclude
 	# the file is unchanged, so the plugin gets wrongly reported as having nothing to release.
-	rsync -avzc --no-times --delete --exclude=".svn" --exclude="*.min.js" --exclude="*.min.css" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
+	rsync -avzc --no-times --delete --exclude=".svn" --exclude="*.min.js" --exclude="*.min.css" --exclude="build/*.js" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
 
 	cd "$stable_dir/$plugin_slug/"
 
