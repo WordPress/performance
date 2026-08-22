@@ -64,6 +64,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 * Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
 * Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
 * Bump the bundled web-vitals library from 5.1.0 to 6.1.0, including its 6.0.0 major release. ([2606](https://github.com/WordPress/performance/pull/2606), [2629](https://github.com/WordPress/performance/pull/2629))
+* Ship the source maps for the bundled web-vitals library, which it began publishing in 6.0.0.
 * Move URL Metrics storage HMAC validation into the REST endpoint callback so it runs once all parameters have been validated and sanitized, returning a `rest_invalid_param` error. ([2436](https://github.com/WordPress/performance/pull/2436))
 * Remove the deprecated constants along with the `deprecated.php` file that contained them.
 
