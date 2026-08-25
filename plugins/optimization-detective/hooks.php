@@ -31,4 +31,7 @@ add_filter( 'plugin_row_meta', 'od_render_extensions_meta_link', 10, 2 );
 add_action( 'rest_api_init', 'od_register_rest_url_metric_store_endpoint' );
 add_filter( 'rest_pre_dispatch', 'od_decompress_rest_request_body', 10, 3 );
 add_action( 'od_trigger_page_cache_invalidation', 'od_trigger_post_update_actions' );
+if ( WP_DEBUG ) {
+	add_filter( 'od_extension_module_urls', 'od_filter_extension_module_urls_for_devtools_discovery' );
+}
 // @codeCoverageIgnoreEnd
