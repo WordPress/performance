@@ -42,10 +42,17 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 	remote_stable_tag=$( grep "Stable tag:" "$stable_dir/$plugin_slug/readme.txt" | awk '{print $3}' )
 	local_stable_tag=$( grep "Stable tag:" "build/$plugin_slug/readme.txt" | awk '{print $3}' )
 
-	# Exclude minified assets: they are build artifacts derived from their sources, so
-	# diffing them just adds noise. Excluding them here also protects the stable copies
-	# from --delete, so svn status/diff below will not report them.
-	rsync -avz --delete --exclude=".svn" --exclude="*.min.js" --exclude="*.min.css" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
+	# Copy everything, including generated assets. They are excluded from the *diff* further
+	# below rather than from the copy, so that "svn status" reports the true set of files
+	# being added, removed, and modified. Excluding them here instead would protect them
+	# from --delete and make them invisible to svn entirely: a stray minified asset dropped
+	# into an already-tracked directory would then be reported nowhere at all.
+	#
+	# Compare by checksum (-c) and stamp copied files with a fresh mtime (--no-times).
+	# Both are required: "Tested up to: 7.0" -> "7.1" is a same-length edit, and rsync's
+	# default quick check (size+mtime) as well as SVN's own stat cache would each conclude
+	# the file is unchanged, so the plugin gets wrongly reported as having nothing to release.
+	rsync -avzc --no-times --delete --exclude=".svn" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
 
 	cd "$stable_dir/$plugin_slug/"
 
@@ -67,13 +74,49 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 
 		echo "\`svn status\`:"
 		echo '```'
-		svn status
+		# SVN reports an unversioned directory without listing what is inside it, so a batch
+		# of added files would otherwise surface only as their parent directory. Expand those
+		# so every file being added is named.
+		svn status | while IFS= read -r status_line; do
+			echo "$status_line"
+			if [ "${status_line:0:1}" = "?" ]; then
+				status_path="${status_line:8}"
+				if [ -d "$status_path" ]; then
+					find "$status_path" -type f | sort | sed 's|^|?       |'
+				fi
+			fi
+		done
 		echo '```'
 		echo
 		echo '<details><summary><code>svn diff</code></summary>'
 		echo
 		echo '```diff'
-		svn diff
+		# Keep generated files in the diff so it is clear they changed, but replace their
+		# contents with a placeholder. They are minified or bundled build output, so their
+		# diffs are unreadable and enormous: the two web-vitals bundles alone were 35% of
+		# the entire report, for what amounts to a library version bump. The sibling
+		# *.asset.php is left intact, since its 'version' is the readable signal of that.
+		svn diff | awk '
+			/^Index: / {
+				path = substr( $0, 8 )
+				suppress = ( path ~ /\.min\.(js|css)$/ || path ~ /(^|\/)build\// )
+				if ( path ~ /\.asset\.php$/ ) {
+					suppress = 0
+				}
+				placed = 0
+				print
+				next
+			}
+			suppress && /^(=+|--- |\+\+\+ )/ { print; next }
+			suppress {
+				if ( ! placed ) {
+					print "(Built file content suppressed.)"
+					placed = 1
+				}
+				next
+			}
+			{ print }
+		'
 		echo '```'
 		echo '</details>'
 	fi
