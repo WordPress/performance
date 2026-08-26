@@ -391,9 +391,9 @@ function od_get_breakpoint_max_widths(): array {
 		 * @since 0.1.0
 		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_breakpoint_max_widths
 		 *
-		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
+		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [380, 480, 600, 782].
 		 */
-		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) ) )
+		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 380, 480, 600, 782 ) ) )
 	);
 
 	$breakpoint_max_widths = array_unique( $breakpoint_max_widths, SORT_NUMERIC );

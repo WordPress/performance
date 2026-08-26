@@ -10,7 +10,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 		);
 
 		// Embed not visible on mobile.
-		if ( 480 === $viewport_width ) {
+		if ( 380 === $viewport_width ) {
 			$elements[0]['intersectionRatio'] = 0;
 			$elements[0]['isLCP']             = false;
 		}
