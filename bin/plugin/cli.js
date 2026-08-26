@@ -96,11 +96,11 @@ withOptions(
 	.action( catchException( bumpVersionsHandler ) );
 
 withOptions(
-	program.command( 'prepare-release-notes' ),
+	program.command( 'prepare-release-notes [plugins...]' ),
 	prepareReleaseNotesOptions
 )
 	.description(
-		'Prints the combined per-plugin changelogs (release notes) for plugins with an open, dated release milestone; progress goes to STDERR so STDOUT can be piped'
+		'Prints the combined per-plugin changelogs (release notes) for plugins with an open, dated release milestone, or for a list of plugin slugs given without a milestone; progress goes to STDERR so STDOUT can be piped'
 	)
 	.action( catchException( prepareReleaseNotesHandler ) );
 
