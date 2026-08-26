@@ -70,7 +70,7 @@ jobs:
 
     steps:
       - name: Gather a list of contributors
-        uses: WordPress/props-bot-action@496473a3d11a263c17653aa9a00a98b8ed1479f8 # trunk
+        uses: WordPress/props-bot-action@8506b2615cdaaf57e4f3364eff8a38d0fbd16e1a # trunk
 
       - name: Remove the props-bot label
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
