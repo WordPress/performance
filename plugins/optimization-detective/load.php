@@ -5,7 +5,7 @@
  * Description: Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
  * Requires at least: 6.9
  * Requires PHP: 7.4
- * Version: 1.0.0-beta6
+ * Version: 1.0.0-beta7
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'1.0.0-beta6',
+	'1.0.0-beta7',
 	static function ( string $version ): void {
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 			return;

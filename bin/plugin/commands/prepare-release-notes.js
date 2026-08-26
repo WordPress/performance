@@ -39,66 +39,103 @@ exports.options = [
  * Progress and warnings are written to STDERR so that STDOUT (the Markdown release
  * notes) can be piped to a file or the clipboard.
  *
+ * Naming plugin slugs explicitly skips the milestone lookup entirely, for releases that do
+ * not use milestones. The notes come from the same place either way, since the milestone
+ * only ever decided which plugins to include.
+ *
+ * There is deliberately no option to select every plugin. A plugin that is not being
+ * released still has a changelog entry for its current stable tag, so including it would
+ * silently repeat an already-published entry in the new release notes.
+ *
+ * @param {string[]}                            pluginSlugs Plugin slugs given as positional arguments.
  * @param {WPPrepareReleaseNotesCommandOptions} opt
  */
-exports.handler = async ( opt ) => {
-	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
-		throw new Error(
-			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
-		);
+exports.handler = async ( pluginSlugs, opt ) => {
+	const requestedSlugs = [ ...new Set( pluginSlugs ) ];
+	if ( opt.plugin && ! requestedSlugs.includes( opt.plugin ) ) {
+		requestedSlugs.push( opt.plugin );
+	}
+
+	for ( const slug of requestedSlugs ) {
+		if ( ! plugins.includes( slug ) ) {
+			throw new Error(
+				`The plugin "${ slug }" is not a valid plugin managed as part of this project.`
+			);
+		}
+	}
+
+	// With slugs named, the milestone lookup is skipped and their readmes are read directly.
+	if ( requestedSlugs.length > 0 ) {
+		writeSections( [ ...requestedSlugs ].sort(), true );
+		return;
 	}
 
 	const milestones = await getReleaseMilestones( opt.token );
 
-	const selected = (
-		opt.plugin
-			? milestones.filter(
-					( milestone ) => milestone.slug === opt.plugin
-			  )
-			: milestones
-	).sort( ( a, b ) => a.slug.localeCompare( b.slug ) );
+	const selected = milestones
+		.map( ( milestone ) => milestone.slug )
+		.sort( ( a, b ) => a.localeCompare( b ) );
 
 	if ( selected.length === 0 ) {
 		process.stderr.write(
 			formats.warning(
-				opt.plugin
-					? `⚠ Skipping ${ opt.plugin }: no open release milestone with a due date (and without "n.e.x.t") was found.\n`
-					: '⚠ No plugins have an open release milestone with a due date (and without "n.e.x.t"); nothing to prepare.\n'
+				'⚠ No plugins have an open release milestone with a due date (and without "n.e.x.t"); nothing to prepare. Name the plugin slugs explicitly to prepare notes without a milestone.\n'
 			)
 		);
 		return;
 	}
 
+	writeSections( selected, false );
+};
+
+/**
+ * Writes the release notes for the given plugins to STDOUT.
+ *
+ * When the plugins were named explicitly, any failure is fatal and nothing is written: the
+ * caller asked for those specific plugins, so quietly emitting notes for a subset would
+ * produce a release whose notes silently omit part of what is being released. Milestone
+ * selection keeps the original per-plugin tolerance.
+ *
+ * @param {string[]} slugs      Plugin slugs, already sorted.
+ * @param {boolean}  isExplicit Whether the plugins were named explicitly.
+ */
+function writeSections( slugs, isExplicit ) {
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 	const sections = [];
+	const failures = [];
 
-	for ( const milestone of selected ) {
+	for ( const slug of slugs ) {
 		try {
 			const readmeFilePath = path.resolve(
 				pluginRoot,
 				'plugins',
-				milestone.slug,
+				slug,
 				'readme.txt'
 			);
 			const { version, changelog } =
 				getReadmeChangelogEntry( readmeFilePath );
-			sections.push(
-				`## \`${ milestone.slug }\` ${ version }\n\n${ changelog }`
-			);
+			sections.push( `## \`${ slug }\` ${ version }\n\n${ changelog }` );
 			process.stderr.write(
 				formats.success(
-					`✔ Prepared release notes for ${ milestone.slug } ${ version }.\n`
+					`✔ Prepared release notes for ${ slug } ${ version }.\n`
 				)
 			);
 		} catch ( error ) {
 			const message =
 				error instanceof Error ? error.message : 'Unknown error';
+			failures.push( `${ slug }: ${ message }` );
 			process.stderr.write(
-				formats.error(
-					`${ milestone.slug } failed to prepare: ${ message }\n`
-				)
+				formats.error( `${ slug } failed to prepare: ${ message }\n` )
 			);
 		}
+	}
+
+	if ( isExplicit && failures.length > 0 ) {
+		throw new Error(
+			`Release notes could not be prepared for every plugin named, so none were written:\n  ${ failures.join(
+				'\n  '
+			) }`
+		);
 	}
 
 	if ( sections.length === 0 ) {
@@ -106,7 +143,7 @@ exports.handler = async ( opt ) => {
 	}
 
 	log( sections.join( '\n\n' ) );
-};
+}
 
 /**
  * Reads the changelog entry for a plugin's stable tag from its `readme.txt`.
