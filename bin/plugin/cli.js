@@ -56,6 +56,10 @@ const {
 	handler: bumpVersionsHandler,
 	options: bumpVersionsOptions,
 } = require( './commands/bump-versions' );
+const {
+	handler: prepareReleaseNotesHandler,
+	options: prepareReleaseNotesOptions,
+} = require( './commands/prepare-release-notes' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -81,11 +85,23 @@ withOptions( program.command( 'verify-version-consistency' ), versionsOptions )
 	.description( 'Verifies consistency of versions in plugins' )
 	.action( catchException( versionsHandler ) );
 
-withOptions( program.command( 'bump-plugin-versions' ), bumpVersionsOptions )
+withOptions(
+	program.command( 'bump-plugin-versions [plugins...]' ),
+	bumpVersionsOptions
+)
 	.alias( 'bump-versions' )
 	.description(
-		'Bumps plugin versions based on open, dated release milestones (titled "$plugin_slug $version" without "n.e.x.t")'
+		'Bumps plugin versions based on open, dated release milestones (titled "$plugin_slug $version" without "n.e.x.t"); pass --increment or --set-version with a list of plugin slugs to bump without a milestone'
 	)
 	.action( catchException( bumpVersionsHandler ) );
+
+withOptions(
+	program.command( 'prepare-release-notes [plugins...]' ),
+	prepareReleaseNotesOptions
+)
+	.description(
+		'Prints the combined per-plugin changelogs (release notes) for plugins with an open, dated release milestone, or for a list of plugin slugs given without a milestone; progress goes to STDERR so STDOUT can be piped'
+	)
+	.action( catchException( prepareReleaseNotesHandler ) );
 
 program.parse( process.argv );
