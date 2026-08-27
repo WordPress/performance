@@ -124,6 +124,24 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 				$size = array( 420, 420 );
 			}
 
+			/*
+			 * When a Gallery block has a wide or full alignment, child Image blocks inherit that
+			 * alignment unless the child block explicitly sets its own alignment.
+			 */
+			$is_parent_gallery_aligned = (bool) ( $block->context['is_parent_aligned'] ?? false );
+			if ( $is_parent_gallery_aligned && '' === $alignment ) {
+				$alignment = $max_alignment;
+
+				/*
+				 * A full alignment normally spans the whole viewport, but inside a narrower
+				 * container (e.g. a column) the gallery is constrained to that container instead.
+				 * The resulting width cannot be expressed reliably here, so keep the default sizes.
+				 */
+				if ( 1.0 !== (float) $container_relative_width && 'full' === $alignment ) {
+					return $sizes;
+				}
+			}
+
 			$better_sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width, $max_alignment, $container_relative_width );
 
 			// If better sizes can't be calculated, use the default sizes.
@@ -311,11 +329,12 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 	// Define block-specific context usage.
 	$block_specific_context = array(
 		'core/cover'               => array( 'max_alignment', 'container_relative_width' ),
-		'core/image'               => array( 'max_alignment', 'container_relative_width' ),
+		'core/image'               => array( 'max_alignment', 'container_relative_width', 'is_parent_aligned' ),
 		'core/post-featured-image' => array( 'max_alignment', 'container_relative_width' ),
 		'core/group'               => array( 'max_alignment' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
+		'core/gallery'             => array( 'max_alignment', 'gallery_column_count', 'container_relative_width', 'gallery_total_images' ),
 	);
 
 	if ( isset( $block_specific_context[ $block_type->name ] ) ) {
@@ -344,6 +363,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		'core/columns',
 		'core/group',
 		'core/post-featured-image',
+		'core/gallery',
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
@@ -353,6 +373,67 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
 		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
+	}
+
+	if ( 'core/gallery' === $block['blockName'] ) {
+		$gallery_image_block_count = count( $block['innerBlocks'] );
+		// Store the total number of inner images in the gallery context for child blocks to access.
+		$context['gallery_total_images'] = $gallery_image_block_count;
+
+		if ( isset( $block['attrs']['columns'] ) && is_numeric( $block['attrs']['columns'] ) && (int) $block['attrs']['columns'] > 0 ) {
+			$context['gallery_column_count'] = (int) $block['attrs']['columns'];
+		} elseif ( $gallery_image_block_count <= 3 ) {
+			/*
+			 * Fallback to the inner block count if column count isn't explicitly set.
+			 * Cap the columns at 3 to prevent layout issues, as the default gallery
+			 * style wraps images to new lines after 3 columns.
+			 * See https://github.com/WordPress/gutenberg/blob/46e0ceee86b66a6036c9e58568ce21bc1cf8b630/packages/block-library/src/gallery/style.scss#L167
+			 */
+			$context['gallery_column_count'] = $gallery_image_block_count;
+		} else {
+			$context['gallery_column_count'] = 3;
+		}
+
+		// If the gallery is wide or full aligned, treat child Image blocks as aligned too.
+		$gallery_alignment            = $block['attrs']['align'] ?? '';
+		$context['is_parent_aligned'] = in_array( $gallery_alignment, array( 'wide', 'full' ), true );
+	}
+
+	// Special handling for images inside galleries, as they have a different layout calculation that depends on the number of columns.
+	if ( 'core/image' === $block['blockName'] && $parent_block instanceof WP_Block && 'core/gallery' === $parent_block->parsed_block['blockName'] ) {
+		$columns      = $parent_block->context['gallery_column_count'] ?? 0;
+		$total_images = $parent_block->context['gallery_total_images'] ?? 0;
+
+		$current_width = 1.0;
+
+		if ( $total_images > 0 && $columns > 0 ) {
+			// Sequential rendering tracker.
+			static $last_parent_gallery = null;
+			static $image_index         = 0;
+
+			// If the parent block object changes, reset the index for the new gallery.
+			if ( $last_parent_gallery !== $parent_block ) {
+				$last_parent_gallery = $parent_block;
+				$image_index         = 0;
+			}
+
+			$remainder              = $total_images % $columns;
+			$full_rows_images_count = $total_images - $remainder;
+
+			if ( $remainder > 0 && $image_index >= $full_rows_images_count ) {
+				// Image falls in the last, incomplete row. Distribute evenly among leftovers.
+				$current_width = 1.0 / $remainder;
+			} else {
+				// Image falls within the perfect full grid rows.
+				$current_width = 1.0 / $columns;
+			}
+
+			// Move to the next image index for the next iteration.
+			++$image_index;
+		}
+
+		// Multiply with parent's width if available.
+		$context['container_relative_width'] = ( $parent_block->context['container_relative_width'] ?? 1 ) * $current_width;
 	}
 
 	if ( 'core/columns' === $block['blockName'] ) {

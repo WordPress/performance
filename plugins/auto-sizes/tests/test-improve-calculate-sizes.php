@@ -1476,6 +1476,804 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
+	 * 'sizes' attribute based on the number of images and the configured automatic column count.
+	 *
+	 * @dataProvider data_gallery_block_with_automatic_columns_set
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param int    $image_count              Number of images.
+	 * @param string $expected                 Expected output.
+	 */
+	public function test_gallery_block_with_automatic_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, string $expected ): void {
+		$image_block = '';
+		for ( $i = 0; $i < $image_count; $i++ ) {
+			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
+		}
+		$block_content = $this->get_gallery_block_markup(
+			$image_block,
+			array(
+				'align' => $ancestor_block_alignment,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+		$this->assertSame( $image_count, substr_count( $result, $expected ), 'Expected all gallery images to have the same calculated sizes attribute.' );
+	}
+
+	/**
+	 * Data provider for testing Gallery block layout sizes with automatic columns set.
+	 *
+	 * @return array<string, array<mixed>> Arguments passed to the test method.
+	 */
+	public static function data_gallery_block_with_automatic_columns_set(): array {
+		return array(
+			'Default alignment, 1 image (1 column)'   => array(
+				'',
+				'',
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'wide',
+				'',
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 2 images (2 columns)' => array(
+				'',
+				'',
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'wide',
+				'',
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 3 images (3 columns)' => array(
+				'',
+				'',
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'wide',
+				'',
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 6 images (maxes out column constraints)' => array(
+				'',
+				'',
+				6,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 images (maxes out column constraints)' => array(
+				'wide',
+				'',
+				6,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 9 images (maxes out column constraints)' => array(
+				'',
+				'',
+				9,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 9 images (maxes out column constraints)' => array(
+				'wide',
+				'',
+				9,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+
+			/*
+			 * A full aligned gallery with a single image spans the whole viewport,
+			 * so the image covers '100vw'. Once the gallery has more than one column
+			 * the image no longer spans the viewport and the default sizes are used.
+			 */
+			'Full gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'full',
+				'',
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'full',
+				'',
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'full',
+				'',
+				3,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 6 images (maxes out column constraints)' => array(
+				'full',
+				'',
+				6,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 9 images (maxes out column constraints)' => array(
+				'full',
+				'',
+				9,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the Gallery block dynamically calculates and outputs the correct responsive
+	 * 'sizes' attribute based on the number of images and columns.
+	 *
+	 * @dataProvider data_gallery_block_with_columns_set
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param int    $image_count              Number of images.
+	 * @param int    $columns                  Number of columns in the gallery.
+	 * @param string $big_img_expected         Expected sizes attribute output for large images.
+	 * @param string $small_img_expected       Expected sizes attribute output for small images (optional).
+	 */
+	public function test_gallery_block_with_columns_set( string $ancestor_block_alignment, string $image_block_alignment, int $image_count, int $columns, string $big_img_expected, string $small_img_expected = '' ): void {
+		$image_block = '';
+		for ( $i = 0; $i < $image_count; $i++ ) {
+			$image_block .= $this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment );
+		}
+		$block_content = $this->get_gallery_block_markup(
+			$image_block,
+			array(
+				'align'   => $ancestor_block_alignment,
+				'columns' => $columns,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		if ( '' === $small_img_expected || $small_img_expected === $big_img_expected ) {
+			$this->assertSame( $image_count, substr_count( $result, $big_img_expected ) );
+		} else {
+			$remainder            = $columns > 0 ? ( $image_count % $columns ) : 0;
+			$small_expected_count = 0 === $remainder ? 0 : $remainder;
+			$big_expected_count   = $image_count - $small_expected_count;
+			$this->assertSame( $big_expected_count, substr_count( $result, $big_img_expected ) );
+			$this->assertSame( $small_expected_count, substr_count( $result, $small_img_expected ) );
+		}
+	}
+
+	/**
+	 * Data provider for testing Gallery block layout sizes with columns set.
+	 *
+	 * @return array<string, array<mixed>> Arguments passed to the test method.
+	 */
+	public static function data_gallery_block_with_columns_set(): array {
+		return array(
+			// Equal image and columns.
+			'Default alignment, 1 image (1 column)'   => array(
+				'',
+				'',
+				1,
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'wide',
+				'',
+				1,
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 2 images (2 columns)' => array(
+				'',
+				'',
+				2,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 2 images (2 columns)' => array(
+				'wide',
+				'',
+				2,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 3 images (3 columns)' => array(
+				'',
+				'',
+				3,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 3 images (3 columns)' => array(
+				'wide',
+				'',
+				3,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 4 images (4 columns)' => array(
+				'',
+				'',
+				4,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (4 columns)' => array(
+				'wide',
+				'',
+				4,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+			),
+			'Default alignment, 5 images (5 columns)' => array(
+				'',
+				'',
+				5,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 5 images (5 columns)' => array(
+				'wide',
+				'',
+				5,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+			),
+			'Default alignment, 6 images (6 columns)' => array(
+				'',
+				'',
+				6,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 images (6 columns)' => array(
+				'wide',
+				'',
+				6,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+			),
+			'Default alignment, 7 images (7 columns)' => array(
+				'',
+				'',
+				7,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 7 images (7 columns)' => array(
+				'wide',
+				'',
+				7,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+			),
+			'Default alignment, 8 images (8 columns)' => array(
+				'',
+				'',
+				8,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 images (8 columns)' => array(
+				'wide',
+				'',
+				8,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+			),
+
+			// Different combination of image and columns.
+			'Default alignment, 2 images (1 columns)' => array(
+				'',
+				'',
+				2,
+				1,
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 2 images (1 column)' => array(
+				'wide',
+				'',
+				2,
+				1,
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 3 image (2 columns)'  => array(
+				'',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 3 images (2 columns)' => array(
+				'wide',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 4 image (2 columns)'  => array(
+				'',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (2 columns)' => array(
+				'wide',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 5 image (2 columns)'  => array(
+				'',
+				'',
+				5,
+				2,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 5 images (2 columns)' => array(
+				'wide',
+				'',
+				5,
+				2,
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 4 image (3 columns)'  => array(
+				'',
+				'',
+				4,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 4 images (3 columns)' => array(
+				'wide',
+				'',
+				4,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 5 image (3 columns)'  => array(
+				'',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 5 image (3 columns)' => array(
+				'wide',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 6 image (3 columns)'  => array(
+				'',
+				'',
+				6,
+				3,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (3 columns)' => array(
+				'wide',
+				'',
+				6,
+				3,
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 5 image (4 columns)'  => array(
+				'',
+				'',
+				5,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 5 image (4 columns)' => array(
+				'wide',
+				'',
+				5,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 6 image (4 columns)'  => array(
+				'',
+				'',
+				6,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (4 columns)' => array(
+				'wide',
+				'',
+				6,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 7 image (4 columns)'  => array(
+				'',
+				'',
+				7,
+				4,
+				'sizes="(max-width: 155px) 100vw, 155px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 7 image (4 columns)' => array(
+				'wide',
+				'',
+				7,
+				4,
+				'sizes="(max-width: 320px) 100vw, 320px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 6 image (5 columns)'  => array(
+				'',
+				'',
+				6,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 6 image (5 columns)' => array(
+				'wide',
+				'',
+				6,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 7 image (5 columns)'  => array(
+				'',
+				'',
+				7,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 7 image (5 columns)' => array(
+				'wide',
+				'',
+				7,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 8 image (5 columns)'  => array(
+				'',
+				'',
+				8,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (5 columns)' => array(
+				'wide',
+				'',
+				8,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 7 image (6 columns)'  => array(
+				'',
+				'',
+				7,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 7 image (6 columns)' => array(
+				'wide',
+				'',
+				7,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 8 image (6 columns)'  => array(
+				'',
+				'',
+				8,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (6 columns)' => array(
+				'wide',
+				'',
+				8,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 9 image (6 columns)'  => array(
+				'',
+				'',
+				9,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 9 image (6 columns)' => array(
+				'wide',
+				'',
+				9,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 8 image (7 columns)'  => array(
+				'',
+				'',
+				8,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 8 image (7 columns)' => array(
+				'wide',
+				'',
+				8,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 9 image (7 columns)'  => array(
+				'',
+				'',
+				9,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 9 image (7 columns)' => array(
+				'wide',
+				'',
+				9,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 10 image (7 columns)' => array(
+				'',
+				'',
+				10,
+				7,
+				'sizes="(max-width: 88px) 100vw, 88px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 10 image (7 columns)' => array(
+				'wide',
+				'',
+				10,
+				7,
+				'sizes="(max-width: 182px) 100vw, 182px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+			'Default alignment, 9 image (8 columns)'  => array(
+				'',
+				'',
+				9,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 9 image (8 columns)' => array(
+				'wide',
+				'',
+				9,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Default alignment, 10 image (8 columns)' => array(
+				'',
+				'',
+				10,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 10 image (8 columns)' => array(
+				'wide',
+				'',
+				10,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Default alignment, 11 image (8 columns)' => array(
+				'',
+				'',
+				11,
+				8,
+				'sizes="(max-width: 77px) 100vw, 77px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 11 image (8 columns)' => array(
+				'wide',
+				'',
+				11,
+				8,
+				'sizes="(max-width: 160px) 100vw, 160px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+
+			// Random image columns setup.
+			'Default alignment, 15 image (5 columns)' => array(
+				'',
+				'',
+				15,
+				5,
+				'sizes="(max-width: 124px) 100vw, 124px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 15 image (5 columns)' => array(
+				'wide',
+				'',
+				15,
+				5,
+				'sizes="(max-width: 256px) 100vw, 256px" ',
+			),
+			'Default alignment, 15 image (6 columns)' => array(
+				'',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 103px) 100vw, 103px" ',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Wide gallery alignment, Default image alignment, 15 image (6 columns)' => array(
+				'wide',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 213px) 100vw, 213px" ',
+				'sizes="(max-width: 426px) 100vw, 426px" ',
+			),
+
+			/*
+			 * Full aligned galleries. Only a single column spans the whole viewport,
+			 * every other column count falls back to the default sizes, including the
+			 * images in an incomplete last row.
+			 */
+			'Full gallery alignment, Default image alignment, 1 image (1 column)' => array(
+				'full',
+				'',
+				1,
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 3 images (1 column)' => array(
+				'full',
+				'',
+				3,
+				1,
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 3 images (2 columns; incomplete last row with remainder=1)' => array(
+				'full',
+				'',
+				3,
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+				'sizes="100vw" ',
+			),
+			'Full gallery alignment, Default image alignment, 4 images (2 columns)' => array(
+				'full',
+				'',
+				4,
+				2,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 5 images (3 columns)' => array(
+				'full',
+				'',
+				5,
+				3,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Full gallery alignment, Default image alignment, 15 images (6 columns)' => array(
+				'full',
+				'',
+				15,
+				6,
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that a Gallery block only marks its child Image blocks as aligned for
+	 * the alignments that actually break out of the content width.
+	 *
+	 * @dataProvider data_gallery_is_parent_aligned_context
+	 *
+	 * @cover ::auto_sizes_filter_render_block_context
+	 *
+	 * @param string $gallery_alignment Gallery block alignment.
+	 * @param bool   $expected          Expected 'is_parent_aligned' context value.
+	 */
+	public function test_gallery_is_parent_aligned_context( string $gallery_alignment, bool $expected ): void {
+		$block = array(
+			'blockName'   => 'core/gallery',
+			'attrs'       => '' !== $gallery_alignment ? array( 'align' => $gallery_alignment ) : array(),
+			'innerBlocks' => array(),
+		);
+
+		$context = auto_sizes_filter_render_block_context( array(), $block, null );
+
+		$this->assertArrayHasKey( 'is_parent_aligned', $context );
+		$this->assertSame( $expected, $context['is_parent_aligned'] );
+	}
+
+	/**
+	 * Data provider for testing the 'is_parent_aligned' gallery context.
+	 *
+	 * @return array<string, array{0: string, 1: bool}> Arguments passed to the test method.
+	 */
+	public static function data_gallery_is_parent_aligned_context(): array {
+		return array(
+			'wide alignment'   => array( 'wide', true ),
+			'full alignment'   => array( 'full', true ),
+			'no alignment'     => array( '', false ),
+			'left alignment'   => array( 'left', false ),
+			'right alignment'  => array( 'right', false ),
+			'center alignment' => array( 'center', false ),
+		);
+	}
+
+	/**
+	 * Test that a non gallery block never receives the 'is_parent_aligned' context,
+	 * even when it is full aligned.
+	 *
+	 * @cover ::auto_sizes_filter_render_block_context
+	 */
+	public function test_non_gallery_block_does_not_receive_is_parent_aligned_context(): void {
+		$block = array(
+			'blockName'   => 'core/group',
+			'attrs'       => array( 'align' => 'full' ),
+			'innerBlocks' => array(),
+		);
+
+		$context = auto_sizes_filter_render_block_context( array(), $block, null );
+
+		$this->assertArrayNotHasKey( 'is_parent_aligned', $context );
+	}
+
+	/**
+	 * Test that the Image block declares the context keys the gallery alignment
+	 * handling depends on.
+	 *
+	 * @cover ::auto_sizes_filter_uses_context
+	 */
+	public function test_image_block_uses_is_parent_aligned_context(): void {
+		$block_type = new WP_Block_Type( 'core/image' );
+
+		$uses_context = auto_sizes_filter_uses_context( array(), $block_type );
+
+		$this->assertContains( 'is_parent_aligned', $uses_context );
+		$this->assertContains( 'max_alignment', $uses_context );
+		$this->assertContains( 'container_relative_width', $uses_context );
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
@@ -1596,6 +2394,38 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 			wp_json_encode( $atts ),
 			esc_attr( $align_class ),
 			$column_block
+		);
+	}
+
+	/**
+	 * Helper to generate gallery block markup.
+	 *
+	 * This function generates a WordPress gallery block with optional alignment.
+	 *
+	 * @param string       $content Content to be included in the gallery.
+	 * @param array<mixed> $atts    Optional. Block attributes. Default empty array.
+	 * @return string The generated gallery block markup.
+	 */
+	public function get_gallery_block_markup( string $content, array $atts = array() ): string {
+		$atts = wp_parse_args(
+			$atts,
+			array(
+				'linkTo' => 'none',
+			)
+		);
+
+		$class  = '';
+		$class .= ( isset( $atts['align'] ) && '' !== $atts['align'] ) ? ' align' . $atts['align'] : '';
+		$class .= ' columns-' . ( ( isset( $atts['columns'] ) && '' !== $atts['columns'] ) ? $atts['columns'] : 'default' );
+
+		// Generate and return the final gallery block markup.
+		return sprintf(
+			'<!-- wp:gallery ' . wp_json_encode( $atts ) . ' -->
+			<figure class="wp-block-gallery has-nested-images is-cropped' . $class . '">
+				%1$s
+			</figure>
+			<!-- /wp:gallery -->',
+			$content
 		);
 	}
 }
