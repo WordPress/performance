@@ -349,6 +349,33 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					'/HTML/BODY/DIV[@id=\'page\']/*[6][self::FOOTER]' => array( 'HTML', 'BODY', 'DIV', 'FOOTER' ),
 				),
 			),
+			'stray-closing-p-positions'              => array(
+				'document'          => '
+					<html>
+						<head></head>
+						<body>
+							<div id="page">
+								<!-- A stray closing P tag as the first child, where the implied empty P element takes the first slot. -->
+								<section></p><span>1</span></section>
+
+								<!-- Two stray closing P tags in a row imply two empty P elements. -->
+								<article></p></p><span>2</span></article>
+							</div>
+						</body>
+					</html>
+				',
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'SECTION', 'SPAN', 'ARTICLE', 'SPAN' ),
+				'xpath_breadcrumbs' => array(
+					'/HTML'                        => array( 'HTML' ),
+					'/HTML/HEAD'                   => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                   => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'page\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::SECTION]' => array( 'HTML', 'BODY', 'DIV', 'SECTION' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::SECTION]/*[2][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SECTION', 'SPAN' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::ARTICLE]' => array( 'HTML', 'BODY', 'DIV', 'ARTICLE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::ARTICLE]/*[3][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'ARTICLE', 'SPAN' ),
+				),
+			),
 			'document-with-multiple-div-id-children' => array(
 				'document'          => '
 					<!DOCTYPE html>

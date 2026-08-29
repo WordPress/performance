@@ -355,11 +355,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 			$this->open_stack_attributes[] = $attributes;
 
-			if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
-				$this->open_stack_indices[ $level ] = 0;
-			} else {
-				++$this->open_stack_indices[ $level ];
-			}
+			$this->advance_open_stack_index( $level );
 
 			// Keep track of whether the next call to next_token() should start by
 			// immediately popping off the stack due to this tag being either self-closing
@@ -388,12 +384,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			 * @link https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody:end-tag-p
 			 */
 			if ( 'P' === $tag_name && ! in_array( 'P', $this->open_stack_tags, true ) ) {
-				$level = count( $this->open_stack_tags );
-				if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
-					$this->open_stack_indices[ $level ] = 0;
-				} else {
-					++$this->open_stack_indices[ $level ];
-				}
+				$this->advance_open_stack_index( count( $this->open_stack_tags ) );
 				return true;
 			}
 
@@ -422,6 +413,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Advances the sibling index at the supplied depth to account for another element occurring there.
+	 *
+	 * This is called both when an open tag is pushed onto the stack and when an empty P element is implied by a stray
+	 * closing P tag, so that both arrive at the sibling indices used to compute XPaths in the same way.
+	 *
+	 * @since 1.0.0
+	 * @see self::get_xpath()
+	 *
+	 * @param non-negative-int $level Depth at which an element occurs.
+	 */
+	private function advance_open_stack_index( int $level ): void {
+		if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
+			$this->open_stack_indices[ $level ] = 0;
+		} else {
+			++$this->open_stack_indices[ $level ];
+		}
 	}
 
 	/**
