@@ -146,7 +146,7 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 /**
  * Retrieves attachment metadata for an image attachment.
  *
- * @since 1.0.0
+ * @since n.e.x.t
  *
  * @param int $attachment_id Attachment ID.
  * @return array<string, mixed>|null Attachment metadata array, or null if not an image or metadata unavailable.

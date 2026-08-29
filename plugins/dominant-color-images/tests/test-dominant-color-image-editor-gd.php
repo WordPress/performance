@@ -23,7 +23,7 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}
 
-		// ensure the GD editor is registered. Doesnt seem to be by the time this runs.
+		// Ensure the GD editor is registered. It doesn't seem to be by the time this runs.
 		require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
 		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
 		require_once __DIR__ . '/../class-dominant-color-image-editor-gd.php';

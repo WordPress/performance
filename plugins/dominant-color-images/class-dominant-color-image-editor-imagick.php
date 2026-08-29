@@ -39,10 +39,13 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
 
+			// Cast to int: ImagickPixel::getColor() may return floats depending on
+			// ImageMagick/Imagick configuration, which would break the int contract
+			// of this method under strict_types.
 			return array(
-				'r' => $color['r'],
-				'g' => $color['g'],
-				'b' => $color['b'],
+				'r' => (int) $color['r'],
+				'g' => (int) $color['g'],
+				'b' => (int) $color['b'],
 			);
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
