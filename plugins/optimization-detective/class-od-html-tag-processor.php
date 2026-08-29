@@ -377,7 +377,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				return true;
 			}
 
-			/*
+			/**
 			 * A closing P tag with no corresponding open P element is a stray end tag. This occurs with markup like
 			 * `<p><figure>&hellip;</figure></p>`, as output by `wpautop()` when a shortcode inside a paragraph expands
 			 * into a FIGURE, since the FIGURE has already implicitly closed the P per self::P_CLOSING_TAGS above. Such
