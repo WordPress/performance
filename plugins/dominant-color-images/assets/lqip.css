@@ -16,14 +16,14 @@
 }
 
 [style*="--lqip:"] {
-	--lqip-ca: mod(round(down, calc((var(--lqip) + 524288) / 262144)), 4);
-	--lqip-cb: mod(round(down, calc((var(--lqip) + 524288) / 65536)), 4);
-	--lqip-cc: mod(round(down, calc((var(--lqip) + 524288) / 16384)), 4);
-	--lqip-cd: mod(round(down, calc((var(--lqip) + 524288) / 4096)), 4);
-	--lqip-ce: mod(round(down, calc((var(--lqip) + 524288) / 1024)), 4);
-	--lqip-cf: mod(round(down, calc((var(--lqip) + 524288) / 256)), 4);
-	--lqip-ll: mod(round(down, calc((var(--lqip) + 524288) / 64)), 4);
-	--lqip-aaa: mod(round(down, calc((var(--lqip) + 524288) / 8)), 8);
+	--lqip-ca: mod(round(down, calc((var(--lqip) + 524288) / 262144), 1), 4);
+	--lqip-cb: mod(round(down, calc((var(--lqip) + 524288) / 65536), 1), 4);
+	--lqip-cc: mod(round(down, calc((var(--lqip) + 524288) / 16384), 1), 4);
+	--lqip-cd: mod(round(down, calc((var(--lqip) + 524288) / 4096), 1), 4);
+	--lqip-ce: mod(round(down, calc((var(--lqip) + 524288) / 1024), 1), 4);
+	--lqip-cf: mod(round(down, calc((var(--lqip) + 524288) / 256), 1), 4);
+	--lqip-ll: mod(round(down, calc((var(--lqip) + 524288) / 64), 1), 4);
+	--lqip-aaa: mod(round(down, calc((var(--lqip) + 524288) / 8), 1), 8);
 	--lqip-bbb: mod(calc(var(--lqip) + 524288), 8);
 
 	--lqip-ca-clr: hsl(0 0% calc(var(--lqip-ca) / 3 * 100%));
