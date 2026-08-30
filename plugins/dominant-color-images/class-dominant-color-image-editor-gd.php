@@ -21,11 +21,11 @@ declare( strict_types = 1 );
 class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 
 	/**
-	 * Get dominant color from a file as raw RGB values.
+	 * Get dominant color from a file.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
 
@@ -49,12 +49,15 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( false === $rgb ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
+		$r   = ( $rgb >> 16 ) & 0xFF;
+		$g   = ( $rgb >> 8 ) & 0xFF;
+		$b   = $rgb & 0xFF;
+		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
+		if ( null === $hex ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
 
-		return array(
-			'r' => ( $rgb >> 16 ) & 0xFF,
-			'g' => ( $rgb >> 8 ) & 0xFF,
-			'b' => $rgb & 0xFF,
-		);
+		return $hex;
 	}
 
 	/**

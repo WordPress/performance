@@ -89,15 +89,7 @@ class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 
 		$result = $editor->get_dominant_color();
 
-		$this->assertIsArray( $result );
-		$this->assertSame(
-			array(
-				'r' => 255,
-				'g' => 0,
-				'b' => 0,
-			),
-			$result
-		);
+		$this->assertSame( 'ff0000', $result );
 	}
 
 	/**
