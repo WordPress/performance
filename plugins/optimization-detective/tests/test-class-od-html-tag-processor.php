@@ -137,6 +137,35 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					'/HTML/BODY/DIV[@id=\'page\']/*[3][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SPAN' ),
 				),
 			),
+			'multiple-figures-in-p-with-stray-p-closer' => array(
+				'document'          => '
+					<html>
+						<head></head>
+						<body>
+							<div id="page">
+								<p>
+									<figure><img src="foo.jpg"></figure>
+									<figure><img src="bar.jpg"></figure>
+								</p>
+								<footer id="footer">Footer</footer>
+							</div>
+						</body>
+					</html>
+				',
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'P', 'FIGURE', 'IMG', 'FIGURE', 'IMG', 'FOOTER' ),
+				'xpath_breadcrumbs' => array(
+					'/HTML'                        => array( 'HTML' ),
+					'/HTML/HEAD'                   => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                   => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'page\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::P]' => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::FIGURE]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::FIGURE]/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'IMG' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[3][self::FIGURE]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[3][self::FIGURE]/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'IMG' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[5][self::FOOTER[@id=\'footer\']]' => array( 'HTML', 'BODY', 'DIV', 'FOOTER' ),
+				),
+			),
 			'void-tags'                              => array(
 				'document'          => '
 					<html>

@@ -377,6 +377,22 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				return true;
 			}
 
+			/*
+			 * A `</p>` encountered when no P is open is a stray end tag. Per the HTML spec this does not
+			 * close any open element; instead an empty P element is implied at this position. This happens
+			 * with `wpautop()` output like `<p><figure>…</figure></p>` where the FIGURE has already
+			 * implicitly closed the P (see self::P_CLOSING_TAGS above).
+			 */
+			if ( 'P' === $tag_name && 'P' !== end( $this->open_stack_tags ) ) {
+				$level = count( $this->open_stack_tags );
+				if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
+					$this->open_stack_indices[ $level ] = 0;
+				} else {
+					++$this->open_stack_indices[ $level ];
+				}
+				return true;
+			}
+
 			$popped_tag_name = array_pop( $this->open_stack_tags );
 			array_pop( $this->open_stack_attributes );
 			if ( $popped_tag_name !== $tag_name ) {
