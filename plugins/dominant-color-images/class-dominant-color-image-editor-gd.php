@@ -49,7 +49,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array{r: int<0, 255>, g: int<0, 255>, b: int<0, 255>}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
 	 */
 	public function get_dominant_color_rgb() {
 		if ( ! (bool) $this->image ) {
@@ -171,10 +171,18 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
 
+		$r = $linear_to_srgb( $sum_r / $count );
+		$g = $linear_to_srgb( $sum_g / $count );
+		$b = $linear_to_srgb( $sum_b / $count );
+
+		if ( $r < 0 || $r > 255 || $g < 0 || $g > 255 || $b < 0 || $b > 255 ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
 		return array(
-			'r' => $linear_to_srgb( $sum_r / $count ),
-			'g' => $linear_to_srgb( $sum_g / $count ),
-			'b' => $linear_to_srgb( $sum_b / $count ),
+			'r' => $r,
+			'g' => $g,
+			'b' => $b,
 		);
 	}
 

@@ -163,6 +163,9 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 		return $rgb;
 	}
 	$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+	if ( null === $hex ) {
+		return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+	}
 	$dominant_color_data['dominant_color'] = $hex;
 
 	// LQIP generation.
