@@ -33,21 +33,5 @@ define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.3.0' );
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
 
-add_filter(
-	'wp_image_editors',
-	static function ( array $editors ): array {
-		// Ensure core editor classes are loaded before delegating, since this
-		// filter can run early (e.g. during wp_image_editor_supports()).
-		if ( ! class_exists( 'WP_Image_Editor_GD' ) ) {
-			require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
-		}
-		if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
-			require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
-		}
-
-		return dominant_color_set_image_editors( $editors );
-	},
-	999,
-	1
-);
+add_filter( 'wp_image_editors', 'dominant_color_filter_image_editors', 999, 1 );
 // @codeCoverageIgnoreEnd

@@ -47,6 +47,38 @@ function dominant_color_set_image_editors( array $editors ): array {
 }
 
 /**
+ * Filters the list of image editors to include the dominant color editors.
+ *
+ * Ensures core editor classes are loaded before delegating to
+ * {@see dominant_color_set_image_editors()}, since the `wp_image_editors`
+ * filter can run early (e.g. during `wp_image_editor_supports()`).
+ *
+ * @since n.e.x.t
+ *
+ * @param mixed $editors List of image editor class names, or mixed value from previous filter.
+ * @return string[] Filtered list of image editor class names.
+ */
+function dominant_color_filter_image_editors( $editors ): array {
+	if ( ! is_array( $editors ) ) {
+		$editors = array();
+	}
+	/**
+	 * Because plugins do bad things.
+	 *
+	 * @var string[] $editors
+	 */
+
+	if ( ! class_exists( 'WP_Image_Editor_GD' ) ) {
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';// @codeCoverageIgnore
+	}
+	if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';// @codeCoverageIgnore
+	}
+
+	return dominant_color_set_image_editors( $editors );
+}
+
+/**
  * Computes the dominant color of the given attachment image and whether it has transparency.
  *
  * The image types jpeg, png, gif, webp, and avif are supported for determining the dominant color.
@@ -188,12 +220,12 @@ function dominant_color_get_attachment_file_path( int $attachment_id, string $si
  * @since 1.0.0
  *
  * @param int $attachment_id Attachment ID for image.
- * @return string|null Hex value of dominant color or null if not set.
+ * @return non-empty-string|null Hex value of dominant color or null if not set.
  */
 function dominant_color_get_dominant_color( int $attachment_id ): ?string {
 	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
-	if ( ! isset( $image_meta['dominant_color'] ) ) {
+	if ( ! isset( $image_meta['dominant_color'] ) || ! is_string( $image_meta['dominant_color'] ) || '' === $image_meta['dominant_color'] ) {
 		return null;
 	}
 
@@ -215,7 +247,7 @@ function dominant_color_has_transparency( int $attachment_id ): ?bool {
 		return null;
 	}
 
-	return $image_meta['has_transparency'];
+	return (bool) $image_meta['has_transparency'];
 }
 
 /**
