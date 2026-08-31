@@ -421,7 +421,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This is called both when an open tag is pushed onto the stack and when an empty P element is implied by a stray
 	 * closing P tag, so that both arrive at the sibling indices used to compute XPaths in the same way.
 	 *
-	 * @since 1.0.0
+	 * @since n.e.x.t
 	 * @see self::get_xpath()
 	 *
 	 * @param non-negative-int $level Depth at which an element occurs.
