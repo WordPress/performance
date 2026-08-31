@@ -55,7 +55,7 @@ function dominant_color_set_image_editors( array $editors ): array {
  *
  * @since n.e.x.t
  *
- * @param mixed $editors List of image editor class names, or mixed value from previous filter.
+ * @param string[]|mixed $editors List of image editor class names, or mixed value from previous filter.
  * @return string[] Filtered list of image editor class names.
  */
 function dominant_color_filter_image_editors( $editors ): array {
@@ -69,10 +69,10 @@ function dominant_color_filter_image_editors( $editors ): array {
 	 */
 
 	if ( ! class_exists( 'WP_Image_Editor_GD' ) ) {
-		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';// @codeCoverageIgnore
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php'; // @codeCoverageIgnore
 	}
 	if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
-		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';// @codeCoverageIgnore
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php'; // @codeCoverageIgnore
 	}
 
 	return dominant_color_set_image_editors( $editors );
