@@ -32,4 +32,6 @@ define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.3.0' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+
+add_filter( 'wp_image_editors', 'dominant_color_filter_image_editors', 999, 1 );
 // @codeCoverageIgnoreEnd
