@@ -1476,6 +1476,119 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the background image of a Group block is reduced in size based on the layout width.
+	 *
+	 * @dataProvider data_group_block_background_image
+	 *
+	 * @covers ::auto_sizes_filter_background_image_style
+	 * @covers ::auto_sizes_get_background_image_attachment_id
+	 * @covers ::auto_sizes_calculate_background_image_max_width
+	 * @covers ::auto_sizes_get_smaller_image_url
+	 * @covers ::auto_sizes_get_attachment_image_width
+	 *
+	 * @param string|null $align         Block alignment.
+	 * @param string      $expected_size Image size expected to be used for the background image.
+	 */
+	public function test_group_block_with_background_image( ?string $align, string $expected_size ): void {
+		$block_content = $this->get_group_block_with_background_image_markup( self::$image_id, $align );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString(
+			(string) wp_get_attachment_image_url( self::$image_id, $expected_size ),
+			$result
+		);
+
+		if ( 'full' !== $expected_size ) {
+			$this->assertStringNotContainsString(
+				(string) wp_get_attachment_image_url( self::$image_id, 'full' ),
+				$result,
+				'Expected the full size image to no longer be used as the background image.'
+			);
+		}
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array{ align: string|null, expected_size: string }> Data.
+	 */
+	public static function data_group_block_background_image(): array {
+		return array(
+			// The contentSize of 620px is smaller than the full size of 1080px, so the next larger size of 768px is used.
+			'default alignment uses contentSize' => array(
+				'align'         => null,
+				'expected_size' => 'medium_large',
+			),
+			// The wideSize of 1280px is larger than the full size of 1080px, so no smaller image is available.
+			'wide alignment uses wideSize'       => array(
+				'align'         => 'wide',
+				'expected_size' => 'full',
+			),
+			// The width of a full-aligned block depends on the viewport width, which is not known when rendering.
+			'full alignment is not reduced'      => array(
+				'align'         => 'full',
+				'expected_size' => 'full',
+			),
+		);
+	}
+
+	/**
+	 * Test that the background image of a Group block is not reduced when it does not come from an attachment.
+	 *
+	 * @covers ::auto_sizes_filter_background_image_style
+	 * @covers ::auto_sizes_get_background_image_attachment_id
+	 */
+	public function test_group_block_with_background_image_lacking_attachment_id(): void {
+		$block_content = $this->get_group_block_with_background_image_markup( self::$image_id, null, false );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( (string) wp_get_attachment_image_url( self::$image_id, 'full' ), $result );
+	}
+
+	/**
+	 * Test that the background image of a Group block is not reduced in a classic theme.
+	 *
+	 * @covers ::auto_sizes_filter_background_image_style
+	 */
+	public function test_group_block_with_background_image_in_classic_theme(): void {
+		switch_theme( 'twentytwentyone' );
+
+		$block_content = $this->get_group_block_with_background_image_markup( self::$image_id );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( (string) wp_get_attachment_image_url( self::$image_id, 'full' ), $result );
+	}
+
+	/**
+	 * Test that the background image of a Cover block with a fixed background is reduced in size.
+	 *
+	 * @covers ::auto_sizes_filter_background_image_style
+	 * @covers ::auto_sizes_get_background_image_attachment_id
+	 * @covers ::auto_sizes_calculate_background_image_max_width
+	 */
+	public function test_cover_block_with_parallax_background_image(): void {
+		$full_url = (string) wp_get_attachment_image_url( self::$image_id, 'full' );
+
+		// Note that for a Cover block with a fixed background the background image is applied to an inner DIV.
+		$block_content = '<!-- wp:cover {"url":"' . $full_url . '","id":' . self::$image_id . ',"hasParallax":true,"dimRatio":50,"sizeSlug":"full"} -->
+		<div class="wp-block-cover has-parallax"><div class="wp-block-cover__image-background wp-image-' . self::$image_id . ' size-full has-parallax" style="background-position:50% 50%;background-image:url(' . $full_url . ')"></div><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:paragraph -->
+		<p></p>
+		<!-- /wp:paragraph --></div></div>
+		<!-- /wp:cover -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString(
+			(string) wp_get_attachment_image_url( self::$image_id, 'medium_large' ),
+			$result
+		);
+		$this->assertStringNotContainsString( $full_url, $result );
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
@@ -1518,6 +1631,45 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		$align_class = null !== $align ? ' align' . $align : '';
 
 		return '<!-- wp:image ' . wp_json_encode( $atts ) . ' --><figure class="wp-block-image size-' . $size . $align_class . '"><img src="' . $image_url . '" alt="" class="wp-image-' . $attachment_id . '"/></figure><!-- /wp:image -->';
+	}
+
+	/**
+	 * Helper to generate group block markup with a background image.
+	 *
+	 * @param int         $attachment_id  Attachment ID.
+	 * @param string|null $align          Optional. Block alignment. Default null.
+	 * @param bool        $include_id     Optional. Whether the background image references the attachment ID, as opposed
+	 *                                    to being sourced from the theme. Default true.
+	 * @return string Group block markup.
+	 */
+	public function get_group_block_with_background_image_markup( int $attachment_id, ?string $align = null, bool $include_id = true ): string {
+		$background_image = array(
+			'url'    => wp_get_attachment_image_url( $attachment_id, 'full' ),
+			'source' => 'file',
+		);
+		if ( $include_id ) {
+			$background_image['id'] = $attachment_id;
+		}
+
+		$atts = array(
+			'style'  => array(
+				'background' => array(
+					'backgroundImage' => $background_image,
+				),
+			),
+			'layout' => array(
+				'type' => 'constrained',
+			),
+		);
+		if ( null !== $align ) {
+			$atts['align'] = $align;
+		}
+
+		$align_class = null !== $align ? ' align' . $align : '';
+
+		return '<!-- wp:group ' . wp_json_encode( $atts ) . ' -->
+		<div class="wp-block-group' . $align_class . '"></div>
+		<!-- /wp:group -->';
 	}
 
 	/**
