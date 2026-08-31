@@ -28,7 +28,27 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
+		$rgb = $this->get_dominant_color_rgb();
+		if ( is_wp_error( $rgb ) ) {
+			return $rgb;
+		}
 
+		$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+		if ( null === $hex ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
+		return $hex;
+	}
+
+	/**
+	 * Get dominant color from a file as RGB values.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 */
+	public function get_dominant_color_rgb() {
 		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
@@ -38,15 +58,15 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
+
 			// Cast to int: ImagickPixel::getColor() may return floats depending on
 			// ImageMagick/Imagick configuration, which would break the int contract
-			// of dominant_color_rgb_to_hex() under strict_types.
-			$hex = dominant_color_rgb_to_hex( (int) $color['r'], (int) $color['g'], (int) $color['b'] );
-			if ( null === $hex ) {
-				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-			}
-
-			return $hex;
+			// of this method under strict_types.
+			return array(
+				'r' => (int) $color['r'],
+				'g' => (int) $color['g'],
+				'b' => (int) $color['b'],
+			);
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
 			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );

@@ -28,7 +28,27 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
+		$rgb = $this->get_dominant_color_rgb();
+		if ( is_wp_error( $rgb ) ) {
+			return $rgb;
+		}
 
+		$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+		if ( null === $hex ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
+		return $hex;
+	}
+
+	/**
+	 * Get dominant color from a file as RGB values.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 */
+	public function get_dominant_color_rgb() {
 		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
@@ -49,15 +69,12 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( false === $rgb ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
-		$r   = ( $rgb >> 16 ) & 0xFF;
-		$g   = ( $rgb >> 8 ) & 0xFF;
-		$b   = $rgb & 0xFF;
-		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
-		if ( null === $hex ) {
-			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-		}
 
-		return $hex;
+		return array(
+			'r' => ( $rgb >> 16 ) & 0xFF,
+			'g' => ( $rgb >> 8 ) & 0xFF,
+			'b' => $rgb & 0xFF,
+		);
 	}
 
 	/**
