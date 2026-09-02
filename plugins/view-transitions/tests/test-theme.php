@@ -85,8 +85,9 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 	/**
 	 * @covers ::plvt_apply_settings_to_theme_support
 	 * @covers ::plvt_sanitize_view_transitions_theme_support
+	 * @covers ::plvt_get_directional_transition_animation_aliases
 	 */
-	public function test_plvt_apply_settings_to_theme_support_enables_directional_animations_from_default_animation(): void {
+	public function test_plvt_apply_settings_to_theme_support_applies_directional_animation_independently(): void {
 		remove_theme_support( 'view-transitions' );
 		add_theme_support( 'view-transitions' );
 		plvt_sanitize_view_transitions_theme_support();
@@ -94,8 +95,9 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 		update_option(
 			'plvt_view_transitions',
 			array(
-				'default_transition_animation'   => 'wipe-from-top',
-				'enable_directional_transitions' => true,
+				'default_transition_animation'     => 'fade',
+				'enable_directional_transitions'   => true,
+				'directional_transition_animation' => 'wipe-vertical',
 			)
 		);
 
@@ -103,35 +105,70 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 
 		$theme_support = get_theme_support( 'view-transitions' );
 
-		$this->assertSame( 'wipe-from-top', $theme_support['default-animation'] );
-		$this->assertSame( 'wipe-from-right', $theme_support['chronological-forwards-animation'] );
-		$this->assertSame( 'wipe-from-left', $theme_support['chronological-backwards-animation'] );
-		$this->assertSame( 'wipe-from-right', $theme_support['pagination-forwards-animation'] );
-		$this->assertSame( 'wipe-from-left', $theme_support['pagination-backwards-animation'] );
+		$this->assertSame( 'fade', $theme_support['default-animation'] );
+		$this->assertSame( 'wipe-from-bottom', $theme_support['chronological-forwards-animation'] );
+		$this->assertSame( 'wipe-from-top', $theme_support['chronological-backwards-animation'] );
+		$this->assertSame( 'wipe-from-bottom', $theme_support['pagination-forwards-animation'] );
+		$this->assertSame( 'wipe-from-top', $theme_support['pagination-backwards-animation'] );
+
+		delete_option( 'plvt_view_transitions' );
+	}
+
+	/**
+	 * @covers ::plvt_apply_settings_to_theme_support
+	 * @covers ::plvt_sanitize_view_transitions_theme_support
+	 */
+	public function test_plvt_apply_settings_to_theme_support_omits_directional_animations_when_disabled(): void {
+		remove_theme_support( 'view-transitions' );
+		add_theme_support( 'view-transitions' );
+		plvt_sanitize_view_transitions_theme_support();
+
+		update_option(
+			'plvt_view_transitions',
+			array(
+				'default_transition_animation'     => 'slide-from-right',
+				'enable_directional_transitions'   => false,
+				'directional_transition_animation' => 'slide-horizontal',
+			)
+		);
+
+		plvt_apply_settings_to_theme_support();
+
+		$theme_support = get_theme_support( 'view-transitions' );
+
+		$this->assertSame( 'slide-from-right', $theme_support['default-animation'] );
+		$this->assertFalse( $theme_support['chronological-forwards-animation'] );
+		$this->assertFalse( $theme_support['chronological-backwards-animation'] );
+		$this->assertFalse( $theme_support['pagination-forwards-animation'] );
+		$this->assertFalse( $theme_support['pagination-backwards-animation'] );
 
 		delete_option( 'plvt_view_transitions' );
 	}
 
 	/**
 	 * @covers ::plvt_sanitize_setting
-	 * @covers ::plvt_get_supported_directional_animation
 	 */
-	public function test_plvt_sanitize_setting_disables_directional_animations_for_unsupported_default_animation(): void {
-		global $wp_settings_errors;
-
-		$wp_settings_errors = array();
-
-		$setting         = plvt_sanitize_setting(
+	public function test_plvt_sanitize_setting_directional_transition_animation(): void {
+		$setting = plvt_sanitize_setting(
 			array(
-				'default_transition_animation'   => 'fade',
-				'enable_directional_transitions' => true,
+				'default_transition_animation'     => 'fade',
+				'enable_directional_transitions'   => true,
+				'directional_transition_animation' => 'swipe-vertical',
 			)
 		);
-		$settings_errors = get_settings_errors( 'plvt_view_transitions' );
 
 		$this->assertSame( 'fade', $setting['default_transition_animation'] );
-		$this->assertFalse( $setting['enable_directional_transitions'] );
-		$this->assertCount( 1, $settings_errors );
-		$this->assertSame( 'plvt_directional_transitions_requires_supported_animation', $settings_errors[0]['code'] );
+		$this->assertTrue( $setting['enable_directional_transitions'] );
+		$this->assertSame( 'swipe-vertical', $setting['directional_transition_animation'] );
+
+		// An animation which cannot express a direction falls back to the default.
+		$setting = plvt_sanitize_setting(
+			array(
+				'enable_directional_transitions'   => true,
+				'directional_transition_animation' => 'fade',
+			)
+		);
+
+		$this->assertSame( plvt_get_setting_default()['directional_transition_animation'], $setting['directional_transition_animation'] );
 	}
 }
