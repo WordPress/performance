@@ -1040,6 +1040,132 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Test that the output format is selected without regard to server support for client side media processing.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_map_to_the_selected_format_for_client_side_media_processing(): void {
+		$this->set_image_output_type( 'avif' );
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+			}
+		);
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/webp' ) );
+
+		// Server side, the editor supports neither modern format, so nothing is mapped.
+		$this->assertSame( array(), webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ) );
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'A JPEG should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array( 'image/png' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.png', 'image/png' ),
+			'A PNG should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array( 'image/webp' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.webp', 'image/webp' ),
+			'A WebP should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.avif', 'image/avif' ),
+			'An AVIF should not be mapped when it is already in the selected format.'
+		);
+		$this->assertSame(
+			array( 'image/gif' => 'image/gif' ),
+			webp_uploads_filter_image_editor_output_format( array( 'image/gif' => 'image/gif' ), '/tmp/image.gif', 'image/gif' ),
+			'A mime type without transforms should be left alone.'
+		);
+
+		// With fallback output enabled the browser still produces the modern format; the server generates the fallback.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'A JPEG should be mapped to AVIF when fallback output is enabled and the browser encodes the images.'
+		);
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.avif', 'image/avif' ),
+			'An AVIF should keep its format when fallback output is enabled and the browser encodes the images.'
+		);
+	}
+
+	/**
+	 * Test that the client side media processing context is tracked around REST request callbacks.
+	 *
+	 * @covers ::webp_uploads_start_client_side_media_processing_request
+	 * @covers ::webp_uploads_end_client_side_media_processing_request
+	 */
+	public function test_it_should_track_client_side_media_processing_around_rest_callbacks(): void {
+		$this->assertSame( 10, has_filter( 'rest_request_before_callbacks', 'webp_uploads_start_client_side_media_processing_request' ) );
+		$this->assertSame( 10, has_filter( 'rest_request_after_callbacks', 'webp_uploads_end_client_side_media_processing_request' ) );
+
+		$handler = array( 'callback' => array( new WP_REST_Attachments_Controller( 'attachment' ), 'create_item' ) );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_body_params( array( 'generate_sub_sizes' => false ) );
+
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+		$this->assertNull( webp_uploads_start_client_side_media_processing_request( null, $handler, $request ) );
+		$this->assertTrue( webp_uploads_is_client_side_media_processing() );
+
+		$response = new WP_REST_Response();
+		$this->assertSame( $response, webp_uploads_end_client_side_media_processing_request( $response ) );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+
+		// A request which is not part of the client side flow leaves the context untouched.
+		$request->set_body_params( array() );
+		$this->assertNull( webp_uploads_start_client_side_media_processing_request( null, $handler, $request ) );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+		webp_uploads_end_client_side_media_processing_request( null );
+
+		// A non-request value is ignored.
+		$this->assertNull( webp_uploads_start_client_side_media_processing_request( null, $handler, null ) );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+	}
+
+	/**
+	 * Test that dispatching a finalize request enables the client side media processing context for its duration.
+	 *
+	 * @covers ::webp_uploads_start_client_side_media_processing_request
+	 * @covers ::webp_uploads_end_client_side_media_processing_request
+	 */
+	public function test_it_should_enable_client_side_media_processing_while_dispatching_finalize_request(): void {
+		if ( ! method_exists( WP_REST_Attachments_Controller::class, 'finalize_item' ) ) {
+			$this->markTestSkipped( 'Client side media processing REST endpoints are not available.' );
+		}
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$observed = array();
+		add_filter(
+			'rest_request_after_callbacks',
+			static function ( $response ) use ( &$observed ) {
+				$observed[] = webp_uploads_is_client_side_media_processing();
+				return $response;
+			},
+			9
+		);
+
+		rest_get_server()->dispatch( new WP_REST_Request( 'POST', '/wp/v2/media/' . PHP_INT_MAX . '/finalize' ) );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+
+		rest_get_server()->dispatch( new WP_REST_Request( 'GET', '/wp/v2/media' ) );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+
+		$this->assertSame( array( true, false ), $observed );
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::webp_uploads_render_generator
