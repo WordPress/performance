@@ -395,6 +395,20 @@ function webp_uploads_is_client_side_media_processing(): bool {
 }
 
 /**
+ * Checks whether WordPress offers client side media processing on this site.
+ *
+ * Client side media processing was introduced in WordPress 7.1 and requires a secure context. Whether a given
+ * browser is actually able to process images is a runtime check which happens in JavaScript.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if client side media processing is enabled for the site, false otherwise.
+ */
+function webp_uploads_is_client_side_media_processing_enabled(): bool {
+	return function_exists( 'wp_is_client_side_media_processing_enabled' ) && wp_is_client_side_media_processing_enabled();
+}
+
+/**
  * Checks whether a REST request is part of the client side media processing flow.
  *
  * This is the case for an attachment creation request in which the client opts out of server side sub-size
