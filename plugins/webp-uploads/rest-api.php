@@ -26,21 +26,35 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post ): WP_REST_Response {
 	$data = $response->get_data();
-	if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) || ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
+	if (
+		! is_array( $data ) ||
+		! isset( $data['media_details'] ) ||
+		! is_array( $data['media_details'] ) ||
+		! isset( $data['media_details']['sizes'] ) ||
+		! is_array( $data['media_details']['sizes'] ) ) {
 		return $response;
 	}
 
 	foreach ( $data['media_details']['sizes'] as $size => &$details ) {
 
-		if ( ! isset( $details['sources'] ) || ! is_array( $details['sources'] ) ) {
+		if (
+			! is_array( $details ) ||
+			! isset( $details['sources'], $details['source_url'] ) ||
+			! is_array( $details['sources'] ) ||
+			! is_string( $details['source_url'] )
+		) {
 			continue;
 		}
 
 		$image_url_basename = wp_basename( $details['source_url'] );
 		foreach ( $details['sources'] as $mime => &$mime_details ) {
-			$mime_details['source_url'] = str_replace( $image_url_basename, $mime_details['file'], $details['source_url'] );
+			if ( is_array( $mime_details ) && isset( $mime_details['file'] ) && is_string( $mime_details['file'] ) ) {
+				$mime_details['source_url'] = str_replace( $image_url_basename, $mime_details['file'], $details['source_url'] );
+			}
 		}
+		unset( $mime_details );
 	}
+	unset( $details );
 
 	$full_src = wp_get_attachment_image_src( $post->ID, 'full' );
 	if (
@@ -52,8 +66,11 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	) {
 		$full_url_basename = wp_basename( $full_src[0] );
 		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
-			$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
+			if ( is_array( $mime_details ) && isset( $mime_details['file'] ) && is_string( $mime_details['file'] ) ) {
+				$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
+			}
 		}
+		unset( $mime_details );
 
 		$data['media_details']['sizes']['full']['sources'] = $data['media_details']['sources'];
 		unset( $data['media_details']['sources'] );

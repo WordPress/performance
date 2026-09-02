@@ -88,6 +88,11 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 	 */
 	$use_attribution_build = (bool) apply_filters( 'od_use_web_vitals_attribution_build', false );
 
+	/**
+	 * Lib data for web-vitals.
+	 *
+	 * @var array{ version: non-empty-string, dependencies: list<non-empty-string> } $web_vitals_lib_data
+	 */
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
 	$web_vitals_lib_src  = $use_attribution_build ?
 		plugins_url( 'build/web-vitals-attribution.js', __FILE__ ) :

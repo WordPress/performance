@@ -1,5 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"testsEnvironment": false,
 	"core": null,
 	"plugins": [
 		"./plugins/optimization-detective",
@@ -13,19 +14,7 @@
 		"./plugins/web-worker-offloading",
 		"./plugins/webp-uploads"
 	],
-	"env": {
-		"development": {
-			"config": {
-				"WP_DEVELOPMENT_MODE": "plugin"
-			}
-		},
-		"tests": {
-			"config": {
-				"FS_METHOD": "direct"
-			},
-			"mappings": {
-				"wp-content/plugins/performance": "."
-			}
-		}
+	"config": {
+		"WP_DEVELOPMENT_MODE": "plugin"
 	}
 }

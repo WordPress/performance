@@ -263,7 +263,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
 	 *
 	 * @since 0.4.0
-	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
+	 * @deprecated 1.0.0 Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
@@ -355,11 +355,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 			$this->open_stack_attributes[] = $attributes;
 
-			if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
-				$this->open_stack_indices[ $level ] = 0;
-			} else {
-				++$this->open_stack_indices[ $level ];
-			}
+			$this->advance_open_stack_index( $level );
 
 			// Keep track of whether the next call to next_token() should start by
 			// immediately popping off the stack due to this tag being either self-closing
@@ -374,6 +370,21 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 			// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
 			if ( ! $this->expects_closer() ) {
+				return true;
+			}
+
+			/**
+			 * A closing P tag with no corresponding open P element is a stray end tag. This occurs with markup like
+			 * `<p><figure>&hellip;</figure></p>`, as output by `wpautop()` when a shortcode inside a paragraph expands
+			 * into a FIGURE, since the FIGURE has already implicitly closed the P per self::P_CLOSING_TAGS above. Such
+			 * an end tag does not close any open element. Instead, an empty P element is implied at this position, so
+			 * account for it in the sibling indices to keep the computed XPaths aligned with the DOM the browser
+			 * constructs.
+			 *
+			 * @link https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody:end-tag-p
+			 */
+			if ( 'P' === $tag_name && ! in_array( 'P', $this->open_stack_tags, true ) ) {
+				$this->advance_open_stack_index( count( $this->open_stack_tags ) );
 				return true;
 			}
 
@@ -402,6 +413,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Advances the sibling index at the supplied depth to account for another element occurring there.
+	 *
+	 * This is called both when an open tag is pushed onto the stack and when an empty P element is implied by a stray
+	 * closing P tag, so that both arrive at the sibling indices used to compute XPaths in the same way.
+	 *
+	 * @since n.e.x.t
+	 * @see self::get_xpath()
+	 *
+	 * @param non-negative-int $level Depth at which an element occurs.
+	 */
+	private function advance_open_stack_index( int $level ): void {
+		if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
+			$this->open_stack_indices[ $level ] = 0;
+		} else {
+			++$this->open_stack_indices[ $level ];
+		}
 	}
 
 	/**
@@ -772,6 +802,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			} else {
 				$start = $this->bookmarks[ $bookmark ]->start;
 
+				// @phpstan-ignore no.private.class
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
 					0,
