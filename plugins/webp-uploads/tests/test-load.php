@@ -1140,7 +1140,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @covers ::webp_uploads_end_client_side_media_processing_request
 	 */
 	public function test_it_should_enable_client_side_media_processing_while_dispatching_finalize_request(): void {
-		if ( ! method_exists( WP_REST_Attachments_Controller::class, 'finalize_item' ) ) {
+		// The finalize endpoint was added in WordPress 7.1.
+		if ( version_compare( get_bloginfo( 'version' ), '7.1', '<' ) ) {
 			$this->markTestSkipped( 'Client side media processing REST endpoints are not available.' );
 		}
 
