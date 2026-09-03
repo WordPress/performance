@@ -588,57 +588,57 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		$posts_controller       = new WP_REST_Posts_Controller( 'post' );
 
 		return array(
-			'create_item_without_sub_sizes'         => array(
+			'create_item_without_sub_sizes'       => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => true,
 			),
-			'create_item_with_sub_sizes'            => array(
+			'create_item_with_sub_sizes'          => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
 				'params'   => array( 'generate_sub_sizes' => true ),
 				'expected' => false,
 			),
-			'create_item_default'                   => array(
+			'create_item_default'                 => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
 				'params'   => array(),
 				'expected' => false,
 			),
-			'create_item_with_unsanitized_string'   => array(
+			'create_item_with_unsanitized_string' => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
 				'params'   => array( 'generate_sub_sizes' => 'false' ),
 				'expected' => false,
 			),
-			'sideload_item'                         => array(
+			'sideload_item'                       => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'sideload_item' ) ),
 				'params'   => array(),
 				'expected' => true,
 			),
-			'finalize_item'                         => array(
+			'finalize_item'                       => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'finalize_item' ) ),
 				'params'   => array(),
 				'expected' => true,
 			),
-			'update_item'                           => array(
+			'update_item'                         => array(
 				'handler'  => array( 'callback' => array( $attachments_controller, 'update_item' ) ),
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => false,
 			),
-			'other_controller'                      => array(
+			'other_controller'                    => array(
 				'handler'  => array( 'callback' => array( $posts_controller, 'create_item' ) ),
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => false,
 			),
-			'function_callback'                     => array(
+			'function_callback'                   => array(
 				'handler'  => array( 'callback' => '__return_true' ),
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => false,
 			),
-			'handler_without_callback'              => array(
+			'handler_without_callback'            => array(
 				'handler'  => array(),
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => false,
 			),
-			'non_array_handler'                     => array(
+			'non_array_handler'                   => array(
 				'handler'  => null,
 				'params'   => array( 'generate_sub_sizes' => false ),
 				'expected' => false,

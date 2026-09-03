@@ -116,7 +116,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		}
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
-		$image = wp_get_attachment_image(
+		$image     = wp_get_attachment_image(
 			$attachment_id,
 			'large',
 			false,

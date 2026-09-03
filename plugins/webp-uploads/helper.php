@@ -416,8 +416,10 @@ function webp_uploads_is_client_side_media_processing_enabled(): bool {
  *
  * @since n.e.x.t
  *
- * @param WP_REST_Request<array<string, mixed>> $request The REST request.
- * @param mixed                                 $handler The route handler used for the request.
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
+ * @param WP_REST_Request $request The REST request.
+ * @param mixed           $handler The route handler used for the request.
  * @return bool True if the browser supplies the encoded images for the request, false otherwise.
  */
 function webp_uploads_is_client_side_media_processing_request( WP_REST_Request $request, $handler ): bool {

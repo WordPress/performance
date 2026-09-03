@@ -155,11 +155,11 @@ class Test_WebP_Uploads_Settings extends TestCase {
 		}
 		$this->assertSame(
 			array(
-				'webp_uploads_avif_unavailable_notice'                 => 'hidden',
-				'webp_uploads_webp_unavailable_notice'                 => 'hidden',
-				'webp_uploads_avif_browser_notice'                     => 'visible',
-				'webp_uploads_webp_browser_notice'                     => 'visible',
-				'webp_uploads_server_conversion_notice'                => 'hidden',
+				'webp_uploads_avif_unavailable_notice'  => 'hidden',
+				'webp_uploads_webp_unavailable_notice'  => 'hidden',
+				'webp_uploads_avif_browser_notice'      => 'visible',
+				'webp_uploads_webp_browser_notice'      => 'visible',
+				'webp_uploads_server_conversion_notice' => 'hidden',
 				'webp_uploads_modern_image_support_unavailable_notice' => 'hidden',
 			),
 			$notices
