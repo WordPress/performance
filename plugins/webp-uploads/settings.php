@@ -109,8 +109,12 @@ function webp_uploads_add_media_settings_fields(): void {
 		array( 'class' => 'perflab-generate-avif-and-webp' )
 	);
 
-	// Only add the remaining settings fields if at least one modern image format is supported.
-	if ( ! webp_uploads_mime_type_supported( 'image/avif' ) && ! webp_uploads_mime_type_supported( 'image/webp' ) ) {
+	// Only add the remaining settings fields if at least one modern image format can be generated, either by the server or by the browser.
+	if (
+		! webp_uploads_mime_type_supported( 'image/avif' ) &&
+		! webp_uploads_mime_type_supported( 'image/webp' ) &&
+		! webp_uploads_is_client_side_media_processing_enabled()
+	) {
 		return;
 	}
 
@@ -149,7 +153,12 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
 /**
  * Renders the settings field for the 'perflab_modern_image_format' setting.
  *
+ * Since WordPress 7.1 the block editor can convert uploads in the browser, in which case a format is available even if
+ * the server cannot encode it. Whether the browser is able to do so is a runtime check, so the notices are rendered
+ * for a capable browser and adjusted with JavaScript when the check fails.
+ *
  * @since 2.0.0
+ * @since n.e.x.t Formats which the browser can encode via client side media processing are no longer disabled.
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
@@ -158,29 +167,27 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	$avif_transparency_supported = webp_uploads_avif_transparency_supported();
 	$avif_fully_supported        = $avif_supported && $avif_transparency_supported;
 	$webp_supported              = webp_uploads_mime_type_supported( 'image/webp' );
+	$client_side_enabled         = webp_uploads_is_client_side_media_processing_enabled();
 
-	// If neither format is support, the entire field is not shown.
-	if ( ! $avif_fully_supported && ! $webp_supported ) {
-		?>
-		<br>
-		<div class="notice notice-warning inline">
-			<p><b><?php esc_html_e( 'Modern image support is not available.', 'webp-uploads' ); ?></b></p>
-			<p><?php esc_html_e( 'WebP or AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
-		</div>
-		<?php
+	// If neither format is supported by the server and the browser cannot help either, the entire field is not shown.
+	if ( ! $avif_fully_supported && ! $webp_supported && ! $client_side_enabled ) {
+		webp_uploads_render_modern_image_support_unavailable_notice( false );
 		return;
 	}
 
-	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( ! $avif_fully_supported && 'avif' === $selected ) {
-		$selected = 'webp';
-	} elseif ( ! $webp_supported && 'webp' === $selected ) {
-		$selected = 'avif';
+	// If only one of the two formats is supported by the server, the dropdown defaults to that type and the other type is disabled.
+	if ( ! $client_side_enabled ) {
+		if ( ! $avif_fully_supported && 'avif' === $selected ) {
+			$selected = 'webp';
+		} elseif ( ! $webp_supported && 'webp' === $selected ) {
+			$selected = 'avif';
+		}
 	}
+
 	?>
-	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
-		<option value="webp"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_supported ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
-		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_fully_supported ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
+	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description" data-selected="<?php echo esc_attr( $selected ); ?>">
+		<option value="webp" data-server-supported="<?php echo $webp_supported ? '1' : '0'; ?>"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_supported && ! $client_side_enabled ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
+		<option value="avif" data-server-supported="<?php echo $avif_fully_supported ? '1' : '0'; ?>"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_fully_supported && ! $client_side_enabled ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 	</select>
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
@@ -189,26 +196,140 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		<?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?>
 		<?php esc_html_e( 'Generated images may be discarded if the file in the modern format is larger than the originally uploaded image.', 'webp-uploads' ); ?>
 	</p>
-	<?php if ( ! $avif_supported ) : ?>
-		<br>
-		<div class="notice notice-warning inline">
+	<?php
+	// Notices about the server's capabilities. These are hidden when the browser can encode the format instead.
+	?>
+	<div id="webp_uploads_avif_unavailable_notice" class="notice notice-warning inline" <?php echo ( $avif_fully_supported || $client_side_enabled ) ? 'hidden' : ''; ?>>
+		<?php if ( ! $avif_supported ) : ?>
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
-		</div>
-	<?php elseif ( ! $avif_transparency_supported ) : ?>
-		<br>
-		<div class="notice notice-warning inline">
+		<?php else : ?>
 			<p><b><?php esc_html_e( 'AVIF is supported, but not fully: transparency support is lacking.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'Current ImageMagick version does not support transparent AVIF images, so contact your hosting provider for more information.', 'webp-uploads' ); ?></p>
-		</div>
-	<?php endif; ?>
-	<?php if ( ! $webp_supported ) : ?>
-		<br>
-		<div class="notice notice-warning inline">
-			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
-			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
-		</div>
-	<?php endif; ?>
+		<?php endif; ?>
+	</div>
+	<div id="webp_uploads_webp_unavailable_notice" class="notice notice-warning inline" <?php echo ( $webp_supported || $client_side_enabled ) ? 'hidden' : ''; ?>>
+		<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
+		<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+	</div>
+	<?php
+	if ( ! $client_side_enabled ) {
+		return;
+	}
+
+	// Notices about client side media processing. Whether the browser is capable is determined by the script below.
+	?>
+	<div id="webp_uploads_avif_browser_notice" class="notice notice-info inline" <?php echo $avif_fully_supported ? 'hidden' : ''; ?>>
+		<p><b><?php esc_html_e( 'AVIF images are created by your browser.', 'webp-uploads' ); ?></b></p>
+		<p>
+			<?php
+			if ( $webp_supported ) {
+				esc_html_e( 'Your server cannot generate AVIF images, but your browser can. Images uploaded in the editor are converted to AVIF in the browser. Images uploaded elsewhere, such as in the Media Library, are converted to WebP on the server instead.', 'webp-uploads' );
+			} else {
+				esc_html_e( 'Your server cannot generate AVIF images, but your browser can. Images uploaded in the editor are converted to AVIF in the browser. Images uploaded elsewhere, such as in the Media Library, are not converted.', 'webp-uploads' );
+			}
+			?>
+		</p>
+	</div>
+	<div id="webp_uploads_webp_browser_notice" class="notice notice-info inline" <?php echo $webp_supported ? 'hidden' : ''; ?>>
+		<p><b><?php esc_html_e( 'WebP images are created by your browser.', 'webp-uploads' ); ?></b></p>
+		<p><?php esc_html_e( 'Your server cannot generate WebP images, but your browser can. Images uploaded in the editor are converted to WebP in the browser. Images uploaded elsewhere, such as in the Media Library, are not converted.', 'webp-uploads' ); ?></p>
+	</div>
+	<div id="webp_uploads_server_conversion_notice" class="notice notice-info inline" hidden>
+		<p><?php esc_html_e( 'Your browser cannot convert images itself, so uploaded images are converted on the server.', 'webp-uploads' ); ?></p>
+	</div>
+	<?php
+	webp_uploads_render_modern_image_support_unavailable_notice( true );
+
+	// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
+	$js  = <<<'JS'
+	( function () {
+		/**
+		 * Detects whether the browser is able to process media client side.
+		 *
+		 * This mirrors the feature detection of the editor's upload-media package, except for the SharedArrayBuffer
+		 * check: SharedArrayBuffer is only available to cross-origin isolated documents, which the editor sets up for
+		 * itself but the settings screen does not.
+		 *
+		 * @return {boolean} Whether the browser can process media client side.
+		 */
+		function isClientSideMediaProcessingSupported() {
+			if ( typeof WebAssembly === 'undefined' || typeof Worker === 'undefined' ) {
+				return false;
+			}
+			if ( 'deviceMemory' in navigator && navigator.deviceMemory <= 2 ) {
+				return false;
+			}
+			if ( 'hardwareConcurrency' in navigator && navigator.hardwareConcurrency < 2 ) {
+				return false;
+			}
+			const connection = navigator.connection;
+			if ( connection && ( connection.saveData || 'slow-2g' === connection.effectiveType || '2g' === connection.effectiveType ) ) {
+				return false;
+			}
+			// Security plugins may set a Content Security Policy which blocks the blob: workers used for processing.
+			try {
+				const url = URL.createObjectURL( new Blob( [ '' ], { type: 'application/javascript' } ) );
+				try {
+					new Worker( url ).terminate();
+				} finally {
+					URL.revokeObjectURL( url );
+				}
+			} catch ( error ) {
+				return false;
+			}
+			return true;
+		}
+
+		if ( isClientSideMediaProcessingSupported() ) {
+			return;
+		}
+
+		// The browser cannot help, so fall back to what the server supports.
+		const select = document.getElementById( 'perflab_modern_image_format' );
+		const options = Array.from( select.options );
+		let serverSupportsAny = false;
+		for ( const option of options ) {
+			const serverSupported = '1' === option.dataset.serverSupported;
+			option.disabled = ! serverSupported;
+			serverSupportsAny = serverSupportsAny || serverSupported;
+			document.getElementById( 'webp_uploads_' + option.value + '_browser_notice' ).hidden = true;
+			document.getElementById( 'webp_uploads_' + option.value + '_unavailable_notice' ).hidden = serverSupported;
+		}
+		document.getElementById( 'webp_uploads_server_conversion_notice' ).hidden = ! serverSupportsAny;
+
+		if ( ! serverSupportsAny ) {
+			select.hidden = true;
+			select.disabled = true;
+			select.labels.forEach( ( label ) => { label.hidden = true; } );
+			document.getElementById( 'perflab_modern_image_format_description' ).hidden = true;
+			document.getElementById( 'webp_uploads_modern_image_support_unavailable_notice' ).hidden = false;
+			return;
+		}
+
+		// Make sure a supported format is selected, so that the submitted value is not lost.
+		if ( select.selectedOptions.length === 0 || select.selectedOptions[ 0 ].disabled ) {
+			select.value = options.find( ( option ) => ! option.disabled ).value;
+		}
+	} )();
+	JS;
+	$js .= "\n//# sourceURL=webp-uploads-settings-client-side-media-processing";
+	wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
+}
+
+/**
+ * Renders the notice shown when no modern image format can be generated.
+ *
+ * @since n.e.x.t
+ *
+ * @param bool $hidden Whether the notice is initially hidden.
+ */
+function webp_uploads_render_modern_image_support_unavailable_notice( bool $hidden ): void {
+	?>
+	<div id="webp_uploads_modern_image_support_unavailable_notice" class="notice notice-warning inline" <?php echo $hidden ? 'hidden' : ''; ?>>
+		<p><b><?php esc_html_e( 'Modern image support is not available.', 'webp-uploads' ); ?></b></p>
+		<p><?php esc_html_e( 'WebP or AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+	</div>
 	<?php
 }
 
