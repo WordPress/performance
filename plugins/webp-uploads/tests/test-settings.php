@@ -167,7 +167,7 @@ class Test_WebP_Uploads_Settings extends TestCase {
 
 		$this->assertStringContainsString( 'AVIF images are created by your browser.', $output );
 		$this->assertStringContainsString( 'are not converted.', $output );
-		$this->assertStringContainsString( '<script>', $output );
+		$this->assertStringContainsString( '<script type="module">', $output );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class Test_WebP_Uploads_Settings extends TestCase {
 		);
 
 		$this->assertStringNotContainsString( 'created by your browser', $output );
-		$this->assertStringNotContainsString( '<script>', $output );
+		$this->assertStringNotContainsString( '<script type="module">', $output );
 	}
 
 	/**

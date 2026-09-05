@@ -240,8 +240,9 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	</div>
 	<?php
 	webp_uploads_render_modern_image_support_unavailable_notice( true );
-	?>
-	<script>
+
+	// phpcs:ignore Squiz.PHP.Heredoc.NotAllowed -- Part of the PCP ruleset. Appealed in <https://github.com/WordPress/plugin-check/issues/792#issuecomment-3214985527>.
+	$js  = <<<'JS'
 	( function () {
 		/**
 		 * Detects whether the browser is able to process media client side.
@@ -311,8 +312,9 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 			select.value = options.find( ( option ) => ! option.disabled ).value;
 		}
 	} )();
-	</script>
-	<?php
+	JS;
+	$js .= "\n//# sourceURL=webp-uploads-settings-client-side-media-processing";
+	wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 }
 
 /**
