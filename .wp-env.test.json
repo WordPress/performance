@@ -22,5 +22,8 @@
 	},
 	"mappings": {
 		"wp-content/plugins/performance": "."
+	},
+	"lifecycleScripts": {
+		"afterStart": "npx wp-env --config=.wp-env.test.json run wordpress git config --global --replace-all safe.directory /var/www/html/wp-content/plugins/performance"
 	}
 }
