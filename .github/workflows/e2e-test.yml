@@ -61,7 +61,7 @@ jobs:
         run: npm run build
 
       - name: Install Playwright dependencies
-        run: npx playwright install chromium --with-deps
+        run: npm exec --no -- playwright install chromium --with-deps
 
       - name: Install WordPress
         run: npm run wp-env-test start
