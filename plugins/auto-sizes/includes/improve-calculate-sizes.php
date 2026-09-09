@@ -313,7 +313,8 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		'core/cover'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/image'               => array( 'max_alignment', 'container_relative_width' ),
 		'core/post-featured-image' => array( 'max_alignment', 'container_relative_width' ),
-		'core/group'               => array( 'max_alignment' ),
+		'core/gallery'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
+		'core/group'               => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/columns'             => array( 'max_alignment', 'column_count', 'container_relative_width' ),
 		'core/column'              => array( 'max_alignment' ),
 	);
@@ -323,6 +324,75 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 		return array_values( array_unique( array_merge( $uses_context, $block_specific_context[ $block_type->name ] ) ) );
 	}
 	return $uses_context;
+}
+
+/**
+ * Gets the number of equal-width columns for a layout block.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $block The parsed block.
+ * @return int The number of columns, or 0 if the block does not constrain child widths equally.
+ */
+function auto_sizes_get_layout_block_column_count( array $block ): int {
+	$inner_block_count = isset( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ? count( $block['innerBlocks'] ) : 0;
+
+	if ( 'core/columns' === $block['blockName'] ) {
+		return $inner_block_count;
+	}
+
+	if ( 'core/gallery' === $block['blockName'] ) {
+		$column_count = isset( $block['attrs']['columns'] ) ? (int) $block['attrs']['columns'] : 0;
+
+		return $column_count > 0 ? $column_count : $inner_block_count;
+	}
+
+	if (
+		'core/group' === $block['blockName'] &&
+		isset( $block['attrs']['layout']['type'] ) &&
+		'grid' === $block['attrs']['layout']['type']
+	) {
+		$column_count = isset( $block['attrs']['layout']['columnCount'] ) ? (int) $block['attrs']['layout']['columnCount'] : 0;
+
+		return $column_count > 0 ? $column_count : $inner_block_count;
+	}
+
+	return 0;
+}
+
+/**
+ * Inherits equal-width layout constraints from a parent block.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $context      Current block context.
+ * @param WP_Block             $parent_block Parent block instance.
+ * @return array<string, mixed> Modified block context.
+ */
+function auto_sizes_inherit_parent_layout_width( array $context, WP_Block $parent_block ): array {
+	$column_count = isset( $parent_block->context['column_count'] ) ? (int) $parent_block->context['column_count'] : 0;
+
+	if ( 0 === $column_count && is_array( $parent_block->parsed_block ) ) {
+		$column_count = auto_sizes_get_layout_block_column_count( $parent_block->parsed_block );
+	}
+
+	if ( $column_count <= 0 ) {
+		return $context;
+	}
+
+	$current_width = 1.0 / $column_count;
+
+	if (
+		isset( $parent_block->context['container_relative_width'] ) &&
+		( $current_width > 0.0 ||
+		$current_width < 1.0 )
+	) {
+		$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
+	} else {
+		$context['container_relative_width'] = $current_width;
+	}
+
+	return $context;
 }
 
 /**
@@ -341,6 +411,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 	// The list of blocks that can modify outer layout context.
 	$provider_blocks = array(
+		'core/gallery',
 		'core/columns',
 		'core/group',
 		'core/post-featured-image',
@@ -355,9 +426,10 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
 
-	if ( 'core/columns' === $block['blockName'] ) {
-		// This is a special context key just to pass to the child 'core/column' block.
-		$context['column_count'] = count( $block['innerBlocks'] );
+	$column_count = auto_sizes_get_layout_block_column_count( $block );
+	if ( $column_count > 0 ) {
+		// This context value is used to calculate equal-width child layouts.
+		$context['column_count'] = $column_count;
 	}
 
 	if ( 'core/column' === $block['blockName'] ) {
@@ -385,6 +457,13 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 				$context['container_relative_width'] = $current_width;
 			}
 		}
+	}
+
+	if (
+		null !== $parent_block &&
+		in_array( $block['blockName'], array( 'core/cover', 'core/image', 'core/post-featured-image' ), true )
+	) {
+		$context = auto_sizes_inherit_parent_layout_width( $context, $parent_block );
 	}
 	return $context;
 }
