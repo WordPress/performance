@@ -310,12 +310,6 @@ add_filter( 'od_maximum_viewport_aspect_ratio', static function (): int {
 } );
 ```
 
-### Filter: `od_template_output_buffer` (default: the HTML response)
-
-Filters the template output buffer before sending it to the client. 
-
-This filter is added to implement [\#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
-
 ### Filter: `od_url_metric_schema_element_item_additional_properties` (default: empty array)
 
 Filters additional schema properties which should be allowed for an element's item in a URL Metric.
