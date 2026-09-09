@@ -28,25 +28,51 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
+		$rgb = $this->get_dominant_color_rgb();
+		if ( is_wp_error( $rgb ) ) {
+			return $rgb;
+		}
 
+		$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+		if ( null === $hex ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
+		return $hex;
+	}
+
+	/**
+	 * Get dominant color from a file as RGB values.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 */
+	public function get_dominant_color_rgb() {
 		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 
 		try {
-			// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
-			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
-			$pixel = $this->image->getImagePixelColor( 0, 0 );
+			// Clone so $this->image is not mutated — otherwise subsequent
+			// calls (e.g. get_lqip_grid_values) would operate on a 1×1 image.
+			$thumb = clone $this->image;
+
+			// Convert to linear RGB before resizing to avoid gamma-skewed averaging.
+			$thumb->transformImageColorspace( Imagick::COLORSPACE_RGB );
+			$thumb->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
+			$thumb->transformImageColorspace( Imagick::COLORSPACE_SRGB );
+			$pixel = $thumb->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
+
 			// Cast to int: ImagickPixel::getColor() may return floats depending on
 			// ImageMagick/Imagick configuration, which would break the int contract
-			// of dominant_color_rgb_to_hex() under strict_types.
-			$hex = dominant_color_rgb_to_hex( (int) $color['r'], (int) $color['g'], (int) $color['b'] );
-			if ( null === $hex ) {
-				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-			}
-
-			return $hex;
+			// of this method under strict_types.
+			return array(
+				'r' => (int) $color['r'],
+				'g' => (int) $color['g'],
+				'b' => (int) $color['b'],
+			);
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
 			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
@@ -97,6 +123,68 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
 			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Get the 3×2 grid pixel values from the image.
+	 *
+	 * The grid is a 3-column × 2-row sampling of the image, resized to
+	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
+	 * in LQIP generation.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<int, array{r: int, g: int, b: int}>|WP_Error 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B], or WP_Error on failure.
+	 */
+	public function get_lqip_grid_values() {
+
+		// Skip LQIP generation for images with transparency (the gradient
+		// placeholder would show through transparent areas).
+		$has_transparency = $this->has_transparency();
+		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
+		}
+
+		try {
+			$small = clone $this->image;
+
+			// Resize to 3×2.
+			$small->resizeImage( 3, 2, Imagick::FILTER_LANCZOS, 1 );
+			$small->sharpenImage( 0, 0.5 );
+
+			// Flatten if the image has an alpha channel.
+			if ( is_callable( array( $small, 'getImageAlphaChannel' ) ) && $small->getImageAlphaChannel() ) {
+				$small->setImageBackgroundColor( 'white' );
+				$small = $small->mergeImageLayers( Imagick::LAYERMETHOD_FLATTEN );
+			}
+
+			// Cell positions: left-to-right, top-to-bottom.
+			$cell_positions = array(
+				array( 0, 0 ),
+				array( 1, 0 ),
+				array( 2, 0 ),
+				array( 0, 1 ),
+				array( 1, 1 ),
+				array( 2, 1 ),
+			);
+
+			$values = array();
+
+			foreach ( $cell_positions as $pos ) {
+				$pixel    = $small->getImagePixelColor( $pos[0], $pos[1] );
+				$color    = $pixel->getColor();
+				$values[] = array(
+					'r' => $color['r'],
+					'g' => $color['g'],
+					'b' => $color['b'],
+				);
+			}
+
+			return $values;
+
+		} catch ( Exception $e ) {
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
 		}
 	}
 }

@@ -93,7 +93,7 @@ function dominant_color_filter_image_editors( $editors ): array {
  * @access private
  *
  * @param int $attachment_id The attachment ID.
- * @return array{ has_transparency?: bool, dominant_color?: string }|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
+ * @return array{ has_transparency?: bool, dominant_color?: string, lqip?: int }|WP_Error Array with the dominant color, has transparency, and optional LQIP values or WP_Error on error.
  */
 function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	$mime_type            = get_post_mime_type( $attachment_id );
@@ -158,11 +158,27 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 
 	$dominant_color_data['has_transparency'] = $has_transparency;
 
-	$dominant_color = $editor->get_dominant_color();
-	if ( is_wp_error( $dominant_color ) ) {
-		return $dominant_color;
+	$rgb = $editor->get_dominant_color_rgb();
+	if ( is_wp_error( $rgb ) ) {
+		return $rgb;
 	}
-	$dominant_color_data['dominant_color'] = $dominant_color;
+	$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
+	if ( null === $hex ) {
+		return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+	}
+	$dominant_color_data['dominant_color'] = $hex;
+
+	// LQIP generation.
+	require_once __DIR__ . '/lqip-generator.php';
+
+	$grid = $editor->get_lqip_grid_values();
+	if ( ! is_wp_error( $grid ) ) {
+		try {
+			$dominant_color_data['lqip'] = dominant_color_lqip_generate( $rgb, $grid );
+		} catch ( \UnexpectedValueException $e ) {
+			wp_trigger_error( 'dominant_color_lqip_generate', $e->getMessage() );
+		}
+	}
 
 	return $dominant_color_data;
 }
