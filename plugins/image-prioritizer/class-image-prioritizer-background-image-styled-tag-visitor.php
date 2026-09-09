@@ -38,6 +38,24 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	const LAZY_BG_IMAGE_CLASS_NAME = 'od-lazy-bg-image';
 
 	/**
+	 * Pattern for matching the URL of a background image in a `style` attribute.
+	 *
+	 * @since n.e.x.t
+	 * @var non-empty-string
+	 */
+	const BACKGROUND_IMAGE_PATTERN = '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/';
+
+	/**
+	 * Name of the attribute which contains the attachment ID for an element's background image.
+	 *
+	 * This is added by {@see image_prioritizer_add_background_image_attachment_id()}.
+	 *
+	 * @since n.e.x.t
+	 * @var non-empty-string
+	 */
+	const ATTACHMENT_ID_ATTR_NAME = 'data-image-prioritizer-bg-attachment-id';
+
+	/**
 	 * Whether the lazy-loading script and stylesheet have been added.
 	 *
 	 * @since 0.3.0
@@ -77,7 +95,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		if (
 			is_string( $style )
 			&&
-			1 === preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
+			1 === preg_match( self::BACKGROUND_IMAGE_PATTERN, $style, $matches )
 			&&
 			! $this->is_data_url( $matches['background_image'] )
 		) {
@@ -88,6 +106,10 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			$this->maybe_preload_external_lcp_background_image( $context );
 			return false;
 		}
+
+		// Reduce the background image size if URL Metrics are available. Note this must happen before the preload link
+		// is added below so that the preloaded image is the same one that ends up being used.
+		$background_image_url = $this->reduce_background_image_size( $background_image_url, $context );
 
 		$xpath = $processor->get_xpath();
 
@@ -243,5 +265,128 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_lazy_load_bg_image_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_assets = true;
 		}
+	}
+
+	/**
+	 * Reduces background image size by choosing one that fits the element dimensions more closely.
+	 *
+	 * This is similar to how VIDEO poster images are optimized in the Video Tag Visitor. Since a background image has no
+	 * `srcset` for the browser to select an appropriately-sized image from, the full size image is often used even when
+	 * the element it is displayed in is much smaller.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param non-empty-string       $background_image_url Background image URL.
+	 * @param OD_Tag_Visitor_Context $context              Tag visitor context, with the cursor currently at an element with a background image.
+	 * @return non-empty-string The background image URL which is now used by the element.
+	 */
+	private function reduce_background_image_size( string $background_image_url, OD_Tag_Visitor_Context $context ): string {
+		$processor = $context->processor;
+
+		// The attachment ID is only known for background images added by a block. See image_prioritizer_add_background_image_attachment_id().
+		$attachment_id = $processor->get_attribute( self::ATTACHMENT_ID_ATTR_NAME );
+		if ( ! is_string( $attachment_id ) || ! is_numeric( $attachment_id ) || (int) $attachment_id <= 0 ) {
+			return $background_image_url;
+		}
+
+		$max_element_width = $this->get_max_element_width( $context );
+
+		// If the element wasn't present in any URL Metrics gathered for desktop, then abort downsizing the background image.
+		if ( null === $max_element_width ) {
+			return $background_image_url;
+		}
+
+		$smaller_image_url = $this->get_smaller_image_url( (int) $attachment_id, $background_image_url, (int) $max_element_width );
+		if ( null === $smaller_image_url ) {
+			return $background_image_url;
+		}
+
+		// Replace the background image URL in the style attribute.
+		$style = $processor->get_attribute( 'style' );
+		if ( ! is_string( $style ) ) {
+			return $background_image_url;
+		}
+		$processor->set_attribute( 'style', str_replace( $background_image_url, $smaller_image_url, $style ) );
+
+		return $smaller_image_url;
+	}
+
+	/**
+	 * Gets the URL for a smaller version of an attachment's image, if one is available.
+	 *
+	 * This ensures a larger image is never served in place of the image currently being used, which could otherwise
+	 * happen when the current image is already smaller than the element it is displayed in.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int              $attachment_id Attachment ID.
+	 * @param non-empty-string $current_url   URL of the image currently being used.
+	 * @param int              $max_width     Maximum width at which the image is displayed.
+	 * @return non-empty-string|null URL for a smaller image, or null if no smaller image is available.
+	 */
+	private function get_smaller_image_url( int $attachment_id, string $current_url, int $max_width ): ?string {
+		if ( $max_width <= 0 ) {
+			return null;
+		}
+
+		$smaller_image = wp_get_attachment_image_src( $attachment_id, array( $max_width, 0 ) );
+		if ( false === $smaller_image || '' === $smaller_image[0] || $smaller_image[0] === $current_url ) {
+			return null;
+		}
+
+		/*
+		 * Note that the width returned by wp_get_attachment_image_src() is the width the image is constrained to for
+		 * display rather than the width of the image file itself, so the widths are obtained from the attachment
+		 * metadata.
+		 */
+		$current_width = $this->get_attachment_image_width( $attachment_id, $current_url );
+		$smaller_width = $this->get_attachment_image_width( $attachment_id, $smaller_image[0] );
+		if ( null === $current_width || null === $smaller_width || $smaller_width >= $current_width ) {
+			return null;
+		}
+
+		return $smaller_image[0];
+	}
+
+	/**
+	 * Gets the width of the image which an attachment URL refers to.
+	 *
+	 * File extensions are disregarded when matching the URL against the attachment's files since a plugin may serve the
+	 * image in another format, as WebP Uploads does.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int              $attachment_id Attachment ID.
+	 * @param non-empty-string $url           Image URL.
+	 * @return int|null Image width, or null if the attachment has no image metadata.
+	 */
+	private function get_attachment_image_width( int $attachment_id, string $url ): ?int {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		if ( ! is_array( $metadata ) || ! isset( $metadata['width'] ) ) {
+			return null;
+		}
+
+		$get_file_stem = static function ( string $file ): string {
+			return (string) preg_replace( '/\.\w+$/', '', wp_basename( $file ) );
+		};
+
+		$stem = $get_file_stem( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+
+		foreach ( $metadata['sizes'] ?? array() as $size ) {
+			if ( isset( $size['file'], $size['width'] ) && $get_file_stem( $size['file'] ) === $stem ) {
+				return (int) $size['width'];
+			}
+		}
+
+		/*
+		 * An original image is only retained when the uploaded image exceeded the big image size threshold, in which
+		 * case it is larger than the full size image.
+		 */
+		if ( isset( $metadata['original_image'] ) && $get_file_stem( $metadata['original_image'] ) === $stem ) {
+			return PHP_INT_MAX;
+		}
+
+		// Fall back to the width of the full size image, which is also the size used when the URL is not recognized.
+		return (int) $metadata['width'];
 	}
 }
