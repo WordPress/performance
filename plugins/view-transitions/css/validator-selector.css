@@ -1,0 +1,34 @@
+/**
+ * CSS Selector Validation Styles
+ *
+ * Styles for visual feedback of CSS selector validation.
+ *
+ * @since n.e.x.t
+ */
+
+/* Valid selector indicator */
+input.plvt-selector-valid {
+	border-color: #46b450 !important;
+	background-color: #f0fdf4;
+}
+
+input.plvt-selector-valid:focus {
+	border-color: #46b450 !important;
+}
+
+/* Invalid selector indicator */
+input.plvt-selector-invalid {
+	border-color: #dc2626 !important;
+	background-color: #fdf2f2;
+}
+
+input.plvt-selector-invalid:focus {
+	border-color: #dc2626 !important;
+}
+
+/* Error message styling */
+.plvt-selector-error {
+	color: #dc2626;
+	margin-top: 5px;
+	font-style: italic;
+}
