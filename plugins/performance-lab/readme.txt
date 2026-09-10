@@ -369,7 +369,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Bug Fixes**
 
 * Images: Add dominant color styling before any existing inline style attributes. ([716](https://github.com/WordPress/performance/pull/716))
-* Infrastructure: Resolve low-severity security advisory [GHSA-66qq-69rw-6x63](https://github.com/WordPress/performance/security/advisories/GHSA-66qq-69rw-6x63).
+* Infrastructure: Resolve low-severity security advisory GHSA-66qq-69rw-6x63.
 
 = 2.2.0 =
 
