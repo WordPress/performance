@@ -17,7 +17,7 @@
 		"@types/lodash": "4.17.25",
 		"@types/node": "^20.19.43",
 		"@wordpress/e2e-test-utils-playwright": "1.54.0",
-		"@wordpress/env": "^11.14.0",
+		"@wordpress/env": "^11.15.0",
 		"@wordpress/prettier-config": "^4.54.0",
 		"@wordpress/scripts": "^34.2.0",
 		"ajv": "8.20.0",
