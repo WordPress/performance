@@ -38,7 +38,10 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
-			$hex   = dominant_color_rgb_to_hex( $color['r'], $color['g'], $color['b'] );
+			// Cast to int: ImagickPixel::getColor() may return floats depending on
+			// ImageMagick/Imagick configuration, which would break the int contract
+			// of dominant_color_rgb_to_hex() under strict_types.
+			$hex = dominant_color_rgb_to_hex( (int) $color['r'], (int) $color['g'], (int) $color['b'] );
 			if ( null === $hex ) {
 				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 			}

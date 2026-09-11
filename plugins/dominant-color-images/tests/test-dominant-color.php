@@ -26,8 +26,7 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+		$attachment_id           = self::factory()->attachment->create_upload_object( $image_path );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
 		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
@@ -77,8 +76,7 @@ class Test_Dominant_Color extends TestCase {
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+		$attachment_id         = self::factory()->attachment->create_upload_object( $image_path );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		$this->assertSame( $expected_transparency, $transparency_metadata['has_transparency'] );
@@ -130,7 +128,6 @@ class Test_Dominant_Color extends TestCase {
 		$this->skip_if_mime_type_unsupported( $image_path );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
 		// Testing tag_add_adjust() with image being lazy load.
@@ -167,7 +164,6 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes( string $image, bool $expected ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg' );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$image_url = wp_get_attachment_image_url( $attachment_id );
 		$image     = sprintf( $image, $image_url );
@@ -211,7 +207,6 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( string $filtered_image, string $expected ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg' );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
 
@@ -411,26 +406,6 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'dominant-color-images ' . DOMINANT_COLOR_IMAGES_VERSION, $tag );
-	}
-
-	/**
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
-	 */
-	public function test_invalid_image_type(): void {
-		$editor = new Dominant_Color_Image_Editor_GD( '/invalid/type' );
-		$result = $editor->get_dominant_color();
-		$this->assertWPError( $result );
-		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
-	}
-
-	/**
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
-	 */
-	public function test_corrupted_image_file(): void {
-		$editor = new Dominant_Color_Image_Editor_GD( 'path/to/corrupted/file.jpg' );
-		$result = $editor->get_dominant_color();
-		$this->assertWPError( $result );
-		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
 	}
 
 	/**

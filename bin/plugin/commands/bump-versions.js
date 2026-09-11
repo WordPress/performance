@@ -18,9 +18,15 @@ const { plugins } = require( '../../../plugins.json' );
 /**
  * @typedef WPBumpVersionsCommandOptions
  *
- * @property {string=}  plugin Optional plugin slug to limit bumping to a single plugin.
- * @property {string=}  token  Optional personal GitHub access token.
- * @property {boolean=} dryRun Whether to only report what would change without writing.
+ * @property {string=}  plugin     Optional plugin slug to limit bumping to a single plugin.
+ * @property {string=}  increment  Optional increment level ("major", "minor", "patch", or
+ *                                 "prerelease") to derive the target version from the current
+ *                                 one instead of from a release milestone.
+ * @property {string=}  setVersion Optional explicit target version, bypassing both release
+ *                                 milestones and --increment.
+ * @property {boolean=} all        Whether to target every plugin; requires --increment.
+ * @property {string=}  token      Optional personal GitHub access token.
+ * @property {boolean=} dryRun     Whether to only report what would change without writing.
  */
 
 /**
@@ -35,11 +41,30 @@ const { plugins } = require( '../../../plugins.json' );
 
 const VERSION_PATTERN = '\\d+\\.\\d+\\.\\d+(?:-[\\w.]+)?';
 
+const INCREMENT_LEVELS = [ 'major', 'minor', 'patch', 'prerelease' ];
+
 exports.options = [
 	{
 		argname: '-p, --plugin <plugin>',
 		description:
 			'The plugin slug to bump; if omitted, all plugins with a matching milestone are bumped',
+	},
+	{
+		argname: '-i, --increment <level>',
+		description: `Derive the target version from the current one rather than from a release milestone: ${ INCREMENT_LEVELS.join(
+			', '
+		) }`,
+	},
+	{
+		argname: '-s, --set-version <version>',
+		description:
+			'Set an explicit target version, bypassing both release milestones and --increment',
+	},
+	{
+		argname: '-a, --all',
+		description:
+			'Target every plugin; only valid together with --increment',
+		defaults: false,
 	},
 	{
 		argname: '-t, --token <token>',
@@ -64,27 +89,65 @@ exports.options = [
  *  - the "Stable tag" in readme.txt, and
  *  - a new (empty) changelog entry is inserted so the readme is ready for `npm run readme`.
  *
+ * Alternatively, passing --increment or --set-version skips the milestone lookup entirely
+ * and derives the target version from each plugin's current "Stable tag". In that mode the
+ * plugins to bump are named explicitly (as positional arguments), because the appropriate
+ * increment level differs per plugin and must not be guessed.
+ *
+ * @param {string[]}                     pluginSlugs Plugin slugs given as positional arguments;
+ *                                                   commander passes an empty array when none.
  * @param {WPBumpVersionsCommandOptions} opt
  */
-exports.handler = async ( opt ) => {
-	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
+exports.handler = async ( pluginSlugs, opt ) => {
+	const requestedSlugs = [ ...new Set( pluginSlugs ) ];
+	if ( opt.plugin && ! requestedSlugs.includes( opt.plugin ) ) {
+		requestedSlugs.push( opt.plugin );
+	}
+
+	for ( const slug of requestedSlugs ) {
+		if ( ! plugins.includes( slug ) ) {
+			throw new Error(
+				`The plugin "${ slug }" is not a valid plugin managed as part of this project.`
+			);
+		}
+	}
+
+	if ( opt.increment && opt.setVersion ) {
 		throw new Error(
-			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
+			'The --increment and --set-version options are mutually exclusive.'
 		);
 	}
 
+	if ( opt.increment || opt.setVersion ) {
+		await bumpWithoutMilestone( requestedSlugs, opt );
+		return;
+	}
+
+	if ( opt.all ) {
+		throw new Error(
+			'The --all option requires --increment, since milestones already determine which plugins to bump.'
+		);
+	}
+
+	if ( requestedSlugs.length > 1 ) {
+		throw new Error(
+			`Milestone-based bumping targets at most one plugin, but ${ requestedSlugs.length } were given. Pass --increment or --set-version to bump several plugins at once.`
+		);
+	}
+
+	const milestonePlugin = requestedSlugs[ 0 ];
 	const milestones = await getReleaseMilestones( opt.token );
 
 	let selected = milestones;
-	if ( opt.plugin ) {
-		selected = milestones.filter( ( m ) => m.slug === opt.plugin );
+	if ( milestonePlugin ) {
+		selected = milestones.filter( ( m ) => m.slug === milestonePlugin );
 	}
 
 	if ( selected.length === 0 ) {
 		log(
 			formats.warning(
-				opt.plugin
-					? `⚠ No release milestone (open, dated, without "n.e.x.t") found for ${ opt.plugin }.`
+				milestonePlugin
+					? `⚠ No release milestone (open, dated, without "n.e.x.t") found for ${ milestonePlugin }.`
 					: '⚠ No release milestones (open, dated, without "n.e.x.t") found.'
 			)
 		);
@@ -154,6 +217,188 @@ exports.handler = async ( opt ) => {
 		}
 	}
 };
+
+/**
+ * Bumps the given plugins without consulting release milestones, deriving each target
+ * version from the plugin's current "Stable tag" via --increment, or using --set-version
+ * verbatim.
+ *
+ * Every target version is resolved before anything is written, so a validation failure
+ * (most importantly the prerelease guard) aborts the whole run rather than leaving some
+ * plugins bumped and others not.
+ *
+ * @param {string[]}                     requestedSlugs Explicitly named plugin slugs.
+ * @param {WPBumpVersionsCommandOptions} opt
+ */
+async function bumpWithoutMilestone( requestedSlugs, opt ) {
+	if ( opt.increment && ! INCREMENT_LEVELS.includes( opt.increment ) ) {
+		throw new Error(
+			`Unknown --increment level "${
+				opt.increment
+			}"; expected one of: ${ INCREMENT_LEVELS.join( ', ' ) }.`
+		);
+	}
+
+	if (
+		opt.setVersion &&
+		! new RegExp( `^${ VERSION_PATTERN }$` ).test( opt.setVersion )
+	) {
+		throw new Error(
+			`"${ opt.setVersion }" is not a valid version (expected e.g. "1.2.3" or "1.0.0-beta4").`
+		);
+	}
+
+	let targetSlugs = requestedSlugs;
+	if ( opt.all ) {
+		if ( requestedSlugs.length > 0 ) {
+			throw new Error(
+				'The --all option cannot be combined with an explicit list of plugins.'
+			);
+		}
+		targetSlugs = plugins;
+	}
+
+	if ( targetSlugs.length === 0 ) {
+		throw new Error(
+			'No plugins were named. List the plugin slugs to bump (e.g. `bump-versions --increment minor auto-sizes webp-uploads`), or pass --all for every plugin.'
+		);
+	}
+
+	if ( opt.setVersion && targetSlugs.length > 1 ) {
+		throw new Error(
+			`The --set-version option applies to a single plugin, but ${ targetSlugs.length } were given.`
+		);
+	}
+
+	const pluginRoot = path.resolve( __dirname, '../../../' );
+
+	// Resolve first, write second.
+	const targets = [ ...targetSlugs ].sort().map( ( slug ) => {
+		const pluginDirectory = path.resolve( pluginRoot, 'plugins', slug );
+		const currentVersion = readCurrentVersion( pluginDirectory, slug );
+		const version =
+			opt.setVersion ??
+			incrementVersion( currentVersion, opt.increment ?? '', slug );
+		return { slug, pluginDirectory, currentVersion, version };
+	} );
+
+	for ( const {
+		slug,
+		pluginDirectory,
+		currentVersion,
+		version,
+	} of targets ) {
+		try {
+			const changes = await bumpPlugin(
+				pluginDirectory,
+				version,
+				opt.dryRun
+			);
+			const prefix = opt.dryRun ? '🔍 [dry-run] ' : '💃 ';
+			log(
+				formats.success(
+					`${ prefix }${ slug }: ${ currentVersion } → ${ version }:`
+				)
+			);
+			for ( const change of changes ) {
+				log( `    ${ change }` );
+			}
+		} catch ( error ) {
+			const message =
+				error instanceof Error ? error.message : 'Unknown error';
+			log( formats.error( `❌ ${ slug }: ${ message }` ) );
+			process.exitCode = 1;
+		}
+	}
+}
+
+/**
+ * Reads a plugin's current version from the "Stable tag" in its readme.txt.
+ *
+ * @param {string} pluginDirectory Absolute path to the plugin directory.
+ * @param {string} slug            Plugin slug, for error messages.
+ * @return {string} The current version.
+ */
+function readCurrentVersion( pluginDirectory, slug ) {
+	const readmeFile = path.resolve( pluginDirectory, 'readme.txt' );
+	if ( ! fs.existsSync( readmeFile ) ) {
+		throw new Error( `Unable to locate readme.txt for ${ slug }.` );
+	}
+	const matches = fs
+		.readFileSync( readmeFile, 'utf-8' )
+		.match( new RegExp( `^Stable tag:\\s*(${ VERSION_PATTERN })$`, 'm' ) );
+	if ( ! matches ) {
+		throw new Error( `Unable to locate "Stable tag" in ${ readmeFile }.` );
+	}
+	return matches[ 1 ];
+}
+
+/**
+ * Increments a version by the given level.
+ *
+ * The "prerelease" level increments the trailing number of the prerelease component, so
+ * "1.0.0-beta5" becomes "1.0.0-beta6". This is deliberately hand-rolled rather than
+ * delegated to semver: `semver.inc( '1.0.0-beta5', 'prerelease' )` yields "1.0.0-beta5.0",
+ * because semver treats "beta5" as a single alphanumeric identifier.
+ *
+ * Incrementing a version that has a prerelease component by major/minor/patch is refused,
+ * since that would silently graduate a beta to a stable release.
+ *
+ * @param {string} currentVersion Current version.
+ * @param {string} level          Increment level.
+ * @param {string} slug           Plugin slug, for error messages.
+ * @return {string} The incremented version.
+ */
+function incrementVersion( currentVersion, level, slug ) {
+	const matches = currentVersion.match(
+		/^(\d+)\.(\d+)\.(\d+)(?:-([\w.]+))?$/
+	);
+	if ( ! matches ) {
+		throw new Error(
+			`Unable to parse the current version "${ currentVersion }" of ${ slug }.`
+		);
+	}
+	const [ , major, minor, patch, prerelease ] = matches;
+
+	if ( 'prerelease' === level ) {
+		if ( ! prerelease ) {
+			throw new Error(
+				`${ slug } is at ${ currentVersion }, which has no prerelease component to increment. Use --increment patch/minor/major, or --set-version.`
+			);
+		}
+		const prereleaseMatches = prerelease.match( /^(.*?)(\d+)$/ );
+		if ( ! prereleaseMatches ) {
+			throw new Error(
+				`Unable to increment the prerelease component of ${ slug }'s version "${ currentVersion }" because it does not end in a number. Use --set-version.`
+			);
+		}
+		const [ , label, number ] = prereleaseMatches;
+		return `${ major }.${ minor }.${ patch }-${ label }${
+			Number( number ) + 1
+		}`;
+	}
+
+	if ( prerelease ) {
+		throw new Error(
+			`${ slug } is at ${ currentVersion }, so --increment ${ level } would graduate it to a stable release. Use --increment prerelease for the next prerelease, or --set-version to set it explicitly.`
+		);
+	}
+
+	switch ( level ) {
+		case 'major':
+			return `${ Number( major ) + 1 }.0.0`;
+		case 'minor':
+			return `${ major }.${ Number( minor ) + 1 }.0`;
+		case 'patch':
+			return `${ major }.${ minor }.${ Number( patch ) + 1 }`;
+		default:
+			throw new Error(
+				`Unknown --increment level "${ level }"; expected one of: ${ INCREMENT_LEVELS.join(
+					', '
+				) }.`
+			);
+	}
+}
 
 /**
  * Fetches the release milestones: open milestones with a due date whose title is

@@ -317,6 +317,65 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					'/HTML/BODY/DIV[@id=\'page\']/*[63][self::UL]' => array( 'HTML', 'BODY', 'DIV', 'UL' ),
 				),
 			),
+			'stray-closing-p'                        => array(
+				'document'          => '
+					<html>
+						<head></head>
+						<body>
+							<div id="page">
+								<!-- As output by wpautop() when caption shortcodes inside a paragraph expand into FIGURE elements, which implicitly close the P. The closing P tag is then stray. -->
+								<p><figure class="wp-caption"><img src="https://example.com/bison1.jpg" width="300" height="226" alt=""><figcaption>This is a bison.</figcaption></figure><br>
+								<figure class="wp-caption"><img src="https://example.com/bison2.jpg" width="300" height="226" alt=""><figcaption>This is another bison.</figcaption></figure></p>
+								<footer>The end!</footer>
+							</div>
+						</body>
+					</html>
+				',
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'P', 'FIGURE', 'IMG', 'FIGCAPTION', 'BR', 'FIGURE', 'IMG', 'FIGCAPTION', 'FOOTER' ),
+				'xpath_breadcrumbs' => array(
+					'/HTML'                        => array( 'HTML' ),
+					'/HTML/HEAD'                   => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                   => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'page\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::P]' => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::FIGURE]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::FIGURE]/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'IMG' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::FIGURE]/*[2][self::FIGCAPTION]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'FIGCAPTION' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[3][self::BR]' => array( 'HTML', 'BODY', 'DIV', 'BR' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[4][self::FIGURE]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[4][self::FIGURE]/*[1][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'IMG' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[4][self::FIGURE]/*[2][self::FIGCAPTION]' => array( 'HTML', 'BODY', 'DIV', 'FIGURE', 'FIGCAPTION' ),
+					// Note the index 6 accounts for the empty P element which the HTML spec implies at the position of the stray closing P tag.
+					'/HTML/BODY/DIV[@id=\'page\']/*[6][self::FOOTER]' => array( 'HTML', 'BODY', 'DIV', 'FOOTER' ),
+				),
+			),
+			'stray-closing-p-positions'              => array(
+				'document'          => '
+					<html>
+						<head></head>
+						<body>
+							<div id="page">
+								<!-- A stray closing P tag as the first child, where the implied empty P element takes the first slot. -->
+								<section></p><span>1</span></section>
+
+								<!-- Two stray closing P tags in a row imply two empty P elements. -->
+								<article></p></p><span>2</span></article>
+							</div>
+						</body>
+					</html>
+				',
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'SECTION', 'SPAN', 'ARTICLE', 'SPAN' ),
+				'xpath_breadcrumbs' => array(
+					'/HTML'                        => array( 'HTML' ),
+					'/HTML/HEAD'                   => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                   => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV[@id=\'page\']' => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::SECTION]' => array( 'HTML', 'BODY', 'DIV', 'SECTION' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[1][self::SECTION]/*[2][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SECTION', 'SPAN' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::ARTICLE]' => array( 'HTML', 'BODY', 'DIV', 'ARTICLE' ),
+					'/HTML/BODY/DIV[@id=\'page\']/*[2][self::ARTICLE]/*[3][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'ARTICLE', 'SPAN' ),
+				),
+			),
 			'document-with-multiple-div-id-children' => array(
 				'document'          => '
 					<!DOCTYPE html>
