@@ -29,7 +29,7 @@ add_action( 'wp_head', 'auto_sizes_render_generator' );
 /**
  * Filters related to the improved image sizes functionality.
  */
-add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 9 ); // This must run before 'do_blocks', which runs at priority 9.
+add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 8 ); // This must run before 'do_blocks', which runs at priority 9.
 add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 3 );
 add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 3 );
 add_filter( 'render_block_core/post-featured-image', 'auto_sizes_filter_image_tag', 10, 3 );
