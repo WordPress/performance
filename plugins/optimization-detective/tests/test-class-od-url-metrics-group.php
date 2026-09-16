@@ -295,6 +295,23 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				'freshness_ttl'              => -1,
 				'expected_is_group_complete' => false,
 			),
+			// Note: The following test case will not be required once the 'source' is mandatory in a future release.
+			'source_missing'                   => array(
+				'url_metric'                 => new OD_URL_Metric(
+					array(
+						'url'       => home_url( '/' ),
+						'etag'      => md5( '' ),
+						'viewport'  => array(
+							'width'  => 400,
+							'height' => 700,
+						),
+						'timestamp' => microtime( true ),
+						'elements'  => array(),
+					)
+				),
+				'freshness_ttl'              => HOUR_IN_SECONDS,
+				'expected_is_group_complete' => true,
+			),
 		);
 	}
 

@@ -270,6 +270,31 @@ function od_decompress_rest_request_body( $result, WP_REST_Server $server, WP_RE
 }
 
 /**
+ * Registers the REST API endpoint for priming URL Metrics.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function od_register_rest_url_metric_priming_endpoint(): void {
+	$endpoint_controller = new OD_REST_URL_Metrics_Priming_Mode_Endpoint();
+	register_rest_route(
+		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,
+		$endpoint_controller::PRIME_URLS_ROUTE,
+		$endpoint_controller->get_registration_args_prime_urls()
+	);
+	register_rest_route(
+		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,
+		$endpoint_controller::PRIME_URLS_VIEWPORTS_ROUTE,
+		$endpoint_controller->get_registration_args_prime_urls_viewports()
+	);
+	register_rest_route(
+		OD_REST_URL_Metrics_Store_Endpoint::ROUTE_NAMESPACE,
+		$endpoint_controller::PRIME_URLS_VERIFICATION_TOKEN_ROUTE,
+		$endpoint_controller->get_registration_args_prime_urls_verification_token()
+	);
+}
+
+/**
  * Triggers post update actions for page caches to invalidate their caches related to the supplied cache purge post ID.
  *
  * This is intended to flush any page cache for the URL after the new URL Metric was submitted so that the optimizations
