@@ -48,4 +48,36 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 		$this->assertTrue( wp_style_is( 'plvt-view-transitions', 'registered' ) );
 		$this->assertTrue( wp_style_is( 'plvt-view-transitions', 'enqueued' ) );
 	}
+
+	/**
+	 * @covers ::plvt_inject_animation_duration
+	 */
+	public function test_plvt_inject_animation_duration_with_existing_css(): void {
+		$css    = '::view-transition-old(*) { animation-name: test; }';
+		$result = plvt_inject_animation_duration( $css, 500 );
+
+		$this->assertStringContainsString( '--plvt-view-transition-animation-duration: 0.5s', $result );
+		$this->assertStringContainsString( $css, $result );
+	}
+
+	/**
+	 * @covers ::plvt_inject_animation_duration
+	 */
+	public function test_plvt_inject_animation_duration_with_empty_css(): void {
+		$result = plvt_inject_animation_duration( '', 400 );
+
+		$this->assertStringContainsString( 'animation-duration: 0.4s', $result );
+		$this->assertStringNotContainsString( '--plvt-view-transition-animation-duration', $result );
+	}
+
+	/**
+	 * @covers ::plvt_inject_animation_duration
+	 */
+	public function test_plvt_inject_animation_duration_converts_milliseconds_to_seconds(): void {
+		$result = plvt_inject_animation_duration( '', 1000 );
+		$this->assertStringContainsString( '1s', $result );
+
+		$result = plvt_inject_animation_duration( '', 250 );
+		$this->assertStringContainsString( '0.25s', $result );
+	}
 }
