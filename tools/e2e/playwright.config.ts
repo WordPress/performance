@@ -16,6 +16,10 @@ const config = defineConfig( {
 			name: 'auto-sizes',
 			testDir: '../../plugins/auto-sizes/tests/e2e/specs',
 		},
+		{
+			name: 'performance-lab',
+			testDir: '../../plugins/performance-lab/tests/e2e/specs',
+		},
 	],
 } );
 
