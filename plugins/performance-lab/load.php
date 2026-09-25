@@ -45,6 +45,9 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/defaults.php';
 // Load site health checks.
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
 
+// Load Chrome DevTools third-party tools integration.
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/devtools/load.php';
+
 // Only load admin integration when in admin.
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/load.php';
