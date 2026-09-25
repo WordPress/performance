@@ -240,7 +240,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		remove_all_filters( 'od_template_output_buffer' ); // In case go_to() caused them to be added.
 
 		od_maybe_add_template_output_buffer_filter();
-		$this->assertSame( $expected_has_filter, has_filter( 'od_template_output_buffer' ) );
+
+		// Backward compatibility with WP<6.9.
+		if ( version_compare( $GLOBALS['wp_version'], '6.9', '<' ) ) {
+			$this->assertSame( $expected_has_filter, has_filter( 'od_template_output_buffer' ) );
+		} else {
+			$this->assertSame( $expected_has_filter, has_filter( 'wp_template_enhancement_output_buffer' ) );
+		}
 	}
 
 	/**
