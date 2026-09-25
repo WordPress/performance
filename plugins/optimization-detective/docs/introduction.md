@@ -458,7 +458,7 @@ There is a [reference](https://github.com/WordPress/performance/blob/trunk/plugi
 
 As shown in the Background section above, WordPress core can incorrectly add `fetchpriority=high` to an `IMG` which is never the LCP element. Not only this, different viewport sizes often have different LCP elements, meaning that adding `fetchpriority=high` to an `IMG` will always be wrong for some segment of visitors. Additionally, WordPress adds `loading=lazy` to the first three content images even though the fourth may be in a viewport (and even the LCP element) as can be seen in this example:
 
-![Responsive Image Prioritization. WordPress core adds fetchpriority=high to the wrong image since it adds it to the first sufficiently-large image and no the largest image. Also, the largest image varies based on the viewport size, for example on desktop versus mobile. Lastly, the fourth content image in the viewport gets lazy-loaded incorrectly.](images/responsive-image-prioritization.png)
+![Responsive Image Prioritization. WordPress core adds fetchpriority=high to the wrong image since it adds it to the first sufficiently-large image and not the largest image. Also, the largest image varies based on the viewport size, for example on desktop versus mobile. Lastly, the fourth content image in the viewport gets lazy-loaded incorrectly.](images/responsive-image-prioritization.png)
 
 Here Image Prioritizer does the following:
 

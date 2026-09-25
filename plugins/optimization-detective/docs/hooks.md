@@ -78,7 +78,7 @@ $tag_visitor_registry->register(
 		}
 	}
 );
-````
+```
 
 Please note this implementation of setting `fetchpriority=high` on the LCP `IMG` element is simplified. Please
 see the Image Prioritizer extension for a more robust implementation.
