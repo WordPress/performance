@@ -41,4 +41,5 @@ add_action( 'admin_head', 'plvt_print_view_transitions_admin_style' );
 add_action( 'init', 'plvt_register_setting' );
 add_action( 'init', 'plvt_apply_settings_to_theme_support' );
 add_action( 'load-options-reading.php', 'plvt_add_setting_ui' );
+add_action( 'admin_enqueue_scripts', 'plvt_enqueue_selector_validation' );
 add_filter( 'plugin_action_links_' . plugin_basename( VIEW_TRANSITIONS_MAIN_FILE ), 'plvt_add_settings_action_link' );
