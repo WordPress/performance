@@ -20,7 +20,7 @@ on:
   issue_comment:
     types:
       - created
-  # This event will run everytime a new PR review is initially submitted.
+  # This event will run every time a new PR review is initially submitted.
   pull_request_review:
     types:
       - submitted

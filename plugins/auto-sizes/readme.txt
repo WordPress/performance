@@ -90,7 +90,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Enhancements**
 
 * Accurate sizes: Add ancestor block context for image and cover block that help in sizes calculate. ([1795](https://github.com/WordPress/performance/pull/1795))
-* Accurate sizes: Calculate sizes base on ancestor block context. ([1818](https://github.com/WordPress/performance/pull/1818))
+* Accurate sizes: Calculate sizes based on ancestor block context. ([1818](https://github.com/WordPress/performance/pull/1818))
 
 = 1.4.0 =
 

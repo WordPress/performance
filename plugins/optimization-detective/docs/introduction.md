@@ -463,7 +463,7 @@ As shown in the Background section above, WordPress core can incorrectly add `fe
 Here Image Prioritizer does the following:
 
 * Remove `fetchpriority=high` from the `IMG` tag since it is not the common LCP element across all viewport sizes (or even in one viewport).
-* Add preload links with `fetchpriority=high` with media queries to target viewport-specific LCP images:
+* Add preload links with `fetchpriority=high` using media queries to target viewport-specific LCP images:
 
 ```html
 <link

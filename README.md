@@ -15,7 +15,7 @@ Plugin                          | Slug                      | Experimental      
 --------------------------------|---------------------------|------------------------|-------------
 [Embed Optimizer][5]            | `embed-optimizer`         | No                     | [Source][13], [Issues][21], [PRs][29]
 [Enhanced Responsive Images][6] | `auto-sizes`              | No                     | [Source][14], [Issues][22], [PRs][30]
-[Image Placeholders][1]         | `dominant-color-images`   | No                     | [Source][9],  [Issues][17], [PRs][25]
+[Image Placeholders][1]         | `dominant-color-images`   | No                     | [Source][9], [Issues][17], [PRs][25]
 [Image Prioritizer][7]          | `image-prioritizer`       | No                     | [Source][15], [Issues][23], [PRs][31]
 [Instant Back/Forward][41]      | `nocache-bfcache`         | No                     | [Source][42], [Issues][43], [PRs][44]
 [Modern Image Formats][2]       | `webp-uploads`            | No                     | [Source][10], [Issues][18], [PRs][26]
