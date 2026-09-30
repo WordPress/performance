@@ -25,6 +25,130 @@ function embed_optimizer_add_hooks(): void {
 
 	add_action( 'od_init', 'embed_optimizer_init_optimization_detective' );
 	add_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' );
+
+	add_filter( 'embed_oembed_html', 'embed_optimizer_wrap_oembed_html_in_embed_block_markup', 9, 4 );
+}
+
+/**
+ * Determines whether a URL is already inside a core/embed block's FIGURE.wp-block-embed > DIV.wp-block-embed__wrapper
+ * markup in a post's stored content.
+ *
+ * The core/embed block is a static block: its saved markup already contains the FIGURE/DIV wrapper with the bare
+ * URL as its only content, e.g. `<div class="wp-block-embed__wrapper">\nhttps://example.com/x\n</div>`. That bare
+ * URL is what WP_Embed::autoembed() (hooked onto `the_content` at priority 8, before do_blocks() at priority 9)
+ * replaces with the resolved oEmbed HTML, via the same embed_oembed_html filter used for Classic Editor and
+ * Classic block auto-embedded URLs. Since that replacement happens before the block is even parsed, there is no
+ * reliable way to distinguish the two cases from block-rendering hooks; instead this looks at whether the URL
+ * appears immediately inside an existing wp-block-embed__wrapper DIV in the post's raw, unprocessed content.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string   $url     The attempted embed URL.
+ * @param int|null $post_id Post ID, if any.
+ * @return bool Whether the URL is already wrapped by a core/embed block.
+ */
+function embed_optimizer_is_url_in_existing_embed_block_wrapper( string $url, ?int $post_id ): bool {
+	if ( null === $post_id ) {
+		return false;
+	}
+
+	$post = get_post( $post_id );
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	$pattern = sprintf(
+		'#<div\b[^>]*\bclass\s*=\s*"[^"]*\bwp-block-embed__wrapper\b[^"]*"[^>]*>\s*%s\s*<#i',
+		preg_quote( $url, '#' )
+	);
+
+	return 1 === preg_match( $pattern, $post->post_content );
+}
+
+/**
+ * Wraps oEmbed HTML in the FIGURE.wp-block-embed > DIV.wp-block-embed__wrapper markup used by the core/embed block.
+ *
+ * Embeds added via the Classic Editor (auto-embedded URLs, the `[embed]` shortcode) or the Classic block are
+ * resolved via WP_Embed::shortcode(), the same core method the core/embed block relies on to resolve the bare
+ * URL saved in its own FIGURE/DIV wrapper (see embed_optimizer_is_url_in_existing_embed_block_wrapper()). Both
+ * cases fire the embed_oembed_html filter. By wrapping classic embeds in the same FIGURE/DIV markup the block
+ * already has, they become recognizable to Embed_Optimizer_Tag_Visitor and Optimization Detective just like
+ * embeds added via the Embed block. Wrapping is skipped when the URL is already inside such a wrapper, to avoid
+ * nesting the markup twice.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|mixed         $html    The oEmbed HTML.
+ * @param string               $url     The attempted embed URL.
+ * @param array<string, mixed> $attr Shortcode attributes.
+ * @param int|null             $post_id Post ID, if any.
+ * @return string Filtered oEmbed HTML.
+ */
+function embed_optimizer_wrap_oembed_html_in_embed_block_markup( $html, string $url, array $attr, ?int $post_id ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
+
+	if ( '' === $html || embed_optimizer_is_url_in_existing_embed_block_wrapper( $url, $post_id ) ) {
+		return $html;
+	}
+
+	$class_names = array( 'wp-block-embed' );
+	$type_class  = embed_optimizer_get_embed_provider_class( $url );
+	if ( null !== $type_class ) {
+		$class_names[] = $type_class;
+	}
+
+	return sprintf(
+		'<figure class="%s"><div class="wp-block-embed__wrapper">%s</div></figure>',
+		esc_attr( implode( ' ', $class_names ) ),
+		$html
+	);
+}
+
+/**
+ * Gets the wp-block-embed-{provider} CSS class for a given embed URL.
+ *
+ * This mirrors (for the subset of providers Embed Optimizer already recognizes for dns-prefetching, see
+ * Embed_Optimizer_Tag_Visitor::get_dns_prefetch_urls()) the provider class that the block editor applies to
+ * FIGURE.wp-block-embed. It is best-effort since the actual oEmbed provider name is not available from the
+ * embed_oembed_html filter, only the requested URL.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $url Embed URL.
+ * @return non-empty-string|null Provider class, or null if the provider is not recognized.
+ */
+function embed_optimizer_get_embed_provider_class( string $url ): ?string {
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! is_string( $host ) || '' === $host ) {
+		return null;
+	}
+	$host = strtolower( $host );
+
+	$host_provider_map = array(
+		'youtube.com'         => 'youtube',
+		'youtu.be'            => 'youtube',
+		'twitter.com'         => 'twitter',
+		'x.com'               => 'twitter',
+		'vimeo.com'           => 'vimeo',
+		'open.spotify.com'    => 'spotify',
+		'video.wordpress.com' => 'wordpress-tv',
+		'instagram.com'       => 'instagram',
+		'tiktok.com'          => 'tiktok',
+		'amazon.com'          => 'amazon',
+		'soundcloud.com'      => 'soundcloud',
+		'pinterest.com'       => 'pinterest',
+	);
+
+	foreach ( $host_provider_map as $provider_host => $provider_slug ) {
+		if ( $host === $provider_host || str_ends_with( $host, ".{$provider_host}" ) ) {
+			return "wp-block-embed-{$provider_slug}";
+		}
+	}
+
+	return null;
 }
 
 /**

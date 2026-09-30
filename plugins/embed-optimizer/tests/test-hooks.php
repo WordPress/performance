@@ -14,10 +14,118 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 		remove_all_actions( 'od_init' );
 		remove_all_actions( 'wp_head' );
 		remove_all_actions( 'wp_loaded' );
+		remove_all_filters( 'embed_oembed_html' );
 		embed_optimizer_add_hooks();
 		$this->assertSame( 10, has_action( 'od_init', 'embed_optimizer_init_optimization_detective' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 		$this->assertSame( 10, has_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' ) );
+		$this->assertSame( 9, has_filter( 'embed_oembed_html', 'embed_optimizer_wrap_oembed_html_in_embed_block_markup' ) );
+	}
+
+	/**
+	 * @covers ::embed_optimizer_is_url_in_existing_embed_block_wrapper
+	 */
+	public function test_embed_optimizer_is_url_in_existing_embed_block_wrapper(): void {
+		$this->assertFalse( embed_optimizer_is_url_in_existing_embed_block_wrapper( 'https://example.com/x', null ), 'Expected false when no post ID is provided.' );
+		$this->assertFalse( embed_optimizer_is_url_in_existing_embed_block_wrapper( 'https://example.com/x', PHP_INT_MAX ), 'Expected false for a non-existent post.' );
+
+		$embed_block_post_id = self::factory()->post->create(
+			array(
+				'post_content' => "<!-- wp:embed {\"url\":\"https://example.com/x\"} -->\n<figure class=\"wp-block-embed\"><div class=\"wp-block-embed__wrapper\">\nhttps://example.com/x\n</div></figure>\n<!-- /wp:embed -->",
+			)
+		);
+		$this->assertTrue( embed_optimizer_is_url_in_existing_embed_block_wrapper( 'https://example.com/x', $embed_block_post_id ) );
+		$this->assertFalse( embed_optimizer_is_url_in_existing_embed_block_wrapper( 'https://example.com/y', $embed_block_post_id ), 'Expected false for a URL not present in the post.' );
+
+		$classic_post_id = self::factory()->post->create(
+			array(
+				'post_content' => "Check this out:\n\nhttps://example.com/x\n\nPretty cool, right?",
+			)
+		);
+		$this->assertFalse( embed_optimizer_is_url_in_existing_embed_block_wrapper( 'https://example.com/x', $classic_post_id ), 'Expected false for a bare classic auto-embedded URL.' );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string|null}>
+	 */
+	public function data_provider_to_test_embed_optimizer_get_embed_provider_class(): array {
+		return array(
+			'youtube'      => array( 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'wp-block-embed-youtube' ),
+			'youtu.be'     => array( 'https://youtu.be/dQw4w9WgXcQ', 'wp-block-embed-youtube' ),
+			'twitter'      => array( 'https://twitter.com/WordPress/status/123', 'wp-block-embed-twitter' ),
+			'x.com'        => array( 'https://x.com/WordPress/status/123', 'wp-block-embed-twitter' ),
+			'vimeo'        => array( 'https://vimeo.com/123456', 'wp-block-embed-vimeo' ),
+			'spotify'      => array( 'https://open.spotify.com/track/123', 'wp-block-embed-spotify' ),
+			'wordpress-tv' => array( 'https://video.wordpress.com/embed/abc123', 'wp-block-embed-wordpress-tv' ),
+			'instagram'    => array( 'https://www.instagram.com/p/abc123/', 'wp-block-embed-instagram' ),
+			'tiktok'       => array( 'https://www.tiktok.com/@user/video/123', 'wp-block-embed-tiktok' ),
+			'amazon'       => array( 'https://read.amazon.com/kp/embed?asin=123', 'wp-block-embed-amazon' ),
+			'soundcloud'   => array( 'https://soundcloud.com/user/track', 'wp-block-embed-soundcloud' ),
+			'pinterest'    => array( 'https://www.pinterest.com/pin/123/', 'wp-block-embed-pinterest' ),
+			'unrecognized' => array( 'https://example.com/some-page', null ),
+			'invalid_url'  => array( 'not a url', null ),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_to_test_embed_optimizer_get_embed_provider_class
+	 * @covers ::embed_optimizer_get_embed_provider_class
+	 */
+	public function test_embed_optimizer_get_embed_provider_class( string $url, ?string $expected ): void {
+		$this->assertSame( $expected, embed_optimizer_get_embed_provider_class( $url ) );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
+	public function data_provider_to_test_embed_optimizer_wrap_oembed_html_in_embed_block_markup(): array {
+		return array(
+			'iframe_embed'     => array(
+				'<iframe src="https://www.youtube.com/embed/123"></iframe>',
+				'https://www.youtube.com/watch?v=123',
+				'<figure class="wp-block-embed wp-block-embed-youtube"><div class="wp-block-embed__wrapper"><iframe src="https://www.youtube.com/embed/123"></iframe></div></figure>',
+			),
+			'unknown_provider' => array(
+				'<div class="example-embed"></div>',
+				'https://example.com/some-page',
+				'<figure class="wp-block-embed"><div class="wp-block-embed__wrapper"><div class="example-embed"></div></div></figure>',
+			),
+			'empty_html'       => array(
+				'',
+				'https://www.youtube.com/watch?v=123',
+				'',
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_to_test_embed_optimizer_wrap_oembed_html_in_embed_block_markup
+	 * @covers ::embed_optimizer_wrap_oembed_html_in_embed_block_markup
+	 */
+	public function test_embed_optimizer_wrap_oembed_html_in_embed_block_markup( string $html, string $url, string $expected ): void {
+		$this->assertSame( $expected, embed_optimizer_wrap_oembed_html_in_embed_block_markup( $html, $url, array(), null ) );
+	}
+
+	/**
+	 * Tests that wrapping is skipped when the URL is already inside an existing core/embed block wrapper, to avoid
+	 * double-wrapping the block's own FIGURE.wp-block-embed > DIV.wp-block-embed__wrapper markup.
+	 *
+	 * @covers ::embed_optimizer_wrap_oembed_html_in_embed_block_markup
+	 */
+	public function test_embed_optimizer_wrap_oembed_html_in_embed_block_markup_skips_existing_wrapper(): void {
+		$html = '<iframe src="https://www.youtube.com/embed/123"></iframe>';
+		$url  = 'https://www.youtube.com/watch?v=123';
+
+		$post_id = self::factory()->post->create(
+			array(
+				'post_content' => sprintf(
+					"<!-- wp:embed {\"url\":\"%1\$s\"} -->\n<figure class=\"wp-block-embed\"><div class=\"wp-block-embed__wrapper\">\n%1\$s\n</div></figure>\n<!-- /wp:embed -->",
+					$url
+				),
+			)
+		);
+
+		$this->assertSame( $html, embed_optimizer_wrap_oembed_html_in_embed_block_markup( $html, $url, array(), $post_id ) );
 	}
 
 	/**
@@ -262,5 +370,61 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'embed-optimizer ' . EMBED_OPTIMIZER_VERSION, $tag );
+	}
+
+	/**
+	 * Tests that a classic (non-block) auto-embedded URL gets wrapped in the same FIGURE/DIV markup as the
+	 * core/embed block, while an actual core/embed block's own bare URL does not get double-wrapped.
+	 *
+	 * WP_Embed::autoembed() (and WP_Embed::run_shortcode() for the `[embed]` shortcode) resolve a bare URL via
+	 * WP_Embed::shortcode(), which fires the embed_oembed_html filter. This is the same mechanism that resolves
+	 * the bare URL saved inside a core/embed block's own FIGURE/DIV wrapper, since that resolution happens before
+	 * the block comment is even parsed (see embed_optimizer_is_url_in_existing_embed_block_wrapper()).
+	 *
+	 * @covers ::embed_optimizer_wrap_oembed_html_in_embed_block_markup
+	 * @covers ::embed_optimizer_is_url_in_existing_embed_block_wrapper
+	 */
+	public function test_embed_optimizer_classic_and_block_embed_wrapping_integration(): void {
+		remove_all_filters( 'embed_oembed_html' );
+		remove_all_filters( 'pre_oembed_result' );
+		add_filter( 'embed_oembed_html', 'embed_optimizer_wrap_oembed_html_in_embed_block_markup', 9, 4 );
+
+		// Short-circuit oEmbed HTTP discovery/fetching so this stays a canned response, while still flowing
+		// through WP_Embed::shortcode() and the embed_oembed_html filter like a real oEmbed provider would.
+		add_filter(
+			'pre_oembed_result',
+			static function ( $pre, string $url ) {
+				if ( 1 === preg_match( '#^https://example\.test/video/(?P<id>\d+)$#i', $url, $matches ) ) {
+					return sprintf( '<iframe src="https://example.test/embed/%s"></iframe>', $matches['id'] );
+				}
+				return $pre;
+			},
+			10,
+			2
+		);
+
+		global $post, $wp_embed;
+		$original_post = $post;
+		try {
+			// Classic Editor / Classic block scenario: a bare auto-embedded URL is not wrapped by the editor,
+			// so Embed Optimizer must add the FIGURE/DIV wrapper itself.
+			$classic_post_content = "Check this out:\n\nhttps://example.test/video/123\n\nPretty cool, right?";
+			$post                 = get_post( self::factory()->post->create( array( 'post_content' => $classic_post_content ) ) );
+			$classic_content      = $wp_embed->autoembed( $classic_post_content );
+			$this->assertStringContainsString(
+				'<figure class="wp-block-embed"><div class="wp-block-embed__wrapper"><iframe src="https://example.test/embed/123"></iframe></div></figure>',
+				$classic_content
+			);
+
+			// Block editor scenario: the core/embed block already saves its own FIGURE/DIV wrapper around the bare
+			// URL, so Embed Optimizer must not wrap it a second time.
+			$block_post_content = "<!-- wp:embed {\"url\":\"https://example.test/video/456\"} -->\n<figure class=\"wp-block-embed\"><div class=\"wp-block-embed__wrapper\">\nhttps://example.test/video/456\n</div></figure>\n<!-- /wp:embed -->";
+			$post               = get_post( self::factory()->post->create( array( 'post_content' => $block_post_content ) ) );
+			$block_content      = $wp_embed->autoembed( $block_post_content );
+			$this->assertSame( 1, substr_count( $block_content, 'wp-block-embed__wrapper' ), 'Expected the block markup to not be double-wrapped.' );
+			$this->assertStringContainsString( '<iframe src="https://example.test/embed/456"></iframe>', $block_content );
+		} finally {
+			$post = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 	}
 }
