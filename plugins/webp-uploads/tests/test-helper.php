@@ -498,6 +498,155 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Keeps the AVIF output format for client side media processing when the server cannot encode AVIF.
+	 *
+	 * @covers ::webp_uploads_get_upload_image_mime_transforms
+	 */
+	public function test_it_should_keep_avif_for_client_side_media_processing_when_server_does_not_support_avif(): void {
+		$this->set_image_output_type( 'avif' );
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+			}
+		);
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/webp' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The server side flow should fall back to WebP when AVIF is not supported.'
+		);
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/avif' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/avif' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF regardless of the server support.'
+		);
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+				'image/png'  => array( 'image/png', 'image/avif' ),
+				'image/avif' => array( 'image/avif', 'image/jpeg' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF alongside the fallback format.'
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_is_client_side_media_processing
+	 */
+	public function test_it_should_only_report_client_side_media_processing_when_filtered(): void {
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+		$this->assertTrue( webp_uploads_is_client_side_media_processing() );
+
+		remove_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+	}
+
+	/**
+	 * @covers ::webp_uploads_is_client_side_media_processing_request
+	 *
+	 * @dataProvider data_provider_client_side_media_processing_requests
+	 *
+	 * @param mixed                $handler  The route handler.
+	 * @param array<string, mixed> $params   The request parameters.
+	 * @param bool                 $expected Whether the request is expected to be a client side media processing request.
+	 */
+	public function test_webp_uploads_is_client_side_media_processing_request( $handler, array $params, bool $expected ): void {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_body_params( $params );
+
+		$this->assertSame( $expected, webp_uploads_is_client_side_media_processing_request( $request, $handler ) );
+	}
+
+	/**
+	 * Data provider for test_webp_uploads_is_client_side_media_processing_request().
+	 *
+	 * @return array<string, array{ handler: mixed, params: array<string, mixed>, expected: bool }>
+	 */
+	public function data_provider_client_side_media_processing_requests(): array {
+		$attachments_controller = new WP_REST_Attachments_Controller( 'attachment' );
+		$posts_controller       = new WP_REST_Posts_Controller( 'post' );
+
+		return array(
+			'create_item_without_sub_sizes'       => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => true,
+			),
+			'create_item_with_sub_sizes'          => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
+				'params'   => array( 'generate_sub_sizes' => true ),
+				'expected' => false,
+			),
+			'create_item_default'                 => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
+				'params'   => array(),
+				'expected' => false,
+			),
+			'create_item_with_unsanitized_string' => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'create_item' ) ),
+				'params'   => array( 'generate_sub_sizes' => 'false' ),
+				'expected' => false,
+			),
+			'sideload_item'                       => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'sideload_item' ) ),
+				'params'   => array(),
+				'expected' => true,
+			),
+			'finalize_item'                       => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'finalize_item' ) ),
+				'params'   => array(),
+				'expected' => true,
+			),
+			'update_item'                         => array(
+				'handler'  => array( 'callback' => array( $attachments_controller, 'update_item' ) ),
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => false,
+			),
+			'other_controller'                    => array(
+				'handler'  => array( 'callback' => array( $posts_controller, 'create_item' ) ),
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => false,
+			),
+			'function_callback'                   => array(
+				'handler'  => array( 'callback' => '__return_true' ),
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => false,
+			),
+			'handler_without_callback'            => array(
+				'handler'  => array(),
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => false,
+			),
+			'non_array_handler'                   => array(
+				'handler'  => null,
+				'params'   => array( 'generate_sub_sizes' => false ),
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
 	 * Returns transforms array with fallback to original mime with invalid transforms array.
 	 */
 	public function test_it_should_return_fallback_transforms_when_overwritten_invalid_transforms(): void {
