@@ -40,6 +40,7 @@ const sharedConfig = {
 // Store plugins that require build process.
 const pluginsWithBuild = [
 	'performance-lab',
+	'dominant-color-images',
 	'embed-optimizer',
 	'image-prioritizer',
 	'optimization-detective',
@@ -75,6 +76,47 @@ const performanceLab = ( env ) => {
 			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
 			new WebpackBar( {
 				name: 'Building Performance Lab Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: Dominant Color Images
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const dominantColorImages = ( env ) => {
+	if ( env.plugin && env.plugin !== 'dominant-color-images' ) {
+		return defaultBuildConfig;
+	}
+
+	const pluginDir = path.resolve(
+		__dirname,
+		'plugins/dominant-color-images'
+	);
+
+	return {
+		...sharedConfig,
+		name: 'dominant-color-images',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ pluginDir }/assets/lqip.css`,
+						to: `${ pluginDir }/assets/lqip.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+				],
+			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
+			new WebpackBar( {
+				name: 'Building Dominant Color Images Assets',
 				color: '#2196f3',
 			} ),
 		],
@@ -448,6 +490,7 @@ const buildPlugin = ( env ) => {
 
 module.exports = [
 	performanceLab,
+	dominantColorImages,
 	embedOptimizer,
 	imagePrioritizer,
 	optimizationDetective,

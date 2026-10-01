@@ -23,41 +23,167 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	/**
 	 * Get dominant color from a file.
 	 *
+	 * Averages all pixels in linear light to avoid the gamma-skewed
+	 * dominant color that results from averaging gamma-encoded sRGB values.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
+		$rgb = $this->get_dominant_color_rgb();
+		if ( is_wp_error( $rgb ) ) {
+			return $rgb;
+		}
 
-		if ( ! (bool) $this->image ) {
-			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
-		}
-		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
-		$shorted_image = imagecreatetruecolor( 1, 1 );
-		if ( false === $shorted_image ) {
-			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-		}
-		// Note: These two functions only return integers, but they used to return int|false in PHP<8. This was changed in the PHP documentation in
-		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
-		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
-		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
-		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
-		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
-		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
-
-		$rgb = imagecolorat( $shorted_image, 0, 0 );
-		if ( false === $rgb ) {
-			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
-		}
-		$r   = ( $rgb >> 16 ) & 0xFF;
-		$g   = ( $rgb >> 8 ) & 0xFF;
-		$b   = $rgb & 0xFF;
-		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
+		$hex = dominant_color_rgb_to_hex( $rgb['r'], $rgb['g'], $rgb['b'] );
 		if ( null === $hex ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
 
 		return $hex;
+	}
+
+	/**
+	 * Get dominant color from a file as RGB values.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{r: int, g: int, b: int}|WP_Error RGB values (0-255), or WP_Error on failure.
+	 */
+	public function get_dominant_color_rgb() {
+		if ( ! (bool) $this->image ) {
+			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
+		}
+
+		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
+		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
+
+		// Sample pixels with a step when the image is large so the
+		// per-pixel PHP loop stays fast even when the source image is
+		// very large (e.g. when the 'medium' subsize is unavailable).
+		// Sampling (skipping pixels) preserves the original colors,
+		// whereas resampling (imagecopyresampled) interpolates and
+		// shifts the average (e.g. balloons.webp c8c3c6 vs cac5c8).
+		$max_dimension = 150;
+		$sample_step   = 1;
+		if ( $image_width > $max_dimension || $image_height > $max_dimension ) {
+			$scale       = min( $max_dimension / $image_width, $max_dimension / $image_height );
+			$sample_step = max( 1, (int) round( 1 / $scale ) );
+		}
+
+		// Build a 256-entry LUT for sRGB 8-bit → linear float conversion.
+		$srgb_to_linear = array();
+		for ( $i = 0; $i < 256; $i++ ) {
+			$val = $i / 255;
+			if ( $val <= 0.04045 ) {
+				$srgb_to_linear[ $i ] = $val / 12.92;
+			} else {
+				$srgb_to_linear[ $i ] = pow( ( $val + 0.055 ) / 1.055, 2.4 );
+			}
+		}
+
+		// Helper: linear float (0.0–1.0) → sRGB 8-bit integer.
+		$linear_to_srgb = static function ( float $linear ): int {
+			if ( $linear <= 0.0031308 ) {
+				$srgb = 12.92 * $linear;
+			} else {
+				$srgb = 1.055 * pow( $linear, 1 / 2.4 ) - 0.055;
+			}
+			$clamped = max( 0.0, min( 1.0, $srgb ) );
+			return (int) round( $clamped * 255 );
+		};
+
+		// Determine if the image is truecolor or palette-based.
+		$is_truecolor = imageistruecolor( $this->image );
+
+		// For palette-based images, cache the palette for fast lookup.
+		$palette = null;
+		if ( ! $is_truecolor ) {
+			$palette    = array();
+			$num_colors = imagecolorstotal( $this->image );
+			for ( $i = 0; $i < $num_colors; $i++ ) {
+				$palette[ $i ] = imagecolorsforindex( $this->image, $i );
+			}
+		}
+
+		// Iterate every pixel, decode to linear light, and accumulate.
+		// Skip transparent pixels on the first pass; if no opaque pixels
+		// are found, fall back to including all pixels.
+		$include_transparent = false;
+
+		do {
+			$sum_r      = 0.0;
+			$sum_g      = 0.0;
+			$sum_b      = 0.0;
+			$count      = 0;
+			$loop_again = false;
+
+			// Use distinct step variables to avoid Generic.CodeAnalysis.JumbledIncrementer
+			// false positive (same $sample_step in both incrementers).
+			$y_step = $sample_step;
+			$x_step = $sample_step;
+			for ( $y = 0; $y < $image_height; $y += $y_step ) {
+				for ( $x = 0; $x < $image_width; $x += $x_step ) {
+					$rgb = imagecolorat( $this->image, $x, $y );
+					if ( false === $rgb ) {
+						continue;
+					}
+
+					if ( $is_truecolor ) {
+						$r = ( $rgb >> 16 ) & 0xFF;
+						$g = ( $rgb >> 8 ) & 0xFF;
+						$b = $rgb & 0xFF;
+						if ( ! $include_transparent ) {
+							$alpha = ( $rgb >> 24 ) & 0x7F;
+							if ( $alpha > 0 ) {
+								continue;
+							}
+						}
+					} else {
+						$index = $rgb;
+						if ( ! isset( $palette[ $index ] ) ) {
+							continue;
+						}
+						$rgba = $palette[ $index ];
+						$r    = $rgba['red'];
+						$g    = $rgba['green'];
+						$b    = $rgba['blue'];
+						if ( ! $include_transparent && $rgba['alpha'] > 0 ) {
+							continue;
+						}
+					}
+
+					$sum_r += $srgb_to_linear[ $r ];
+					$sum_g += $srgb_to_linear[ $g ];
+					$sum_b += $srgb_to_linear[ $b ];
+					++$count;
+				}
+			}
+
+			if ( 0 === $count && ! $include_transparent ) {
+				$include_transparent = true;
+				$loop_again          = true;
+			}
+		} while ( $loop_again );
+
+		if ( 0 === $count ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
+		$r = $linear_to_srgb( $sum_r / $count );
+		$g = $linear_to_srgb( $sum_g / $count );
+		$b = $linear_to_srgb( $sum_b / $count );
+
+		if ( $r < 0 || $r > 255 || $g < 0 || $g > 255 || $b < 0 || $b > 255 ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+
+		return array(
+			'r' => $r,
+			'g' => $g,
+			'b' => $b,
+		);
 	}
 
 	/**
@@ -98,5 +224,87 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get the 3×2 grid pixel values from the image.
+	 *
+	 * The grid is a 3-column × 2-row sampling of the image, resized to
+	 * exactly 6 pixels. Each cell's raw RGB values are returned for use
+	 * in LQIP generation.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<int, array{r: int, g: int, b: int}>|WP_Error 6 grid cells as ['r'=>R, 'g'=>G, 'b'=>B], or WP_Error on failure.
+	 */
+	public function get_lqip_grid_values() {
+
+		// Skip LQIP generation for images with transparency (the gradient
+		// placeholder would show through transparent areas).
+		$has_transparency = $this->has_transparency();
+		if ( is_wp_error( $has_transparency ) || $has_transparency ) {
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
+		}
+
+		$small = imagecreatetruecolor( 3, 2 );
+		if ( false === $small ) {
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
+		}
+
+		// Fill with fully transparent white so imagecopyresampled can blend
+		// against it, then we will flatten below.
+		imagesavealpha( $small, true );
+		$transparent = imagecolorallocatealpha( $small, 255, 255, 255, 127 );
+		if ( false !== $transparent ) {
+			imagefill( $small, 0, 0, $transparent );
+		}
+
+		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
+		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
+		imagecopyresampled( $small, $this->image, 0, 0, 0, 0, 3, 2, $image_width, $image_height );
+
+		// Flatten any residual alpha against white background so the
+		// returned RGB values are always opaque.
+		$flat = imagecreatetruecolor( 3, 2 );
+		if ( false !== $flat ) {
+			$white = imagecolorallocate( $flat, 255, 255, 255 );
+			if ( false !== $white ) {
+				imagefill( $flat, 0, 0, $white );
+			}
+			imagealphablending( $flat, true );
+			imagesavealpha( $flat, false );
+			imagecopy( $flat, $small, 0, 0, 0, 0, 3, 2 );
+			$small = $flat;
+		}
+
+		// Cell positions: left-to-right, top-to-bottom.
+		$cell_positions = array(
+			array( 0, 0 ),
+			array( 1, 0 ),
+			array( 2, 0 ),
+			array( 0, 1 ),
+			array( 1, 1 ),
+			array( 2, 1 ),
+		);
+
+		$values = array();
+
+		foreach ( $cell_positions as $pos ) {
+			$rgb = imagecolorat( $small, $pos[0], $pos[1] );
+			if ( false === $rgb ) {
+				continue;
+			}
+			$values[] = array(
+				'r' => ( $rgb >> 16 ) & 0xFF,
+				'g' => ( $rgb >> 8 ) & 0xFF,
+				'b' => $rgb & 0xFF,
+			);
+		}
+
+		if ( count( $values ) < 6 ) {
+			return new WP_Error( 'image_editor_lqip_grid_error', __( 'LQIP grid values detection failed.', 'dominant-color-images' ) );
+		}
+
+		return $values;
 	}
 }
