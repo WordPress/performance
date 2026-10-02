@@ -65,6 +65,7 @@ export type ExtendElementDataFunction = (
 	xpath: string,
 	properties: ExtendedElementData
 ) => void;
+export type GetElementXPathFunction = ( element: Element ) => string | null;
 
 export type InitializeArgs = {
 	readonly isDebug: boolean;
@@ -81,6 +82,7 @@ export type InitializeArgs = {
 	readonly extendRootData: ExtendRootDataFunction;
 	readonly getElementData: GetElementDataFunction;
 	readonly extendElementData: ExtendElementDataFunction;
+	readonly getElementXPath: GetElementXPathFunction;
 };
 
 export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
@@ -90,6 +92,7 @@ export type FinalizeArgs = {
 	readonly extendRootData: ExtendRootDataFunction;
 	readonly getElementData: GetElementDataFunction;
 	readonly extendElementData: ExtendElementDataFunction;
+	readonly getElementXPath: GetElementXPathFunction;
 	readonly isDebug: boolean;
 	readonly log: LogFunction;
 	readonly info: LogFunction;

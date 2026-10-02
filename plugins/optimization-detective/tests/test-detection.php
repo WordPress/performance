@@ -219,7 +219,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$breakpoints      = array( 480, 600, 782 );
 		$group_collection = new OD_URL_Metric_Group_Collection( array(), $current_etag, $breakpoints, 3, HOUR_IN_SECONDS );
 
-		$script = od_get_detection_scripts( $slug, $group_collection );
+		$script = od_get_detection_scripts( $slug, $group_collection, array() );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'async function load', $script );
@@ -243,6 +243,61 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		} else {
 			$this->assertStringNotContainsString( '"restApiNonce":', $script );
 		}
+	}
+
+	/**
+	 * Test that od_get_detection_scripts() omits the XPath ID map script when there are no tracked elements.
+	 *
+	 * @covers ::od_get_detection_scripts
+	 */
+	public function test_od_get_detection_scripts_omits_xpath_id_map_when_empty(): void {
+		$slug             = od_get_url_metrics_slug( array() );
+		$group_collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 480, 600, 782 ), 3, HOUR_IN_SECONDS );
+
+		$script = od_get_detection_scripts( $slug, $group_collection, array() );
+
+		$this->assertStringNotContainsString( 'optimization-detective-xpath-map', $script );
+	}
+
+	/**
+	 * Test that od_get_detection_scripts() includes the XPath ID map script when there are tracked elements.
+	 *
+	 * @covers ::od_get_detection_scripts
+	 */
+	public function test_od_get_detection_scripts_includes_xpath_id_map(): void {
+		$slug             = od_get_url_metrics_slug( array() );
+		$group_collection = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array( 480, 600, 782 ), 3, HOUR_IN_SECONDS );
+
+		$xpath_id_map = array(
+			'/HTML/BODY/*[1][self::DIV]',
+			'/HTML/BODY/*[2][self::IMG]',
+		);
+
+		$script = od_get_detection_scripts( $slug, $group_collection, $xpath_id_map );
+
+		$this->assertSame(
+			1,
+			preg_match(
+				'#<script id="optimization-detective-xpath-map" type="(application/gzip\+json;base64|application/json)">(.+?)</script>#s',
+				$script,
+				$matches
+			)
+		);
+		list( , $type, $contents ) = $matches;
+		$contents                  = trim( $contents );
+
+		if ( function_exists( 'gzencode' ) ) {
+			$this->assertSame( 'application/gzip+json;base64', $type );
+			$decoded = base64_decode( $contents, true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- base64_decode() is used here to verify the gzip-compressed payload, not to obfuscate code.
+			$this->assertIsString( $decoded );
+			$json = gzdecode( $decoded );
+			$this->assertIsString( $json );
+		} else {
+			$this->assertSame( 'application/json', $type );
+			$json = $contents;
+		}
+
+		$this->assertSame( $xpath_id_map, json_decode( $json, true ) );
 	}
 
 	/**
