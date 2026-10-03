@@ -71,12 +71,16 @@ function od_get_cache_purge_post_id(): ?int {
  *
  * @since 0.1.0
  * @since 1.0.0 Renamed from od_get_detection_script().
+ * @since n.e.x.t Added $xpath_id_map parameter to emit the XPath ID mapping script.
  * @access private
+ *
+ * @phpstan-param list<string> $xpath_id_map
  *
  * @param non-empty-string               $slug             URL Metrics slug.
  * @param OD_URL_Metric_Group_Collection $group_collection URL Metric group collection.
+ * @param string[]                       $xpath_id_map     XPaths for tracked elements, keyed by the auto-incremented ID referenced in each element's data-od-id attribute.
  */
-function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
+function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection $group_collection, array $xpath_id_map ): string {
 
 	/**
 	 * Filters whether to use the web-vitals.js build with attribution.
@@ -189,7 +193,31 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 		array( 'type' => 'module' )
 	);
 
-	return $json_script . $module_script;
+	$xpath_map_script = '';
+	if ( count( $xpath_id_map ) > 0 ) {
+		$xpath_map_json = (string) wp_json_encode( $xpath_id_map, $json_flags );
+
+		if ( function_exists( 'gzencode' ) ) {
+			$compressed_xpath_map = gzencode( $xpath_map_json );
+			$xpath_map_script     = wp_get_inline_script_tag(
+				false !== $compressed_xpath_map ? base64_encode( $compressed_xpath_map ) : $xpath_map_json, // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64_encode() is used here to safely embed the gzip-compressed binary payload inside a SCRIPT tag, not to obfuscate code.
+				array(
+					'type' => false !== $compressed_xpath_map ? 'application/gzip+json;base64' : 'application/json',
+					'id'   => 'optimization-detective-xpath-map',
+				)
+			);
+		} else {
+			$xpath_map_script = wp_get_inline_script_tag(
+				$xpath_map_json,
+				array(
+					'type' => 'application/json',
+					'id'   => 'optimization-detective-xpath-map',
+				)
+			);
+		}
+	}
+
+	return $json_script . $xpath_map_script . $module_script;
 }
 
 /**

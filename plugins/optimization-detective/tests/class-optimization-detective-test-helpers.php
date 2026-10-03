@@ -332,6 +332,20 @@ trait Optimization_Detective_Test_Helpers {
 		}
 		$buffer = $processor->get_updated_html();
 
+		// Normalize XPath ID map script content so the gzip/base64-encoded (or plain JSON) payload does not impact snapshots.
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if ( 'optimization-detective-xpath-map' !== $processor->get_attribute( 'id' ) ) {
+				continue;
+			}
+
+			$text = $processor->get_modifiable_text();
+			if ( '' !== $text ) {
+				$processor->set_modifiable_text( '__XPATH_ID_MAP__' );
+			}
+		}
+		$buffer = $processor->get_updated_html();
+
 		// Normalize style content so changes do not impact snapshots.
 		$processor = new WP_HTML_Tag_Processor( $buffer );
 		while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
