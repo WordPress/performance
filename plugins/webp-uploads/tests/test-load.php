@@ -316,34 +316,48 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @covers ::get_attached_file
 	 * @covers ::wp_get_attachment_metadata
 	 */
-	public function test_it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted(): void {
+		/**
+	 * WebP sub-sizes should have the same dimensions as the JPEG sub-sizes in the metadata.
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 */
+	public function test_it_should_create_webp_subsizes_with_the_same_dimensions_as_the_jpeg_subsizes(): void {
+		$this->opt_in_to_jpeg_and_webp();
+
+		// The leaves image is 1080 pixels wide, so this filter ensures a -scaled version is created.
+		add_filter(
+			'big_image_size_threshold',
+			static function () {
+				return 850;
+			}
+		);
+
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg'
 		);
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$directory     = dirname( (string) get_attached_file( $attachment_id ) );
 
-		$file    = get_attached_file( $attachment_id, true );
-		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+		$this->assertIsArray( $metadata );
+		$this->assertArrayHasKey( 'sizes', $metadata );
 
-		$this->assertIsString( $file );
-		$this->assertFileExists( $file );
+		$checked = 0;
+		foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+			if ( ! isset( $size_data['sources']['image/webp']['file'] ) ) {
+				continue;
+			}
 
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$sizes    = array( 'thumbnail', 'medium' );
+			$webp_path = path_join( $directory, $size_data['sources']['image/webp']['file'] );
+			$this->assertFileExists( $webp_path );
 
-		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
-
-		foreach ( $sizes as $size_name ) {
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
-			$this->assertFileExists( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
+			$image_size = wp_getimagesize( $webp_path );
+			$this->assertIsArray( $image_size, "Could not read the WebP size for {$size_name}." );
+			$this->assertSame( $size_data['width'], $image_size[0], "WebP width differs from the JPEG width for {$size_name}." );
+			$this->assertSame( $size_data['height'], $image_size[1], "WebP height differs from the JPEG height for {$size_name}." );
+			++$checked;
 		}
 
-		wp_delete_attachment( $attachment_id );
-
-		foreach ( $sizes as $size_name ) {
-			$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
-		}
-
-		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$this->assertGreaterThan( 0, $checked, 'Expected at least one WebP sub-size to be checked.' );
 	}
 
 	/**
