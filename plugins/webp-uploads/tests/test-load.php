@@ -311,12 +311,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Remove the generated webp images when the attachment is deleted
-	 *
-	 * @covers ::get_attached_file
-	 * @covers ::wp_get_attachment_metadata
-	 */
-		/**
 	 * WebP sub-sizes should have the same dimensions as the JPEG sub-sizes in the metadata.
 	 *
 	 * @covers ::wp_get_attachment_metadata
@@ -358,6 +352,42 @@ class Test_WebP_Uploads_Load extends TestCase {
 		}
 
 		$this->assertGreaterThan( 0, $checked, 'Expected at least one WebP sub-size to be checked.' );
+	}
+
+	/**
+	 * Remove the generated webp images when the attachment is deleted
+	 *
+	 * @covers ::get_attached_file
+	 * @covers ::wp_get_attachment_metadata
+	 */
+	public function test_it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg'
+		);
+
+		$file    = get_attached_file( $attachment_id, true );
+		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+
+		$this->assertIsString( $file );
+		$this->assertFileExists( $file );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$sizes    = array( 'thumbnail', 'medium' );
+
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+
+		foreach ( $sizes as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertFileExists( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
+		}
+
+		wp_delete_attachment( $attachment_id );
+
+		foreach ( $sizes as $size_name ) {
+			$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
+		}
+
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 	}
 
 	/**
