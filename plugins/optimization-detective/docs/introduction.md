@@ -102,7 +102,7 @@ WordPress is not designed to do something like collect URL Metrics from every pa
 | Mobile  | `0 < width <= 480`   |
 | Phablet | `480 < width <= 600` |
 | Tablet  | `600 < width <= 782` |
-| Desktop | `width < 782`        |
+| Desktop | `782 < width`        |
 
 These specific breakpoints were chosen based on media query usage in core block styles. They can be customized via the `od_breakpoint_max_widths` filter. Then for each viewport group, a sample of three (3) URL Metrics are collected. This can be customized with the `od_url_metrics_breakpoint_sample_size` filter. This means that for each URL, a maximum of twelve URL Metrics are collected (3 x 4).
 
@@ -211,7 +211,7 @@ As mentioned above, the detection phase and the optimization phase both depend o
 
 A tag visitor is simply a callback which is invoked for every open tag on the document. (That is, every tag except for those in the Admin Bar and `NOSCRIPT` elements.) The callback may be a regular PHP function, a class method, a closure, or even a class with an `__invoke()` method defined. Tag visitors are passed a context object (`OD_Tag_Visitor_Context`) which includes the following properties:
 
-1. `processor` (`OD_HTML_Tag_Visitor`): The HTML Tag Processor instance with the cursor at the current open tag.
+1. `processor` (`OD_HTML_Tag_Processor`): The HTML Tag Processor instance with the cursor at the current open tag.
 2. `url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The collection of URL Metrics collated into their viewport groups. This object includes helper methods for querying URL Metrics for data needed to perform optimizations.
 3. `link_collection` (`OD_Link_Collection`): An interface for adding `preload`/`preconnect`/`dns-prefetch`/etc links to the response (both as `LINK` tags and `Link` HTTP headers).
 
@@ -385,7 +385,7 @@ add_filter(
 The `detect.js` file is a script module which exports two async functions: `initialize` ~and `finalize`~ (the use of `finalize` is [deprecated](https://github.com/WordPress/performance/issues/1930)). The `initialize` function is invoked by Optimization Detective when detection starts, and `finalize` naturally is invoked when the page is left and the URL Metric is being constructed for submission (although, again, `finalize` is now deprecated because [compression](https://github.com/WordPress/performance/issues/1893) of the URL Metric data cannot be done reliably at `pagehide`; extensions should use `initialize` instead and call the supplied `extendRootData` and `extendElementData` whenever a relevant mutation occurs rather than waiting until the page is left). The full typing for what an extension looks like is defined via TypeScript in [`types.ts`](https://github.com/WordPress/performance/blob/f751ae2f070e27eddb6a0336def24cf000d6760b/plugins/optimization-detective/types.ts#L69-L106). An extension may also export a `name` which is used as a prefix when logging out messages. Here is an example `detect.js` module script which amends the URL Metric with these exported functions (note that this depends on `1.0.0-beta4`):
 
 ```js
-export name = 'My Resized Embed Optimizer';
+export const name = 'My Resized Embed Optimizer';
 
 /**
  * Initializes extension.
@@ -544,7 +544,7 @@ The other major performance optimization implemented by Embed Optimizer is the r
 
 | Before                                                                                       | After                                                                                                               |
 |:---------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------|
-| ![Tweet embed showing significant layout shift once it loads](images/tweet-embed-before.gif) | ![Tweet embed showing now layout shift once it loads due to the space being reserved](images/tweet-embed-after.gif) |
+| ![Tweet embed showing significant layout shift once it loads](images/tweet-embed-before.gif) | ![Tweet embed showing no layout shift once it loads due to the space being reserved](images/tweet-embed-after.gif) |
 | CLS 0.15 ⚠️                                                                                  | CLS 0.00 ✅                                                                                                          |
 
 To see how these optimizations were implemented in Image Prioritizer and Embed Optimizer, refer to the previously mentioned [reference](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#use-cases-and-examples). The same docs page also includes a [list of extension plugins](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md#extension-plugins), some of which are experimental and others which are helpful for development and debugging.  
