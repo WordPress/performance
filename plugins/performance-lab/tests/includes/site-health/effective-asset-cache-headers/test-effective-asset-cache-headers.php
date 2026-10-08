@@ -70,7 +70,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 
 		$result = perflab_effective_asset_cache_headers_assets_test();
 		$this->assertEquals( 'good', $result['status'] );
-		$this->assertEmpty( $result['actions'] );
+		$this->assertSame( '', $result['actions'] );
 	}
 
 	/**
@@ -100,7 +100,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 
 		$result = perflab_effective_asset_cache_headers_assets_test();
 		$this->assertEquals( 'recommended', $result['status'] );
-		$this->assertNotEmpty( $result['actions'] );
+		$this->assertNotSame( '', $result['actions'] );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class Test_Effective_Asset_Cache_Headers extends WP_UnitTestCase {
 		$result = perflab_effective_asset_cache_headers_check_assets( array() );
 
 		$this->assertEquals( 'good', $result['final_status'] );
-		$this->assertEmpty( $result['details'] );
+		$this->assertSame( array(), $result['details'] );
 	}
 
 	/**

@@ -23,13 +23,13 @@ class Test_Dominant_Color extends TestCase {
 
 		// Non-existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
-		$this->assertEmpty( $dominant_color_metadata );
+		$this->assertSame( array(), $dominant_color_metadata );
 
 		// Creating attachment.
 		$attachment_id           = self::factory()->attachment->create_upload_object( $image_path );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
-		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
+		$this->assertNotSame( '', $dominant_color_metadata['dominant_color'] );
 		$this->assertContains( $dominant_color_metadata['dominant_color'], $expected_color );
 	}
 
@@ -74,7 +74,7 @@ class Test_Dominant_Color extends TestCase {
 
 		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
-		$this->assertEmpty( $transparency_metadata );
+		$this->assertSame( array(), $transparency_metadata );
 
 		$attachment_id         = self::factory()->attachment->create_upload_object( $image_path );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
@@ -422,7 +422,8 @@ class Test_Dominant_Color extends TestCase {
 
 		// Verify the inline style was added.
 		$inline_styles = wp_styles()->get_data( 'dominant-color-styles', 'after' );
-		$this->assertNotEmpty( $inline_styles );
+		$this->assertIsArray( $inline_styles );
+		$this->assertNotCount( 0, $inline_styles );
 		$this->assertStringContainsString(
 			'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
 			implode( '', $inline_styles )
@@ -443,7 +444,8 @@ class Test_Dominant_Color extends TestCase {
 
 		// Verify the inline style was added.
 		$inline_styles = wp_styles()->get_data( 'dominant-color-admin-styles', 'after' );
-		$this->assertNotEmpty( $inline_styles );
+		$this->assertIsArray( $inline_styles );
+		$this->assertNotCount( 0, $inline_styles );
 		$this->assertStringContainsString(
 			'.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
 			implode( '', $inline_styles )
