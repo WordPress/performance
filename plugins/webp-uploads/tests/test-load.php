@@ -276,7 +276,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertSame( array(), $metadata['sizes'] );
 
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
@@ -435,7 +435,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertSame( array(), $metadata['sizes'] );
 		$this->assertFileExists( $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 
@@ -466,12 +466,12 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$editor->rotate_right()->save();
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-		$this->assertNotEmpty( $backup_sources );
 		$this->assertIsArray( $backup_sources );
+		$this->assertNotCount( 0, $backup_sources );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-		$this->assertNotEmpty( $backup_sizes );
 		$this->assertIsArray( $backup_sizes );
+		$this->assertNotCount( 0, $backup_sizes );
 
 		wp_delete_attachment( $attachment_id, true );
 
@@ -532,7 +532,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$expected_tag = str_replace( $metadata['sources']['image/webp']['file'], $metadata['sources']['image/jpeg']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
@@ -580,7 +580,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
@@ -909,7 +909,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, $result );
 	}
