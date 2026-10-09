@@ -158,7 +158,7 @@ Fires whenever a URL Metric was successfully stored.
 The supplied context object includes these properties:
 
 * `$request`: The `WP_REST_Request` for storing the URL Metric.
-* `$post_id`: The post ID for the `od_url_metric` post.
+* `$url_metrics_id`: The post ID for the `od_url_metrics` post. Before Optimization Detective 1.0.0 this was `$post_id`, which still works but now triggers a `_doing_it_wrong()` notice.
 * `$url_metric`: The newly-stored URL Metric.
 * `$url_metric_group`: The viewport group that the URL Metric was added to.
 * `$url_metric_group_collection`: The `OD_URL_Metric_Group_Collection` instance to which the URL Metric was added.
