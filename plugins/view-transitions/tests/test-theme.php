@@ -60,32 +60,32 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 	 */
 	public function data_plvt_inject_animation_duration(): array {
 		return array(
-			'with_existing_css_and_custom_duration'     => array(
+			'with_existing_css_and_custom_duration'    => array(
 				'css'      => '::view-transition-old(root) { opacity: 1; }',
 				'duration' => 500,
 				'expected' => '::view-transition-old(root) { opacity: 1; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 0.5s; }',
 			),
-			'with_existing_css_and_default_duration'    => array(
+			'with_existing_css_and_default_duration'   => array(
 				'css'      => '::view-transition-new(root) { opacity: 0; }',
 				'duration' => 400,
 				'expected' => '::view-transition-new(root) { opacity: 0; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 0.4s; }',
 			),
-			'with_empty_css_and_custom_duration'        => array(
+			'with_empty_css_and_custom_duration'       => array(
 				'css'      => '',
 				'duration' => 300,
 				'expected' => '::view-transition-group(*) { animation-duration: 0.3s; }',
 			),
-			'with_zero_duration_defaults_to_1000ms'     => array(
+			'with_zero_duration_is_valid'              => array(
 				'css'      => '',
 				'duration' => 0,
-				'expected' => '::view-transition-group(*) { animation-duration: 1s; }',
+				'expected' => '::view-transition-group(*) { animation-duration: 0s; }',
 			),
-			'with_negative_duration_defaults_to_1000ms' => array(
+			'with_negative_duration_defaults_to_400ms' => array(
 				'css'      => '::view-transition-old(root) { opacity: 1; }',
 				'duration' => -500,
-				'expected' => '::view-transition-old(root) { opacity: 1; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 1s; }',
+				'expected' => '::view-transition-old(root) { opacity: 1; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 0.4s; }',
 			),
-			'with_standard_1000ms_duration'             => array(
+			'with_standard_1000ms_duration'            => array(
 				'css'      => '',
 				'duration' => 1000,
 				'expected' => '::view-transition-group(*) { animation-duration: 1s; }',
