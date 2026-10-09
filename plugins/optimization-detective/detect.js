@@ -23,6 +23,7 @@
  * @typedef {import("./types.ts").ExtendRootDataFunction} ExtendRootDataFunction
  * @typedef {import("./types.ts").GetElementDataFunction} GetElementDataFunction
  * @typedef {import("./types.ts").ExtendElementDataFunction} ExtendElementDataFunction
+ * @typedef {import("./types.ts").GetElementXPathFunction} GetElementXPathFunction
  * @typedef {import("./types.ts").Logger} Logger
  */
 
@@ -360,6 +361,97 @@ function extendRootData( properties ) {
 const elementsByXPath = new Map();
 
 /**
+ * XPaths for tracked elements, keyed by the auto-incremented ID referenced in each element's data-od-id attribute.
+ *
+ * @see {getXPathIdMap}
+ * @type {string[]}
+ */
+let xpathIdMap = [];
+
+/**
+ * Gets the XPath for an element based on its data-od-id attribute.
+ *
+ * @type {GetElementXPathFunction}
+ * @param {Element} element - Element.
+ * @return {string|null} XPath for the element, or null if the element is not tracked.
+ */
+function getElementXPath( element ) {
+	const id = element.getAttribute( 'data-od-id' );
+	if ( null === id ) {
+		return null;
+	}
+	const xpath = xpathIdMap[ Number( id ) ];
+	return 'string' === typeof xpath ? xpath : null;
+}
+
+/**
+ * Fetches and decodes the mapping of auto-incremented IDs to XPaths for tracked elements.
+ *
+ * The mapping is embedded in a SCRIPT tag added by PHP. To keep the HTML payload small, it is normally
+ * gzip-compressed and base64-encoded, but it falls back to being plain JSON when gzip is unavailable server-side.
+ * This avoids putting XPath strings directly into HTML attributes, where they can be corrupted by plugins which use
+ * naive regular expressions to strip JS/CSS comments from the page (mistaking XPath's /* for the start of one).
+ *
+ * @see https://github.com/WordPress/performance/issues/1947
+ *
+ * @param {Pick<Logger, 'warn'|'error'>} logger - Logger.
+ * @return {Promise<string[]>} XPaths for tracked elements, keyed by their auto-incremented ID.
+ */
+async function getXPathIdMap( { warn, error } ) {
+	const script = doc.querySelector(
+		'script#optimization-detective-xpath-map'
+	);
+	if ( ! ( script instanceof HTMLScriptElement ) ) {
+		return [];
+	}
+
+	const type = script.type.toLowerCase();
+
+	/** @type {string} */
+	let json;
+	if ( 'application/json' === type ) {
+		json = script.text;
+	} else if ( 'application/gzip+json;base64' === type ) {
+		if ( typeof DecompressionStream === 'undefined' ) {
+			error(
+				'Unable to decode the XPath ID map since DecompressionStream is not supported in this browser.'
+			);
+			return [];
+		}
+		try {
+			const binaryString = atob( script.text );
+			const bytes = Uint8Array.from( binaryString, ( char ) =>
+				char.charCodeAt( 0 )
+			);
+			const decompressedStream = new Blob( [ bytes ] )
+				.stream()
+				.pipeThrough( new DecompressionStream( 'gzip' ) );
+			json = await new Response( decompressedStream ).text();
+		} catch ( err ) {
+			error( 'Failed to decompress the XPath ID map:', err );
+			return [];
+		}
+	} else {
+		warn( `Unexpected type for the XPath ID map script: ${ type }` );
+		return [];
+	}
+
+	try {
+		const parsed = JSON.parse( json );
+		if (
+			Array.isArray( parsed ) &&
+			parsed.every( ( xpath ) => 'string' === typeof xpath )
+		) {
+			return parsed;
+		}
+		error( 'Parsed XPath ID map is not an array of strings.' );
+	} catch ( err ) {
+		error( 'Failed to parse the XPath ID map JSON:', err );
+	}
+	return [];
+}
+
+/**
  * Reserved element property keys.
  *
  * @see {ElementData}
@@ -694,23 +786,23 @@ export default async function detect( {
 
 	log( 'Proceeding with detection' );
 
-	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
+	xpathIdMap = await getXPathIdMap( { warn, error } );
+
+	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-id]' );
 
 	/** @type {Map<Element, string>} */
-	const breadcrumbedElementsMap = new Map(
-		[ ...breadcrumbedElements ].map(
-			/**
-			 * @param {Element} element
-			 * @return {[Element, string]} Tuple of an element and its XPath.
-			 */
-			( element ) => [
-				element,
-				/** @type {string} */ (
-					element.getAttribute( 'data-od-xpath' )
-				),
-			]
-		)
-	);
+	const breadcrumbedElementsMap = new Map();
+	for ( const element of breadcrumbedElements ) {
+		const xpath = getElementXPath( element );
+		if ( null === xpath ) {
+			warn(
+				'Unable to resolve XPath for element with data-od-id:',
+				element
+			);
+			continue;
+		}
+		breadcrumbedElementsMap.set( element, xpath );
+	}
 
 	/** @type {IntersectionObserverEntry[]} */
 	const elementIntersections = [];
@@ -883,6 +975,7 @@ export default async function detect( {
 					extendRootData,
 					getElementData,
 					extendElementData,
+					getElementXPath,
 				} );
 				if ( initializePromise instanceof Promise ) {
 					extensionInitializePromises.push( initializePromise );
@@ -989,6 +1082,7 @@ export default async function detect( {
 						getElementData,
 						extendElementData,
 						extendRootData,
+						getElementXPath,
 					} );
 					if ( finalizePromise instanceof Promise ) {
 						extensionFinalizePromises.push( finalizePromise );
