@@ -377,6 +377,10 @@ function plvt_load_view_transitions(): void {
  * @return string Modified CSS with the actual animation duration in seconds.
  */
 function plvt_inject_animation_duration( string $css, int $animation_duration ): string {
+	if ( $animation_duration <= 0 ) {
+		$animation_duration = 1000;
+	}
+
 	$seconds = $animation_duration / 1000;
 
 	// Inject animation duration as CSS variable to take effect.
