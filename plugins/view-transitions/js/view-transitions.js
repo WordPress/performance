@@ -3,6 +3,7 @@
  * @typedef {import("./types.ts").InitViewTransitionsFunction} InitViewTransitionsFunction
  * @typedef {import("./types.ts").PageSwapListenerFunction} PageSwapListenerFunction
  * @typedef {import("./types.ts").PageRevealListenerFunction} PageRevealListenerFunction
+ * @typedef {import("./types.ts").NavigationHistoryEntry} NavigationHistoryEntry
  */
 
 /**
@@ -32,10 +33,13 @@ window.plvtInitViewTransitions = ( config ) => {
 		bodyElement,
 		articleElement
 	) => {
-		const animations = config.animations || {};
+		const animationConfig = config.animations?.[ transitionType ];
 
-		const globalEntries = animations[ transitionType ]
-			.useGlobalTransitionNames
+		if ( ! animationConfig ) {
+			return [];
+		}
+
+		const globalEntries = animationConfig.useGlobalTransitionNames
 			? Object.entries( config.globalTransitionNames || {} ).map(
 					( [ selector, name ] ) => {
 						const element = bodyElement.querySelector( selector );
@@ -45,8 +49,7 @@ window.plvtInitViewTransitions = ( config ) => {
 			: [];
 
 		const postEntries =
-			animations[ transitionType ].usePostTransitionNames &&
-			articleElement
+			animationConfig.usePostTransitionNames && articleElement
 				? Object.entries( config.postTransitionNames || {} ).map(
 						( [ selector, name ] ) => {
 							const element =
@@ -151,6 +154,169 @@ window.plvtInitViewTransitions = ( config ) => {
 	};
 
 	/**
+	 * Determines the view transition type to use, given an old and new navigation history entry.
+	 *
+	 * @param {NavigationHistoryEntry|null} oldEntry Navigation history entry for the URL navigated from.
+	 * @param {NavigationHistoryEntry}      newEntry Navigation history entry for the URL navigated to.
+	 * @return {string} View transition type (e.g. 'default', 'chronological-forwards', 'chronological-backwards').
+	 */
+	const determineTransitionType = ( oldEntry, newEntry ) => {
+		if (
+			! oldEntry ||
+			! newEntry ||
+			! config.animations ||
+			! oldEntry.url ||
+			! newEntry.url
+		) {
+			return 'default';
+		}
+
+		// Use 'default' transition type if all other transition types are disabled.
+		if (
+			! config.animations[ 'chronological-forwards' ] &&
+			! config.animations[ 'chronological-backwards' ] &&
+			! config.animations[ 'pagination-forwards' ] &&
+			! config.animations[ 'pagination-backwards' ]
+		) {
+			return 'default';
+		}
+
+		const oldURL = new URL( oldEntry.url );
+		const newURL = new URL( newEntry.url );
+
+		// TODO: Handle non-pretty permalinks.
+		const oldPathname = oldURL.pathname;
+		const newPathname = newURL.pathname;
+
+		if ( oldPathname === newPathname ) {
+			return 'default';
+		}
+
+		let oldPageMatches = null;
+		let newPageMatches = null;
+		let prefix = '';
+
+		// If enabled, check if the URLs are for a chronologically paginated archive.
+		if (
+			config.animations[ 'chronological-forwards' ] ||
+			config.animations[ 'chronological-backwards' ]
+		) {
+			const pagedRegEx = new RegExp(
+				'/' + config.paginationBase + '/(\\d+)/?$' // TODO: Escape.
+			);
+			// TODO: Handle non-pretty permalinks.
+			oldPageMatches = oldPathname.match( pagedRegEx );
+			newPageMatches = newPathname.match( pagedRegEx );
+			prefix = 'chronological-';
+		}
+
+		// If not, check if the URLs are for a multipage post.
+		if (
+			! oldPageMatches &&
+			! newPageMatches &&
+			( config.animations[ 'pagination-forwards' ] ||
+				config.animations[ 'pagination-backwards' ] )
+		) {
+			// TODO: Handle non-pretty permalinks.
+			oldPageMatches = oldPathname.match( /\/(\d+)\/?$/ );
+			newPageMatches = newPathname.match( /\/(\d+)\/?$/ );
+			prefix = 'pagination-';
+		}
+		// If there is a match on at least one of the URLs, compare whether their roots before the page segment match.
+		if ( oldPageMatches || newPageMatches ) {
+			const oldPageBase = oldPageMatches
+				? oldPathname.substring(
+						0,
+						oldPathname.length - oldPageMatches[ 0 ].length
+				  )
+				: oldPathname.replace( /\/$/, '' );
+			const newPageBase = newPageMatches
+				? newPathname.substring(
+						0,
+						newPathname.length - newPageMatches[ 0 ].length
+				  )
+				: newPathname.replace( /\/$/, '' );
+
+			if ( oldPageBase === newPageBase ) {
+				// They belong to the same archive or post.
+				// Return the appropriate transition type, or 'default' if no particular animation is specified.
+				if ( oldPageMatches && newPageMatches ) {
+					if (
+						Number( oldPageMatches[ 1 ] ) <
+						Number( newPageMatches[ 1 ] )
+					) {
+						return config.animations[ `${ prefix }forwards` ]
+							? `${ prefix }forwards`
+							: 'default';
+					}
+					return config.animations[ `${ prefix }backwards` ]
+						? `${ prefix }backwards`
+						: 'default';
+				}
+				if ( newPageMatches && Number( newPageMatches[ 1 ] ) > 1 ) {
+					return config.animations[ `${ prefix }forwards` ]
+						? `${ prefix }forwards`
+						: 'default';
+				}
+				if ( oldPageMatches && Number( oldPageMatches[ 1 ] ) > 1 ) {
+					return config.animations[ `${ prefix }backwards` ]
+						? `${ prefix }backwards`
+						: 'default';
+				}
+			}
+		}
+
+		// If enabled, check if the URLs are for content labeled by date (e.g. navigation to previous/next post).
+		if (
+			config.animations[ 'chronological-forwards' ] ||
+			config.animations[ 'chronological-backwards' ]
+		) {
+			// TODO: Handle non-pretty permalinks.
+			const oldDateMatches = oldPathname.match(
+				/\/(\d{4})\/(\d{2})\/(\d{2})\/[^\/]+\/?$/
+			);
+			const newDateMatches = newPathname.match(
+				/\/(\d{4})\/(\d{2})\/(\d{2})\/[^\/]+\/?$/
+			);
+			if ( oldDateMatches && newDateMatches ) {
+				const oldPageBase = oldPathname.substring(
+					0,
+					oldPathname.length - oldDateMatches[ 0 ].length
+				);
+				const newPageBase = newPathname.substring(
+					0,
+					newPathname.length - newDateMatches[ 0 ].length
+				);
+				if ( oldPageBase === newPageBase ) {
+					// They belong to the same hierarchy.
+					const oldDate = new Date(
+						parseInt( oldDateMatches[ 1 ] ),
+						parseInt( oldDateMatches[ 2 ] ) - 1,
+						parseInt( oldDateMatches[ 3 ] )
+					);
+					const newDate = new Date(
+						parseInt( newDateMatches[ 1 ] ),
+						parseInt( newDateMatches[ 2 ] ) - 1,
+						parseInt( newDateMatches[ 3 ] )
+					);
+					if ( oldDate < newDate ) {
+						return config.animations[ 'chronological-forwards' ]
+							? 'chronological-forwards'
+							: 'default';
+					}
+					if ( oldDate > newDate ) {
+						return config.animations[ 'chronological-backwards' ]
+							? 'chronological-backwards'
+							: 'default';
+					}
+				}
+			}
+		}
+
+		return 'default';
+	};
+
+	/**
 	 * Customizes view transition behavior on the URL that is being navigated from.
 	 *
 	 * @type {PageSwapListenerFunction}
@@ -160,10 +326,15 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pageswap',
 		( /** @type {PageSwapEvent} */ event ) => {
 			if ( event.viewTransition ) {
-				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				if ( ! event.activation?.entry || ! event.activation?.from ) {
+					return;
+				}
+				const transitionType = determineTransitionType(
+					event.activation.from,
+					event.activation.entry
+				);
 				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
-
 				let viewTransitionEntries;
 				if ( document.body.classList.contains( 'single' ) ) {
 					viewTransitionEntries = getViewTransitionEntries(
@@ -204,7 +375,16 @@ window.plvtInitViewTransitions = ( config ) => {
 		'pagereveal',
 		( /** @type {PageRevealEvent} */ event ) => {
 			if ( event.viewTransition ) {
-				const transitionType = 'default'; // Only 'default' is supported so far, but more to be added.
+				if (
+					! window.navigation.activation?.from ||
+					! window.navigation.activation.entry
+				) {
+					return;
+				}
+				const transitionType = determineTransitionType(
+					window.navigation.activation.from,
+					window.navigation.activation.entry
+				);
 				suppressViewTransitionRejections( event.viewTransition );
 				event.viewTransition.types.add( transitionType );
 
