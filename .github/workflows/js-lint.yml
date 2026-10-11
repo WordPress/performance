@@ -60,6 +60,8 @@ jobs:
         run: npm ci
       - name: JS Lint
         run: npm run lint-js
+      - name: JS Unit Tests
+        run: npm run test-unit-js
       - name: JSON Schema Validation
         run: npm run lint-json
       - name: TypeScript compile
