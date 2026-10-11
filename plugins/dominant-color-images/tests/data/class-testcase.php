@@ -37,98 +37,122 @@ abstract class TestCase extends WP_UnitTestCase {
 	 */
 	public function provider_get_dominant_color(): array {
 		return array(
-			'animated_gif'  => array(
+			'animated_gif'        => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/animated.gif',
-				'expected_color'        => array( '874e4e', '864e4e', 'df7f7f' ),
+				'expected_color'        => array( 'e3a3a3', 'e3a5a5' ),
 				'expected_transparency' => true,
+				'expected_lqip'         => null,
 			),
-			'red_jpg'       => array(
+			'red_jpg'             => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg',
 				'expected_color'        => array( 'ff0000', 'fe0000' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174772,
 			),
-			'green_jpg'     => array(
+			'green_jpg'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/green.jpg',
 				'expected_color'        => array( '00ff00', '00ff01', '02ff01' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174797,
 			),
-			'white_jpg'     => array(
+			'white_jpg'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/white.jpg',
 				'expected_color'        => array( 'ffffff' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174819,
 			),
 
-			'red_gif'       => array(
+			'red_gif'             => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/red.gif',
 				'expected_color'        => array( 'ff0000' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174781,
 			),
-			'green_gif'     => array(
+			'green_gif'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/green.gif',
 				'expected_color'        => array( '00ff00' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174797,
 			),
-			'white_gif'     => array(
+			'white_gif'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/white.gif',
 				'expected_color'        => array( 'ffffff' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174819,
 			),
-			'trans_gif'     => array(
+			'trans_gif'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/trans.gif',
-				'expected_color'        => array( '5a5a5a', '020202' ),
+				'expected_color'        => array( '5a5a5a', '828282' ),
 				'expected_transparency' => true,
+				'expected_lqip'         => null,
 			),
 
-			'red_png'       => array(
+			'red_png'             => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/red.png',
 				'expected_color'        => array( 'ff0000' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174781,
 			),
-			'green_png'     => array(
+			'green_png'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/green.png',
 				'expected_color'        => array( '00ff00' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174797,
 			),
-			'white_png'     => array(
+			'white_png'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/white.png',
 				'expected_color'        => array( 'ffffff' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174819,
 			),
-			'trans_png'     => array(
+			'trans_png'           => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/trans.png',
-				'expected_color'        => array( '000000' ),
+				'expected_color'        => array( '000000', 'f7f7f7' ),
 				'expected_transparency' => true,
+				'expected_lqip'         => null,
 			),
 
-			'red_webp'      => array(
+			'red_webp'            => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/red.webp',
 				'expected_color'        => array( 'ff0000' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174781,
 			),
-			'green_webp'    => array(
+			'green_webp'          => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/green.webp',
 				'expected_color'        => array( '00ff00' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174797,
 			),
-			'white_webp'    => array(
+			'white_webp'          => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/white.webp',
 				'expected_color'        => array( 'ffffff' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 174819,
 			),
-			'trans_webp'    => array(
+			'trans_webp'          => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/trans.webp',
 				'expected_color'        => array( '000000' ),
 				'expected_transparency' => true,
+				'expected_lqip'         => null,
 			),
-			'balloons_webp' => array(
+			'balloons_webp'       => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp',
-				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8', 'c2bdbc' ),
+				'expected_color'        => array( 'c9c4c6', 'c9c4c7', 'cac5c8' ),
 				'expected_transparency' => false,
+				'expected_lqip'         => 169443,
 			),
-			'half_opaque'   => array(
+			'half_opaque'         => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/half-opaque.png',
-				'expected_color'        => array( '7e7e7e', 'ffffff' ),
+				'expected_color'        => array( '7e7e7e', 'ffffff', '000000' ),
 				'expected_transparency' => true,
+				'expected_lqip'         => null,
+			),
+			'checkerboard_bw_2x2' => array(
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/checkerboard-bw-2x2.png',
+				'expected_color'        => array( 'bbbbbb', 'bcbcbc' ),
+				'expected_transparency' => false,
+				'expected_lqip'         => 67299,
 			),
 		);
 	}
@@ -175,7 +199,7 @@ abstract class TestCase extends WP_UnitTestCase {
 	 *
 	 * @phpstan-param string[] $expected_color
 	 */
-	public function test_get_dominant_color_valid( string $image_path, array $expected_color, bool $expected_transparency ): void {
+	public function test_get_dominant_color_valid( string $image_path, array $expected_color, bool $expected_transparency, ?int $expected_lqip ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -188,6 +212,13 @@ abstract class TestCase extends WP_UnitTestCase {
 		$this->assertNotWPError( $dominant_color_data );
 		$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
 		$this->assertSame( $dominant_color_data['has_transparency'], $expected_transparency );
+
+		if ( null === $expected_lqip ) {
+			$this->assertArrayNotHasKey( 'lqip', $dominant_color_data );
+		} else {
+			$this->assertArrayHasKey( 'lqip', $dominant_color_data );
+			$this->assertSame( $expected_lqip, $dominant_color_data['lqip'] );
+		}
 	}
 
 	/**
