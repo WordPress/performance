@@ -106,7 +106,13 @@ function od_maybe_add_template_output_buffer_filter(): void {
 	) {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
-	add_filter( 'od_template_output_buffer', $callback );
+
+	// Backward compatibility with WP<6.9.
+	if ( function_exists( 'wp_start_template_enhancement_output_buffer' ) ) {
+		add_filter( 'wp_template_enhancement_output_buffer', $callback );
+	} else {
+		add_filter( 'od_template_output_buffer', $callback );
+	}
 }
 
 /**
