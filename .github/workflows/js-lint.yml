@@ -57,7 +57,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: npm
       - name: npm install
-        run: npm ci
+        run: |
+          npm ci
+          npm ci --prefix plugins/optimization-detective/priming-cli
       - name: JS Lint
         run: npm run lint-js
       - name: JSON Schema Validation

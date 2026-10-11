@@ -31,6 +31,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		return array(
 			'valid_minimal'                   => array(
 				'data' => array(
+					// Note: The 'source' field is currently optional, so this data is still valid without it.
 					'url'       => home_url( '/' ),
 					'etag'      => md5( '' ),
 					'viewport'  => $viewport,
@@ -135,6 +136,17 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					'elements'  => array(),
 				),
 				'error' => 'etag is a required property of OD_URL_Metric.',
+			),
+			'missing_source'                  => array(
+				'data' => array(
+					'uuid'      => wp_generate_uuid4(),
+					'etag'      => md5( '' ),
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				// Note: Add error message 'source is a required property of OD_URL_Metric.' when 'source' becomes mandatory.
 			),
 			'missing_viewport'                => array(
 				'data'  => array(
@@ -330,6 +342,15 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$this->assertSame( $data['etag'], $url_metric->get_etag() );
 		$this->assertSame( $data['etag'], $url_metric->get( 'etag' ) );
 		$this->assertTrue( 1 === preg_match( '/^[a-f0-9]{32}$/', $url_metric->get_etag() ) );
+
+		// Note: When the 'source' field becomes required, the else statement can be removed.
+		if ( array_key_exists( 'source', $data ) ) {
+			$this->assertSame( $data['source'], $url_metric->get_source() );
+			$this->assertSame( $data['source'], $url_metric->get( 'source' ) );
+			$this->assertContains( $url_metric->get_source(), array( 'visitor', 'user', 'synthetic' ) );
+		} else {
+			$this->assertNull( $url_metric->get_source() );
+		}
 
 		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
 		$this->assertSame( $url_metric->get_uuid(), $url_metric->get( 'uuid' ) );
@@ -919,7 +940,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 */
 	protected function check_schema_subset( array $schema, string $path, bool $extended = false ): void {
 		$this->assertArrayHasKey( 'required', $schema, $path );
-		if ( ! $extended ) {
+		if ( ! $extended && 'root/source' !== $path ) {
 			$this->assertTrue( $schema['required'], $path );
 		}
 		$this->assertArrayHasKey( 'type', $schema, $path );
