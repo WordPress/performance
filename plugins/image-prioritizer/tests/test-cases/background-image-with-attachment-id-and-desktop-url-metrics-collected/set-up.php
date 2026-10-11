@@ -1,0 +1,48 @@
+<?php
+return static function ( Test_Image_Prioritizer_Helper $test_case, WP_UnitTest_Factory $factory ): array {
+	$breakpoint_max_widths = array( 480, 600, 782 );
+	add_filter(
+		'od_breakpoint_max_widths',
+		static function () use ( $breakpoint_max_widths ) {
+			return $breakpoint_max_widths;
+		}
+	);
+
+	$element = array(
+		'isLCP'              => false,
+		'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]',
+		'boundingClientRect' => $test_case->get_sample_dom_rect(),
+		'intersectionRatio'  => 1.0,
+	);
+
+	foreach ( array_merge( $breakpoint_max_widths, array( 1000 ) ) as $viewport_width ) {
+		$test_case->store_url_metric(
+			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
+			$test_case->get_sample_url_metric(
+				array(
+					'viewport_width' => $viewport_width,
+					'elements'       => array( $element ),
+				)
+			)
+		);
+	}
+
+	// Note: A high attachment ID is used so that the ID does not incidentally occur elsewhere in the snapshot, since the
+	// placeholders below are substituted back into the snapshot by way of a string replacement.
+	$attachment_id = $factory->attachment->create_object(
+		DIR_TESTDATA . '/images/33772.jpg',
+		0,
+		array(
+			'post_mime_type' => 'image/jpeg',
+			'import_id'      => 987654,
+		)
+	);
+
+	wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, DIR_TESTDATA . '/images/33772.jpg' ) );
+
+	return array(
+		'{{attachment_id}}' => (string) $attachment_id,
+		'{{full_url}}'      => wp_get_attachment_url( $attachment_id ),
+		'{{expected_url}}'  => wp_get_attachment_image_url( $attachment_id, array( (int) $element['boundingClientRect']['width'], 0 ) ),
+	);
+};
