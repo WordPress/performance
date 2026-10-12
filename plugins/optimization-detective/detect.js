@@ -123,9 +123,9 @@ function createLogger(
 	/**
 	 * Constructs the args to pass to the logging function.
 	 *
-	 * @param {Array<any>} message       - The message(s) to log.
-	 * @param {boolean}    includeSource - Whether to include the source. This should be true for warnings or errors.
-	 * @return {Array<any>} Amended message.
+	 * @param {Array<unknown>} message       - The message(s) to log.
+	 * @param {boolean}        includeSource - Whether to include the source. This should be true for warnings or errors.
+	 * @return {Array<unknown>} Amended message.
 	 */
 	const constructLogArgs = ( message, includeSource = false ) => {
 		return [ prefix, ...message, includeSource ? logSource : null ].filter(
@@ -137,7 +137,7 @@ function createLogger(
 		/**
 		 * Logs a message if debug mode is enabled.
 		 *
-		 * @param {...*} message - The message(s) to log.
+		 * @param {...unknown} message - The message(s) to log.
 		 */
 		log( ...message ) {
 			if ( debugMode ) {
@@ -149,7 +149,7 @@ function createLogger(
 		/**
 		 * Logs an informational message if debug mode is enabled.
 		 *
-		 * @param {...*} message - The message(s) to log as info.
+		 * @param {...unknown} message - The message(s) to log as info.
 		 */
 		info( ...message ) {
 			if ( debugMode ) {
@@ -161,7 +161,7 @@ function createLogger(
 		/**
 		 * Logs a warning if debug mode is enabled.
 		 *
-		 * @param {...*} message - The message(s) to log as a warning.
+		 * @param {...unknown} message - The message(s) to log as a warning.
 		 */
 		warn( ...message ) {
 			if ( debugMode ) {
@@ -173,7 +173,7 @@ function createLogger(
 		/**
 		 * Logs an error.
 		 *
-		 * @param {...*} message - The message(s) to log as an error.
+		 * @param {...unknown} message - The message(s) to log as an error.
 		 */
 		error( ...message ) {
 			// eslint-disable-next-line no-console
@@ -329,9 +329,9 @@ function waitForPrerenderingToEnd() {
  *
  * @param {Object} obj - Object to recursively freeze.
  */
-function recursiveFreeze( /** @type {Record<string, any>} */ obj ) {
+function recursiveFreeze( obj ) {
 	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
-		const value = obj[ prop ];
+		const value = /** @type {Record<string, unknown>} */ ( obj )[ prop ];
 		if ( null !== value && typeof value === 'object' ) {
 			recursiveFreeze( value );
 		}
