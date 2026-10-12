@@ -294,6 +294,37 @@ function getCurrentTime() {
 }
 
 /**
+ * Waits for a prerendering document to be activated before resolving.
+ *
+ * If the document is not currently prerendering, this resolves immediately. Otherwise, it waits for the
+ * `prerenderingchange` event (fired on the document, not the window) and then, if supported, for the subsequent
+ * idle callback to fire, so that detection logic and extensions don't run, or interfere with other JavaScript, while
+ * a prerendered page is still hidden from the user.
+ *
+ * @since n.e.x.t
+ *
+ * @return {Promise<void>} Promise which resolves once the document is no longer prerendering.
+ */
+function waitForPrerenderingToEnd() {
+	if ( ! doc.prerendering ) {
+		return Promise.resolve();
+	}
+	return new Promise( ( resolve ) => {
+		doc.addEventListener(
+			'prerenderingchange',
+			() => {
+				if ( typeof requestIdleCallback === 'function' ) {
+					requestIdleCallback( () => resolve() );
+				} else {
+					resolve();
+				}
+			},
+			{ once: true }
+		);
+	} );
+}
+
+/**
  * Recursively freezes an object to prevent mutation.
  *
  * @param {Object} obj - Object to recursively freeze.
@@ -664,6 +695,10 @@ export default async function detect( {
 		warn( 'Aborted detection due to storage being locked.' );
 		return;
 	}
+
+	// Wait for a prerendered page to be activated before proceeding, so that detection logic and extensions don't
+	// run while the page is still hidden from the user.
+	await waitForPrerenderingToEnd();
 
 	// Keep track of whether the window resized. If it was resized, we abort sending the URLMetric.
 	let didWindowResize = false;
