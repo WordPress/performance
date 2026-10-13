@@ -972,19 +972,17 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$processor = new OD_HTML_Tag_Processor( '<div><span></div>' );
 
 		$captured_warnings = array();
-		set_error_handler(
-			static function ( int $errno, string $errstr ) use ( &$captured_warnings ): bool {
-				$captured_warnings[] = $errstr;
-				return true;
-			}
-		);
+		$callback          = static function ( string $function_name, string $message ) use ( &$captured_warnings ): void {
+			$captured_warnings[] = $message;
+		};
+		add_action( 'wp_trigger_error_run', $callback, 10, 2 );
 
 		try {
-			while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
-				// Process tags until closer mismatch triggers warning.
+			while ( $processor->next_token() ) {
+				$processor->get_tag();
 			}
 		} finally {
-			restore_error_handler();
+			remove_action( 'wp_trigger_error_run', $callback );
 			unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
 		}
 
