@@ -12,6 +12,7 @@ const config = require( '../config' );
 const { getChangelog } = require( './changelog' );
 const { getReleaseMilestones } = require( './bump-versions' );
 const { plugins } = require( '../../../plugins.json' );
+const { isVersionReleased } = require( '../lib/wporg' );
 
 /**
  * @typedef WPReadmeCommandOptions
@@ -19,6 +20,7 @@ const { plugins } = require( '../../../plugins.json' );
  * @property {string=}  plugin Optional plugin slug to update a single plugin's readme. Defaults to all plugins with an open, dated release milestone.
  * @property {string=}  token  Optional personal GitHub access token.
  * @property {boolean=} all    Update every plugin, ignoring release milestones (legacy behavior).
+ * @property {boolean=} force  Update readme even if the version is already released on WordPress.org.
  */
 
 exports.options = [
@@ -35,6 +37,12 @@ exports.options = [
 		argname: '-a, --all',
 		description:
 			'Update all plugins, ignoring release milestones (legacy behavior). When combined with --plugin, that plugin is updated without checking for a milestone.',
+		defaults: false,
+	},
+	{
+		argname: '-f, --force',
+		description:
+			'Update readme even if the detected version is already released on WordPress.org.',
 		defaults: false,
 	},
 ];
@@ -80,6 +88,7 @@ exports.handler = async ( opt ) => {
 	await updateReadme( {
 		pluginSlugs,
 		token: opt.token,
+		force: opt.force,
 	} );
 };
 
@@ -303,7 +312,7 @@ function escapeRegExp( value ) {
 /**
  * Updates the `readme.txt` file with a specific release changelog.
  *
- * @param {{pluginSlugs: string[], token?: string}} settings
+ * @param {{pluginSlugs: string[], token?: string, force?: boolean}} settings
  */
 async function updateReadme( settings ) {
 	const pluginRoot = path.resolve( __dirname, '../../../' );
@@ -320,6 +329,22 @@ async function updateReadme( settings ) {
 				'readme.txt'
 			);
 			const stableTag = getStableTag( readmeFilePath );
+
+			if ( ! settings.force ) {
+				const alreadyReleased = await isVersionReleased(
+					pluginSlug,
+					stableTag
+				);
+				if ( alreadyReleased ) {
+					log(
+						formats.warning(
+							`⚠ Skipping ${ pluginSlug }: version ${ stableTag } is already released on WordPress.org. Bump the version before running this command, or pass --force to run anyway.`
+						)
+					);
+					continue;
+				}
+			}
+
 			const changelog = await getChangelog( {
 				owner: config.githubRepositoryOwner,
 				repo: config.githubRepositoryName,

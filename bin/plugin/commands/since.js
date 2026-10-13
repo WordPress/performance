@@ -11,6 +11,7 @@ const { log, formats } = require( '../lib/logger' );
  */
 const { plugins } = require( '../../../plugins.json' );
 const { getReleaseMilestones } = require( './bump-versions' );
+const { isVersionReleased } = require( '../lib/wporg' );
 
 /**
  * @typedef WPSinceCommandOptions
@@ -18,6 +19,7 @@ const { getReleaseMilestones } = require( './bump-versions' );
  * @property {string=}  plugin Plugin slug.
  * @property {string=}  token  Optional personal GitHub access token.
  * @property {boolean=} all    Update every plugin, ignoring release milestones (legacy behavior).
+ * @property {boolean=} force  Update plugins even if the version is already released on WordPress.org.
  */
 
 exports.options = [
@@ -34,6 +36,12 @@ exports.options = [
 		argname: '-a, --all',
 		description:
 			'Update all plugins, ignoring release milestones (legacy behavior). When combined with --plugin, that plugin is updated without checking for a milestone.',
+		defaults: false,
+	},
+	{
+		argname: '-f, --force',
+		description:
+			'Update plugins even if the detected version is already released on WordPress.org.',
 		defaults: false,
 	},
 ];
@@ -98,6 +106,21 @@ exports.handler = async ( opt ) => {
 			);
 		}
 		const version = readmeContentMatches[ 1 ];
+
+		if ( ! opt.force ) {
+			const alreadyReleased = await isVersionReleased(
+				pluginSlug,
+				version
+			);
+			if ( alreadyReleased ) {
+				log(
+					formats.warning(
+						`⚠ Skipping ${ pluginSlug }: version ${ version } is already released on WordPress.org. Bump the version before running this command, or pass --force to run anyway.`
+					)
+				);
+				continue;
+			}
+		}
 
 		patterns.push( `${ pluginDirectory }/**/*.php` );
 		patterns.push( `${ pluginDirectory }/**/*.js` );

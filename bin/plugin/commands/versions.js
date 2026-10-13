@@ -10,11 +10,13 @@ const { log, formats } = require( '../lib/logger' );
  * Internal dependencies
  */
 const { plugins } = require( '../../../plugins.json' );
+const { isVersionReleased } = require( '../lib/wporg' );
 
 /**
  * @typedef WPVersionsCommandOptions
  *
- * @property {?string} plugin Plugin slug.
+ * @property {?string}  plugin Plugin slug.
+ * @property {boolean=} force  Skip WordPress.org check for already released versions.
  */
 
 exports.options = [
@@ -22,6 +24,12 @@ exports.options = [
 		argname: '-p, --plugin <plugin>',
 		description: 'Plugin slug',
 		defaults: null,
+	},
+	{
+		argname: '-f, --force',
+		description:
+			'Verify versions without checking WordPress.org for already released versions.',
+		defaults: false,
 	},
 ];
 
@@ -140,7 +148,16 @@ exports.handler = async ( opt ) => {
 		const slug = path.basename( pluginDirectory );
 		try {
 			const version = await checkPluginDirectory( pluginDirectory );
-			if ( version.includes( '-' ) ) {
+			const isReleased =
+				! opt.force && ( await isVersionReleased( slug, version ) );
+
+			if ( isReleased ) {
+				log(
+					formats.warning(
+						`⚠ ${ slug }: ${ version } (already released on WordPress.org)`
+					)
+				);
+			} else if ( version.includes( '-' ) ) {
 				log(
 					formats.warning(
 						`⚠ ${ slug }: ${ version } (pre-release identifier is present)`
