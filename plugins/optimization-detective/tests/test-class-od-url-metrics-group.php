@@ -567,6 +567,153 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_current_url_metrics().
+	 *
+	 * @covers ::get_current_url_metrics
+	 */
+	public function test_get_current_url_metrics(): void {
+		$current_etag = md5( 'current' );
+		$stale_etag   = md5( 'stale' );
+		$collection   = new OD_URL_Metric_Group_Collection( array(), $current_etag, array( 1000 ), 5, HOUR_IN_SECONDS );
+		$group        = $collection->get_first_group();
+
+		// Case 1: Empty group.
+		$this->assertSame( array(), $group->get_current_url_metrics() );
+
+		$metric_stale_1 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $stale_etag,
+				'timestamp' => 100.0,
+			)
+		);
+		$metric_stale_2 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $stale_etag,
+				'timestamp' => 200.0,
+			)
+		);
+
+		// Case 2: Only stale metrics -> returns all stale metrics sorted by timestamp descending.
+		$group->add_url_metric( $metric_stale_1 );
+		$group->add_url_metric( $metric_stale_2 );
+		$this->assertSame(
+			array( $metric_stale_2, $metric_stale_1 ),
+			$group->get_current_url_metrics()
+		);
+
+		$metric_current_1 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $current_etag,
+				'timestamp' => 150.0,
+			)
+		);
+		$metric_current_2 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $current_etag,
+				'timestamp' => 250.0,
+			)
+		);
+
+		// Case 3: Mixed metrics -> returns ONLY metrics with current ETag sorted by timestamp descending.
+		$group->add_url_metric( $metric_current_1 );
+		$group->add_url_metric( $metric_current_2 );
+		$this->assertSame(
+			array( $metric_current_2, $metric_current_1 ),
+			$group->get_current_url_metrics()
+		);
+
+		// Verify cached result is returned.
+		$this->assertSame(
+			$group->get_current_url_metrics(),
+			$group->get_current_url_metrics()
+		);
+	}
+
+	/**
+	 * Test get_xpath_elements_map() disregards stale ETag metrics when current ETag metrics exist.
+	 *
+	 * @covers ::get_xpath_elements_map
+	 */
+	public function test_get_xpath_elements_map_disregards_stale_etag_metrics(): void {
+		$current_etag = md5( 'current' );
+		$stale_etag   = md5( 'stale' );
+		$collection   = new OD_URL_Metric_Group_Collection( array(), $current_etag, array( 1000 ), 5, HOUR_IN_SECONDS );
+		$group        = $collection->get_first_group();
+
+		$xpath_stale   = '/HTML/BODY/DIV/*[1][self::OLD]';
+		$xpath_current = '/HTML/BODY/DIV/*[1][self::NEW]';
+
+		$metric_stale = $this->get_sample_url_metric(
+			array(
+				'etag'    => $stale_etag,
+				'element' => array(
+					'xpath' => $xpath_stale,
+				),
+			)
+		);
+		$metric_current = $this->get_sample_url_metric(
+			array(
+				'etag'    => $current_etag,
+				'element' => array(
+					'xpath' => $xpath_current,
+				),
+			)
+		);
+
+		$group->add_url_metric( $metric_stale );
+		// When only stale metric is present, it is used.
+		$map_stale = $group->get_xpath_elements_map();
+		$this->assertArrayHasKey( $xpath_stale, $map_stale );
+
+		// When current metric is added, stale metric is disregarded.
+		$group->add_url_metric( $metric_current );
+		$map_current = $group->get_xpath_elements_map();
+		$this->assertArrayHasKey( $xpath_current, $map_current );
+		$this->assertArrayNotHasKey( $xpath_stale, $map_current );
+	}
+
+	/**
+	 * Test is_complete() disregards stale ETag metrics when evaluating completeness.
+	 *
+	 * @covers ::is_complete
+	 */
+	public function test_is_complete_with_mixed_etags(): void {
+		$current_etag = md5( 'current' );
+		$stale_etag   = md5( 'stale' );
+		// Sample size is 2.
+		$collection   = new OD_URL_Metric_Group_Collection( array(), $current_etag, array( 1000 ), 2, HOUR_IN_SECONDS );
+		$group        = $collection->get_first_group();
+
+		$metric_stale = $this->get_sample_url_metric(
+			array(
+				'etag'      => $stale_etag,
+				'timestamp' => microtime( true ),
+			)
+		);
+		$metric_current_1 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $current_etag,
+				'timestamp' => microtime( true ),
+			)
+		);
+		$metric_current_2 = $this->get_sample_url_metric(
+			array(
+				'etag'      => $current_etag,
+				'timestamp' => microtime( true ),
+			)
+		);
+
+		// With 1 stale and 1 current metric, sample size (2) is not met by current metrics.
+		$group->add_url_metric( $metric_stale );
+		$group->add_url_metric( $metric_current_1 );
+		$this->assertFalse( $group->is_complete() );
+
+		// When second current metric is added, oldest (stale) is pushed out, sample size is 2 current metrics -> complete.
+		$group->add_url_metric( $metric_current_2 );
+		$this->assertTrue( $group->is_complete() );
+	}
+
+	/**
 	 * Gets sample XPath.
 	 *
 	 * @param string ...$breadcrumbs List of tags.

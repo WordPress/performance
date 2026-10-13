@@ -87,6 +87,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *          is_complete?: bool,
 	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
+	 *          get_current_url_metrics?: OD_URL_Metric[],
 	 *      }
 	 */
 	private array $result_cache = array();
@@ -275,6 +276,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.1.0
 	 * @since 0.9.0 If the current environment's generated ETag does not match the URL Metric's ETag, the URL Metric is considered stale.
 	 * @since 1.0.0 Negative freshness TTL values now disable timestamp-based freshness checks.
+	 * @since n.e.x.t Disregard URL Metrics with mismatched ETags if any have current ETags.
 	 *
 	 * @return bool Whether complete.
 	 */
@@ -284,11 +286,12 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 		}
 
 		$result = ( function () {
-			if ( count( $this->url_metrics ) < $this->sample_size ) {
+			$url_metrics = $this->get_current_url_metrics();
+			if ( count( $url_metrics ) < $this->sample_size ) {
 				return false;
 			}
 			$current_time = microtime( true );
-			foreach ( $this->url_metrics as $url_metric ) {
+			foreach ( $url_metrics as $url_metric ) {
 				// The URL Metric is too old to be fresh (skip if freshness TTL is negative).
 				if ( $this->freshness_ttl >= 0 && $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
 					return false;
@@ -301,6 +304,49 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			}
 
 			return true;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets URL Metrics in the group, preferring those that match the current ETag.
+	 *
+	 * If any URL Metrics have an ETag matching the current ETag, only those are returned.
+	 * Otherwise, if no URL Metrics have a current ETag, all URL Metrics are returned.
+	 * In either case, the returned URL Metrics are sorted by timestamp in descending order.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric[] URL Metrics.
+	 */
+	public function get_current_url_metrics(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$current_etag = $this->collection->get_current_etag();
+
+			$current_url_metrics = array();
+			$stale_url_metrics   = array();
+			foreach ( $this->url_metrics as $url_metric ) {
+				if ( hash_equals( $current_etag, $url_metric->get_etag() ) ) {
+					$current_url_metrics[] = $url_metric;
+				} else {
+					$stale_url_metrics[] = $url_metric;
+				}
+			}
+
+			$url_metrics = count( $current_url_metrics ) > 0 ? $current_url_metrics : $stale_url_metrics;
+
+			usort(
+				$url_metrics,
+				static fn ( OD_URL_Metric $a, OD_URL_Metric $b ): int => $b->get_timestamp() <=> $a->get_timestamp()
+			);
+
+			return $url_metrics;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -321,9 +367,10 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 		}
 
 		$result = ( function () {
+			$url_metrics = $this->get_current_url_metrics();
 
 			// No metrics have been gathered for this group, so there is no LCP element.
-			if ( count( $this->url_metrics ) === 0 ) {
+			if ( count( $url_metrics ) === 0 ) {
 				return null;
 			}
 
@@ -333,17 +380,6 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			 * @var array<non-empty-string, array{count: int<1, max>, element: OD_Element}> $breadcrumbs
 			 */
 			$breadcrumbs = array();
-
-			// Prefer to use URL Metrics, which have a current ETag.
-			$url_metrics = array_filter(
-				$this->url_metrics,
-				fn ( OD_URL_Metric $url_metric ): bool => $url_metric->get_etag() === $this->get_collection()->get_current_etag()
-			);
-
-			// Otherwise, if no URL Metrics have a current ETag, fall back to using all the stale ones.
-			if ( count( $url_metrics ) === 0 ) {
-				$url_metrics = $this->url_metrics;
-			}
 
 			foreach ( $url_metrics as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
@@ -388,6 +424,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Gets all elements from all URL Metrics in the viewport group keyed by the elements' XPaths.
 	 *
 	 * @since 0.9.0
+	 * @since n.e.x.t Disregard URL Metrics with mismatched ETags if any have current ETags.
 	 *
 	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
@@ -398,7 +435,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 
 		$result = ( function () {
 			$all_elements = array();
-			foreach ( $this->url_metrics as $url_metric ) {
+			foreach ( $this->get_current_url_metrics() as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
 					$all_elements[ $element->get_xpath() ][] = $element;
 				}
