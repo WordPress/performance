@@ -593,11 +593,11 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 			)
 		);
 
-		// Case 2: Only stale metrics -> returns all stale metrics sorted by timestamp descending.
+		// Case 2: Only stale metrics -> returns all stale metrics.
 		$group->add_url_metric( $metric_stale_1 );
 		$group->add_url_metric( $metric_stale_2 );
 		$this->assertSame(
-			array( $metric_stale_2, $metric_stale_1 ),
+			array( $metric_stale_1, $metric_stale_2 ),
 			$group->get_current_url_metrics()
 		);
 
@@ -614,11 +614,11 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 			)
 		);
 
-		// Case 3: Mixed metrics -> returns ONLY metrics with current ETag sorted by timestamp descending.
+		// Case 3: Mixed metrics -> returns ONLY metrics with current ETag.
 		$group->add_url_metric( $metric_current_1 );
 		$group->add_url_metric( $metric_current_2 );
 		$this->assertSame(
-			array( $metric_current_2, $metric_current_1 ),
+			array( $metric_current_1, $metric_current_2 ),
 			$group->get_current_url_metrics()
 		);
 
@@ -643,7 +643,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$xpath_stale   = '/HTML/BODY/DIV/*[1][self::OLD]';
 		$xpath_current = '/HTML/BODY/DIV/*[1][self::NEW]';
 
-		$metric_stale = $this->get_sample_url_metric(
+		$metric_stale   = $this->get_sample_url_metric(
 			array(
 				'etag'    => $stale_etag,
 				'element' => array(
@@ -681,10 +681,10 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$current_etag = md5( 'current' );
 		$stale_etag   = md5( 'stale' );
 		// Sample size is 2.
-		$collection   = new OD_URL_Metric_Group_Collection( array(), $current_etag, array( 1000 ), 2, HOUR_IN_SECONDS );
-		$group        = $collection->get_first_group();
+		$collection = new OD_URL_Metric_Group_Collection( array(), $current_etag, array( 1000 ), 2, HOUR_IN_SECONDS );
+		$group      = $collection->get_first_group();
 
-		$metric_stale = $this->get_sample_url_metric(
+		$metric_stale     = $this->get_sample_url_metric(
 			array(
 				'etag'      => $stale_etag,
 				'timestamp' => microtime( true ),

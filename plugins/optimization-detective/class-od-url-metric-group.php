@@ -315,7 +315,6 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * If any URL Metrics have an ETag matching the current ETag, only those are returned.
 	 * Otherwise, if no URL Metrics have a current ETag, all URL Metrics are returned.
-	 * In either case, the returned URL Metrics are sorted by timestamp in descending order.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -339,14 +338,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 				}
 			}
 
-			$url_metrics = count( $current_url_metrics ) > 0 ? $current_url_metrics : $stale_url_metrics;
-
-			usort(
-				$url_metrics,
-				static fn ( OD_URL_Metric $a, OD_URL_Metric $b ): int => $b->get_timestamp() <=> $a->get_timestamp()
-			);
-
-			return $url_metrics;
+			return count( $current_url_metrics ) > 0 ? $current_url_metrics : $stale_url_metrics;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;

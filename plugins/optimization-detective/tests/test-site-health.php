@@ -402,9 +402,9 @@ class Test_OD_Site_Health extends WP_UnitTestCase {
 		$this->assertSame( $expected, (bool) has_action( 'admin_notices' ) );
 		$admin_notices_output = get_echo( 'do_action', array( 'admin_notices' ) );
 		if ( $expected ) {
-			$this->assertStringContainsString( '<div class="notice notice-warning">', $admin_notices_output );
+			$this->assertStringContainsString( '<div class="notice notice-warning', $admin_notices_output );
 		} else {
-			$this->assertStringNotContainsString( '<div class="notice notice-warning">', $admin_notices_output );
+			$this->assertStringNotContainsString( '<div class="notice notice-warning', $admin_notices_output );
 		}
 	}
 
