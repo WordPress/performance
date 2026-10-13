@@ -973,8 +973,11 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 		$captured_warnings = array();
 		$callback          = static function ( string $function_name, string $message ) use ( &$captured_warnings ): void {
-			$captured_warnings[] = $message;
+			if ( ! in_array( $message, $captured_warnings, true ) ) {
+				$captured_warnings[] = $message;
+			}
 		};
+		add_action( 'wp_trigger_error_always_run', $callback, 10, 2 );
 		add_action( 'wp_trigger_error_run', $callback, 10, 2 );
 
 		try {
@@ -982,8 +985,13 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				$processor->get_tag();
 			}
 		} finally {
+			remove_action( 'wp_trigger_error_always_run', $callback );
 			remove_action( 'wp_trigger_error_run', $callback );
 			unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
+		}
+
+		if ( 0 === count( $captured_warnings ) && ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) ) {
+			$this->markTestSkipped( 'wp_trigger_error is not triggered when WP_DEBUG is disabled.' );
 		}
 
 		$this->assertCount( 1, $captured_warnings );
