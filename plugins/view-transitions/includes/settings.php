@@ -269,6 +269,17 @@ function plvt_apply_settings_to_theme_support(): void {
 function plvt_add_setting_ui(): void {
 	global $plvt_has_theme_support_with_args;
 
+	/**
+	 * Filters whether to display the View Transitions settings UI.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $show Whether to show the settings UI. Default true.
+	 */
+	if ( ! apply_filters( 'plvt_show_settings_ui', true ) ) {
+		return;
+	}
+
 	add_settings_section(
 		'plvt_view_transitions',
 		_x( 'View Transitions', 'Settings section', 'view-transitions' ),
@@ -516,11 +527,22 @@ function plvt_render_settings_field( array $args ): void {
  * @since 1.0.0
  *
  * @param string[]|mixed $links An array of plugin action links.
- * @return non-empty-array<string> The modified list of actions.
+ * @return array<string> The modified list of actions.
  */
 function plvt_add_settings_action_link( $links ): array {
 	if ( ! is_array( $links ) ) {
 		$links = array();
+	}
+
+	/**
+	 * Filters whether to display the View Transitions settings UI.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $show Whether to show the settings UI. Default true.
+	 */
+	if ( ! apply_filters( 'plvt_show_settings_ui', true ) ) {
+		return $links;
 	}
 
 	return array_merge(
