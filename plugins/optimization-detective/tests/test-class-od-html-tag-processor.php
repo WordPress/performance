@@ -960,6 +960,42 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that a tag stack mismatch triggers a warning containing the current URL.
+	 *
+	 * @covers ::next_token
+	 * @covers ::warn
+	 */
+	public function test_tag_stack_mismatch_warning(): void {
+		$_SERVER['HTTP_HOST']   = 'example.com';
+		$_SERVER['REQUEST_URI'] = '/test-page/';
+
+		$processor = new OD_HTML_Tag_Processor( '<div><span></div>' );
+
+		$captured_warnings = array();
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$captured_warnings ): bool {
+				$captured_warnings[] = $errstr;
+				return true;
+			}
+		);
+
+		try {
+			while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+				// Process tags until closer mismatch triggers warning.
+			}
+		} finally {
+			restore_error_handler();
+			unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
+		}
+
+		$this->assertCount( 1, $captured_warnings );
+		$this->assertStringContainsString( 'Expected popped tag stack element SPAN to match the currently visited closing tag DIV', $captured_warnings[0] );
+		if ( function_exists( 'od_get_current_url' ) ) {
+			$this->assertStringContainsString( od_get_current_url(), $captured_warnings[0] );
+		}
+	}
+
+	/**
 	 * Test get_cursor_move_count().
 	 *
 	 * @covers ::get_cursor_move_count
