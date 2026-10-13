@@ -10,6 +10,12 @@ function compareVersions( v1, v2 ) {
 		return 0;
 	}
 
+	/**
+	 * Parses a version string.
+	 *
+	 * @param {string} version Version string.
+	 * @return {{major: number, minor: number, patch: number, prerelease: string|null}|null} Parsed version or null.
+	 */
 	const parseVersion = ( version ) => {
 		const match = version.match( /^(\d+)\.(\d+)\.(\d+)(?:-([\w.]+))?$/ );
 		if ( ! match ) {
