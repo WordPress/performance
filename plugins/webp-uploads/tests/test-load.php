@@ -482,7 +482,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
 		$metadata     = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/webp']['file'], $properties['sources']['image/jpeg']['file'], $expected_tag );
 		}
 
@@ -530,7 +530,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
 		$metadata     = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
 
@@ -857,7 +857,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertFileExists( path_join( $dirname, $properties['sources']['image/webp']['file'] ) );
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
