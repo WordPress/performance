@@ -140,9 +140,6 @@ parameters:
 			identifier: method.alreadyNarrowedType
 			path: */tests/*
 		-
-			identifier: argument.unresolvableType
-			path: */tests/*
-		-
 			identifier: no.private.method
 			path: */tests/*
 		-
