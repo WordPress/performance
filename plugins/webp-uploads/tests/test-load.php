@@ -124,6 +124,67 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Recover the original image dimensions when the base metadata is incomplete.
+	 *
+	 * When core's wp_create_image_subsizes() cannot read the uploaded file (an
+	 * intermittent race at upload time) it returns metadata without width/height/sizes,
+	 * which makes the attachment render at 1x1 pixels. The filter should recover the
+	 * dimensions from the now-readable file instead of decorating a 1x1 record.
+	 *
+	 * @link https://github.com/WordPress/performance/issues/2468
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_recover_dimensions_when_base_metadata_is_incomplete(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// The metadata generated during upload holds the real dimensions.
+		$generated = wp_get_attachment_metadata( $attachment_id );
+		$this->assertArrayHasKey( 'width', $generated );
+		$this->assertArrayHasKey( 'height', $generated );
+		$this->assertGreaterThan( 1, $generated['width'] );
+		$this->assertGreaterThan( 1, $generated['height'] );
+
+		// Simulate the core failure: base metadata without dimensions or sizes.
+		$result = webp_uploads_create_sources_property( array(), $attachment_id );
+
+		// The dimensions should be recovered from the readable file, not left empty.
+		$this->assertArrayHasKey( 'width', $result );
+		$this->assertArrayHasKey( 'height', $result );
+		$this->assertSame( $generated['width'], $result['width'] );
+		$this->assertSame( $generated['height'], $result['height'] );
+
+		// Sources are attached to the now-valid record rather than to a 1x1 placeholder.
+		$this->assertArrayHasKey( 'sources', $result );
+	}
+
+	/**
+	 * Do not decorate or persist metadata when the file cannot be read.
+	 *
+	 * If the dimensions still cannot be recovered (the file is genuinely unreadable),
+	 * the filter must bail without inventing dimensions or adding a sources property.
+	 *
+	 * @link https://github.com/WordPress/performance/issues/2468
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_not_decorate_metadata_when_file_is_missing(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Remove the underlying file so it can no longer be read.
+		$file = get_attached_file( $attachment_id );
+		$this->assertIsString( $file );
+		wp_delete_file( $file );
+
+		$result = webp_uploads_create_sources_property( array(), $attachment_id );
+
+		// No dimensions invented and no sources attached to the empty record.
+		$this->assertArrayNotHasKey( 'width', $result );
+		$this->assertArrayNotHasKey( 'height', $result );
+		$this->assertArrayNotHasKey( 'sources', $result );
+	}
+
+	/**
 	 * Create JPEG and output format for JPEG images, if perflab_generate_webp_and_jpeg option set.
 	 *
 	 * @covers ::wp_get_attachment_metadata
