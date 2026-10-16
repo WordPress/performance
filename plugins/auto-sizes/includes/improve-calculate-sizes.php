@@ -348,7 +348,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
 		// Normalize default alignment values.
-		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? $block['attrs']['align'] : 'default';
+		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? (string) $block['attrs']['align'] : 'default';
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
