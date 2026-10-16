@@ -113,7 +113,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 			 */
 			if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-				$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+				$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 			}
 
 			/*
@@ -141,7 +141,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 		 */
 		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+			$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 		}
 
 		$sizes = wp_calculate_image_sizes(
