@@ -82,6 +82,43 @@ const generateBuildManifest = ( slug, from ) => {
 };
 
 /**
+ * Creates a transformer that repoints a bundle's sourceMappingURL at a given file name.
+ *
+ * A bundle vendored out of node_modules keeps the sourceMappingURL its publisher emitted,
+ * which names the map as it is called inside that package. Where the bundle is renamed on
+ * the way in, that reference stops matching the map shipped beside it, so it has to be
+ * rewritten to the name the map is given here.
+ *
+ * @param {string} mapFileName File name the source map is shipped under.
+ *
+ * @return {function(Buffer): string} Transformer.
+ */
+const sourceMappingUrlTransformer = ( mapFileName ) => ( content ) =>
+	content
+		.toString()
+		.replace(
+			/\/\/# sourceMappingURL=\S+/,
+			`//# sourceMappingURL=${ mapFileName }`
+		);
+
+/**
+ * Creates a transformer that repoints a source map's "file" field at a given file name.
+ *
+ * The field names the generated file a map belongs to, as that file is called inside the
+ * package the map was published in. Where the bundle is renamed on the way in, the field
+ * has to be repointed at the new name to stay consistent with it.
+ *
+ * @param {string} bundleFileName File name the bundle is shipped under.
+ *
+ * @return {function(Buffer): string} Transformer.
+ */
+const sourceMapFileTransformer = ( bundleFileName ) => ( content ) => {
+	const map = JSON.parse( content.toString() );
+	map.file = bundleFileName;
+	return JSON.stringify( map );
+};
+
+/**
  * Transformer to get version from package.json and return it as a PHP file.
  *
  * @param {Buffer} content      The content as a Buffer of the file being transformed.
@@ -293,6 +330,8 @@ module.exports = {
 	getPluginVersion,
 	generateBuildManifest,
 	assetDataTransformer,
+	sourceMappingUrlTransformer,
+	sourceMapFileTransformer,
 	cssMinifyTransformer,
 	getZipContentFingerprint,
 	getUntrackedIncludedFiles,

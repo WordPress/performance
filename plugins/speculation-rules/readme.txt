@@ -1,8 +1,8 @@
 === Speculative Loading ===
 
 Contributors: wordpressdotorg
-Tested up to: 7.0
-Stable tag:   1.6.0
+Tested up to: 7.1
+Stable tag:   1.7.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, javascript, speculation rules, prerender, prefetch
@@ -121,6 +121,16 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.7.0 =
+
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum required WordPress version to 6.9. ([2517](https://github.com/WordPress/performance/pull/2517))
+* Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
+* Harden the JSON encoding of the inline speculation rules script and add a `sourceURL` to the authentication admin notice script. ([2169](https://github.com/WordPress/performance/pull/2169))
 
 = 1.6.0 =
 

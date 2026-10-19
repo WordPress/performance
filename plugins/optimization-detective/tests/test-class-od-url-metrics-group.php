@@ -591,7 +591,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 */
 	private function get_xpath( string ...$breadcrumbs ): string {
 		$xpath = '';
-		foreach ( $breadcrumbs as $i => $tag_name ) {
+		foreach ( array_values( $breadcrumbs ) as $i => $tag_name ) {
 			if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $xpath ) ) {
 				$xpath .= "/$tag_name";
 			} else {

@@ -26,6 +26,11 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
+		// Ensure the Imagick editor is registered, even though it seems to be by the time this runs.
+		require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
+		require_once __DIR__ . '/../class-dominant-color-image-editor-imagick.php';
+
 		add_filter(
 			'wp_image_editors',
 			static function ( array $editors ): array {
@@ -147,7 +152,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 
 		$result = $editor->get_dominant_color();
 
-		$this->assertEquals( 'ff0000', $result );
+		$this->assertSame( 'ff0000', $result );
 	}
 
 	/**
