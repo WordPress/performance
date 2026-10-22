@@ -14,7 +14,7 @@
 	"devDependencies": {
 		"@octokit/rest": "^22.0.1",
 		"@playwright/test": "^1.64.1",
-		"@types/lodash": "4.17.25",
+		"@types/lodash": "4.17.26",
 		"@types/node": "^20.19.43",
 		"@wordpress/e2e-test-utils-playwright": "3.0.0",
 		"@wordpress/env": "^11.17.0",
