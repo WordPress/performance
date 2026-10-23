@@ -4,7 +4,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 		od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 		$test_case->get_sample_url_metric(
 			array(
-				'viewport_width' => 400,
+				'viewport_width' => 300,
 				'elements'       => array(
 					array(
 						'isLCP'             => true,
