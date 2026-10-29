@@ -79,7 +79,7 @@ function plvt_sanitize_view_transitions_theme_support(): void {
 			'.wp-block-post-content, .entry-content' => 'post-content',
 		),
 		'default-animation'          => 'fade',
-		'default-animation-duration' => 400,
+		'default-animation-duration' => VIEW_TRANSITIONS_DEFAULT_ANIMATION_DURATION,
 	);
 
 	// If no specific `$args` were provided, simply use the defaults.
@@ -378,7 +378,7 @@ function plvt_load_view_transitions(): void {
  */
 function plvt_inject_animation_duration( string $css, int $animation_duration ): string {
 	if ( $animation_duration < 0 ) {
-		$animation_duration = 400;
+		$animation_duration = VIEW_TRANSITIONS_DEFAULT_ANIMATION_DURATION;
 	}
 
 	$seconds = $animation_duration / 1000;

@@ -67,7 +67,7 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 			),
 			'with_existing_css_and_default_duration'   => array(
 				'css'      => '::view-transition-new(root) { opacity: 0; }',
-				'duration' => 400,
+				'duration' => VIEW_TRANSITIONS_DEFAULT_ANIMATION_DURATION,
 				'expected' => '::view-transition-new(root) { opacity: 0; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 0.4s; }',
 			),
 			'with_empty_css_and_custom_duration'       => array(
@@ -80,7 +80,7 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 				'duration' => 0,
 				'expected' => '::view-transition-group(*) { animation-duration: 0s; }',
 			),
-			'with_negative_duration_defaults_to_400ms' => array(
+			'with_negative_duration_defaults_to_default' => array(
 				'css'      => '::view-transition-old(root) { opacity: 1; }',
 				'duration' => -500,
 				'expected' => '::view-transition-old(root) { opacity: 1; }::view-transition-group(*) { --plvt-view-transition-animation-duration: 0.4s; }',
@@ -120,7 +120,7 @@ class Test_ViewTransitions_Theme extends WP_UnitTestCase {
 		$support = get_theme_support( 'view-transitions' );
 		$this->assertIsArray( $support );
 		$this->assertSame( 'fade', $support['default-animation'] );
-		$this->assertSame( 400, $support['default-animation-duration'] );
+		$this->assertSame( VIEW_TRANSITIONS_DEFAULT_ANIMATION_DURATION, $support['default-animation-duration'] );
 		$this->assertIsArray( $support['global-transition-names'] );
 		$this->assertIsArray( $support['post-transition-names'] );
 
