@@ -103,7 +103,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 */
 		$filter = static function ( $sizes, $size ) use ( $block ) {
 			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
-			$alignment                = $block->attributes['align'] ?? '';
+			$alignment                = (string) ( $block->attributes['align'] ?? '' );
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
 			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
@@ -113,7 +113,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 			 */
 			if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-				$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+				$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 			}
 
 			/*
@@ -141,7 +141,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 		 */
 		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+			$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 		}
 
 		$sizes = wp_calculate_image_sizes(
@@ -348,7 +348,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
 		// Normalize default alignment values.
-		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? $block['attrs']['align'] : 'default';
+		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? (string) $block['attrs']['align'] : 'default';
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
 
@@ -366,7 +366,8 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
 			// Get column width, if explicitly set.
 			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
+				// Note: In old versions of the Columns block, the percentage width may be a float. So the string cast is required.
+				$current_width = floatval( rtrim( (string) $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
 				// Default to equally divided width if not explicitly set.
 				$current_width = 1.0 / $parent_block->context['column_count'];
