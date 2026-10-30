@@ -50,12 +50,15 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  * @since 1.0.0
  *
  * @param array<string, mixed>|mixed $attr       Attributes for the image markup.
- * @param WP_Post                    $attachment Image attachment post.
+ * @param WP_Post|null               $attachment Image attachment post, or null if no post is found.
  * @return array{ 'data-has-transparency'?: string, class?: string, 'data-dominant-color'?: string, style?: string, ... } Attributes for the image markup.
  */
-function dominant_color_update_attachment_image_attributes( $attr, WP_Post $attachment ): array {
+function dominant_color_update_attachment_image_attributes( $attr, ?WP_Post $attachment ): array {
 	if ( ! is_array( $attr ) ) {
 		$attr = array();
+	}
+	if ( null === $attachment ) {
+		return $attr;
 	}
 
 	$image_meta = wp_get_attachment_metadata( $attachment->ID );
