@@ -273,10 +273,11 @@ class Test_Dominant_Color extends TestCase {
 			2
 		);
 
-		$attachment_image = wp_get_attachment_image( $nonexistent_id );
-		$this->assertStringContainsString( 'src="https://example.com/image.jpg"', $attachment_image );
-		$this->assertStringNotContainsString( 'data-dominant-color', $attachment_image );
-		$this->assertStringNotContainsString( 'data-has-transparency', $attachment_image );
+		$processor = new WP_HTML_Tag_Processor( wp_get_attachment_image( $nonexistent_id ) );
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$this->assertSame( 'https://example.com/image.jpg', $processor->get_attribute( 'src' ) );
+		$this->assertNull( $processor->get_attribute( 'data-dominant-color' ) );
+		$this->assertNull( $processor->get_attribute( 'data-has-transparency' ) );
 
 		$attr = array( 'class' => 'foo' );
 		$this->assertSame( $attr, dominant_color_update_attachment_image_attributes( $attr, null ) );
