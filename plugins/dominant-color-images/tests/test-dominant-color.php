@@ -261,11 +261,12 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function test_dominant_color_update_attachment_image_attributes_with_null_attachment(): void {
 		$nonexistent_id = -1;
+		$image_url      = 'https://example.com/image.jpg';
 		add_filter(
 			'wp_get_attachment_image_src',
-			static function ( $image, $attachment_id ) use ( $nonexistent_id ) {
+			static function ( $image, $attachment_id ) use ( $nonexistent_id, $image_url ) {
 				if ( $nonexistent_id === $attachment_id ) {
-					return array( 'https://example.com/image.jpg', 100, 100, false );
+					return array( $image_url, 100, 100, false );
 				}
 				return $image;
 			},
@@ -275,7 +276,7 @@ class Test_Dominant_Color extends TestCase {
 
 		$processor = new WP_HTML_Tag_Processor( wp_get_attachment_image( $nonexistent_id ) );
 		$this->assertTrue( $processor->next_tag( 'IMG' ) );
-		$this->assertSame( 'https://example.com/image.jpg', $processor->get_attribute( 'src' ) );
+		$this->assertSame( $image_url, $processor->get_attribute( 'src' ) );
 		$this->assertNull( $processor->get_attribute( 'data-dominant-color' ) );
 		$this->assertNull( $processor->get_attribute( 'data-has-transparency' ) );
 
