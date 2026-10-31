@@ -104,16 +104,28 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		$filter = static function ( $sizes, $size ) use ( $block ) {
 			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
 			$alignment                = $block->attributes['align'] ?? '';
-			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
+			$width                    = 0;
 			$max_alignment            = $block->context['max_alignment'] ?? '';
 			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
+
+			if ( isset( $block->attributes['width'] ) && '' !== $block->attributes['width'] ) {
+				$width_attr = (string) $block->attributes['width'];
+				if ( str_ends_with( $width_attr, '%' ) ) {
+					$percent_width = floatval( rtrim( $width_attr, '%' ) ) / 100;
+					if ( $percent_width > 0.0 && $percent_width < 1.0 ) {
+						$container_relative_width *= $percent_width;
+					}
+				} elseif ( str_ends_with( $width_attr, 'px' ) || is_numeric( $block->attributes['width'] ) ) {
+					$width = max( 0, (int) $width_attr );
+				}
+			}
 
 			/*
 			 * For the post featured image block, use the post ID to get the featured image attachment ID.
 			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 			 */
 			if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-				$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+				$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 			}
 
 			/*
@@ -141,7 +153,7 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
 		 */
 		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
+			$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
 		}
 
 		$sizes = wp_calculate_image_sizes(
@@ -229,7 +241,7 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			// TODO: Add support for em, rem, vh, and vw.
 			if (
 				str_ends_with( $layout_width, 'px' ) &&
-				( $container_relative_width > 0.0 ||
+				( $container_relative_width > 0.0 &&
 				$container_relative_width < 1.0 )
 			) {
 				// First remove 'px' from width.
@@ -253,15 +265,16 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			 *
 			 * TODO: Add support for em, rem, vh, and vw.
 			 */
-			if (
-				str_ends_with( $layout_width, 'px' ) &&
-				( $container_relative_width > 0.0 ||
-				$container_relative_width < 1.0 )
-			) {
+			if ( str_ends_with( $layout_width, 'px' ) ) {
 				// First remove 'px' from width.
 				$layout_width = str_replace( 'px', '', $layout_width );
 				// Convert to float for better precision.
-				$layout_width = (float) $layout_width * $container_relative_width;
+				if (
+					$container_relative_width > 0.0 &&
+					$container_relative_width < 1.0
+				) {
+					$layout_width = (float) $layout_width * $container_relative_width;
+				}
 				$layout_width = sprintf( '%dpx', min( (int) $layout_width, $image_width ) );
 			} else {
 				$layout_width = sprintf( 'min(%1$s, %2$spx)', $layout_width, $image_width );
@@ -364,11 +377,15 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
 		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
-			// Get column width, if explicitly set.
-			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				$current_width = floatval( rtrim( $block['attrs']['width'], '%' ) ) / 100;
+			// Get column width, if explicitly set with percentage or numeric value.
+			if (
+				isset( $block['attrs']['width'] ) &&
+				'' !== $block['attrs']['width'] &&
+				( str_ends_with( (string) $block['attrs']['width'], '%' ) || is_numeric( $block['attrs']['width'] ) )
+			) {
+				$current_width = floatval( rtrim( (string) $block['attrs']['width'], '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
-				// Default to equally divided width if not explicitly set.
+				// Default to equally divided width if not explicitly set or non-percentage units.
 				$current_width = 1.0 / $parent_block->context['column_count'];
 			} else {
 				// Full width fallback.
@@ -378,7 +395,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 			// Multiply with parent's width if available.
 			if (
 				isset( $parent_block->context['container_relative_width'] ) &&
-				( $current_width > 0.0 || $current_width < 1.0 )
+				( $current_width > 0.0 && $current_width < 1.0 )
 			) {
 				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
