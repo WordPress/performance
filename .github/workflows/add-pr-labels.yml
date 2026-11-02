@@ -26,8 +26,18 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
       - name: Apply plugin labels from changed paths
         uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
         with:
           configuration-path: .github/labeler-config.yml
           sync-labels: true
+
+      - name: Assign the primary plugin milestone
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { assignPluginMilestone } = require('./bin/plugin/lib/assign-plugin-milestone');
+            await assignPluginMilestone({ github, context, core });
