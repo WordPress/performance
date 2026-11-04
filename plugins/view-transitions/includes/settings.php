@@ -66,7 +66,7 @@ function plvt_get_setting_default(): array {
 	return array(
 		'override_theme_config'                 => false,
 		'default_transition_animation'          => 'fade',
-		'default_transition_animation_duration' => 400,
+		'default_transition_animation_duration' => VIEW_TRANSITIONS_DEFAULT_ANIMATION_DURATION,
 		'header_selector'                       => 'header',
 		'main_selector'                         => 'main',
 		'post_title_selector'                   => '.wp-block-post-title, .entry-title',
