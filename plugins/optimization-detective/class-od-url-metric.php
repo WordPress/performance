@@ -45,7 +45,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
- *                                elements: ElementData[]
+ *                                elements: ElementData[],
+ *                                source?: 'visitor'|'user'|'synthetic',
  *                            }
  * @phpstan-type JSONSchema   array{
  *                                type: string|string[],
@@ -315,6 +316,17 @@ class OD_URL_Metric implements JsonSerializable {
 						'additionalProperties' => true,
 					),
 				),
+				'source'    => array(
+					'description' => __( 'The source of the URL Metric.', 'optimization-detective' ),
+					'type'        => 'string',
+					'required'    => false,
+					'readonly'    => true, // Omit from REST API.
+					'enum'        => array(
+						'visitor',
+						'user',
+						'synthetic',
+					),
+				),
 			),
 			// Additional root properties may be added to the schema via the od_url_metric_schema_root_additional_properties filter.
 			// Therefore, `additionalProperties` is set to true so that additional properties defined in the extended schema may persist
@@ -527,6 +539,17 @@ class OD_URL_Metric implements JsonSerializable {
 			);
 		}
 		return $this->elements;
+	}
+
+	/**
+	 * Gets the source of the URL Metric.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return 'visitor'|'user'|'synthetic'|null Source.
+	 */
+	public function get_source(): ?string {
+		return $this->data['source'] ?? null;
 	}
 
 	/**

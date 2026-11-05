@@ -23,6 +23,9 @@ $od_delete_site_data = static function (): void {
 	// Clear out options and transients.
 	delete_option( 'od_rest_api_unavailable' );
 	delete_transient( 'od_rest_api_health_check_response' );
+
+	// Clear out priming mode data.
+	delete_transient( 'od_priming_mode_frontend_visible_url_count' );
 };
 
 $od_delete_site_data();
