@@ -95,25 +95,10 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	private function reduce_poster_image_size( string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
-		$xpath = $processor->get_xpath();
-
-		/*
-		 * Obtain maximum width of the element exclusively from the URL Metrics group with the widest viewport width,
-		 * which would be desktop. This prevents the situation where if URL Metrics have only so far been gathered for
-		 * mobile viewports that an excessively-small poster would end up getting served to the first desktop visitor.
-		 */
-		$max_element_width = 0;
-		foreach ( $context->url_metric_group_collection->get_last_group() as $url_metric ) {
-			foreach ( $url_metric->get_elements() as $element ) {
-				if ( $element->get_xpath() === $xpath ) {
-					$max_element_width = max( $max_element_width, $element->get_bounding_client_rect()['width'] );
-					break; // Move on to the next URL Metric.
-				}
-			}
-		}
+		$max_element_width = $this->get_max_element_width( $context );
 
 		// If the element wasn't present in any URL Metrics gathered for desktop, then abort downsizing the poster.
-		if ( 0 === $max_element_width ) {
+		if ( null === $max_element_width ) {
 			return;
 		}
 
