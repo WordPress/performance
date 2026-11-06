@@ -224,16 +224,16 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		<p>
 			<?php
 			if ( $webp_supported ) {
-				esc_html_e( 'Your server cannot generate AVIF images, but your browser can. Images uploaded in the editor are converted to AVIF in the browser. Images uploaded elsewhere, such as in the Media Library, are converted to WebP on the server instead.', 'webp-uploads' );
+				esc_html_e( 'Your server cannot generate AVIF images, but your browser can, so uploaded images are converted to AVIF in the browser. Uploads which are not processed in the browser are converted to WebP on the server instead.', 'webp-uploads' );
 			} else {
-				esc_html_e( 'Your server cannot generate AVIF images, but your browser can. Images uploaded in the editor are converted to AVIF in the browser. Images uploaded elsewhere, such as in the Media Library, are not converted.', 'webp-uploads' );
+				esc_html_e( 'Your server cannot generate AVIF images, but your browser can, so uploaded images are converted to AVIF in the browser. Uploads which are not processed in the browser are not converted.', 'webp-uploads' );
 			}
 			?>
 		</p>
 	</div>
 	<div id="webp_uploads_webp_browser_notice" class="notice notice-info inline" <?php echo $webp_supported ? 'hidden' : ''; ?>>
 		<p><b><?php esc_html_e( 'WebP images are created by your browser.', 'webp-uploads' ); ?></b></p>
-		<p><?php esc_html_e( 'Your server cannot generate WebP images, but your browser can. Images uploaded in the editor are converted to WebP in the browser. Images uploaded elsewhere, such as in the Media Library, are not converted.', 'webp-uploads' ); ?></p>
+		<p><?php esc_html_e( 'Your server cannot generate WebP images, but your browser can, so uploaded images are converted to WebP in the browser. Uploads which are not processed in the browser are not converted.', 'webp-uploads' ); ?></p>
 	</div>
 	<div id="webp_uploads_server_conversion_notice" class="notice notice-info inline" hidden>
 		<p><?php esc_html_e( 'Your browser cannot convert images itself, so uploaded images are converted on the server.', 'webp-uploads' ); ?></p>
