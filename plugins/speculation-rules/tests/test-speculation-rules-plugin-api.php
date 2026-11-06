@@ -379,7 +379,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 	 *
 	 * The WordPress test suite sets the uploads directory to `wp-content/test-suite-uploads` since WordPress 7.2.
 	 *
-	 * @return string Uploads path pattern.
+	 * @return non-falsy-string Uploads path pattern.
 	 */
 	private function get_uploads_path_pattern(): string {
 		return (string) wp_parse_url( wp_upload_dir( null, false )['baseurl'], PHP_URL_PATH ) . '/*';
