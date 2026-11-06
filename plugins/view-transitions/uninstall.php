@@ -25,7 +25,7 @@ if ( is_multisite() ) {
 	);
 
 	foreach ( $plvt_site_ids as $plvt_site_id ) {
-		switch_to_blog( $plvt_site_id ); // @phpstan-ignore argument.type (get_sites( 'fields' => 'ids' ) returns int[], but php-stubs/wordpress-stubs uses a sealed array shape in its conditional return type so the narrowing is lost when extra args are passed. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
+		switch_to_blog( $plvt_site_id );
 		plvt_delete_plugin_option();
 		restore_current_blog();
 	}

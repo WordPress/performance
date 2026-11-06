@@ -49,7 +49,7 @@ class Test_WebP_Uploads_Settings extends TestCase {
 	/**
 	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
 	 */
-	public function test_webp_uploads_generate_avif_webp_setting_callback_disables_avif_and_shows_warning(): void {
+	public function test_webp_uploads_generate_avif_webp_setting_callback_allows_avif_and_shows_transparency_warning(): void {
 		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
 		if ( ! is_string( $editor ) || ! webp_uploads_imagick_avif_supported( $editor ) ) {
 			$this->markTestSkipped( 'Test requires WP_Image_Editor_Imagick.' );
@@ -63,15 +63,15 @@ class Test_WebP_Uploads_Settings extends TestCase {
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'OPTION' ) ) );
 		$this->assertSame( 'webp', $processor->get_attribute( 'value' ) );
-		$this->assertNotNull( $processor->get_attribute( 'selected' ) );
+		$this->assertNull( $processor->get_attribute( 'selected' ) );
 
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'OPTION' ) ) );
 		$this->assertSame( 'avif', $processor->get_attribute( 'value' ) );
-		$this->assertNotNull( $processor->get_attribute( 'disabled' ) );
-		$this->assertNull( $processor->get_attribute( 'selected' ) );
+		$this->assertNull( $processor->get_attribute( 'disabled' ) );
+		$this->assertNotNull( $processor->get_attribute( 'selected' ) );
 
-		$this->assertStringContainsString( 'AVIF is supported, but not fully: transparency support is lacking.', $output );
-		$this->assertStringContainsString( 'Current ImageMagick version does not support transparent AVIF images', $output );
+		$this->assertStringContainsString( 'AVIF is supported, but transparent images will lose their transparency.', $output );
+		$this->assertStringContainsString( 'The ImageMagick version on this server cannot keep transparency in AVIF images.', $output );
 	}
 
 	/**

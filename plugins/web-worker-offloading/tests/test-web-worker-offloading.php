@@ -50,8 +50,8 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'forward', $config );
 		$this->assertArrayHasKey( 'debug', $config );
-		$this->assertNotEmpty( $config['forward'] );
 		$this->assertIsArray( $config['forward'] );
+		$this->assertNotCount( 0, $config['forward'] );
 		$this->assertTrue( $config['debug'] );
 		$this->assertContains( 'datalayer.push', $config['forward'] );
 	}
@@ -72,8 +72,8 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
-		$this->assertNotEmpty( $before_data );
-		$this->assertNotEmpty( $after_data );
+		$this->assertNotSame( '', $before_data );
+		$this->assertNotSame( '', $after_data );
 		$this->assertStringContainsString(
 			'window.partytown',
 			$before_data
@@ -407,6 +407,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		// Test with different plugin file.
 		$output = get_echo( 'plwwo_render_sunset_notice', array( 'other-plugin/load.php' ) );
-		$this->assertEmpty( $output );
+		$this->assertSame( '', $output );
 	}
 }

@@ -234,4 +234,4 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 2.0.0 =
 
-This release adds support for AVIF images and enables selecting the the output image format to choose between WebP and AVIF when both are available. AVIF is used as the default when the server supports it.
+This release adds support for AVIF images and enables selecting the output image format to choose between WebP and AVIF when both are available. AVIF is used as the default when the server supports it.

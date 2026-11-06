@@ -59,7 +59,7 @@ function perflab_aao_handle_update_autoload(): void {
 	}
 
 	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload    = rest_sanitize_boolean( wp_unslash( $_GET['autoload'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Won't be needed after <https://github.com/WordPress/WordPress-Coding-Standards/pull/2530>.
+	$autoload    = rest_sanitize_boolean( wp_unslash( $_GET['autoload'] ) ); // @phpstan-ignore argument.templateType (rest_sanitize_boolean() is designed to accept loose user input, but php-stubs/wordpress-stubs types it with a template bound to bool|string|int which mixed cannot satisfy. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );

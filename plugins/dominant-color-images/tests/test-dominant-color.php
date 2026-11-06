@@ -23,13 +23,13 @@ class Test_Dominant_Color extends TestCase {
 
 		// Non-existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
-		$this->assertEmpty( $dominant_color_metadata );
+		$this->assertSame( array(), $dominant_color_metadata );
 
 		// Creating attachment.
 		$attachment_id           = self::factory()->attachment->create_upload_object( $image_path );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
-		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
+		$this->assertNotSame( '', $dominant_color_metadata['dominant_color'] );
 		$this->assertContains( $dominant_color_metadata['dominant_color'], $expected_color );
 	}
 
@@ -74,7 +74,7 @@ class Test_Dominant_Color extends TestCase {
 
 		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
-		$this->assertEmpty( $transparency_metadata );
+		$this->assertSame( array(), $transparency_metadata );
 
 		$attachment_id         = self::factory()->attachment->create_upload_object( $image_path );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
@@ -252,6 +252,39 @@ class Test_Dominant_Color extends TestCase {
 	}
 
 	/**
+	 * Tests that the attributes are returned unchanged when no attachment post is found.
+	 *
+	 * The `wp_get_attachment_image_attributes` filter passes null for the attachment when
+	 * `wp_get_attachment_image_src()` is filtered to return an image for an ID with no post.
+	 *
+	 * @covers ::dominant_color_update_attachment_image_attributes
+	 */
+	public function test_dominant_color_update_attachment_image_attributes_with_null_attachment(): void {
+		$nonexistent_id = -1;
+		$image_url      = 'https://example.com/image.jpg';
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( $nonexistent_id, $image_url ) {
+				if ( $nonexistent_id === $attachment_id ) {
+					return array( $image_url, 100, 100, false );
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$processor = new WP_HTML_Tag_Processor( wp_get_attachment_image( $nonexistent_id ) );
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$this->assertSame( $image_url, $processor->get_attribute( 'src' ) );
+		$this->assertNull( $processor->get_attribute( 'data-dominant-color' ) );
+		$this->assertNull( $processor->get_attribute( 'data-has-transparency' ) );
+
+		$attr = array( 'class' => 'foo' );
+		$this->assertSame( $attr, dominant_color_update_attachment_image_attributes( $attr, null ) );
+	}
+
+	/**
 	 * Data provider for test_dominant_color_update_attachment_image_attributes().
 	 *
 	 * @return array<string, mixed>
@@ -422,7 +455,8 @@ class Test_Dominant_Color extends TestCase {
 
 		// Verify the inline style was added.
 		$inline_styles = wp_styles()->get_data( 'dominant-color-styles', 'after' );
-		$this->assertNotEmpty( $inline_styles );
+		$this->assertIsArray( $inline_styles );
+		$this->assertNotCount( 0, $inline_styles );
 		$this->assertStringContainsString(
 			'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
 			implode( '', $inline_styles )
@@ -443,7 +477,8 @@ class Test_Dominant_Color extends TestCase {
 
 		// Verify the inline style was added.
 		$inline_styles = wp_styles()->get_data( 'dominant-color-admin-styles', 'after' );
-		$this->assertNotEmpty( $inline_styles );
+		$this->assertIsArray( $inline_styles );
+		$this->assertNotCount( 0, $inline_styles );
 		$this->assertStringContainsString(
 			'.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
 			implode( '', $inline_styles )

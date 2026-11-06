@@ -471,11 +471,11 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
-	 * Falls back to WebP output when AVIF is selected but AVIF transparency is not supported.
+	 * Keeps AVIF output when AVIF is selected but AVIF transparency is not supported.
 	 *
 	 * @covers ::webp_uploads_get_upload_image_mime_transforms
 	 */
-	public function test_it_should_fall_back_to_webp_when_avif_transparency_not_supported(): void {
+	public function test_it_should_keep_avif_when_avif_transparency_not_supported(): void {
 		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
 		if ( ! is_string( $editor ) || ! webp_uploads_imagick_avif_supported( $editor ) ) {
 			$this->markTestSkipped( 'Test requires WP_Image_Editor_Imagick.' );
@@ -488,10 +488,10 @@ class Test_WebP_Uploads_Helper extends TestCase {
 
 		$this->assertSame(
 			array(
-				'image/jpeg' => array( 'image/webp' ),
-				'image/webp' => array( 'image/webp' ),
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/avif' ),
 				'image/avif' => array( 'image/avif' ),
-				'image/png'  => array( 'image/webp' ),
+				'image/png'  => array( 'image/avif' ),
 			),
 			$transforms
 		);

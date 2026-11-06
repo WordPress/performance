@@ -132,14 +132,14 @@ function perflab_wrap_server_timing( callable $callback, string $metric_slug, st
 
 		// If metric instance was not set, this metric should not be calculated.
 		if ( null === $server_timing_metric ) {
-			return call_user_func_array( $callback, $callback_args );
+			return $callback( ...$callback_args );
 		}
 
 		// Measure time before the callback.
 		$server_timing_metric->measure_before();
 
 		// Execute the callback.
-		$result = call_user_func_array( $callback, $callback_args );
+		$result = $callback( ...$callback_args );
 
 		// Measure time after the callback and calculate total.
 		$server_timing_metric->measure_after();

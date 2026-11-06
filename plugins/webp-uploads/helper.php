@@ -351,6 +351,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  *
  * @since 2.0.0
  * @since 2.7.0 AVIF is now only reported as supported when the server can also encode transparent AVIF images.
+ * @since n.e.x.t AVIF is reported as supported even when the server cannot encode transparent AVIF images.
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
@@ -362,7 +363,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
-		return webp_uploads_avif_transparency_supported();
+		return webp_uploads_avif_supported();
 	}
 
 	return true;
@@ -585,7 +586,7 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 	}
 
 	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-		foreach ( $metadata['sizes'] as $size => $size_data ) {
+		foreach ( $metadata['sizes'] as $size_data ) {
 
 			if ( ! isset( $size_data['file'] ) ) {
 				continue;
