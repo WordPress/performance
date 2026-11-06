@@ -448,6 +448,8 @@ During the development of Optimization Detective extensions, it’s recommended 
 
 Then, to actually inspect the contents of the URL Metrics which are collected, it’s recommended you install the [Admin UI](https://github.com/westonruter/od-admin-ui) plugin.
 
+When `WP_DEBUG` is enabled, Optimization Detective also registers a [Chrome DevTools for agents](https://developer.chrome.com/docs/devtools/agents/use-cases/third-party-tools) third-party tools integration, exposing `get_od_url_metric` and `get_od_element_data` tools so an AI coding agent can inspect the URL Metric being collected for the current page load while debugging performance.
+
 # Highlighted Extensions
 
 There is a [reference](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md) for the full list of known Optimization Detective extensions, including links to the code on GitHub for how they were implemented. But here are highlights from Image Prioritizer and Embed Optimizer:

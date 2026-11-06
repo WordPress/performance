@@ -26,5 +26,11 @@ class Test_OD_Hooks extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'rest_api_init', 'od_register_rest_url_metric_store_endpoint' ) );
 		$this->assertEquals( 10, has_action( 'rest_pre_dispatch', 'od_decompress_rest_request_body' ) );
 		$this->assertEquals( 10, has_action( 'od_trigger_page_cache_invalidation', 'od_trigger_post_update_actions' ) );
+
+		if ( WP_DEBUG ) {
+			$this->assertEquals( 10, has_filter( 'od_extension_module_urls', 'od_filter_extension_module_urls_for_devtools_discovery' ) );
+		} else {
+			$this->assertFalse( has_filter( 'od_extension_module_urls', 'od_filter_extension_module_urls_for_devtools_discovery' ) );
+		}
 	}
 }
