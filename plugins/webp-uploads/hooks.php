@@ -783,18 +783,16 @@ function webp_uploads_get_image_sizes_additional_mime_type_support(): array {
  * @return int The updated quality for mime types.
  */
 function webp_uploads_modify_webp_quality( int $quality, string $mime_type ): int {
-	// For WebP images, always return 82 (other MIME types were already using 82 by default anyway).
-	if ( 'image/webp' === $mime_type ) {
-		return 82;
+	switch ( $mime_type ) {
+		case 'image/webp':
+			// For WebP images, always return 82 (JPEG images already use 82 by default).
+			return 82;
+		case 'image/avif':
+			// AVIF needs a lower quality number than WebP to look the same. See https://github.com/WordPress/performance/issues/2745.
+			return 70;
+		default:
+			return $quality;
 	}
-
-	// AVIF at 82 is often larger than WebP at 82. AVIF at 70 looks about the same as WebP at 82 and is smaller.
-	if ( 'image/avif' === $mime_type ) {
-		return 70;
-	}
-
-	// Return default quality for other images in WP.
-	return $quality;
 }
 add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 );
 
