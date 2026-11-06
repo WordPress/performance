@@ -227,9 +227,10 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
+		$discarded_mimes = array();
 		foreach ( $valid_mime_transforms[ $mime_type ] as $mime ) {
-			// If this property exists no need to create the image again.
-			if ( isset( $properties['sources'][ $mime ]['file'] ) ) {
+			// If this property exists or was just discarded, no need to create the image again.
+			if ( isset( $properties['sources'][ $mime ]['file'] ) || in_array( $mime, $discarded_mimes, true ) ) {
 				continue;
 			}
 
@@ -238,7 +239,23 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 				continue;
 			}
 
-			if ( webp_uploads_should_discard_additional_image_file( $properties, $source ) ) {
+			/*
+			 * When the browser generated the sub-size in the modern format, the source being generated here is the
+			 * fallback in the original format. Keep it, and as in the server side flow, discard the modern image
+			 * instead if it is the larger one.
+			 */
+			if ( $mime === $mime_type && $current_mime !== $mime_type ) {
+				if ( isset( $properties['sources'][ $current_mime ]['file'] ) && webp_uploads_should_discard_additional_image_file( $source, $properties['sources'][ $current_mime ] ) ) {
+					wp_delete_file_from_directory( path_join( $original_directory, $properties['sources'][ $current_mime ]['file'] ), $original_directory );
+					unset( $properties['sources'][ $current_mime ] );
+					$discarded_mimes[]       = $current_mime;
+					$properties['file']      = $source['file'];
+					$properties['mime-type'] = $mime;
+					if ( isset( $properties['filesize'] ) ) {
+						$properties['filesize'] = $source['filesize'];
+					}
+				}
+			} elseif ( webp_uploads_should_discard_additional_image_file( $properties, $source ) ) {
 				$destination = path_join( $original_directory, $source['file'] );
 				wp_delete_file_from_directory( $destination, $original_directory );
 				continue;

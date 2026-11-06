@@ -1101,6 +1101,85 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Replaces an attachment's medium size with a modern format image, as the browser generates it.
+	 *
+	 * @param int $attachment_id The attachment ID.
+	 * @param int $filesize      The size in bytes of the modern format image.
+	 * @return string The modern format image's file name.
+	 */
+	private function replace_medium_size_with_browser_generated_webp( int $attachment_id, int $filesize ): string {
+		$metadata  = wp_get_attachment_metadata( $attachment_id );
+		$directory = dirname( (string) get_attached_file( $attachment_id ) );
+		$medium    = $metadata['sizes']['medium'];
+		$webp_file = $medium['sources']['image/webp']['file'];
+
+		// The server generated JPEG sub-size does not exist in the client side flow.
+		wp_delete_file( path_join( $directory, $medium['sources']['image/jpeg']['file'] ) );
+		file_put_contents( path_join( $directory, $webp_file ), str_repeat( 'a', $filesize ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$metadata['sizes']['medium'] = array(
+			'file'      => $webp_file,
+			'width'     => $medium['width'],
+			'height'    => $medium['height'],
+			'mime-type' => 'image/webp',
+			'filesize'  => $filesize,
+			'sources'   => array(
+				'image/webp' => array(
+					'file'     => $webp_file,
+					'filesize' => $filesize,
+				),
+			),
+		);
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $webp_file;
+	}
+
+	/**
+	 * Test that the fallback for a browser generated sub-size is kept even when it is larger.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_keep_the_fallback_for_a_browser_generated_sub_size(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$webp_file     = $this->replace_medium_size_with_browser_generated_webp( $attachment_id, 1 );
+
+		remove_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+		$metadata = webp_uploads_create_sources_property( wp_get_attachment_metadata( $attachment_id ), $attachment_id );
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( $webp_file, $medium['file'] );
+		$this->assertSame( 'image/webp', $medium['mime-type'] );
+		$this->assertArrayHasKey( 'image/webp', $medium['sources'] );
+		$this->assertArrayHasKey( 'image/jpeg', $medium['sources'], 'The JPEG fallback should not be discarded for being larger than the WebP.' );
+		$this->assertFileExists( path_join( dirname( (string) get_attached_file( $attachment_id ) ), $medium['sources']['image/jpeg']['file'] ) );
+	}
+
+	/**
+	 * Test that a browser generated sub-size is discarded in favor of its fallback when it is larger.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_discard_a_browser_generated_sub_size_larger_than_its_fallback(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$webp_file     = $this->replace_medium_size_with_browser_generated_webp( $attachment_id, 10 * MB_IN_BYTES );
+		$directory     = dirname( (string) get_attached_file( $attachment_id ) );
+
+		remove_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+		$metadata = webp_uploads_create_sources_property( wp_get_attachment_metadata( $attachment_id ), $attachment_id );
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( 'image/jpeg', $medium['mime-type'] );
+		$this->assertSame( $medium['sources']['image/jpeg']['file'], $medium['file'] );
+		$this->assertSame( $medium['sources']['image/jpeg']['filesize'], $medium['filesize'] );
+		$this->assertArrayNotHasKey( 'image/webp', $medium['sources'], 'The WebP should be discarded for being larger than the JPEG.' );
+		$this->assertFileDoesNotExist( path_join( $directory, $webp_file ) );
+		$this->assertFileExists( path_join( $directory, $medium['file'] ) );
+	}
+
+	/**
 	 * Test that the client side media processing context is tracked around REST request callbacks.
 	 *
 	 * @covers ::webp_uploads_start_client_side_media_processing_request
