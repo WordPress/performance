@@ -46,9 +46,10 @@ function wp_get_attachment_metadata( int $attachment_id = 0, bool $unfiltered = 
  *     width: int,
  *     height: int,
  *     file: string,
- *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, ... }>,
  *     image_meta: array<string, mixed>,
- *     filesize: int
+ *     filesize: int,
+ *     ...
  * } $image_meta
  * @phpstan-return array{
  *     width: int,

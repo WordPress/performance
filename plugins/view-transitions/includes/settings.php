@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -389,7 +391,7 @@ function plvt_add_setting_ui(): void {
 			'plvt_render_settings_field',
 			'reading',
 			$section,
-			array_merge(
+			array_merge( // @phpstan-ignore argument.type (WordPress documents add_settings_field()'s $args as arbitrary extra arguments forwarded to the field callback, but php-stubs/wordpress-stubs types it as a sealed array{label_for?, class?}. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 				$additional_args,
 				$args
 			)

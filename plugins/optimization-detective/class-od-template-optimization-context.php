@@ -6,6 +6,8 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -31,7 +33,7 @@ final class OD_Template_Optimization_Context {
 	 * @since 1.0.0
 	 * @var OD_URL_Metric_Group_Collection
 	 */
-	private $url_metric_group_collection;
+	private OD_URL_Metric_Group_Collection $url_metric_group_collection;
 
 	/**
 	 * ID for the od_url_metrics post which provided the URL Metrics in the collection.
@@ -41,7 +43,7 @@ final class OD_Template_Optimization_Context {
 	 * @since 1.0.0
 	 * @var positive-int|null
 	 */
-	private $url_metrics_id;
+	private ?int $url_metrics_id;
 
 	/**
 	 * Normalized query vars.
@@ -49,7 +51,7 @@ final class OD_Template_Optimization_Context {
 	 * @since 1.0.0
 	 * @var array<string, mixed>
 	 */
-	private $normalized_query_vars;
+	private array $normalized_query_vars;
 
 	/**
 	 * Slug for the od_url_metrics post.
@@ -57,7 +59,7 @@ final class OD_Template_Optimization_Context {
 	 * @since 1.0.0
 	 * @var non-empty-string
 	 */
-	private $url_metrics_slug;
+	private string $url_metrics_slug;
 
 	/**
 	 * Link collection.
@@ -65,7 +67,7 @@ final class OD_Template_Optimization_Context {
 	 * @since 1.0.0
 	 * @var OD_Link_Collection
 	 */
-	private $link_collection;
+	private OD_Link_Collection $link_collection;
 
 	/**
 	 * Constructor.

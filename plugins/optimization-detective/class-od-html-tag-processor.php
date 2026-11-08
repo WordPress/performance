@@ -6,6 +6,8 @@
  * @since 0.1.1
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -150,7 +152,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var non-empty-string[]
 	 */
-	private $open_stack_tags = array();
+	private array $open_stack_tags = array();
 
 	/**
 	 * Stack of the attributes for open tags.
@@ -161,7 +163,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 1.0.0
 	 * @var array<array<non-empty-string, string>>
 	 */
-	private $open_stack_attributes = array();
+	private array $open_stack_attributes = array();
 
 	/**
 	 * Open stack indices.
@@ -169,7 +171,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var non-negative-int[]
 	 */
-	private $open_stack_indices = array();
+	private array $open_stack_indices = array();
 
 	/**
 	 * Bookmarked open stacks.
@@ -182,7 +184,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var array<string, array{tags: non-empty-string[], attributes: array<array<non-empty-string, string>>, indices: non-negative-int[]}>
 	 */
-	private $bookmarked_open_stacks = array();
+	private array $bookmarked_open_stacks = array();
 
 	/**
 	 * (Transitional) XPath for the current tag.
@@ -193,7 +195,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 1.0.0
 	 * @var string|null
 	 */
-	private $current_xpath = null;
+	private ?string $current_xpath = null;
 
 	/**
 	 * Whether the previous tag does not expect a closer.
@@ -201,7 +203,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var bool
 	 */
-	private $previous_tag_without_closer = false;
+	private bool $previous_tag_without_closer = false;
 
 	/**
 	 * Mapping of bookmark name to a list of HTML strings which will be inserted at the time get_updated_html() is called.
@@ -209,7 +211,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @var array<non-empty-string, string[]>
 	 */
-	private $buffered_text_replacements = array();
+	private array $buffered_text_replacements = array();
 
 	/**
 	 * Whether the end of the document was reached.
@@ -218,7 +220,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see self::next_token()
 	 * @var bool
 	 */
-	private $reached_end_of_document = false;
+	private bool $reached_end_of_document = false;
 
 	/**
 	 * Count for the number of times that the cursor was moved.
@@ -228,7 +230,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @see self::next_token()
 	 * @see self::seek()
 	 */
-	private $cursor_move_count = 0;
+	private int $cursor_move_count = 0;
 
 	/**
 	 * Finds the next tag.
@@ -261,7 +263,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This method will soon be equivalent to calling {@see self::next_tag()} without passing any `$query`.
 	 *
 	 * @since 0.4.0
-	 * @deprecated n.e.x.t Use {@see self::next_tag()} instead.
+	 * @deprecated 1.0.0 Use {@see self::next_tag()} instead.
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
@@ -353,11 +355,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 			$this->open_stack_attributes[] = $attributes;
 
-			if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
-				$this->open_stack_indices[ $level ] = 0;
-			} else {
-				++$this->open_stack_indices[ $level ];
-			}
+			$this->advance_open_stack_index( $level );
 
 			// Keep track of whether the next call to next_token() should start by
 			// immediately popping off the stack due to this tag being either self-closing
@@ -372,6 +370,21 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 			// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
 			if ( ! $this->expects_closer() ) {
+				return true;
+			}
+
+			/**
+			 * A closing P tag with no corresponding open P element is a stray end tag. This occurs with markup like
+			 * `<p><figure>&hellip;</figure></p>`, as output by `wpautop()` when a shortcode inside a paragraph expands
+			 * into a FIGURE, since the FIGURE has already implicitly closed the P per self::P_CLOSING_TAGS above. Such
+			 * an end tag does not close any open element. Instead, an empty P element is implied at this position, so
+			 * account for it in the sibling indices to keep the computed XPaths aligned with the DOM the browser
+			 * constructs.
+			 *
+			 * @link https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody:end-tag-p
+			 */
+			if ( 'P' === $tag_name && ! in_array( 'P', $this->open_stack_tags, true ) ) {
+				$this->advance_open_stack_index( count( $this->open_stack_tags ) );
 				return true;
 			}
 
@@ -400,6 +413,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Advances the sibling index at the supplied depth to account for another element occurring there.
+	 *
+	 * This is called both when an open tag is pushed onto the stack and when an empty P element is implied by a stray
+	 * closing P tag, so that both arrive at the sibling indices used to compute XPaths in the same way.
+	 *
+	 * @since n.e.x.t
+	 * @see self::get_xpath()
+	 *
+	 * @param non-negative-int $level Depth at which an element occurs.
+	 */
+	private function advance_open_stack_index( int $level ): void {
+		if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
+			$this->open_stack_indices[ $level ] = 0;
+		} else {
+			++$this->open_stack_indices[ $level ];
+		}
 	}
 
 	/**
@@ -770,6 +802,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			} else {
 				$start = $this->bookmarks[ $bookmark ]->start;
 
+				// @phpstan-ignore no.private.class
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
 					0,

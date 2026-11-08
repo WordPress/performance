@@ -17,9 +17,6 @@ export type InitViewTransitionsFunction = (
 declare global {
 	interface Window {
 		plvtInitViewTransitions?: InitViewTransitionsFunction;
-		navigation?: {
-			activation: NavigationActivation;
-		};
 	}
 }
 

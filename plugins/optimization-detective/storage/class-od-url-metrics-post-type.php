@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -105,7 +107,7 @@ class OD_URL_Metrics_Post_Type {
 			)
 		);
 
-		$post = current( $post_query->posts );
+		$post = current( $post_query->posts ?? array() );
 		if ( $post instanceof WP_Post ) {
 			return $post;
 		}
@@ -324,7 +326,7 @@ class OD_URL_Metrics_Post_Type {
 			)
 		);
 
-		foreach ( $query->posts as $post ) {
+		foreach ( $query->posts ?? array() as $post ) {
 			if ( $post instanceof WP_Post && self::SLUG === $post->post_type ) { // Sanity check.
 				wp_delete_post( $post->ID, true );
 			}

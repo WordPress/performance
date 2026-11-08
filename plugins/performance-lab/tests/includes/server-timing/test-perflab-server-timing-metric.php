@@ -75,4 +75,47 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 
 		$this->assertNull( $this->metric->get_value() );
 	}
+
+	/**
+	 * @covers Perflab_Server_Timing_Metric::set_description
+	 * @covers Perflab_Server_Timing_Metric::get_description
+	 */
+	public function test_set_description_with_string(): void {
+		$this->metric->set_description( 'Database queries' );
+		$this->assertSame( 'Database queries', $this->metric->get_description() );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing_Metric::get_description
+	 */
+	public function test_get_description_returns_null_by_default(): void {
+		$this->assertNull( $this->metric->get_description() );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing_Metric::set_description
+	 */
+	public function test_set_description_prevents_late_setting(): void {
+		$this->setExpectedIncorrectUsage( Perflab_Server_Timing_Metric::class . '::set_description' );
+
+		// Detach default-metric registration so firing the action does not mutate the shared singleton.
+		remove_all_actions( 'perflab_server_timing_send_header' );
+
+		$this->metric->set_description( 'before' );
+		do_action( 'perflab_server_timing_send_header' );
+		$this->metric->set_description( 'after' );
+
+		$this->assertSame( 'before', $this->metric->get_description() );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing_Metric::set_description
+	 * @covers Perflab_Server_Timing_Metric::get_description
+	 */
+	public function test_set_description_with_empty_string_is_treated_as_unset(): void {
+		$this->metric->set_description( 'Database queries' );
+		$this->assertIsString( $this->metric->get_description() );
+		$this->metric->set_description( '' );
+		$this->assertNull( $this->metric->get_description() );
+	}
 }

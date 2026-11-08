@@ -36,6 +36,32 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
 }
 
 /**
+ * Returns a promise resolving to all milestones in a repository.
+ *
+ * @param {GitHub}     octokit Initialized Octokit REST client.
+ * @param {string}     owner   Repository owner.
+ * @param {string}     repo    Repository name.
+ * @param {IssueState} [state] Optional milestone state. Defaults to "open".
+ *
+ * @return {Promise<import('@octokit/rest').RestEndpointMethodTypes['issues']['listMilestones']['response']['data']>} Promise resolving to milestones.
+ */
+async function getMilestones( octokit, owner, repo, state = 'open' ) {
+	const options = octokit.issues.listMilestones.endpoint.merge( {
+		owner,
+		repo,
+		state,
+	} );
+
+	const milestones = [];
+
+	for await ( const response of octokit.paginate.iterator( options ) ) {
+		milestones.push( ...response.data );
+	}
+
+	return milestones;
+}
+
+/**
  * Returns a promise resolving to pull requests by a given milestone ID.
  *
  * @param {GitHub}     octokit       Initialized Octokit REST client.
@@ -89,5 +115,6 @@ async function getIssuesByMilestone(
 
 module.exports = {
 	getMilestoneByTitle,
+	getMilestones,
 	getIssuesByMilestone,
 };

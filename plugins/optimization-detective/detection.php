@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -86,6 +88,11 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 	 */
 	$use_attribution_build = (bool) apply_filters( 'od_use_web_vitals_attribution_build', false );
 
+	/**
+	 * Lib data for web-vitals.
+	 *
+	 * @var array{ version: non-empty-string, dependencies: list<non-empty-string> } $web_vitals_lib_data
+	 */
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
 	$web_vitals_lib_src  = $use_attribution_build ?
 		plugins_url( 'build/web-vitals-attribution.js', __FILE__ ) :
@@ -133,13 +140,11 @@ function od_get_detection_scripts( string $slug, OD_URL_Metric_Group_Collection 
 		'cachePurgePostId'       => od_get_cache_purge_post_id(),
 		'urlMetricHMAC'          => od_get_url_metrics_storage_hmac( $slug, $current_etag, $current_url, $cache_purge_post_id ),
 		'urlMetricGroupStatuses' => array_map(
-			static function ( OD_URL_Metric_Group $group ): array {
-				return array(
-					'minimumViewportWidth' => $group->get_minimum_viewport_width(), // Exclusive.
-					'maximumViewportWidth' => $group->get_maximum_viewport_width(), // Inclusive.
-					'complete'             => $group->is_complete(),
-				);
-			},
+			static fn ( OD_URL_Metric_Group $group ) => array(
+				'minimumViewportWidth' => $group->get_minimum_viewport_width(), // Exclusive.
+				'maximumViewportWidth' => $group->get_maximum_viewport_width(), // Inclusive.
+				'complete'             => $group->is_complete(),
+			),
 			iterator_to_array( $group_collection )
 		),
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),

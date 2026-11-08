@@ -144,9 +144,9 @@ class Test_OD_Element extends WP_UnitTestCase {
 		$exception = null;
 		try {
 			unset( $element['isLCP'] );
-		} catch ( Exception $e ) { // @phpstan-ignore catch.neverThrown (It is thrown by offsetUnset actually.)
+		} catch ( Exception $e ) {
 			$exception = $e;
 		}
-		$this->assertInstanceOf( Exception::class, $exception ); // @phpstan-ignore method.impossibleType (It is thrown by offsetUnset actually.)
+		$this->assertInstanceOf( Exception::class, $exception );
 	}
 }

@@ -153,4 +153,20 @@ abstract class TestCase extends WP_UnitTestCase {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
 	}
+
+	/**
+	 * Mocks AVIF transparency support to force a specific scenario.
+	 *
+	 * @param bool $supported Whether to mock AVIF transparency as supported.
+	 */
+	public function mock_avif_transparency_support( bool $supported ): void {
+		remove_all_filters( 'webp_uploads_imagick_avif_transparency_supported' );
+		add_filter(
+			'webp_uploads_imagick_avif_transparency_supported',
+			static function () use ( $supported ) {
+				return $supported;
+			},
+			1
+		);
+	}
 }

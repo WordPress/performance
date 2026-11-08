@@ -8,6 +8,8 @@
  * @noinspection PhpUnhandledExceptionInspection
  */
 
+use PHPUnit\Framework\ExpectationFailedException;
+
 /**
  * @phpstan-type ElementDataSubset array{
  *     xpath: string,
@@ -191,16 +193,6 @@ trait Optimization_Detective_Test_Helpers {
 	}
 
 	/**
-	 * Removes initial tabs from the lines in the input.
-	 *
-	 * @param string $input Input.
-	 * @return string Output.
-	 */
-	public function remove_initial_tabs( string $input ): string {
-		return (string) preg_replace( '/^\t+/m', '', $input );
-	}
-
-	/**
 	 * Gets JSON-serializable data from an array of JsonSerializable objects.
 	 *
 	 * @param JsonSerializable[] $items Items.
@@ -278,82 +270,89 @@ trait Optimization_Detective_Test_Helpers {
 
 		$buffer = od_optimize_template_output_buffer( $buffer );
 
-		// When testing WP versions prior to 6.9, ensure the output buffer accounts for the change to entity encoding in <https://core.trac.wordpress.org/changeset/60919>.
-		if ( ! is_wp_version_compatible( '6.9' ) ) {
-			$buffer = str_replace( '&#039;', '&apos;', $buffer );
-		}
+		$home_url_needles = array( home_url( '/', 'http' ), home_url( '/', 'https' ) );
 
 		// Normalize script module content so changes do not impact snapshots.
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
-		$buffer = preg_replace_callback(
-			'#(<script type="module">)(.+?)(</script>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if ( 'module' !== strtolower( (string) $processor->get_attribute( 'type' ) ) ) {
+				continue;
+			}
 
-				$text = str_replace( "/* <![CDATA[ */\n", '', $text );
-				$text = str_replace( "/* ]]> */\n", '', $text );
-				$text = trim( $text );
-				if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
-					$text = '/* ' . $matches[0] . ' ... */';
-				} elseif ( 1 === preg_match( '/^async function load/', $text ) ) {
-					$text = '/* detect loader */';
-				}
+			$text = $processor->get_modifiable_text();
+			if ( '' === $text ) {
+				continue;
+			}
 
-				// Normalize versions which occur in sourceURL.
-				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+			$text = str_replace( "/* <![CDATA[ */\n", '', $text );
+			$text = str_replace( "/* ]]> */\n", '', $text );
+			$text = trim( $text );
+			if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
+				$text = '/* ' . $matches[0] . ' ... */';
+			} elseif ( 1 === preg_match( '/^async function load/', $text ) ) {
+				$text = '/* detect loader */';
+			}
 
-				// Ensure any home URLs are normalized to account for variations in the testing environment.
-				$text = str_replace(
-					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
-					'https://example.com/',
-					$text
-				);
+			// Normalize versions which occur in sourceURL.
+			$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
 
-				return $start_tag . $text . $end_tag;
-			},
-			$buffer
-		);
+			// Ensure any home URLs are normalized to account for variations in the testing environment.
+			$text = str_replace(
+				$home_url_needles,
+				'https://example.com/',
+				$text
+			);
 
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
-		// TODO: This should use assertEqualHTML() once 6.9 is the minimum supported version.
-		$buffer = preg_replace_callback(
-			'#(<script (?:type="application/json" id="optimization-detective-detect-args"|id="optimization-detective-detect-args" type="application/json")>)(.+?)(</script>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+			$processor->set_modifiable_text( $text );
+		}
+		$buffer = $processor->get_updated_html();
 
-				$data = json_decode( $text, true );
-				if ( is_array( $data ) && 2 === count( $data ) && is_string( $data[0] ) && is_array( $data[1] ) ) {
-					$text = '[]';
-				}
+		// Normalize detect-args JSON script content so detect payloads do not impact snapshots.
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if (
+				'optimization-detective-detect-args' !== $processor->get_attribute( 'id' )
+				||
+				'application/json' !== strtolower( (string) $processor->get_attribute( 'type' ) )
+			) {
+				continue;
+			}
 
-				return '<script type="application/json" id="optimization-detective-detect-args">' . $text . $end_tag;
-			},
-			$buffer
-		);
+			$text = $processor->get_modifiable_text();
+			if ( '' === $text ) {
+				continue;
+			}
 
-		// TODO: Once WP 6.7 is the minimum-supported version, replace this with WP_HTML_Tag_Processor::set_modifiable_text().
-		$buffer = preg_replace_callback(
-			'#(<style[^>]*?>)(.+?)(</style>)#s',
-			static function ( $matches ) {
-				array_shift( $matches );
-				list( $start_tag, $text, $end_tag ) = $matches;
+			$data = json_decode( $text, true );
+			if ( is_array( $data ) && 2 === count( $data ) && is_string( $data[0] ) && is_array( $data[1] ) ) {
+				$text = '[]';
+			}
 
-				// Normalize versions which occur in sourceURL.
-				$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+			$processor->set_modifiable_text( $text );
+		}
+		$buffer = $processor->get_updated_html();
 
-				// Ensure any home URLs are normalized to account for variations in the testing environment.
-				$text = str_replace(
-					array( home_url( '/', 'http' ), home_url( '/', 'https' ) ),
-					'https://example.com/',
-					$text
-				);
+		// Normalize style content so changes do not impact snapshots.
+		$processor = new WP_HTML_Tag_Processor( $buffer );
+		while ( $processor->next_tag( array( 'tag_name' => 'STYLE' ) ) ) {
+			$text = $processor->get_modifiable_text();
+			if ( '' === $text ) {
+				continue;
+			}
 
-				return $start_tag . $text . $end_tag;
-			},
-			$buffer
-		);
+			// Normalize versions which occur in sourceURL.
+			$text = preg_replace( '/ver=\d+\.\d+\.\d+(-\w+)?/', 'ver=__VERSION__', $text );
+
+			// Ensure any home URLs are normalized to account for variations in the testing environment.
+			$text = str_replace(
+				$home_url_needles,
+				'https://example.com/',
+				$text
+			);
+
+			$processor->set_modifiable_text( $text );
+		}
+		$buffer = $processor->get_updated_html();
 
 		// Undo replacements so that the placeholders are restored to the buffer for persisting in the snapshot.
 		$snapshot = $buffer;
@@ -361,27 +360,25 @@ trait Optimization_Detective_Test_Helpers {
 			$snapshot = str_replace( array_values( $replacements ), array_keys( $replacements ), $snapshot );
 		}
 
-		$buffer = $this->remove_initial_tabs( $buffer );
-		if ( is_string( $expected ) ) {
-			$expected = $this->remove_initial_tabs( $expected );
-		}
-
-		if ( $buffer !== $expected ) {
-			file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		}
-
 		$rel_actual_file   = str_replace( trailingslashit( getcwd() ), '', $actual_file );
 		$rel_expected_file = str_replace( trailingslashit( getcwd() ), '', $expected_file );
 		$rel_buffer_file   = str_replace( trailingslashit( getcwd() ), '', $buffer_file );
 
 		if ( null === $expected ) {
+			file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			$this->markTestIncomplete( "Examine $actual_file to see if it is expected and if so rename to $expected_file." );
 		} else {
-			$this->assertEquals(
-				$expected,
-				$buffer,
-				"Examine $rel_actual_file for differences with $rel_buffer_file and if acceptable move to $rel_expected_file"
-			);
+			try {
+				$this->assertEqualHTML(
+					$expected,
+					$buffer,
+					null,
+					"Examine $rel_actual_file for differences with $rel_buffer_file and if acceptable move to $rel_expected_file"
+				);
+			} catch ( ExpectationFailedException $e ) {
+				file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				throw $e;
+			}
 		}
 	}
 }

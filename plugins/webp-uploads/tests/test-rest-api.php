@@ -15,6 +15,8 @@ class Test_WebP_Uploads_REST_API extends WP_UnitTestCase {
 
 	/**
 	 * Checks whether the sources information is added to image sizes details of the REST response object.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
 	 */
 	public function test_it_should_add_sources_to_rest_response(): void {
 		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
@@ -70,6 +72,8 @@ class Test_WebP_Uploads_REST_API extends WP_UnitTestCase {
 
 	/**
 	 * Checks whether the media details information is added to the REST response object.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
 	 */
 	public function test_it_should_check_media_details_in_rest_response(): void {
 		$file_location = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
@@ -100,5 +104,156 @@ class Test_WebP_Uploads_REST_API extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'media_details', $data );
 		$this->assertIsNotArray( $data['media_details'] );
 		$this->assertIsObject( $data['media_details'] );
+	}
+
+	/**
+	 * Checks that an image size is skipped when its `source_url` is missing.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
+	 */
+	public function test_it_should_skip_size_when_source_url_is_missing(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$post          = get_post( $attachment_id );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$response = new WP_REST_Response(
+			array(
+				'media_details' => array(
+					'sizes' => array(
+						'large' => array(
+							// Note: 'source_url' is intentionally omitted.
+							'sources' => array(
+								'image/webp' => array( 'file' => 'leaves-large.webp' ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$data = webp_uploads_update_rest_attachment( $response, $post )->get_data();
+
+		// The size was skipped, so no `source_url` was written into the mime source.
+		$this->assertArrayNotHasKey( 'source_url', $data['media_details']['sizes']['large']['sources']['image/webp'] );
+	}
+
+	/**
+	 * Checks that an image size is skipped when its `source_url` is not a string.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
+	 */
+	public function test_it_should_skip_size_when_source_url_is_not_a_string(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$post          = get_post( $attachment_id );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$response = new WP_REST_Response(
+			array(
+				'media_details' => array(
+					'sizes' => array(
+						'large' => array(
+							'source_url' => 12345, // Not a string.
+							'sources'    => array(
+								'image/webp' => array( 'file' => 'leaves-large.webp' ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$data = webp_uploads_update_rest_attachment( $response, $post )->get_data();
+
+		// The size was skipped, so no `source_url` was written into the mime source.
+		$this->assertArrayNotHasKey( 'source_url', $data['media_details']['sizes']['large']['sources']['image/webp'] );
+	}
+
+	/**
+	 * Checks that a mime source is skipped when its `file` is missing or invalid, without affecting valid sources.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
+	 */
+	public function test_it_should_skip_size_source_when_file_is_missing_or_invalid(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$post          = get_post( $attachment_id );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$response = new WP_REST_Response(
+			array(
+				'media_details' => array(
+					'sizes' => array(
+						'large' => array(
+							'source_url' => 'https://example.com/wp-content/uploads/leaves-large.jpg',
+							'sources'    => array(
+								'image/webp' => array( 'file' => 'leaves-large.webp' ), // Valid: rewritten.
+								'image/avif' => array(),                                 // Missing 'file': skipped.
+								'image/gif'  => 'not-an-array',                          // Not an array: skipped.
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$data    = webp_uploads_update_rest_attachment( $response, $post )->get_data();
+		$sources = $data['media_details']['sizes']['large']['sources'];
+
+		$this->assertSame( 'https://example.com/wp-content/uploads/leaves-large.webp', $sources['image/webp']['source_url'] );
+		$this->assertArrayNotHasKey( 'source_url', $sources['image/avif'] );
+		$this->assertSame( 'not-an-array', $sources['image/gif'] );
+	}
+
+	/**
+	 * Checks that a full-size mime source is skipped when its `file` is missing or invalid, without affecting valid sources.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
+	 */
+	public function test_it_should_skip_full_source_when_file_is_missing_or_invalid(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$post          = get_post( $attachment_id );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$response = new WP_REST_Response(
+			array(
+				'media_details' => array(
+					'sizes'   => array(
+						'full' => array(),
+					),
+					'sources' => array(
+						'image/webp' => array( 'file' => 'leaves.webp' ), // Valid: rewritten.
+						'image/avif' => array(),                          // Missing 'file': skipped.
+						'image/gif'  => 'not-an-array',                   // Not an array: skipped.
+					),
+				),
+			)
+		);
+
+		$data = webp_uploads_update_rest_attachment( $response, $post )->get_data();
+
+		// The top-level `sources` are moved under the `full` size.
+		$this->assertArrayNotHasKey( 'sources', $data['media_details'] );
+		$full_sources = $data['media_details']['sizes']['full']['sources'];
+
+		$this->assertStringEndsWith( 'leaves.webp', $full_sources['image/webp']['source_url'] );
+		$this->assertArrayNotHasKey( 'source_url', $full_sources['image/avif'] );
+		$this->assertSame( 'not-an-array', $full_sources['image/gif'] );
+	}
+
+	/**
+	 * Checks that the response is returned unchanged when its data is not an array.
+	 *
+	 * @covers ::webp_uploads_update_rest_attachment
+	 */
+	public function test_it_should_return_response_when_data_is_not_an_array(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$post          = get_post( $attachment_id );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$response = new WP_REST_Response( 'not-an-array' );
+
+		$filtered = webp_uploads_update_rest_attachment( $response, $post );
+
+		$this->assertSame( $response, $filtered );
+		$this->assertSame( 'not-an-array', $filtered->get_data() );
 	}
 }

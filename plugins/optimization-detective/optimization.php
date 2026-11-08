@@ -6,6 +6,8 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -122,7 +124,7 @@ function od_print_disabled_reasons( array $reasons ): void {
 		wp_print_inline_script_tag(
 			sprintf(
 				"console.info( %s );\n//# sourceURL=od-print-disabled-reasons-%d",
-				wp_json_encode( '[Optimization Detective] ' . $reason, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+				(string) wp_json_encode( '[Optimization Detective] ' . $reason, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 				$i + 1
 			),
 			array( 'type' => 'module' )
@@ -281,8 +283,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 		// Amend the META generator tag if it's the right one and hasn't been amended already.
 		if (
-			! $did_amend_meta_generator && // @phpstan-ignore booleanNot.alwaysTrue, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse, booleanAnd.alwaysFalse (False positives in PHPStan due to the following line.)
-			'META' === $processor->get_tag() && // @phpstan-ignore identical.alwaysFalse (False positive in PHPStan since it isn't aware of the do/while loop apparently.)
+			! $did_amend_meta_generator &&
+			'META' === $processor->get_tag() &&
 			'generator' === $processor->get_attribute( 'name' ) &&
 			str_starts_with( (string) $processor->get_attribute( 'content' ), 'optimization-detective ' )
 		) {

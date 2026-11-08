@@ -38,7 +38,7 @@ of the `OD_Tag_Visitor_Context` object which includes the following read-only pr
 
 - `$processor` (`OD_HTML_Tag_Processor`): The processor with the cursor at the current open tag.
 - `$url_metric_group_collection` (`OD_URL_Metric_Group_Collection`): The URL Metrics which may include information about the current tag to inform what optimizations the callback performs.
-- `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add preload links and preconnect links as needed.
+- `$link_collection` (`OD_Link_Collection`): Collection of links which will be added to the `HEAD` when the page is served. This allows you to add `preload`, `preconnect`, and `dns-prefetch` links as needed.
 - `$url_metrics_id` (`positive-int|null`): The post ID for the `od_url_metrics` post from which the URL Metrics were loaded (if any). For advanced usage.
 
 Note that you are free to call `$processor->next_tag()` in the callback (such as to walk over any child elements)
@@ -78,7 +78,7 @@ $tag_visitor_registry->register(
 		}
 	}
 );
-````
+```
 
 Please note this implementation of setting `fetchpriority=high` on the LCP `IMG` element is simplified. Please
 see the Image Prioritizer extension for a more robust implementation.
@@ -158,7 +158,7 @@ Fires whenever a URL Metric was successfully stored.
 The supplied context object includes these properties:
 
 * `$request`: The `WP_REST_Request` for storing the URL Metric.
-* `$post_id`: The post ID for the `od_url_metric` post.
+* `$url_metrics_id`: The post ID for the `od_url_metrics` post. Before Optimization Detective 1.0.0 this was `$post_id`, which still works but now triggers a `_doing_it_wrong()` notice.
 * `$url_metric`: The newly-stored URL Metric.
 * `$url_metric_group`: The viewport group that the URL Metric was added to.
 * `$url_metric_group_collection`: The `OD_URL_Metric_Group_Collection` instance to which the URL Metric was added.
@@ -243,7 +243,7 @@ Filters how long the current IP is locked from submitting another URL metric sto
 Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable locking when a user is logged in with code like the following:
 
 ```php
-add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
+add_filter( 'od_url_metric_storage_lock_ttl', function ( int $ttl ): int {
 	return is_user_logged_in() ? 0 : $ttl;
 } );
 ```
@@ -253,7 +253,7 @@ By default, the TTL is zero (0) for authorized users and sixty (60) for everyone
 During development this is useful to set to zero, so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 
 ```php
-add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
+add_filter( 'od_url_metric_storage_lock_ttl', function ( int $ttl ): int {
 	return 0;
 } );
 ```

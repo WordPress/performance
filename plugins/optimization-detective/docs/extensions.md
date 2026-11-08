@@ -30,7 +30,7 @@ As mentioned above, this plugin is a dependency that doesn't provide features on
 **[Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) ([GitHub](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer)):**
 
 1. Lazy loading embeds just before they come into view. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L298-L324), [2](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L168-L336))
-2. Adding preconnect links for embeds in the initial viewport. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L199-L296))
+2. Adding `dns-prefetch` links for embeds in the initial viewport. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L199-L296))
 3. Reserving space for embeds that resize to reduce layout shifting. ([1](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L64-L65), [2](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/hooks.php#L81-L144), [3](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/detect.js), [4](https://github.com/WordPress/performance/blob/dde008b801d0f2eb3745205365053920cf3e51db/plugins/embed-optimizer/class-embed-optimizer-tag-visitor.php#L130-L197))
 
 ## Extension Plugins
@@ -38,9 +38,9 @@ As mentioned above, this plugin is a dependency that doesn't provide features on
 Stable plugins for use in production from the WordPress.org Plugin Directory:
 
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/): Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy loading.
-* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/): Optimizes the performance of embeds through lazy-loading, preconnecting, and reserving space to reduce layout shifts.
+* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/): Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
 
-Experimental plugins being explored exploration, from repositories on GitHub:
+Experimental plugins being explored, from repositories on GitHub:
 
 * [Optimization Detective Content Visibility](https://github.com/westonruter/od-content-visibility): Applies content-visibility to posts in The Loop to improve rendering performance.
 * [Optimization Detective Intrinsic Dimensions](https://github.com/westonruter/od-intrinsic-dimensions): Supplies width and height attributes to IMG and VIDEO tags that lack them according to their intrinsic dimensions. This reduces Cumulative Layout Shift (CLS).
@@ -52,4 +52,4 @@ For development and debugging, also on GitHub:
 * [Optimization Detective Store Query Vars](https://github.com/westonruter/od-store-query-vars): Stores the Query Vars with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular what the slug was computed from.
 * [Optimization Detective Store User Agent](https://github.com/westonruter/od-store-user-agent): Stores the User Agent with a URL Metric in the Optimization Detective plugin. This is useful for debugging URL Metrics, in particular to understand what device has a given viewport's dimensions.
 * [Optimization Detective Dev Mode](https://github.com/westonruter/od-dev-mode): Adds filters to facilitate development of the Optimization Detective plugin.
-* [Optimization Detective Default Disabled](https://github.com/westonruter/od-default-disabled): Disables functionality in Optimization Detective by default unless the `?optimization_detective_enabled=1` query parameter is present. This allows you for troubleshooting issues on a live site without visitors seeing a broken experience.
+* [Optimization Detective Default Disabled](https://github.com/westonruter/od-default-disabled): Disables functionality in Optimization Detective by default unless the `?optimization_detective_enabled=1` query parameter is present. This allows you to troubleshoot issues on a live site without visitors seeing a broken experience.

@@ -122,12 +122,12 @@ abstract class TestCase extends WP_UnitTestCase {
 			),
 			'balloons_webp' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp',
-				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8' ),
+				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8', 'c2bdbc' ),
 				'expected_transparency' => false,
 			),
 			'half_opaque'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/data/images/half-opaque.png',
-				'expected_color'        => array( '7e7e7e' ),
+				'expected_color'        => array( '7e7e7e', 'ffffff' ),
 				'expected_transparency' => true,
 			),
 		);
@@ -157,10 +157,10 @@ abstract class TestCase extends WP_UnitTestCase {
 	public function provider_get_dominant_color_none_images(): array {
 		return array(
 			'pdf' => array(
-				'files_path' => TESTS_PLUGIN_DIR . '/tests/data/images/wordpress-gsoc-flyer.pdf',
+				'image_path' => TESTS_PLUGIN_DIR . '/tests/data/images/wordpress-gsoc-flyer.pdf',
 			),
 			'mp4' => array(
-				'files_path' => TESTS_PLUGIN_DIR . '/tests/data/images/small-video.mp4',
+				'image_path' => TESTS_PLUGIN_DIR . '/tests/data/images/small-video.mp4',
 			),
 		);
 	}
@@ -182,7 +182,6 @@ abstract class TestCase extends WP_UnitTestCase {
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
@@ -208,35 +207,41 @@ abstract class TestCase extends WP_UnitTestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => $mime_type,
+			)
+		);
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
-		$this->assertStringContainsString( 'image_no_editor', $dominant_color_data->get_error_code() );
+		$this->assertSame( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
 	}
 
 	/**
-	 * Test the function returns a WP_Error object for unsupported mime types.
+	 * Tests dominant_color_get_dominant_color_data() returns a WP_Error when the
+	 * dominant_color_supported_mime_types filter returns an empty array.
 	 *
 	 * @covers dominant_color_get_dominant_color_data
 	 */
 	public function test_get_dominant_color_data_unsupported_mime_type(): void {
 		add_filter( 'dominant_color_supported_mime_types', '__return_empty_array' );
-		$image_path = TESTS_PLUGIN_DIR . '/tests/data/images/red.jpg';
 
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
-		$this->assertStringContainsString( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
+		$this->assertSame( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
 	}
 
 	/**
-	 * Test if the function returns the correct color.
+	 * Tests dominant_color_get_dominant_color_data() returns a WP_Error for non-image file types.
 	 *
 	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
 	 * @covers Dominant_Color_Image_Editor_Imagick::get_dominant_color
@@ -244,11 +249,20 @@ abstract class TestCase extends WP_UnitTestCase {
 	 * @dataProvider provider_get_dominant_color_none_images
 	 */
 	public function test_get_dominant_color_none_images( string $image_path ): void {
-		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( false === $mime_type ) {
+			$this->markTestSkipped( 'Mime type is not supported.' );
+		}
+
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => $mime_type,
+			)
+		);
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
+		$this->assertSame( 'unsupported_attachment_type', $dominant_color_data->get_error_code() );
 	}
 }

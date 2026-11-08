@@ -304,6 +304,20 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 0,
 				'error'           => 'A link with rel=preconnect must include an &quot;href&quot; attribute.',
 			),
+			'bad_dns_prefetch'                           => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'         => 'dns-prefetch',
+							'imagesrcset' => 'https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w',
+						),
+					),
+				),
+				'expected_html'   => '',
+				'expected_header' => '',
+				'expected_count'  => 0,
+				'error'           => 'A link with rel=dns-prefetch must include an &quot;href&quot; attribute.',
+			),
 			'bad_rel'                                    => array(
 				'links_args'      => array(
 					array(

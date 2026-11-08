@@ -6,6 +6,8 @@
  * @noinspection PhpRedundantOptionalArgumentInspection
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -48,7 +50,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	// Proceed with API request since no cache hit.
 	$response = plugins_api(
 		'query_plugins',
-		array(
+		array( // @phpstan-ignore argument.type (plugins_api()'s $args is typed too narrowly in php-stubs/wordpress-stubs to include the 'fields' shape passed here. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 			'author'   => 'wordpressdotorg',
 			'tag'      => 'performance',
 			'per_page' => 100,
@@ -327,8 +329,8 @@ function perflab_render_plugins_ui(): void {
  * @since 3.1.0
  * @see perflab_install_and_activate_plugin()
  *
- * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data                     Plugin data from the WordPress.org API.
- * @param array<string, array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool}>                      $processed_plugin_availabilities Plugin availabilities already processed. This param is only used by recursive calls.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental?: bool} $plugin_data                     Plugin data from the WordPress.org API.
+ * @param array<string, array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool}>                                           $processed_plugin_availabilities Plugin availabilities already processed. This param is only used by recursive calls.
  * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool} Availability.
  */
 function perflab_get_plugin_availability( array $plugin_data, array &$processed_plugin_availabilities = array() ): array {
@@ -408,7 +410,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	// Get the freshest data (including the most recent download_link) as opposed what is cached by perflab_query_plugin_info().
 	$plugin_data = plugins_api(
 		'plugin_information',
-		array(
+		array( // @phpstan-ignore argument.type (plugins_api()'s $args is typed too narrowly in php-stubs/wordpress-stubs to include the 'fields' shape passed here. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 			'slug'   => $plugin_slug,
 			'fields' => array(
 				'download_link'    => true,

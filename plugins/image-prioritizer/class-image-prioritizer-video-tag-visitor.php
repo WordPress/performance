@@ -8,6 +8,8 @@
  * @since 0.2.0
  */
 
+declare( strict_types = 1 );
+
 // @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -36,7 +38,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 * @since 0.2.0
 	 * @var bool
 	 */
-	protected $added_lazy_script = false;
+	protected bool $added_lazy_script = false;
 
 	/**
 	 * Visits a tag.
