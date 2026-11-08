@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4378cb0b2cc1b72a37462a251eea6a48",
+    "content-hash": "51ae68dfb13eab07348129ef938fbebb",
     "packages": [],
     "packages-dev": [
         {
@@ -690,16 +690,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.4.43",
+            "version": "0.4.44",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "47d572570d71b2de6d882974c3a2e530cffce481"
+                "reference": "5283c0d4934990a21857511eea10019fe7b03c7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/47d572570d71b2de6d882974c3a2e530cffce481",
-                "reference": "47d572570d71b2de6d882974c3a2e530cffce481",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/5283c0d4934990a21857511eea10019fe7b03c7a",
+                "reference": "5283c0d4934990a21857511eea10019fe7b03c7a",
                 "shasum": ""
             },
             "type": "library",
@@ -716,9 +716,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.43"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.4.44"
             },
-            "time": "2026-09-25T00:34:48+00:00"
+            "time": "2026-10-28T00:25:02+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -769,11 +769,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.1",
+            "version": "2.3.4",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6155239b488e95d26d1ebd95c6b4bb294d7f09db",
-                "reference": "6155239b488e95d26d1ebd95c6b4bb294d7f09db",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f20ce6f3c82556cfcfc086b152445a12d1d64fff",
+                "reference": "f20ce6f3c82556cfcfc086b152445a12d1d64fff",
                 "shasum": ""
             },
             "require": {
@@ -829,7 +829,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-08T21:09:11+00:00"
+            "time": "2026-10-28T22:38:53+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
