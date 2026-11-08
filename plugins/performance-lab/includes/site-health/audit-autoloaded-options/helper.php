@@ -202,7 +202,7 @@ function perflab_aao_get_autoloaded_options_table(): string {
 			)
 		);
 		$disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Disable Autoload', 'performance-lab' ) );
-		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $value->option_name ), size_format( $value->option_value_length, 2 ), $disable_button );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $value->option_name ), (string) size_format( $value->option_value_length, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
 

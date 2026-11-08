@@ -141,12 +141,11 @@ function getIssueType( issue ) {
 /**
  * Formats the changelog string for a given list of pull requests.
  *
- * @param {string}                          milestone    Milestone title.
  * @param {IssuesListForRepoResponseItem[]} pullRequests List of pull requests.
  *
  * @return {string} The formatted changelog string (without the heading).
  */
-function formatChangelog( milestone, pullRequests ) {
+function formatChangelog( pullRequests ) {
 	let changelog = '';
 
 	// Group PRs by type.
@@ -243,7 +242,7 @@ async function getChangelog( settings ) {
 		);
 	}
 
-	return formatChangelog( settings.milestone, nonSkippedPullRequests );
+	return formatChangelog( nonSkippedPullRequests );
 }
 
 /**

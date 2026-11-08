@@ -266,13 +266,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
 function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): string {
 	$action = "store_url_metric:$slug:$current_etag:$url:$cache_purge_post_id";
 
-	/**
-	 * HMAC.
-	 *
-	 * @var non-empty-string $hmac
-	 */
-	$hmac = wp_hash( $action, 'nonce' );
-	return $hmac;
+	return wp_hash( $action, 'nonce' );
 }
 
 /**

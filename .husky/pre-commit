@@ -1,1 +1,1 @@
-npx lint-staged
+npm exec --no -- lint-staged

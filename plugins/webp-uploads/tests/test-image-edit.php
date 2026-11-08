@@ -24,8 +24,8 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
-		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
+		$this->assertSame( '', get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
+		$this->assertSame( '', get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -125,7 +125,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$this->assertTrue( $editor->success() );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-		$this->assertEmpty( $backup_sources );
+		$this->assertSame( '', $backup_sources );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
@@ -155,7 +155,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$this->assertTrue( $editor->success() );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-		$this->assertEmpty( $backup_sources );
+		$this->assertSame( '', $backup_sources );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
@@ -372,7 +372,6 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$editor->rotate_right()->save();
 
 		$full_size_key = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
-		// @phpstan-ignore-next-line method.impossibleType (Work around PHPStan remembering the return value above being null but now being a string. This is instead of adding rememberPossiblyImpureFunctionValues:false to the config.)
 		$this->assertIsString( $full_size_key );
 		$this->assertSizeNameIsHashed( 'full', $full_size_key );
 	}
@@ -449,7 +448,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		webp_uploads_backup_full_image_sources( $attachment_id, array() );
 
 		$this->assertTrue( $editor->success() );
-		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
+		$this->assertSame( '', get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 	}
 
 	/**

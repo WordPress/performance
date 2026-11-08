@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 7.0
-Stable tag:   4.1.0
+Tested up to: 7.1
+Stable tag:   4.2.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -72,6 +72,15 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 4.2.0 =
+
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum PHP requirement from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Enqueued Assets audit: treat zero-size and no-store responses as errors. ([2481](https://github.com/WordPress/performance/pull/2481))
+* Server Timing - Allow description and make duration optional. ([2379](https://github.com/WordPress/performance/pull/2379))
 
 = 4.1.0 =
 

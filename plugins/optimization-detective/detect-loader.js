@@ -26,13 +26,12 @@ async function load() {
 		} );
 	}
 
-	const argsScript = document.getElementById(
-		'optimization-detective-detect-args'
-	);
+	const jsonScriptSelector = 'script#optimization-detective-detect-args';
+	const argsScript = document.querySelector( jsonScriptSelector );
 	if ( ! ( argsScript instanceof HTMLScriptElement ) ) {
-		throw new Error( 'Missing: SCRIPT#optimization-detective-detect-args' );
+		throw new Error( `Missing: ${ jsonScriptSelector }` );
 	}
-	const data = JSON.parse( argsScript.textContent );
+	const data = JSON.parse( argsScript.text );
 	if (
 		! Array.isArray( data ) ||
 		data.length !== 2 ||
