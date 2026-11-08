@@ -38,7 +38,7 @@ class AIPA_Test_Context_Providers extends WP_UnitTestCase {
 	public function test_environment_provider_shape(): void {
 		$provider = new AIPA_Provider_Environment();
 		$this->assertSame( 'environment', $provider->get_key() );
-		$this->assertNotEmpty( $provider->get_label() );
+		$this->assertNotSame( '', $provider->get_label() );
 		$this->assertTrue( $provider->is_available() );
 
 		$data = $provider->collect();
@@ -187,7 +187,7 @@ class AIPA_Test_Context_Providers extends WP_UnitTestCase {
 	public function test_optimization_detective_provider(): void {
 		$provider = new AIPA_Provider_Optimization_Detective();
 		$this->assertSame( 'optimization_detective', $provider->get_key() );
-		$this->assertNotEmpty( $provider->get_label() );
+		$this->assertNotSame( '', $provider->get_label() );
 
 		if ( $provider->is_available() ) {
 			$data = $provider->collect();
