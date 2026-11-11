@@ -260,6 +260,7 @@ final class OD_Link_Collection implements Countable {
 	 * Constructs the Link HTTP response header.
 	 *
 	 * @since 0.4.0
+	 * @since n.e.x.t Excludes links with `imagesrcset` since responsive image preloads are sent via `<link>` tags in the HTML instead.
 	 *
 	 * @return non-empty-string|null Link HTTP response header, or null if there are none.
 	 */
@@ -267,32 +268,18 @@ final class OD_Link_Collection implements Countable {
 		$link_headers = array();
 
 		foreach ( $this->get_prepared_links() as $link ) {
-			if ( isset( $link['href'] ) ) {
-				$link['href'] = $this->encode_url_for_response_header( $link['href'] );
-			} else {
-				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
-				$link['href'] = 'about:blank';
-			}
-
-			// Encode the URLs in the srcset.
+			// Responsive image preloads are sent via <link> tags in the HTML (see get_html()) instead of the Link
+			// response header, since imagesrcset/imagesizes can make the header exceed common reverse-proxy header
+			// size limits. See <https://web.dev/articles/preload-responsive-images#imagesrcset-imagesizes>.
 			if ( isset( $link['imagesrcset'] ) ) {
-				$link['imagesrcset'] = join(
-					', ',
-					array_map(
-						function ( $image_candidate ) {
-							// Parse out the URL to separate it from the descriptor.
-							$image_candidate_parts = (array) preg_split( '/\s+/', (string) $image_candidate, 2 );
-
-							// Encode the URL.
-							$image_candidate_parts[0] = $this->encode_url_for_response_header( (string) $image_candidate_parts[0] );
-
-							// Re-join the URL with the descriptor.
-							return implode( ' ', $image_candidate_parts );
-						},
-						(array) preg_split( '/\s*,\s*/', $link['imagesrcset'] )
-					)
-				);
+				continue;
 			}
+
+			if ( ! isset( $link['href'] ) ) {
+				// Not reachable: imagesrcset-only links are skipped above, and add_link() requires either href or imagesrcset.
+				continue;
+			}
+			$link['href'] = $this->encode_url_for_response_header( $link['href'] );
 
 			$link_header = '<' . $link['href'] . '>';
 			unset( $link['href'] );
