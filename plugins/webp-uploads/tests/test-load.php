@@ -1061,25 +1061,24 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Test that AVIF images are not discarded as larger than the JPEG fallback for each image editor.
+	 * Test that AVIF images created with GD are not discarded as larger than the JPEG fallback.
 	 *
-	 * @dataProvider data_provider_image_editors
+	 * Imagick is not tested here, as its AVIF file size depends on the libaom version on the server.
+	 * With libaom 2.0.2 or older, AVIF is larger than JPEG at any quality.
 	 *
 	 * @covers ::webp_uploads_modify_webp_quality
 	 * @covers ::webp_uploads_should_discard_additional_image_file
-	 *
-	 * @param string $editor The image editor class name.
 	 */
-	public function test_it_should_create_avif_smaller_than_jpeg_fallback_for_all_sizes( string $editor ): void {
+	public function test_it_should_create_avif_smaller_than_jpeg_fallback_for_all_sizes_with_gd(): void {
 		add_filter(
 			'wp_image_editors',
-			static function () use ( $editor ) {
-				return array( $editor );
+			static function () {
+				return array( WP_Image_Editor_GD::class );
 			}
 		);
 
-		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) || ( WP_Image_Editor_Imagick::class === $editor && ! $this->check_avif_encoding_support() ) ) {
-			$this->markTestSkipped( "$editor does not support AVIF encoding." );
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'GD does not support AVIF encoding.' );
 		}
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
