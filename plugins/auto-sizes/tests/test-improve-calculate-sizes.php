@@ -1476,6 +1476,262 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that column block width parsed correctly for percentage and numeric values.
+	 *
+	 * @dataProvider data_column_block_percentage_and_numeric_widths
+	 *
+	 * @param string|int|float $width    Column width attribute.
+	 * @param string           $expected Expected sizes attribute string.
+	 */
+	public function test_column_block_with_percentage_and_numeric_widths( $width, string $expected ): void {
+		$image_markup = $this->get_image_block_markup( self::$image_id, 'large' );
+
+		$width_attr    = is_string( $width ) ? '"' . $width . '"' : $width;
+		$block_content = sprintf(
+			'<!-- wp:columns -->
+			<div class="wp-block-columns">
+				<!-- wp:column {"width":%1$s} -->
+				<div class="wp-block-column">%2$s</div>
+				<!-- /wp:column -->
+				<!-- wp:column -->
+				<div class="wp-block-column"></div>
+				<!-- /wp:column -->
+			</div>
+			<!-- /wp:columns -->',
+			$width_attr,
+			$image_markup
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider for test_column_block_with_percentage_and_numeric_widths.
+	 *
+	 * @return array<string, array{0: string|int|float, 1: string}>
+	 */
+	public static function data_column_block_percentage_and_numeric_widths(): array {
+		return array(
+			'Percentage string 33.33%'   => array(
+				'33.33%',
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Percentage string 50%'      => array(
+				'50%',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Legacy numeric float 33.33' => array(
+				33.33,
+				'sizes="(max-width: 206px) 100vw, 206px" ',
+			),
+			'Legacy numeric int 50'      => array(
+				50,
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that column block with non-percentage units falls through to column_count branch.
+	 *
+	 * @dataProvider data_column_block_non_percentage_units
+	 *
+	 * @param string $width           Column width attribute.
+	 * @param string $columns_align   Columns alignment.
+	 * @param string $image_align     Image alignment.
+	 * @param string $expected        Expected sizes attribute string.
+	 * @param string $unexpected_part String that must not be in the output (e.g. tripled width).
+	 */
+	public function test_column_block_with_non_percentage_units_falls_through_to_column_count( string $width, string $columns_align, string $image_align, string $expected, string $unexpected_part ): void {
+		$image_markup = $this->get_image_block_markup( self::$image_id, 'large', '' !== $image_align ? $image_align : null );
+
+		$align_attr  = '' !== $columns_align ? '{"align":"' . $columns_align . '"}' : '';
+		$align_class = '' !== $columns_align ? ' align' . $columns_align : '';
+
+		$block_content = sprintf(
+			'<!-- wp:columns %1$s -->
+			<div class="wp-block-columns%2$s">
+				<!-- wp:column {"width":"%3$s"} -->
+				<div class="wp-block-column">%4$s</div>
+				<!-- /wp:column -->
+				<!-- wp:column -->
+				<div class="wp-block-column"></div>
+				<!-- /wp:column -->
+			</div>
+			<!-- /wp:columns -->',
+			$align_attr,
+			$align_class,
+			$width,
+			$image_markup
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+		$this->assertStringNotContainsString( $unexpected_part, $result );
+	}
+
+	/**
+	 * Data provider for test_column_block_with_non_percentage_units_falls_through_to_column_count.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string, 3: string, 4: string}>
+	 */
+	public static function data_column_block_non_percentage_units(): array {
+		return array(
+			'300px in 2-column with wide alignment falls to 50% (640px) not 300% (3840px)' => array(
+				'300px',
+				'wide',
+				'wide',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+				'3840px',
+			),
+			'300px in 2-column with default alignment falls to 50% (310px)' => array(
+				'300px',
+				'',
+				'',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'1860px',
+			),
+			'20em in 2-column with default alignment falls to 50% (310px) not 20% (124px)' => array(
+				'20em',
+				'',
+				'',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'124px',
+			),
+		);
+	}
+
+	/**
+	 * Test post featured image block with various width units.
+	 *
+	 * @dataProvider data_post_featured_image_block_various_width_units
+	 *
+	 * @param string $width           Width attribute value.
+	 * @param string $expected        Expected sizes attribute string.
+	 * @param string $unexpected_part Substring that must not appear in the sizes attribute.
+	 */
+	public function test_post_featured_image_block_with_various_width_units( string $width, string $expected, string $unexpected_part ): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = sprintf(
+			'<!-- wp:post-featured-image {"width":"%s"} /-->',
+			esc_attr( $width )
+		);
+
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
+		$this->assertStringContainsString( $expected, $result );
+		$this->assertStringNotContainsString( $unexpected_part, $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Data provider for test_post_featured_image_block_with_various_width_units.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
+	public static function data_post_featured_image_block_various_width_units(): array {
+		return array(
+			'Percentage 50% scaled relative width (310px) not 50px' => array(
+				'50%',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+				'max-width: 50px',
+			),
+			'Viewport width 30vw ignored for resize width, uses contentSize (620px) not 30px' => array(
+				'30vw',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+				'max-width: 30px',
+			),
+			'Relative unit 20em ignored for resize width, uses contentSize (620px) not 20px' => array(
+				'20em',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+				'max-width: 20px',
+			),
+			'Pixel unit 300px recognized for resize width (300px)' => array(
+				'300px',
+				'sizes="(max-width: 300px) 100vw, 300px" ',
+				'max-width: 620px',
+			),
+		);
+	}
+
+	/**
+	 * Test relative width boundary conditions with corrected && logic.
+	 *
+	 * @dataProvider data_relative_width_boundary_conditions
+	 *
+	 * @param float  $relative_width Container relative width.
+	 * @param string $alignment      Alignment.
+	 * @param string $expected       Expected sizes attribute.
+	 */
+	public function test_relative_width_boundary_conditions( float $relative_width, string $alignment, string $expected ): void {
+		$sizes = auto_sizes_calculate_better_sizes(
+			self::$image_id,
+			'full',
+			$alignment,
+			0,
+			'full',
+			$relative_width
+		);
+
+		$this->assertSame( $expected, $sizes );
+	}
+
+	/**
+	 * Data provider for test_relative_width_boundary_conditions.
+	 *
+	 * @return array<string, array{0: float, 1: string, 2: string}>
+	 */
+	public static function data_relative_width_boundary_conditions(): array {
+		return array(
+			'Valid fractional relative width 0.5 in default alignment scales to 310px' => array(
+				0.5,
+				'default',
+				'(max-width: 310px) 100vw, 310px',
+			),
+			'1.0 boundary in default alignment stays unscaled at contentSize 620px' => array(
+				1.0,
+				'default',
+				'(max-width: 620px) 100vw, 620px',
+			),
+			'1.5 (greater than 1.0) in default alignment does not scale up' => array(
+				1.5,
+				'default',
+				'(max-width: 620px) 100vw, 620px',
+			),
+			'0.0 (zero boundary) in default alignment does not scale to zero' => array(
+				0.0,
+				'default',
+				'(max-width: 620px) 100vw, 620px',
+			),
+			'-0.5 (negative) in default alignment does not scale to negative' => array(
+				-0.5,
+				'default',
+				'(max-width: 620px) 100vw, 620px',
+			),
+			'Valid fractional relative width 0.5 in wide alignment scales to 640px' => array(
+				0.5,
+				'wide',
+				'(max-width: 640px) 100vw, 640px',
+			),
+			'3.0 (greater than 1.0) in wide alignment does not triple wideSize' => array(
+				3.0,
+				'wide',
+				'(max-width: 1280px) 100vw, 1280px',
+			),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
