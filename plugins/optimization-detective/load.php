@@ -98,6 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		define( 'OPTIMIZATION_DETECTIVE_VERSION', $version );
+		define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 		require_once __DIR__ . '/helper.php';
 
@@ -115,6 +116,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
 		require_once __DIR__ . '/storage/class-od-rest-url-metrics-store-endpoint.php';
+		require_once __DIR__ . '/storage/class-od-rest-url-metrics-priming-mode-endpoint.php';
 		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.
@@ -133,5 +135,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		// Load site health checks.
 		require_once __DIR__ . '/site-health.php';
+
+		// Load the settings page.
+		require_once __DIR__ . '/settings.php';
+
+		// Load WP-CLI commands.
+		require_once __DIR__ . '/storage/class-od-priming-mode-wp-cli.php';
 	}
 );

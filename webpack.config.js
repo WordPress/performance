@@ -247,6 +247,18 @@ const optimizationDetective = ( env ) => {
 						from: `${ destination }/detect.js`,
 						to: `${ destination }/detect.min.js`,
 					},
+					{
+						from: `${ destination }/prime-url-metrics.js`,
+						to: `${ destination }/prime-url-metrics.min.js`,
+					},
+					{
+						from: `${ destination }/prime-url-metrics-block-editor.js`,
+						to: `${ destination }/prime-url-metrics-block-editor.min.js`,
+					},
+					{
+						from: `${ destination }/prime-url-metrics-classic-editor.js`,
+						to: `${ destination }/prime-url-metrics-classic-editor.min.js`,
+					},
 				],
 			} ),
 			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.

@@ -696,7 +696,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	 */
 	public function test_od_get_breakpoint_max_widths(): void {
 		$this->assertSame(
-			array( 480, 600, 782 ),
+			array( 380, 480, 600, 782 ),
 			od_get_breakpoint_max_widths()
 		);
 
