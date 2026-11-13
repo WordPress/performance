@@ -225,6 +225,40 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	/**
+	 * Test that the image falls back to the format of the upload when only the scaled full size image is in the modern format.
+	 *
+	 * This is the shape of an attachment over the big image size threshold uploaded with client side media
+	 * processing and fallback output, for which every modern sub-size was discarded for being the larger file.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_image_falls_back_to_the_format_of_the_upload_when_only_the_scaled_image_is_modern(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			unset( $metadata['sizes'][ $size_name ]['sources'][ self::$mime_type ] );
+		}
+		$metadata['original_image'] = wp_basename( $metadata['file'] );
+		$metadata['file']           = dirname( $metadata['file'] ) . '/' . $metadata['sources'][ self::$mime_type ]['file'];
+		update_attached_file( $attachment_id, $metadata['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$image = wp_get_attachment_image( $attachment_id, 'large', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$this->assertStringContainsString( '.webp', (string) $this->get_attribute_from_first_tag( $image, 'IMG', 'srcset' ), 'The unfiltered srcset should list the scaled image in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '<picture', $markup, 'A single modern image does not make for a source.' );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['original_image'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The image should not list a modern image without a picture element.' );
+	}
+
+	/**
 	 * Gets an attribute from the first tag of the given name in the markup.
 	 *
 	 * @param string $markup    The markup.

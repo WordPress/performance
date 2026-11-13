@@ -224,13 +224,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		}
 	}
 
-	// Never emit a `<picture>` with no `<source>` children: if every modern-format
-	// source failed to resolve (e.g. the attachment has no modern sub-sizes), return
-	// the original markup untouched instead of a pointless empty wrapper element.
-	if ( '' === $picture_sources ) {
-		return $image;
-	}
-
 	$marker = new WP_HTML_Tag_Processor( $image );
 	if ( $marker->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 		/*
@@ -262,8 +255,17 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		// Tag the inner `<img>` so a later rewrite pass (for example `wp_content_img_tag`
 		// once this markup is embedded in post content) recognises it as already wrapped
 		// and skips it. See the idempotency guard above.
-		$marker->set_attribute( 'data-wp-picture-wrapped', true );
+		if ( '' !== $picture_sources ) {
+			$marker->set_attribute( 'data-wp-picture-wrapped', true );
+		}
 		$image = $marker->get_updated_html();
+	}
+
+	// Never emit a `<picture>` with no `<source>` children: if every modern-format
+	// source failed to resolve (e.g. the attachment has no modern sub-sizes), return
+	// the fallback image instead of a pointless empty wrapper element.
+	if ( '' === $picture_sources ) {
+		return $image;
 	}
 
 	return sprintf(
