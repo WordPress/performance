@@ -514,4 +514,49 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 			$this->assertIsArray( $backup_sizes[ $size_name ] );
 		}
 	}
+
+	/**
+	 * Keep the crop of cropped sizes for the additional mime type when the image is edited.
+	 *
+	 * @covers ::webp_uploads_update_image_onchange
+	 * @dataProvider data_provider_generate_fallback
+	 */
+	public function test_it_should_crop_the_additional_mime_type_of_cropped_sizes_when_an_image_is_edited( bool $generate_fallback ): void {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
+		if ( $generate_fallback ) {
+			$this->opt_in_to_jpeg_and_webp();
+		}
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+
+		$thumbnail_file = path_join( dirname( get_attached_file( $attachment_id ) ), $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
+		$this->assertFileExists( $thumbnail_file );
+
+		$thumbnail_size = wp_getimagesize( $thumbnail_file );
+		$this->assertIsArray( $thumbnail_size );
+		$this->assertSame( 150, $thumbnail_size[0] );
+		$this->assertSame( 150, $thumbnail_size[1] );
+	}
+
+	/**
+	 * Data provider for whether the fallback image is generated.
+	 *
+	 * @return array<string, array{ 0: bool }>
+	 */
+	public function data_provider_generate_fallback(): array {
+		return array(
+			'without fallback' => array( false ),
+			'with fallback'    => array( true ),
+		);
+	}
 }
