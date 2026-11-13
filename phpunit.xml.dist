@@ -11,6 +11,9 @@
 		<testsuite name="performance-lab">
 			<directory suffix=".php">plugins/performance-lab/tests</directory>
 		</testsuite>
+		<testsuite name="ai-performance-advisor">
+			<directory suffix=".php">plugins/ai-performance-advisor/tests</directory>
+		</testsuite>
 		<testsuite name="auto-sizes">
 			<directory suffix=".php">plugins/auto-sizes/tests</directory>
 		</testsuite>

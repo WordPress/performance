@@ -1,0 +1,61 @@
+<?php
+/**
+ * PHPStan stubs for the WordPress 7.0 AI Client and Abilities APIs.
+ *
+ * These are bundled in WordPress core 7.0+ but are not yet present in the
+ * php-stubs/wordpress-stubs package, so they are declared here so that static
+ * analysis recognizes the symbols. Loaded via `scanFiles` in phpstan.neon.dist.
+ */
+
+/**
+ * @return bool
+ */
+function wp_supports_ai(): bool {}
+
+/**
+ * @param mixed $prompt
+ * @return WP_AI_Client_Prompt_Builder
+ */
+function wp_ai_client_prompt( $prompt = null ): WP_AI_Client_Prompt_Builder {}
+
+/**
+ * @param string $name
+ * @return bool
+ */
+function wp_has_ability( string $name ): bool {}
+
+/**
+ * Minimal stub of the AI client prompt builder.
+ */
+class WP_AI_Client_Prompt_Builder {
+
+	/**
+	 * @param string $instruction
+	 * @return WP_AI_Client_Prompt_Builder
+	 */
+	public function using_system_instruction( string $instruction ): WP_AI_Client_Prompt_Builder {}
+
+	/**
+	 * @param float $temperature
+	 * @return WP_AI_Client_Prompt_Builder
+	 */
+	public function using_temperature( float $temperature ): WP_AI_Client_Prompt_Builder {}
+
+	/**
+	 * @param mixed ...$abilities
+	 * @return WP_AI_Client_Prompt_Builder
+	 */
+	public function using_abilities( ...$abilities ): WP_AI_Client_Prompt_Builder {}
+
+	/**
+	 * @return bool
+	 */
+	public function is_supported_for_text_generation(): bool {}
+
+	/**
+	 * Returns the generated text, or a WP_Error on failure.
+	 *
+	 * @return mixed
+	 */
+	public function generate_text() {}
+}
