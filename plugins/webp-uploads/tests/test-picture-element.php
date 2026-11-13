@@ -95,6 +95,184 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	/**
+	 * Test that the fallback IMG points at the original format when the image sub-sizes are in the modern format.
+	 *
+	 * This is the shape of an attachment uploaded with client side media processing: the browser generates the
+	 * sub-sizes in the modern format, and the server adds the fallback sources in the original format afterwards.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_picture_element_uses_original_format_for_fallback_img_when_image_is_modern_format(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		// Make the modern format the primary file of every sub-size, as the client side flow does.
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+			$this->assertArrayHasKey( self::$mime_type, $size_data['sources'], "The $size_name size should have a WebP source." );
+			$metadata['sizes'][ $size_name ]['file']      = $size_data['sources'][ self::$mime_type ]['file'];
+			$metadata['sizes'][ $size_name ]['mime-type'] = self::$mime_type;
+		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$image     = wp_get_attachment_image(
+			$attachment_id,
+			'large',
+			false,
+			array( 'class' => 'wp-image-' . $attachment_id )
+		);
+		$processor = new WP_HTML_Tag_Processor( $image );
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$this->assertStringEndsWith( '.webp', $processor->get_attribute( 'src' ), 'The unfiltered image should be in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$this->assertTrue( $processor->next_tag( 'PICTURE' ) );
+		$this->assertTrue( $processor->next_tag( 'SOURCE' ) );
+		$this->assertSame( self::$mime_type, $processor->get_attribute( 'type' ) );
+		$source_srcset = $processor->get_attribute( 'srcset' );
+		$this->assertIsString( $source_srcset );
+		$this->assertStringContainsString( '.webp', $source_srcset );
+		$this->assertStringNotContainsString( '.jpg', $source_srcset );
+
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$img_src = $processor->get_attribute( 'src' );
+		$this->assertIsString( $img_src );
+		$this->assertStringEndsWith( '.jpg', $img_src, 'The fallback IMG should point at the original format.' );
+		$this->assertSame( $metadata['sizes']['large']['sources']['image/jpeg']['file'], wp_basename( $img_src ) );
+		$img_srcset = $processor->get_attribute( 'srcset' );
+		$this->assertIsString( $img_srcset );
+		$this->assertStringContainsString( '.jpg', $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The fallback IMG srcset should only contain the original format.' );
+		$this->assertSame( $processor->get_attribute( 'sizes' ), $this->get_attribute_from_first_tag( $picture_markup, 'SOURCE', 'sizes' ) );
+	}
+
+	/**
+	 * Test that the fallback IMG srcset only contains the original format when the full size image is in the original format.
+	 *
+	 * This is the shape of an attachment uploaded with client side media processing and fallback output: the upload
+	 * stays the attached file, while the browser generates the sub-sizes in the modern format.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_picture_element_uses_original_format_for_fallback_srcset_of_full_size_image(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+			$metadata['sizes'][ $size_name ]['file']      = $size_data['sources'][ self::$mime_type ]['file'];
+			$metadata['sizes'][ $size_name ]['mime-type'] = self::$mime_type;
+		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$image     = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$processor = new WP_HTML_Tag_Processor( $image );
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$this->assertStringEndsWith( '.jpg', (string) $processor->get_attribute( 'src' ), 'The unfiltered image should be in the original format.' );
+		$this->assertStringContainsString( '.webp', (string) $processor->get_attribute( 'srcset' ), 'The unfiltered sub-sizes should be in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '.jpg', (string) $this->get_attribute_from_first_tag( $picture_markup, 'SOURCE', 'srcset' ) );
+		$this->assertStringEndsWith( '.jpg', (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'src' ) );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['sizes']['medium']['sources']['image/jpeg']['file'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The fallback IMG srcset should only contain the original format.' );
+	}
+
+	/**
+	 * Test that the format of the upload is the fallback when the browser supplied the scaled full size image.
+	 *
+	 * This is the shape of an attachment over the big image size threshold uploaded with client side media
+	 * processing and fallback output: the attached file is the scaled image in the modern format, and the upload
+	 * is kept as the original image.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_picture_element_falls_back_to_the_format_of_the_upload_for_a_scaled_modern_image(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+			$metadata['sizes'][ $size_name ]['file']      = $size_data['sources'][ self::$mime_type ]['file'];
+			$metadata['sizes'][ $size_name ]['mime-type'] = self::$mime_type;
+		}
+		$metadata['original_image'] = wp_basename( $metadata['file'] );
+		$metadata['file']           = dirname( $metadata['file'] ) . '/' . $metadata['sources'][ self::$mime_type ]['file'];
+		update_attached_file( $attachment_id, $metadata['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+		$this->assertSame( self::$mime_type, webp_uploads_get_attachment_file_mime_type( $attachment_id ) );
+
+		$image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$this->assertStringNotContainsString( '.jpg', $image, 'The unfiltered image should be in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '.jpg', (string) $this->get_attribute_from_first_tag( $picture_markup, 'SOURCE', 'srcset' ) );
+		$this->assertSame( $metadata['original_image'], wp_basename( (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'src' ) ) );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['sizes']['medium']['sources']['image/jpeg']['file'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The fallback IMG srcset should only contain the format of the upload.' );
+	}
+
+	/**
+	 * Test that the image falls back to the format of the upload when only the scaled full size image is in the modern format.
+	 *
+	 * This is the shape of an attachment over the big image size threshold uploaded with client side media
+	 * processing and fallback output, for which every modern sub-size was discarded for being the larger file.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_image_falls_back_to_the_format_of_the_upload_when_only_the_scaled_image_is_modern(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			unset( $metadata['sizes'][ $size_name ]['sources'][ self::$mime_type ] );
+		}
+		$metadata['original_image'] = wp_basename( $metadata['file'] );
+		$metadata['file']           = dirname( $metadata['file'] ) . '/' . $metadata['sources'][ self::$mime_type ]['file'];
+		update_attached_file( $attachment_id, $metadata['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$image = wp_get_attachment_image( $attachment_id, 'large', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$this->assertStringContainsString( '.webp', (string) $this->get_attribute_from_first_tag( $image, 'IMG', 'srcset' ), 'The unfiltered srcset should list the scaled image in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '<picture', $markup, 'A single modern image does not make for a source.' );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['original_image'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The image should not list a modern image without a picture element.' );
+	}
+
+	/**
+	 * Gets an attribute from the first tag of the given name in the markup.
+	 *
+	 * @param string $markup    The markup.
+	 * @param string $tag_name  The tag name.
+	 * @param string $attribute The attribute name.
+	 * @return string|true|null The attribute value.
+	 */
+	private function get_attribute_from_first_tag( string $markup, string $tag_name, string $attribute ) {
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$processor->next_tag( $tag_name );
+		return $processor->get_attribute( $attribute );
+	}
+
+	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
