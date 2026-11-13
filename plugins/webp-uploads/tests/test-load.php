@@ -1196,10 +1196,20 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
 		$this->assertNull( webp_uploads_start_client_side_media_processing_request( null, $handler, $request ) );
 		$this->assertTrue( webp_uploads_is_client_side_media_processing() );
+		$this->assertSame( 0, has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_end_client_side_upload_processing' ), 'The upload is still to be processed when the attachment is created.' );
 
 		$response = new WP_REST_Response();
 		$this->assertSame( $response, webp_uploads_end_client_side_media_processing_request( $response ) );
 		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
+		$this->assertFalse( has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_end_client_side_upload_processing' ) );
+
+		// The sideload and finalize requests have no upload for the server to process.
+		$handler['callback'][1] = 'finalize_item';
+		webp_uploads_start_client_side_media_processing_request( null, $handler, $request );
+		$this->assertTrue( webp_uploads_is_client_side_media_processing() );
+		$this->assertFalse( has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_end_client_side_upload_processing' ) );
+		webp_uploads_end_client_side_media_processing_request( null );
+		$handler['callback'][1] = 'create_item';
 
 		// A request which is not part of the client side flow leaves the context untouched.
 		$request->set_body_params( array() );
@@ -1243,6 +1253,237 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertFalse( webp_uploads_is_client_side_media_processing() );
 
 		$this->assertSame( array( true, false ), $observed );
+	}
+
+	/**
+	 * Test that the output format mapping is withheld while the server processes an upload which keeps its fallback.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 * @covers ::webp_uploads_end_client_side_upload_processing
+	 */
+	public function test_it_should_not_map_the_upload_of_a_client_side_request_while_the_server_processes_it(): void {
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+		add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_end_client_side_upload_processing', 0 );
+
+		// Without fallback output the server converts the upload itself.
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/webp' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' )
+		);
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'The server should not convert an upload which is kept as the fallback.'
+		);
+
+		$metadata = array( 'file' => 'image.jpg' );
+		$this->assertSame( $metadata, apply_filters( 'wp_generate_attachment_metadata', $metadata, 0 ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$this->assertFalse( has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_end_client_side_upload_processing' ) );
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/webp' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'The browser should be told to encode the sub-sizes in the modern format once the upload is processed.'
+		);
+	}
+
+	/**
+	 * Skips the test when the REST API does not offer client side media processing, and enables it otherwise.
+	 */
+	private function enable_client_side_media_processing(): void {
+		// Client side media processing was added in WordPress 7.1.
+		if ( ! function_exists( 'wp_is_client_side_media_processing_enabled' ) ) {
+			$this->markTestSkipped( 'Client side media processing REST endpoints are not available.' );
+		}
+
+		add_filter( 'wp_client_side_media_processing_enabled', '__return_true' );
+
+		// Have the REST server register the sideload and finalize routes.
+		$GLOBALS['wp_rest_server'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// As in production, the larger of the two images is the one discarded.
+		remove_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
+	/**
+	 * Uploads an image the way the block editor does for client side media processing.
+	 *
+	 * @param string $file_name File name of an image in the test data.
+	 * @param string $mime_type Mime type of the image.
+	 * @return array<string, mixed> The response data of the created attachment.
+	 */
+	private function upload_from_browser( string $file_name, string $mime_type ): array {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', $mime_type );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=' . $file_name );
+		$request->set_param( 'generate_sub_sizes', false );
+		$request->set_body( (string) file_get_contents( TESTS_PLUGIN_DIR . '/tests/data/images/' . $file_name ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		return $response->get_data();
+	}
+
+	/**
+	 * Sideloads a WebP image for an attachment the way the block editor does for an image the browser generated.
+	 *
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $image_size    The image size the browser generated.
+	 * @param int    $width         Width of the image in pixels.
+	 * @param int    $height        Height of the image in pixels.
+	 * @return array<string, mixed> The sub-size data to finalize the upload with.
+	 */
+	private function sideload_from_browser( int $attachment_id, string $image_size, int $width, int $height ): array {
+		$original = (string) wp_get_original_image_path( $attachment_id );
+		$editor   = wp_get_image_editor( $original );
+		$this->assertNotWPError( $editor );
+		$editor->resize( $width, $height, true );
+		$editor->set_quality( 1 );
+		$saved = $editor->save( get_temp_dir() . wp_unique_id( 'browser-generated-' ) . '.webp', 'image/webp' );
+		$this->assertNotWPError( $saved );
+		$this->to_unlink[] = $saved['path'];
+
+		$suffix  = 'scaled' === $image_size ? 'scaled' : "{$width}x{$height}";
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/{$attachment_id}/sideload" );
+		$request->set_header( 'Content-Type', 'image/webp' );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=' . pathinfo( $original, PATHINFO_FILENAME ) . "-{$suffix}.webp" );
+		$request->set_param( 'image_size', $image_size );
+		$request->set_param( 'convert_format', false );
+		$request->set_body( (string) file_get_contents( $saved['path'] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		return $response->get_data();
+	}
+
+	/**
+	 * Finalizes an upload the way the block editor does once it sideloaded the images the browser generated.
+	 *
+	 * @param int                         $attachment_id The attachment ID.
+	 * @param array<array<string, mixed>> $sub_sizes     The sub-size data collected from the sideload requests.
+	 * @return array<string, mixed> The attachment metadata.
+	 */
+	private function finalize_from_browser( int $attachment_id, array $sub_sizes ): array {
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/{$attachment_id}/finalize" );
+		$request->set_param( 'sub_sizes', $sub_sizes );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		return (array) wp_get_attachment_metadata( $attachment_id );
+	}
+
+	/**
+	 * Test that a client side upload keeps the upload as the attached file and as the fallback of every sub-size.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 * @covers ::webp_uploads_end_client_side_upload_processing
+	 * @covers ::webp_uploads_create_sources_property
+	 *
+	 * @dataProvider data_provider_client_side_uploads
+	 *
+	 * @param string $file_name File name of an image in the test data.
+	 * @param string $mime_type Mime type of the image.
+	 */
+	public function test_it_should_keep_the_fallback_of_a_client_side_upload( string $file_name, string $mime_type ): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$attachment    = $this->upload_from_browser( $file_name, $mime_type );
+		$attachment_id = $attachment['id'];
+		$upload        = (string) get_attached_file( $attachment_id );
+		$directory     = dirname( $upload );
+
+		$this->assertSame( $mime_type, wp_check_filetype( $upload )['type'], 'The server should not convert the upload.' );
+		$this->assertArrayNotHasKey( 'original_image', (array) wp_get_attachment_metadata( $attachment_id ) );
+		$this->assertSame( 'image/webp', $attachment['image_output_format'], 'The browser should be told to encode the sub-sizes as WebP.' );
+
+		$sub_size = $this->sideload_from_browser( $attachment_id, 'medium', 300, 200 );
+		$metadata = $this->finalize_from_browser( $attachment_id, array( $sub_size ) );
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( $upload, get_attached_file( $attachment_id ) );
+		$this->assertSame( 'image/webp', $medium['mime-type'] );
+		$this->assertSame( $sub_size['file'], $medium['sources']['image/webp']['file'] );
+		$this->assertArrayHasKey( $mime_type, $medium['sources'], 'The fallback should be kept even though it is larger than the WebP.' );
+		$this->assertGreaterThan( $medium['sources']['image/webp']['filesize'], $medium['sources'][ $mime_type ]['filesize'] );
+		$this->assertFileExists( path_join( $directory, $medium['sources'][ $mime_type ]['file'] ) );
+	}
+
+	/**
+	 * Data provider for test_it_should_keep_the_fallback_of_a_client_side_upload().
+	 *
+	 * @return array<string, array{ string, string }>
+	 */
+	public function data_provider_client_side_uploads(): array {
+		return array(
+			'JPEG' => array( 'leaves.jpg', 'image/jpeg' ),
+			'PNG'  => array( 'dice.png', 'image/png' ),
+		);
+	}
+
+	/**
+	 * Test that a client side upload over the big image size threshold keeps its fallbacks.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_keep_the_fallbacks_of_a_scaled_client_side_upload(): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$attachment_id = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' )['id'];
+		$upload        = (string) get_attached_file( $attachment_id );
+		$directory     = dirname( $upload );
+		$scaled        = pathinfo( $upload, PATHINFO_FILENAME ) . '-scaled.webp';
+
+		// The server generates a WebP from the upload, as the browser has yet to supply the scaled image.
+		$metadata    = (array) wp_get_attachment_metadata( $attachment_id );
+		$server_webp = path_join( $directory, $metadata['sources']['image/webp']['file'] );
+		$this->assertFileExists( $server_webp );
+
+		$metadata = $this->finalize_from_browser(
+			$attachment_id,
+			array(
+				$this->sideload_from_browser( $attachment_id, 'scaled', 600, 400 ),
+				$this->sideload_from_browser( $attachment_id, 'medium', 300, 200 ),
+			)
+		);
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( $scaled, wp_basename( (string) get_attached_file( $attachment_id ) ) );
+		$this->assertSame( wp_basename( $upload ), $metadata['original_image'] );
+
+		$this->assertSame( $scaled, $metadata['sources']['image/webp']['file'], 'The scaled image should replace the WebP the server generated.' );
+		$this->assertFileDoesNotExist( $server_webp );
+		$this->assertSame( wp_basename( $upload ), $metadata['sources']['image/jpeg']['file'], 'The full size should fall back to the upload.' );
+		$this->assertFileExists( $upload );
+
+		$this->assertSame( 'image/webp', $medium['mime-type'] );
+		$this->assertArrayHasKey( 'image/webp', $medium['sources'] );
+		$this->assertArrayHasKey( 'image/jpeg', $medium['sources'], 'The fallback should be kept even though it is larger than the WebP.' );
+		$this->assertGreaterThan( $medium['sources']['image/webp']['filesize'], $medium['sources']['image/jpeg']['filesize'] );
+		$this->assertFileExists( path_join( $directory, $medium['sources']['image/jpeg']['file'] ) );
+	}
+
+	/**
+	 * Test that the server converts a client side upload when there is no fallback to keep.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_convert_a_client_side_upload_without_fallback(): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '' );
+
+		$attachment_id = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' )['id'];
+		$metadata      = (array) wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertSame( 'image/webp', wp_check_filetype( (string) get_attached_file( $attachment_id ) )['type'] );
+		$this->assertSame( 'image/jpeg', wp_check_filetype( $metadata['original_image'] )['type'] );
 	}
 
 	/**
