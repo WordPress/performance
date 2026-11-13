@@ -42,6 +42,10 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-ser
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/load.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/defaults.php';
 
+// Load performance marks API.
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/performance-marks/class-perflab-performance-marks.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/performance-marks/load.php';
+
 // Load site health checks.
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
 
