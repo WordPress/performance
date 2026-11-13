@@ -1335,6 +1335,68 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the post featured image block in a two-column layout renders the correct sizes attribute.
+	 *
+	 * @covers ::auto_sizes_filter_image_tag
+	 * @covers ::auto_sizes_filter_render_block_context
+	 */
+	public function test_post_featured_image_block_in_two_column_layout_renders_correct_sizes_attribute(): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column -->
+			<div class="wp-block-column">
+			<!-- wp:post-featured-image /-->
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column -->
+			<div class="wp-block-column"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
+	 * Test that the post featured image block in a column with explicit percentage width renders the correct sizes attribute.
+	 *
+	 * @covers ::auto_sizes_filter_image_tag
+	 * @covers ::auto_sizes_filter_render_block_context
+	 */
+	public function test_post_featured_image_block_in_column_with_explicit_percentage_width(): void {
+		update_post_meta( self::$post_id, '_thumbnail_id', self::$image_id );
+
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column {"width":"33.33%"} -->
+			<div class="wp-block-column" style="flex-basis:33.33%">
+			<!-- wp:post-featured-image /-->
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column {"width":"66.67%"} -->
+			<div class="wp-block-column" style="flex-basis:66.67%"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		global $post;
+		$post = get_post( self::$post_id );
+		setup_postdata( $post );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 206px) 100vw, 206px" ', $result );
+
+		wp_reset_postdata();
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
