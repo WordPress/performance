@@ -45,6 +45,9 @@ async function saveSettings( admin, page, fallback ) {
 	await page
 		.locator( '#perflab_generate_webp_and_jpeg' )
 		.setChecked( fallback );
+	if ( fallback ) {
+		await page.locator( '#webp_uploads_use_picture_element' ).check();
+	}
 	await page.locator( '#submit' ).click();
 	await expect(
 		page.locator( '#setting-error-settings_updated' )
@@ -168,6 +171,32 @@ async function uploadFromImageBlock(
 }
 
 /**
+ * Asserts that the published image offers AVIF with a fallback which is free of AVIF.
+ *
+ * @param {Editor} editor   Editor utils.
+ * @param {Page}   page     Playwright page.
+ * @param {string} mimeType The mime type to fall back to.
+ */
+async function expectPictureWithFallback( editor, page, mimeType ) {
+	const postId = await editor.publishPost();
+	await page.goto( `/?p=${ postId }` );
+
+	const picture = page.locator( '.wp-block-image picture' );
+	await expect(
+		picture.locator( 'source[type="image/avif"]' )
+	).toHaveAttribute( 'srcset', /\.avif/ );
+
+	const extension = 'image/png' === mimeType ? /\.png$/ : /\.jpe?g$/;
+	const img = picture.locator( 'img' );
+	await expect( img ).toHaveAttribute( 'src', extension );
+
+	const srcset = ( await img.getAttribute( 'srcset' ) ) ?? '';
+	for ( const candidate of srcset.split( ', ' ).filter( Boolean ) ) {
+		expect( candidate.split( ' ' )[ 0 ] ).toMatch( extension );
+	}
+}
+
+/**
  * Gets the sub-sizes of an attachment, leaving out the full size which the REST API lists along with them.
  *
  * @param {Attachment} attachment The attachment.
@@ -267,6 +296,8 @@ test.describe( 'client side media processing', () => {
 						);
 					}
 				}
+
+				await expectPictureWithFallback( editor, page, mimeType );
 			} );
 		} );
 
@@ -310,6 +341,8 @@ test.describe( 'client side media processing', () => {
 					'image/jpeg'
 				);
 			}
+
+			await expectPictureWithFallback( editor, page, 'image/jpeg' );
 		} );
 	} );
 
