@@ -112,6 +112,17 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	}
 	$sub_size_mime_types = array_keys( $mime_type_data );
 
+	/*
+	 * For an upload over the big image size threshold which the browser processed, the attached file is the
+	 * scaled image in the modern format, and the fallbacks are in the format of the upload.
+	 */
+	if ( isset( $image_meta['original_image'] ) && in_array( $original_file_mime_type, array( 'image/avif', 'image/webp' ), true ) ) {
+		$upload_mime_type = wp_check_filetype( $image_meta['original_image'] )['type'];
+		if ( is_string( $upload_mime_type ) && in_array( $upload_mime_type, $sub_size_mime_types, true ) ) {
+			$original_file_mime_type = $upload_mime_type;
+		}
+	}
+
 	// If original image type fallback is not available, don't wrap in picture element.
 	if ( ! in_array( $original_file_mime_type, $sub_size_mime_types, true ) ) {
 		return $image;
@@ -227,17 +238,24 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		 * element. When the image itself is already in a modern format, as is the case when the browser generated
 		 * the sub-sizes (see webp_uploads_is_client_side_media_processing()), point it at the original format instead.
 		 */
+		$is_fallback = static function ( string $url ) use ( $original_file_mime_type ): bool {
+			return wp_check_filetype( (string) strtok( $url, ' ' ) )['type'] === $original_file_mime_type;
+		};
+
 		$img_src = $marker->get_attribute( 'src' );
-		if ( is_string( $img_src ) && wp_check_filetype( $img_src )['type'] !== $original_file_mime_type ) {
+		if ( is_string( $img_src ) && ! $is_fallback( $img_src ) ) {
 			$fallback_src = webp_uploads_get_mime_type_image( $attachment_id, $img_src, $original_file_mime_type );
 			if ( is_string( $fallback_src ) ) {
 				$marker->set_attribute( 'src', $fallback_src );
-				if ( null !== $srcset && null !== $sizes ) {
-					$fallback_srcset = $get_srcset_for_mime_type( $original_file_mime_type );
-					if ( is_string( $fallback_srcset ) ) {
-						$marker->set_attribute( 'srcset', $fallback_srcset );
-					}
-				}
+			}
+		}
+
+		// The image itself may be in the original format while some of its sub-sizes are not.
+		$candidates = is_string( $srcset ) ? explode( ', ', $srcset ) : array();
+		if ( null !== $sizes && count( array_filter( $candidates, $is_fallback ) ) < count( $candidates ) ) {
+			$fallback_srcset = $get_srcset_for_mime_type( $original_file_mime_type );
+			if ( is_string( $fallback_srcset ) ) {
+				$marker->set_attribute( 'srcset', $fallback_srcset );
 			}
 		}
 
