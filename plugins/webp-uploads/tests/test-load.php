@@ -1014,7 +1014,103 @@ class Test_WebP_Uploads_Load extends TestCase {
 		global $wp_version;
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
+		$this->assertSame( 70, webp_uploads_modify_webp_quality( 82, 'image/avif' ), 'AVIF image quality should always be 70.' );
+		$this->assertSame( 70, webp_uploads_modify_webp_quality( 90, 'image/avif' ), 'AVIF image quality should always be 70.' );
 		$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
+	}
+
+	/**
+	 * Test the AVIF quality with and without the plugin quality filter for each image editor.
+	 *
+	 * @dataProvider data_provider_image_editors
+	 *
+	 * @covers ::webp_uploads_modify_webp_quality
+	 *
+	 * @param string $editor The image editor class name.
+	 */
+	public function test_it_should_set_avif_quality_with_image_conversion( string $editor ): void {
+		add_filter(
+			'wp_image_editors',
+			static function () use ( $editor ) {
+				return array( $editor );
+			}
+		);
+
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) || ( WP_Image_Editor_Imagick::class === $editor && ! $this->check_avif_encoding_support() ) ) {
+			$this->markTestSkipped( "$editor does not support AVIF encoding." );
+		}
+
+		$image = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$this->assertNotWPError( $image );
+		$with_filter = $image->save( $this->temp_filename(), 'image/avif' );
+		$this->assertNotWPError( $with_filter );
+		$this->to_unlink[] = $with_filter['path'];
+		$this->assertSame( 'image/avif', $with_filter['mime-type'] );
+		$this->assertSame( 70, $image->get_quality(), 'Output image format is AVIF. Quality setting for it should be 70.' );
+
+		remove_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality' );
+
+		$image = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$this->assertNotWPError( $image );
+		$without_filter = $image->save( $this->temp_filename(), 'image/avif' );
+		$this->assertNotWPError( $without_filter );
+		$this->to_unlink[] = $without_filter['path'];
+		$this->assertSame( 82, $image->get_quality(), 'Without the plugin filter, AVIF quality should be the WordPress default of 82.' );
+
+		$this->assertLessThan( $without_filter['filesize'], $with_filter['filesize'], 'AVIF at quality 70 should be smaller than AVIF at quality 82.' );
+	}
+
+	/**
+	 * Test that AVIF images created with GD are not discarded as larger than the JPEG fallback.
+	 *
+	 * Imagick is not tested here, as its AVIF file size depends on the libaom version on the server.
+	 * With libaom 2.0.2 or older, AVIF is larger than JPEG at any quality.
+	 *
+	 * @covers ::webp_uploads_modify_webp_quality
+	 * @covers ::webp_uploads_should_discard_additional_image_file
+	 */
+	public function test_it_should_create_avif_smaller_than_jpeg_fallback_for_all_sizes_with_gd(): void {
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( WP_Image_Editor_GD::class );
+			}
+		);
+
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'GD does not support AVIF encoding.' );
+		}
+
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+		$this->set_image_output_type( 'avif' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/avif' );
+		$this->assertLessThan( $metadata['sources']['image/jpeg']['filesize'], $metadata['sources']['image/avif']['filesize'], 'The full size AVIF image should be smaller than the JPEG fallback.' );
+		$this->assertNotSame( array(), $metadata['sizes'] );
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/avif', "The AVIF $size_name image should not be discarded as larger than the JPEG fallback." );
+			$this->assertLessThan( $properties['sources']['image/jpeg']['filesize'], $properties['sources']['image/avif']['filesize'], "The AVIF $size_name image should be smaller than the JPEG fallback." );
+		}
+
+		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
+	 * Data provider for tests that run with each image editor.
+	 *
+	 * @return array<string, array{ class-string<WP_Image_Editor> }> The image editor classes.
+	 */
+	public function data_provider_image_editors(): array {
+		return array(
+			'GD'      => array( WP_Image_Editor_GD::class ),
+			'Imagick' => array( WP_Image_Editor_Imagick::class ),
+		);
 	}
 
 	/**
