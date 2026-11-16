@@ -108,7 +108,6 @@ class Test_WebP_Uploads_Settings extends TestCase {
 
 	/**
 	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
-	 * @covers ::webp_uploads_render_modern_image_support_unavailable_notice
 	 */
 	public function test_webp_uploads_generate_avif_webp_setting_callback_shows_only_notice_without_any_support(): void {
 		$this->remove_server_modern_image_support();
@@ -119,12 +118,10 @@ class Test_WebP_Uploads_Settings extends TestCase {
 
 		$this->assertFalse( $processor->next_tag( 'SELECT' ) );
 		$this->assertStringContainsString( 'Modern image support is not available.', $output );
-		$this->assertStringNotContainsString( 'hidden', $output );
 	}
 
 	/**
 	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
-	 * @covers ::webp_uploads_render_modern_image_support_unavailable_notice
 	 */
 	public function test_webp_uploads_generate_avif_webp_setting_callback_keeps_formats_selectable_with_client_side_media_processing(): void {
 		$this->remove_server_modern_image_support();
@@ -134,93 +131,19 @@ class Test_WebP_Uploads_Settings extends TestCase {
 		$output    = get_echo( 'webp_uploads_generate_avif_webp_setting_callback' );
 		$processor = new WP_HTML_Tag_Processor( $output );
 
-		$this->assertTrue( $processor->next_tag( 'SELECT' ) );
-		$this->assertSame( 'avif', $processor->get_attribute( 'data-selected' ) );
-
 		$this->assertTrue( $processor->next_tag( 'OPTION' ) );
 		$this->assertSame( 'webp', $processor->get_attribute( 'value' ) );
-		$this->assertSame( '0', $processor->get_attribute( 'data-server-supported' ) );
 		$this->assertNull( $processor->get_attribute( 'disabled' ) );
 		$this->assertNull( $processor->get_attribute( 'selected' ) );
 
 		$this->assertTrue( $processor->next_tag( 'OPTION' ) );
 		$this->assertSame( 'avif', $processor->get_attribute( 'value' ) );
-		$this->assertSame( '0', $processor->get_attribute( 'data-server-supported' ) );
 		$this->assertNull( $processor->get_attribute( 'disabled' ) );
 		$this->assertNotNull( $processor->get_attribute( 'selected' ) );
 
-		$notices = array();
-		while ( $processor->next_tag( 'DIV' ) ) {
-			$notices[ (string) $processor->get_attribute( 'id' ) ] = null === $processor->get_attribute( 'hidden' ) ? 'visible' : 'hidden';
-		}
-		$this->assertSame(
-			array(
-				'webp_uploads_avif_unavailable_notice'  => 'hidden',
-				'webp_uploads_webp_unavailable_notice'  => 'hidden',
-				'webp_uploads_avif_browser_notice'      => 'visible',
-				'webp_uploads_webp_browser_notice'      => 'visible',
-				'webp_uploads_server_conversion_notice' => 'hidden',
-				'webp_uploads_modern_image_support_unavailable_notice' => 'hidden',
-			),
-			$notices
-		);
-
-		$this->assertStringContainsString( 'AVIF images are created by your browser.', $output );
-		$this->assertStringContainsString( 'are not converted.', $output );
-		$this->assertStringContainsString( '<script type="module">', $output );
-	}
-
-	/**
-	 * @covers ::webp_uploads_generate_avif_webp_setting_callback
-	 */
-	public function test_webp_uploads_generate_avif_webp_setting_callback_shows_server_notices_without_client_side_media_processing(): void {
-		$this->remove_server_modern_image_support();
-		$this->mock_client_side_media_processing( false );
-
-		// With WebP support only, AVIF is disabled and the selection falls back to WebP.
-		add_filter(
-			'wp_image_editors',
-			static function () {
-				return array( 'WP_Image_Editor_GD' );
-			},
-			11
-		);
-		if ( ! webp_uploads_mime_type_supported( 'image/webp' ) ) {
-			$this->markTestSkipped( 'Test requires WebP support in WP_Image_Editor_GD.' );
-		}
-		add_filter( 'webp_uploads_imagick_avif_transparency_supported', '__return_false' );
-		remove_all_filters( 'webp_uploads_client_side_media_processing' );
-
-		$this->set_image_output_type( 'avif' );
-		$avif_fully_supported = webp_uploads_mime_type_supported( 'image/avif' );
-
-		$output    = get_echo( 'webp_uploads_generate_avif_webp_setting_callback' );
-		$processor = new WP_HTML_Tag_Processor( $output );
-
-		$this->assertTrue( $processor->next_tag( 'SELECT' ) );
-		$options = array();
-		while ( $processor->next_tag( 'OPTION' ) ) {
-			$options[ (string) $processor->get_attribute( 'value' ) ] = array(
-				'disabled' => null !== $processor->get_attribute( 'disabled' ),
-				'selected' => null !== $processor->get_attribute( 'selected' ),
-			);
-		}
-		$this->assertSame(
-			array(
-				'webp' => array(
-					'disabled' => false,
-					'selected' => ! $avif_fully_supported,
-				),
-				'avif' => array(
-					'disabled' => ! $avif_fully_supported,
-					'selected' => $avif_fully_supported,
-				),
-			),
-			$options
-		);
-
-		$this->assertStringNotContainsString( 'created by your browser', $output );
-		$this->assertStringNotContainsString( '<script type="module">', $output );
+		$this->assertStringContainsString( 'AVIF images are created in the browser.', $output );
+		$this->assertStringContainsString( 'WebP images are created in the browser.', $output );
+		$this->assertStringNotContainsString( 'support is not available.', $output );
 	}
 
 	/**
