@@ -39,6 +39,55 @@ class Test_Server_Timing_Load extends WP_UnitTestCase {
 		$this->assertSame( PHP_INT_MIN, has_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ) ), 'template_redirect action not added' );
 	}
 
+	/**
+	 * @covers Perflab_Server_Timing::add_hooks
+	 */
+	public function test_perflab_server_timing_admin_ajax_without_output_buffering(): void {
+		remove_all_actions( 'admin_init' );
+		remove_all_actions( 'template_redirect' );
+		remove_all_filters( 'template_include' );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		$server_timing = perflab_server_timing();
+		$this->assertFalse( $server_timing->use_output_buffer() );
+		$server_timing->add_hooks();
+		$this->assertSame( PHP_INT_MAX, has_action( 'admin_init', array( $server_timing, 'send_header' ) ), 'admin_init send_header action not added' );
+		$this->assertFalse( has_action( 'admin_init', array( $server_timing, 'start_output_buffer' ) ), 'admin_init start_output_buffer action added' );
+		$this->assertFalse( has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter added' );
+		$this->assertFalse( has_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ) ), 'template_redirect action added' );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing::add_hooks
+	 */
+	public function test_perflab_server_timing_admin_ajax_with_output_buffering(): void {
+		remove_all_actions( 'admin_init' );
+		remove_all_actions( 'template_redirect' );
+		remove_all_filters( 'template_include' );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
+
+		$server_timing = perflab_server_timing();
+		$server_timing->add_hooks();
+		$this->assertSame( PHP_INT_MIN, has_action( 'admin_init', array( $server_timing, 'start_output_buffer' ) ), 'admin_init start_output_buffer action not added' );
+		$this->assertFalse( has_action( 'admin_init', array( $server_timing, 'send_header' ) ), 'admin_init send_header action added' );
+		$this->assertFalse( has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter added' );
+		$this->assertFalse( has_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ) ), 'template_redirect action added' );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing::add_hooks
+	 */
+	public function test_perflab_server_timing_non_ajax_does_not_hook_admin_init(): void {
+		remove_all_actions( 'admin_init' );
+		add_filter( 'wp_doing_ajax', '__return_false' );
+
+		$server_timing = perflab_server_timing();
+		$server_timing->add_hooks();
+		$this->assertFalse( has_action( 'admin_init', array( $server_timing, 'send_header' ) ), 'admin_init send_header action added' );
+		$this->assertFalse( has_action( 'admin_init', array( $server_timing, 'start_output_buffer' ) ), 'admin_init start_output_buffer action added' );
+	}
+
 	public function test_perflab_server_timing_register_metric(): void {
 		$this->assertFalse( perflab_server_timing()->has_registered_metric( 'test-metric' ) );
 
