@@ -116,11 +116,9 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * For an upload over the big image size threshold which the browser processed, the attached file is the
 	 * scaled image in the modern format, and the fallbacks are in the format of the upload.
 	 */
-	if ( isset( $image_meta['original_image'] ) && in_array( $original_file_mime_type, array( 'image/avif', 'image/webp' ), true ) ) {
-		$upload_mime_type = wp_check_filetype( $image_meta['original_image'] )['type'];
-		if ( is_string( $upload_mime_type ) && in_array( $upload_mime_type, $sub_size_mime_types, true ) ) {
-			$original_file_mime_type = $upload_mime_type;
-		}
+	$upload_mime_type = webp_uploads_get_original_image_mime_type( $image_meta );
+	if ( null !== $upload_mime_type && in_array( $upload_mime_type, $sub_size_mime_types, true ) ) {
+		$original_file_mime_type = $upload_mime_type;
 	}
 
 	// If original image type fallback is not available, don't wrap in picture element.

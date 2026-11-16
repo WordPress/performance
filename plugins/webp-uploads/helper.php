@@ -410,40 +410,19 @@ function webp_uploads_is_client_side_media_processing_enabled(): bool {
 }
 
 /**
- * Checks whether a REST request is part of the client side media processing flow.
- *
- * This is the case for an attachment creation request in which the client opts out of server side sub-size
- * generation, and for the sideload and finalize requests that supply and record the client generated images.
+ * Gets the mime type of the original image of an attachment, which is the upload when a scaled image replaced it.
  *
  * @since n.e.x.t
  *
- * @phpstan-param WP_REST_Request<array<string, mixed>> $request
- *
- * @param WP_REST_Request $request The REST request.
- * @param mixed           $handler The route handler used for the request.
- * @return bool True if the browser supplies the encoded images for the request, false otherwise.
+ * @param array<string, mixed> $metadata The attachment metadata.
+ * @return string|null The mime type, or null if there is no original image or its mime type is unknown.
  */
-function webp_uploads_is_client_side_media_processing_request( WP_REST_Request $request, $handler ): bool {
-	if (
-		! is_array( $handler ) ||
-		! isset( $handler['callback'] ) ||
-		! is_array( $handler['callback'] ) ||
-		! isset( $handler['callback'][0], $handler['callback'][1] ) ||
-		! $handler['callback'][0] instanceof WP_REST_Attachments_Controller ||
-		! is_string( $handler['callback'][1] )
-	) {
-		return false;
+function webp_uploads_get_original_image_mime_type( array $metadata ): ?string {
+	if ( ! isset( $metadata['original_image'] ) || ! is_string( $metadata['original_image'] ) ) {
+		return null;
 	}
-
-	switch ( $handler['callback'][1] ) {
-		case 'create_item':
-			return false === $request->get_param( 'generate_sub_sizes' );
-		case 'sideload_item':
-		case 'finalize_item':
-			return true;
-	}
-
-	return false;
+	$mime_type = wp_check_filetype( $metadata['original_image'] )['type'];
+	return is_string( $mime_type ) ? $mime_type : null;
 }
 
 /**
