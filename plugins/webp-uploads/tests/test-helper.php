@@ -498,6 +498,58 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Keeps the AVIF output format for client side media processing when the server cannot encode AVIF.
+	 *
+	 * @covers ::webp_uploads_get_upload_image_mime_transforms
+	 */
+	public function test_it_should_keep_avif_for_client_side_media_processing_when_server_does_not_support_avif(): void {
+		$this->set_image_output_type( 'avif' );
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+			}
+		);
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/webp' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The server side flow should fall back to WebP when AVIF is not supported.'
+		);
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/avif' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/avif' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF regardless of the server support.'
+		);
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+				'image/png'  => array( 'image/png', 'image/avif' ),
+				'image/avif' => array( 'image/avif', 'image/jpeg' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF alongside the fallback format.'
+		);
+	}
+
+	/**
 	 * Returns transforms array with fallback to original mime with invalid transforms array.
 	 */
 	public function test_it_should_return_fallback_transforms_when_overwritten_invalid_transforms(): void {
