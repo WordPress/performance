@@ -549,6 +549,7 @@ class Test_WebP_Uploads_Helper extends TestCase {
 					'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
 					'image/png'  => array( 'image/png', 'image/avif' ),
 					'image/avif' => array( 'image/avif', 'image/jpeg' ),
+					'image/webp' => array( 'image/webp', 'image/avif' ),
 				),
 				$transforms
 			);

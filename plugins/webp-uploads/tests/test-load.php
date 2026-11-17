@@ -1154,6 +1154,37 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Create AVIF and keep WebP for WebP uploads when fallback output is enabled.
+	 */
+	public function test_it_should_create_avif_and_keep_webp_for_webp_images_if_generate_webp_and_jpeg_set(): void {
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is not supported.' );
+		}
+
+		$this->set_image_output_type( 'avif' );
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp' );
+
+		$this->assertSame( 'image/webp', get_post_mime_type( $attachment_id ) );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, 'image/avif' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/avif' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+		}
+		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
 	 * Tests that the `webp_uploads_convert_palette_png_to_truecolor` function is hooked to the upload filters.
 	 */
 	public function test_webp_uploads_convert_palette_png_to_truecolor_hooks(): void {
