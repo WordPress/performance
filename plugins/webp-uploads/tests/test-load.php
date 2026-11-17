@@ -1199,28 +1199,30 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Sideloads a WebP image for an attachment the way the block editor does for an image the browser generated.
+	 * Sideloads a modern format image for an attachment the way the block editor does for an image the browser generated.
 	 *
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $image_size    The image size the browser generated.
 	 * @param int    $width         Width of the image in pixels.
 	 * @param int    $height        Height of the image in pixels.
+	 * @param string $mime_type     Mime type the browser encoded the image in. Default 'image/webp'.
 	 * @return array<string, mixed> The sub-size data to finalize the upload with.
 	 */
-	private function sideload_from_browser( int $attachment_id, string $image_size, int $width, int $height ): array {
+	private function sideload_from_browser( int $attachment_id, string $image_size, int $width, int $height, string $mime_type = 'image/webp' ): array {
 		$original = (string) wp_get_original_image_path( $attachment_id );
 		$editor   = wp_get_image_editor( $original );
 		$this->assertNotWPError( $editor );
 		$editor->resize( $width, $height, true );
 		$editor->set_quality( 1 );
-		$saved = $editor->save( get_temp_dir() . wp_unique_id( 'browser-generated-' ) . '.webp', 'image/webp' );
+		$extension = wp_get_default_extension_for_mime_type( $mime_type );
+		$saved     = $editor->save( get_temp_dir() . wp_unique_id( 'browser-generated-' ) . '.' . $extension, $mime_type );
 		$this->assertNotWPError( $saved );
 		$this->to_unlink[] = $saved['path'];
 
 		$suffix  = 'scaled' === $image_size ? 'scaled' : "{$width}x{$height}";
 		$request = new WP_REST_Request( 'POST', "/wp/v2/media/{$attachment_id}/sideload" );
-		$request->set_header( 'Content-Type', 'image/webp' );
-		$request->set_header( 'Content-Disposition', 'attachment; filename=' . pathinfo( $original, PATHINFO_FILENAME ) . "-{$suffix}.webp" );
+		$request->set_header( 'Content-Type', $mime_type );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=' . pathinfo( $original, PATHINFO_FILENAME ) . "-{$suffix}.{$extension}" );
 		$request->set_param( 'image_size', $image_size );
 		$request->set_param( 'convert_format', false );
 		$request->set_body( (string) file_get_contents( $saved['path'] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -1359,6 +1361,50 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertSame( wp_basename( (string) get_attached_file( $attachment_id ) ), $metadata['sources']['image/webp']['file'] );
 		$this->assertNotSame( $metadata['original_image'], $metadata['sources']['image/webp']['file'] );
 		$this->assertFileExists( $upload, 'The upload should be kept as the original image.' );
+	}
+
+	/**
+	 * Test that a client side upload gets AVIF sub-sizes from the browser when the server cannot encode AVIF.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 * @covers ::webp_uploads_start_client_side_media_processing_request
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_use_browser_avif_when_the_server_cannot_encode_avif(): void {
+		// The AVIF the browser would send is made with the real editor, so it needs AVIF encoding support.
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is needed to create the browser generated image.' );
+		}
+
+		$this->enable_client_side_media_processing();
+		$this->set_image_output_type( 'avif' );
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		// The server side AVIF encoder ignores the quality setting, so keep the AVIF even when it is the larger image.
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+
+		$no_modern_editor = static function (): array {
+			return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+		};
+		add_filter( 'wp_image_editors', $no_modern_editor );
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+
+		$attachment    = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' );
+		$attachment_id = $attachment['id'];
+
+		$this->assertSame( 'image/avif', $attachment['image_output_format'], 'The browser should be told to encode AVIF even though the server cannot.' );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing(), 'The client side context should end with the request.' );
+
+		// Stand in for the browser's encoder, then finalize on the server without AVIF support again.
+		remove_filter( 'wp_image_editors', $no_modern_editor );
+		$sub_size = $this->sideload_from_browser( $attachment_id, 'medium', 300, 200, 'image/avif' );
+		add_filter( 'wp_image_editors', $no_modern_editor );
+
+		$medium = $this->finalize_from_browser( $attachment_id, array( $sub_size ) )['sizes']['medium'];
+
+		$this->assertSame( 'image/jpeg', wp_check_filetype( (string) get_attached_file( $attachment_id ) )['type'], 'The server should not convert the upload.' );
+		$this->assertSame( $sub_size['file'], $medium['sources']['image/avif']['file'], 'The browser generated AVIF should be kept.' );
+		$this->assertArrayHasKey( 'image/jpeg', $medium['sources'], 'The server should still generate the JPEG fallback.' );
 	}
 
 	/**
