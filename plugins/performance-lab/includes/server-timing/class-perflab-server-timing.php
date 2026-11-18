@@ -240,10 +240,22 @@ class Perflab_Server_Timing {
 	 * assured that other plugins' output buffer callbacks will run before the Server-Timing one that sends the
 	 * Server-Timing header.
 	 *
+	 * For admin-ajax requests, the {@see 'admin_init'} action is used instead of the template hooks, since it is the
+	 * last action that fires before the `wp_ajax_{$action}` handler runs, and template hooks never fire there. When
+	 * output buffering is enabled, the header is sent from the buffer callback once the AJAX handler has finished
+	 * (e.g. via `wp_send_json()` or `wp_die()`), so the handler execution time can be measured as well.
+	 *
 	 * @since 3.2.0
+	 * @since n.e.x.t Added support for admin-ajax requests.
 	 */
 	public function add_hooks(): void {
-		if ( $this->use_output_buffer() ) {
+		if ( wp_doing_ajax() ) {
+			if ( $this->use_output_buffer() ) {
+				add_action( 'admin_init', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
+			} else {
+				add_action( 'admin_init', array( $this, 'send_header' ), PHP_INT_MAX );
+			}
+		} elseif ( $this->use_output_buffer() ) {
 			add_action( 'template_redirect', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
 		} else {
 			add_filter( 'template_include', array( $this, 'on_template_include' ), PHP_INT_MAX );

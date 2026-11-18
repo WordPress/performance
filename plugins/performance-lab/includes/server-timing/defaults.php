@@ -120,6 +120,19 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 		},
 		PHP_INT_MAX
 	);
+
+	// For admin-ajax requests, 'admin_init' is the last action before the AJAX handler runs, so it serves as the
+	// equivalent of 'template_include' when output buffering is used.
+	add_action(
+		'admin_init',
+		static function () use ( $calculate_before_template_metrics ): void {
+			if ( wp_doing_ajax() && perflab_server_timing_use_output_buffer() ) {
+				$calculate_before_template_metrics();
+			}
+		},
+		PHP_INT_MAX
+	);
+
 	add_action(
 		'perflab_server_timing_send_header',
 		static function () use ( $calculate_before_template_metrics ): void {
@@ -139,7 +152,10 @@ perflab_register_default_server_timing_before_template_metrics();
  * They will only be registered if the Server-Timing API is configured to use an
  * output buffer for the site's template.
  *
+ * For admin-ajax requests, the 'template' metric measures the execution of the AJAX handler instead.
+ *
  * @since 1.8.0
+ * @since n.e.x.t Added support for admin-ajax requests.
  */
 function perflab_register_default_server_timing_template_metrics(): void {
 	// Template-related metrics can only be recorded if output buffering is used.
@@ -147,22 +163,36 @@ function perflab_register_default_server_timing_template_metrics(): void {
 		return;
 	}
 
+	$register_template_metric = static function (): void {
+		// WordPress execution while serving the template (or the AJAX handler).
+		perflab_server_timing_register_metric(
+			'template',
+			array(
+				'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
+					$metric->measure_before();
+					add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
+				},
+				'access_cap'       => 'exist',
+			)
+		);
+	};
+
 	add_filter(
 		'template_include',
-		static function ( $passthrough = null ) {
-			// WordPress execution while serving the template.
-			perflab_server_timing_register_metric(
-				'template',
-				array(
-					'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
-						$metric->measure_before();
-						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
-					},
-					'access_cap'       => 'exist',
-				)
-			);
-
+		static function ( $passthrough = null ) use ( $register_template_metric ) {
+			$register_template_metric();
 			return $passthrough;
+		},
+		PHP_INT_MAX
+	);
+
+	// For admin-ajax requests, 'admin_init' is the last action before the AJAX handler runs.
+	add_action(
+		'admin_init',
+		static function () use ( $register_template_metric ): void {
+			if ( wp_doing_ajax() ) {
+				$register_template_metric();
+			}
 		},
 		PHP_INT_MAX
 	);
