@@ -15,6 +15,7 @@ export const name = 'Embed Optimizer';
  * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
  * @typedef {import("../optimization-detective/types.ts").GetElementDataFunction} GetElementDataFunction
  * @typedef {import("../optimization-detective/types.ts").ExtendElementDataFunction} ExtendElementDataFunction
+ * @typedef {import("../optimization-detective/types.ts").GetElementXPathFunction} GetElementXPathFunction
  * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
  * @typedef {import("../optimization-detective/types.ts").LogFunction} LogFunction
  */
@@ -30,10 +31,11 @@ export async function initialize( {
 	error,
 	getElementData,
 	extendElementData,
+	getElementXPath,
 } ) {
 	/** @type NodeListOf<HTMLDivElement> */
 	const embedWrappers = document.querySelectorAll(
-		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
+		'.wp-block-embed > .wp-block-embed__wrapper[data-od-id]'
 	);
 
 	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
@@ -41,6 +43,7 @@ export async function initialize( {
 			embedWrapper,
 			extendElementData,
 			getElementData,
+			getElementXPath,
 			log,
 			error
 		);
@@ -53,6 +56,7 @@ export async function initialize( {
  * @param {HTMLDivElement}            embedWrapper      - Embed wrapper DIV.
  * @param {ExtendElementDataFunction} extendElementData - Function to extend element data with.
  * @param {GetElementDataFunction}    getElementData    - Function to get element data.
+ * @param {GetElementXPathFunction}   getElementXPath   - Function to get the XPath for an element.
  * @param {LogFunction}               log               - The function to call with log messages.
  * @param {LogFunction}               error             - The function to call with error messages.
  */
@@ -60,12 +64,13 @@ function monitorEmbedWrapperForResizes(
 	embedWrapper,
 	extendElementData,
 	getElementData,
+	getElementXPath,
 	log,
 	error
 ) {
-	const xpath = embedWrapper.dataset.odXpath;
+	const xpath = getElementXPath( embedWrapper );
 	if ( ! xpath ) {
-		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
+		throw new Error( 'Embed wrapper missing data-od-id attribute.' );
 	}
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
