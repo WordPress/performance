@@ -29,7 +29,7 @@ The other major feature in Embed Optimizer enabled by Optimization Detective is 
 
 Since Optimization Detective relies on page visits to learn how the page is laid out, you’ll need to wait until you have visits from a mobile and desktop device to start seeing optimizations applied. Also, note that Optimization Detective does not apply optimizations by default for logged-in admin users.
 
-Please note that the optimizations are intended to apply to Embed blocks. So if you do not see optimizations applied, make sure that your embeds are not inside a Classic Block.
+Embeds added via the Embed block, the Classic block, or the Classic Editor (auto-embedded URLs and the `[embed]` shortcode) are all supported.
 
 Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
