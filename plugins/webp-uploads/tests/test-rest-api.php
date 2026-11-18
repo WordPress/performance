@@ -256,4 +256,40 @@ class Test_WebP_Uploads_REST_API extends WP_UnitTestCase {
 		$this->assertSame( $response, $filtered );
 		$this->assertSame( 'not-an-array', $filtered->get_data() );
 	}
+
+	/**
+	 * Checks the AVIF quality in the REST response used by client-side image processing, with and without the plugin quality filter.
+	 *
+	 * @covers ::webp_uploads_modify_webp_quality
+	 */
+	public function test_it_should_return_avif_image_quality_in_rest_response(): void {
+		if ( ! function_exists( 'wp_get_image_encode_quality' ) ) {
+			$this->markTestSkipped( 'The image_quality REST field requires WordPress 7.1.' );
+		}
+
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		update_option( 'perflab_modern_image_format', 'avif' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+
+		$request = new WP_REST_Request();
+		$request->set_param( 'id', $attachment_id );
+		$request->set_param( 'context', 'edit' );
+
+		$controller = new WP_REST_Attachments_Controller( 'attachment' );
+		$response   = $controller->get_item( $request );
+		$this->assertNotWPError( $response );
+		$data = $response->get_data();
+		$this->assertSame( 'image/avif', $data['image_output_format'] );
+		$this->assertSame( 70, $data['image_quality']['default'], 'AVIF image quality should be 70.' );
+
+		remove_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality' );
+
+		$response = $controller->get_item( $request );
+		$this->assertNotWPError( $response );
+		$this->assertSame( 82, $response->get_data()['image_quality']['default'], 'Without the plugin filter, AVIF image quality should be the WordPress default of 82.' );
+	}
 }
