@@ -74,7 +74,7 @@ The implementation involves two phases: detection and optimization. Both of thes
 The detection phase involves collecting metrics about the viewport and the elements on the page and then submitting this data to the site’s REST API:
 
 1. Extensions register tag visitors which opt in to measurement for the elements they target for optimization. (As elaborated in a section below, tag visitors are simply callbacks which are invoked for every open tag.)
-2. The rendered page is captured in an output buffer (which starts at the `template_include` filter with the highest priority). Output buffering ensures that optimizations can be applied to classic themes, block themes, or even completely custom templating systems (e.g. Timber).
+2. The rendered page is captured in WordPress 6.9's template enhancement output buffer (via the `wp_template_enhancement_output_buffer` filter). Output buffering ensures that optimizations can be applied to classic themes, block themes, or even completely custom templating systems (e.g. Timber).
 3. The rendered page is loaded into an HTML Tag processor instance ([introduced](https://make.wordpress.org/core/2023/03/07/introducing-the-html-api-in-wordpress-6-2/) in WP 6.2).
 4. The open tags are iterated over, and all registered tag visitors are invoked for each open tag, giving them the opportunity to opt in the tag for measurement via the `track_tag()` method on the tag visitor context object. A tag which is opted in for measurement will get a `data-od-xpath` attribute added to it.
 5. The detection script module is added to the frontend (`detect.js`).
