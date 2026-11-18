@@ -413,3 +413,529 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 
 	return $min_path;
 }
+
+/**
+ * Enqueues scripts for the URL priming in the admin area.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $hook_suffix Current admin page.
+ */
+function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
+	if ( 'tools_page_od-optimization-detective' === $hook_suffix ) {
+		wp_enqueue_script(
+			'od-prime-url-metrics',
+			plugins_url( od_get_asset_path( 'prime-url-metrics.js' ), __FILE__ ),
+			array( 'wp-i18n', 'wp-api-fetch' ),
+			OPTIMIZATION_DETECTIVE_VERSION,
+			true
+		);
+	}
+
+	if (
+		'post.php' === $hook_suffix &&
+		function_exists( 'get_current_screen' ) &&
+		isset( $_GET['od_classic_editor_post_update_nonce'] ) &&
+		false !== wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['od_classic_editor_post_update_nonce'] ) ), 'od_classic_editor_post_update' ) &&
+		isset( $_GET['post'] ) &&
+		isset( $_GET['message'] ) &&
+		1 === (int) $_GET['message']
+	) {
+		$screen = get_current_screen();
+		if ( $screen instanceof WP_Screen && ! $screen->is_block_editor() ) {
+			$permalink = get_permalink( (int) $_GET['post'] );
+
+			if ( false !== $permalink ) {
+				wp_enqueue_script(
+					'od-prime-url-metrics-classic-editor',
+					plugins_url( od_get_asset_path( 'prime-url-metrics-classic-editor.js' ), __FILE__ ),
+					array( 'wp-i18n', 'wp-api-fetch' ),
+					OPTIMIZATION_DETECTIVE_VERSION,
+					true
+				);
+
+				wp_localize_script(
+					'od-prime-url-metrics-classic-editor',
+					'odPrimeURLMetricsClassicEditor',
+					array(
+						'permalink' => $permalink,
+					)
+				);
+			}
+		}
+	}
+}
+
+/**
+ * Enqueues scripts for the URL priming in block editor.
+ *
+ * @since n.e.x.t
+ * @access private
+ */
+function od_enqueue_block_editor_prime_url_metrics_scripts(): void {
+	wp_enqueue_script(
+		'od-prime-url-metrics',
+		plugins_url( od_get_asset_path( 'prime-url-metrics-block-editor.js' ), __FILE__ ),
+		array( 'wp-data', 'wp-api-fetch' ),
+		OPTIMIZATION_DETECTIVE_VERSION,
+		true
+	);
+}
+
+/**
+ * Adds a nonce to the post update redirect URL for the classic editor.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string $location The redirect URL.
+ * @return string The updated redirect URL.
+ */
+function od_add_data_to_post_update_redirect_url_for_classic_editor( string $location ): string {
+	return add_query_arg( 'od_classic_editor_post_update_nonce', wp_create_nonce( 'od_classic_editor_post_update' ), $location );
+}
+
+/**
+ * Gets URLs for priming URL Metrics from sitemap in batches.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param array<string, int> $cursor Cursor to resume from.
+ * @return array<string, mixed> Batch of URLs to prime metrics for and the updated cursor.
+ */
+function od_get_priming_mode_batch( array $cursor ): array {
+	// Get the server & its registry of sitemap providers.
+	$server   = wp_sitemaps_get_server();
+	$registry = $server->registry;
+
+	// All registered providers.
+	$providers = array_values( $registry->get_providers() ); // Ensure zero-based index.
+
+	$all_urls        = array();
+	$collected_count = 0;
+
+	// Flag to indicate if we should stop collecting further URLs (i.e., we reached $cursor['batch_size']).
+	$done = false;
+
+	// Start iterating from the current provider_index forward.
+	$providers_count = count( $providers );
+	for ( $provider_index = $cursor['provider_index']; $provider_index < $providers_count && ! $done; ) {
+		$provider = $providers[ $provider_index ];
+
+		// WordPress providers return an array of strings from get_object_subtypes().
+		$subtypes = array_values( $provider->get_object_subtypes() ); // zero-based index.
+
+		// Start from the current subtype_index if resuming.
+		$subtypes_count = count( $subtypes );
+		for ( $subtype_index = ( $provider_index === $cursor['provider_index'] ) ? $cursor['subtype_index'] : 0; $subtype_index < $subtypes_count && ! $done; ) {
+			// This is a string, e.g. 'post', 'page', etc.
+			$subtype = $subtypes[ $subtype_index ];
+
+			// Retrieve the max number of pages for this subtype.
+			$max_num_pages = $provider->get_max_num_pages( $subtype->name );
+
+			// Start from the current page_number if resuming.
+			for ( $page = ( ( $provider_index === $cursor['provider_index'] ) && ( $subtype_index === $cursor['subtype_index'] ) ) ? $cursor['page_number'] : 1; $page <= $max_num_pages && ! $done; ++$page ) {
+				$url_list = $provider->get_url_list( $page, $subtype->name );
+				if ( ! is_array( $url_list ) ) {
+					continue;
+				}
+
+				// Filter out empty URLs.
+				$url_chunk = array_filter( array_column( $url_list, 'loc' ) );
+
+				// We might have partially consumed this page, so skip $cursor['offset_within_page'] items first.
+				$current_page_urls = array_slice( $url_chunk, $cursor['offset_within_page'] );
+
+				// Count how many URLs we consumed in this page.
+				$consumed_in_this_page = 0;
+
+				// Now collect from current_page_urls until we reach $cursor['batch_size'].
+				foreach ( $current_page_urls as $url ) {
+					$all_urls[] = $url;
+					++$collected_count;
+					++$consumed_in_this_page;
+
+					if ( $collected_count >= $cursor['batch_size'] ) {
+						// We have our full batch; stop collecting further.
+						$done = true;
+						break;
+					}
+				}
+
+				if ( ! $done ) {
+					// We consumed this entire page, so if we continue, next time we start at offset 0 of the next page.
+					$cursor['page_number']        = $page + 1;
+					$cursor['offset_within_page'] = 0;
+				} else {
+					// We reached the limit in the middle of this page.
+					// Figure out how many we used from this page to update the offset properly.
+					$extra_consumed = $collected_count - $cursor['batch_size']; // If exactly $cursor['batch_size'], this might be 0 or negative.
+					if ( $extra_consumed < 0 ) {
+						$extra_consumed = 0;
+					}
+
+					$cursor['offset_within_page'] = $cursor['offset_within_page'] + ( $consumed_in_this_page - $extra_consumed );
+
+					// We haven't fully finished this page, so keep the same $cursor['page_number'].
+					$cursor['page_number'] = $page;
+				}
+			} // end for pages.
+
+			if ( ! $done ) {
+				// If we've finished all pages in this subtype, move to next subtype from the start (page 1, offset 0).
+				$cursor['page_number']        = 1;
+				$cursor['offset_within_page'] = 0;
+			}
+
+			$cursor['subtype_index'] = $subtype_index;
+			++$subtype_index;
+		} // end for subtypes.
+
+		if ( ! $done ) {
+			// If we finished all subtypes in this provider, move to next provider and start at subtype=0, page=1.
+			$cursor['subtype_index']      = 0;
+			$cursor['page_number']        = 1;
+			$cursor['offset_within_page'] = 0;
+		}
+
+		$cursor['provider_index'] = $provider_index;
+		++$provider_index;
+	} // end for providers.
+
+	// Prepare next cursor.
+	$new_cursor = array(
+		'provider_index'     => $cursor['provider_index'],
+		'subtype_index'      => $cursor['subtype_index'],
+		'page_number'        => $cursor['page_number'],
+		'offset_within_page' => $cursor['offset_within_page'],
+		'batch_size'         => $cursor['batch_size'],
+	);
+
+	return array(
+		'urls'   => $all_urls,
+		'cursor' => $new_cursor,
+	);
+}
+
+/**
+ * Filter for WP_Query to allow specifying 'post_title__in' => array( 'title1', 'title2', ... ).
+ *
+ * This is needed because WP_Query does not support filtering by post_title.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string   $where The WHERE clause of the query.
+ * @param WP_Query $query The WP_Query instance.
+ */
+function od_filter_posts_where_for_titles( string $where, WP_Query $query ): string {
+	global $wpdb;
+
+	$titles = (array) $query->get( 'post_title__in', array() );
+	$titles = array_filter( $titles );
+
+	if ( 0 === count( $titles ) ) {
+		return $where;
+	}
+
+	// Safely prepare each title for IN() clause.
+	$placeholders = array();
+	foreach ( $titles as $title ) {
+		$placeholders[] = $wpdb->prepare( '%s', $title );
+	}
+	$list = implode( ',', $placeholders );
+
+	$where .= " AND {$wpdb->posts}.post_title IN ($list)";
+	return $where;
+}
+
+/**
+ * Fetches od_url_metrics posts of URLs in a single WP_Query.
+ *
+ * This function is used to reduce the number of database queries done by querying all URLs in a
+ * single query instead of one per URL.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param string[] $urls Array of exact URLs, as stored in post_title of od_url_metrics.
+ * @return array<string, OD_URL_Metric_Group_Collection> Map of URL to its OD_URL_Metric_Group_Collection.
+ */
+function od_get_metrics_by_post_title( array $urls ): array {
+	$urls = array_unique( array_filter( $urls ) );
+	if ( 0 === count( $urls ) ) {
+		return array();
+	}
+
+	$results_map = array();
+
+	add_filter( 'posts_where', 'od_filter_posts_where_for_titles', 10, 2 );
+
+	$query = new WP_Query(
+		array(
+			'post_type'              => OD_URL_Metrics_Post_Type::SLUG,
+			'post_status'            => 'publish',
+			'post_title__in'         => $urls,
+			// Currently the count of urls is 10 or less for each batch so we can use -1 for now.
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'fields'                 => 'all',
+		)
+	);
+
+	remove_filter( 'posts_where', 'od_filter_posts_where_for_titles', 10 );
+
+	foreach ( $query->posts as $post ) {
+		if ( ! $post instanceof WP_Post ) {
+			continue;
+		}
+		$results_map[ $post->post_title ] = new OD_URL_Metric_Group_Collection(
+			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ),
+			md5( '' ), // This is a dummy hash.
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
+	}
+	return $results_map;
+}
+
+/**
+ * Gets the standard array of viewport based on real world device.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return array<int, array{width: int, height: int}> Array of viewports.
+ */
+function od_get_standard_viewports(): array {
+	$device_viewports = array(
+		array( // Small smartphones.
+			'width'  => 360,
+			'height' => 780,
+		),
+		array( // Large smartphones.
+			'width'  => 414,
+			'height' => 896,
+		),
+		array( // Tablets.
+			'width'  => 768,
+			'height' => 1024,
+		),
+		array( // Desktop/laptop screens.
+			'width'  => 1920,
+			'height' => 1080,
+		),
+	);
+
+	/**
+	 * Filters the standard device viewports used for priming mode.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array<int, array{width: int, height: int}> $device_viewports Array of viewport dimensions.
+	 */
+	return apply_filters( 'od_standard_viewports', $device_viewports );
+}
+
+/**
+ * Filters the batch of URLs to only include those that need additional metrics.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param array<string> $urls Array of URLs to filter.
+ * @return array<int, array{url: string, viewports: array<int, array{width: int, height: int}>}> Filtered batch of URL groups.
+ */
+function od_filter_priming_mode_batch_urls( array $urls ): array {
+	$filtered_url_groups = array();
+	$standard_viewports  = od_get_standard_viewports();
+	$group_collections   = od_get_metrics_by_post_title( $urls );
+
+	foreach ( $urls as $url ) {
+		$group_collection = $group_collections[ $url ] ?? null;
+		if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
+			$filtered_url_groups[] = array(
+				'url'       => $url,
+				'viewports' => $standard_viewports,
+			);
+			continue;
+		}
+
+		if ( $group_collection->is_every_group_populated() ) {
+			continue;
+		}
+
+		$existing_widths = array();
+		foreach ( $group_collection as $group ) {
+			if ( ! $group->is_complete() ) {
+				foreach ( $group as $url_metric ) {
+					$existing_widths[] = $url_metric->get_viewport_width();
+				}
+			}
+		}
+
+		$missing_viewports = array();
+		foreach ( $standard_viewports as $viewport ) {
+			if ( ! in_array( $viewport['width'], $existing_widths, true ) ) {
+				$missing_viewports[] = $viewport;
+			}
+		}
+
+		if ( count( $missing_viewports ) > 0 ) {
+			$filtered_url_groups[] = array(
+				'url'       => $url,
+				'viewports' => $missing_viewports,
+			);
+		}
+	}
+
+	return $filtered_url_groups;
+}
+
+/**
+ * Determine whether to show the priming mode settings page.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True to display the settings page; false to hide it.
+ */
+function od_show_priming_mode_settings(): bool {
+	/**
+	 * Filters whether the priming mode settings page should be shown in the admin dashboard, regardless of the number of URLs.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $show_feature True if the feature should be shown, false otherwise.
+	 */
+	$force_show = apply_filters( 'od_show_priming_mode_settings', false );
+	if ( true === $force_show ) {
+		return true;
+	}
+
+	/**
+	 * Filters maximum number of URLs allowed before hiding the settings page.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $threshold The threshold count of frontend-visible URLs.
+	 */
+	$threshold = apply_filters( 'od_show_priming_mode_settings_max_urls', 1000 );
+
+	$count = (int) get_transient( 'od_priming_mode_frontend_visible_url_count' );
+	if ( 0 !== $count ) {
+		return $count <= $threshold;
+	}
+
+	// Get the sitemap server and its registry of providers.
+	$server    = wp_sitemaps_get_server();
+	$registry  = $server->registry;
+	$providers = array_values( $registry->get_providers() );
+	$show      = true;
+
+	foreach ( $providers as $provider ) {
+		// Each provider returns its object subtypes (e.g. 'post', 'page', etc.).
+		$subtypes = array_values( $provider->get_object_subtypes() );
+		foreach ( $subtypes as $subtype ) {
+			$max_pages = $provider->get_max_num_pages( $subtype->name );
+			for ( $page = 1; $page <= $max_pages; $page++ ) {
+				$url_list = $provider->get_url_list( $page, $subtype->name );
+				if ( ! is_array( $url_list ) ) {
+					continue;
+				}
+
+				$url_chunk = array_filter( array_column( $url_list, 'loc' ) );
+				$count    += count( $url_chunk );
+
+				if ( $count >= $threshold ) {
+					$show = false;
+					break 3;
+				}
+			}
+		}
+	}
+
+	set_transient( 'od_priming_mode_frontend_visible_url_count', $count, DAY_IN_SECONDS );
+
+	return $show;
+}
+
+/**
+ * Generates the batch of URLs for priming URL Metrics.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param array<string, int>|null $cursor Cursor to resume from.
+ * @return array<string, mixed> Final batch of URLs to prime metrics for and the updated cursor.
+ */
+function od_generate_priming_mode_batch( ?array $cursor ): array {
+	$default_cursor = array(
+		'provider_index'     => 0,
+		'subtype_index'      => 0,
+		'page_number'        => 1,
+		'offset_within_page' => 0,
+		'batch_size'         => 10,
+	);
+
+	// Validate the cursor.
+	$cursor = array_map( 'intval', array_intersect_key( wp_parse_args( (array) $cursor, $default_cursor ), $default_cursor ) );
+
+	if ( $default_cursor === $cursor ) {
+		$last_cursor = get_option( 'od_priming_mode_batch_cursor' );
+		if ( false !== $last_cursor ) {
+			$cursor = array_map( 'intval', array_intersect_key( wp_parse_args( $cursor, $last_cursor ), $last_cursor ) );
+		}
+	} else {
+		update_option( 'od_priming_mode_batch_cursor', $cursor );
+	}
+
+	$batch                 = array();
+	$filtered_url_groups   = array();
+	$prevent_infinite_loop = 0;
+	while ( $prevent_infinite_loop < 100 ) {
+		if ( count( $filtered_url_groups ) > 0 ) {
+			break;
+		}
+
+		$batch               = od_get_priming_mode_batch( $cursor );
+		$filtered_url_groups = od_filter_priming_mode_batch_urls( $batch['urls'] );
+
+		if ( $cursor === $batch['cursor'] ) {
+			delete_option( 'od_priming_mode_batch_cursor' );
+			break;
+		}
+		$cursor = $batch['cursor'];
+
+		++$prevent_infinite_loop;
+	}
+
+	return array(
+		'urlGroups'         => $filtered_url_groups,
+		'cursor'            => $batch['cursor'],
+		'verificationToken' => od_get_priming_mode_verification_token(),
+		'isDebug'           => defined( 'WP_DEBUG' ) && WP_DEBUG,
+	);
+}
+
+/**
+ * Gets the verification token for priming mode.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return string Verification token.
+ */
+function od_get_priming_mode_verification_token(): string {
+	$verification_token = get_transient( 'od_priming_mode_verification_token' );
+	if ( false === $verification_token ) {
+		$verification_token = wp_generate_uuid4();
+		set_transient( 'od_priming_mode_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
+	}
+	return $verification_token;
+}
