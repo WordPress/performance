@@ -996,4 +996,156 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	public function test_image_prioritizer_get_lazy_load_bg_image_stylesheet(): void {
 		$this->assertStringContainsString( '.od-lazy-bg-image', image_prioritizer_get_lazy_load_bg_image_stylesheet() );
 	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed> Data.
+	 */
+	public function data_provider_to_test_image_prioritizer_add_background_image_attachment_id(): array {
+		return array(
+			'group_block_with_background_image'       => array(
+				'block_name' => 'core/group',
+				'attributes' => static function ( int $attachment_id ): array {
+					return array(
+						'style' => array(
+							'background' => array(
+								'backgroundImage' => array(
+									'id'     => $attachment_id,
+									'url'    => wp_get_attachment_url( $attachment_id ),
+									'source' => 'file',
+								),
+							),
+						),
+					);
+				},
+				'expected'   => true,
+			),
+			'group_block_with_theme_background_image' => array(
+				'block_name' => 'core/group',
+				'attributes' => static function (): array {
+					return array(
+						'style' => array(
+							'background' => array(
+								'backgroundImage' => array(
+									'url'    => 'https://example.com/theme-background.jpg',
+									'source' => 'theme',
+								),
+							),
+						),
+					);
+				},
+				'expected'   => false,
+			),
+			'group_block_without_background_image'    => array(
+				'block_name' => 'core/group',
+				'attributes' => static function (): array {
+					return array();
+				},
+				'expected'   => false,
+			),
+			'cover_block_with_fixed_background_image' => array(
+				'block_name' => 'core/cover',
+				'attributes' => static function ( int $attachment_id ): array {
+					return array(
+						'id'          => $attachment_id,
+						'url'         => wp_get_attachment_url( $attachment_id ),
+						'hasParallax' => true,
+					);
+				},
+				'expected'   => true,
+			),
+			'cover_block_with_invalid_attachment_id'  => array(
+				'block_name' => 'core/cover',
+				'attributes' => static function (): array {
+					return array(
+						'id'          => 0,
+						'url'         => 'https://example.com/foo.jpg',
+						'hasParallax' => true,
+					);
+				},
+				'expected'   => false,
+			),
+		);
+	}
+
+	/**
+	 * Test image_prioritizer_add_background_image_attachment_id.
+	 *
+	 * @covers ::image_prioritizer_add_background_image_attachment_id
+	 *
+	 * @dataProvider data_provider_to_test_image_prioritizer_add_background_image_attachment_id
+	 *
+	 * @param non-empty-string $block_name Block name.
+	 * @param Closure          $attributes Callback which returns the block attributes.
+	 * @param bool             $expected   Whether the attachment ID is expected to be added.
+	 */
+	public function test_image_prioritizer_add_background_image_attachment_id( string $block_name, Closure $attributes, bool $expected ): void {
+		$attachment_id = self::factory()->attachment->create_object(
+			DIR_TESTDATA . '/images/33772.jpg',
+			0,
+			array( 'post_mime_type' => 'image/jpeg' )
+		);
+
+		$block = new WP_Block(
+			array(
+				'blockName'   => $block_name,
+				'attrs'       => $attributes( $attachment_id ),
+				'innerBlocks' => array(),
+			)
+		);
+
+		if ( 'core/cover' === $block_name ) {
+			// A Cover block with a fixed background applies the background image to an inner DIV.
+			$block_content = '<div class="wp-block-cover has-parallax"><div class="wp-block-cover__image-background has-parallax" style="background-position:50% 50%;background-image:url(\'https://example.com/foo.jpg\')"></div><div class="wp-block-cover__inner-container">Hello</div></div>';
+		} else {
+			$block_content = '<div class="wp-block-group" style="background-image:url(\'https://example.com/foo.jpg\')">Hello</div>';
+		}
+
+		$filtered_block_content = image_prioritizer_add_background_image_attachment_id( $block_content, $block->parsed_block, $block );
+
+		// Locate the element which has the background image applied to it.
+		$processor = new WP_HTML_Tag_Processor( $filtered_block_content );
+		do {
+			$this->assertTrue( $processor->next_tag() );
+			$style = $processor->get_attribute( 'style' );
+		} while ( ! is_string( $style ) || false === strpos( $style, 'background-image' ) );
+
+		$this->assertSame(
+			$expected ? (string) $attachment_id : null,
+			$processor->get_attribute( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ATTACHMENT_ID_ATTR_NAME )
+		);
+	}
+
+	/**
+	 * Test image_prioritizer_add_background_image_attachment_id when there is no background image.
+	 *
+	 * @covers ::image_prioritizer_add_background_image_attachment_id
+	 */
+	public function test_image_prioritizer_add_background_image_attachment_id_without_background_image(): void {
+		$attachment_id = self::factory()->attachment->create_object(
+			DIR_TESTDATA . '/images/33772.jpg',
+			0,
+			array( 'post_mime_type' => 'image/jpeg' )
+		);
+
+		$block = new WP_Block(
+			array(
+				'blockName'   => 'core/cover',
+				'attrs'       => array(
+					'id'  => $attachment_id,
+					'url' => wp_get_attachment_url( $attachment_id ),
+				),
+				'innerBlocks' => array(),
+			)
+		);
+
+		// A Cover block which is not fixed/repeated renders an IMG instead of a background image.
+		$block_content = '<div class="wp-block-cover"><img class="wp-block-cover__image-background" src="https://example.com/foo.jpg" alt=""></div>';
+
+		$this->assertSame(
+			$block_content,
+			image_prioritizer_add_background_image_attachment_id( $block_content, $block->parsed_block, $block )
+		);
+	}
 }
