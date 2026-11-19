@@ -77,9 +77,9 @@ function auto_sizes_prime_attachment_caches( $content ): string {
  *
  * @since 1.1.0
  *
- * @param string|mixed                                             $content      The block content about to be rendered.
- * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
- * @param WP_Block                                                 $block        Block instance.
+ * @param string|mixed                                                                              $content      The block content about to be rendered.
+ * @param array{ attrs?: array{ align?: string, width?: string|int, id?: int, sizeSlug?: string } } $parsed_block The parsed block.
+ * @param WP_Block                                                                                  $block        Block instance.
  * @return string The updated block content.
  */
 function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $block ): string {
