@@ -1383,6 +1383,27 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that unknown alignment values are treated as the default alignment.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 * @covers ::auto_sizes_calculate_better_sizes
+	 */
+	public function test_unknown_alignment_is_treated_as_default(): void {
+		$block_content = $this->get_group_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large', 'none' ),
+			array(
+				'align' => 'none',
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {

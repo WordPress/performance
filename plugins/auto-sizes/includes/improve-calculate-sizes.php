@@ -210,11 +210,14 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 		$image_width = min( $image_width, $resize_width );
 	}
 
-	// Normalize default alignment values.
-	$align = '' !== $align ? $align : 'default';
-
 	// Use the defined constant for constraints.
 	$constraints = AUTO_SIZES_CONSTRAINTS;
+
+	// Normalize empty and unknown alignment values.
+	$align = isset( $constraints[ $align ] ) ? $align : 'default';
+	if ( ! isset( $constraints[ $max_alignment ] ) ) {
+		$max_alignment = 'full';
+	}
 
 	$alignment = $constraints[ $align ] > $constraints[ $max_alignment ] ? $align : $max_alignment;
 
@@ -347,10 +350,13 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 	);
 
 	if ( in_array( $block['blockName'], $provider_blocks, true ) ) {
-		// Normalize default alignment values.
-		$alignment = isset( $block['attrs']['align'] ) && '' !== $block['attrs']['align'] ? (string) $block['attrs']['align'] : 'default';
 		// Use the defined constant for constraints.
 		$constraints = AUTO_SIZES_CONSTRAINTS;
+		// Normalize empty and unknown alignment values.
+		$alignment = isset( $block['attrs']['align'] ) && is_string( $block['attrs']['align'] ) && isset( $constraints[ $block['attrs']['align'] ] ) ? $block['attrs']['align'] : 'default';
+		if ( ! is_string( $context['max_alignment'] ) || ! isset( $constraints[ $context['max_alignment'] ] ) ) {
+			$context['max_alignment'] = 'full';
+		}
 
 		$context['max_alignment'] = $constraints[ $context['max_alignment'] ] > $constraints[ $alignment ] ? $context['max_alignment'] : $alignment;
 	}
