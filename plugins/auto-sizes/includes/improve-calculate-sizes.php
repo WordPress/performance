@@ -144,9 +144,24 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$id = auto_sizes_get_featured_image_attachment_id( $block->context['postId'] );
 		}
 
+		// If we don't have a size slug, assume the full size was used.
+		$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'full';
+
+		/*
+		 * Without a size slug, the post featured image block renders the 'post-thumbnail' size,
+		 * which falls back to the full size when that sub-size does not exist for the attachment.
+		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L25
+		 */
+		if (
+			'core/post-featured-image' === $block->name &&
+			! isset( $parsed_block['attrs']['sizeSlug'] ) &&
+			false !== image_get_intermediate_size( $id, 'post-thumbnail' )
+		) {
+			$size_slug = 'post-thumbnail';
+		}
+
 		$sizes = wp_calculate_image_sizes(
-			// If we don't have a size slug, assume the full size was used.
-			$parsed_block['attrs']['sizeSlug'] ?? 'full',
+			$size_slug,
 			null,
 			null,
 			$id
