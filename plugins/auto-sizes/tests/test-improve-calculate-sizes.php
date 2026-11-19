@@ -1427,6 +1427,44 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that a column width outside the valid range is ignored.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @dataProvider data_column_width_outside_valid_range
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 * @covers ::auto_sizes_calculate_better_sizes
+	 *
+	 * @param string $width Column width.
+	 */
+	public function test_column_width_outside_valid_range_is_ignored( string $width ): void {
+		$block_content = $this->get_columns_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large' ),
+			array(),
+			array( $width => true )
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string, array{ 0: string }> Column widths.
+	 */
+	public static function data_column_width_outside_valid_range(): array {
+		return array(
+			'zero width'     => array( '0%' ),
+			'more than 100%' => array( '150%' ),
+		);
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {

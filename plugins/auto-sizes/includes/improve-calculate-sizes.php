@@ -232,8 +232,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			// TODO: Add support for em, rem, vh, and vw.
 			if (
 				str_ends_with( $layout_width, 'px' ) &&
-				( $container_relative_width > 0.0 ||
-				$container_relative_width < 1.0 )
+				$container_relative_width > 0.0 &&
+				$container_relative_width <= 1.0
 			) {
 				// First remove 'px' from width.
 				$layout_width = str_replace( 'px', '', $layout_width );
@@ -258,8 +258,8 @@ function auto_sizes_calculate_better_sizes( int $id, $size, string $align, int $
 			 */
 			if (
 				str_ends_with( $layout_width, 'px' ) &&
-				( $container_relative_width > 0.0 ||
-				$container_relative_width < 1.0 )
+				$container_relative_width > 0.0 &&
+				$container_relative_width <= 1.0
 			) {
 				// First remove 'px' from width.
 				$layout_width = str_replace( 'px', '', $layout_width );
@@ -392,11 +392,13 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 				$current_width = 1.0;
 			}
 
+			// Ignore widths outside the valid range, such as 0% or 150%.
+			if ( $current_width <= 0.0 || $current_width > 1.0 ) {
+				$current_width = 1.0;
+			}
+
 			// Multiply with parent's width if available.
-			if (
-				isset( $parent_block->context['container_relative_width'] ) &&
-				( $current_width > 0.0 || $current_width < 1.0 )
-			) {
+			if ( isset( $parent_block->context['container_relative_width'] ) ) {
 				$context['container_relative_width'] = $parent_block->context['container_relative_width'] * $current_width;
 			} else {
 				$context['container_relative_width'] = $current_width;
