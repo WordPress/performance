@@ -1337,8 +1337,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	/**
 	 * Test that a column width stored as a number, as in old versions of the Columns block, is handled.
 	 *
-	 * @since n.e.x.t
-	 *
 	 * @covers ::auto_sizes_filter_render_block_context
 	 */
 	public function test_image_block_in_column_with_numeric_width(): void {
@@ -1360,8 +1358,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Test that a column width in a non-percentage unit falls back to the equally divided width.
-	 *
-	 * @since n.e.x.t
 	 *
 	 * @covers ::auto_sizes_filter_render_block_context
 	 */
@@ -1385,8 +1381,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	/**
 	 * Test that unknown alignment values are treated as the default alignment.
 	 *
-	 * @since n.e.x.t
-	 *
 	 * @covers ::auto_sizes_filter_render_block_context
 	 * @covers ::auto_sizes_calculate_better_sizes
 	 */
@@ -1405,8 +1399,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Test that invalid block context values filtered by a plugin do not cause a TypeError.
-	 *
-	 * @since n.e.x.t
 	 *
 	 * @covers ::auto_sizes_filter_image_tag
 	 */
@@ -1429,8 +1421,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	/**
 	 * Test that a column width outside the valid range is ignored.
 	 *
-	 * @since n.e.x.t
-	 *
 	 * @dataProvider data_column_width_outside_valid_range
 	 *
 	 * @covers ::auto_sizes_filter_render_block_context
@@ -1452,8 +1442,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
-	 *
-	 * @since n.e.x.t
 	 *
 	 * @return array<string, array{ 0: string }> Column widths.
 	 */
