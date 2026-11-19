@@ -105,8 +105,8 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 			$id                       = isset( $block->attributes['id'] ) ? (int) $block->attributes['id'] : 0;
 			$alignment                = (string) ( $block->attributes['align'] ?? '' );
 			$width                    = isset( $block->attributes['width'] ) ? (int) $block->attributes['width'] : 0;
-			$max_alignment            = $block->context['max_alignment'] ?? '';
-			$container_relative_width = $block->context['container_relative_width'] ?? 1.0;
+			$max_alignment            = isset( $block->context['max_alignment'] ) && is_string( $block->context['max_alignment'] ) ? $block->context['max_alignment'] : '';
+			$container_relative_width = isset( $block->context['container_relative_width'] ) && is_numeric( $block->context['container_relative_width'] ) ? (float) $block->context['container_relative_width'] : 1.0;
 
 			/*
 			 * For the post featured image block, use the post ID to get the featured image attachment ID.

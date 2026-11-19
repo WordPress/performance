@@ -1404,6 +1404,29 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that invalid block context values filtered by a plugin do not cause a TypeError.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @covers ::auto_sizes_filter_image_tag
+	 */
+	public function test_invalid_block_context_values_are_ignored(): void {
+		add_filter(
+			'render_block_context',
+			static function ( array $context ): array {
+				$context['max_alignment']            = null;
+				$context['container_relative_width'] = 'invalid';
+				return $context;
+			},
+			20
+		);
+
+		$result = apply_filters( 'the_content', $this->get_image_block_markup( self::$image_id, 'large' ) );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
