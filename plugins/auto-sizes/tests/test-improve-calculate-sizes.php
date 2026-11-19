@@ -1360,9 +1360,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 		$result = apply_filters( 'the_content', $block_content );
 
-		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
-
 		wp_reset_postdata();
+
+		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
 	}
 
 	/**
@@ -1391,9 +1391,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 
 		$result = apply_filters( 'the_content', $block_content );
 
-		$this->assertStringContainsString( 'sizes="(max-width: 206px) 100vw, 206px" ', $result );
-
 		wp_reset_postdata();
+
+		$this->assertStringContainsString( 'sizes="(max-width: 206px) 100vw, 206px" ', $result );
 	}
 
 	/**
