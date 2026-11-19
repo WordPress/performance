@@ -252,6 +252,39 @@ class Test_Dominant_Color extends TestCase {
 	}
 
 	/**
+	 * Tests that the attributes are returned unchanged when no attachment post is found.
+	 *
+	 * The `wp_get_attachment_image_attributes` filter passes null for the attachment when
+	 * `wp_get_attachment_image_src()` is filtered to return an image for an ID with no post.
+	 *
+	 * @covers ::dominant_color_update_attachment_image_attributes
+	 */
+	public function test_dominant_color_update_attachment_image_attributes_with_null_attachment(): void {
+		$nonexistent_id = -1;
+		$image_url      = 'https://example.com/image.jpg';
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( $nonexistent_id, $image_url ) {
+				if ( $nonexistent_id === $attachment_id ) {
+					return array( $image_url, 100, 100, false );
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$processor = new WP_HTML_Tag_Processor( wp_get_attachment_image( $nonexistent_id ) );
+		$this->assertTrue( $processor->next_tag( 'IMG' ) );
+		$this->assertSame( $image_url, $processor->get_attribute( 'src' ) );
+		$this->assertNull( $processor->get_attribute( 'data-dominant-color' ) );
+		$this->assertNull( $processor->get_attribute( 'data-has-transparency' ) );
+
+		$attr = array( 'class' => 'foo' );
+		$this->assertSame( $attr, dominant_color_update_attachment_image_attributes( $attr, null ) );
+	}
+
+	/**
 	 * Data provider for test_dominant_color_update_attachment_image_attributes().
 	 *
 	 * @return array<string, mixed>
