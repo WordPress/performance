@@ -366,8 +366,16 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
 			// Get column width, if explicitly set.
 			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				// Note: In old versions of the Columns block, the percentage width may be a float. So the string cast is required.
-				$current_width = floatval( rtrim( (string) $block['attrs']['width'], '%' ) ) / 100;
+				$width = $block['attrs']['width'];
+				if ( is_numeric( $width ) ) {
+					/*
+					 * In old versions of the Columns block, the percentage width may be a number.
+					 * Cast it to float directly, since casting a float to string depends on the locale in PHP 7.4.
+					 */
+					$current_width = (float) $width / 100;
+				} else {
+					$current_width = floatval( rtrim( (string) $width, '%' ) ) / 100;
+				}
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
 				// Default to equally divided width if not explicitly set.
 				$current_width = 1.0 / $parent_block->context['column_count'];
