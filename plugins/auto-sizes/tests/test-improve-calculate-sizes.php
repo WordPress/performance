@@ -1335,6 +1335,124 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that a column width stored as a number, as in old versions of the Columns block, is handled.
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 */
+	public function test_image_block_in_column_with_numeric_width(): void {
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column {"width":66.66} -->
+			<div class="wp-block-column" style="flex-basis:66.66%">
+			' . $this->get_image_block_markup( self::$image_id, 'large' ) . '
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column {"width":33.33} -->
+			<div class="wp-block-column" style="flex-basis:33.33%"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 413px) 100vw, 413px" ', $result );
+	}
+
+	/**
+	 * Test that a column width in a non-percentage unit falls back to the equally divided width.
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 */
+	public function test_image_block_in_column_with_pixel_width(): void {
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column {"width":"250px"} -->
+			<div class="wp-block-column" style="flex-basis:250px">
+			' . $this->get_image_block_markup( self::$image_id, 'large' ) . '
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column -->
+			<div class="wp-block-column"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
+	}
+
+	/**
+	 * Test that unknown alignment values are treated as the default alignment.
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 * @covers ::auto_sizes_calculate_better_sizes
+	 */
+	public function test_unknown_alignment_is_treated_as_default(): void {
+		$block_content = $this->get_group_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large', 'none' ),
+			array(
+				'align' => 'none',
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
+	 * Test that invalid block context values filtered by a plugin do not cause a TypeError.
+	 *
+	 * @covers ::auto_sizes_filter_image_tag
+	 */
+	public function test_invalid_block_context_values_are_ignored(): void {
+		add_filter(
+			'render_block_context',
+			static function ( array $context ): array {
+				$context['max_alignment']            = null;
+				$context['container_relative_width'] = 'invalid';
+				return $context;
+			},
+			20
+		);
+
+		$result = apply_filters( 'the_content', $this->get_image_block_markup( self::$image_id, 'large' ) );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
+	 * Test that a column width outside the valid range is ignored.
+	 *
+	 * @dataProvider data_column_width_outside_valid_range
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 * @covers ::auto_sizes_calculate_better_sizes
+	 *
+	 * @param string $width Column width.
+	 */
+	public function test_column_width_outside_valid_range_is_ignored( string $width ): void {
+		$block_content = $this->get_columns_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large' ),
+			array(),
+			array( $width => true )
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array{ 0: string }> Column widths.
+	 */
+	public static function data_column_width_outside_valid_range(): array {
+		return array(
+			'zero width'     => array( '0%' ),
+			'more than 100%' => array( '150%' ),
+		);
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
