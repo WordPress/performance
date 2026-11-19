@@ -364,20 +364,22 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
 		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
 		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
-			// Get column width, if explicitly set.
-			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
-				$width = $block['attrs']['width'];
-				if ( is_numeric( $width ) ) {
-					/*
-					 * In old versions of the Columns block, the percentage width may be a number.
-					 * Cast it to float directly, since casting a float to string depends on the locale in PHP 7.4.
-					 */
-					$current_width = (float) $width / 100;
-				} else {
-					$current_width = floatval( rtrim( (string) $width, '%' ) ) / 100;
-				}
+			// Get column width, if explicitly set as a percentage.
+			$width = $block['attrs']['width'] ?? null;
+			if ( is_numeric( $width ) ) {
+				/*
+				 * In old versions of the Columns block, the percentage width may be a number.
+				 * Cast it to float directly, since casting a float to string depends on the locale in PHP 7.4.
+				 */
+				$current_width = (float) $width / 100;
+			} elseif ( is_string( $width ) && str_ends_with( $width, '%' ) ) {
+				$current_width = floatval( rtrim( $width, '%' ) ) / 100;
 			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
-				// Default to equally divided width if not explicitly set.
+				/*
+				 * Default to equally divided width if not explicitly set.
+				 *
+				 * TODO: Add support for px, em, rem, and vw column widths. These also use the equally divided width for now.
+				 */
 				$current_width = 1.0 / $parent_block->context['column_count'];
 			} else {
 				// Full width fallback.

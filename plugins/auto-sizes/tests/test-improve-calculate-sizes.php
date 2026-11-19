@@ -1359,6 +1359,30 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that a column width in a non-percentage unit falls back to the equally divided width.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @covers ::auto_sizes_filter_render_block_context
+	 */
+	public function test_image_block_in_column_with_pixel_width(): void {
+		$block_content = '<!-- wp:columns -->
+			<div class="wp-block-columns"><!-- wp:column {"width":"250px"} -->
+			<div class="wp-block-column" style="flex-basis:250px">
+			' . $this->get_image_block_markup( self::$image_id, 'large' ) . '
+			</div>
+			<!-- /wp:column -->
+			<!-- wp:column -->
+			<div class="wp-block-column"></div>
+			<!-- /wp:column --></div>
+			<!-- /wp:columns -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 310px) 100vw, 310px" ', $result );
+	}
+
+	/**
 	 * Verifies that the post featured image block does not render when no featured image is set for the post.
 	 */
 	public function test_post_featured_image_block_without_featured_image(): void {
