@@ -48,6 +48,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
+
+		// Many tests in this class rely on `wp_get_attachment_image()` returning
+		// unfiltered markup so they can exercise the `wp_content_img_tag` path
+		// manually. Remove the new auto-rewriter by default; tests that want to
+		// exercise it explicitly can re-register via `opt_in_to_picture_element()`
+		// (which re-runs `webp_uploads_init()`).
+		remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
 	}
 
 	public function tear_down(): void {
@@ -88,6 +95,92 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	/**
+	 * Test that the format of the upload is the fallback when the browser supplied the scaled full size image.
+	 *
+	 * This is the shape of an attachment over the big image size threshold uploaded with client side media
+	 * processing and fallback output: the attached file is the scaled image in the modern format, and the upload
+	 * is kept as the original image.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_picture_element_falls_back_to_the_format_of_the_upload_for_a_scaled_modern_image(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+			$metadata['sizes'][ $size_name ]['file']      = $size_data['sources'][ self::$mime_type ]['file'];
+			$metadata['sizes'][ $size_name ]['mime-type'] = self::$mime_type;
+		}
+		$metadata['original_image'] = wp_basename( $metadata['file'] );
+		$metadata['file']           = dirname( $metadata['file'] ) . '/' . $metadata['sources'][ self::$mime_type ]['file'];
+		update_attached_file( $attachment_id, $metadata['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+		$this->assertSame( self::$mime_type, webp_uploads_get_attachment_file_mime_type( $attachment_id ) );
+
+		$image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$this->assertStringNotContainsString( '.jpg', $image, 'The unfiltered image should be in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '.jpg', (string) $this->get_attribute_from_first_tag( $picture_markup, 'SOURCE', 'srcset' ) );
+		$this->assertSame( $metadata['original_image'], wp_basename( (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'src' ) ) );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $picture_markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['sizes']['medium']['sources']['image/jpeg']['file'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The fallback IMG srcset should only contain the format of the upload.' );
+	}
+
+	/**
+	 * Test that the image falls back to the format of the upload when only the scaled full size image is in the modern format.
+	 *
+	 * This is the shape of an attachment over the big image size threshold uploaded with client side media
+	 * processing and fallback output, for which every modern sub-size was discarded for being the larger file.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_image_falls_back_to_the_format_of_the_upload_when_only_the_scaled_image_is_modern(): void {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$this->assertNotWPError( $attachment_id );
+		$this->temp_attachment_ids[] = $attachment_id;
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			unset( $metadata['sizes'][ $size_name ]['sources'][ self::$mime_type ] );
+		}
+		$metadata['original_image'] = wp_basename( $metadata['file'] );
+		$metadata['file']           = dirname( $metadata['file'] ) . '/' . $metadata['sources'][ self::$mime_type ]['file'];
+		update_attached_file( $attachment_id, $metadata['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$image = wp_get_attachment_image( $attachment_id, 'large', false, array( 'class' => 'wp-image-' . $attachment_id ) );
+		$this->assertStringContainsString( '.webp', (string) $this->get_attribute_from_first_tag( $image, 'IMG', 'srcset' ), 'The unfiltered srcset should list the scaled image in the modern format.' );
+
+		$this->opt_in_to_picture_element();
+		$markup = apply_filters( 'the_content', $image );
+
+		$this->assertStringNotContainsString( '<picture', $markup, 'A single modern image does not make for a source.' );
+		$img_srcset = (string) $this->get_attribute_from_first_tag( $markup, 'IMG', 'srcset' );
+		$this->assertStringContainsString( $metadata['original_image'], $img_srcset );
+		$this->assertStringNotContainsString( '.webp', $img_srcset, 'The image should not list a modern image without a picture element.' );
+	}
+
+	/**
+	 * Gets an attribute from the first tag of the given name in the markup.
+	 *
+	 * @param string $markup    The markup.
+	 * @param string $tag_name  The tag name.
+	 * @param string $attribute The attribute name.
+	 * @return string|true|null The attribute value.
+	 */
+	private function get_attribute_from_first_tag( string $markup, string $tag_name, string $attribute ) {
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$processor->next_tag( $tag_name );
+		return $processor->get_attribute( $attribute );
+	}
+
+	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
@@ -102,6 +195,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Apply picture element support.
 		if ( $picture_element ) {
 			$this->opt_in_to_picture_element();
+			// `opt_in_to_picture_element()` re-runs webp_uploads_init(), which
+			// re-registers the new wp_get_attachment_image rewriter. Remove it
+			// again so this test exercises the wp_content_img_tag path only.
+			remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
 		}
 
 		// Create some content with the image.
@@ -169,7 +266,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'jpeg and picture enabled' => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => true,
-				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img data-wp-picture-wrapped width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'fallback_jpeg'   => false,
@@ -570,26 +667,179 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 */
 	public function data_provider_webp_uploads_wrap_image_in_picture_with_different_context(): array {
 		return array(
-			'the_content'          =>
+			'the_content'             =>
 				array(
 					'context'  => 'the_content',
 					'expected' => true,
 				),
-			'post_thumbnail_html'  =>
+			'post_thumbnail_html'     =>
 				array(
 					'context'  => 'post_thumbnail_html',
 					'expected' => true,
 				),
-			'widget_block_content' =>
+			'widget_block_content'    =>
 				array(
 					'context'  => 'widget_block_content',
 					'expected' => true,
 				),
-			'invalid_context'      =>
+			'wp_get_attachment_image' =>
+				array(
+					'context'  => 'wp_get_attachment_image',
+					'expected' => true,
+				),
+			'invalid_context'         =>
 				array(
 					'context'  => 'invalid_context',
 					'expected' => false,
 				),
 		);
+	}
+
+	/**
+	 * `wp_get_attachment_image()` should return a <picture>-wrapped image when
+	 * picture-element output is enabled, because the new filter dispatches to
+	 * `webp_uploads_wrap_image_in_picture()`.
+	 *
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wp_get_attachment_image_is_wrapped_in_picture_when_picture_element_enabled(): void {
+		$this->opt_in_to_picture_element();
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$this->assertStringStartsWith( '<picture ', $image );
+		$this->assertStringContainsString( '<source type="image/webp"', $image );
+	}
+
+	/**
+	 * `webp_uploads_wrap_image_in_picture()` must be idempotent: wrapping an
+	 * already-wrapped string should be a no-op. Otherwise the same markup
+	 * passing through both `wp_get_attachment_image` and `wp_content_img_tag`
+	 * would end up double-wrapped.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wrap_image_in_picture_is_idempotent(): void {
+		$this->opt_in_to_picture_element();
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$twice = webp_uploads_wrap_image_in_picture( $image, 'wp_get_attachment_image', self::$image_id );
+
+		$this->assertSame( $image, $twice, 'Re-wrapping an already-wrapped picture should return the input unchanged.' );
+		$this->assertSame( 1, substr_count( $twice, '<picture ' ) );
+	}
+
+	/**
+	 * A `<picture>` produced for a `wp_get_attachment_image()` call that is then
+	 * embedded in post content must not be wrapped a second time when the content
+	 * runs through `the_content` (`wp_filter_content_tags()` -> `wp_content_img_tag`).
+	 *
+	 * Regression test: `wp_filter_content_tags()` extracts only the inner `<img>`
+	 * substring, so the `stripos( $image, '<picture' )` guard alone never sees the
+	 * surrounding wrapper. The `data-wp-picture-wrapped` marker closes that gap.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_in_content_is_not_double_wrapped(): void {
+		$this->opt_in_to_picture_element();
+
+		// `wp_get_attachment_image()` now returns a `<picture>`; the inner `<img>`
+		// keeps the `wp-image-{ID}` class so `wp_filter_content_tags()` can resolve
+		// the attachment on the content pass.
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+		$this->assertStringStartsWith( '<picture ', $image, 'Precondition: the image should be wrapped once.' );
+
+		// Simulate the markup being placed into post content and rendered.
+		$rendered = apply_filters( 'the_content', $image );
+
+		$this->assertSame(
+			1,
+			substr_count( $rendered, '<picture' ),
+			'An image embedded in content must be wrapped in exactly one <picture> element.'
+		);
+		$this->assertSame(
+			1,
+			substr_count( $rendered, '<img ' ),
+			'Exactly one <img> element should remain after the content pass.'
+		);
+	}
+
+	/**
+	 * `webp_uploads_wrap_image_in_picture()` must not emit an empty `<picture>`
+	 * wrapper (one with no `<source>` children) when no modern-format source can
+	 * be resolved for the attachment.
+	 *
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_wrap_image_in_picture_skips_empty_wrapper_when_no_sources(): void {
+		$this->opt_in_to_picture_element();
+
+		// Let the first `wp_calculate_image_srcset()` call (core building the
+		// `<img>`) succeed so the tag keeps its `srcset`/`sizes`, then force every
+		// later call (the per-mime-type lookups inside the wrapper) to come back
+		// empty, leaving no `<source>` to emit.
+		$call = 0;
+		add_filter(
+			'wp_calculate_image_srcset',
+			static function ( $sources ) use ( &$call ) {
+				++$call;
+				return $call > 1 ? array() : $sources;
+			}
+		);
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array( 'class' => 'wp-image-' . self::$image_id )
+		);
+
+		$this->assertStringNotContainsString( '<picture', $image, 'No <picture> wrapper should be emitted when there are no <source> elements.' );
+		$this->assertStringStartsWith( '<img ', $image );
+	}
+
+	/**
+	 * The deprecated `webp_uploads_update_featured_image()` shim must still exist
+	 * and return rewritten markup, so third-party callers do not fatal-error.
+	 *
+	 * @expectedDeprecated webp_uploads_update_featured_image
+	 * @covers ::webp_uploads_update_featured_image
+	 */
+	public function test_webp_uploads_update_featured_image_is_deprecated_but_functional(): void {
+		$this->assertTrue( function_exists( 'webp_uploads_update_featured_image' ) );
+
+		$html = wp_get_attachment_image( self::$image_id, 'large', false, array( 'class' => 'wp-image-' . self::$image_id ) );
+
+		// @phpstan-ignore function.deprecated (Intentionally exercising the deprecated shim.)
+		$result = webp_uploads_update_featured_image( $html, 0, self::$image_id );
+
+		$this->assertStringContainsString( '<img ', $result );
 	}
 }

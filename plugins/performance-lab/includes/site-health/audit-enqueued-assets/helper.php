@@ -27,6 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                     code: int|false,
  *                     message: string|false,
  *                 },
+ *                 ...
  *             },
  *             assets: array{
  *                 scripts: array<array{ src: string, size: int|null, error: WP_Error|null }>,
@@ -421,10 +422,11 @@ function perflab_aea_enqueued_blocking_styles( array $blocking_assets ): array {
  *                        code: int|false,
  *                        message: string|false,
  *                    },
+ *                    ...
  *                } $response
  *
  * @param WP_Error|array<string, mixed> $response The response from the home page retrieval.
- * @return array{status: 'recommended', description: string}|null Result, or null if there was no failure.
+ * @return array{label: string, status: 'recommended', description: string}|null Result, or null if there was no failure.
  */
 function perflab_aea_blocking_assets_retrieval_failure( $response ): ?array {
 	$result = array(

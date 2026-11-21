@@ -319,6 +319,43 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	}
 
 	/**
+	 * Tests that the filesize is derived from the path when the webp_uploads_pre_generate_additional_image_source filter returns a path but no filesize.
+	 *
+	 * @covers ::webp_uploads_generate_additional_image_source
+	 */
+	public function test_it_should_use_filesize_from_path_when_filter_webp_uploads_pre_generate_additional_image_source_omits_filesize(): void {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		$path          = TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg';
+		$attachment_id = self::factory()->attachment->create_upload_object( $path );
+		$this->assertIsInt( $attachment_id );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			static function () use ( $path ) {
+				return array(
+					'file' => 'image.webp',
+					'path' => $path,
+				);
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertSame( wp_filesize( $path ), $result['filesize'] );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
+	}
+
+	/**
 	 * Return an error when filter webp_uploads_pre_generate_additional_image_source returns WP_Error.
 	 */
 	public function test_it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error(): void {
@@ -431,6 +468,85 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
 		$this->assertSame( $default_transforms, $transforms );
+	}
+
+	/**
+	 * Keeps AVIF output when AVIF is selected but AVIF transparency is not supported.
+	 *
+	 * @covers ::webp_uploads_get_upload_image_mime_transforms
+	 */
+	public function test_it_should_keep_avif_when_avif_transparency_not_supported(): void {
+		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+		if ( ! is_string( $editor ) || ! webp_uploads_imagick_avif_supported( $editor ) ) {
+			$this->markTestSkipped( 'Test requires WP_Image_Editor_Imagick.' );
+		}
+
+		$this->set_image_output_type( 'avif' );
+		$this->mock_avif_transparency_support( false );
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/avif' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/avif' ),
+			),
+			$transforms
+		);
+	}
+
+	/**
+	 * Keeps the AVIF output format for client side media processing when the server cannot encode AVIF.
+	 *
+	 * @covers ::webp_uploads_get_upload_image_mime_transforms
+	 */
+	public function test_it_should_keep_avif_for_client_side_media_processing_when_server_does_not_support_avif(): void {
+		$this->set_image_output_type( 'avif' );
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+			}
+		);
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/webp' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The server side flow should fall back to WebP when AVIF is not supported.'
+		);
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/avif' ),
+				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/avif' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF regardless of the server support.'
+		);
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$this->assertSame(
+			array(
+				'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+				'image/png'  => array( 'image/png', 'image/avif' ),
+				'image/avif' => array( 'image/avif', 'image/jpeg' ),
+			),
+			webp_uploads_get_upload_image_mime_transforms(),
+			'The client side flow should keep AVIF alongside the fallback format.'
+		);
 	}
 
 	/**
@@ -677,5 +793,47 @@ class Test_WebP_Uploads_Helper extends TestCase {
 	 */
 	public function test_webp_uploads_sanitize_image_format( $input, string $expected ): void {
 		$this->assertSame( $expected, webp_uploads_sanitize_image_format( $input ) );
+	}
+
+	/**
+	 * Data provider for ImageMagick version strings.
+	 *
+	 * @return array<string, array{string, bool}> Test data with version strings and expected support.
+	 */
+	public function data_provider_imagick_versions(): array {
+		return array(
+			'ImageMagick 6.8.9 Q16 x86_64'              => array( 'ImageMagick 6.8.9-9 Q16 x86_64 2018-09-28 https://imagemagick.org/index.php', false ),
+			'ImageMagick 6.9.11 Q16 x86_64'             => array( 'ImageMagick 6.9.11-60 Q16 x86_64 2021-01-01 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 below minimum revision' => array( 'ImageMagick 6.9.12-27 Q16 x86_64 2021-10-24 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 just below minimum revision' => array( 'ImageMagick 6.9.12-67 Q16 x86_64 2025-06-01 https://imagemagick.org', false ),
+			'ImageMagick 6.9.12 exact minimum revision' => array( 'ImageMagick 6.9.12-68 Q16 x86_64 2025-06-04 https://imagemagick.org', true ),
+			'ImageMagick 6.9.13 above minimum revision' => array( 'ImageMagick 6.9.13-17 Q16 x86_64', true ),
+			'ImageMagick 7.0.24 above minimum major version' => array( 'ImageMagick 7.0.24 Q16 x86_64', true ),
+			'ImageMagick 7.0.25 above minimum major version' => array( 'ImageMagick 7.0.25 Q16 x86_64', true ),
+			'ImageMagick 7.1.0 Q16-HDRI x86_64'         => array( 'ImageMagick 7.1.0-57 Q16-HDRI x86_64 d68553b17:20221230 https://imagemagick.org', true ),
+			'ImageMagick 7.1.1 Q16 aarch64'             => array( 'ImageMagick 7.1.1-15 Q16 aarch64 98eceff6a:20230729 https://imagemagick.org', true ),
+			'ImageMagick 7.1.2 Q16-HDRI x86_64'         => array( 'ImageMagick 7.1.2-7 Q16-HDRI x86_64 23405 https://imagemagick.org', true ),
+			'Empty string should return false'          => array( '', false ),
+			'Invalid string without version should be false' => array( 'Invalid version string', false ),
+			'String with only text should be false'     => array( 'ImageMagick', false ),
+			'Malformed version string should be false'  => array( 'ImageMagick x.y.z', false ),
+		);
+	}
+
+	/**
+	 * Tests webp_uploads_imagick_avif_transparency_supported checks version correctly.
+	 *
+	 * @dataProvider data_provider_imagick_versions
+	 * @covers ::webp_uploads_imagick_avif_transparency_supported
+	 *
+	 * @param string $version          ImageMagick version string.
+	 * @param bool   $expected_support Expected transparency support result.
+	 */
+	public function test_webp_uploads_imagick_avif_transparency_supported_checks_version( string $version, bool $expected_support ): void {
+		remove_all_filters( 'webp_uploads_imagick_avif_transparency_supported' );
+
+		$result = webp_uploads_imagick_avif_transparency_supported( $version );
+
+		$this->assertSame( $expected_support, $result );
 	}
 }

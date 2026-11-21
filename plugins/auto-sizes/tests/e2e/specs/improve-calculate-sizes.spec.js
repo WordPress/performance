@@ -1,3 +1,7 @@
+/* jshint node: true */
+// ^ This Playwright spec runs in Node (CommonJS), not the browser like the
+// sibling plugin scripts that the `plugins/.jshintrc` browser config targets.
+
 /**
  * External dependencies
  */

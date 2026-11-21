@@ -247,7 +247,7 @@ async function getAlreadySubmittedSessionStorageKey(
 ) {
 	if ( ! win.crypto || ! win.crypto.subtle ) {
 		warn(
-			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to to the page not being served via HTTPS.'
+			'Unable to generate sessionStorage key for already-submitted URL since crypto is not available, likely due to the page not being served via HTTPS.'
 		);
 		return null;
 	}

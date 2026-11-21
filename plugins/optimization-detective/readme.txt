@@ -1,8 +1,8 @@
 === Optimization Detective ===
 
 Contributors: wordpressdotorg
-Tested up to: 7.0
-Stable tag:   1.0.0-beta5
+Tested up to: 7.1
+Stable tag:   1.0.0-beta7
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -54,6 +54,25 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 1.0.0-beta7 =
+
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum required WordPress version to 6.9. ([2517](https://github.com/WordPress/performance/pull/2517))
+* Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
+* Bump the bundled web-vitals library from 5.1.0 to 6.1.0, including its 6.0.0 major release. ([2606](https://github.com/WordPress/performance/pull/2606), [2629](https://github.com/WordPress/performance/pull/2629))
+* Ship the source maps for the bundled web-vitals library, which it began publishing in 6.0.0.
+* Move URL Metrics storage HMAC validation into the REST endpoint callback so it runs once all parameters have been validated and sanitized, returning a `rest_invalid_param` error. ([2436](https://github.com/WordPress/performance/pull/2436))
+* Remove the deprecated constants along with the `deprecated.php` file that contained them.
+
+= 1.0.0-beta6 =
+
+**Security**
+
+* Add validation of the SCRIPT element containing the detection args JSON. This fixes a DOM clobbering vulnerability in which an injected element with a colliding `id` could shadow the script and cause an arbitrary module to be imported, which required an authenticated user with at least a contributor role. Props to Asaf Mozes (amosec) for [responsible disclosure](https://github.com/WordPress/performance/blob/trunk/SECURITY.md).
 
 = 1.0.0-beta5 =
 
