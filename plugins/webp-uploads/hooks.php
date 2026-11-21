@@ -78,6 +78,30 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 	}
 
 	/*
+	 * If the base image metadata is missing its dimensions, the core sub-size
+	 * generation failed at upload time. This happens when wp_create_image_subsizes()
+	 * bails early because wp_getimagesize() could not read the file -- typically an
+	 * intermittent race where the upload is read before it has finished being written
+	 * to disk. The result is metadata without `width`/`height`/`sizes`, which renders
+	 * the attachment at 1x1 pixels both in the Media Library and on the front end.
+	 *
+	 * The file is readable by the time this filter runs, so attempt to recover the
+	 * original dimensions from it. If they can be recovered, the full-size image will
+	 * display correctly again (responsive sub-sizes still require regeneration). If the
+	 * file still cannot be read, bail without decorating or persisting a partial record.
+	 *
+	 * See https://github.com/WordPress/performance/issues/2468.
+	 */
+	if ( ! isset( $metadata['width'], $metadata['height'] ) || (int) $metadata['width'] < 1 || (int) $metadata['height'] < 1 ) {
+		$image_size = wp_getimagesize( $file );
+		if ( ! is_array( $image_size ) ) {
+			return $metadata;
+		}
+		$metadata['width']  = $image_size[0];
+		$metadata['height'] = $image_size[1];
+	}
+
+	/*
 	 * For an upload over the big image size threshold, the browser supplies the scaled full size image in the
 	 * modern format and the upload is kept as the original image. The upload's format is then the one to fall
 	 * back to, as it is when the upload stays the attached file.
