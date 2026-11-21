@@ -27,8 +27,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function webp_uploads_get_upload_image_mime_transforms(): array {
 
-	// Check the selected output format.
-	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
+	// Check the selected output format. When the browser encodes the images, the server's own AVIF support is irrelevant.
+	$output_format = webp_uploads_get_image_output_format();
+	if ( 'avif' === $output_format && ! webp_uploads_mime_type_supported( 'image/avif' ) && ! webp_uploads_is_client_side_media_processing() ) {
+		$output_format = 'webp';
+	}
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
@@ -348,6 +351,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  *
  * @since 2.0.0
  * @since 2.7.0 AVIF is now only reported as supported when the server can also encode transparent AVIF images.
+ * @since n.e.x.t AVIF is reported as supported even when the server cannot encode transparent AVIF images.
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
@@ -359,10 +363,66 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
-		return webp_uploads_avif_transparency_supported();
+		return webp_uploads_avif_supported();
 	}
 
 	return true;
+}
+
+/**
+ * Checks whether the images for the current request are encoded by the browser rather than the server.
+ *
+ * Since WordPress 7.1, the block editor can process uploads client side: the browser uploads the original,
+ * generates the sub-sizes itself (transcoding them to the format reported via the `image_output_format`
+ * REST field), sideloads them, and finally asks the server to record the metadata. In that flow the
+ * server's image editor capabilities do not limit which modern format can be produced.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True while handling a REST request in which the browser supplies the encoded images, false otherwise.
+ */
+function webp_uploads_is_client_side_media_processing(): bool {
+	/**
+	 * Filters whether the images for the current request are encoded client side.
+	 *
+	 * The plugin enables this for the REST API requests of the client side media processing flow, in which case
+	 * the modern image format is selected without regard to what the server's image editor can encode.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $client_side Whether the current request's images are encoded client side. Default false.
+	 */
+	return (bool) apply_filters( 'webp_uploads_client_side_media_processing', false );
+}
+
+/**
+ * Checks whether WordPress offers client side media processing on this site.
+ *
+ * Client side media processing was introduced in WordPress 7.1 and requires a secure context. Whether a given
+ * browser is actually able to process images is a runtime check which happens in JavaScript.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if client side media processing is enabled for the site, false otherwise.
+ */
+function webp_uploads_is_client_side_media_processing_enabled(): bool {
+	return function_exists( 'wp_is_client_side_media_processing_enabled' ) && wp_is_client_side_media_processing_enabled();
+}
+
+/**
+ * Gets the mime type of the original image of an attachment, which is the upload when a scaled image replaced it.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $metadata The attachment metadata.
+ * @return string|null The mime type, or null if there is no original image or its mime type is unknown.
+ */
+function webp_uploads_get_original_image_mime_type( array $metadata ): ?string {
+	if ( ! isset( $metadata['original_image'] ) || ! is_string( $metadata['original_image'] ) ) {
+		return null;
+	}
+	$mime_type = wp_check_filetype( $metadata['original_image'] )['type'];
+	return is_string( $mime_type ) ? $mime_type : null;
 }
 
 /**
@@ -505,7 +565,7 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 	}
 
 	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-		foreach ( $metadata['sizes'] as $size => $size_data ) {
+		foreach ( $metadata['sizes'] as $size_data ) {
 
 			if ( ! isset( $size_data['file'] ) ) {
 				continue;

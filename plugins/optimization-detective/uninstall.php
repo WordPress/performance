@@ -42,14 +42,14 @@ if ( is_multisite() ) {
 	);
 
 	// Skip iterating over self.
-	$od_site_ids = array_diff( // @phpstan-ignore argument.type (get_sites( 'fields' => 'ids' ) returns int[], but php-stubs/wordpress-stubs uses a sealed array shape in its conditional return type so the narrowing is lost when extra args are passed. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
+	$od_site_ids = array_diff(
 		$od_site_ids,
 		array( get_current_blog_id() )
 	);
 
 	// Delete all other blogs' URL Metrics posts.
 	foreach ( $od_site_ids as $od_site_id ) {
-		switch_to_blog( $od_site_id ); // @phpstan-ignore argument.type (get_sites( 'fields' => 'ids' ) returns int[], but php-stubs/wordpress-stubs uses a sealed array shape in its conditional return type so the narrowing is lost when extra args are passed. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
+		switch_to_blog( $od_site_id );
 		$od_delete_site_data();
 		restore_current_blog();
 	}

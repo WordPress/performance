@@ -98,6 +98,9 @@ parameters:
 			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
 			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
 			path: plugins/dominant-color-images/*.php
+		# Hook callbacks receive their arguments positionally, so an unused parameter cannot be removed when a later one is used.
+		-
+			identifier: function.unusedParameter
 
 		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
 		-
@@ -135,9 +138,6 @@ parameters:
 			path: */tests/*
 		-
 			identifier: method.alreadyNarrowedType
-			path: */tests/*
-		-
-			identifier: argument.unresolvableType
 			path: */tests/*
 		-
 			identifier: no.private.method

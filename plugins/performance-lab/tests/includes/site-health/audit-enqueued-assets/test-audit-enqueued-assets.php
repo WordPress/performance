@@ -109,7 +109,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertIsArray( $result['assets'] );
 		$assets = $result['assets'];
 		$this->assertArrayHasKey( 'scripts', $assets );
-		$this->assertNotEmpty( $assets['scripts'] );
+		$this->assertNotCount( 0, $assets['scripts'] );
 
 		$this->assertSame(
 			array(
@@ -214,7 +214,7 @@ class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 		$this->assertIsArray( $result['assets'] );
 		$assets = $result['assets'];
 		$this->assertArrayHasKey( 'styles', $assets );
-		$this->assertNotEmpty( $assets['styles'] );
+		$this->assertNotCount( 0, $assets['styles'] );
 
 		$this->assertSame(
 			array(
