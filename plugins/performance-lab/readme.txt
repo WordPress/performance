@@ -57,6 +57,10 @@ The primary purpose of the Performance Lab plugin is to allow testing of various
 
 Per the primary purpose of the plugin (see above), it can mostly be considered a beta testing plugin for the various performance features it includes. However, it's essential to understand that utilizing it comes with inherent risks. Users are encouraged to proceed with caution and understand that they are doing so at their own risk.
 
+= How can AI agents inspect my site's performance? =
+
+Performance Lab integrates with the experimental [Chrome DevTools third-party tools API](https://developer.chrome.com/docs/devtools/agents/use-cases/third-party-tools). When a logged-in administrator (or any user with the capability from the `perflab_devtools_capability` filter, which defaults to `manage_options`) views the site, the plugin registers read-only tools which AI agents connected via the Chrome DevTools MCP server can invoke: `get_server_timing_metrics` (the Server-Timing metrics sent for the page), `get_database_queries` (the SQL queries executed while rendering the page, when the `SAVEQUERIES` constant is enabled), and `get_environment_info` (WordPress/PHP versions, active theme and plugins, object cache status). No data is exposed to unauthenticated visitors or regular users.
+
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin is a collection of future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the Performance Lab GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/performance-lab/#new-topic-0).
