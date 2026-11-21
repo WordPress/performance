@@ -2,6 +2,13 @@ name: Spell Check
 
 on: [pull_request]
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 # Disable permissions for all available scopes by default.
 # Any needed permissions should be configured at the job level.
 permissions: {}
@@ -14,8 +21,8 @@ jobs:
     permissions:
       contents: read # Required to clone the repo.
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Search for misspellings
-        uses: crate-ci/typos@f8a58b6b53f2279f71eb605f03a4ae4d10608f45 # v1.47.0
+        uses: crate-ci/typos@276087d9a4f06398b3e04825487805e2d7375888 # v1.52.2
         with:
           config: ./.github/typos.toml

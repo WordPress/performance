@@ -12,6 +12,8 @@ const { plugins: standalonePlugins } = require( './plugins.json' );
 const {
 	createPluginZip,
 	assetDataTransformer,
+	sourceMappingUrlTransformer,
+	sourceMapFileTransformer,
 	cssMinifyTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
@@ -194,11 +196,40 @@ const optimizationDetective = ( env ) => {
 						from: `${ source }/dist/web-vitals.js`,
 						to: `${ destination }/build/web-vitals.js`,
 						info: { minimized: true },
+						transform: {
+							transformer:
+								sourceMappingUrlTransformer(
+									'web-vitals.js.map'
+								),
+							cache: false,
+						},
+					},
+					{
+						from: `${ source }/dist/web-vitals.js.map`,
+						to: `${ destination }/build/web-vitals.js.map`,
+						info: { minimized: true },
 					},
 					{
 						from: `${ source }/dist/web-vitals.attribution.js`,
 						to: `${ destination }/build/web-vitals-attribution.js`,
 						info: { minimized: true },
+						transform: {
+							transformer: sourceMappingUrlTransformer(
+								'web-vitals-attribution.js.map'
+							),
+							cache: false,
+						},
+					},
+					{
+						from: `${ source }/dist/web-vitals.attribution.js.map`,
+						to: `${ destination }/build/web-vitals-attribution.js.map`,
+						info: { minimized: true },
+						transform: {
+							transformer: sourceMapFileTransformer(
+								'web-vitals-attribution.js'
+							),
+							cache: false,
+						},
 					},
 					{
 						from: `${ source }/package.json`,
@@ -398,7 +429,9 @@ const buildPlugin = ( env ) => {
 
 						// If zip flag is passed, create a zip file.
 						if ( env.zip ) {
-							createPluginZip( buildDir, env.plugin );
+							createPluginZip( buildDir, env.plugin, {
+								force: Boolean( env.force ),
+							} );
 						}
 					} );
 				},

@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type AnimationConfig array{
  *     aliases?: non-empty-string[],
  *     use_stylesheet?: bool|non-empty-string,
- *     use_global_transition_names?: bool|callable(string, array<string,string>):bool,
- *     use_post_transition_names?: bool|callable(string, array<string,string>):bool,
- *     get_stylesheet_callback?: callable(string, string, array<string,string>):string|null
+ *     use_global_transition_names?: bool|callable(string, array<string,mixed>):bool,
+ *     use_post_transition_names?: bool|callable(string, array<string,mixed>):bool,
+ *     get_stylesheet_callback?: callable(string, string, array<string,mixed>):string|null
  * }
  *
  * @since 1.0.0
