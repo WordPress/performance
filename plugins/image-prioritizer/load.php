@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Image Prioritizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer
- * Description: Optimizes LCP image loading with <code>fetchpriority=high</code> and applies image lazy-loading by leveraging client-side detection with real user metrics.
- * Requires at least: 6.5
- * Requires PHP: 7.2
+ * Description: Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds <code>fetchpriority</code> and applies lazy-loading.
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
  * Requires Plugins: optimization-detective
- * Version: 0.1.3
+ * Version: 1.0.0-beta4
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -16,10 +16,13 @@
  * @package image-prioritizer
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -44,9 +47,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			};
 
-			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
-			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
+			/*
+			 * Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action could be
+			 * used since it is the first action that fires once the theme is loaded. However, plugins may embed this
+			 * logic inside a module which initializes even later at the init action. The earliest action that this
+			 * plugin has hooks for is the init action at the default priority of 10 (which includes the rest_api_init
+			 * action), so this is why it gets initialized at priority 9.
+			 */
+			add_action( 'init', $bootstrap, 9 );
 		}
 
 		// Register this copy of the plugin.
@@ -60,25 +68,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// Otherwise, register this copy if it is actually the one installed in the directory for plugins.
 			rtrim( WP_PLUGIN_DIR, '/' ) === dirname( __DIR__ )
 		) {
-			$GLOBALS[ $global_var_name ]['version'] = $version;
-			$GLOBALS[ $global_var_name ]['load']    = $load;
+			$GLOBALS[ $global_var_name ]['version'] = $version; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
+			$GLOBALS[ $global_var_name ]['load']    = $load; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
 		}
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.1.3',
+	'1.0.0-beta4',
 	static function ( string $version ): void {
-
-		// Define the constant.
 		if ( defined( 'IMAGE_PRIORITIZER_VERSION' ) ) {
 			return;
 		}
 
 		define( 'IMAGE_PRIORITIZER_VERSION', $version );
 
-		require_once __DIR__ . '/class-image-prioritizer-tag-visitor.php';
-		require_once __DIR__ . '/class-image-prioritizer-img-tag-visitor.php';
-		require_once __DIR__ . '/class-image-prioritizer-background-image-styled-tag-visitor.php';
 		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 	}

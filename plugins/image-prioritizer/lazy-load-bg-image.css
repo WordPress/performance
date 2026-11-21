@@ -1,0 +1,5 @@
+@media (scripting: enabled) {
+	.od-lazy-bg-image {
+		background-image: none !important;
+	}
+}

@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Embed Optimizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer
- * Description: Optimizes the performance of embeds by lazy-loading iframes and scripts.
- * Requires at least: 6.5
- * Requires PHP: 7.2
- * Version: 0.2.0
+ * Description: Optimizes the performance of embeds through lazy-loading, adding dns-prefetch links, and reserving space to reduce layout shifts.
+ * Requires at least: 6.9
+ * Requires PHP: 7.4
+ * Version: 1.0.0-beta6
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,10 +15,13 @@
  * @package embed-optimizer
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -43,9 +46,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			};
 
-			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
-			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
+			/*
+			 * Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action could be
+			 * used since it is the first action that fires once the theme is loaded. However, plugins may embed this
+			 * logic inside a module which initializes even later at the init action. The earliest action that this
+			 * plugin has hooks for is the init action at the default priority of 10 (which includes the rest_api_init
+			 * action), so this is why it gets initialized at priority 9.
+			 */
+			add_action( 'init', $bootstrap, 9 );
 		}
 
 		// Register this copy of the plugin.
@@ -59,18 +67,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 			// Otherwise, register this copy if it is actually the one installed in the directory for plugins.
 			rtrim( WP_PLUGIN_DIR, '/' ) === dirname( __DIR__ )
 		) {
-			$GLOBALS[ $global_var_name ]['version'] = $version;
-			$GLOBALS[ $global_var_name ]['load']    = $load;
+			$GLOBALS[ $global_var_name ]['version'] = $version; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
+			$GLOBALS[ $global_var_name ]['load']    = $load; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- It is prefixed.
 		}
 	}
 )(
 	'embed_optimizer_pending_plugin',
-	'0.2.0',
+	'1.0.0-beta6',
 	static function ( string $version ): void {
+		if ( defined( 'EMBED_OPTIMIZER_VERSION' ) ) {
+			return;
+		}
 
 		define( 'EMBED_OPTIMIZER_VERSION', $version );
 
-		// Load in the Embed Optimizer plugin hooks.
+		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 	}
 );

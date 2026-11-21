@@ -7,9 +7,13 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Registers setting for generating JPEG in addition to the selected modern format for image uploads.
@@ -40,6 +44,18 @@ function webp_uploads_register_media_settings_field(): void {
 			'show_in_rest' => false,
 		)
 	);
+
+	// Add a setting to generate fallback images in all sizes including custom sizes.
+	register_setting(
+		'media',
+		'perflab_generate_all_fallback_sizes',
+		array(
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => false,
+		)
+	);
+
 	// Add a setting to use the picture element.
 	register_setting(
 		'media',
@@ -63,7 +79,19 @@ function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
 		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
-		'__return_empty_string',
+		static function (): void {
+			printf(
+				'<p>%s</p>',
+				wp_kses(
+					sprintf(
+						/* translators: %s: URL to the plugin FAQ on WordPress.org */
+						__( 'If modern format images are not being generated after upload, see the <a href="%s">FAQ</a> for common reasons.', 'webp-uploads' ),
+						'https://wordpress.org/plugins/webp-uploads/#faq'
+					),
+					array( 'a' => array( 'href' => array() ) )
+				)
+			);
+		},
 		'media',
 		array(
 			'before_section' => '<div id="modern-image-formats">',
@@ -81,19 +109,33 @@ function webp_uploads_add_media_settings_fields(): void {
 		array( 'class' => 'perflab-generate-avif-and-webp' )
 	);
 
-	// Only add the remaining settings fields if at least one modern image format is supported.
-	if ( ! webp_uploads_mime_type_supported( 'image/avif' ) && ! webp_uploads_mime_type_supported( 'image/webp' ) ) {
+	// Only add the remaining settings fields if at least one modern image format can be generated, either by the server or by the browser.
+	if (
+		! webp_uploads_mime_type_supported( 'image/avif' ) &&
+		! webp_uploads_mime_type_supported( 'image/webp' ) &&
+		! webp_uploads_is_client_side_media_processing_enabled()
+	) {
 		return;
 	}
 
-	// Add JPEG Output settings field.
+	// Add fallback image output settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
-		__( 'Also output JPEG', 'webp-uploads' ),
+		__( 'Output fallback images', 'webp-uploads' ),
 		'webp_uploads_generate_webp_jpeg_setting_callback',
 		'media',
 		'perflab_modern_image_format_settings',
 		array( 'class' => 'perflab-generate-webp-and-jpeg' )
+	);
+
+	// Add setting field for generating fallback images in all sizes including custom sizes.
+	add_settings_field(
+		'perflab_generate_all_fallback_sizes',
+		__( 'Generate all fallback image sizes', 'webp-uploads' ),
+		'webp_uploads_generate_all_fallback_sizes_callback',
+		'media',
+		'perflab_modern_image_format_settings',
+		array( 'class' => 'perflab-generate-fallback-all-sizes' )
 	);
 
 	// Add picture element support settings field.
@@ -112,17 +154,23 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
  * Renders the settings field for the 'perflab_modern_image_format' setting.
  *
  * @since 2.0.0
+ * @since n.e.x.t A format the server cannot encode stays selectable when uploads can be converted in the browser.
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
 	$selected       = webp_uploads_get_image_output_format();
-	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
+	$avif_supported = webp_uploads_avif_supported();
 	$webp_supported = webp_uploads_mime_type_supported( 'image/webp' );
 
-	// If neither format is support, the entire field is not shown.
-	if ( ! $avif_supported && ! $webp_supported ) {
+	// Since WordPress 7.1 uploads can be converted in the browser, which makes both formats available.
+	$client_side    = webp_uploads_is_client_side_media_processing_enabled();
+	$avif_available = $avif_supported || $client_side;
+	$webp_available = $webp_supported || $client_side;
+
+	// If neither format is available, the entire field is not shown.
+	if ( ! $avif_available && ! $webp_available ) {
 		?>
-		<br />
+		<br>
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'Modern image support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'WebP or AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
@@ -131,30 +179,59 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		return;
 	}
 
-	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( ! $avif_supported && 'avif' === $selected ) {
+	// If only one of the two formats is available, the dropdown defaults to that type and the other type is disabled.
+	if ( ! $avif_available && 'avif' === $selected ) {
 		$selected = 'webp';
-	} elseif ( ! $webp_supported && 'webp' === $selected ) {
+	} elseif ( ! $webp_available && 'webp' === $selected ) {
 		$selected = 'avif';
 	}
 	?>
 	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
-		<option value="webp"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_supported ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
-		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_supported ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
+		<option value="webp"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_available ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
+		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_available ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 	</select>
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 	</label>
-	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
-	<?php if ( ! $avif_supported ) : ?>
-		<br />
+	<p class="description" id="perflab_modern_image_format_description">
+		<?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?>
+		<?php esc_html_e( 'Generated images may be discarded if the file in the modern format is larger than the originally uploaded image.', 'webp-uploads' ); ?>
+	</p>
+	<?php if ( ! $avif_supported && $client_side ) : ?>
+		<br>
+		<div class="notice notice-info inline">
+			<p><b><?php esc_html_e( 'AVIF images are created in the browser.', 'webp-uploads' ); ?></b></p>
+			<p>
+				<?php
+				if ( $webp_supported ) {
+					esc_html_e( 'Your server cannot generate AVIF images, so uploads are converted to AVIF in the browser where it is able to. Uploads which are not processed in the browser are converted to WebP on the server instead.', 'webp-uploads' );
+				} else {
+					esc_html_e( 'Your server cannot generate AVIF images, so uploads are converted to AVIF in the browser where it is able to. Uploads which are not processed in the browser are not converted.', 'webp-uploads' );
+				}
+				?>
+			</p>
+		</div>
+	<?php elseif ( ! $avif_supported ) : ?>
+		<br>
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
+	<?php elseif ( ! webp_uploads_avif_transparency_supported() ) : ?>
+		<br>
+		<div class="notice notice-warning inline">
+			<p><b><?php esc_html_e( 'AVIF is supported, but transparent images will lose their transparency.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'The ImageMagick version on this server cannot keep transparency in AVIF images. Select WebP if you upload transparent images, or contact your hosting provider to update ImageMagick.', 'webp-uploads' ); ?></p>
+		</div>
 	<?php endif; ?>
-	<?php if ( ! $webp_supported ) : ?>
-		<br />
+	<?php if ( ! $webp_supported && $client_side ) : ?>
+		<br>
+		<div class="notice notice-info inline">
+			<p><b><?php esc_html_e( 'WebP images are created in the browser.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'Your server cannot generate WebP images, so uploads are converted to WebP in the browser where it is able to. Uploads which are not processed in the browser are not converted.', 'webp-uploads' ); ?></p>
+		</div>
+	<?php elseif ( ! $webp_supported ) : ?>
+		<br>
 		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
@@ -172,9 +249,97 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 	?>
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
-			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
+			<?php esc_html_e( 'Also generate fallback images in the original upload format', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling fallback image output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+	<?php
+}
+
+
+/**
+ * Renders the settings field for generating all fallback image sizes.
+ *
+ * @since 2.4.0
+ */
+function webp_uploads_generate_all_fallback_sizes_callback(): void {
+	$all_fallback_sizes_enabled   = webp_uploads_should_generate_all_fallback_sizes();
+	$fallback_enabled             = webp_uploads_is_fallback_enabled();
+	$all_fallback_sizes_hidden_id = 'perflab_generate_all_fallback_sizes_hidden';
+
+	?>
+	<style>
+		#perflab_generate_all_fallback_sizes_fieldset.disabled label,
+		#perflab_generate_all_fallback_sizes_fieldset.disabled p {
+			opacity: 0.7;
+		}
+	</style>
+	<div id="perflab_generate_all_fallback_sizes_notice" class="notice notice-info inline" <?php echo $fallback_enabled ? 'hidden' : ''; ?>>
+		<p><?php esc_html_e( 'This setting requires fallback image output to be enabled.', 'webp-uploads' ); ?></p>
+	</div>
+	<div id="perflab_generate_all_fallback_sizes_fieldset" class="<?php echo ! $fallback_enabled ? 'disabled' : ''; ?>">
+		<label for="perflab_generate_all_fallback_sizes" id="perflab_generate_all_fallback_sizes_label">
+			<input
+				type="checkbox"
+				id="perflab_generate_all_fallback_sizes"
+				name="perflab_generate_all_fallback_sizes"
+				aria-describedby="perflab_generate_all_fallback_sizes_description"
+				value="1"
+				<?php checked( $all_fallback_sizes_enabled ); ?>
+				<?php disabled( ! $fallback_enabled ); ?>
+			>
+			<?php
+			/*
+			 * If the checkbox is disabled, but the option is enabled, include a hidden input to continue sending the
+			 * same value upon form submission.
+			 */
+			if ( ! $fallback_enabled && $all_fallback_sizes_enabled ) {
+				?>
+				<input
+					type="hidden"
+					id="<?php echo esc_attr( $all_fallback_sizes_hidden_id ); ?>"
+					name="perflab_generate_all_fallback_sizes"
+					value="1"
+				>
+				<?php
+			}
+			esc_html_e( 'Generate all fallback image sizes including custom sizes', 'webp-uploads' );
+			?>
+		</label>
+		<p class="description" id="perflab_generate_all_fallback_sizes_description"><?php esc_html_e( 'Enabling this option will generate all fallback image sizes including custom sizes. Note: uses even more storage space.', 'webp-uploads' ); ?></p>
+	</div>
+	<script>
+	( function ( allFallbackSizesHiddenId ) {
+		const fallbackCheckbox = document.getElementById( 'perflab_generate_webp_and_jpeg' );
+		const allFallbackSizesCheckbox = document.getElementById( 'perflab_generate_all_fallback_sizes' );
+		const allFallbackSizesFieldset = document.getElementById( 'perflab_generate_all_fallback_sizes_fieldset' );
+		const allFallbackSizesNotice = document.getElementById( 'perflab_generate_all_fallback_sizes_notice' );
+
+		function toggleAllFallbackSizes() {
+			const fallbackEnabled = fallbackCheckbox.checked;
+			allFallbackSizesFieldset.classList.toggle( 'disabled', ! fallbackEnabled );
+			allFallbackSizesCheckbox.disabled = ! fallbackEnabled;
+			allFallbackSizesNotice.hidden = fallbackEnabled;
+
+			// Remove or inject hidden input to preserve original setting value as needed.
+			if ( fallbackEnabled ) {
+				const hiddenInput = document.getElementById( allFallbackSizesHiddenId );
+				if ( hiddenInput ) {
+					hiddenInput.parentElement.removeChild( hiddenInput );
+				}
+			} else if ( allFallbackSizesCheckbox.checked && ! document.getElementById( allFallbackSizesHiddenId ) ) {
+				// The hidden input is only needed if the value was originally set (i.e., the checkbox enabled).
+				const hiddenInput = document.createElement( 'input' );
+				hiddenInput.type = 'hidden';
+				hiddenInput.id = allFallbackSizesHiddenId;
+				hiddenInput.name = allFallbackSizesCheckbox.name;
+				hiddenInput.value = allFallbackSizesCheckbox.value;
+				allFallbackSizesCheckbox.parentElement.insertBefore( hiddenInput, allFallbackSizesCheckbox.nextSibling );
+			}
+		}
+
+		fallbackCheckbox.addEventListener( 'change', toggleAllFallbackSizes );
+	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
+	</script>
 	<?php
 }
 
@@ -186,7 +351,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
 	$picture_element_option    = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
-	$jpeg_fallback_enabled     = webp_uploads_is_jpeg_fallback_enabled();
+	$jpeg_fallback_enabled     = webp_uploads_is_fallback_enabled();
 	$picture_element_hidden_id = 'webp_uploads_use_picture_element_hidden';
 	?>
 	<style>
@@ -196,7 +361,7 @@ function webp_uploads_use_picture_element_callback(): void {
 		}
 	</style>
 	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
-		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
+		<p><?php esc_html_e( 'This setting requires fallback image output to be enabled.', 'webp-uploads' ); ?></p>
 	</div>
 	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
 		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
@@ -228,9 +393,9 @@ function webp_uploads_use_picture_element_callback(): void {
 			?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
-		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to the original upload format. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
 		<div id="webp_uploads_jpeg_fallback_notice" class="notice notice-info inline" <?php echo $picture_element_option ? '' : 'hidden'; ?>>
-			<p><?php esc_html_e( 'Picture elements will only be used when JPEG fallback images are available. So this will not apply to any images you may have uploaded while the "Also generate JPEG" setting was disabled.', 'webp-uploads' ); ?></p>
+			<p><?php esc_html_e( 'Picture elements will only be used when fallback images are available. So this will only apply to  images you have uploaded while the "Also generate fallback images" setting was enabled.', 'webp-uploads' ); ?></p>
 		</div>
 	</div>
 	<script>
@@ -239,7 +404,7 @@ function webp_uploads_use_picture_element_callback(): void {
 			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = ! this.checked;
 		} );
 
-		// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+		// Listen for clicks on the fallback output checkbox, enabling/disabling the
 		// picture element checkbox accordingly.
 		document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
 			document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
@@ -265,7 +430,7 @@ function webp_uploads_use_picture_element_callback(): void {
 				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
 			}
 		} );
-	} )( <?php echo wp_json_encode( $picture_element_hidden_id ); ?> );
+	} )( <?php echo wp_json_encode( $picture_element_hidden_id, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?> );
 	</script>
 	<?php
 }

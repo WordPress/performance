@@ -115,6 +115,92 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		$this->assertSame( $autoloaded_options_size + $expected_size_increase, perflab_aao_autoloaded_options_size() );
 	}
 
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_test_perflab_aao_query_autoloaded_options(): array {
+		return array(
+			'none_over_threshold'           => array(
+				'alloptions' => array(
+					'foo'  => 'bar',
+					'o100' => str_repeat( 'a', 100 ),
+				),
+				'threshold'  => null,
+				'expected'   => array(),
+			),
+			'one_over_threshold'            => array(
+				'alloptions' => array(
+					'foo'  => 'bar',
+					'o101' => str_repeat( 'a', 101 ),
+				),
+				'threshold'  => null,
+				'expected'   => array( 'o101' ),
+			),
+			'three_over_custom_threshold'   => array(
+				'alloptions' => array(
+					'foo'  => 'bar',
+					'o51'  => str_repeat( 'a', 51 ),
+					'o100' => str_repeat( 'a', 100 ),
+					'o101' => str_repeat( 'a', 101 ),
+					'int'  => 123,
+					'bool' => true,
+				),
+				'threshold'  => 50,
+				'expected'   => array( 'o51', 'o100', 'o101' ),
+			),
+			'two_non_scalar_over_threshold' => array(
+				'alloptions' => array(
+					'foo'    => 'bar',
+					'array'  => array(
+						'key' => str_repeat( 'a', 101 ),
+					),
+					'object' => (object) array(
+						'key' => str_repeat( 'a', 101 ),
+					),
+				),
+				'threshold'  => null,
+				'expected'   => array( 'array', 'object' ),
+			),
+		);
+	}
+
+	/**
+	 * Tests perflab_aao_query_autoloaded_options().
+	 *
+	 * @dataProvider data_provider_test_perflab_aao_query_autoloaded_options
+	 * @covers ::perflab_aao_query_autoloaded_options
+	 *
+	 * @param array<string, mixed> $alloptions All options.
+	 * @param int|null             $threshold  Custom threshold.
+	 * @param string[]             $expected   Expected option names to be over the threshold.
+	 */
+	public function test_perflab_aao_query_autoloaded_options( array $alloptions, ?int $threshold, array $expected ): void {
+		add_filter(
+			'pre_wp_load_alloptions',
+			static function () use ( $alloptions ): array {
+				return $alloptions;
+			}
+		);
+
+		if ( isset( $threshold ) ) {
+			add_filter(
+				'perflab_aao_autoloaded_options_table_threshold',
+				static function () use ( $threshold ): int {
+					return $threshold;
+				}
+			);
+		}
+
+		$query = perflab_aao_query_autoloaded_options();
+		$this->assertCount( count( $expected ), $query );
+		$this->assertSameSets( $expected, wp_list_pluck( $query, 'option_name' ) );
+		foreach ( wp_list_pluck( $query, 'option_value_length' ) as $option_value_length ) {
+			$this->assertIsInt( $option_value_length );
+		}
+	}
+
 	public function test_perflab_aao_autoloaded_options_disable_revert_functionality(): void {
 
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );

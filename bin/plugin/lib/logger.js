@@ -6,9 +6,8 @@ const { styleText } = require( 'node:util' );
 /**
  * Create a function that applies a style to text using `node:util.styleText`.
  *
- * @param {string} style Style to apply to the text
- *
- * @return {Function} Function that applies the style to the text
+ * @param {Parameters<typeof import('node:util').styleText>[0]} style - Style to apply to the text.
+ * @return {function(string):string} Function that applies the style to the text.
  */
 const createStyledText = ( style ) => ( text ) => styleText( style, text );
 
@@ -17,14 +16,14 @@ const error = createStyledText( 'red' );
 const warning = createStyledText( 'yellowBright' );
 const success = createStyledText( 'green' );
 
-const log = console.log; // eslint-disable-line no-console
+const log = console.log;
 
 module.exports = {
 	log,
 	formats: {
 		title: bold,
-		error: ( text ) => bold( error( text ) ),
-		warning: ( text ) => bold( warning( text ) ),
-		success: ( text ) => bold( success( text ) ),
+		error: ( /** @type {string} */ text ) => bold( error( text ) ),
+		warning: ( /** @type {string} */ text ) => bold( warning( text ) ),
+		success: ( /** @type {string} */ text ) => bold( success( text ) ),
 	},
 };

@@ -1,0 +1,30 @@
+{
+	"boss": true,
+	"curly": true,
+	"eqeqeq": true,
+	"eqnull": true,
+	"esversion": 11,
+	"expr": true,
+	"immed": true,
+	"laxbreak": true,
+	"noarg": true,
+	"nonbsp": true,
+	"quotmark": "single",
+	"undef": true,
+	"unused": true,
+
+	"browser": true,
+	"devel": true,
+
+	"globals": {
+		"wp": false,
+		"jQuery": false,
+		"ResizeObserver": false,
+		"requestIdleCallback": false,
+		"cancelIdleCallback": false,
+		"structuredClone": false,
+		"CompressionStream": false,
+		"crypto": false,
+		"name": true
+	}
+}

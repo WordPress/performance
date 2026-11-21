@@ -103,8 +103,9 @@ class Image_Has_Source_Constraint extends Constraint {
 
 		// Fail if the file property is empty or not a string.
 		if (
-			empty( $sources[ $this->mime_type ]['file'] ) ||
-			! is_string( $sources[ $this->mime_type ]['file'] )
+			! isset( $sources[ $this->mime_type ]['file'] ) ||
+			! is_string( $sources[ $this->mime_type ]['file'] ) ||
+			'' === $sources[ $this->mime_type ]['file']
 		) {
 			return false;
 		}

@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-Base">
+<ruleset name="WPP-Base" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
 	<description>Sniffs for WordPress plugins</description>
 
 	<rule ref="PHPCompatibility"/>
-	<config name="testVersion" value="7.2-"/>
+	<config name="testVersion" value="7.4-"/>
 
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
+	<rule ref="Generic.PHP.RequireStrictTypes"/>
 
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
@@ -17,51 +18,61 @@
 
 	<!-- Do not require docblocks for unit tests -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.FileComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.ClassComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.ClassComment.SpacingAfter">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting.DocComment.Empty">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting.DocComment.MissingShort">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.VariableComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 
 	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
 	<rule ref="WordPress.WP.EnqueuedResourceParameters">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions.unlink_unlink">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_var_export">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>plugins/performance-lab/includes/server-timing/object-cache.copy.php</exclude-pattern>
 	</rule>
 
 	<!-- Exceptions for variable name casing. -->
@@ -78,7 +89,7 @@
 
 	<!-- Do not apply script rules for unit tests -->
 	<rule ref="WordPress.WP.EnqueuedResources.NonEnqueuedScript">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
@@ -104,13 +115,39 @@
 	</rule>
 	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
 		<properties>
-			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
 			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
 			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
 			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
 		</properties>
 		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+		<!-- WordPress code style requires @var docblocks (Squiz.Commenting.VariableComment.MissingVar) even when redundant with the native type hint. -->
+		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.UselessAnnotation" />
+	</rule>
+
+	<!-- Don't require native property type hints in tests; test fixtures and PHPUnit helpers should not have to match the strict typing applied to source. -->
+	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.PHP.DiscouragedFunctions.Discouraged">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotValidated">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.ValidatedSanitizedInput.MissingUnslash">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.ValidatedSanitizedInput.InputNotSanitized">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="Generic.PHP.RequireStrictTypes.MissingDeclaration">
+		<exclude-pattern>./plugins/*/tests/**</exclude-pattern>
+		<exclude-pattern>./tools/**</exclude-pattern>
 	</rule>
 
 	<!-- Exclude built plugins and built assets in plugins. -->

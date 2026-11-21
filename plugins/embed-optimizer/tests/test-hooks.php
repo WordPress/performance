@@ -10,35 +10,102 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	/**
 	 * @covers ::embed_optimizer_add_hooks
 	 */
-	public function test_hooks(): void {
+	public function test_embed_optimizer_add_hooks(): void {
+		remove_all_actions( 'od_init' );
+		remove_all_actions( 'wp_head' );
+		remove_all_actions( 'wp_loaded' );
 		embed_optimizer_add_hooks();
-		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-			$this->assertFalse( has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
-		} else {
-			$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
-		}
+		$this->assertSame( 10, has_action( 'od_init', 'embed_optimizer_init_optimization_detective' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
+		$this->assertSame( 10, has_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' ) );
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function data_provider_to_test_embed_optimizer_add_non_optimization_detective_hooks(): array {
+		return array(
+			'without_optimization_detective' => array(
+				'set_up'   => static function (): void {},
+				'expected' => 10,
+			),
+			'with_optimization_detective'    => array(
+				'set_up'   => static function (): void {
+					add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
+				},
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_to_test_embed_optimizer_add_non_optimization_detective_hooks
+	 * @covers ::embed_optimizer_add_non_optimization_detective_hooks
+	 *
+	 * @param Closure   $set_up   Set up.
+	 * @param int|false $expected Expected.
+	 */
+	public function test_embed_optimizer_add_non_optimization_detective_hooks( Closure $set_up, $expected ): void {
+		remove_all_filters( 'embed_oembed_html' );
+		remove_all_actions( 'od_register_tag_visitors' );
+		$set_up();
+		embed_optimizer_add_non_optimization_detective_hooks();
+		$this->assertSame( $expected, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' ) );
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function data_provider_to_test_embed_optimizer_init_optimization_detective(): array {
+		return array(
+			'with_old_version' => array(
+				'version'  => '0.5.0',
+				'expected' => false,
+			),
+			'with_new_version' => array(
+				'version'  => '99.0.0',
+				'expected' => true,
+			),
+		);
+	}
+
+	/**
+	 * @covers ::embed_optimizer_init_optimization_detective
+	 * @dataProvider data_provider_to_test_embed_optimizer_init_optimization_detective
+	 */
+	public function test_embed_optimizer_init_optimization_detective( string $version, bool $expected ): void {
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'od_register_tag_visitors' );
+		remove_all_filters( 'embed_oembed_html' );
+		remove_all_filters( 'od_url_metric_schema_element_item_additional_properties' );
+
+		embed_optimizer_init_optimization_detective( $version );
+
+		$this->assertSame( ! $expected, has_action( 'admin_notices' ) );
+		$this->assertSame( $expected ? 10 : false, has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) );
+		$this->assertSame( $expected ? 10 : false, has_action( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' ) );
+		$this->assertSame( $expected ? 10 : false, has_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' ) );
 	}
 
 	/**
 	 * Test that the oEmbed HTML is filtered.
 	 *
-	 * @covers ::embed_optimizer_filter_oembed_html
+	 * @covers ::embed_optimizer_filter_oembed_html_to_lazy_load
 	 * @covers ::embed_optimizer_update_markup
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
-	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
+	public function test_embed_optimizer_filter_oembed_html_to_lazy_load( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
 		if ( null === $expected_html ) {
 			$expected_html = $html; // No change.
 		}
-		$this->assertEquals( $expected_html, embed_optimizer_filter_oembed_html( $html ) );
+		$this->assertEquals( $expected_html, embed_optimizer_filter_oembed_html_to_lazy_load( $html ) );
 		$this->assertSame( $expected_lazy_script ? 10 : false, has_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' ) );
 	}
 
 	/**
 	 * Data provider for oEmbed HTML tests.
 	 *
-	 * @return array<int, array{string, string|null}>
+	 * @return array<int, array{0: string, 1: string|null, 2?: bool}>
 	 */
 	public function get_data_to_test_filter_oembed_html_data(): array {
 		return array(
@@ -159,10 +226,12 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_lazy_load_scripts
 	 */
 	public function test_embed_optimizer_lazy_load_scripts(): void {
-		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
-		$this->assertStringStartsWith( '<script type="module">', $script );
-		$this->assertStringContainsString( 'IntersectionObserver', $script );
-		$this->assertStringEndsWith( '</script>', $script );
+		$processor = new WP_HTML_Tag_Processor( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertTrue( $processor->next_tag(), 'Expected there to be a tag.' );
+		$this->assertSame( 'SCRIPT', $processor->get_tag(), 'Expected first tag to match name.' );
+		$this->assertSame( 'module', $processor->get_attribute( 'type' ), 'Expected type attribute.' );
+		$this->assertNull( $processor->get_attribute( 'nonce' ), 'Expected nonce to be null.' );
+		$this->assertStringContainsString( 'IntersectionObserver', $processor->get_modifiable_text(), 'Expected string to include IntersectionObserver.' );
 
 		add_filter(
 			'wp_inline_script_attributes',
@@ -175,9 +244,12 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 			10,
 			2
 		);
-		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
-		$this->assertStringStartsWith( '<script type="module" nonce="abc123">', $script );
-		$this->assertStringEndsWith( '</script>', $script );
+		$processor = new WP_HTML_Tag_Processor( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertTrue( $processor->next_tag(), 'Expected there to be a tag.' );
+		$this->assertSame( 'SCRIPT', $processor->get_tag(), 'Expected first tag to match name.' );
+		$this->assertSame( 'module', $processor->get_attribute( 'type' ), 'Expected type attribute.' );
+		$this->assertSame( 'abc123', $processor->get_attribute( 'nonce' ), 'Expected nonce attribute to match.' );
+		$this->assertStringContainsString( 'IntersectionObserver', $processor->get_modifiable_text(), 'Expected string to include IntersectionObserver.' );
 	}
 
 	/**

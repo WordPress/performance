@@ -24,6 +24,7 @@ class Test_OD_Tag_Visitor_Registry extends WP_UnitTestCase {
 
 		// Add img visitor.
 		$this->assertFalse( $registry->is_registered( 'img' ) );
+		$this->assertNull( $registry->get_registered( 'img' ) );
 		$img_visitor = static function ( OD_Tag_Visitor_Context $context ) {
 			return $context->processor->get_tag() === 'IMG';
 		};

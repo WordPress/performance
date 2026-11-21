@@ -138,7 +138,7 @@ abstract class TestCase extends WP_UnitTestCase {
 	 */
 	public function opt_in_to_picture_element(): void {
 		remove_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10 );
-		remove_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
+		remove_filter( 'wp_content_img_tag', 'webp_uploads_filter_image_tag', 10 );
 
 		// Apply picture element support.
 		update_option( 'webp_uploads_use_picture_element', '1' );
@@ -152,5 +152,21 @@ abstract class TestCase extends WP_UnitTestCase {
 	public function mock_frontend_body_hooks(): void {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
+	}
+
+	/**
+	 * Mocks AVIF transparency support to force a specific scenario.
+	 *
+	 * @param bool $supported Whether to mock AVIF transparency as supported.
+	 */
+	public function mock_avif_transparency_support( bool $supported ): void {
+		remove_all_filters( 'webp_uploads_imagick_avif_transparency_supported' );
+		add_filter(
+			'webp_uploads_imagick_avif_transparency_supported',
+			static function () use ( $supported ) {
+				return $supported;
+			},
+			1
+		);
 	}
 }

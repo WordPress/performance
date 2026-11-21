@@ -1,0 +1,6 @@
+build/
+dist/
+node_modules/
+vendor/
+artifacts/
+**/*.min.js

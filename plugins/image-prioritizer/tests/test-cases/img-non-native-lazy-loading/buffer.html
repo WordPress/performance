@@ -1,0 +1,16 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+		<script>/* custom lazy-loading */</script>
+	</head>
+	<body>
+		<div id="page">
+			<!-- Example with an adjoining NOSCRIPT > IMG tag which should be excluded from URL Metrics. -->
+			<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://example.com/bar.jpg" data-srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
+			<noscript>
+				<img src="https://example.com/bar.jpg" srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
+			</noscript>
+		</div>
+	</body>
+</html>

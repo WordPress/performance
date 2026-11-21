@@ -1,8 +1,8 @@
 === Enhanced Responsive Images ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   1.2.0
+Tested up to: 7.1
+Stable tag:   1.8.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
@@ -11,12 +11,12 @@ Improvements for responsive images in WordPress.
 
 == Description ==
 
-This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes:
+This plugin implements enhancements for the responsive images functionality in WordPress. Currently, this includes:
 
-1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme.
-2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
+1. Improvements to the accuracy of the `sizes` attribute by using layout information available in [block themes](https://wordpress.org/documentation/article/block-themes/). This enhancement is not available to classic themes.
+2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. This enhancement was [merged](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) into WordPress 6.7.
 
-This plugin integrates with the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin. When that plugin is active, it starts learning about which images are not in the initial viewport based on actual visitors to your site. When it knows which images are below the fold, it then adds `loading=lazy` to these images. This plugin then extends Image Prioritizer to also add `sizes=auto` to these lazy-loaded images.
+See also the complimentary [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which detects which images are outside the viewport, and then adds `loading=lazy` and `sizes=auto` to them.
 
 There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
@@ -51,6 +51,70 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.8.0 =
+
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum required WordPress version to 6.9. ([2517](https://github.com/WordPress/performance/pull/2517))
+* Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
+
+= 1.7.0 =
+
+**Enhancements**
+
+* Remove `sizes=auto` as the functionality is now available in WordPress core. ([2146](https://github.com/WordPress/performance/pull/2146))
+
+**Bug Fixes**
+
+* Fix: Moved `column_count` context from `column` block to `columns` block to ensure it is available to ancestor blocks. ([2138](https://github.com/WordPress/performance/pull/2138))
+
+**Documentation**
+
+* Update Enhanced Responsive Images plugin description. ([2145](https://github.com/WordPress/performance/pull/2145))
+
+= 1.6.0 =
+
+**Features**
+
+* Accurate sizes: Add support for `core/post-featured-image` block. ([2084](https://github.com/WordPress/performance/pull/2084))
+
+**Enhancements**
+
+* Remove experimental from Enhanced Responsive Images readme.txt. ([2077](https://github.com/WordPress/performance/pull/2077))
+
+= 1.5.0 =
+
+**Enhancements**
+
+* Accurate sizes: Add ancestor block context for image and cover block that help in sizes calculate. ([1795](https://github.com/WordPress/performance/pull/1795))
+* Accurate sizes: Calculate sizes based on ancestor block context. ([1818](https://github.com/WordPress/performance/pull/1818))
+
+= 1.4.0 =
+
+**Features**
+
+* Accurate Sizes: Incorporate layout constraints in image sizes calculations. ([1738](https://github.com/WordPress/performance/pull/1738))
+
+**Enhancements**
+
+* Accurate sizes: Pass parent alignment context to images. ([1701](https://github.com/WordPress/performance/pull/1701))
+* Accurate sizes: Reorganize file structure by feature. ([1699](https://github.com/WordPress/performance/pull/1699))
+* Accurate sizes: Support relative alignment widths. ([1737](https://github.com/WordPress/performance/pull/1737))
+* Remove `auto_sizes_get_layout_settings()`. ([1743](https://github.com/WordPress/performance/pull/1743))
+
+**Bug Fixes**
+
+* Accurate sizes: Disable layout calculations for classic themes. ([1744](https://github.com/WordPress/performance/pull/1744))
+
+= 1.3.0 =
+
+**Enhancements**
+
+* Move Auto Sizes logic from Enhanced Responsive Images to Image Prioritizer. ([1476](https://github.com/WordPress/performance/pull/1476))
+* Update auto sizes logic in Enhanced Responsive Images plugin to no longer load if already in Core. ([1547](https://github.com/WordPress/performance/pull/1547))
 
 = 1.2.0 =
 

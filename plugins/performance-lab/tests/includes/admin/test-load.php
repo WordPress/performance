@@ -87,65 +87,111 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @return array<string, array{ hook_suffix: string|null, expected: bool }>
+	 * @covers ::perflab_get_dismissed_admin_pointer_ids
+	 */
+	public function test_perflab_get_dismissed_admin_pointer_ids(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		// No dismissed pointers.
+		$this->assertSame( array(), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss a single pointer.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
+		$this->assertSame( array( 'perflab-admin-pointer' ), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss multiple pointers.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', 'perflab-admin-pointer,another-pointer' );
+		$this->assertSame( array( 'perflab-admin-pointer', 'another-pointer' ), perflab_get_dismissed_admin_pointer_ids() );
+
+		// Dismiss all pointers.
+		update_user_meta( $user_id, 'dismissed_wp_pointers', implode( ',', array_keys( perflab_get_admin_pointers() ) ) );
+		$this->assertSame( array_keys( perflab_get_admin_pointers() ), perflab_get_dismissed_admin_pointer_ids() );
+	}
+
+	/**
+	 * @covers ::perflab_get_admin_pointers
+	 */
+	public function test_perflab_get_admin_pointers(): void {
+		$pointers = perflab_get_admin_pointers();
+		$this->assertArrayHasKey( 'perflab-admin-pointer', $pointers );
+	}
+
+	/**
+	 * @return array<string, array{
+	 *     initial_wp_pointers: string,
+	 *     hook_suffix: string|null,
+	 *     expected: bool,
+	 *     dismissed_wp_pointers: string,
+	 * }>
 	 */
 	public function data_provider_test_perflab_admin_pointer(): array {
+		$has_instant_back_forward = array_key_exists( 'nocache-bfcache/nocache-bfcache.php', get_plugins() );
+
 		return array(
-			'null'                       => array(
-				'set_up'                => null,
+			'null'                             => array(
+				'initial_wp_pointers'   => '',
 				'hook_suffix'           => null,
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'edit.php'                   => array(
-				'set_up'                => null,
+			'edit.php'                         => array(
+				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'edit.php',
 				'expected'              => false,
-				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'dashboard_not_dismissed'    => array(
-				'set_up'                => null,
+			'dashboard_not_dismissed'          => array(
+				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
-				'assert'                => null,
-				'dismissed_wp_pointers' => '',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
 			),
-			'plugins_not_dismissed'      => array(
-				'set_up'                => null,
+			'plugins_not_dismissed'            => array(
+				'initial_wp_pointers'   => '',
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
-				'assert'                => null,
-				'dismissed_wp_pointers' => '',
+				'dismissed_wp_pointers' => 'perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
 			),
-			'dashboard_yes_dismissed'    => array(
-				'set_up'                => static function (): void {
-					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
-				},
+			'dashboard_new_dismissed'          => array(
+				// Note: If the Instant Back/Forward plugin (not part of the monorepo) is installed, then this test will likely fail and it should be skipped.
+				'initial_wp_pointers'   => 'perflab-admin-pointer',
+				'hook_suffix'           => 'index.php',
+				'expected'              => true,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-view-transitions' . ( $has_instant_back_forward ? ',perflab-feature-nocache-bfcache' : '' ),
+			),
+			'dashboard_last_auto_dismissed'    => array(
+				// Note: The Instant Back/Forward plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth',
 				'hook_suffix'           => 'index.php',
 				'expected'              => false,
-				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-speculation-rules-auth,perflab-feature-view-transitions',
 			),
-			'perflab_screen_first_time'  => array(
-				'set_up'                => static function (): void {
-					$_GET['page'] = PERFLAB_SCREEN;
-				},
-				'hook_suffix'           => 'options-general.php',
-				'expected'              => false,
-				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+			'dashboard_one_not_auto_dismissed' => array(
+				// Note: The Instant Back/Forward plugin is not part of the monorepo, so it is not automatically installed in the dev environment.
+				// Note: The Speculative Loading admin pointer 'perflab-feature-speculation-rules-auth' does not get auto-dismissed because it is for a new feature of an existing feature plugin.
+				'initial_wp_pointers'   => 'perflab-admin-pointer,perflab-feature-nocache-bfcache',
+				'hook_suffix'           => 'index.php',
+				'expected'              => true,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer,perflab-feature-nocache-bfcache,perflab-feature-view-transitions',
 			),
-			'perflab_screen_second_time' => array(
-				'set_up'                => static function (): void {
-					$_GET['page'] = PERFLAB_SCREEN;
-					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
-				},
-				'hook_suffix'           => 'options-general.php',
+			'dashboard_all_dismissed'          => array(
+				'initial_wp_pointers'   => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
+				'hook_suffix'           => 'index.php',
 				'expected'              => false,
-				'assert'                => null,
-				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
+			),
+			'perflab_screen_first_time'        => array(
+				'initial_wp_pointers'   => '',
+				'hook_suffix'           => 'settings_page_' . PERFLAB_SCREEN,
+				'expected'              => false,
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
+			),
+			'perflab_screen_second_time'       => array(
+				'initial_wp_pointers'   => 'perflab-admin-pointer',
+				'hook_suffix'           => 'settings_page_' . PERFLAB_SCREEN,
+				'expected'              => false,
+				'dismissed_wp_pointers' => implode( ',', array_keys( perflab_get_admin_pointers() ) ),
 			),
 		);
 	}
@@ -154,24 +200,31 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	 * @covers ::perflab_admin_pointer
 	 * @dataProvider data_provider_test_perflab_admin_pointer
 	 *
-	 * @param Closure|null $set_up      Set up.
-	 * @param string|null  $hook_suffix Hook suffix.
-	 * @param bool         $expected    Expected.
-	 * @param Closure|null $assert      Assert.
-	 * @param string       $dismissed_wp_pointers Dismissed admin pointers.
+	 * @param string      $initial_wp_pointers   Set up.
+	 * @param string|null $hook_suffix           Hook suffix.
+	 * @param bool        $expected              Expected.
+	 * @param string      $dismissed_wp_pointers Dismissed admin pointers.
 	 */
-	public function test_perflab_admin_pointer( ?Closure $set_up, ?string $hook_suffix, bool $expected, ?Closure $assert, string $dismissed_wp_pointers ): void {
+	public function test_perflab_admin_pointer( string $initial_wp_pointers, ?string $hook_suffix, bool $expected, string $dismissed_wp_pointers ): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
-		if ( $set_up instanceof Closure ) {
-			$set_up();
-		}
+		update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', $initial_wp_pointers );
 		$this->assertFalse( is_network_admin() || is_user_admin() );
 		perflab_admin_pointer( $hook_suffix );
-		$this->assertSame( $expected ? 10 : false, has_action( 'admin_print_footer_scripts', 'perflab_render_pointer' ) );
+
+		$after_script      = '';
+		$script_dependency = wp_scripts()->query( 'wp-pointer' );
+		if ( $script_dependency instanceof _WP_Dependency ) {
+			$after_script = implode( "\n", array_filter( $script_dependency->extra['after'] ?? array() ) );
+		}
+		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
 		$this->assertSame( $expected, wp_script_is( 'wp-pointer', 'enqueued' ) );
 		$this->assertSame( $expected, wp_style_is( 'wp-pointer', 'enqueued' ) );
-		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
+		if ( $expected ) {
+			$this->assertStringContainsString( 'pointerIdsToDismiss', $after_script );
+		} else {
+			$this->assertStringNotContainsString( 'pointerIdsToDismiss', $after_script );
+		}
 	}
 
 	/**
