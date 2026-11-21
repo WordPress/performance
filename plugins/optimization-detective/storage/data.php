@@ -6,57 +6,42 @@
  * @since 0.1.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
- * Gets the freshness age (TTL) for a given URL metric.
+ * Gets the freshness age (TTL) for a given URL Metric.
  *
- * When a URL metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
+ * When a URL Metric expires, it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
  * @since 0.1.0
  * @access private
  *
- * @return int Expiration TTL in seconds.
+ * @return int<-1, max> Expiration TTL in seconds.
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given URL metric.
-	 *
-	 * The freshness TTL must be at least zero, in which it considers URL metrics to always be stale.
-	 * In practice, the value should be at least an hour.
+	 * Filters age (TTL) for which a URL Metric can be considered fresh.
 	 *
 	 * @since 0.1.0
+	 * @since 1.0.0 Negative values disable timestamp-based freshness checks.
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_freshness_ttl
 	 *
-	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
+	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 week.
 	 */
-	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', DAY_IN_SECONDS );
-
-	if ( $freshness_ttl < 0 ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			esc_html(
-				sprintf(
-					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'optimization-detective' ),
-					$freshness_ttl
-				)
-			),
-			''
-		);
-		$freshness_ttl = 0;
-	}
-
-	return $freshness_ttl;
+	$ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', WEEK_IN_SECONDS );
+	return max( -1, $ttl );
 }
 
 /**
  * Gets the normalized query vars for the current request.
  *
- * This is used as a cache key for stored URL metrics.
- *
- * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
+ * This is used as a cache key for stored URL Metrics.
  *
  * @since 0.1.0
  * @access private
@@ -77,11 +62,6 @@ function od_get_normalized_query_vars(): array {
 		);
 	}
 
-	// Vary URL metrics by whether the user is logged in since additional elements may be present.
-	if ( is_user_logged_in() ) {
-		$normalized_query_vars['user_logged_in'] = true;
-	}
-
 	return $normalized_query_vars;
 }
 
@@ -89,7 +69,7 @@ function od_get_normalized_query_vars(): array {
  * Get the URL for the current request.
  *
  * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
- * This is needed in particular due to subdirectory installs.
+ * This is needed in particular due to subdirectory installations.
  *
  * @since 0.1.1
  * @access private
@@ -120,11 +100,13 @@ function od_get_current_url(): string {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
 	}
+
+	// TODO: We should be able to assert that this returns an non-empty-string.
 	return esc_url_raw( $current_url );
 }
 
 /**
- * Gets slug for URL metrics.
+ * Gets slug for URL Metrics.
  *
  * A slug is the hash of the normalized query vars.
  *
@@ -134,67 +116,194 @@ function od_get_current_url(): string {
  * @see od_get_normalized_query_vars()
  *
  * @param array<string, mixed> $query_vars Normalized query vars.
- * @return string Slug.
+ * @return non-empty-string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here, but beware this could invalidate URL Metrics. See <https://github.com/WordPress/performance/pull/1949>.
 	return md5( (string) wp_json_encode( $query_vars ) );
 }
 
 /**
- * Computes nonce for storing URL metrics for a specific slug.
+ * Gets the current template for a block theme or a classic theme.
  *
- * This is used in the REST API to authenticate the storage of new URL metrics from a given URL.
- *
- * @since 0.1.0
+ * @since 0.9.0
  * @access private
  *
- * @see wp_create_nonce()
- * @see od_verify_url_metrics_storage_nonce()
- * @see od_get_url_metrics_slug()
+ * @global string|null $_wp_current_template_id Current template ID.
+ * @global string|null $template                Template file path.
  *
- * @param string $slug Slug (hash of normalized query vars).
- * @param string $url  URL.
- * @return string Nonce.
+ * @return string|WP_Block_Template|null Template.
  */
-function od_get_url_metrics_storage_nonce( string $slug, string $url ): string {
-	return wp_create_nonce( "store_url_metrics:$slug:$url" );
+function od_get_current_theme_template() {
+	global $template, $_wp_current_template_id;
+
+	if ( wp_is_block_theme() && isset( $_wp_current_template_id ) ) {
+		$block_template = get_block_template( $_wp_current_template_id );
+		if ( $block_template instanceof WP_Block_Template ) {
+			return $block_template;
+		}
+	}
+	if ( isset( $template ) && is_string( $template ) ) {
+		return basename( $template );
+	}
+	return null;
 }
 
 /**
- * Verifies nonce for storing URL metrics for a specific slug.
+ * Gets the current ETag for URL Metrics.
  *
- * @since 0.1.0
+ * Generates a hash based on the IDs of registered tag visitors, the queried object,
+ * posts in The Loop, and theme information in the current environment. This ETag
+ * is used to assess if the URL Metrics are stale when its value changes.
+ *
+ * @since 0.9.0
  * @access private
  *
- * @see wp_verify_nonce()
- * @see od_get_url_metrics_storage_nonce()
- * @see od_get_url_metrics_slug()
- *
- * @param string $nonce Nonce.
- * @param string $slug  Slug (hash of normalized query vars).
- * @param String $url   URL.
- * @return bool Whether the nonce is valid.
+ * @param OD_Tag_Visitor_Registry       $tag_visitor_registry Tag visitor registry.
+ * @param WP_Query|null                 $wp_query             The WP_Query instance.
+ * @param string|WP_Block_Template|null $current_template     The current template being used.
+ * @return non-empty-string Current ETag.
  */
-function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, string $url ): bool {
-	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug:$url" );
+function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_registry, ?WP_Query $wp_query, $current_template ): string {
+	$queried_object      = $wp_query instanceof WP_Query ? $wp_query->get_queried_object() : null;
+	$queried_object_data = array(
+		'id'   => null,
+		'type' => null,
+	);
+
+	if ( $queried_object instanceof WP_Post ) {
+		$queried_object_data['id']                = $queried_object->ID;
+		$queried_object_data['type']              = 'post';
+		$queried_object_data['post_modified_gmt'] = $queried_object->post_modified_gmt;
+	} elseif ( $queried_object instanceof WP_Term ) {
+		$queried_object_data['id']   = $queried_object->term_id;
+		$queried_object_data['type'] = 'term';
+	} elseif ( $queried_object instanceof WP_User ) {
+		$queried_object_data['id']   = $queried_object->ID;
+		$queried_object_data['type'] = 'user';
+	} elseif ( $queried_object instanceof WP_Post_Type ) {
+		$queried_object_data['type'] = $queried_object->name;
+	}
+
+	$active_plugins = (array) get_option( 'active_plugins', array() );
+	if ( is_multisite() ) {
+		$active_plugins = array_unique(
+			array_merge(
+				$active_plugins,
+				array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+			)
+		);
+	}
+	sort( $active_plugins );
+
+	$data = array(
+		'xpath_version'    => 2, // Bump whenever a major change to the XPath format occurs so that new URL Metrics are proactively gathered.
+		'tag_visitors'     => array_keys( iterator_to_array( $tag_visitor_registry ) ),
+		'queried_object'   => $queried_object_data,
+		'queried_posts'    => array_filter(
+			array_map(
+				static function ( $post ): ?array {
+					if ( is_int( $post ) ) {
+						$post = get_post( $post );
+					}
+					if ( ! ( $post instanceof WP_Post ) ) {
+						return null;
+					}
+					return array(
+						'id'                => $post->ID,
+						'post_modified_gmt' => $post->post_modified_gmt,
+					);
+				},
+				( $wp_query instanceof WP_Query && is_array( $wp_query->posts ) ) ? $wp_query->posts : array()
+			)
+		),
+		'active_theme'     => array(
+			'template'   => array(
+				'name'    => get_template(),
+				'version' => wp_get_theme( get_template() )->get( 'Version' ),
+			),
+			'stylesheet' => array(
+				'name'    => get_stylesheet(),
+				'version' => wp_get_theme()->get( 'Version' ),
+			),
+		),
+		'active_plugins'   => $active_plugins,
+		'current_template' => $current_template instanceof WP_Block_Template ? get_object_vars( $current_template ) : $current_template,
+	);
+
+	/**
+	 * Filters the data that goes into computing the current ETag for URL Metrics.
+	 *
+	 * @since 0.9.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_current_url_metrics_etag_data
+	 *
+	 * @param array<string, mixed> $data Data.
+	 */
+	$data = (array) apply_filters( 'od_current_url_metrics_etag_data', $data );
+
+	// TODO: The JSON_UNESCAPED_SLASHES flag could be used here.
+	return md5( (string) wp_json_encode( $data ) );
 }
 
 /**
- * Gets the minimum allowed viewport aspect ratio for URL metrics.
+ * Computes HMAC for storing URL Metrics for a specific slug.
+ *
+ * This is used in the REST API to authenticate the storage of new URL Metrics from a given URL.
+ *
+ * @since 0.8.0
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
+ * @access private
+ *
+ * @see od_verify_url_metrics_storage_hmac()
+ * @see od_get_url_metrics_slug()
+ *
+ * @param non-empty-string  $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string  $current_etag        Current ETag.
+ * @param string            $url                 URL.
+ * @param positive-int|null $cache_purge_post_id Cache purge post ID.
+ * @return non-empty-string HMAC.
+ */
+function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): string {
+	$action = "store_url_metric:$slug:$current_etag:$url:$cache_purge_post_id";
+
+	return wp_hash( $action, 'nonce' );
+}
+
+/**
+ * Verifies HMAC for storing URL Metrics for a specific slug.
+ *
+ * @since 0.8.0
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
+ * @access private
+ *
+ * @see od_get_url_metrics_storage_hmac()
+ * @see od_get_url_metrics_slug()
+ *
+ * @param non-empty-string  $hmac                HMAC.
+ * @param non-empty-string  $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string  $current_etag        Current ETag.
+ * @param string            $url                 URL.
+ * @param positive-int|null $cache_purge_post_id Cache purge post ID.
+ * @return bool Whether the HMAC is valid.
+ */
+function od_verify_url_metrics_storage_hmac( string $hmac, string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): bool {
+	return hash_equals( od_get_url_metrics_storage_hmac( $slug, $current_etag, $url, $cache_purge_post_id ), $hmac );
+}
+
+/**
+ * Gets the minimum allowed viewport aspect ratio for URL Metrics.
  *
  * @since 0.6.0
  * @access private
  *
- * @return float Minimum viewport aspect ratio for URL metrics.
+ * @return float Minimum viewport aspect ratio for URL Metrics.
  */
 function od_get_minimum_viewport_aspect_ratio(): float {
 	/**
-	 * Filters the minimum allowed viewport aspect ratio for URL metrics.
-	 *
-	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
+	 * Filters the minimum allowed viewport aspect ratio for URL Metrics.
 	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_minimum_viewport_aspect_ratio
 	 *
 	 * @param float $minimum_viewport_aspect_ratio Minimum viewport aspect ratio.
 	 */
@@ -202,21 +311,19 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 }
 
 /**
- * Gets the maximum allowed viewport aspect ratio for URL metrics.
+ * Gets the maximum allowed viewport aspect ratio for URL Metrics.
  *
  * @since 0.6.0
  * @access private
  *
- * @return float Maximum viewport aspect ratio for URL metrics.
+ * @return float Maximum viewport aspect ratio for URL Metrics.
  */
 function od_get_maximum_viewport_aspect_ratio(): float {
 	/**
-	 * Filters the maximum allowed viewport aspect ratio for URL metrics.
-	 *
-	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
-	 * ratio at 21:9 (2.333).
+	 * Filters the maximum allowed viewport aspect ratio for URL Metrics.
 	 *
 	 * @since 0.6.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_viewport_aspect_ratio
 	 *
 	 * @param float $maximum_viewport_aspect_ratio Maximum viewport aspect ratio.
 	 */
@@ -224,11 +331,11 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 }
 
 /**
- * Gets the breakpoint max widths to group URL metrics for various viewports.
+ * Gets the breakpoint max widths to group URL Metrics for various viewports.
  *
  * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
- * provided breakpoints (320, 480, 576) then this means there will be four groups:
+ * provided breakpoints (320, 480, 576), then this means there will be four groups:
  *
  *  1. 0-320 (small smartphone)
  *  2. 321-480 (normal smartphone)
@@ -243,38 +350,23 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
  *
- * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * This array may be empty, in which case there are no responsive breakpoints, and all URL Metrics are collected in a
  * single group.
  *
  * @since 0.1.0
  * @access private
  * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
  *
- * @return int[] Breakpoint max widths, sorted in ascending order.
+ * @return positive-int[] Breakpoint max widths, sorted in ascending order.
  */
 function od_get_breakpoint_max_widths(): array {
-	$function_name = __FUNCTION__;
-
 	$breakpoint_max_widths = array_map(
-		static function ( $original_breakpoint ) use ( $function_name ): int {
+		static function ( $original_breakpoint ): int {
 			$breakpoint = $original_breakpoint;
-			if ( PHP_INT_MAX === $breakpoint ) {
-				$breakpoint = PHP_INT_MAX - 1;
-				_doing_it_wrong(
-					esc_html( $function_name ),
-					esc_html(
-						sprintf(
-							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'optimization-detective' ),
-							$original_breakpoint
-						)
-					),
-					''
-				);
-			} elseif ( $breakpoint <= 0 ) {
+			if ( $breakpoint <= 0 ) {
 				$breakpoint = 1;
 				_doing_it_wrong(
-					esc_html( $function_name ),
+					esc_html( "Filter: 'od_breakpoint_max_widths'" ),
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
@@ -288,14 +380,12 @@ function od_get_breakpoint_max_widths(): array {
 			return $breakpoint;
 		},
 		/**
-		 * Filters the breakpoint max widths to group URL metrics for various viewports.
-		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
-		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
+		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
 		 * @since 0.1.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_breakpoint_max_widths
 		 *
-		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
+		 * @param positive-int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
 		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) ) )
 	);
@@ -306,24 +396,23 @@ function od_get_breakpoint_max_widths(): array {
 }
 
 /**
- * Gets the sample size for a breakpoint's URL metrics on a given URL.
+ * Gets the sample size for a breakpoint's URL Metrics on a given URL.
  *
- * A breakpoint divides URL metrics for viewports which are smaller and those which are larger. Given the default
+ * A breakpoint divides URL Metrics for viewports which are smaller and those which are larger. Given the default
  * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
- * total of 6 URL metrics stored for a given URL: 3 for mobile and 3 for desktop.
+ * total of 6 URL Metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
  * @since 0.1.0
  * @access private
  *
- * @return int Sample size.
+ * @return int<1, max> Sample size.
  */
 function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
-	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
-	 *
-	 * The sample size must be greater than zero.
+	 * Filters the sample size for a breakpoint's URL Metrics on a given URL.
 	 *
 	 * @since 0.1.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metrics_breakpoint_sample_size
 	 *
 	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
@@ -331,7 +420,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 
 	if ( $sample_size <= 0 ) {
 		_doing_it_wrong(
-			__FUNCTION__,
+			esc_html( "Filter: 'od_url_metrics_breakpoint_sample_size'" ),
 			esc_html(
 				sprintf(
 					/* translators: %s is the sample size */
@@ -345,4 +434,40 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	}
 
 	return $sample_size;
+}
+
+/**
+ * Gets the maximum allowed size in bytes for a URL Metric serialized to JSON.
+ *
+ * @since 1.0.0
+ * @access private
+ *
+ * @return positive-int Maximum allowed byte size.
+ */
+function od_get_maximum_url_metric_size(): int {
+	/**
+	 * Filters the maximum allowed size in bytes for a URL Metric serialized to JSON.
+	 *
+	 * @since 1.0.0
+	 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_maximum_url_metric_size
+	 *
+	 * @param int $max_size Maximum allowed byte size.
+	 * @return int Filtered maximum allowed byte size.
+	 */
+	$size = (int) apply_filters( 'od_maximum_url_metric_size', MB_IN_BYTES );
+	if ( $size <= 0 ) {
+		_doing_it_wrong(
+			esc_html( "Filter: 'od_maximum_url_metric_size'" ),
+			esc_html(
+				sprintf(
+					/* translators: %s: size */
+					__( 'Invalid size "%s". Must be greater than zero.', 'optimization-detective' ),
+					$size
+				)
+			),
+			'Optimization Detective 1.0.0'
+		);
+		$size = MB_IN_BYTES;
+	}
+	return $size;
 }

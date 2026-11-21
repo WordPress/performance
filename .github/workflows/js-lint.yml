@@ -10,7 +10,7 @@ on:
       - '.github/workflows/js-lint.yml'
       - '**.js'
       - '**.json'
-      - '.eslint*'
+      - 'eslint.config.*'
       - '.nvmrc'
       - '.wp-env.json'
       - '**/package.json'
@@ -21,7 +21,7 @@ on:
       - '.github/workflows/js-lint.yml'
       - '**.js'
       - '**.json'
-      - '.eslint*'
+      - 'eslint.config.*'
       - '.nvmrc'
       - '.wp-env.json'
       - '**/package.json'
@@ -31,16 +31,28 @@ on:
       - reopened
       - synchronize
 
+# Cancel previous workflow run groups that have not completed.
+concurrency:
+  # Group workflow runs by workflow name, along with the head branch ref of the pull request
+  # or otherwise the branch or tag ref.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Disable permissions for all available scopes by default.
+# Any needed permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   js-lint:
     name: JS Lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read # Required to clone the repo.
     steps:
-      - uses: styfle/cancel-workflow-action@0.12.1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Node.js (via .nvmrc)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -48,5 +60,7 @@ jobs:
         run: npm ci
       - name: JS Lint
         run: npm run lint-js
+      - name: JSON Schema Validation
+        run: npm run lint-json
       - name: TypeScript compile
         run: npm run tsc

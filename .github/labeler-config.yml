@@ -1,0 +1,39 @@
+'[Plugin] Enhanced Responsive Images':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/auto-sizes/**'
+
+'[Plugin] Embed Optimizer':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/embed-optimizer/**'
+
+'[Plugin] Image Placeholders':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/dominant-color-images/**'
+
+'[Plugin] Image Prioritizer':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/image-prioritizer/**'
+
+'[Plugin] Modern Image Formats':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/webp-uploads/**'
+
+'[Plugin] Optimization Detective':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/optimization-detective/**'
+
+'[Plugin] Performance Lab':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/performance-lab/**'
+
+'[Plugin] Speculative Loading':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/speculation-rules/**'
+
+'[Plugin] View Transitions':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/view-transitions/**'
+
+'[Plugin] Web Worker Offloading':
+  - changed-files:
+      - any-glob-to-any-file: 'plugins/web-worker-offloading/**'

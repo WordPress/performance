@@ -6,13 +6,16 @@
  * @since 0.7.0
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
- * Data for a single element in a URL metric.
+ * Data for a single element in a URL Metric.
  *
  * @phpstan-import-type ElementData from OD_URL_Metric
  * @phpstan-import-type DOMRect from OD_URL_Metric
@@ -20,7 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
  *
  * @since 0.7.0
- * @access private
  */
 class OD_Element implements ArrayAccess, JsonSerializable {
 
@@ -30,15 +32,15 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @since 0.7.0
 	 * @var ElementData
 	 */
-	protected $data;
+	protected array $data;
 
 	/**
-	 * URL metric that this element belongs to.
+	 * URL Metric that this element belongs to.
 	 *
 	 * @since 0.7.0
 	 * @var OD_URL_Metric
 	 */
-	protected $url_metric;
+	protected OD_URL_Metric $url_metric;
 
 	/**
 	 * Constructor.
@@ -48,15 +50,16 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @phpstan-param ElementData $data
 	 *
 	 * @param array<string, mixed> $data       Element data.
-	 * @param OD_URL_Metric        $url_metric URL metric.
+	 * @param OD_URL_Metric        $url_metric URL Metric.
 	 */
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
-		$this->data       = $data;
+		$this->data = $data;
+
 		$this->url_metric = $url_metric;
 	}
 
 	/**
-	 * Gets the URL metric that this element belongs to.
+	 * Gets the URL Metric that this element belongs to.
 	 *
 	 * @since 0.7.0
 	 *
@@ -67,7 +70,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this element's URL metric is a part of (which may not be any).
+	 * Gets the group that this element's URL Metric is a part of (which may not be any).
 	 *
 	 * @since 0.7.0
 	 *

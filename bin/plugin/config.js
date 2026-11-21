@@ -11,7 +11,6 @@
 const config = {
 	githubRepositoryOwner: 'WordPress',
 	githubRepositoryName: 'performance',
-	textDomain: 'performance-lab',
 };
 
 module.exports = config;

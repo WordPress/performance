@@ -10,21 +10,21 @@ class Test_OD_Hooks extends WP_UnitTestCase {
 	/**
 	 * Make sure the hooks are added in hooks.php.
 	 *
-	 * @see OD_Storage_Post_Type_Tests::test_add_hooks()
+	 * @see Test_OD_Storage_Post_Type::test_add_hooks()
 	 */
 	public function test_hooks_added(): void {
+		$this->assertEquals( PHP_INT_MAX, has_action( 'init', 'od_initialize_extensions' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
+
 		$this->assertEquals( 10, has_filter( 'wp', 'od_maybe_add_template_output_buffer_filter' ) );
-		$this->assertSame(
-			10,
-			has_action(
-				'init',
-				array(
-					OD_URL_Metrics_Post_Type::class,
-					'register_post_type',
-				)
-			)
-		);
 		$this->assertEquals( 10, has_action( 'wp_head', 'od_render_generator_meta_tag' ) );
+		$this->assertEquals( 10, has_filter( 'site_status_tests', 'od_add_rest_api_availability_test' ) );
+		$this->assertEquals( 10, has_action( 'admin_init', 'od_maybe_run_rest_api_health_check' ) );
+		$this->assertEquals( 30, has_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_notice_in_plugin_row' ) );
+		$this->assertEquals( 30, has_action( 'after_plugin_row_meta', 'od_render_installed_extensions_admin_notice_in_plugin_row' ) );
+		$this->assertEquals( 10, has_filter( 'plugin_row_meta', 'od_render_extensions_meta_link' ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', 'od_register_rest_url_metric_store_endpoint' ) );
+		$this->assertEquals( 10, has_action( 'rest_pre_dispatch', 'od_decompress_rest_request_body' ) );
+		$this->assertEquals( 10, has_action( 'od_trigger_page_cache_invalidation', 'od_trigger_post_update_actions' ) );
 	}
 }

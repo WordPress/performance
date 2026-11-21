@@ -1,145 +1,39 @@
 === Optimization Detective ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.7
-Stable tag:   0.7.0
+Tested up to: 7.1
+Stable tag:   1.0.0-beta7
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
 
-Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+Provides a framework for leveraging real user metrics to detect optimizations for improving page performance.
 
 == Description ==
 
-This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics. This plugin is a dependency which does not provide end-user functionality on its own. For that, please install the dependent plugin [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) (among [others](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective) to come from the WordPress Core Performance team).
+This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics.
 
-= Background =
+This plugin is a framework dependency which does not provide optimization functionality on its own. For that, please install the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) and [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) dependent plugins (among [others](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective) to come from the WordPress Core Performance team). There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
-WordPress uses [server-side heuristics](https://make.wordpress.org/core/2023/07/13/image-performance-enhancements-in-wordpress-6-3/) to make educated guesses about which images are likely to be in the initial viewport. Likewise, it uses server-side heuristics to identify a hero image which is likely to be the Largest Contentful Paint (LCP) element. To optimize page loading, it avoids lazy-loading any of these images while also adding `fetchpriority=high` to the hero image. When these heuristics are applied successfully, the LCP metric for page loading can be improved 5-10%. Unfortunately, however, there are limitations to the heuristics that make the correct identification of which image is the LCP element only about 50% effective. See [Analyzing the Core Web Vitals performance impact of WordPress 6.3 in the field](https://make.wordpress.org/core/2023/09/19/analyzing-the-core-web-vitals-performance-impact-of-wordpress-6-3-in-the-field/). For example, it is [common](https://github.com/GoogleChromeLabs/wpp-research/pull/73) for the LCP element to vary between different viewport widths, such as desktop versus mobile. Since WordPress's heuristics are completely server-side it has no knowledge of how the page is actually laid out, and it cannot prioritize loading of images according to the client's viewport width.
+Your site must currently have the **REST API accessible** to unauthenticated frontend visitors since this is how real user metrics are collected about pages on your site; nevertheless, [exploration](https://github.com/WordPress/performance/issues/1311) is underway for providing alternative mechanisms for collecting the metrics. Also, please note that no metrics are currently collected from Safari since it does not yet support the [Largest Contentful Paint](https://developer.mozilla.org/en-US/docs/Web/API/LargestContentfulPaint) metric, but support for this [Core Web Vitals](https://web.dev/explore/learn-core-web-vitals) metric is coming this year [via Interop 2025](https://webkit.org/blog/16458/announcing-interop-2025/#core-web-vitals).
 
-In order to increase the accuracy of identifying the LCP element, including across various client viewport widths, this plugin gathers metrics from real users (RUM) to detect the actual LCP element and then use this information to optimize the page for future visitors so that the loading of the LCP element is properly prioritized. This is the purpose of Optimization Detective. The approach is heavily inspired by Philip Walton’s [Dynamic LCP Priority: Learning from Past Visits](https://philipwalton.com/articles/dynamic-lcp-priority/). See also the initial exploration document that laid out this project: [Image Loading Optimization via Client-side Detection](https://docs.google.com/document/u/1/d/16qAJ7I_ljhEdx2Cn2VlK7IkiixobY9zNn8FXxN9T9Ls/view).
-
-= Technical Foundation =
-
-At the core of Optimization Detective is the “URL Metric”, information about a page according to how it was loaded by a client with a specific viewport width. This includes which elements were visible in the initial viewport and which one was the LCP element. Each URL on a site can have an associated set of these URL Metrics (stored in a custom post type) which are gathered from real users. It gathers a sample of URL Metrics according to common responsive breakpoints (e.g. mobile, tablet, and desktop). When no more URL Metrics are needed for a URL due to the sample size being obtained for the breakpoints, it discontinues serving the JavaScript to gather the metrics (leveraging the [web-vitals.js](https://github.com/GoogleChrome/web-vitals) library). With the URL Metrics in hand, the output-buffered page is sent through the HTML Tag Processor and--when the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) dependent plugin is installed--the images which were the LCP element for various breakpoints will get prioritized with high-priority preload links (along with `fetchpriority=high` on the actual `img` tag when it is the common LCP element across all breakpoints). LCP elements with background images added via inline `background-image` styles are also prioritized with preload links.
-
-URL Metrics have a “freshness TTL” after which they will be stale and the JavaScript will be served again to start gathering metrics again to ensure that the right elements continue to get their loading prioritized. When a URL Metrics custom post type hasn't been touched in a while, it is automatically garbage-collected.
-
-👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages (since URL metrics need to be collected). As such, you won't see optimizations applied immediately after activating the plugin (and dependent plugin(s)). And since administrator users are not normal visitors typically, optimizations are not applied for admins by default (but this can be overridden with the `od_can_optimize_response` filter below). URL metrics are not collected for administrators because it is likely that additional elements will be present on the page which are not also shown to non-administrators, meaning the URL metrics could not reliably be reused between them. 
-
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
-
-When the `WP_DEBUG` constant is enabled, additional logging for Optimization Detective is added to the browser console.
-
-= Hooks =
-
-**Action:** `od_init` (argument: plugin version)
-
-Fires when the Optimization Detective is initializing. This action is useful for loading extension code that depends on Optimization Detective to be running. The version of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
-
-**Filter:** `od_breakpoint_max_widths` (default: [480, 600, 782])
-
-Filters the breakpoint max widths to group URL metrics for various viewports. Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three provided breakpoints (320, 480, 576) then this means there will be four groups:
-
- 1. 0-320 (small smartphone)
- 2. 321-480 (normal smartphone)
- 3. 481-576 (phablets)
- 4. >576 (desktop)
-
-The default breakpoints are reused from Gutenberg which appear to be used the most in media queries that affect frontend styles.
-
-**Filter:** `od_can_optimize_response` (default: boolean condition, see below)
-
-Filters whether the current response can be optimized. By default, detection and optimization are only performed when:
-
-1. It’s not a search template (`is_search()`).
-2. It’s not a post embed template (`is_embed()`).
-3. It’s not the Customizer preview (`is_customize_preview()`)
-4. It’s not the response to a `POST` request.
-5. The user is not an administrator (`current_user_can( 'customize' )`).
-
-During development, you may want to force this to always be enabled:
-
-`
-<?php
-add_filter( 'od_can_optimize_response', '__return_true' );
-`
-
-**Filter:** `od_url_metrics_breakpoint_sample_size` (default: 3)
-
-Filters the sample size for a breakpoint's URL metrics on a given URL. The sample size must be greater than zero. During development, it may be helpful to reduce the sample size to 1:
-
-`
-<?php
-add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
-	return 1;
-} );
-`
-
-**Filter:** `od_url_metric_storage_lock_ttl` (default: 1 minute)
-
-Filters how long a given IP is locked from submitting another metric-storage REST API request. Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable locking when a user is logged-in with code like the following:
-
-`
-<?php
-add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
-    return is_user_logged_in() ? 0 : $ttl;
-} );
-`
-
-**Filter:** `od_url_metric_freshness_ttl` (default: 1 day)
-
-Filters the freshness age (TTL) for a given URL metric. The freshness TTL must be at least zero, in which it considers URL metrics to always be stale. In practice, the value should be at least an hour. During development, this can be useful to set to zero:
-
-`
-<?php
-add_filter( 'od_url_metric_freshness_ttl', '__return_zero' );
-`
-
-**Filter:** `od_detection_time_window` (default: 5 seconds)
-
-Filters the time window between serve time and run time in which loading detection is allowed to run. This amount is the allowance between when the page was first generated (and perhaps cached) and when the detect function on the page is allowed to perform its detection logic and submit the request to store the results. This avoids situations in which there are missing URL Metrics in which case a site with page caching which also has a lot of traffic could result in a cache stampede.
-
-**Filter:** `od_minimum_viewport_aspect_ratio` (default: 0.4)
-
-Filters the minimum allowed viewport aspect ratio for URL metrics.
-
-The 0.4 value is intended to accommodate the phone with the greatest known aspect
-ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
-
-**Filter:** `od_maximum_viewport_aspect_ratio` (default: 2.5)
-
-Filters the maximum allowed viewport aspect ratio for URL metrics.
-
-The 2.5 value is intended to accommodate the phone with the greatest known aspect
-ratio at 21:9 (2.333).
-
-During development when you have the DevTools console open, for example, the viewport aspect ratio will be wider than normal. In this case, you may want to increase the maximum aspect ratio:
-
-`
-<?php
-add_filter( 'od_maximum_viewport_aspect_ratio', function () {
-	return 5;
-} );
-`
-
-**Filter:** `od_template_output_buffer` (default: the HTML response)
-
-Filters the template output buffer prior to sending to the client. This filter is added to implement [#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
+Please refer to the [full plugin documentation](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/README.md) for a [technical introduction](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/introduction.md), [filter/action hooks](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md), and [extensions](https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/extensions.md) that show use cases and examples. You can also watch the talk from WordCamp Asia 2025: [Boosting Performance with Optimization Detective](https://weston.ruter.net/2025/02/21/boosting-performance-with-optimization-detective/).
 
 == Installation ==
 
-= Installation from within WordPress =
+= Installation from the directory within WordPress =
 
-1. Visit **Plugins > Add New**.
+1. Visit **Plugins > Add New** in the WordPress Admin.
 2. Search for **Optimization Detective**.
 3. Install and activate the **Optimization Detective** plugin.
 
 = Manual installation =
 
-1. Upload the entire `optimization-detective` folder to the `/wp-content/plugins/` directory.
-2. Visit **Plugins**.
-3. Activate the **Optimization Detective** plugin.
+1. Download the plugin [ZIP from WordPress.org](https://downloads.wordpress.org/plugin/optimization-detective.zip) or, after following the [Getting Started instructions](https://make.wordpress.org/performance/handbook/performance-lab/), create a ZIP build from a clone of the [GitHub repo](https://github.com/WordPress/performance) via `npm run build:plugin:optimization-detective --env zip=true`.
+2. Visit **Plugins > Add New Plugin** in the WordPress Admin.
+3. Click **Upload Plugin**
+4. Select the `optimization-detective.zip` file on your system from step 1 and click **Install Now**.
+5. Click the **Active Plugin** button.
 
 == Frequently Asked Questions ==
 
@@ -161,11 +55,156 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 == Changelog ==
 
+= 1.0.0-beta7 =
+
+**Enhancements**
+
+* Add `declare( strict_types = 1 )` to all PHP files. ([2424](https://github.com/WordPress/performance/pull/2424))
+* Bump minimum required WordPress version to 6.9. ([2517](https://github.com/WordPress/performance/pull/2517))
+* Bump minimum required PHP version from 7.2 to 7.4. ([2469](https://github.com/WordPress/performance/pull/2469))
+* Improve code quality with native property types and stricter static analysis. ([1729](https://github.com/WordPress/performance/pull/1729))
+* Bump the bundled web-vitals library from 5.1.0 to 6.1.0, including its 6.0.0 major release. ([2606](https://github.com/WordPress/performance/pull/2606), [2629](https://github.com/WordPress/performance/pull/2629))
+* Ship the source maps for the bundled web-vitals library, which it began publishing in 6.0.0.
+* Move URL Metrics storage HMAC validation into the REST endpoint callback so it runs once all parameters have been validated and sanitized, returning a `rest_invalid_param` error. ([2436](https://github.com/WordPress/performance/pull/2436))
+* Remove the deprecated constants along with the `deprecated.php` file that contained them.
+
+= 1.0.0-beta6 =
+
+**Security**
+
+* Add validation of the SCRIPT element containing the detection args JSON. This fixes a DOM clobbering vulnerability in which an injected element with a colliding `id` could shadow the script and cause an arbitrary module to be imported, which required an authenticated user with at least a contributor role. Props to Asaf Mozes (amosec) for [responsible disclosure](https://github.com/WordPress/performance/blob/trunk/SECURITY.md).
+
+= 1.0.0-beta5 =
+
+**Bug Fixes**
+
+* Prevent fatal error in `od_get_current_url_metrics_etag()` when `$wp_query->posts` is `null`. ([2347](https://github.com/WordPress/performance/pull/2347))
+
+**Enhancements**
+
+* Add support for dns-prefetch links. ([2256](https://github.com/WordPress/performance/pull/2256))
+
+= 1.0.0-beta4 =
+
+**Enhancements**
+
+* Add URL Metric mutation helpers to extension initialization API. ([1951](https://github.com/WordPress/performance/pull/1951))
+* Add gzip compression for URL metrics using Compression Streams API. ([1959](https://github.com/WordPress/performance/pull/1959))
+* Allow disabling timestamp-based freshness checks by using negative TTL values. ([1940](https://github.com/WordPress/performance/pull/1940))
+* Bump web-vitals from 5.0.3 to 5.1.0. ([2116](https://github.com/WordPress/performance/pull/2116))
+* Change default garbage collection TTL of `od_url_metrics` posts from 1 month to 3 months and add the filter to customize expiration. ([1950](https://github.com/WordPress/performance/pull/1950))
+* Enhance Optimization Detective meta generator tag with all disabled reasons. ([1979](https://github.com/WordPress/performance/pull/1979))
+* Amend URL metrics to the generator meta tag content. ([1954](https://github.com/WordPress/performance/pull/1954))
+* Improve construction of inline scripts with `sourceURL`, hardened JSON encoding, and exporting JSON in separate script. ([2169](https://github.com/WordPress/performance/pull/2169))
+* Improve discoverability and user guidance for Optimization Detective extensions. ([2261](https://github.com/WordPress/performance/pull/2261))
+* Remove deprecated `url_metrics_group_collection` and class aliases and bump required OD version in Image Prioritizer. ([1943](https://github.com/WordPress/performance/pull/1943))
+
+**Bug Fixes**
+
+* Avoid possible error when reading groups in debug mode. ([2108](https://github.com/WordPress/performance/pull/2108))
+* Delay loading detect module until page is loaded and idle. ([2017](https://github.com/WordPress/performance/pull/2017))
+* Ensure URL Metric is initially constructed with all elements prior to initializing extensions. ([1968](https://github.com/WordPress/performance/pull/1968))
+* Short-circuit detection when page is opened in background tab since web-vitals.js will not report LCP. ([1927](https://github.com/WordPress/performance/pull/1927))
+
+= 1.0.0-beta3 =
+
+**Enhancements**
+
+* Fire actions before and after Optimization Detective processes a document. ([1919](https://github.com/WordPress/performance/pull/1919))
+* Update `OD_HTML_Tag_Processor::next_tag()` to allow `$query` arg and prepare to skip visiting tag closers by default. ([1872](https://github.com/WordPress/performance/pull/1872))
+* Expose the logging functions to client-side extensions and automatically account for the value of `isDebug`. ([1895](https://github.com/WordPress/performance/pull/1895))
+* Update URL Metric storage REST API endpoint to return status code `423 Locked` instead of `403 Forbidden`. ([1863](https://github.com/WordPress/performance/pull/1863))
+* De-duplicate logic between REST API and URL Metrics post type. ([1867](https://github.com/WordPress/performance/pull/1867))
+
+**Bug Fixes**
+
+* Fix URL encoding in Link HTTP response header. ([1907](https://github.com/WordPress/performance/pull/1907))
+* Fix triggering post update actions after storing a URL Metric and refactor REST API endpoint logic into class. ([1865](https://github.com/WordPress/performance/pull/1865))
+* Fix unpredictable LCP element being identified in a URL Metric Group. ([1903](https://github.com/WordPress/performance/pull/1903))
+* Handle missing Web Crypto API in non-HTTPS contexts when generating the already-submitted `sessionStorage` key. ([1911](https://github.com/WordPress/performance/pull/1911))
+
+= 1.0.0-beta2 =
+
+**Enhancements**
+
+* Account for 64 KiB limit for sending beacon data. ([1851](https://github.com/WordPress/performance/pull/1851))
+* Add post ID for the `od_url_metrics` post to the tag visitor context. ([1847](https://github.com/WordPress/performance/pull/1847))
+* Change minimum viewport width to be exclusive whereas the maximum width remains inclusive. ([1839](https://github.com/WordPress/performance/pull/1839))
+* Disable URL Metric storage locking by default for administrators. ([1835](https://github.com/WordPress/performance/pull/1835))
+* Include active plugins in ETag data and increase default freshness TTL from 1 day to 1 week. ([1854](https://github.com/WordPress/performance/pull/1854))
+* Make ETag a required property of the URL Metric. ([1824](https://github.com/WordPress/performance/pull/1824))
+* Use CSS range syntax in media queries. ([1833](https://github.com/WordPress/performance/pull/1833))
+* Use `IFRAME` to display HTML responses for REST API storage request failures in Site Health test. ([1849](https://github.com/WordPress/performance/pull/1849))
+
+**Bug Fixes**
+
+* Prevent URL in `Link` header from including invalid characters. ([1802](https://github.com/WordPress/performance/pull/1802))
+* Prevent optimizing post previews by default. ([1848](https://github.com/WordPress/performance/pull/1848))
+
+**Documentation**
+
+* Improve Optimization Detective documentation. ([1782](https://github.com/WordPress/performance/pull/1782))
+
+= 1.0.0-beta1 =
+
+**Enhancements**
+
+* Add site health check to detect blocked REST API and short-circuit optimization when unavailable. ([1762](https://github.com/WordPress/performance/pull/1762))
+* Allow extensions to opt in to using the web-vitals attribution build via the `od_use_web_vitals_attribution_build` filter. ([1759](https://github.com/WordPress/performance/pull/1759))
+* Disambiguate XPaths for children of `BODY` with `id`, `class`, or `role` attributes. ([1797](https://github.com/WordPress/performance/pull/1797))
+* Eliminate varying URL Metrics by logged-in state and discontinue disabling optimization by default for admins. ([1788](https://github.com/WordPress/performance/pull/1788))
+* Improve test coverage for Optimization Detective. ([1817](https://github.com/WordPress/performance/pull/1817))
+* Introduce `OD_Tag_Visitor_Context::track_tag()` method as alternative for returning `true` in tag visitor callback. ([1821](https://github.com/WordPress/performance/pull/1821))
+* Omit element node index in XPaths up to children of BODY. ([1790](https://github.com/WordPress/performance/pull/1790))
+* Skip visiting tags in the Admin Bar when optimizing a page. ([1816](https://github.com/WordPress/performance/pull/1816))
+
+**Bug Fixes**
+
+* Ensure optimization is performed in the wp-env local environment and log debug messages to console when disabled. ([1822](https://github.com/WordPress/performance/pull/1822))
+* Skip visiting any tags inside of `NOSCRIPT` elements. ([1783](https://github.com/WordPress/performance/pull/1783))
+
+**Documentation**
+
+* Move Optimization Detective docs into [`README.md`](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective/docs). ([1763](https://github.com/WordPress/performance/pull/1763))
+
+= 0.9.0 =
+
+**Enhancements**
+
+* Add `fetchpriority=high` to `IMG` when it is the LCP element on desktop and mobile with other viewport groups empty. ([1723](https://github.com/WordPress/performance/pull/1723))
+* Improve debugging stored URL Metrics in Optimization Detective. ([1656](https://github.com/WordPress/performance/pull/1656))
+* Incorporate page state into ETag computation. ([1722](https://github.com/WordPress/performance/pull/1722))
+* Mark existing URL Metrics as stale when a new tag visitor is registered. ([1705](https://github.com/WordPress/performance/pull/1705))
+* Set development mode to 'plugin' in the dev environment and allow pages to be optimized when admin is logged-in (when in plugin dev mode). ([1700](https://github.com/WordPress/performance/pull/1700))
+* Add `get_xpath_elements_map()` helper methods to `OD_URL_Metric_Group_Collection` and `OD_URL_Metric_Group`, and add `get_all_element_max_intersection_ratios`/`get_element_max_intersection_ratio` methods to `OD_URL_Metric_Group`. ([1654](https://github.com/WordPress/performance/pull/1654))
+* Add `get_breadcrumbs()` method to `OD_HTML_Tag_Processor`. ([1707](https://github.com/WordPress/performance/pull/1707))
+* Add `get_sample_size()` and `get_freshness_ttl()` methods to `OD_URL_Metric_Group`. ([1697](https://github.com/WordPress/performance/pull/1697))
+* Expose `onTTFB`, `onFCP`, `onLCP`, `onINP`, and `onCLS` from web-vitals.js to extension JS modules via args their `initialize` functions. ([1697](https://github.com/WordPress/performance/pull/1697))
+
+**Bug Fixes**
+
+* Prevent submitting URL Metric if viewport size changed. ([1712](https://github.com/WordPress/performance/pull/1712))
+* Fix construction of XPath expressions for implicitly closed paragraphs. ([1707](https://github.com/WordPress/performance/pull/1707))
+
+= 0.8.0 =
+
+**Enhancements**
+
+* Serve unminified scripts when `SCRIPT_DEBUG` is enabled. ([1643](https://github.com/WordPress/performance/pull/1643))
+* Bump web-vitals from 4.2.3 to 4.2.4. ([1628](https://github.com/WordPress/performance/pull/1628))
+
+**Bug Fixes**
+
+* Eliminate the detection time window which prevented URL Metrics from being gathered when page caching is present. ([1640](https://github.com/WordPress/performance/pull/1640))
+* Revise the use of nonces in requests to store a URL Metric and block cross-origin requests. ([1637](https://github.com/WordPress/performance/pull/1637))
+* Send post ID of queried object or first post in loop in URL Metric storage request to schedule page cache validation. ([1641](https://github.com/WordPress/performance/pull/1641))
+* Fix phpstan errors. ([1627](https://github.com/WordPress/performance/pull/1627))
+
 = 0.7.0 =
 
 **Enhancements**
 
-* Send gathered URL metric data when the page is hidden/unloaded as opposed to once the page has loaded; this enables the ability to track layout shifts and INP scores over the life of the page. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Send gathered URL Metric data when the page is hidden/unloaded as opposed to once the page has loaded; this enables the ability to track layout shifts and INP scores over the life of the page. ([1373](https://github.com/WordPress/performance/pull/1373))
 * Introduce client-side extensions in the form of script modules which are loaded when the detection logic runs. ([1373](https://github.com/WordPress/performance/pull/1373))
 * Add an `od_init` action for extensions to load their code. ([1373](https://github.com/WordPress/performance/pull/1373))
 * Introduce `OD_Element` class and improve PHP API. ([1585](https://github.com/WordPress/performance/pull/1585))
@@ -180,9 +219,9 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 **Enhancements**
 
-* Allow URL metric schema to be extended. ([1492](https://github.com/WordPress/performance/pull/1492))
+* Allow URL Metric schema to be extended. ([1492](https://github.com/WordPress/performance/pull/1492))
 * Clarify docs around a tag visitor's boolean return value. ([1479](https://github.com/WordPress/performance/pull/1479))
-* Include UUID with each URL metric. ([1489](https://github.com/WordPress/performance/pull/1489))
+* Include UUID with each URL Metric. ([1489](https://github.com/WordPress/performance/pull/1489))
 * Introduce get_cursor_move_count() to use instead of get_seek_count() and get_next_token_count(). ([1478](https://github.com/WordPress/performance/pull/1478))
 
 **Bug Fixes**
@@ -224,11 +263,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 **Enhancements**
 
-* Log URL metrics group collection to console when debugging is enabled (`WP_DEBUG` is true). ([1295](https://github.com/WordPress/performance/pull/1295))
+* Log URL Metrics group collection to console when debugging is enabled (`WP_DEBUG` is true). ([1295](https://github.com/WordPress/performance/pull/1295))
 
 **Bug Fixes**
 
-* Include non-intersecting elements in URL metrics to fix lazy-load optimization. ([1293](https://github.com/WordPress/performance/pull/1293))
+* Include non-intersecting elements in URL Metrics to fix lazy-load optimization. ([1293](https://github.com/WordPress/performance/pull/1293))
 
 = 0.3.0 =
 

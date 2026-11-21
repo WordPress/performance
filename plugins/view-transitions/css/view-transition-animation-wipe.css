@@ -1,0 +1,49 @@
+@property --plvt-view-transition-animation-wipe-angle {
+	syntax: "<angle>";
+	initial-value: 270deg;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-wipe-progress {
+	syntax: "<number>";
+	initial-value: 0;
+	inherits: false;
+}
+
+@property --plvt-view-transition-animation-duration {
+	syntax: "<time>";
+	initial-value: 1s;
+	inherits: false;
+}
+
+@keyframes plvt-view-transition-animation-wipe-new {
+	from {
+		--plvt-view-transition-animation-wipe-progress: 0;
+	}
+	to {
+		--plvt-view-transition-animation-wipe-progress: 1;
+	}
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+	mix-blend-mode: normal;
+	backface-visibility: hidden;
+}
+
+::view-transition-old(root) {
+	opacity: 1;
+	transform: none;
+	animation: none var(--plvt-view-transition-animation-duration) cubic-bezier(0.45, 0, 0.35, 1.0);
+	animation-fill-mode: both;
+	animation-delay: 0s;
+}
+
+::view-transition-new(root) {
+	opacity: 1;
+	transform: none;
+	animation: plvt-view-transition-animation-wipe-new var(--plvt-view-transition-animation-duration) cubic-bezier(0.45, 0, 0.35, 1.0);
+	animation-fill-mode: both;
+	-webkit-mask-image: linear-gradient(var(--plvt-view-transition-animation-wipe-angle), #000 calc(-70% + calc(170% * var(--plvt-view-transition-animation-wipe-progress, 0))), transparent calc(170% * var(--plvt-view-transition-animation-wipe-progress, 0)));
+	mask-image: linear-gradient(var(--plvt-view-transition-animation-wipe-angle), #000 calc(-70% + calc(170% * var(--plvt-view-transition-animation-wipe-progress, 0))), transparent calc(170% * var(--plvt-view-transition-animation-wipe-progress, 0)));
+}

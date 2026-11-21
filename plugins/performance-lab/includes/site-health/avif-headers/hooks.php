@@ -3,26 +3,30 @@
  * Hook callbacks used for AVIF Headers.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 3.6.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds tests to site health.
  *
- * @since n.e.x.t
+ * @since 3.6.0
  *
  * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
  * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function avif_headers_add_is_avif_headers_enabled_test( array $tests ): array {
+function perflab_avif_headers_add_is_avif_headers_enabled_test( array $tests ): array {
 	$tests['direct']['avif_headers'] = array(
 		'label' => __( 'AVIF Headers', 'performance-lab' ),
-		'test'  => 'avif_headers_check_avif_headers_test',
+		'test'  => 'perflab_avif_headers_check_avif_headers_test',
 	);
 	return $tests;
 }
-add_filter( 'site_status_tests', 'avif_headers_add_is_avif_headers_enabled_test' );
+add_filter( 'site_status_tests', 'perflab_avif_headers_add_is_avif_headers_enabled_test' );

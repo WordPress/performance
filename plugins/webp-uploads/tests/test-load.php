@@ -43,15 +43,29 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Don't create the original mime type for JPEG images.
 	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::wp_get_original_image_path
+	 * @covers ::get_post_mime_type
 	 * @dataProvider data_provider_supported_image_types
+	 * @dataProvider data_provider_supported_image_types_with_threshold
 	 */
-	public function test_it_should_not_create_the_original_mime_type_for_jpeg_images( string $image_type ): void {
+	public function test_it_should_not_create_the_original_mime_type_for_jpeg_images( string $image_type, bool $above_big_image_size = false ): void {
 		$mime_type = 'image/' . $image_type;
 		$this->set_image_output_type( $image_type );
 		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		if ( $above_big_image_size ) {
+			// Add threshold to create a `-scaled` output image for testing.
+			add_filter(
+				'big_image_size_threshold',
+				static function () {
+					return 850;
+				}
+			);
+		}
 
 		// There should be an image_type source, but no JPEG source for the full image.
 		$this->assertImageHasSource( $attachment_id, $mime_type );
@@ -79,6 +93,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the original mime type for WebP images.
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_mime_type
 	 */
 	public function test_it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime(): void {
 		update_option( 'perflab_generate_webp_and_jpeg', false );
@@ -107,44 +124,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Create JPEG and output type for JPEG images, if opted in.
-	 *
-	 * @dataProvider data_provider_supported_image_types
-	 */
-	public function test_it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in( string $image_type ): void {
-		$mime_type = 'image/' . $image_type;
-		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
-		$this->set_image_output_type( $image_type );
-
-		update_option( 'perflab_generate_webp_and_jpeg', true );
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
-		// There should be JPEG and mime_type sources for the full image.
-		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
-		$this->assertImageHasSource( $attachment_id, $mime_type );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		// The full image should be a JPEG.
-		$this->assertArrayHasKey( 'file', $metadata );
-		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $metadata['file'] );
-		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], get_attached_file( $attachment_id ) );
-
-		// The post MIME type should be JPEG.
-		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
-
-		// There should be JPEG and WebP sources for all sizes.
-		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, $mime_type );
-		}
-	}
-
-	/**
 	 * Create JPEG and output format for JPEG images, if perflab_generate_webp_and_jpeg option set.
 	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_mime_type
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set( string $image_type ): void {
@@ -181,6 +164,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Don't create the sources property if no transform is provided.
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_not_create_the_sources_property_if_no_transform_is_provided(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
@@ -200,6 +185,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the sources property when no transform is available
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_create_the_sources_property_when_no_transform_is_available(): void {
 		add_filter(
@@ -225,6 +212,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Not create the sources property if the mime is not specified on the transforms images
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images(): void {
 		add_filter(
@@ -249,6 +238,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create a WebP version with all the required properties
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_create_a_webp_version_with_all_the_required_properties(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -275,6 +266,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the full size images when no size is available
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_create_the_full_size_images_when_no_size_is_available(): void {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
@@ -283,7 +276,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertSame( array(), $metadata['sizes'] );
 
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
@@ -291,6 +284,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove `scaled` suffix from the generated filename
+	 *
+	 * @covers ::get_attached_file
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_scaled_suffix_from_the_generated_filename(): void {
 		// Create JPEG and WebP to check for scaled suffix.
@@ -316,6 +312,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the generated webp images when the attachment is deleted
+	 *
+	 * @covers ::get_attached_file
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -349,6 +348,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the attached WebP version if the attachment is force deleted
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -374,6 +376,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove full size images when no size image exists
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_full_size_images_when_no_size_image_exists(): void {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
@@ -386,7 +391,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertSame( array(), $metadata['sizes'] );
 		$this->assertFileExists( $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 
@@ -397,6 +402,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the attached WebP version if the attachment is force deleted after edit.
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_meta
 	 */
 	public function test_it_should_remove_the_backup_sizes_and_sources_if_the_attachment_is_deleted_after_edit(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -413,12 +422,12 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$editor->rotate_right()->save();
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-		$this->assertNotEmpty( $backup_sources );
 		$this->assertIsArray( $backup_sources );
+		$this->assertNotCount( 0, $backup_sources );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-		$this->assertNotEmpty( $backup_sizes );
 		$this->assertIsArray( $backup_sizes );
+		$this->assertNotCount( 0, $backup_sizes );
 
 		wp_delete_attachment( $attachment_id, true );
 
@@ -429,35 +438,38 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Avoid the change of URLs of images that are not part of the media library
 	 *
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library(): void {
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 
-		$paragraph = '<p>Donec accumsan, sapien et <img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+		$paragraph = '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 
-		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+		$this->assertSame( $paragraph, webp_uploads_filter_image_tag( $paragraph, 'the_content', 0 ) );
 	}
 
 	/**
 	 * Avoid replacing not existing attachment IDs
 	 *
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_avoid_replacing_not_existing_attachment_i_ds(): void {
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 
-		$paragraph = '<p>Donec accumsan, sapien et <img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+		$paragraph = '<img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 
-		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+		$this->assertSame( $paragraph, webp_uploads_filter_image_tag( $paragraph, 'the_content', 0 ) );
 	}
 
 	/**
 	 * Prevent replacing a WebP image
 	 *
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_a_webp_image(): void {
 		// Create JPEG and WebP to check that WebP does not get replaced with JPEG.
@@ -470,21 +482,23 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
 		$metadata     = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/webp']['file'], $properties['sources']['image/jpeg']['file'], $expected_tag );
 		}
 
 		$expected_tag = str_replace( $metadata['sources']['image/webp']['file'], $metadata['sources']['image/jpeg']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent replacing a jpg image if the image does not have the target class name
+	 *
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_a_jpg_image_if_the_image_does_not_have_the_target_class_name(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -496,14 +510,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium' );
 
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Replace references to a JPG image to a WebP version
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider provider_replace_images_with_different_extensions
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_replace_references_to_a_jpg_image_to_a_webp_version( string $image_path ): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
@@ -514,24 +530,26 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
 		$metadata     = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
 
 		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Should not replace jpeg images in the content if other mime types are disabled via filter.
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider provider_replace_images_with_different_extensions
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( string $image_path ): void {
 		remove_all_filters( 'webp_uploads_content_image_mimes' );
@@ -549,7 +567,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function provider_replace_images_with_different_extensions(): Generator {
@@ -559,6 +577,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Replace all the images including the full size image
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_replace_all_the_images_including_the_full_size_image(): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
@@ -578,15 +599,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
 		$this->mock_frontend_body_hooks();
 		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 		$this->assertStringContainsString( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent replacing an image with no available sources
 	 *
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_an_image_with_no_available_sources(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
@@ -596,14 +619,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent update not supported images with no available sources
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider data_provider_not_supported_webp_images
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_update_not_supported_images_with_no_available_sources( string $image_path ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -613,7 +638,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function data_provider_not_supported_webp_images(): Generator {
@@ -654,6 +679,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Tests that we can force generating jpeg subsizes using the webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @covers \Test_WebP_Uploads_Load::opt_in_to_jpeg_and_webp
 	 */
 	public function test_it_should_preserve_jpeg_subsizes_using_transform_filter(): void {
 		// Create JPEG and WebP.
@@ -674,6 +701,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Allow the upload of an image if at least one editor supports the image type
 	 *
+	 * @covers ::wp_image_editor_supports
+	 * @covers ::set_post_thumbnail
 	 * @dataProvider data_provider_supported_image_types
 	 *
 	 * @group current1
@@ -691,7 +720,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support modern images needs to be first in this list.
-				array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				array_unshift( $editors, WP_Image_Doesnt_Support_Modern_Images::class );
 				return $editors;
 			}
 		);
@@ -716,6 +745,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Replace the featured image to the proper type when requesting the featured image.
 	 *
+	 * @covers ::get_the_post_thumbnail
+	 * @covers ::set_post_thumbnail
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( string $image_type ): void {
@@ -743,16 +774,41 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * @return array<string, array<string>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types(): array {
-		return array(
+		$data = array(
 			'webp' => array( 'webp' ),
-			'avif' => array( 'avif' ),
 		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif'] = array( 'avif' );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Data provider for tests returns the supported image types to run the tests with and without threshold check.
+	 *
+	 * @return array<string, array<int, string|true>> An array of valid image types.
+	 */
+	public function data_provider_supported_image_types_with_threshold(): array {
+		$data = array(
+			'webp'                    => array( 'webp' ),
+			'webp with 850 threshold' => array( 'webp', true ),
+		);
+
+		if ( $this->check_avif_encoding_support() ) {
+			$data['avif']                    = array( 'avif' );
+			$data['avif with 850 threshold'] = array( 'avif', true );
+		}
+
+		return $data;
 	}
 
 	/**
 	 * Prevent replacing an image if image was uploaded via external source or plugin.
 	 *
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_an_image_uploaded_via_external_source(): void {
 		remove_all_filters( 'webp_uploads_pre_replace_additional_image_source' );
@@ -769,11 +825,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertNotSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_when_webp_is_smaller_than_jpegs(): void {
 		// Create JPEG and WebP.
@@ -792,13 +851,13 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $result, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $result, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 
 		$this->assertNotSame( $tag, $result );
 
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		foreach ( $metadata['sizes'] as $size => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertFileExists( path_join( $dirname, $properties['sources']['image/webp']['file'] ) );
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
@@ -806,13 +865,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
 
-		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( '', $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, $result );
 	}
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_for_full_size_which_is_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
@@ -835,11 +897,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 		}
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertNotSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
@@ -868,7 +933,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotSame( $tag, $updated_tag );
 		$this->assertSame( $expected_tag, $updated_tag );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
@@ -953,6 +1018,412 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
+	 * Test that the output format is normalized and short-circuited for invalid or unknown input.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_normalize_non_array_output_format_and_return_early_without_mime_type(): void {
+		// A non-array output format is normalized to an empty array; a null mime type returns it unchanged.
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( 'not-an-array', null, null ),
+			'A non-array output format should be normalized to an empty array.'
+		);
+
+		// An existing output format mapping is returned unchanged when there is no source mime type to map.
+		$output_format = array( 'image/png' => 'image/webp' );
+		$this->assertSame(
+			$output_format,
+			webp_uploads_filter_image_editor_output_format( $output_format, '/tmp/image.png', null ),
+			'The output format mapping should be returned unchanged when the source mime type is null.'
+		);
+	}
+
+	/**
+	 * Test that the output format is selected without regard to server support for client side media processing.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_map_to_the_selected_format_for_client_side_media_processing(): void {
+		$this->set_image_output_type( 'avif' );
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+			}
+		);
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/webp' ) );
+
+		// Server side, the editor supports neither modern format, so nothing is mapped.
+		$this->assertSame( array(), webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ) );
+
+		add_filter( 'webp_uploads_client_side_media_processing', '__return_true' );
+
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'A JPEG should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array( 'image/png' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.png', 'image/png' ),
+			'A PNG should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array( 'image/webp' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.webp', 'image/webp' ),
+			'A WebP should be mapped to AVIF when the browser encodes the images.'
+		);
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.avif', 'image/avif' ),
+			'An AVIF should not be mapped when it is already in the selected format.'
+		);
+		$this->assertSame(
+			array( 'image/gif' => 'image/gif' ),
+			webp_uploads_filter_image_editor_output_format( array( 'image/gif' => 'image/gif' ), '/tmp/image.gif', 'image/gif' ),
+			'A mime type without transforms should be left alone.'
+		);
+
+		// With fallback output enabled the browser still produces the modern format; the server generates the fallback.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->assertSame(
+			array( 'image/jpeg' => 'image/avif' ),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.jpg', 'image/jpeg' ),
+			'A JPEG should be mapped to AVIF when fallback output is enabled and the browser encodes the images.'
+		);
+		$this->assertSame(
+			array(),
+			webp_uploads_filter_image_editor_output_format( array(), '/tmp/image.avif', 'image/avif' ),
+			'An AVIF should keep its format when fallback output is enabled and the browser encodes the images.'
+		);
+	}
+
+	/**
+	 * Replaces an attachment's medium size with a modern format image, as the browser generates it.
+	 *
+	 * @param int $attachment_id The attachment ID.
+	 * @param int $filesize      The size in bytes of the modern format image.
+	 * @return string The modern format image's file name.
+	 */
+	private function replace_medium_size_with_browser_generated_webp( int $attachment_id, int $filesize ): string {
+		$metadata  = wp_get_attachment_metadata( $attachment_id );
+		$directory = dirname( (string) get_attached_file( $attachment_id ) );
+		$medium    = $metadata['sizes']['medium'];
+		$webp_file = $medium['sources']['image/webp']['file'];
+
+		// The server generated JPEG sub-size does not exist in the client side flow.
+		wp_delete_file( path_join( $directory, $medium['sources']['image/jpeg']['file'] ) );
+		file_put_contents( path_join( $directory, $webp_file ), str_repeat( 'a', $filesize ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$metadata['sizes']['medium'] = array(
+			'file'      => $webp_file,
+			'width'     => $medium['width'],
+			'height'    => $medium['height'],
+			'mime-type' => 'image/webp',
+			'filesize'  => $filesize,
+			'sources'   => array(
+				'image/webp' => array(
+					'file'     => $webp_file,
+					'filesize' => $filesize,
+				),
+			),
+		);
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $webp_file;
+	}
+
+	/**
+	 * Test that a browser generated sub-size is discarded in favor of its fallback when it is larger.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_discard_a_browser_generated_sub_size_larger_than_its_fallback(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$webp_file     = $this->replace_medium_size_with_browser_generated_webp( $attachment_id, 10 * MB_IN_BYTES );
+		$directory     = dirname( (string) get_attached_file( $attachment_id ) );
+
+		remove_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+		$metadata = webp_uploads_create_sources_property( wp_get_attachment_metadata( $attachment_id ), $attachment_id );
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( 'image/jpeg', $medium['mime-type'] );
+		$this->assertSame( $medium['sources']['image/jpeg']['file'], $medium['file'] );
+		$this->assertSame( $medium['sources']['image/jpeg']['filesize'], $medium['filesize'] );
+		$this->assertArrayNotHasKey( 'image/webp', $medium['sources'], 'The WebP should be discarded for being larger than the JPEG.' );
+		$this->assertFileDoesNotExist( path_join( $directory, $webp_file ) );
+		$this->assertFileExists( path_join( $directory, $medium['file'] ) );
+	}
+
+	/**
+	 * Skips the test when the REST API does not offer client side media processing, and enables it otherwise.
+	 */
+	private function enable_client_side_media_processing(): void {
+		// Client side media processing was added in WordPress 7.1.
+		if ( ! function_exists( 'wp_is_client_side_media_processing_enabled' ) ) {
+			$this->markTestSkipped( 'Client side media processing REST endpoints are not available.' );
+		}
+
+		add_filter( 'wp_client_side_media_processing_enabled', '__return_true' );
+
+		// Have the REST server register the sideload and finalize routes.
+		$GLOBALS['wp_rest_server'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// As in production, the larger of the two images is the one discarded.
+		remove_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
+	/**
+	 * Uploads an image the way the block editor does for client side media processing.
+	 *
+	 * @param string $file_name File name of an image in the test data.
+	 * @param string $mime_type Mime type of the image.
+	 * @return array<string, mixed> The response data of the created attachment.
+	 */
+	private function upload_from_browser( string $file_name, string $mime_type ): array {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/media' );
+		$request->set_header( 'Content-Type', $mime_type );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=' . $file_name );
+		$request->set_param( 'generate_sub_sizes', false );
+		$request->set_body( (string) file_get_contents( TESTS_PLUGIN_DIR . '/tests/data/images/' . $file_name ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		return $response->get_data();
+	}
+
+	/**
+	 * Sideloads a modern format image for an attachment the way the block editor does for an image the browser generated.
+	 *
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $image_size    The image size the browser generated.
+	 * @param int    $width         Width of the image in pixels.
+	 * @param int    $height        Height of the image in pixels.
+	 * @param string $mime_type     Mime type the browser encoded the image in. Default 'image/webp'.
+	 * @return array<string, mixed> The sub-size data to finalize the upload with.
+	 */
+	private function sideload_from_browser( int $attachment_id, string $image_size, int $width, int $height, string $mime_type = 'image/webp' ): array {
+		$original = (string) wp_get_original_image_path( $attachment_id );
+		$editor   = wp_get_image_editor( $original );
+		$this->assertNotWPError( $editor );
+		$editor->resize( $width, $height, true );
+		$editor->set_quality( 1 );
+		$extension = wp_get_default_extension_for_mime_type( $mime_type );
+		$saved     = $editor->save( get_temp_dir() . wp_unique_id( 'browser-generated-' ) . '.' . $extension, $mime_type );
+		$this->assertNotWPError( $saved );
+		$this->to_unlink[] = $saved['path'];
+
+		$suffix  = 'scaled' === $image_size ? 'scaled' : "{$width}x{$height}";
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/{$attachment_id}/sideload" );
+		$request->set_header( 'Content-Type', $mime_type );
+		$request->set_header( 'Content-Disposition', 'attachment; filename=' . pathinfo( $original, PATHINFO_FILENAME ) . "-{$suffix}.{$extension}" );
+		$request->set_param( 'image_size', $image_size );
+		$request->set_param( 'convert_format', false );
+		$request->set_body( (string) file_get_contents( $saved['path'] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		return $response->get_data();
+	}
+
+	/**
+	 * Finalizes an upload the way the block editor does once it sideloaded the images the browser generated.
+	 *
+	 * @param int                         $attachment_id The attachment ID.
+	 * @param array<array<string, mixed>> $sub_sizes     The sub-size data collected from the sideload requests.
+	 * @return array<string, mixed> The attachment metadata.
+	 */
+	private function finalize_from_browser( int $attachment_id, array $sub_sizes ): array {
+		$request = new WP_REST_Request( 'POST', "/wp/v2/media/{$attachment_id}/finalize" );
+		$request->set_param( 'sub_sizes', $sub_sizes );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing(), 'The client side context should end with the request.' );
+
+		return (array) wp_get_attachment_metadata( $attachment_id );
+	}
+
+	/**
+	 * Test that a client side upload keeps the upload as the attached file and as the fallback of every sub-size.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 * @covers ::webp_uploads_start_client_side_media_processing_request
+	 * @covers ::webp_uploads_end_client_side_upload_processing
+	 * @covers ::webp_uploads_end_client_side_media_processing_request
+	 * @covers ::webp_uploads_create_sources_property
+	 *
+	 * @dataProvider data_provider_client_side_uploads
+	 *
+	 * @param string $file_name File name of an image in the test data.
+	 * @param string $mime_type Mime type of the image.
+	 */
+	public function test_it_should_keep_the_fallback_of_a_client_side_upload( string $file_name, string $mime_type ): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$attachment    = $this->upload_from_browser( $file_name, $mime_type );
+		$attachment_id = $attachment['id'];
+		$upload        = (string) get_attached_file( $attachment_id );
+		$directory     = dirname( $upload );
+
+		$this->assertSame( $mime_type, wp_check_filetype( $upload )['type'], 'The server should not convert the upload.' );
+		$this->assertArrayNotHasKey( 'original_image', (array) wp_get_attachment_metadata( $attachment_id ) );
+		$this->assertSame( 'image/webp', $attachment['image_output_format'], 'The browser should be told to encode the sub-sizes as WebP.' );
+
+		$sub_size = $this->sideload_from_browser( $attachment_id, 'medium', 300, 200 );
+		$metadata = $this->finalize_from_browser( $attachment_id, array( $sub_size ) );
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( $upload, get_attached_file( $attachment_id ) );
+		$this->assertSame( 'image/webp', $medium['mime-type'] );
+		$this->assertSame( $sub_size['file'], $medium['sources']['image/webp']['file'] );
+		$this->assertArrayHasKey( $mime_type, $medium['sources'], 'The fallback should be kept even though it is larger than the WebP.' );
+		$this->assertGreaterThan( $medium['sources']['image/webp']['filesize'], $medium['sources'][ $mime_type ]['filesize'] );
+		$this->assertFileExists( path_join( $directory, $medium['sources'][ $mime_type ]['file'] ) );
+	}
+
+	/**
+	 * Data provider for test_it_should_keep_the_fallback_of_a_client_side_upload().
+	 *
+	 * @return array<string, array{ string, string }>
+	 */
+	public function data_provider_client_side_uploads(): array {
+		return array(
+			'JPEG' => array( 'leaves.jpg', 'image/jpeg' ),
+			'PNG'  => array( 'dice.png', 'image/png' ),
+		);
+	}
+
+	/**
+	 * Test that a client side upload over the big image size threshold keeps its fallbacks.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_keep_the_fallbacks_of_a_scaled_client_side_upload(): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$attachment_id = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' )['id'];
+		$upload        = (string) get_attached_file( $attachment_id );
+		$directory     = dirname( $upload );
+		$scaled        = pathinfo( $upload, PATHINFO_FILENAME ) . '-scaled.webp';
+
+		// The server leaves the full size WebP to the browser, which has yet to supply the scaled image.
+		$this->assertArrayNotHasKey( 'image/webp', (array) wp_get_attachment_metadata( $attachment_id )['sources'] );
+
+		$metadata = $this->finalize_from_browser(
+			$attachment_id,
+			array(
+				$this->sideload_from_browser( $attachment_id, 'scaled', 600, 400 ),
+				$this->sideload_from_browser( $attachment_id, 'medium', 300, 200 ),
+			)
+		);
+		$medium   = $metadata['sizes']['medium'];
+
+		$this->assertSame( $scaled, wp_basename( (string) get_attached_file( $attachment_id ) ) );
+		$this->assertSame( wp_basename( $upload ), $metadata['original_image'] );
+
+		$this->assertSame( $scaled, $metadata['sources']['image/webp']['file'] );
+		$this->assertSame( wp_basename( $upload ), $metadata['sources']['image/jpeg']['file'], 'The full size should fall back to the upload.' );
+		$this->assertFileExists( $upload );
+
+		$this->assertSame( 'image/webp', $medium['mime-type'] );
+		$this->assertArrayHasKey( 'image/webp', $medium['sources'] );
+		$this->assertArrayHasKey( 'image/jpeg', $medium['sources'], 'The fallback should be kept even though it is larger than the WebP.' );
+		$this->assertGreaterThan( $medium['sources']['image/webp']['filesize'], $medium['sources']['image/jpeg']['filesize'] );
+		$this->assertFileExists( path_join( $directory, $medium['sources']['image/jpeg']['file'] ) );
+	}
+
+	/**
+	 * Test that the scaled image the browser supplies replaces an upload which is already in the modern format.
+	 *
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_replace_a_modern_client_side_upload_with_the_scaled_image(): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		$attachment_id = $this->upload_from_browser( 'balloons.webp', 'image/webp' )['id'];
+		$upload        = (string) get_attached_file( $attachment_id );
+		$this->assertSame( wp_basename( $upload ), wp_get_attachment_metadata( $attachment_id )['sources']['image/webp']['file'] );
+
+		$metadata = $this->finalize_from_browser( $attachment_id, array( $this->sideload_from_browser( $attachment_id, 'scaled', 600, 400 ) ) );
+
+		$this->assertSame( wp_basename( $upload ), $metadata['original_image'] );
+		$this->assertSame( wp_basename( (string) get_attached_file( $attachment_id ) ), $metadata['sources']['image/webp']['file'] );
+		$this->assertNotSame( $metadata['original_image'], $metadata['sources']['image/webp']['file'] );
+		$this->assertFileExists( $upload, 'The upload should be kept as the original image.' );
+	}
+
+	/**
+	 * Test that a client side upload gets AVIF sub-sizes from the browser when the server cannot encode AVIF.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 * @covers ::webp_uploads_start_client_side_media_processing_request
+	 * @covers ::webp_uploads_create_sources_property
+	 */
+	public function test_it_should_use_browser_avif_when_the_server_cannot_encode_avif(): void {
+		// The AVIF the browser would send is made with the real editor, so it needs AVIF encoding support.
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is needed to create the browser generated image.' );
+		}
+
+		$this->enable_client_side_media_processing();
+		$this->set_image_output_type( 'avif' );
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		// The server side AVIF encoder ignores the quality setting, so keep the AVIF even when it is the larger image.
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+
+		$no_modern_editor = static function (): array {
+			return array( 'WP_Image_Doesnt_Support_Modern_Images' );
+		};
+		add_filter( 'wp_image_editors', $no_modern_editor );
+		$this->assertFalse( webp_uploads_mime_type_supported( 'image/avif' ) );
+
+		$attachment    = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' );
+		$attachment_id = $attachment['id'];
+
+		$this->assertSame( 'image/avif', $attachment['image_output_format'], 'The browser should be told to encode AVIF even though the server cannot.' );
+		$this->assertFalse( webp_uploads_is_client_side_media_processing(), 'The client side context should end with the request.' );
+
+		// Stand in for the browser's encoder, then finalize on the server without AVIF support again.
+		remove_filter( 'wp_image_editors', $no_modern_editor );
+		$sub_size = $this->sideload_from_browser( $attachment_id, 'medium', 300, 200, 'image/avif' );
+		add_filter( 'wp_image_editors', $no_modern_editor );
+
+		$medium = $this->finalize_from_browser( $attachment_id, array( $sub_size ) )['sizes']['medium'];
+
+		$this->assertSame( 'image/jpeg', wp_check_filetype( (string) get_attached_file( $attachment_id ) )['type'], 'The server should not convert the upload.' );
+		$this->assertSame( $sub_size['file'], $medium['sources']['image/avif']['file'], 'The browser generated AVIF should be kept.' );
+		$this->assertArrayHasKey( 'image/jpeg', $medium['sources'], 'The server should still generate the JPEG fallback.' );
+	}
+
+	/**
+	 * Test that the server converts a client side upload when there is no fallback to keep.
+	 *
+	 * @covers ::webp_uploads_filter_image_editor_output_format
+	 */
+	public function test_it_should_convert_a_client_side_upload_without_fallback(): void {
+		$this->enable_client_side_media_processing();
+		update_option( 'perflab_generate_webp_and_jpeg', '' );
+
+		$attachment_id = $this->upload_from_browser( 'leaves.jpg', 'image/jpeg' )['id'];
+		$metadata      = (array) wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertSame( 'image/webp', wp_check_filetype( (string) get_attached_file( $attachment_id ) )['type'] );
+		$this->assertSame( 'image/jpeg', wp_check_filetype( $metadata['original_image'] )['type'] );
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::webp_uploads_render_generator
@@ -986,5 +1457,493 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->to_unlink[] = $filename;
 
 		return $filename;
+	}
+
+	/**
+	 * Test that fallback images are generated for all sizes when the `perflab_generate_all_fallback_sizes` option is enabled.
+	 *
+	 * @dataProvider data_provider_supported_image_types
+	 *
+	 * @param string $image_type The image type.
+	 */
+	public function test_it_should_generate_fallback_images_for_all_sizes_when_generate_all_fallback_sizes_option_is_enabled( string $image_type ): void {
+		$mime_type = 'image/' . $image_type;
+
+		// Ensure the MIME type is supported; skip the test if not.
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
+			$this->markTestSkipped( 'Mime type ' . $mime_type . ' is not supported.' );
+		}
+
+		// Register custom image sizes.
+		add_image_size( 'custom_size_1', 200, 200, true );
+		add_image_size( 'custom_size_2', 400, 400, true );
+
+		// Generate image output type and fallback image.
+		update_option( 'perflab_generate_webp_and_jpeg', true );
+
+		// Generate fallback images for all sizes.
+		update_option( 'perflab_generate_all_fallback_sizes', true );
+
+		$this->set_image_output_type( $image_type );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Clean up custom sizes.
+		remove_image_size( 'custom_size_1' );
+		remove_image_size( 'custom_size_2' );
+
+		// Verify that fallback images are generated for custom sizes.
+		foreach ( array( 'custom_size_1', 'custom_size_2' ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $mime_type );
+		}
+
+		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
+	 * Convert WebP to AVIF on uploads.
+	 */
+	public function test_that_it_should_convert_webp_to_avif_on_upload(): void {
+		// Ensure the AVIF MIME type is supported; skip the test if not.
+		if ( ! webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->markTestSkipped( 'Mime type image/avif is not supported.' );
+		}
+
+		if ( ! $this->check_avif_encoding_support() ) {
+			$this->markTestSkipped( 'AVIF encoding is not supported.' );
+		}
+
+		$this->set_image_output_type( 'avif' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/balloons.webp' );
+
+		// There should be a AVIF source, but no WebP source for the full image.
+		$this->assertImageNotHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, 'image/avif' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// The full image should be a AVIF.
+		$this->assertArrayHasKey( 'file', $metadata );
+		$this->assertStringEndsWith( $metadata['sources']['image/avif']['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources']['image/avif']['file'], get_attached_file( $attachment_id ) );
+
+		// There should be a AVIF source, but no WebP source for all sizes.
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/avif' );
+		}
+		wp_delete_attachment( $attachment_id );
+	}
+
+	/**
+	 * Tests that the `webp_uploads_convert_palette_png_to_truecolor` function is hooked to the upload filters.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_hooks(): void {
+		$this->assertSame( 10, has_filter( 'wp_handle_upload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+		$this->assertSame( 10, has_filter( 'wp_handle_sideload_prefilter', 'webp_uploads_convert_palette_png_to_truecolor' ) );
+	}
+
+	/**
+	 * Tests converting a palette PNG to a truecolor PNG.
+	 *
+	 * @dataProvider data_to_test_webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 *
+	 * @param string|null $image_path     The path to the image file to test.
+	 * @param bool        $expect_changed Whether the png should be converted to truecolor.
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor( ?string $image_path, bool $expect_changed ): void {
+		if ( ! extension_loaded( 'gd' ) ) {
+			$this->markTestSkipped( 'GD extension is not loaded' );
+		}
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array( WP_Image_Editor_GD::class );
+			}
+		);
+
+		// Temp file will be copied and unlinked by WordPress core during sideload processing.
+		$tmp_file = wp_tempnam();
+		copy( $image_path, $tmp_file );
+		$file = array(
+			'name'     => basename( $image_path ),
+			'tmp_name' => $tmp_file,
+			'type'     => wp_check_filetype( $image_path )['type'],
+			'size'     => filesize( $tmp_file ),
+			'error'    => UPLOAD_ERR_OK,
+		);
+
+		// Store the original file hash and the original file size for later comparison.
+		$original_file_hash = isset( $file['tmp_name'] ) ? md5_file( $file['tmp_name'] ) : '';
+		$original_file_size = (int) filesize( $file['tmp_name'] );
+
+		// This will trigger the `wp_handle_sideload_prefilter` filter.
+		$attachment_id = media_handle_sideload( $file );
+
+		try {
+			$this->assertIsNumeric( $attachment_id );
+
+			// For getting an original image path for computation of the file hash.
+			$meta       = wp_get_attachment_metadata( $attachment_id );
+			$upload_dir = wp_get_upload_dir();
+			$path       = null;
+			if ( isset( $meta['original_image'], $meta['file'] ) ) {
+				$path = path_join(
+					$upload_dir['basedir'],
+					dirname( $meta['file'] ) . '/' . $meta['original_image']
+				);
+			}
+			$this->assertNotNull( $path );
+			$this->assertFileExists( $path );
+
+			// Hash will be modified if the image was converted to truecolor.
+			$modified_file_hash = md5_file( $path );
+
+			if ( ! $expect_changed ) {
+				$this->assertSame( $original_file_hash, $modified_file_hash );
+			} else {
+				$this->assertNotSame( $original_file_hash, $modified_file_hash );
+				$img = imagecreatefrompng( $path );
+				$this->assertTrue( imageistruecolor( $img ) );
+				if ( PHP_VERSION_ID < 80000 ) {
+					imagedestroy( $img ); // phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- imagedestroy() has no effect as of PHP 8.0.
+				}
+
+				// Make sure the image converted to modern image format is not 0 bytes.
+				$modern_image_format_path = get_attached_file( $attachment_id );
+				$this->assertNotFalse( $modern_image_format_path );
+				$this->assertFileExists( $modern_image_format_path );
+				$modern_image_format_filesize = (int) filesize( $modern_image_format_path );
+				$this->assertGreaterThan( 0, $modern_image_format_filesize );
+
+				// Ensure the file size of the converted image is less than or equal to the original indexed PNG file size.
+				$this->assertLessThanOrEqual( $original_file_size, $modern_image_format_filesize );
+			}
+		} finally {
+			wp_delete_attachment( $attachment_id );
+		}
+	}
+
+	/**
+	 * Data provider for `test_webp_uploads_convert_palette_png_to_truecolor`.
+	 *
+	 * @return array<string, mixed> Returns an array of test cases.
+	 */
+	public function data_to_test_webp_uploads_convert_palette_png_to_truecolor(): array {
+		$non_palette_png = TESTS_PLUGIN_DIR . '/tests/data/images/dice.png';
+		$palette_png     = TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png';
+		$test_jpg        = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
+
+		return array(
+			'wrong_extension' => array(
+				'image_path'       => $test_jpg,
+				'expected_changed' => false,
+			),
+			'non_palette_png' => array(
+				'image_path'       => $non_palette_png,
+				'expected_changed' => false,
+			),
+			'palette_png'     => array(
+				'image_path'       => $palette_png,
+				'expected_changed' => true,
+			),
+		);
+	}
+
+	/**
+	 * Tests the webp_uploads_convert_palette_png_to_truecolor function with various conditions.
+	 *
+	 * @covers ::webp_uploads_convert_palette_png_to_truecolor
+	 */
+	public function test_webp_uploads_convert_palette_png_to_truecolor_conditions(): void {
+		$this->assertSame( array(), webp_uploads_convert_palette_png_to_truecolor( 'test' ) );
+		$this->assertSameSets( array(), webp_uploads_convert_palette_png_to_truecolor( array() ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+			'type'     => 'image/jpeg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg',
+			'name'     => 'leaves.jpg',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+
+		add_filter(
+			'wp_image_editors',
+			static function () {
+				return array();
+			}
+		);
+		$file = array(
+			'tmp_name' => TESTS_PLUGIN_DIR . '/tests/data/images/dice-palette.png',
+			'name'     => 'dice-palette.png',
+			'type'     => 'image/png',
+		);
+		$this->assertSameSets( $file, webp_uploads_convert_palette_png_to_truecolor( $file ) );
+	}
+
+	/**
+	 * Featured images are now rewritten through the `wp_get_attachment_image`
+	 * filter (since `the_post_thumbnail()` routes through `wp_get_attachment_image()`),
+	 * so the direct `post_thumbnail_html` registration should no longer exist.
+	 *
+	 * @covers ::webp_uploads_init
+	 */
+	public function test_post_thumbnail_html_filter_is_not_registered_directly(): void {
+		$this->assertFalse( has_filter( 'post_thumbnail_html' ) );
+		$this->assertSame( 10, has_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image' ) );
+	}
+
+	/**
+	 * Test that the featured image is not wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_disabled(): void {
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<img ', $featured_image );
+	}
+
+	/**
+	 * Test that the featured image is wrapped in a picture element.
+	 *
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 * @covers ::webp_uploads_wrap_image_in_picture
+	 */
+	public function test_webp_uploads_update_featured_image_picture_element_enabled(): void {
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		$this->opt_in_to_picture_element();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$post_id       = self::factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+		$this->assertStringStartsWith( '<picture ', $featured_image );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_is_rewritten_to_webp(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.webp', $html );
+		$this->assertStringNotContainsString( 'leaves.jpg', $html );
+
+		$processor = new WP_HTML_Tag_Processor( $html );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertFalse( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Only one IMG tag should be present.' );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_when_no_image_returned(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		add_filter( 'wp_get_attachment_image_src', '__return_false' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$this->assertSame( '', wp_get_attachment_image( $attachment_id, 'large' ) );
+	}
+
+	/**
+	 * Data provider for testing how the `$attr` argument is normalized before being passed to the filter.
+	 *
+	 * @return array<string, array{ attr: string|array<string, mixed>|false, expected_attr: array<string, mixed> }>
+	 */
+	public function data_provider_to_test_attr_normalization(): array {
+		return array(
+			'empty string'  => array(
+				'attr'          => '',
+				'expected_attr' => array(),
+			),
+			'query string'  => array(
+				'attr'          => 'loading=lazy',
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'array'         => array(
+				'attr'          => array( 'loading' => 'lazy' ),
+				'expected_attr' => array( 'loading' => 'lazy' ),
+			),
+			'invalid value' => array(
+				'attr'          => false,
+				'expected_attr' => array(),
+			),
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 *
+	 * @dataProvider data_provider_to_test_attr_normalization
+	 *
+	 * @param string|array<string, mixed>|false $attr          The attributes passed to the filter.
+	 * @param array<string, mixed>              $expected_attr The expected attributes passed to the inner filter.
+	 */
+	public function test_wp_get_attachment_image_attr_normalization( $attr, array $expected_attr ): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		$size          = 'large';
+
+		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id, $size );
+
+		$html = sprintf(
+			'<img src="%s" width="%d" height="%d" alt="">',
+			esc_url( $src ),
+			$width,
+			$height
+		);
+
+		$filter_args = array();
+		add_filter(
+			'webp_uploads_filter_wp_get_attachment_image',
+			static function ( $should_filter, $attachment_id, $size, $attr ) use ( &$filter_args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- They are used in compact!
+				$filter_args[] = compact( 'should_filter', 'attachment_id', 'size', 'attr' );
+				return false;
+			},
+			10,
+			4
+		);
+
+		$this->assertSame( $html, webp_uploads_filter_wp_get_attachment_image( $html, $attachment_id, $size, false, $attr ) );
+		$this->assertCount( 1, $filter_args );
+		$this->assertSame(
+			array(
+				'should_filter' => true,
+				'attachment_id' => $attachment_id,
+				'size'          => $size,
+				'attr'          => $expected_attr,
+			),
+			$filter_args[0]
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_opt_out_filter_returns_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		add_filter( 'webp_uploads_filter_wp_get_attachment_image', '__return_false' );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_unhook_restores_original_html(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		$this->mock_frontend_body_hooks();
+		remove_filter( 'wp_get_attachment_image', 'webp_uploads_filter_wp_get_attachment_image', 10 );
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_outside_frontend_body(): void {
+		$this->opt_in_to_jpeg_and_webp();
+		// Intentionally do NOT call mock_frontend_body_hooks().
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		$html = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertStringContainsString( '.jpg', $html );
+		$this->assertStringNotContainsString( '.webp', $html );
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_icon_placeholder_requested(): void {
+		$this->mock_frontend_body_hooks();
+
+		// Directly exercise the filter callback with $icon = true; expect unchanged HTML.
+		$html = '<img src="https://example.test/wp-content/uploads/2024/01/something.jpg">';
+		$this->assertSame(
+			$html,
+			webp_uploads_filter_wp_get_attachment_image( $html, 0, 'medium', true, array() )
+		);
+	}
+
+	/**
+	 * @covers ::webp_uploads_filter_wp_get_attachment_image
+	 */
+	public function test_wp_get_attachment_image_bails_when_non_string_is_passed(): void {
+		$this->mock_frontend_body_hooks();
+		$this->assertSame(
+			'',
+			webp_uploads_filter_wp_get_attachment_image( false, 0, 'medium', true, array() )
+		);
+	}
+
+	/**
+	 * Check if AVIF encoding is supported.
+	 *
+	 * This is required due to false positive given by Imagick::queryFormats() for AVIF support,
+	 * where it returns true for AVIF support even if only decoding is supported but not encoding.
+	 *
+	 * @return bool True if AVIF encoding is supported, false otherwise.
+	 */
+	public function check_avif_encoding_support(): bool {
+		static $encoding_support = null;
+		if ( null === $encoding_support ) {
+			if ( extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) && class_exists( 'ImagickException' ) ) {
+				// Only reliable way to check for AVIF encoding support is to attempt to encode an image and catch the exception if it fails.
+				try {
+					$i = new Imagick();
+					$i->newImage( 10, 10, 'white' );
+					$i->setImageFormat( 'avif' );
+					$i->getImageBlob();
+					$encoding_support = true;
+				} catch ( ImagickException $e ) {
+					$encoding_support = false;
+				}
+			} else {
+				$encoding_support = false;
+			}
+		}
+
+		return $encoding_support;
 	}
 }

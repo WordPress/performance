@@ -1,7 +1,7 @@
 <phpunit
 	colors="true"
 	backupGlobals="false"
-	bootstrap="tests/bootstrap.php"
+	bootstrap="tools/phpunit/bootstrap.php"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
@@ -29,6 +29,9 @@
 		<testsuite name="speculation-rules">
 			<directory suffix=".php">plugins/speculation-rules/tests</directory>
 		</testsuite>
+		<testsuite name="view-transitions">
+			<directory suffix=".php">plugins/view-transitions/tests</directory>
+		</testsuite>
 		<testsuite name="web-worker-offloading">
 			<directory suffix=".php">plugins/web-worker-offloading/tests</directory>
 		</testsuite>
@@ -41,4 +44,12 @@
 			<group>ms-required</group>
 		</exclude>
 	</groups>
+	<coverage>
+		<include>
+			<directory suffix=".php">plugins</directory>
+		</include>
+		<exclude>
+			<directory suffix=".php">plugins/*/tests</directory>
+		</exclude>
+	</coverage>
 </phpunit>

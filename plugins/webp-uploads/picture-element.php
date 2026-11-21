@@ -7,10 +7,19 @@
  * @since 2.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Potentially wrap an image tag in a picture element.
  *
  * @since 2.0.0
+ * @since n.e.x.t The fallback image is pointed at the original format when the image is in a modern format.
  *
  * @param string $image         The image tag.
  * @param string $context       The context for the image tag.
@@ -19,12 +28,48 @@
  * @return string The new image tag.
  */
 function webp_uploads_wrap_image_in_picture( string $image, string $context, int $attachment_id ): string {
-	if ( 'the_content' !== $context ) {
+	if ( ! in_array( $context, array( 'the_content', 'post_thumbnail_html', 'widget_block_content', 'wp_get_attachment_image' ), true ) ) {
 		return $image;
 	}
-	$image_meta              = wp_get_attachment_metadata( $attachment_id );
-	$original_file_mime_type = get_post_mime_type( $attachment_id );
-	if ( false === $original_file_mime_type || ! isset( $image_meta['sizes'] ) ) {
+
+	/*
+	 * Idempotency: bail if this markup has already been processed, to avoid
+	 * double-wrapping when more than one rewrite path fires on the same image.
+	 *
+	 * Two distinct cases are guarded:
+	 *
+	 * 1. The full `<picture>` string is passed in again.
+	 * 2. Only the inner `<img>` is passed in again. This happens when a
+	 *    `<picture>` produced for a `wp_get_attachment_image()` call is embedded
+	 *    in post content: `wp_filter_content_tags()` then extracts that inner
+	 *    `<img>` and runs it back through this function via `wp_content_img_tag`.
+	 *    The surrounding `<picture>` is not visible at that point, so the wrapped
+	 *    `<img>` carries a `data-wp-picture-wrapped` marker (added below) to be
+	 *    recognised here.
+	 *
+	 * The markup is parsed with WP_HTML_Tag_Processor rather than matched as a
+	 * raw substring, so a literal `<picture` or `data-wp-picture-wrapped` string
+	 * appearing inside an attribute value (such as `alt` text) cannot trigger a
+	 * false positive.
+	 */
+	$processor = new WP_HTML_Tag_Processor( $image );
+	while ( $processor->next_tag() ) {
+		if ( 'PICTURE' === $processor->get_tag() ) {
+			return $image;
+		}
+		if ( 'IMG' === $processor->get_tag() && null !== $processor->get_attribute( 'data-wp-picture-wrapped' ) ) {
+			return $image;
+		}
+	}
+
+	$original_file_mime_type = webp_uploads_get_attachment_file_mime_type( $attachment_id );
+	if ( '' === $original_file_mime_type ) {
+		return $image;
+	}
+
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+
+	if ( ! isset( $image_meta['sizes'] ) ) {
 		return $image;
 	}
 
@@ -35,18 +80,46 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		array_unshift( $image_sizes, $image_meta );
 	}
 
+	// Extract sizes using regex to parse image tag, then use to retrieve tag.
+	$width     = 0;
+	$height    = 0;
+	$processor = new WP_HTML_Tag_Processor( $image );
+	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$width  = (int) $processor->get_attribute( 'width' );
+		$height = (int) $processor->get_attribute( 'height' );
+	}
+	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
+
+	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use );
+	if ( false === $image_src ) {
+		return $image;
+	}
+	list( $src, $width, $height ) = $image_src;
+	$size_array                   = array( absint( $width ), absint( $height ) );
+
 	// Collect all the sub size image mime types.
 	$mime_type_data = array();
 	foreach ( $image_sizes as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
 			foreach ( $size['sources'] as $mime_type => $data ) {
-				$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
-				$mime_type_data[ $mime_type ]['w'][ $size['width'] ]  = $data;
-				$mime_type_data[ $mime_type ]['h'][ $size['height'] ] = $data;
+				if ( wp_image_matches_ratio( $size_array[0], $size_array[1], $size['width'], $size['height'] ) ) {
+					$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
+					$mime_type_data[ $mime_type ]['w'][ $size['width'] ]  = $data;
+					$mime_type_data[ $mime_type ]['h'][ $size['height'] ] = $data;
+				}
 			}
 		}
 	}
 	$sub_size_mime_types = array_keys( $mime_type_data );
+
+	/*
+	 * For an upload over the big image size threshold which the browser processed, the attached file is the
+	 * scaled image in the modern format, and the fallbacks are in the format of the upload.
+	 */
+	$upload_mime_type = webp_uploads_get_original_image_mime_type( $image_meta );
+	if ( null !== $upload_mime_type && in_array( $upload_mime_type, $sub_size_mime_types, true ) ) {
+		$original_file_mime_type = $upload_mime_type;
+	}
 
 	// If original image type fallback is not available, don't wrap in picture element.
 	if ( ! in_array( $original_file_mime_type, $sub_size_mime_types, true ) ) {
@@ -91,48 +164,42 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	// Add each mime type to the picture's sources.
 	$picture_sources = '';
 
-	// Extract sizes using regex to parse image tag, then use to retrieve tag.
-	$width     = 0;
-	$height    = 0;
-	$processor = new WP_HTML_Tag_Processor( $image );
-	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-		$width  = (int) $processor->get_attribute( 'width' );
-		$height = (int) $processor->get_attribute( 'height' );
-	}
-	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-
-	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use );
-	if ( false === $image_src ) {
-		return $image;
-	}
-	list( $src, $width, $height ) = $image_src;
-	$size_array                   = array( absint( $width ), absint( $height ) );
-
 	// Gets the srcset and sizes from the IMG tag.
 	$sizes  = $processor->get_attribute( 'sizes' );
 	$srcset = $processor->get_attribute( 'srcset' );
 
+	/**
+	 * Gets the srcset for the image in a given mime type.
+	 *
+	 * @param string $image_mime_type The mime type.
+	 * @return string|false The srcset, or false if none could be determined.
+	 */
+	$get_srcset_for_mime_type = static function ( string $image_mime_type ) use ( $attachment_id, $size_array, $image_meta, $mime_type_data ) {
+		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
+		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
+			$filtered_sources = array();
+			foreach ( $sources as $source ) {
+				// Swap the URL for the current mime type.
+				if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
+					$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
+					$filtered_sources[] = array(
+						'url'        => dirname( $source['url'] ) . '/' . $filename,
+						'descriptor' => $source['descriptor'],
+						'value'      => $source['value'],
+					);
+				}
+			}
+			return $filtered_sources;
+		};
+		add_filter( 'wp_calculate_image_srcset', $filter );
+		$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
+		remove_filter( 'wp_calculate_image_srcset', $filter );
+		return $image_srcset;
+	};
+
 	if ( null !== $srcset && null !== $sizes ) {
 		foreach ( $mime_types as $image_mime_type ) {
-			// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
-			$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
-				$filtered_sources = array();
-				foreach ( $sources as $source ) {
-					// Swap the URL for the current mime type.
-					if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
-						$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
-						$filtered_sources[] = array(
-							'url'        => dirname( $source['url'] ) . '/' . $filename,
-							'descriptor' => $source['descriptor'],
-							'value'      => $source['value'],
-						);
-					}
-				}
-				return $filtered_sources;
-			};
-			add_filter( 'wp_calculate_image_srcset', $filter );
-			$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
-			remove_filter( 'wp_calculate_image_srcset', $filter );
+			$image_srcset = $get_srcset_for_mime_type( $image_mime_type );
 			if ( is_string( $image_srcset ) ) {
 				$picture_sources .= sprintf(
 					'<source type="%s" srcset="%s"%s>',
@@ -153,6 +220,50 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 				);
 			}
 		}
+	}
+
+	$marker = new WP_HTML_Tag_Processor( $image );
+	if ( $marker->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		/*
+		 * The inner `<img>` is the fallback for browsers which support neither the modern format nor the picture
+		 * element. When the image itself is already in a modern format, as is the case when the browser generated
+		 * the sub-sizes (see webp_uploads_is_client_side_media_processing()), point it at the original format instead.
+		 */
+		$is_fallback = static function ( string $url ) use ( $original_file_mime_type ): bool {
+			return wp_check_filetype( (string) strtok( $url, ' ' ) )['type'] === $original_file_mime_type;
+		};
+
+		$img_src = $marker->get_attribute( 'src' );
+		if ( is_string( $img_src ) && ! $is_fallback( $img_src ) ) {
+			$fallback_src = webp_uploads_get_mime_type_image( $attachment_id, $img_src, $original_file_mime_type );
+			if ( is_string( $fallback_src ) ) {
+				$marker->set_attribute( 'src', $fallback_src );
+			}
+		}
+
+		// The image itself may be in the original format while some of its sub-sizes are not.
+		$candidates = is_string( $srcset ) ? explode( ', ', $srcset ) : array();
+		if ( null !== $sizes && count( array_filter( $candidates, $is_fallback ) ) < count( $candidates ) ) {
+			$fallback_srcset = $get_srcset_for_mime_type( $original_file_mime_type );
+			if ( is_string( $fallback_srcset ) ) {
+				$marker->set_attribute( 'srcset', $fallback_srcset );
+			}
+		}
+
+		// Tag the inner `<img>` so a later rewrite pass (for example `wp_content_img_tag`
+		// once this markup is embedded in post content) recognises it as already wrapped
+		// and skips it. See the idempotency guard above.
+		if ( '' !== $picture_sources ) {
+			$marker->set_attribute( 'data-wp-picture-wrapped', true );
+		}
+		$image = $marker->get_updated_html();
+	}
+
+	// Never emit a `<picture>` with no `<source>` children: if every modern-format
+	// source failed to resolve (e.g. the attachment has no modern sub-sizes), return
+	// the fallback image instead of a pointless empty wrapper element.
+	if ( '' === $picture_sources ) {
+		return $image;
 	}
 
 	return sprintf(

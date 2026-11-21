@@ -6,17 +6,20 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
  * @phpstan-type ViewportRect array{
- *                                width: int,
- *                                height: int
+ *                                width: positive-int,
+ *                                height: positive-int
  *                            }
  * @phpstan-type DOMRect      array{
  *                                width: float,
@@ -38,30 +41,48 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            }
  * @phpstan-type Data         array{
  *                                uuid: non-empty-string,
+ *                                etag: non-empty-string,
  *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]
  *                            }
+ * @phpstan-type JSONSchema   array{
+ *                                type: string|string[],
+ *                                items?: mixed,
+ *                                properties?: array<string, mixed>,
+ *                                patternProperties?: array<string, mixed>,
+ *                                required?: bool,
+ *                                minimum?: int,
+ *                                maximum?: int,
+ *                                pattern?: non-empty-string,
+ *                                additionalProperties?: bool,
+ *                                format?: non-empty-string,
+ *                                readonly?: bool,
+ *                                ...
+ *                            }
  *
  * @since 0.1.0
- * @access private
  */
 class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Data.
 	 *
+	 * @since 0.1.0
 	 * @var Data
 	 */
-	protected $data;
+	protected array $data;
 
 	/**
 	 * Elements.
 	 *
-	 * @var OD_Element[]
+	 * Lazily initialized in {@see self::get_elements()} from data['elements'].
+	 *
+	 * @since 0.7.0
+	 * @var OD_Element[]|null
 	 */
-	protected $elements;
+	protected ?array $elements = null;
 
 	/**
 	 * Group.
@@ -69,16 +90,18 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since 0.7.0
 	 * @var OD_URL_Metric_Group|null
 	 */
-	protected $group = null;
+	protected ?OD_URL_Metric_Group $group = null;
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
-	 * @param array<string, mixed> $data URL metric data.
+	 * @param array<string, mixed> $data URL Metric data.
 	 */
 	public function __construct( array $data ) {
 		if ( ! isset( $data['uuid'] ) ) {
@@ -89,6 +112,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Prepares data with validation and sanitization.
+	 *
+	 * @since 0.6.0
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
@@ -125,20 +150,21 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this URL metric is a part of (which may not be any).
+	 * Gets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return OD_URL_Metric_Group|null Group.
+	 * @return OD_URL_Metric_Group|null Group. Null will never occur in the context of a tag visitor.
 	 */
 	public function get_group(): ?OD_URL_Metric_Group {
 		return $this->group;
 	}
 
 	/**
-	 * Sets the group that this URL metric is a part of.
+	 * Sets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
+	 * @access private
 	 *
 	 * @param OD_URL_Metric_Group $group Group.
 	 *
@@ -154,9 +180,14 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
+	 * @since 0.1.0
+	 * @since 0.9.0 Added the 'etag' property to the schema.
+	 * @since 1.0.0 The 'etag' property is now required.
+	 * @access private
+	 *
 	 * @todo Cache the return value?
 	 *
-	 * @return array<string, mixed> Schema.
+	 * @return JSONSchema Schema.
 	 */
 	public static function get_json_schema(): array {
 		/*
@@ -182,7 +213,7 @@ class OD_URL_Metric implements JsonSerializable {
 			)
 		);
 
-		// The spec allows these to be negative but this doesn't make sense in the context of intersectionRect and boundingClientRect.
+		// The spec allows these to be negative, but this doesn't make sense in the context of intersectionRect and boundingClientRect.
 		$dom_rect_properties['width']['minimum']  = 0.0;
 		$dom_rect_properties['height']['minimum'] = 0.0;
 
@@ -200,9 +231,18 @@ class OD_URL_Metric implements JsonSerializable {
 			'required'             => true,
 			'properties'           => array(
 				'uuid'      => array(
-					'description' => __( 'The UUID for the URL metric.', 'optimization-detective' ),
+					'description' => __( 'The UUID for the URL Metric.', 'optimization-detective' ),
 					'type'        => 'string',
 					'format'      => 'uuid',
+					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+				),
+				'etag'      => array(
+					'description' => __( 'The ETag for the URL Metric.', 'optimization-detective' ),
+					'type'        => 'string',
+					'pattern'     => '^[0-9a-f]{32}\z',
+					'minLength'   => 32,
+					'maxLength'   => 32,
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
 				),
@@ -221,18 +261,18 @@ class OD_URL_Metric implements JsonSerializable {
 						'width'  => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 						'height' => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 					),
 					'additionalProperties' => false,
 				),
 				'timestamp' => array(
-					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
+					'description' => __( 'Timestamp at which the URL Metric was captured.', 'optimization-detective' ),
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
@@ -277,16 +317,17 @@ class OD_URL_Metric implements JsonSerializable {
 				),
 			),
 			// Additional root properties may be added to the schema via the od_url_metric_schema_root_additional_properties filter.
-			// Therefore, additionalProperties is set to true so that additional properties defined in the extended schema may persist
+			// Therefore, `additionalProperties` is set to true so that additional properties defined in the extended schema may persist
 			// in a stored URL Metric even when the extension is deactivated. For REST API requests, the OD_Strict_URL_Metric
-			// which sets this to false so that newly-submitted URL Metrics only ever include the known properties.
+			// which sets this to false so that newly submitted URL Metrics only ever include the known properties.
 			'additionalProperties' => true,
 		);
 
 		/**
-		 * Filters additional schema properties which should be allowed at the root of a URL metric.
+		 * Filters additional schema properties which should be allowed at the root of a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_root_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -296,9 +337,10 @@ class OD_URL_Metric implements JsonSerializable {
 		}
 
 		/**
-		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
+		 * Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 		 *
 		 * @since 0.6.0
+		 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_url_metric_schema_element_item_additional_properties
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -307,7 +349,7 @@ class OD_URL_Metric implements JsonSerializable {
 			$schema['properties']['elements']['items']['properties'] = self::extend_schema_with_optional_properties(
 				$schema['properties']['elements']['items']['properties'],
 				$additional_properties,
-				'od_url_metric_schema_root_additional_properties'
+				'od_url_metric_schema_element_item_additional_properties'
 			);
 		}
 
@@ -322,13 +364,12 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
 	 * @param array<string, mixed> $additional_properties Additional properties.
 	 * @param string               $filter_name           Filter name used to extend.
-	 *
 	 * @return array<string, mixed> Extended schema.
 	 */
 	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {
 		$doing_it_wrong = static function ( string $message ) use ( $filter_name ): void {
 			_doing_it_wrong(
-				esc_html( "Filter: '{$filter_name}'" ),
+				esc_html( "Filter: '$filter_name'" ),
 				esc_html( $message ),
 				'Optimization Detective 0.6.0'
 			);
@@ -407,16 +448,32 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets UUID.
 	 *
-	 * @return string UUID.
+	 * @since 0.6.0
+	 *
+	 * @return non-empty-string UUID.
 	 */
 	public function get_uuid(): string {
 		return $this->data['uuid'];
 	}
 
 	/**
+	 * Gets ETag.
+	 *
+	 * @since 0.9.0
+	 * @since 1.0.0 No longer returns null as 'etag' is now required.
+	 *
+	 * @return non-empty-string ETag.
+	 */
+	public function get_etag(): string {
+		return $this->data['etag'];
+	}
+
+	/**
 	 * Gets URL.
 	 *
-	 * @return string URL.
+	 * @since 0.1.0
+	 *
+	 * @return non-empty-string URL.
 	 */
 	public function get_url(): string {
 		return $this->data['url'];
@@ -424,6 +481,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets viewport data.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return ViewportRect Viewport data.
 	 */
@@ -434,7 +493,9 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport width.
 	 *
-	 * @return int Viewport width.
+	 * @since 0.1.0
+	 *
+	 * @return positive-int Viewport width.
 	 */
 	public function get_viewport_width(): int {
 		return $this->data['viewport']['width'];
@@ -442,6 +503,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets timestamp.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return float Timestamp.
 	 */
@@ -452,14 +515,14 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		if ( ! is_array( $this->elements ) ) {
+		if ( null === $this->elements ) {
 			$this->elements = array_map(
-				function ( array $element ): OD_Element {
-					return new OD_Element( $element, $this );
-				},
+				fn ( array $element ): OD_Element => new OD_Element( $element, $this ),
 				$this->data['elements']
 			);
 		}
@@ -469,9 +532,18 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return Data Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
-		return $this->data;
+		$data = $this->data;
+
+		$data['elements'] = array_map(
+			static fn ( OD_Element $element ): array => $element->jsonSerialize(),
+			$this->get_elements()
+		);
+
+		return $data;
 	}
 }

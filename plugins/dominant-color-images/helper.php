@@ -7,6 +7,14 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+// @codeCoverageIgnoreEnd
+
 /**
  * Overloads wp_image_editors() to load the extended classes.
  *
@@ -17,10 +25,10 @@
  */
 function dominant_color_set_image_editors( array $editors ): array {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
-		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';// @codeCoverageIgnore
 	}
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
-		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';// @codeCoverageIgnore
 	}
 
 	$replaces = array(
@@ -39,7 +47,46 @@ function dominant_color_set_image_editors( array $editors ): array {
 }
 
 /**
+ * Filters the list of image editors to include the dominant color editors.
+ *
+ * Ensures core editor classes are loaded before delegating to
+ * {@see dominant_color_set_image_editors()}, since the `wp_image_editors`
+ * filter can run early (e.g. during `wp_image_editor_supports()`).
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $editors List of image editor class names, or mixed value from previous filter.
+ * @return string[] Filtered list of image editor class names.
+ */
+function dominant_color_filter_image_editors( $editors ): array {
+	if ( ! is_array( $editors ) ) {
+		$editors = array();
+	}
+	/**
+	 * Because plugins do bad things.
+	 *
+	 * @var string[] $editors
+	 */
+
+	if ( ! class_exists( 'WP_Image_Editor_GD' ) ) {
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php'; // @codeCoverageIgnore
+	}
+	if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php'; // @codeCoverageIgnore
+	}
+
+	return dominant_color_set_image_editors( $editors );
+}
+
+/**
  * Computes the dominant color of the given attachment image and whether it has transparency.
+ *
+ * The image types jpeg, png, gif, webp, and avif are supported for determining the dominant color.
+ *
+ * Animated GIFs are supported, but when the GD-based editor is used only the first frame is
+ * processed to determine the dominant color. This may not represent the dominant color of the
+ * entire animation. This behavior is intentional and can be customized via the
+ * {@see 'dominant_color_supported_mime_types'} filter if needed.
  *
  * @since 1.0.0
  *
@@ -49,18 +96,35 @@ function dominant_color_set_image_editors( array $editors ): array {
  * @return array{ has_transparency?: bool, dominant_color?: string }|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
 function dominant_color_get_dominant_color_data( int $attachment_id ) {
-	$mime_type = get_post_mime_type( $attachment_id );
-	if ( 'application/pdf' === $mime_type ) {
-		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
+	$mime_type            = get_post_mime_type( $attachment_id );
+	$supported_mime_types = array(
+		'image/jpeg',
+		'image/png',
+		'image/gif',
+		'image/webp',
+		'image/avif',
+	);
+
+	/**
+	 * Filters supported mime types for dominant color extraction.
+	 *
+	 * Filter the array of supported mime types for dominant color extraction, by default the plugin
+	 * supports image types supported by WordPress Core.
+	 *
+	 * @since 1.2.1
+	 *
+	 * @param string[] $supported_mime_types Array of supported mime types. Defaults are 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'.
+	 */
+	$supported_mime_types = (array) apply_filters( 'dominant_color_supported_mime_types', $supported_mime_types );
+
+	if ( ! in_array( $mime_type, $supported_mime_types, true ) ) {
+		return new WP_Error( 'unsupported_attachment_type', __( 'Unsupported attachment type.', 'dominant-color-images' ) );
 	}
+
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( false === $file ) {
-		$file = get_attached_file( $attachment_id );
-	}
-	if ( false === $file ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
-	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	/**
 	 * Editor.
@@ -77,7 +141,6 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 			),
 		)
 	);
-	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
@@ -105,6 +168,28 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 }
 
 /**
+ * Retrieves attachment metadata for an image attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return array<string, mixed>|null Attachment metadata array, or null if not an image or metadata unavailable.
+ */
+function dominant_color_get_attachment_metadata( int $attachment_id ): ?array {
+
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return null;
+	}
+
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return null;
+	}
+
+	return $image_meta;
+}
+
+/**
  * Gets file path of image based on size.
  *
  * @since 1.0.0
@@ -114,21 +199,17 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
  * @return false|string Path to an image or false if not found.
  */
 function dominant_color_get_attachment_file_path( int $attachment_id, string $size = 'medium' ) {
-	$imagedata = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $imagedata ) ) {
+
+	$filepath = get_attached_file( $attachment_id );
+	if ( false === $filepath ) {
 		return false;
 	}
 
-	if ( ! isset( $imagedata['sizes'][ $size ] ) ) {
-		return false;
-	}
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
-	$file = get_attached_file( $attachment_id );
-	if ( false === $file ) {
-		return false;
+	if ( isset( $image_meta['sizes'][ $size ] ) ) {
+		$filepath = str_replace( wp_basename( $filepath ), $image_meta['sizes'][ $size ]['file'], $filepath );
 	}
-
-	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
 	return $filepath;
 }
@@ -139,18 +220,12 @@ function dominant_color_get_attachment_file_path( int $attachment_id, string $si
  * @since 1.0.0
  *
  * @param int $attachment_id Attachment ID for image.
- * @return string|null Hex value of dominant color or null if not set.
+ * @return non-empty-string|null Hex value of dominant color or null if not set.
  */
 function dominant_color_get_dominant_color( int $attachment_id ): ?string {
-	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-		return null;
-	}
-	$image_meta = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $image_meta ) ) {
-		return null;
-	}
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
-	if ( ! isset( $image_meta['dominant_color'] ) ) {
+	if ( ! isset( $image_meta['dominant_color'] ) || ! is_string( $image_meta['dominant_color'] ) || '' === $image_meta['dominant_color'] ) {
 		return null;
 	}
 
@@ -166,18 +241,14 @@ function dominant_color_get_dominant_color( int $attachment_id ): ?string {
  * @return bool|null Whether the image has transparency, or null if not set.
  */
 function dominant_color_has_transparency( int $attachment_id ): ?bool {
-	$image_meta = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $image_meta ) ) {
-		return null;
-	}
+	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
 
 	if ( ! isset( $image_meta['has_transparency'] ) ) {
 		return null;
 	}
 
-	return $image_meta['has_transparency'];
+	return (bool) $image_meta['has_transparency'];
 }
-
 
 /**
  * Gets hex color from RGB.

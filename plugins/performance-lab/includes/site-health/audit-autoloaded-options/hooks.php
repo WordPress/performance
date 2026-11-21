@@ -6,9 +6,13 @@
  * @since 2.1.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Adds test to site health.
@@ -55,13 +59,13 @@ function perflab_aao_handle_update_autoload(): void {
 	}
 
 	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload    = rest_sanitize_boolean( $_GET['autoload'] );
+	$autoload    = rest_sanitize_boolean( wp_unslash( $_GET['autoload'] ) ); // @phpstan-ignore argument.templateType (rest_sanitize_boolean() is designed to accept loose user input, but php-stubs/wordpress-stubs types it with a template bound to bool|string|int which mixed cannot satisfy. TODO: Fix upstream in php-stubs/wordpress-stubs and remove.)
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
 	}
 
-	if ( empty( $option_name ) ) {
+	if ( '' === $option_name ) {
 		wp_die( esc_html__( 'Invalid option name.', 'performance-lab' ) );
 	}
 

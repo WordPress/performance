@@ -7,9 +7,13 @@
  * @since 1.0.0
  */
 
+declare( strict_types = 1 );
+
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
@@ -23,12 +27,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function webp_uploads_get_upload_image_mime_transforms(): array {
 
-	// Check the selected output format.
-	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
+	// Check the selected output format. When the browser encodes the images, the server's own AVIF support is irrelevant.
+	$output_format = webp_uploads_get_image_output_format();
+	if ( 'avif' === $output_format && ! webp_uploads_mime_type_supported( 'image/avif' ) && ! webp_uploads_is_client_side_media_processing() ) {
+		$output_format = 'webp';
+	}
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
-		'image/webp' => array( 'image/webp' ),
+		'image/webp' => array( 'image/' . $output_format ),
 		'image/avif' => array( 'image/avif' ),
 		'image/png'  => array( 'image/' . $output_format ),
 	);
@@ -64,7 +71,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	// Ensure that all mime types have correct transforms. If a mime type has invalid transforms array,
 	// then fallback to the original mime type to make sure that the correct subsizes are created.
 	foreach ( $transforms as $mime_type => $transform_types ) {
-		if ( ! is_array( $transform_types ) || empty( $transform_types ) ) {
+		if ( ! is_array( $transform_types ) || 0 === count( $transform_types ) ) {
 			$transforms[ $mime_type ] = array( $mime_type );
 		}
 	}
@@ -80,11 +87,11 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
  * @since 1.0.0
  * @access private
  *
- * @param int                                          $attachment_id         The ID of the attachment from where this image would be created.
- * @param string                                       $image_size            The size name that would be used to create the image source, out of the registered subsizes.
- * @param array{ width: int, height: int, crop: bool } $size_data             An array with the dimensions of the image: height, width and crop.
- * @param string                                       $mime                  The target mime in which the image should be created.
- * @param string|null                                  $destination_file_name The path where the file would be stored, including the extension. If null, `generate_filename` is used to create the destination file name.
+ * @param int                                                               $attachment_id         The ID of the attachment from where this image would be created.
+ * @param string                                                            $image_size            The size name that would be used to create the image source, out of the registered subsizes.
+ * @param array{ width: int, height: int, crop: bool|array{string, string}} $size_data             An array with the dimensions of the image: height, width and crop.
+ * @param string                                                            $mime                  The target mime in which the image should be created.
+ * @param string|null                                                       $destination_file_name The path where the file would be stored, including the extension. If null, `generate_filename` is used to create the destination file name.
  *
  * @return array{ file: string, filesize: int }|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
@@ -101,13 +108,13 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	 *            file: string,
 	 *            path?: string,
 	 *            filesize?: int
-	 *        }|null|WP_Error $image         Image data, null, or WP_Error.
-	 * @param int             $attachment_id The ID of the attachment from where this image would be created.
-	 * @param string          $image_size    The size name that would be used to create this image, out of the registered subsizes.
+	 *        }|null|WP_Error|mixed $image         Image data, null, or WP_Error.
+	 * @param int                   $attachment_id The ID of the attachment from where this image would be created.
+	 * @param string                $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array{
 	 *            width: int,
 	 *            height: int,
-	 *            crop: bool
+	 *            crop: bool|array{string, string}
 	 *        }               $size_data     An array with the dimensions of the image.
 	 * @param string          $mime          The target mime in which the image should be created.
 	 */
@@ -118,11 +125,14 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
 		// The filtered image provided all we need to short-circuit here.
 		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
-			return $image;
+			return array(
+				'file'     => $image['file'],
+				'filesize' => $image['filesize'],
+			);
 		}
 
 		// Supply the filesize based on the filter-provided path.
-		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+		if ( array_key_exists( 'path', $image ) && is_string( $image['path'] ) ) {
 			$filesize = wp_filesize( $image['path'] );
 			if ( $filesize > 0 ) {
 				return array(
@@ -152,16 +162,16 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		return $editor;
 	}
 
-	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
-	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
-	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
+	$height = (int) ( $size_data['height'] ?? 0 );
+	$width  = (int) ( $size_data['width'] ?? 0 );
+	$crop   = $size_data['crop'] ?? false;
 	if ( $width <= 0 && $height <= 0 ) {
 		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'webp-uploads' ) );
 	}
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	// If stored EXIF data exists, rotate the source image before creating sub-sizes.
-	if ( ! empty( $image_meta['image_meta'] ) ) {
+	if ( isset( $image_meta['image_meta'] ) && is_array( $image_meta['image_meta'] ) && count( $image_meta['image_meta'] ) > 0 ) {
 		$editor->maybe_exif_rotate();
 	}
 
@@ -183,7 +193,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		return $image;
 	}
 
-	if ( empty( $image['file'] ) ) {
+	if ( ! isset( $image['file'] ) || ! is_string( $image['file'] ) || '' === $image['file'] ) {
 		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'webp-uploads' ) );
 	}
 
@@ -239,7 +249,7 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
 	}
 
 	if ( isset( $sizes[ $size ]['crop'] ) ) {
-		$size_data['crop'] = (bool) $sizes[ $size ]['crop'];
+		$size_data['crop'] = $sizes[ $size ]['crop'];
 	}
 
 	return webp_uploads_generate_additional_image_source( $attachment_id, $size, $size_data, $mime );
@@ -305,8 +315,10 @@ function webp_uploads_in_frontend_body(): bool {
  *
  * @since 1.0.0
  *
- * @param array{ filesize?: int } $original   An array with the metadata of the attachment.
- * @param array{ filesize?: int } $additional An array containing the filename and file size for additional mime.
+ * @param array<string, mixed> $original   An array with the metadata of the attachment.
+ * @param array<string, mixed> $additional An array containing the filename and file size for additional mime.
+ * @phpstan-param array{ filesize?: int, ... } $original
+ * @phpstan-param array{ filesize?: int, ... } $additional
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
 function webp_uploads_should_discard_additional_image_file( array $original, array $additional ): bool {
@@ -338,6 +350,8 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  * Includes special handling for false positives on AVIF support.
  *
  * @since 2.0.0
+ * @since 2.7.0 AVIF is now only reported as supported when the server can also encode transparent AVIF images.
+ * @since n.e.x.t AVIF is reported as supported even when the server cannot encode transparent AVIF images.
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
@@ -349,19 +363,118 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
-		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
-		if ( false === $editor ) {
-			return false;
-		}
-		if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
-			return function_exists( 'imageavif' );
-		}
-		if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
-			return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
-		}
+		return webp_uploads_avif_supported();
 	}
 
 	return true;
+}
+
+/**
+ * Checks whether the images for the current request are encoded by the browser rather than the server.
+ *
+ * Since WordPress 7.1, the block editor can process uploads client side: the browser uploads the original,
+ * generates the sub-sizes itself (transcoding them to the format reported via the `image_output_format`
+ * REST field), sideloads them, and finally asks the server to record the metadata. In that flow the
+ * server's image editor capabilities do not limit which modern format can be produced.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True while handling a REST request in which the browser supplies the encoded images, false otherwise.
+ */
+function webp_uploads_is_client_side_media_processing(): bool {
+	/**
+	 * Filters whether the images for the current request are encoded client side.
+	 *
+	 * The plugin enables this for the REST API requests of the client side media processing flow, in which case
+	 * the modern image format is selected without regard to what the server's image editor can encode.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $client_side Whether the current request's images are encoded client side. Default false.
+	 */
+	return (bool) apply_filters( 'webp_uploads_client_side_media_processing', false );
+}
+
+/**
+ * Checks whether WordPress offers client side media processing on this site.
+ *
+ * Client side media processing was introduced in WordPress 7.1 and requires a secure context. Whether a given
+ * browser is actually able to process images is a runtime check which happens in JavaScript.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if client side media processing is enabled for the site, false otherwise.
+ */
+function webp_uploads_is_client_side_media_processing_enabled(): bool {
+	return function_exists( 'wp_is_client_side_media_processing_enabled' ) && wp_is_client_side_media_processing_enabled();
+}
+
+/**
+ * Gets the mime type of the original image of an attachment, which is the upload when a scaled image replaced it.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $metadata The attachment metadata.
+ * @return string|null The mime type, or null if there is no original image or its mime type is unknown.
+ */
+function webp_uploads_get_original_image_mime_type( array $metadata ): ?string {
+	if ( ! isset( $metadata['original_image'] ) || ! is_string( $metadata['original_image'] ) ) {
+		return null;
+	}
+	$mime_type = wp_check_filetype( $metadata['original_image'] )['type'];
+	return is_string( $mime_type ) ? $mime_type : null;
+}
+
+/**
+ * Checks if the server supports AVIF image format.
+ *
+ * @since 2.7.0
+ *
+ * @return bool True if the server supports AVIF, false otherwise.
+ */
+function webp_uploads_avif_supported(): bool {
+	$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+	if ( false === $editor ) {
+		return false;
+	}
+	if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
+		return function_exists( 'imageavif' );
+	}
+	return webp_uploads_imagick_avif_supported( $editor );
+}
+
+/**
+ * Checks if the server supports transparent AVIF images.
+ *
+ * @since 2.7.0
+ *
+ * @return bool True if the server supports transparent AVIF images, false otherwise.
+ */
+function webp_uploads_avif_transparency_supported(): bool {
+	if ( ! webp_uploads_avif_supported() ) {
+		return false;
+	}
+	// AVIF is supported at this point. GD's imageavif() preserves alpha, so for GD (and any non-Imagick editor) AVIF support implies transparency support. The transparency regression is specific to older ImageMagick.
+	$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+	if ( is_string( $editor ) && is_a( $editor, WP_Image_Editor_Imagick::class, true ) ) {
+		return webp_uploads_imagick_avif_transparency_supported();
+	}
+	return true;
+}
+
+/**
+ * Checks if Imagick supports AVIF format on the server.
+ *
+ * @since 2.7.0
+ *
+ * @param string $editor The image editor class name.
+ * @return bool True if Imagick supports AVIF, false otherwise.
+ */
+function webp_uploads_imagick_avif_supported( string $editor ): bool {
+	if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
+		return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
+	}
+	return false;
 }
 
 /**
@@ -412,6 +525,17 @@ function webp_uploads_is_fallback_enabled(): bool {
 }
 
 /**
+ * Checks if the `perflab_generate_all_fallback_sizes` option is enabled.
+ *
+ * @since 2.4.0
+ *
+ * @return bool Whether the option is enabled. Default is false.
+ */
+function webp_uploads_should_generate_all_fallback_sizes(): bool {
+	return (bool) get_option( 'perflab_generate_all_fallback_sizes', 0 );
+}
+
+/**
  * Retrieves the image URL for a specified MIME type from the attachment metadata.
  *
  * This function attempts to locate an alternate image source URL in the
@@ -419,10 +543,10 @@ function webp_uploads_is_fallback_enabled(): bool {
  *
  * @since 2.2.0
  *
- * @param int    $attachment_id The ID of the attachment.
- * @param string $src           The original image src url.
- * @param string $mime          A mime type we are looking to get image url.
- * @return string|null Returns mime type image if available.
+ * @param int    $attachment_id  The ID of the attachment.
+ * @param string $src            The original image src url.
+ * @param string $mime           A mime type we are looking to get image url.
+ * @return non-empty-string|null Returns mime type image if available.
  */
 function webp_uploads_get_mime_type_image( int $attachment_id, string $src, string $mime ): ?string {
 	$metadata     = wp_get_attachment_metadata( $attachment_id );
@@ -431,16 +555,17 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 		$basename = wp_basename( $metadata['file'] );
 
 		if ( $src_basename === $basename ) {
-			return str_replace(
+			$result = str_replace(
 				$basename,
 				$metadata['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
 	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-		foreach ( $metadata['sizes'] as $size => $size_data ) {
+		foreach ( $metadata['sizes'] as $size_data ) {
 
 			if ( ! isset( $size_data['file'] ) ) {
 				continue;
@@ -458,13 +583,86 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 				continue;
 			}
 
-			return str_replace(
+			$result = str_replace(
 				$size_data['file'],
 				$size_data['sources'][ $mime ]['file'],
 				$src
 			);
+			return '' === $result ? null : $result;
 		}
 	}
 
 	return null;
+}
+
+/**
+ * Retrieves the MIME type of an attachment file, checking the file directly if possible.
+ *
+ * If checking the file directly fails, the function falls back to the attachment's MIME type.
+ *
+ * @since 2.3.0
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $file          Optional. The path to the file.
+ * @return string The MIME type of the file, or an empty string if not found.
+ */
+function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string $file = '' ): string {
+	if ( '' === $file ) {
+		$file = get_attached_file( $attachment_id, true );
+		// File does not exist.
+		if ( false === $file ) {
+			return '';
+		}
+	}
+
+	/*
+	 * We need to get the MIME type ideally from the file, as WordPress Core may have already altered it.
+	 * The post MIME type is typically not updated during that process.
+	 */
+	$filetype  = wp_check_filetype( $file );
+	$mime_type = $filetype['type'] ?? get_post_mime_type( $attachment_id );
+	return is_string( $mime_type ) ? $mime_type : '';
+}
+
+/**
+ * Checks if Imagick has AVIF transparency support.
+ *
+ * ImageMagick versions prior to 6.9.12-68 report AVIF support (so AVIF images can be
+ * generated), but they do not preserve the alpha channel when encoding AVIF. As a result,
+ * transparent images converted to AVIF on those versions silently lose their transparency.
+ * Support for AVIF transparency was added in 6.9.12-68, so this gates on that minimum version.
+ *
+ * @since 2.7.0
+ *
+ * @link https://github.com/WordPress/performance/issues/2237
+ *
+ * @param string|null $version Optional Imagick version string. If not provided, the version will be retrieved from the Imagick class.
+ * @return bool True if Imagick has AVIF transparency support, false otherwise.
+ */
+function webp_uploads_imagick_avif_transparency_supported( ?string $version = null ): bool {
+	$imagick_version = $version;
+
+	if ( null === $imagick_version && extension_loaded( 'imagick' ) && class_exists( 'Imagick' ) ) {
+		$version_info    = Imagick::getVersion();
+		$imagick_version = is_array( $version_info ) && isset( $version_info['versionString'] ) && is_string( $version_info['versionString'] )
+			? $version_info['versionString']
+			: '';
+	}
+
+	if ( null === $imagick_version || '' === $imagick_version || ! (bool) preg_match( '/\d+(?:\.\d+)+(?:-\d+)?/', $imagick_version, $matches ) ) {
+		$supported = false;
+	} else {
+		// Transparency in AVIF is only handled correctly as of ImageMagick 6.9.12-68.
+		$imagick_version = $matches[0];
+		$supported       = version_compare( $imagick_version, '6.9.12-68', '>=' );
+	}
+
+	/**
+	 * Filters whether Imagick has AVIF transparency support.
+	 *
+	 * @since 2.7.0
+	 *
+	 * @param bool $supported Whether AVIF transparency is supported.
+	 */
+	return (bool) apply_filters( 'webp_uploads_imagick_avif_transparency_supported', $supported );
 }
