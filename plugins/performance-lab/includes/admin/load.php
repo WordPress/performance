@@ -53,6 +53,31 @@ function perflab_load_features_page(): void {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
+
+	// Print the filesystem credentials modal in the footer so the activation
+	// flow can surface it when FS_METHOD is not 'direct'.
+	add_action( 'admin_footer', 'perflab_print_filesystem_credentials_modal' );
+}
+
+/**
+ * Prints the filesystem credentials modal on the Performance Features screen.
+ *
+ * When `FS_METHOD` is anything other than 'direct' and FTP/SSH credentials
+ * have not been stored, `Plugin_Upgrader::install()` returns false without
+ * raising a WP_Error, so the REST activation endpoint falls through with a
+ * generic `plugin_not_found` response and the click appears to do nothing.
+ * Mirroring the markup that Plugins > Add Plugin already provides lets the
+ * activation JS fall back to `wp.updates.installPlugin()` to surface the
+ * standard "Connection Information" dialog.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_filesystem_credentials_modal(): void {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/template.php';
+
+	wp_print_request_filesystem_credentials_modal();
+	wp_print_admin_notice_templates();
 }
 
 /**
@@ -401,6 +426,10 @@ function perflab_enqueue_features_page_scripts(): void {
 	wp_enqueue_style( 'thickbox' );
 	wp_enqueue_script( 'plugin-install' );
 
+	// Needed for the filesystem credentials modal fallback when FS_METHOD is
+	// not 'direct'. See perflab_print_filesystem_credentials_modal().
+	wp_enqueue_script( 'updates' );
+
 	// Enqueue plugin activate AJAX script and localize script data.
 	wp_enqueue_script(
 		'perflab-plugin-activate-ajax',
@@ -409,6 +438,46 @@ function perflab_enqueue_features_page_scripts(): void {
 		PERFLAB_VERSION,
 		true
 	);
+
+	wp_add_inline_script(
+		'perflab-plugin-activate-ajax',
+		sprintf(
+			'window.perflabPluginActivate = %s;',
+			wp_json_encode(
+				array(
+					'filesystemCredentialsRequired' => perflab_filesystem_credentials_required(),
+				)
+			)
+		),
+		'before'
+	);
+}
+
+/**
+ * Determines whether the current request needs filesystem credentials in
+ * order to install a plugin.
+ *
+ * Returns true when `get_filesystem_method()` is not 'direct' and FTP/SSH
+ * credentials have not yet been stored via {@see request_filesystem_credentials()}.
+ * The activation JS uses this flag to route through `wp.updates.installPlugin()`
+ * for the standard credentials prompt.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool Whether filesystem credentials are required.
+ */
+function perflab_filesystem_credentials_required(): bool {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+
+	if ( 'direct' === get_filesystem_method() ) {
+		return false;
+	}
+
+	ob_start();
+	$stored = request_filesystem_credentials( self_admin_url() );
+	ob_end_clean();
+
+	return false === $stored;
 }
 
 /**

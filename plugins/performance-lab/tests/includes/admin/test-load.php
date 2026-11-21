@@ -280,4 +280,133 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	public function test_perflab_sanitize_plugin_slug( $slug, ?string $expected ): void {
 		$this->assertSame( $expected, perflab_sanitize_plugin_slug( $slug ) );
 	}
+
+	/**
+	 * @covers ::perflab_load_features_page
+	 */
+	public function test_perflab_load_features_page_registers_filesystem_credentials_modal(): void {
+		remove_all_actions( 'admin_footer' );
+
+		perflab_load_features_page();
+
+		$this->assertSame(
+			10,
+			has_action( 'admin_footer', 'perflab_print_filesystem_credentials_modal' )
+		);
+		$this->assertSame(
+			10,
+			has_action( 'admin_enqueue_scripts', 'perflab_enqueue_features_page_scripts' )
+		);
+	}
+
+	/**
+	 * @covers ::perflab_enqueue_features_page_scripts
+	 */
+	public function test_perflab_enqueue_features_page_scripts_enqueues_updates_and_inline_data(): void {
+		// Ensure get_filesystem_method() is 'direct' so the inline data is deterministic.
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'direct';
+			}
+		);
+
+		set_current_screen( 'options-general' );
+
+		perflab_enqueue_features_page_scripts();
+
+		$this->assertTrue( wp_script_is( 'updates', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'perflab-plugin-activate-ajax', 'enqueued' ) );
+
+		$inline = wp_scripts()->get_inline_script_data( 'perflab-plugin-activate-ajax', 'before' );
+		$this->assertStringContainsString( 'window.perflabPluginActivate', $inline );
+		$this->assertStringContainsString( '"filesystemCredentialsRequired":false', $inline );
+	}
+
+	/**
+	 * @covers ::perflab_filesystem_credentials_required
+	 */
+	public function test_perflab_filesystem_credentials_required_is_false_for_direct_method(): void {
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'direct';
+			}
+		);
+
+		$this->assertFalse( perflab_filesystem_credentials_required() );
+	}
+
+	/**
+	 * @covers ::perflab_filesystem_credentials_required
+	 */
+	public function test_perflab_filesystem_credentials_required_is_true_when_credentials_missing(): void {
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'ftpext';
+			}
+		);
+
+		// No FTP constants/credentials are available, so request_filesystem_credentials() returns false.
+		$this->assertTrue( perflab_filesystem_credentials_required() );
+	}
+
+	/**
+	 * @covers ::perflab_filesystem_credentials_required
+	 */
+	public function test_perflab_filesystem_credentials_required_is_false_when_credentials_stored(): void {
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'ftpext';
+			}
+		);
+
+		// Simulate stored/available credentials by short-circuiting request_filesystem_credentials().
+		add_filter(
+			'request_filesystem_credentials',
+			static function () {
+				return array(
+					'hostname' => 'example.com',
+					'username' => 'user',
+					'password' => 'pass',
+				);
+			}
+		);
+
+		$this->assertFalse( perflab_filesystem_credentials_required() );
+	}
+
+	/**
+	 * @covers ::perflab_print_filesystem_credentials_modal
+	 */
+	public function test_perflab_print_filesystem_credentials_modal_prints_nothing_for_direct_method(): void {
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'direct';
+			}
+		);
+
+		$output = get_echo( 'perflab_print_filesystem_credentials_modal' );
+
+		$this->assertStringNotContainsString( 'id="request-filesystem-credentials-dialog"', $output );
+	}
+
+	/**
+	 * @covers ::perflab_print_filesystem_credentials_modal
+	 */
+	public function test_perflab_print_filesystem_credentials_modal_prints_dialog_when_credentials_required(): void {
+		add_filter(
+			'filesystem_method',
+			static function (): string {
+				return 'ftpext';
+			}
+		);
+
+		$output = get_echo( 'perflab_print_filesystem_credentials_modal' );
+
+		$this->assertStringContainsString( 'id="request-filesystem-credentials-dialog"', $output );
+	}
 }
