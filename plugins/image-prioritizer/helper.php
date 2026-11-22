@@ -389,31 +389,6 @@ function image_prioritizer_get_asset_path( string $src_path, ?string $min_path =
 }
 
 /**
- * Gets the script to lazy-load videos.
- *
- * Load a video and its poster image when it approaches the viewport using an IntersectionObserver.
- *
- * Handles 'autoplay' and 'preload' attributes accordingly.
- *
- * @since 0.2.0
- * @access private
- *
- * @return string Lazy load script.
- */
-function image_prioritizer_get_video_lazy_load_script(): string {
-	$path    = image_prioritizer_get_asset_path( 'lazy-load-video.js' );
-	$script  = (string) file_get_contents( __DIR__ . '/' . $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
-	$script .= sprintf(
-		"\n//# sourceURL=%s",
-		add_query_arg(
-			array( 'ver' => IMAGE_PRIORITIZER_VERSION ),
-			plugins_url( $path, __FILE__ )
-		)
-	);
-	return $script;
-}
-
-/**
  * Gets the script to lazy-load background images.
  *
  * Load the background image when it approaches the viewport using an IntersectionObserver.

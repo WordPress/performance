@@ -26,7 +26,7 @@ The current optimizations include:
 4. Lazy loading:
    1. Apply lazy loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport.
    2. Implement lazy loading of CSS background images added via inline `style` attributes.
-   3. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
+   3. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `loading=lazy` so the browser defers loading the poster, preloading, and autoplay until the `VIDEO` approaches the viewport.
 5. Responsive image sizes:
    1. Ensure [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is set on `IMG` tags after setting correct lazy-loading (above).
    2. ~~Compute the `sizes` attribute using the widths of an image collected from URL Metrics for each breakpoint (when not lazy-loaded since then handled by `sizes=auto`).~~ (This has been removed due to an [issue](https://github.com/WordPress/performance/issues/2098); use [Enhanced Responsive Images instead](https://wordpress.org/plugins/auto-sizes/).)

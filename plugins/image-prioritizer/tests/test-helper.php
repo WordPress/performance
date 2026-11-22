@@ -968,16 +968,6 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test image_prioritizer_get_video_lazy_load_script.
-	 *
-	 * @covers ::image_prioritizer_get_video_lazy_load_script
-	 * @covers ::image_prioritizer_get_asset_path
-	 */
-	public function test_image_prioritizer_get_video_lazy_load_script(): void {
-		$this->assertStringContainsString( 'new IntersectionObserver', image_prioritizer_get_video_lazy_load_script() );
-	}
-
-	/**
 	 * Test image_prioritizer_get_lazy_load_bg_image_script.
 	 *
 	 * @covers ::image_prioritizer_get_lazy_load_bg_image_script
