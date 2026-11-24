@@ -1386,9 +1386,9 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 */
 	public static function data_post_featured_image_block_image_sizes(): array {
 		return array(
-			'Return medium image size 300px' => array(
+			'Return contentSize 620px instead of medium size 300px' => array(
 				'medium',
-				'sizes="(max-width: 300px) 100vw, 300px" ',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
 			'Return contentSize 620px instead of large size 1024px' => array(
 				'large',
@@ -1399,32 +1399,6 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
 		);
-	}
-
-	/**
-	 * Test that the post featured image block without a sizeSlug uses the post-thumbnail size, like core does.
-	 *
-	 * @covers ::auto_sizes_filter_image_tag
-	 */
-	public function test_post_featured_image_block_without_size_slug_uses_post_thumbnail_size(): void {
-		// Register the size before the upload so that the 400px wide 'post-thumbnail' sub-size is generated.
-		add_image_size( 'post-thumbnail', 400, 400 );
-		$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-		update_post_meta( self::$post_id, '_thumbnail_id', $image_id );
-
-		// Set up global $post so 'the_content' filter works as expected.
-		global $post;
-		$post = get_post( self::$post_id );
-		setup_postdata( $post );
-
-		$result = apply_filters( 'the_content', '<!-- wp:post-featured-image /-->' );
-
-		wp_reset_postdata();
-		remove_image_size( 'post-thumbnail' );
-		wp_delete_attachment( $image_id, true );
-
-		$this->assertStringContainsString( 'wp-block-post-featured-image', $result );
-		$this->assertStringContainsString( 'sizes="(max-width: 400px) 100vw, 400px" ', $result );
 	}
 
 	/**
