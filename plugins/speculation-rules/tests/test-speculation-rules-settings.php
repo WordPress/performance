@@ -12,6 +12,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * @covers ::plsr_get_mode_labels
 	 * @covers ::plsr_get_eagerness_labels
 	 * @covers ::plsr_get_authentication_labels
+	 * @covers ::plsr_get_prediction_labels
 	 * @covers ::plsr_get_setting_default
 	 * @covers ::plsr_get_field_description
 	 */
@@ -23,7 +24,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		plsr_register_setting();
 		$settings = get_registered_settings();
 		$this->assertArrayHasKey( 'plsr_speculation_rules', $settings );
-		foreach ( array( 'mode', 'eagerness', 'authentication' ) as $key ) {
+		foreach ( array( 'mode', 'eagerness', 'authentication', 'prediction' ) as $key ) {
 			$this->assertTrue( isset( $settings['plsr_speculation_rules']['show_in_rest']['schema']['properties'][ $key ]['description'] ) );
 			$description = $settings['plsr_speculation_rules']['show_in_rest']['schema']['properties'][ $key ]['description'];
 			$this->assertIsString( $description );
@@ -35,12 +36,13 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'mode', $settings );
 		$this->assertArrayHasKey( 'eagerness', $settings );
 		$this->assertArrayHasKey( 'authentication', $settings );
+		$this->assertArrayHasKey( 'prediction', $settings );
 
 		// Test default settings applied correctly.
 		$default_settings = plsr_get_setting_default();
 		$this->assertEquals( $default_settings, get_option( 'plsr_speculation_rules' ) );
 
-		foreach ( array( 'mode', 'eagerness', 'authentication' ) as $key ) {
+		foreach ( array( 'mode', 'eagerness', 'authentication', 'prediction' ) as $key ) {
 			$description = plsr_get_field_description( $key );
 			$this->assertGreaterThan( 0, strlen( $description ) );
 		}
@@ -52,6 +54,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	 * @covers ::plsr_get_mode_labels
 	 * @covers ::plsr_get_eagerness_labels
 	 * @covers ::plsr_get_authentication_labels
+	 * @covers ::plsr_get_prediction_labels
 	 * @dataProvider data_plsr_sanitize_setting
 	 *
 	 * @param mixed                $input    Input.
@@ -70,6 +73,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 			'mode'           => 'prerender',
 			'eagerness'      => 'moderate',
 			'authentication' => 'logged_out',
+			'prediction'     => 'disabled',
 		);
 
 		return array(
@@ -168,11 +172,29 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 					)
 				),
 			),
+			'invalid prediction'               => array(
+				array(
+					'prediction' => 'bad',
+				),
+				$default_value,
+			),
+			'valid prediction enabled'         => array(
+				array(
+					'prediction' => 'enabled',
+				),
+				array_merge(
+					$default_value,
+					array(
+						'prediction' => 'enabled',
+					)
+				),
+			),
 			'valid fields'                     => array(
 				array(
 					'mode'           => 'prefetch',
 					'eagerness'      => 'conservative',
 					'authentication' => 'logged_out_and_admins',
+					'prediction'     => 'enabled',
 				),
 				array_merge(
 					$default_value,
@@ -180,6 +202,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 						'mode'           => 'prefetch',
 						'eagerness'      => 'conservative',
 						'authentication' => 'logged_out_and_admins',
+						'prediction'     => 'enabled',
 					)
 				),
 			),
@@ -226,6 +249,7 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 				'mode'           => 'prefetch',
 				'eagerness'      => 'moderate',
 				'authentication' => 'logged_out',
+				'prediction'     => 'disabled',
 			),
 			$settings
 		);
@@ -300,6 +324,12 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 				'value'       => 'any',
 				'title'       => 'Authentication',
 				'description' => 'The authentication description.',
+			),
+			'prediction'     => array(
+				'field'       => 'prediction',
+				'value'       => 'enabled',
+				'title'       => 'Link Prediction',
+				'description' => 'The prediction description.',
 			),
 		);
 	}
