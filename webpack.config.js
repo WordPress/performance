@@ -43,6 +43,7 @@ const pluginsWithBuild = [
 	'embed-optimizer',
 	'image-prioritizer',
 	'optimization-detective',
+	'speculation-rules',
 	'view-transitions',
 	'web-worker-offloading',
 ];
@@ -259,6 +260,40 @@ const optimizationDetective = ( env ) => {
 };
 
 /**
+ * Webpack Config: Speculative Loading
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const speculationRules = ( env ) => {
+	if ( env.plugin && env.plugin !== 'speculation-rules' ) {
+		return defaultBuildConfig;
+	}
+
+	const destination = path.resolve( __dirname, 'plugins/speculation-rules' );
+
+	return {
+		...sharedConfig,
+		name: 'speculation-rules',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ destination }/predict.js`,
+						to: `${ destination }/predict.min.js`,
+					},
+				],
+			} ),
+			// @ts-expect-error TS2351: WebpackBar is constructable when using require(), type definitions might be geared towards ESM.
+			new WebpackBar( {
+				name: 'Building Speculative Loading Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
  * Webpack Config: View Transitions
  *
  * @param {*} env Webpack environment
@@ -451,6 +486,7 @@ module.exports = [
 	embedOptimizer,
 	imagePrioritizer,
 	optimizationDetective,
+	speculationRules,
 	viewTransitions,
 	webWorkerOffloading,
 	buildPlugin,
