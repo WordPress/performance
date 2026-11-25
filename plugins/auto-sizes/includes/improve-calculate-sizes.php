@@ -147,7 +147,6 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		add_filter( 'wp_calculate_image_sizes', $filter, 9, 2 );
 
 		// Get the image ID from the block attributes or context.
-		// Get the image ID from the block attributes or context.
 		$id = $parsed_block['attrs']['id'] ?? 0;
 
 		// If we don't have a size slug, assume the full size was used.
