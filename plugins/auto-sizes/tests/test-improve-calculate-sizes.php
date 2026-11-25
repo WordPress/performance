@@ -1386,6 +1386,10 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	 */
 	public static function data_post_featured_image_block_image_sizes(): array {
 		return array(
+			'Return thumbnail image size 150px'                     => array(
+				'thumbnail',
+				'sizes="(max-width: 150px) 100vw, 150px" ',
+			),
 			'Return contentSize 620px instead of medium size 300px' => array(
 				'medium',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
