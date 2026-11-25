@@ -78,9 +78,9 @@ function auto_sizes_prime_attachment_caches( $content ): string {
  * @since 1.1.0
  * @since n.e.x.t Uses the full image size for the post featured image block, unless the thumbnail size is selected.
  *
- * @param string|mixed                                             $content      The block content about to be rendered.
- * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
- * @param WP_Block                                                 $block        Block instance.
+ * @param string|mixed                                                                          $content      The block content about to be rendered.
+ * @param array{ attrs?: array{ id?: int, sizeSlug?: string, align?: string, width?: string } } $parsed_block The parsed block.
+ * @param WP_Block                                                                              $block        Block instance.
  * @return string The updated block content.
  */
 function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $block ): string {
