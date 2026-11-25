@@ -64,7 +64,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -91,7 +91,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -117,7 +117,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -155,7 +155,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -178,7 +178,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -214,7 +214,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp-*.php',
 				'/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -262,7 +262,7 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 			array(
 				'/wp/wp-*.php',
 				'/wp/wp-admin/*',
-				'/wp-content/uploads/*',
+				$this->get_uploads_path_pattern(),
 				'/wp-content/*',
 				'/wp-content/plugins/*',
 				'/wp-content/themes/stylesheet/*',
@@ -372,5 +372,16 @@ class Test_Speculation_Rules_Plugin_API extends WP_UnitTestCase {
 
 	private function disable_pretty_permalinks(): void {
 		update_option( 'permalink_structure', '' );
+	}
+
+	/**
+	 * Gets the expected exclude path pattern for the uploads directory.
+	 *
+	 * The WordPress test suite sets the uploads directory to `wp-content/test-suite-uploads` since WordPress 7.2.
+	 *
+	 * @return non-falsy-string Uploads path pattern.
+	 */
+	private function get_uploads_path_pattern(): string {
+		return (string) wp_parse_url( wp_upload_dir( null, false )['baseurl'], PHP_URL_PATH ) . '/*';
 	}
 }

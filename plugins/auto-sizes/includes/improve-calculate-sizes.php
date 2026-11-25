@@ -76,10 +76,11 @@ function auto_sizes_prime_attachment_caches( $content ): string {
  * Filter the sizes attribute for images to improve the default calculation.
  *
  * @since 1.1.0
+ * @since n.e.x.t Uses the full image size for the post featured image block, unless the thumbnail size is selected.
  *
- * @param string|mixed                                             $content      The block content about to be rendered.
- * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
- * @param WP_Block                                                 $block        Block instance.
+ * @param string|mixed                                                                          $content      The block content about to be rendered.
+ * @param array{ attrs?: array{ id?: int, sizeSlug?: string, align?: string, width?: string } } $parsed_block The parsed block.
+ * @param WP_Block                                                                              $block        Block instance.
  * @return string The updated block content.
  */
 function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $block ): string {
@@ -146,19 +147,34 @@ function auto_sizes_filter_image_tag( $content, array $parsed_block, WP_Block $b
 		add_filter( 'wp_calculate_image_sizes', $filter, 9, 2 );
 
 		// Get the image ID from the block attributes or context.
+		// Get the image ID from the block attributes or context.
 		$id = $parsed_block['attrs']['id'] ?? 0;
 
-		/*
-		 * For the post featured image block, use the post ID to get the featured image attachment ID.
-		 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
-		 */
-		if ( 'core/post-featured-image' === $block->name && isset( $block->context['postId'] ) ) {
-			$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
+		// If we don't have a size slug, assume the full size was used.
+		$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'full';
+
+		if ( 'core/post-featured-image' === $block->name ) {
+			/*
+			 * For the post featured image block, use the post ID to get the featured image attachment ID.
+			 * See https://github.com/WordPress/wordpress-develop/blob/3f9c6fce666ed2ea0d56c21f6235c37db3d91392/src/wp-includes/blocks/post-featured-image.php#L65
+			 */
+			if ( isset( $block->context['postId'] ) ) {
+				$id = auto_sizes_get_featured_image_attachment_id( (int) $block->context['postId'] );
+			}
+
+			/*
+			 * The post featured image block styles the image with `width: 100%`, so it fills its container
+			 * regardless of which sub-size is rendered. Use the full size so the sub-size width does not cap
+			 * the sizes value. The thumbnail size is kept, since it is usually a small, cropped image.
+			 * See https://github.com/WordPress/gutenberg/blob/6b90259aefc965729b972fe226d7c22ecc295823/packages/block-library/src/post-featured-image/style.scss#L12
+			 */
+			if ( 'thumbnail' !== $size_slug ) {
+				$size_slug = 'full';
+			}
 		}
 
 		$sizes = wp_calculate_image_sizes(
-			// If we don't have a size slug, assume the full size was used.
-			$parsed_block['attrs']['sizeSlug'] ?? 'full',
+			$size_slug,
 			null,
 			null,
 			$id

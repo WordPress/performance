@@ -9,6 +9,7 @@ on:
     paths:
       - '.github/workflows/e2e-test.yml'
       - 'plugins/auto-sizes/**'
+      - 'plugins/webp-uploads/**'
       - '**/package.json'
       - 'package-lock.json'
       - 'composer.json'
@@ -17,6 +18,7 @@ on:
     paths:
       - '.github/workflows/e2e-test.yml'
       - 'plugins/auto-sizes/**'
+      - 'plugins/webp-uploads/**'
       - '**/package.json'
       - 'package-lock.json'
       - 'composer.json'
