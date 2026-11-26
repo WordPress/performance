@@ -391,14 +391,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$popped_tag_name = array_pop( $this->open_stack_tags );
 			array_pop( $this->open_stack_attributes );
 			if ( $popped_tag_name !== $tag_name ) {
+				$message = sprintf(
+					/* translators: 1: Popped tag name, 2: Closing tag name */
+					__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'optimization-detective' ),
+					$popped_tag_name,
+					$tag_name
+				);
+
+				$url = function_exists( 'od_get_current_url' ) ? od_get_current_url() : '';
+				if ( '' !== $url ) {
+					$message .= ' ' . sprintf(
+						/* translators: %s: Current URL */
+						__( 'Occurred on URL: %s.', 'optimization-detective' ),
+						$url
+					);
+				}
+
 				$this->warn(
 					__METHOD__,
-					sprintf(
-						/* translators: 1: Popped tag name, 2: Closing tag name */
-						__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'optimization-detective' ),
-						$popped_tag_name,
-						$tag_name
-					)
+					$message
 				);
 			}
 

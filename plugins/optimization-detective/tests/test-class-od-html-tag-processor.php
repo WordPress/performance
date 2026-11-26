@@ -960,6 +960,48 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that a tag stack mismatch triggers a warning containing the current URL.
+	 *
+	 * @covers ::next_token
+	 * @covers ::warn
+	 */
+	public function test_tag_stack_mismatch_warning(): void {
+		$_SERVER['HTTP_HOST']   = 'example.com';
+		$_SERVER['REQUEST_URI'] = '/test-page/';
+
+		$processor = new OD_HTML_Tag_Processor( '<div><span></div>' );
+
+		$captured_warnings = array();
+		$callback          = static function ( string $function_name, string $message ) use ( &$captured_warnings ): void {
+			if ( ! in_array( $message, $captured_warnings, true ) ) {
+				$captured_warnings[] = $message;
+			}
+		};
+		add_action( 'wp_trigger_error_always_run', $callback, 10, 2 );
+		add_action( 'wp_trigger_error_run', $callback, 10, 2 );
+
+		try {
+			while ( $processor->next_token() ) {
+				$processor->get_tag();
+			}
+		} finally {
+			remove_action( 'wp_trigger_error_always_run', $callback );
+			remove_action( 'wp_trigger_error_run', $callback );
+			unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
+		}
+
+		if ( 0 === count( $captured_warnings ) && ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) ) {
+			$this->markTestSkipped( 'wp_trigger_error is not triggered when WP_DEBUG is disabled.' );
+		}
+
+		$this->assertCount( 1, $captured_warnings );
+		$this->assertStringContainsString( 'Expected popped tag stack element SPAN to match the currently visited closing tag DIV', $captured_warnings[0] );
+		if ( function_exists( 'od_get_current_url' ) ) {
+			$this->assertStringContainsString( od_get_current_url(), $captured_warnings[0] );
+		}
+	}
+
+	/**
 	 * Test get_cursor_move_count().
 	 *
 	 * @covers ::get_cursor_move_count
