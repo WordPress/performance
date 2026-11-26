@@ -244,9 +244,21 @@ class Perflab_Server_Timing {
 	 */
 	public function add_hooks(): void {
 		if ( $this->use_output_buffer() ) {
-			add_action( 'template_redirect', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
+			// In WordPress 6.9+, use the core template enhancement output buffer
+			// instead of starting a custom one.
+			if ( function_exists( 'wp_start_template_enhancement_output_buffer' ) ) {
+				add_filter( 'wp_template_enhancement_output_buffer', array( $this, 'process_output_buffer' ), PHP_INT_MIN );
+			} else {
+				add_action( 'template_redirect', array( $this, 'start_output_buffer' ), PHP_INT_MIN );
+			}
 		} else {
-			add_filter( 'template_include', array( $this, 'on_template_include' ), PHP_INT_MAX );
+			// In WordPress 6.9+, use the dedicated action instead of misusing
+			// the template_include filter.
+			if ( function_exists( 'wp_start_template_enhancement_output_buffer' ) ) {
+				add_action( 'wp_before_include_template', array( $this, 'on_before_include_template' ) );
+			} else {
+				add_filter( 'template_include', array( $this, 'on_template_include' ), PHP_INT_MAX );
+			}
 		}
 	}
 
@@ -282,6 +294,39 @@ class Perflab_Server_Timing {
 				return $output;
 			}
 		);
+	}
+
+	/**
+	 * Callback for the wp_template_enhancement_output_buffer filter.
+	 *
+	 * Sends the Server-Timing header and passes through the output buffer content unchanged.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string|mixed $output The output buffer content.
+	 * @return string The output buffer content, unchanged.
+	 */
+	public function process_output_buffer( $output ): string {
+		if ( ! is_string( $output ) ) {
+			$output = '';
+		}
+
+		$this->send_header();
+
+		return $output;
+	}
+
+	/**
+	 * Callback for the wp_before_include_template action.
+	 *
+	 * Sends the Server-Timing header right before the template is included.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $template The template file path.
+	 */
+	public function on_before_include_template( string $template ): void {
+		$this->send_header();
 	}
 
 	/**
