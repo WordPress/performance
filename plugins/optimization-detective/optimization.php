@@ -15,71 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 // @codeCoverageIgnoreEnd
 
 /**
- * Starts output buffering at the end of the 'template_include' filter.
- *
- * This is to implement #43258 in core.
- *
- * This is a hack that would eventually be replaced with something like this in wp-includes/template-loader.php:
- *
- *          $template = apply_filters( 'template_include', $template );
- *     +    ob_start( 'wp_template_output_buffer_callback' );
- *          if ( $template ) {
- *              include $template;
- *          } elseif ( current_user_can( 'switch_themes' ) ) {
- *
- * @since 0.1.0
- * @access private
- * @link https://core.trac.wordpress.org/ticket/43258
- *
- * @param string|mixed $passthrough Value for the template_include filter which is passed through.
- * @return string|mixed Unmodified value of $passthrough.
- */
-function od_buffer_output( $passthrough ) {
-	/*
-	 * Instead of the default PHP_OUTPUT_HANDLER_STDFLAGS (cleanable, flushable, and removable) being used for flags,
-	 * we need to omit PHP_OUTPUT_HANDLER_FLUSHABLE. If the buffer were flushable, then each time that ob_flush() is
-	 * called, it would send a fragment of the output into the output buffer callback. When buffering the entire
-	 * response as an HTML document, this would result in broken HTML processing.
-	 *
-	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
-	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any later
-	 * processing while also emitting a _doing_it_wrong().
-	 *
-	 * The output buffer needs to be removable because WordPress calls wp_ob_end_flush_all() and then calls
-	 * wp_cache_close(). If the buffers are not all flushed before wp_cache_close() is closed, then some output buffer
-	 * handlers (e.g. for caching plugins) may fail to be able to store the page output in the object cache.
-	 * See <https://github.com/WordPress/performance/pull/1317#issuecomment-2271955356>.
-	 */
-	$flags = PHP_OUTPUT_HANDLER_STDFLAGS ^ PHP_OUTPUT_HANDLER_FLUSHABLE;
-
-	ob_start(
-		static function ( string $output, ?int $phase ): string {
-			// When the output is being cleaned (e.g. the pending template is replaced with an error page), do not send it through the filter.
-			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) !== 0 ) {
-				return $output;
-			}
-
-			/**
-			 * Filters the template output buffer before sending it to the client.
-			 *
-			 * @since 0.1.0
-			 * @link https://github.com/WordPress/performance/blob/trunk/plugins/optimization-detective/docs/hooks.md#:~:text=Filter%3A%20od_template_output_buffer
-			 *
-			 * @param string $output Output buffer.
-			 * @return string Filtered output buffer.
-			 */
-			return (string) apply_filters( 'od_template_output_buffer', $output );
-		},
-		0, // Unlimited buffer size.
-		$flags
-	);
-	return $passthrough;
-}
-
-/**
  * Adds template output buffer filter for optimization if eligible.
  *
+ * Since WordPress 6.9, this registers the optimization callback on the {@see 'wp_template_enhancement_output_buffer'}
+ * filter (Core-43258, see r60936) so that the core-managed template enhancement output buffer is reused instead of
+ * Optimization Detective starting its own. Registering the filter also opts in to starting the core output buffer
+ * (see {@see wp_should_output_buffer_template_for_enhancement()}); when the response is not eligible for optimization,
+ * no filter is added and the response is streamed.
+ *
  * @since 0.1.0
+ * @since n.e.x.t Registers on the WordPress 6.9 `wp_template_enhancement_output_buffer` filter instead of the
+ *               plugin's own `od_template_output_buffer` filter.
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter(): void {
@@ -106,7 +52,21 @@ function od_maybe_add_template_output_buffer_filter(): void {
 	) {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
-	add_filter( 'od_template_output_buffer', $callback );
+	add_filter( 'wp_template_enhancement_output_buffer', $callback );
+
+	// Backward compatibility: continue to apply the deprecated `od_template_output_buffer` filter for any third-party
+	// callbacks still hooked to it. This only emits a deprecation notice (and only runs) when the filter has listeners.
+	add_filter(
+		'wp_template_enhancement_output_buffer',
+		static function ( string $filtered_output ): string {
+			return (string) apply_filters_deprecated(
+				'od_template_output_buffer',
+				array( $filtered_output ),
+				'Optimization Detective 1.0.0',
+				'wp_template_enhancement_output_buffer'
+			);
+		}
+	);
 }
 
 /**
