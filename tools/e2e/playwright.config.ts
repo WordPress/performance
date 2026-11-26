@@ -17,6 +17,10 @@ const config = defineConfig( {
 			testDir: '../../plugins/auto-sizes/tests/e2e/specs',
 		},
 		{
+			name: 'performance-lab',
+			testDir: '../../plugins/performance-lab/tests/e2e/specs',
+		},
+		{
 			name: 'webp-uploads',
 			testDir: '../../plugins/webp-uploads/tests/e2e/specs',
 		},
