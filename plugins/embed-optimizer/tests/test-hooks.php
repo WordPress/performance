@@ -94,7 +94,7 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_update_markup
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
-	public function test_embed_optimizer_filter_oembed_html_to_lazy_load( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
+	public function test_embed_optimizer_filter_oembed_html_to_lazy_load( string $html, ?string $expected_html = null, bool $expected_lazy_script = false ): void {
 		if ( null === $expected_html ) {
 			$expected_html = $html; // No change.
 		}
