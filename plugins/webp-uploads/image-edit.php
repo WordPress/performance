@@ -154,8 +154,9 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 				return $metadata;
 			}
 
-			$old_metadata = wp_get_attachment_metadata( $post_id );
-			$resize_sizes = array();
+			$old_metadata     = wp_get_attachment_metadata( $post_id );
+			$registered_sizes = wp_get_registered_image_subsizes();
+			$resize_sizes     = array();
 			// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
 			// function `wp_ajax_image_editor()` which already has one.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -169,10 +170,10 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 					}
 
 					if (
-						isset( $metadata['sizes'][ $size_name ]['file'] ) &&
+						isset( $metadata['sizes'][ $size_name ]['file'], $registered_sizes[ $size_name ] ) &&
 						$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file']
 					) {
-						$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
+						$resize_sizes[ $size_name ] = $registered_sizes[ $size_name ];
 					}
 				}
 			}
