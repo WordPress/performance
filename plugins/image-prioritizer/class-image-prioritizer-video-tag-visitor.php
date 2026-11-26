@@ -2,6 +2,7 @@
 /**
  * Tag visitor that optimizes VIDEO tags:
  * - Adds preload links for poster images if in a breakpoint group's LCP.
+ * - Adds native lazy-loading for videos not in any initial viewport.
  *
  * @package image-prioritizer
  *
@@ -25,22 +26,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 
 	/**
-	 * Class name used to indicate a video which is lazy-loaded.
-	 *
-	 * @since 0.2.0
-	 * @var string
-	 */
-	const LAZY_VIDEO_CLASS_NAME = 'od-lazy-video';
-
-	/**
-	 * Whether the lazy-loading script was added to the body.
-	 *
-	 * @since 0.2.0
-	 * @var bool
-	 */
-	protected bool $added_lazy_script = false;
-
-	/**
 	 * Visits a tag.
 	 *
 	 * @since 0.2.0
@@ -61,7 +46,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$this->preload_poster_image( $poster, $context );
 		}
 
-		$this->lazy_load_videos( $poster, $context );
+		$this->lazy_load_videos( $context );
 
 		return true;
 	}
@@ -167,11 +152,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 * Optimizes the VIDEO tag based on whether it is the LCP element or else whether it is displayed in any initial viewport.
 	 *
 	 * @since 0.2.0
+	 * @since n.e.x.t Switched from JavaScript-based lazy-loading to native `loading=lazy`.
 	 *
-	 * @param non-empty-string|null  $poster  Poster image URL.
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 */
-	private function lazy_load_videos( ?string $poster, OD_Tag_Visitor_Context $context ): void {
+	private function lazy_load_videos( OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
 		/*
@@ -216,35 +201,21 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			if ( 'auto' !== $initial_preload ) {
 				$processor->set_attribute( 'preload', 'auto' );
 			}
+			$processor->remove_attribute( 'loading' );
 			return;
 		}
 
 		// If the element is visible in any viewport, do not lazy-load it.
 		if ( $max_intersection_ratio > 0 ) {
+			$processor->remove_attribute( 'loading' );
 			return;
 		}
 
-		if ( 'none' !== $initial_preload ) {
-			$processor->set_attribute( 'data-original-preload', null !== $initial_preload ? $initial_preload : 'default' );
-			$processor->set_attribute( 'preload', 'none' );
-			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
-		}
-
-		if ( null !== $processor->get_attribute( 'autoplay' ) ) {
-			$processor->set_attribute( 'data-original-autoplay', true );
-			$processor->remove_attribute( 'autoplay' );
-			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
-		}
-
-		if ( null !== $poster ) {
-			$processor->set_attribute( 'data-original-poster', $poster );
-			$processor->remove_attribute( 'poster' );
-			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
-		}
-
-		if ( ! $this->added_lazy_script ) {
-			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_video_lazy_load_script(), array( 'type' => 'module' ) ) );
-			$this->added_lazy_script = true;
-		}
+		/*
+		 * Natively lazy-load the video since it is not in any initial viewport. This defers loading the poster,
+		 * preloading the video data, and autoplay until the video approaches the viewport. Browsers which do not
+		 * yet support lazy-loading videos ignore the attribute.
+		 */
+		$processor->set_attribute( 'loading', 'lazy' );
 	}
 }

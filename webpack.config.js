@@ -143,10 +143,6 @@ const imagePrioritizer = ( env ) => {
 						to: `${ pluginDir }/detect.min.js`,
 					},
 					{
-						from: `${ pluginDir }/lazy-load-video.js`,
-						to: `${ pluginDir }/lazy-load-video.min.js`,
-					},
-					{
 						from: `${ pluginDir }/lazy-load-bg-image.js`,
 						to: `${ pluginDir }/lazy-load-bg-image.min.js`,
 					},
