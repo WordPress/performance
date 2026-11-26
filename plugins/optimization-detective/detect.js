@@ -66,6 +66,22 @@ const storageLockTimeSessionKey = 'odStorageLockTime';
 const compressionDebounceWaitDuration = 1000;
 
 /**
+ * Verification token for skipping the storage lock check while in priming mode.
+ *
+ * @see {detect}
+ * @type {?string}
+ */
+let primeModeVerificationToken = null;
+
+/**
+ * Source of the priming mode (i.e. admin-dashboard or priming-cli).
+ *
+ * @see {detect}
+ * @type {?string}
+ */
+let primeModeSource = null;
+
+/**
  * Checks whether storage is locked.
  *
  * @param {number} currentTime    - Current time in milliseconds.
@@ -73,6 +89,10 @@ const compressionDebounceWaitDuration = 1000;
  * @return {boolean} Whether storage is locked.
  */
 function isStorageLocked( currentTime, storageLockTTL ) {
+	if ( primeModeVerificationToken ) {
+		return false;
+	}
+
 	if ( storageLockTTL === 0 ) {
 		return false;
 	}
@@ -507,6 +527,114 @@ function debounceCompressUrlMetric() {
 }
 
 /**
+ * Forces immediate compression of the URL Metric, bypassing debounce and idle callbacks.
+ *
+ * @return {Promise<void>} A promise that resolves when the compression is complete.
+ */
+async function forceCompressUrlMetric() {
+	if ( ! compressionEnabled ) {
+		return;
+	}
+	if ( null !== recompressionTimeout ) {
+		clearTimeout( recompressionTimeout );
+		recompressionTimeout = null;
+	}
+	if (
+		null !== idleCallbackHandle &&
+		typeof cancelIdleCallback === 'function'
+	) {
+		cancelIdleCallback( idleCallbackHandle );
+		idleCallbackHandle = null;
+	}
+
+	try {
+		compressedPayload = await compress( JSON.stringify( urlMetric ) );
+	} catch ( err ) {
+		const { error } = createLogger( false, consoleLogPrefix );
+		error(
+			'Failed to compress URL Metric falling back to sending uncompressed data:',
+			err
+		);
+		compressionEnabled = false;
+	}
+}
+
+/**
+ * Notifies about the URL Metric request status.
+ *
+ * @param {Object}  status         - The status details.
+ * @param {boolean} status.success - Indicates if the request succeeded.
+ * @param {string}  [status.error] - An error message if the request failed.
+ * @param {?string} source         - The source of the priming mode (i.e. admin-dashboard or priming-cli).
+ */
+function notifyStatus( status, source ) {
+	const message = {
+		type: 'OD_PRIME_URL_METRICS_REQUEST_STATUS',
+		success: status.success,
+		...( status.error && { error: status.error } ),
+	};
+
+	if (
+		'admin-dashboard' === source &&
+		window.parent &&
+		window.parent !== window
+	) {
+		window.parent.postMessage( message, '*' );
+	} else if ( 'priming-cli' === source ) {
+		document.dispatchEvent(
+			new CustomEvent( message.type, {
+				detail: { ...status },
+			} )
+		);
+	}
+}
+
+/**
+ * Scrolls to the bottom of the page.
+ *
+ * @return {Promise<void>} A promise that resolves when the scroll is complete.
+ */
+async function scrollToBottomOfPage() {
+	return new Promise( ( resolve ) => {
+		const viewportHeight = window.innerHeight;
+		const maxScrollAttempts = 20;
+		const maxHeightChangeAmount = viewportHeight * 0.5;
+		const maxHeightChangeAttempts = 3;
+
+		let scrollAttempts = 0;
+		let heightChangeAttempts = 0;
+		let lastScrollPosition = 0;
+		let lastHeight = document.documentElement.scrollHeight;
+
+		function scroll() {
+			const newHeight = document.documentElement.scrollHeight;
+			if (
+				window.innerHeight + window.scrollY >= newHeight - 10 ||
+				scrollAttempts >= maxScrollAttempts ||
+				heightChangeAttempts >= maxHeightChangeAttempts
+			) {
+				resolve();
+				return;
+			}
+
+			lastScrollPosition += viewportHeight;
+			window.scrollTo( { top: lastScrollPosition, behavior: 'smooth' } );
+
+			const heightChange = newHeight - lastHeight;
+			if ( heightChange >= maxHeightChangeAmount ) {
+				lastHeight = newHeight;
+				heightChangeAttempts++;
+			}
+
+			scrollAttempts++;
+			setTimeout( scroll, 300 );
+		}
+
+		scroll();
+	} );
+}
+
+/**
  * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
  * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
  */
@@ -616,6 +744,19 @@ export default async function detect( {
 		return;
 	}
 
+	// Retrieve verification token from the URL hash for priming URL Metrics.
+	// Presence of the token indicates that the URL Metric is being primed
+	// through the Puppeteer script or WordPress admin dashboard.
+	if ( '' !== window.location.hash ) {
+		const searchParams = new URLSearchParams(
+			window.location.hash.slice( 1 )
+		);
+		primeModeVerificationToken = searchParams.get(
+			'odPrimeModeVerificationToken'
+		);
+		primeModeSource = searchParams.get( 'odPrimeModeSource' );
+	}
+
 	// Abort if the client already submitted a URL Metric for this URL and viewport group.
 	const alreadySubmittedSessionStorageKey =
 		await getAlreadySubmittedSessionStorageKey(
@@ -625,6 +766,7 @@ export default async function detect( {
 			logger
 		);
 	if (
+		! primeModeVerificationToken &&
 		null !== alreadySubmittedSessionStorageKey &&
 		alreadySubmittedSessionStorageKey in sessionStorage
 	) {
@@ -934,19 +1076,29 @@ export default async function detect( {
 
 	// Wait for the page to be hidden.
 	await /** @type {Promise<void>} */ (
-		new Promise( ( resolve ) => {
-			win.addEventListener( 'pagehide', () => resolve(), { once: true } );
-			win.addEventListener( 'pageswap', () => resolve(), { once: true } );
-			doc.addEventListener(
-				'visibilitychange',
-				() => {
-					if ( doc.visibilityState === 'hidden' ) {
-						// TODO: This will fire even when switching tabs.
-						resolve();
-					}
-				},
-				{ once: true }
-			);
+		new Promise( async ( resolve ) => {
+			if ( ! primeModeVerificationToken ) {
+				win.addEventListener( 'pagehide', () => resolve(), {
+					once: true,
+				} );
+				win.addEventListener( 'pageswap', () => resolve(), {
+					once: true,
+				} );
+				doc.addEventListener(
+					'visibilitychange',
+					() => {
+						if ( doc.visibilityState === 'hidden' ) {
+							// TODO: This will fire even when switching tabs.
+							resolve();
+						}
+					},
+					{ once: true }
+				);
+			} else {
+				await scrollToBottomOfPage();
+				await forceCompressUrlMetric();
+				resolve();
+			}
 		} )
 	);
 
@@ -1107,6 +1259,12 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
+	if ( primeModeVerificationToken ) {
+		url.searchParams.set(
+			'prime_url_metrics_verification_token',
+			primeModeVerificationToken
+		);
+	}
 
 	/** @type {Record<string, string>} */
 	const headers = {
@@ -1120,7 +1278,26 @@ export default async function detect( {
 		method: 'POST',
 		body: payloadBlob,
 		headers,
-		keepalive: true, // This makes fetch() behave the same as navigator.sendBeacon().
+		keepalive: primeModeVerificationToken ? false : true, // Setting keepalive to true makes fetch() behave the same as navigator.sendBeacon().
 	} );
-	await fetch( request );
+
+	if ( ! primeModeVerificationToken ) {
+		await fetch( request );
+	} else {
+		try {
+			const response = await fetch( request );
+			if ( ! response.ok ) {
+				const errorData = await response.json();
+				throw new Error( errorData.code );
+			}
+			notifyStatus( { success: true }, primeModeSource );
+		} catch ( err ) {
+			const errorMessage =
+				err instanceof Error ? err.message : 'Unknown error';
+			notifyStatus(
+				{ success: false, error: errorMessage },
+				primeModeSource
+			);
+		}
+	}
 }

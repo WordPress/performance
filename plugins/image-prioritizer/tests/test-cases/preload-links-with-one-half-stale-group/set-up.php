@@ -16,7 +16,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 			$url_metrics_data
 		),
 		$current_etag,
-		array( 480, 600, 782 ),
+		array( 380, 480, 600, 782 ),
 		3,
 		WEEK_IN_SECONDS
 	);
