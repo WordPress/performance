@@ -15,6 +15,8 @@ This plugin adds support for the [Speculation Rules API](https://developer.mozil
 
 By default, speculative loading is only enabled for logged-out users, since unauthenticated pages are typically only eligible for caching and so more efficient to prefetch/prerender. This means that sites with frequent logged-in users on the frontend—such as e-commerce, forums, or membership sites—will not benefit from the feature. If your server can handle the additional load (for example, with persistent object caching), you can opt in to enable speculative loading for all logged-in users or for administrators only. This setting exclusively affects frontend pages; admin screens are always excluded.
 
+The plugin can also predict which links a visitor is most likely to follow and load those right away, before the visitor interacts with them. This link prediction is disabled by default and can be enabled in the same settings section. See FAQ for more information.
+
 A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the `no-prerender` CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
 
 = Browser support =
@@ -84,6 +86,31 @@ add_filter(
 `
 
 As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
+
+= How does link prediction work? =
+
+When link prediction is enabled under _Settings > Reading_, a small script estimates the probability that the visitor follows each link on the page. The two most likely links are speculatively loaded right away if their probability is at least 50%, without waiting for the visitor to hover over or click them. The links are evaluated again after the visitor scrolls, since links that come into view become more likely.
+
+The probability is calculated from signals about where and how a link is displayed: whether it is in the viewport and how close it is to the middle of it, how large its clickable area is, whether it is in the main content, a heading, the navigation or the footer, whether it contains an image, whether it goes to the next page or post, and whether other links go to the same URL. Each signal has a weight, and the probability is the logistic function of the weighted sum.
+
+The weights adapt to the links a visitor actually follows. This happens entirely in the visitor's browser: the adapted weights are kept in the browser's local storage, they contain no URLs, and nothing is sent to your server or to a third party. Predicted links are subject to the same exclusions as any other speculative loading, and no links are predicted for visitors who have asked their browser to reduce data usage.
+
+Since predicted links are loaded whether or not the visitor ends up following them, link prediction increases the number of requests to your server. You can adjust it with the `plsr_link_prediction_args` filter. The following example only loads a single predicted link, requires a probability of at least 70%, raises the weight of links to the next page, and keeps the weights from adapting:
+`
+<?php
+add_filter(
+	'plsr_link_prediction_args',
+	function ( array $args ): array {
+		$args['max_links']       = 1;
+		$args['threshold']       = 0.7;
+		$args['learning_rate']   = 0;
+		$args['weights']['next'] = 2.5;
+		return $args;
+	}
+);
+`
+
+Each predicted link gets a `data-plsr-predicted` attribute with its probability, which you can use to see what was predicted on a page.
 
 = Are there any special considerations for speculative loading behavior? =
 

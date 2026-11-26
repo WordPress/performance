@@ -80,6 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/hooks.php';
 		require_once __DIR__ . '/settings.php';
+		require_once __DIR__ . '/prediction.php';
 	}
 );
 // @codeCoverageIgnoreEnd

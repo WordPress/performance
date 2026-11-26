@@ -59,12 +59,26 @@ function plsr_get_authentication_labels(): array {
 }
 
 /**
+ * Returns the available options for the Speculative Loading link prediction and their labels.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{ disabled: string, enabled: string } Associative array of `$prediction => $label` pairs.
+ */
+function plsr_get_prediction_labels(): array {
+	return array(
+		'disabled' => _x( 'Disabled (default)', 'setting label', 'speculation-rules' ),
+		'enabled'  => _x( 'Enabled (immediately load the links a visitor is most likely to follow)', 'setting label', 'speculation-rules' ),
+	);
+}
+
+/**
  * Returns translated description strings for settings fields.
  *
  * @since 1.6.0
  * @access private
  *
- * @param 'mode'|'eagerness'|'authentication' $field The field name to get description for.
+ * @param 'mode'|'eagerness'|'authentication'|'prediction' $field The field name to get description for.
  * @return string The translated description string.
  */
 function plsr_get_field_description( string $field ): string {
@@ -76,6 +90,7 @@ function plsr_get_field_description( string $field ): string {
 			__( 'Only unauthenticated pages are typically served from cache. So in order to reduce load on the server, speculative loading is not enabled by default for logged-in users. If your server can handle the additional load, you can opt in to speculative loading for all logged-in users or just administrator users only. For optimal performance, regardless of the user authentication status but <em>especially</em> when logged-in, ensure you have a <a href="%s" target="_blank">persistent object cache</a> configured. This only applies to pages on the frontend; admin screens remain excluded.', 'speculation-rules' ),
 			'https://developer.wordpress.org/advanced-administration/performance/optimization/#object-caching'
 		),
+		'prediction'     => __( 'Link prediction estimates how likely a visitor is to follow each link on the page and speculatively loads the most likely ones right away, without waiting for an interaction. The estimate is calculated in the visitor\'s browser from where and how a link is displayed, and it adapts to the links that visitor follows; nothing is sent to your server or to a third party. Since more pages are loaded speculatively, enable this only if your server can handle the additional load.', 'speculation-rules' ),
 	);
 	return $descriptions[ $field ] ?? '';
 }
@@ -85,12 +100,13 @@ function plsr_get_field_description( string $field ): string {
  *
  * @since 1.0.0
  *
- * @return array{ mode: 'prerender', eagerness: 'moderate', authentication: 'logged_out' } {
+ * @return array{ mode: 'prerender', eagerness: 'moderate', authentication: 'logged_out', prediction: 'disabled' } {
  *     Default setting value.
  *
  *     @type string $mode           Mode.
  *     @type string $eagerness      Eagerness.
  *     @type string $authentication Authentication.
+ *     @type string $prediction     Link prediction. Added in n.e.x.t.
  * }
  */
 function plsr_get_setting_default(): array {
@@ -98,6 +114,7 @@ function plsr_get_setting_default(): array {
 		'mode'           => 'prerender',
 		'eagerness'      => 'moderate',
 		'authentication' => 'logged_out',
+		'prediction'     => 'disabled',
 	);
 }
 
@@ -106,12 +123,13 @@ function plsr_get_setting_default(): array {
  *
  * @since 1.4.0
  *
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any', prediction: 'disabled'|'enabled' } {
  *     Stored setting value.
  *
  *     @type string $mode           Mode.
  *     @type string $eagerness      Eagerness.
  *     @type string $authentication Authentication.
+ *     @type string $prediction     Link prediction. Added in n.e.x.t.
  * }
  */
 function plsr_get_stored_setting_value(): array {
@@ -125,12 +143,13 @@ function plsr_get_stored_setting_value(): array {
  * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
- * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any' } {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager', authentication: 'logged_out'|'logged_out_and_admins'|'any', prediction: 'disabled'|'enabled' } {
  *     Sanitized setting.
  *
  *     @type string $mode           Mode.
  *     @type string $eagerness      Eagerness.
  *     @type string $authentication Authentication.
+ *     @type string $prediction     Link prediction. Added in n.e.x.t.
  * }
  */
 function plsr_sanitize_setting( $input ): array {
@@ -153,12 +172,16 @@ function plsr_sanitize_setting( $input ): array {
 	if ( ! in_array( $value['authentication'], array_keys( plsr_get_authentication_labels() ), true ) ) {
 		$value['authentication'] = $default_value['authentication'];
 	}
+	if ( ! in_array( $value['prediction'], array_keys( plsr_get_prediction_labels() ), true ) ) {
+		$value['prediction'] = $default_value['prediction'];
+	}
 
 	// Return an explicit array literal so the sealed return shape is preserved (array_intersect_key() above yields a loose remainder).
 	return array(
 		'mode'           => $value['mode'],
 		'eagerness'      => $value['eagerness'],
 		'authentication' => $value['authentication'],
+		'prediction'     => $value['prediction'],
 	);
 }
 
@@ -195,6 +218,11 @@ function plsr_register_setting(): void {
 							'description' => wp_strip_all_tags( plsr_get_field_description( 'authentication' ) ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_authentication_labels() ),
+						),
+						'prediction'     => array(
+							'description' => wp_strip_all_tags( plsr_get_field_description( 'prediction' ) ),
+							'type'        => 'string',
+							'enum'        => array_keys( plsr_get_prediction_labels() ),
 						),
 					),
 					'additionalProperties' => false,
@@ -242,6 +270,10 @@ function plsr_add_setting_ui(): void {
 			'title'       => __( 'User Authentication Status', 'speculation-rules' ),
 			'description' => plsr_get_field_description( 'authentication' ),
 		),
+		'prediction'     => array(
+			'title'       => __( 'Link Prediction', 'speculation-rules' ),
+			'description' => plsr_get_field_description( 'prediction' ),
+		),
 	);
 	foreach ( $fields as $slug => $args ) {
 		add_settings_field(
@@ -265,7 +297,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * @since 1.0.0
  * @access private
  *
- * @param array{ field: 'mode'|'eagerness'|'authentication', title: non-empty-string, description: non-empty-string } $args {
+ * @param array{ field: 'mode'|'eagerness'|'authentication'|'prediction', title: non-empty-string, description: non-empty-string } $args {
  *     Associative array of arguments.
  *
  *     @type string $field       The slug of the sub setting controlled by the field.
@@ -285,6 +317,9 @@ function plsr_render_settings_field( array $args ): void {
 			break;
 		case 'authentication':
 			$choices = plsr_get_authentication_labels();
+			break;
+		case 'prediction':
+			$choices = plsr_get_prediction_labels();
 			break;
 		default:
 			// Invalid (and this case should never occur).
