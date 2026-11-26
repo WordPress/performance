@@ -1,5 +1,6 @@
 {
 	"plugins": [
+		"ai-performance-advisor",
 		"auto-sizes",
 		"dominant-color-images",
 		"embed-optimizer",
