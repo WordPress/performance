@@ -73,6 +73,58 @@ function auto_sizes_prime_attachment_caches( $content ): string {
 }
 
 /**
+ * Primes the attachment caches for the images in a block tree before the tree renders.
+ *
+ * Images in block templates, template parts and synced patterns do not pass through
+ * `the_content`, so {@see auto_sizes_prime_attachment_caches()} never sees them, and each
+ * image block would load its attachment with separate queries while it renders. This
+ * collects the attachment IDs of the image and cover blocks in a whole block tree when
+ * the tree's root block is about to render, and loads them with a single query.
+ *
+ * A root is a block without a parent block, or a block whose parent is a synced pattern
+ * (`core/block`), which renders the pattern's blocks as its own inner blocks.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, mixed> $parsed_block The block being rendered.
+ * @param array<string, mixed> $source_block An unmodified copy of the block, as parsed.
+ * @param WP_Block|null        $parent_block If this is a nested block, a reference to the parent block.
+ * @return array<string, mixed> The block, unchanged.
+ */
+function auto_sizes_prime_block_tree_attachment_caches( array $parsed_block, array $source_block, ?WP_Block $parent_block ): array {
+	if ( null !== $parent_block && 'core/block' !== $parent_block->name ) {
+		return $parsed_block;
+	}
+
+	$attachment_ids = array();
+	$blocks         = array( $parsed_block );
+	while ( array() !== $blocks ) {
+		$block = array_pop( $blocks );
+
+		if ( isset( $block['blockName'], $block['attrs']['id'] ) && in_array( $block['blockName'], array( 'core/image', 'core/cover' ), true ) ) {
+			$attachment_id = (int) $block['attrs']['id'];
+			if ( $attachment_id > 0 ) {
+				$attachment_ids[] = $attachment_id;
+			}
+		}
+
+		if ( isset( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
+			array_push( $blocks, ...$block['innerBlocks'] );
+		}
+	}
+
+	// Reduce the array to unique attachment IDs.
+	$attachment_ids = array_unique( $attachment_ids );
+
+	if ( count( $attachment_ids ) > 1 ) {
+		// Warm the object cache for all the images in the tree with a single query.
+		_prime_post_caches( $attachment_ids, false, true );
+	}
+
+	return $parsed_block;
+}
+
+/**
  * Filter the sizes attribute for images to improve the default calculation.
  *
  * @since 1.1.0
