@@ -318,6 +318,7 @@ As noted and shown above, tag visitors apply optimizations based on the captured
 | `get_collection(): OD_URL_Metric_Group_Collection`            | Gets the collection that this group is a part of.                                                      |
 | `is_viewport_width_in_range( int $viewport_width ): bool`     | Checks whether the provided viewport width is between the minimum (exclusive) and maximum (inclusive). |
 | `is_complete(): bool`                                         | Determines whether the URL Metric group is complete.                                                   |
+| `get_current_url_metrics(): OD_URL_Metric[]`                  | Gets URL Metrics in the group, preferring those that match the current ETag.                            |
 | `get_lcp_element(): ?OD_Element`                              | Gets the LCP element in the viewport group.                                                            |
 | `get_xpath_elements_map(): array`                             | Gets all elements from all URL Metrics in the viewport group keyed by the elements' XPaths.            |
 | `get_all_element_max_intersection_ratios(): array`            | Gets the max intersection ratios of all elements in the viewport group and its captured URL Metrics.   |
