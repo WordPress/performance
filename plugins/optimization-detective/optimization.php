@@ -267,9 +267,17 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 
-	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
+	// Whether we need to add the data-od-id attribute to elements and whether the detection script should be injected.
 	$needs_detection          = ! $group_collection->is_every_group_complete();
 	$did_amend_meta_generator = false;
+
+	/**
+	 * XPaths for tracked elements, keyed by the auto-incremented ID referenced in each element's data-od-id attribute.
+	 *
+	 * @var list<string> $xpath_id_map
+	 */
+	$xpath_id_map = array();
+
 	do {
 		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
 		// Similarly, elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
@@ -318,7 +326,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			}
 
 			// If the visitor traversed HTML tags, we need to go back to this tag so that in the next iteration any
-			// relevant tag visitors may apply, in addition to properly setting the data-od-xpath on this tag below.
+			// relevant tag visitors may apply, in addition to properly setting the data-od-id on this tag below.
 			if ( $cursor_move_count !== $processor->get_cursor_move_count() ) {
 				$processor->seek( $current_tag_bookmark ); // TODO: Should this break out of the optimization loop if it returns false?
 			}
@@ -330,16 +338,17 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $tracked_in_url_metrics && $needs_detection ) {
-			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
+			$xpath_id_map[] = $processor->get_xpath();
+			$processor->set_meta_attribute( 'id', (string) ( count( $xpath_id_map ) - 1 ) );
 		}
 
 		$visited_tag_state->reset();
 	} while ( $processor->next_tag( array( 'tag_closers' => 'skip' ) ) );
 
 	// Inject detection script.
-	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
+	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-id attributes.
 	if ( $needs_detection ) {
-		$processor->append_body_html( od_get_detection_scripts( $slug, $group_collection ) );
+		$processor->append_body_html( od_get_detection_scripts( $slug, $group_collection, $xpath_id_map ) );
 	}
 
 	/**
