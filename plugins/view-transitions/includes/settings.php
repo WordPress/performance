@@ -12,6 +12,22 @@ declare( strict_types = 1 );
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+/**
+ * Minimum allowed transition animation duration in milliseconds.
+ *
+ * @since n.e.x.t
+ * @var int
+ */
+const PLVT_MIN_ANIMATION_DURATION = 100;
+
+/**
+ * Maximum allowed transition animation duration in milliseconds.
+ *
+ * @since n.e.x.t
+ * @var int
+ */
+const PLVT_MAX_ANIMATION_DURATION = 5000;
 // @codeCoverageIgnoreEnd
 
 /**
@@ -137,9 +153,11 @@ function plvt_sanitize_setting( $input ): array {
 		$value['default_transition_animation'] = $input['default_transition_animation'];
 	}
 
-	// Handle default_transition_animation_duration separately.
+	// Handle default_transition_animation_duration with min/max bounds.
 	if ( isset( $input['default_transition_animation_duration'] ) ) {
-		$value['default_transition_animation_duration'] = absint( $input['default_transition_animation_duration'] );
+		$duration = absint( $input['default_transition_animation_duration'] );
+		// Clamp between min and max for sensible values.
+		$value['default_transition_animation_duration'] = max( PLVT_MIN_ANIMATION_DURATION, min( PLVT_MAX_ANIMATION_DURATION, $duration ) );
 	}
 
 	$selector_options = array(
@@ -194,6 +212,12 @@ function plvt_register_setting(): void {
 							'description' => __( 'Animation to use for the default view transition type.', 'view-transitions' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plvt_get_view_transition_animation_labels() ),
+						),
+						'default_transition_animation_duration' => array(
+							'description' => __( 'Duration of the view transition animation in milliseconds.', 'view-transitions' ),
+							'type'        => 'integer',
+							'minimum'     => PLVT_MIN_ANIMATION_DURATION,
+							'maximum'     => PLVT_MAX_ANIMATION_DURATION,
 						),
 					),
 					'additionalProperties' => false,
@@ -333,6 +357,10 @@ function plvt_add_setting_ui(): void {
 			'section'     => 'plvt_view_transitions',
 			'title'       => __( 'Transition Animation Duration', 'view-transitions' ),
 			'description' => __( 'Control the duration of the view transition. Enter the value in milliseconds (e.g., 500, 1000, 2000).', 'view-transitions' ),
+			'min'         => PLVT_MIN_ANIMATION_DURATION,
+			'max'         => PLVT_MAX_ANIMATION_DURATION,
+			'step'        => 50,
+			'unit'        => 'ms',
 		),
 		'header_selector'                       => array(
 			'section'     => 'plvt_view_transitions',
@@ -478,15 +506,68 @@ function plvt_render_settings_field( array $args ): void {
 			<?php echo esc_html( $args['description'] ); ?>
 		</label>
 		<?php
-	} else {
+	} elseif ( 'number' === $type ) {
 		?>
 		<input
-			<?php echo ( 'number' === $type ) ? 'type="number"' : ''; ?>
+			type="number"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
+			value="<?php echo esc_attr( (string) $value ); ?>"
+			class="small-text"
+			<?php
+			if ( isset( $args['min'] ) ) {
+				?>
+				min="<?php echo esc_attr( (string) $args['min'] ); ?>"
+				<?php
+			}
+			if ( isset( $args['max'] ) ) {
+				?>
+				max="<?php echo esc_attr( (string) $args['max'] ); ?>"
+				<?php
+			}
+			if ( isset( $args['step'] ) ) {
+				?>
+				step="<?php echo esc_attr( (string) $args['step'] ); ?>"
+				<?php
+			}
+			if ( '' !== $args['description'] ) {
+				?>
+				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
+				<?php
+			}
+			?>
+		>
+		<?php
+		if ( isset( $args['unit'] ) && '' !== $args['unit'] ) {
+			?>
+			<span class="description"><?php echo esc_html( $args['unit'] ); ?></span>
+			<?php
+		}
+	} else {
+		// Determine if this is a CSS selector field that needs validation.
+		$is_selector_field = in_array(
+			$args['field'],
+			array(
+				'header_selector',
+				'main_selector',
+				'post_title_selector',
+				'post_thumbnail_selector',
+				'post_content_selector',
+			),
+			true
+		);
+		?>
+		<input
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="<?php echo esc_attr( "plvt_view_transitions[{$args['field']}]" ); ?>"
 			value="<?php echo esc_attr( (string) $value ); ?>"
 			class="regular-text code"
 			<?php
+			if ( $is_selector_field ) {
+				?>
+				data-plvt-validate-selector
+				<?php
+			}
 			if ( '' !== $args['description'] ) {
 				?>
 				aria-describedby="<?php echo esc_attr( $args['label_for'] . '-description' ); ?>"
