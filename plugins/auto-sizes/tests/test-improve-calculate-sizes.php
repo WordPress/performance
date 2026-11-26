@@ -1504,12 +1504,12 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	/**
 	 * Helper to generate image block markup.
 	 *
-	 * @param int    $attachment_id Attachment ID.
-	 * @param string $size          Optional. Image size. Default 'full'.
-	 * @param string $align         Optional. Image alignment. Default null.
+	 * @param int         $attachment_id Attachment ID.
+	 * @param string      $size          Optional. Image size. Default 'full'.
+	 * @param string|null $align         Optional. Image alignment. Default null.
 	 * @return string Image block markup.
 	 */
-	public function get_image_block_markup( int $attachment_id, string $size = 'full', string $align = null ): string {
+	public function get_image_block_markup( int $attachment_id, string $size = 'full', ?string $align = null ): string {
 		$image_url = wp_get_attachment_image_url( $attachment_id, $size );
 
 		$atts = array(
