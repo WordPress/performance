@@ -47,6 +47,10 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 			'image/png'               => array( 'image/png', 'image/' . $output_format ),
 			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
 		);
+
+		if ( 'avif' === $output_format ) {
+			$default_transforms['image/webp'] = array( 'image/webp', 'image/avif' );
+		}
 	}
 
 	/**
