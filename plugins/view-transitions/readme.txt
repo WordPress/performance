@@ -40,6 +40,25 @@ Cross-document view transitions are supported in a variety of browsers, includin
 
 == Frequently Asked Questions ==
 
+= What do the View Transitions settings on Settings > Reading do? =
+
+The **View Transitions** section under **Settings > Reading** lets you customize how cross-document view transitions behave on your site:
+
+* **Override Theme Configuration** *(only shown if your active theme explicitly configures `view-transitions` theme support)*: When checked, the plugin settings below override the configuration provided by your theme.
+* **Default Transition Animation**: Sets the default animation used when navigating between pages (`Fade` by default, or `Slide`, `Swipe`, and `Wipe` from right, left, bottom, or top).
+* **Transition Animation Duration**: Sets the animation duration in milliseconds (default `400`).
+* **Header Selector**: CSS selector for the global header element (default `header`) so it persists smoothly across navigations instead of animating with the main content.
+* **Main Selector**: CSS selector for the global main content area (default `main`) to animate as the primary page region.
+* **Post Title Selector**: CSS selector for the post title element (default `.wp-block-post-title, .entry-title`) so clicking a post link smoothly transitions the title into the singular post view.
+* **Post Thumbnail Selector**: CSS selector for the post thumbnail element (default `.wp-post-image`) to morph featured images smoothly between archive/list and single post views.
+* **Post Content Selector**: CSS selector for the post content container (default `.wp-block-post-content, .entry-content`) to transition post body content between views.
+
+To reset any selector field back to its default, clear the text input and save changes.
+
+Under **Admin View Transitions** *(when not already provided by WordPress Core)*:
+
+* **WP Admin**: Enables smooth view transitions when navigating between screens in the WordPress admin area (disabled by default).
+
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/view-transitions/#new-topic-0).
