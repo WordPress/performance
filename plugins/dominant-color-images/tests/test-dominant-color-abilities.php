@@ -215,4 +215,121 @@ class Test_Dominant_Color_Abilities extends TestCase {
 			$result
 		);
 	}
+
+	/**
+	 * Tests that compute-attachment-color and regenerate-attachment-color abilities are registered.
+	 *
+	 * @covers ::dominant_color_register_compute_ability
+	 * @covers ::dominant_color_register_regenerate_ability
+	 */
+	public function test_compute_and_regenerate_abilities_are_registered(): void {
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			$this->markTestSkipped( 'WordPress Abilities API is not available.' );
+		}
+
+		$compute = wp_get_ability( 'dominant-color-images/compute-attachment-color' );
+		$this->assertInstanceOf( WP_Ability::class, $compute );
+		$this->assertSame( 'performance-lab-images', $compute->get_category() );
+
+		$compute_meta = $compute->get_meta();
+		$this->assertTrue( $compute_meta['annotations']['readonly'] );
+		$this->assertFalse( $compute_meta['annotations']['destructive'] );
+		$this->assertTrue( $compute_meta['annotations']['idempotent'] );
+
+		$regenerate = wp_get_ability( 'dominant-color-images/regenerate-attachment-color' );
+		$this->assertInstanceOf( WP_Ability::class, $regenerate );
+		$this->assertSame( 'performance-lab-images', $regenerate->get_category() );
+
+		$regenerate_meta = $regenerate->get_meta();
+		$this->assertFalse( $regenerate_meta['annotations']['readonly'] );
+		$this->assertFalse( $regenerate_meta['annotations']['destructive'] );
+		$this->assertTrue( $regenerate_meta['annotations']['idempotent'] );
+	}
+
+	/**
+	 * Tests compute-attachment-color permission callback.
+	 *
+	 * @covers ::dominant_color_ability_compute_attachment_color_permission
+	 */
+	public function test_compute_permission_callback(): void {
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		// Logged-out user cannot edit.
+		wp_set_current_user( 0 );
+		$this->assertFalse( dominant_color_ability_compute_attachment_color_permission( array( 'attachment_id' => $attachment_id ) ) );
+
+		// Subscriber cannot edit posts.
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+		$this->assertFalse( dominant_color_ability_compute_attachment_color_permission( array( 'attachment_id' => $attachment_id ) ) );
+
+		// Editor can edit posts.
+		$editor_id = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor_id );
+		$this->assertTrue( dominant_color_ability_compute_attachment_color_permission( array( 'attachment_id' => $attachment_id ) ) );
+	}
+
+	/**
+	 * Tests compute-attachment-color returns WP_Error for invalid input.
+	 *
+	 * @covers ::dominant_color_ability_compute_attachment_color
+	 */
+	public function test_compute_returns_wp_error_for_invalid_input(): void {
+		$result = dominant_color_ability_compute_attachment_color( null );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'dominant_color_images_missing_attachment_id', $result->get_error_code() );
+
+		$result = dominant_color_ability_compute_attachment_color( array( 'attachment_id' => 0 ) );
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		// Non-image attachment returns WP_Error from dominant_color_get_dominant_color_data().
+		$pdf    = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$result = dominant_color_ability_compute_attachment_color( array( 'attachment_id' => $pdf ) );
+		$this->assertInstanceOf( WP_Error::class, $result );
+	}
+
+	/**
+	 * Tests regenerate-attachment-color permission callback.
+	 *
+	 * @covers ::dominant_color_ability_regenerate_attachment_color_permission
+	 */
+	public function test_regenerate_permission_callback(): void {
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		// Logged-out user cannot edit.
+		wp_set_current_user( 0 );
+		$this->assertFalse( dominant_color_ability_regenerate_attachment_color_permission( array( 'attachment_id' => $attachment_id ) ) );
+
+		// Editor can edit.
+		$editor_id = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor_id );
+		$this->assertTrue( dominant_color_ability_regenerate_attachment_color_permission( array( 'attachment_id' => $attachment_id ) ) );
+	}
+
+	/**
+	 * Tests regenerate-attachment-color returns WP_Error for invalid input.
+	 *
+	 * @covers ::dominant_color_ability_regenerate_attachment_color
+	 */
+	public function test_regenerate_returns_wp_error_for_invalid_input(): void {
+		$result = dominant_color_ability_regenerate_attachment_color( null );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'dominant_color_images_missing_attachment_id', $result->get_error_code() );
+
+		$result = dominant_color_ability_regenerate_attachment_color( array( 'attachment_id' => -1 ) );
+		$this->assertInstanceOf( WP_Error::class, $result );
+	}
 }
