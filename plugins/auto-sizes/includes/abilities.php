@@ -86,7 +86,8 @@ function auto_sizes_register_compute_sizes_ability(): void {
 					),
 					'container_relative_width' => array(
 						'type'             => 'number',
-						'exclusiveMinimum' => 0,
+						'minimum'          => 0,
+						'exclusiveMinimum' => true,
 						'maximum'          => 1,
 						'default'          => 1.0,
 						'description'      => __( 'Width of the ancestor container relative to its parent (between 0 and 1, e.g. 0.5 for a 50% column).', 'auto-sizes' ),
