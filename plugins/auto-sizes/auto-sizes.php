@@ -30,5 +30,6 @@ if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 define( 'IMAGE_AUTO_SIZES_VERSION', '1.8.0' );
 
 require_once __DIR__ . '/includes/improve-calculate-sizes.php';
+require_once __DIR__ . '/includes/abilities.php';
 require_once __DIR__ . '/hooks.php';
 // @codeCoverageIgnoreEnd
