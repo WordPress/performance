@@ -48,8 +48,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/jpeg',
+				'file'           => '2026/01/sample.jpg',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/sample.jpg' );
 
 		$private_post_id    = self::factory()->post->create(
 			array(
@@ -86,8 +88,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/png',
+				'file'           => '2026/01/test.png',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/test.png' );
 
 		wp_update_attachment_metadata(
 			$attachment_id,
@@ -121,8 +125,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/jpeg',
+				'file'           => '2026/01/test.jpg',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/test.jpg' );
 
 		$result = dominant_color_ability_get_attachment_color( array( 'attachment_id' => $attachment_id ) );
 
@@ -189,8 +195,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/jpeg',
+				'file'           => '2026/01/sample.jpg',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/sample.jpg' );
 		wp_update_attachment_metadata(
 			$attachment_id,
 			array(
@@ -255,8 +263,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/jpeg',
+				'file'           => '2026/01/sample.jpg',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/sample.jpg' );
 
 		// Logged-out user cannot edit.
 		wp_set_current_user( 0 );
@@ -306,8 +316,10 @@ class Test_Dominant_Color_Abilities extends TestCase {
 		$attachment_id = self::factory()->attachment->create(
 			array(
 				'post_mime_type' => 'image/jpeg',
+				'file'           => '2026/01/sample.jpg',
 			)
 		);
+		update_attached_file( $attachment_id, '2026/01/sample.jpg' );
 
 		// Logged-out user cannot edit.
 		wp_set_current_user( 0 );
