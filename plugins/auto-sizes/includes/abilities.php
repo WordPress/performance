@@ -147,6 +147,74 @@ function auto_sizes_register_compute_sizes_ability(): void {
 add_action( 'wp_abilities_api_init', 'auto_sizes_register_compute_sizes_ability' );
 
 /**
+ * Registers the get-version-status ability for Enhanced Responsive Images.
+ *
+ * @since n.e.x.t
+ */
+function auto_sizes_register_get_version_status_ability(): void {
+	wp_register_ability(
+		'auto-sizes/get-version-status',
+		array(
+			'label'               => __( 'Get Auto-Sizes Version Status', 'auto-sizes' ),
+			'description'         => __( 'Reports the Enhanced Responsive Images plugin version, WordPress core sizes=auto support status, and active theme layout widths.', 'auto-sizes' ),
+			'category'            => 'performance-lab-images',
+			'execute_callback'    => 'auto_sizes_ability_get_version_status',
+			'permission_callback' => 'auto_sizes_ability_permission_check',
+			'output_schema'       => array(
+				'type'       => 'object',
+				'properties' => array(
+					'plugin_version'            => array(
+						'type'        => 'string',
+						'description' => __( 'Installed Enhanced Responsive Images plugin version.', 'auto-sizes' ),
+					),
+					'wp_version'                => array(
+						'type'        => 'string',
+						'description' => __( 'Current WordPress core version.', 'auto-sizes' ),
+					),
+					'core_auto_sizes_supported' => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether WordPress core natively handles sizes="auto" (WordPress 6.7+).', 'auto-sizes' ),
+					),
+					'polyfill_active'           => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether a legacy sizes="auto" polyfill is active (always false on WordPress 6.9+).', 'auto-sizes' ),
+					),
+					'is_block_theme'            => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether the active theme is a block theme (required for improved sizes calculation).', 'auto-sizes' ),
+					),
+					'layout'                    => array(
+						'type'       => 'object',
+						'properties' => array(
+							'content_size' => array(
+								'type'        => 'string',
+								'description' => __( 'The theme.json layout contentSize value.', 'auto-sizes' ),
+							),
+							'wide_size'    => array(
+								'type'        => 'string',
+								'description' => __( 'The theme.json layout wideSize value.', 'auto-sizes' ),
+							),
+						),
+					),
+				),
+			),
+			'meta'                => array(
+				'show_in_rest' => true,
+				'mcp'          => array(
+					'public' => true,
+				),
+				'annotations'  => array(
+					'readonly'    => true,
+					'destructive' => false,
+					'idempotent'  => true,
+				),
+			),
+		)
+	);
+}
+add_action( 'wp_abilities_api_init', 'auto_sizes_register_get_version_status_ability' );
+
+/**
  * Checks whether the current user has permission to invoke diagnostic auto-sizes abilities.
  *
  * @since n.e.x.t
@@ -260,5 +328,33 @@ function auto_sizes_ability_compute_sizes_attribute( $input = null ) {
 		'resize_width'             => $resize_width,
 		'max_alignment'            => $max_alignment,
 		'container_relative_width' => $container_relative_width,
+	);
+}
+
+/**
+ * Executes the auto-sizes/get-version-status ability.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{
+ *     plugin_version: string,
+ *     wp_version: string,
+ *     core_auto_sizes_supported: bool,
+ *     polyfill_active: bool,
+ *     is_block_theme: bool,
+ *     layout: array{ content_size: string, wide_size: string }
+ * } Version and theme layout status.
+ */
+function auto_sizes_ability_get_version_status(): array {
+	return array(
+		'plugin_version'            => IMAGE_AUTO_SIZES_VERSION,
+		'wp_version'                => get_bloginfo( 'version' ),
+		'core_auto_sizes_supported' => function_exists( 'wp_img_tag_add_auto_sizes' ),
+		'polyfill_active'           => false,
+		'is_block_theme'            => wp_is_block_theme(),
+		'layout'                    => array(
+			'content_size' => auto_sizes_get_layout_width( 'default' ),
+			'wide_size'    => auto_sizes_get_layout_width( 'wide' ),
+		),
 	);
 }

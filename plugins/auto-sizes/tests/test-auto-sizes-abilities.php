@@ -133,4 +133,52 @@ class Test_Auto_Sizes_Abilities extends WP_UnitTestCase {
 			$this->assertNull( $result['sizes'] );
 		}
 	}
+
+	/**
+	 * Tests that get-version-status ability is registered with expected metadata.
+	 *
+	 * @covers ::auto_sizes_register_get_version_status_ability
+	 */
+	public function test_get_version_status_ability_is_registered(): void {
+		if ( ! function_exists( 'wp_get_ability' ) ) {
+			$this->markTestSkipped( 'WordPress Abilities API is not available.' );
+		}
+
+		$ability = wp_get_ability( 'auto-sizes/get-version-status' );
+		$this->assertInstanceOf( WP_Ability::class, $ability );
+		$this->assertSame( 'performance-lab-images', $ability->get_category() );
+
+		$meta = $ability->get_meta();
+		$this->assertTrue( $meta['show_in_rest'] );
+		$this->assertTrue( $meta['mcp']['public'] );
+		$this->assertTrue( $meta['annotations']['readonly'] );
+		$this->assertFalse( $meta['annotations']['destructive'] );
+		$this->assertTrue( $meta['annotations']['idempotent'] );
+	}
+
+	/**
+	 * Tests get-version-status returns expected plugin, core, and layout status.
+	 *
+	 * @covers ::auto_sizes_ability_get_version_status
+	 */
+	public function test_get_version_status_returns_expected_data(): void {
+		$result = auto_sizes_ability_get_version_status();
+
+		$this->assertSame( IMAGE_AUTO_SIZES_VERSION, $result['plugin_version'] );
+		$this->assertSame( get_bloginfo( 'version' ), $result['wp_version'] );
+		$this->assertTrue( $result['core_auto_sizes_supported'] );
+		$this->assertFalse( $result['polyfill_active'] );
+		$this->assertSame( wp_is_block_theme(), $result['is_block_theme'] );
+		$this->assertArrayHasKey( 'content_size', $result['layout'] );
+		$this->assertArrayHasKey( 'wide_size', $result['layout'] );
+
+		if ( function_exists( 'wp_get_ability' ) ) {
+			$editor_id = self::factory()->user->create( array( 'role' => 'editor' ) );
+			wp_set_current_user( $editor_id );
+
+			$ability = wp_get_ability( 'auto-sizes/get-version-status' );
+			$this->assertInstanceOf( WP_Ability::class, $ability );
+			$this->assertSame( $result, $ability->execute() );
+		}
+	}
 }
